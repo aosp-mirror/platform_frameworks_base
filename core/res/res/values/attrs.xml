@@ -3021,7 +3021,11 @@
              inputType attributes are found,  the inputType flags will override the value of
              singleLine.) } -->
         <attr name="singleLine" format="boolean" />
-        <!-- Specifies whether the TextView is enabled or not. {@deprecated Use state_enabled instead}. -->
+        <!-- Specifies whether the widget is enabled. The interpretation of the enabled state varies by subclass.
+             For example, a non-enabled EditText prevents the user from editing the contained text, and
+             a non-enabled Button prevents the user from tapping the button. 
+             The appearance of enabled and non-enabled widgets may differ, if the drawables referenced
+             from evaluating state_enabled differ. -->
         <attr name="enabled" format="boolean" />
         <!-- If the text is selectable, select it all when the view takes
              focus instead of moving the cursor to the start or end. -->
@@ -3052,7 +3056,7 @@
             <!-- Input is numeric. -->
             <flag name="integer" value="0x01" />
             <!-- Input is numeric, with sign allowed. -->
-            <flag name="signed" value="0x003" />
+            <flag name="signed" value="0x03" />
             <!-- Input is numeric, with decimals allowed. -->
             <flag name="decimal" value="0x05" />
         </attr>
