@@ -1465,6 +1465,8 @@ void EventHub::dump(String8& dump) {
                     device->keyMap.keyCharacterMapFile.string());
             dump.appendFormat(INDENT3 "ConfigurationFile: %s\n",
                     device->configurationFile.string());
+            dump.appendFormat(INDENT3 "HaveKeyboardLayoutOverlay: %s\n",
+                    toString(device->overlayKeyMap != NULL));
         }
     } // release lock
 }
