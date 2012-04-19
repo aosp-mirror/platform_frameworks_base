@@ -4053,6 +4053,7 @@ status_t AudioFlinger::PlaybackThread::TimedTrack::getNextBuffer(
     if (pts == AudioBufferProvider::kInvalidPTS) {
         buffer->raw = 0;
         buffer->frameCount = 0;
+        mTimedAudioOutputOnTime = false;
         return INVALID_OPERATION;
     }
 
@@ -4151,21 +4152,28 @@ status_t AudioFlinger::PlaybackThread::TimedTrack::getNextBuffer(
         // the current output position is within this threshold, then we will
         // concatenate the next input samples to the previous output
         const int64_t kSampleContinuityThreshold =
-                (static_cast<int64_t>(sampleRate()) << 32) / 10;
+                (static_cast<int64_t>(sampleRate()) << 32) / 250;
 
         // if this is the first buffer of audio that we're emitting from this track
         // then it should be almost exactly on time.
         const int64_t kSampleStartupThreshold = 1LL << 32;
 
         if ((mTimedAudioOutputOnTime && llabs(sampleDelta) <= kSampleContinuityThreshold) ||
-            (!mTimedAudioOutputOnTime && llabs(sampleDelta) <= kSampleStartupThreshold)) {
+           (!mTimedAudioOutputOnTime && llabs(sampleDelta) <= kSampleStartupThreshold)) {
             // the next input is close enough to being on time, so concatenate it
             // with the last output
             timedYieldSamples_l(buffer);
 
-            LOGVV("*** on time: head.pos=%d frameCount=%u", head.position(), buffer->frameCount);
+            LOGVV("*** on time: head.pos=%d frameCount=%u",
+                    head.position(), buffer->frameCount);
             return NO_ERROR;
-        } else if (sampleDelta > 0) {
+        }
+
+        // Looks like our output is not on time.  Reset our on timed status.
+        // Next time we mix samples from our input queue, then should be within
+        // the StartupThreshold.
+        mTimedAudioOutputOnTime = false;
+        if (sampleDelta > 0) {
             // the gap between the current output position and the proper start of
             // the next input sample is too big, so fill it with silence
             uint32_t framesUntilNextInput = (sampleDelta + 0x80000000) >> 32;
