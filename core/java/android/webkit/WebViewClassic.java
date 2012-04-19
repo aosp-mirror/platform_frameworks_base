@@ -1074,7 +1074,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private static final int STD_SPEED = 480;  // pixels per second
     // time for the longest scroll animation
     private static final int MAX_DURATION = 750;   // milliseconds
-    private static final int SLIDE_TITLE_DURATION = 500;   // milliseconds
 
     // Used by OverScrollGlow
     OverScroller mScroller;
@@ -4013,17 +4012,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * @param url The URL of the page which has finished loading.
      */
     /* package */ void onPageFinished(String url) {
-        if (mPageThatNeedsToSlideTitleBarOffScreen != null) {
-            // If the user is now on a different page, or has scrolled the page
-            // past the point where the title bar is offscreen, ignore the
-            // scroll request.
-            if (mPageThatNeedsToSlideTitleBarOffScreen.equals(url)
-                    && getScrollX() == 0 && getScrollY() == 0) {
-                pinScrollTo(0, mYDistanceToSlideTitleOffScreen, true,
-                        SLIDE_TITLE_DURATION);
-            }
-            mPageThatNeedsToSlideTitleBarOffScreen = null;
-        }
         mZoomManager.onPageFinished(url);
         injectAccessibilityForUrl(url);
     }
@@ -4135,93 +4123,16 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         return -1;
     }
 
-    /**
-     * The URL of a page that sent a message to scroll the title bar off screen.
-     *
-     * Many mobile sites tell the page to scroll to (0,1) in order to scroll the
-     * title bar off the screen.  Sometimes, the scroll position is set before
-     * the page finishes loading.  Rather than scrolling while the page is still
-     * loading, keep track of the URL and new scroll position so we can perform
-     * the scroll once the page finishes loading.
-     */
-    private String mPageThatNeedsToSlideTitleBarOffScreen;
-
-    /**
-     * The destination Y scroll position to be used when the page finishes
-     * loading.  See mPageThatNeedsToSlideTitleBarOffScreen.
-     */
-    private int mYDistanceToSlideTitleOffScreen;
-
     // scale from content to view coordinates, and pin
-    // return true if pin caused the final x/y different than the request cx/cy,
-    // and a future scroll may reach the request cx/cy after our size has
-    // changed
-    // return false if the view scroll to the exact position as it is requested,
-    // where negative numbers are taken to mean 0
-    private boolean setContentScrollTo(int cx, int cy) {
-        if (mDrawHistory) {
-            // disallow WebView to change the scroll position as History Picture
-            // is used in the view system.
-            // One known case where this is called is that WebCore tries to
-            // restore the scroll position. As history Picture already uses the
-            // saved scroll position, it is ok to skip this.
-            return false;
-        }
-        int vx;
-        int vy;
-        if ((cx | cy) == 0) {
-            // If the page is being scrolled to (0,0), do not add in the title
-            // bar's height, and simply scroll to (0,0). (The only other work
-            // in contentToView_ is to multiply, so this would not change 0.)
-            vx = 0;
-            vy = 0;
-        } else {
-            vx = contentToViewX(cx);
-            vy = contentToViewY(cy);
-        }
-//        Log.d(LOGTAG, "content scrollTo [" + cx + " " + cy + "] view=[" +
-//                      vx + " " + vy + "]");
-        // Some mobile sites attempt to scroll the title bar off the page by
-        // scrolling to (0,1).  If we are at the top left corner of the
-        // page, assume this is an attempt to scroll off the title bar, and
-        // animate the title bar off screen slowly enough that the user can see
-        // it.
-        if (cx == 0 && cy == 1 && getScrollX() == 0 && getScrollY() == 0
-                && getTitleHeight() > 0) {
-            // FIXME: 100 should be defined somewhere as our max progress.
-            if (getProgress() < 100) {
-                // Wait to scroll the title bar off screen until the page has
-                // finished loading.  Keep track of the URL and the destination
-                // Y position
-                mPageThatNeedsToSlideTitleBarOffScreen = getUrl();
-                mYDistanceToSlideTitleOffScreen = vy;
-            } else {
-                pinScrollTo(vx, vy, true, SLIDE_TITLE_DURATION);
-            }
-            // Since we are animating, we have not yet reached the desired
-            // scroll position.  Do not return true to request another attempt
-            return false;
-        }
-        pinScrollTo(vx, vy, false, 0);
-        // If the request was to scroll to a negative coordinate, treat it as if
-        // it was a request to scroll to 0
-        if ((getScrollX() != vx && cx >= 0) || (getScrollY() != vy && cy >= 0)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    // scale from content to view coordinates, and pin
-    private void spawnContentScrollTo(int cx, int cy) {
+    private void contentScrollTo(int cx, int cy, boolean animate) {
         if (mDrawHistory) {
             // disallow WebView to change the scroll position as History Picture
             // is used in the view system.
             return;
         }
-        int vx = contentToViewDimension(cx - mScrollOffset.x);
-        int vy = contentToViewDimension(cy - mScrollOffset.y);
-        pinScrollBy(vx, vy, true, 0);
+        int vx = contentToViewX(cx);
+        int vy = contentToViewY(cy);
+        pinScrollTo(vx, vy, animate, 0);
     }
 
     /**
@@ -7428,11 +7339,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         }
                     }
                     final Point p = (Point) msg.obj;
-                    if (msg.arg1 == 1) {
-                        spawnContentScrollTo(p.x, p.y);
-                    } else {
-                        setContentScrollTo(p.x, p.y);
-                    }
+                    contentScrollTo(p.x, p.y, msg.arg1 == 1);
                     break;
                 }
                 case UPDATE_ZOOM_RANGE: {
@@ -8073,7 +7980,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             int scrollX = viewState.mShouldStartScrolledRight
                     ? getContentWidth() : viewState.mScrollX;
             int scrollY = viewState.mScrollY;
-            setContentScrollTo(scrollX, scrollY);
+            contentScrollTo(scrollX, scrollY, false);
             if (!mDrawHistory) {
                 // As we are on a new page, hide the keyboard
                 hideSoftKeyboard();
