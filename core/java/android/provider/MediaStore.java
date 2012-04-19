@@ -306,13 +306,11 @@ public final class MediaStore {
 
         /**
          * The width of the image/video in pixels.
-         * @hide
          */
         public static final String WIDTH = "width";
 
         /**
          * The height of the image/video in pixels.
-         * @hide
          */
         public static final String HEIGHT = "height";
      }
