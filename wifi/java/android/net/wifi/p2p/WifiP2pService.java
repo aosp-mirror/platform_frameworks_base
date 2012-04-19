@@ -1500,8 +1500,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             int key;
             WifiP2pServiceRequest req;
             for (int i=0; i < c.mReqList.size(); i++) {
-                key = c.mReqList.keyAt(i);
-                req = c.mReqList.get(key);
+                req = c.mReqList.valueAt(i);
                 if (req != null) {
                     sb.append(req.getSupplicantQuery());
                 }
@@ -1539,7 +1538,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             return false;
         }
 
-        req.setTransactionId(++mServiceTransactionId);
+        ++mServiceTransactionId;
+        //The Wi-Fi p2p spec says transaction id should be non-zero
+        if (mServiceTransactionId == 0) ++mServiceTransactionId;
+        req.setTransactionId(mServiceTransactionId);
         clientInfo.mReqList.put(mServiceTransactionId, req);
 
         if (mServiceDiscReqId == null) {
@@ -1550,13 +1552,23 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     }
 
     private void removeServiceRequest(Messenger m, WifiP2pServiceRequest req) {
-
         ClientInfo clientInfo = getClientInfo(m, false);
         if (clientInfo == null) {
             return;
         }
 
-        clientInfo.mReqList.remove(req.getTransactionId());
+        //Application does not have transaction id information
+        //go through stored requests to remove
+        boolean removed = false;
+        for (int i=0; i < clientInfo.mReqList.size(); i++) {
+            if (req.equals(clientInfo.mReqList.valueAt(i))) {
+                removed = true;
+                clientInfo.mReqList.removeAt(i);
+                break;
+            }
+        }
+
+        if (!removed) return;
 
         if (clientInfo.mReqList.size() == 0 && clientInfo.mServList.size() == 0) {
             if (DBG) logd("remove client information from framework");
@@ -1670,6 +1682,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 } catch (RemoteException e) {
                     if (DBG) logd("detect dead channel");
                     clearClientInfo(c.mMessenger);
+                    return;
                 }
             }
         }
@@ -1683,6 +1696,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
      * TODO: This can be done better with full async channels.
      */
     private void clearClientDeadChannels() {
+        ArrayList<Messenger> deadClients = new ArrayList<Messenger>();
+
         for (ClientInfo c : mClientInfoList.values()) {
             Message msg = Message.obtain();
             msg.what = WifiP2pManager.PING;
@@ -1693,8 +1708,12 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 c.mMessenger.send(msg);
             } catch (RemoteException e) {
                 if (DBG) logd("detect dead channel");
-                clearClientInfo(c.mMessenger);
+                deadClients.add(c.mMessenger);
             }
+        }
+
+        for (Messenger m : deadClients) {
+            clearClientInfo(m);
         }
     }
 
