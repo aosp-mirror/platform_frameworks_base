@@ -978,7 +978,7 @@ class WindowStateAnimator {
 
         setSurfaceBoundaries(recoveringMemory);
 
-        if (w.mAttachedHidden || !w.isReadyForDisplay() || !w.isDrawnLw()) {
+        if (w.mAttachedHidden || !w.isReadyForDisplay()) {
             if (!mLastHidden) {
                 //dump();
                 mLastHidden = true;
@@ -1136,17 +1136,15 @@ class WindowStateAnimator {
                     + " animating=" + mAnimating
                     + " tok animating="
                     + (mWin.mAppToken != null ? mWin.mAppToken.mAppAnimator.animating : false));
-            if (!showSurfaceRobustlyLocked()) {
-                return false;
-            }
 
             mService.enableScreenIfNeededLocked();
 
             applyEnterAnimationLocked();
 
+            // Force the show in the next prepareSurfaceLocked() call.
             mLastAlpha = -1;
-            mLastHidden = false;
             mDrawState = HAS_DRAWN;
+            mService.scheduleAnimationLocked();
 
             int i = mWin.mChildWindows.size();
             while (i > 0) {
