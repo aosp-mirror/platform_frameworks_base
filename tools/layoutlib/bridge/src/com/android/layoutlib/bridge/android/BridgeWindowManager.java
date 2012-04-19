@@ -78,6 +78,10 @@ public class BridgeWindowManager implements IWindowManager {
     }
 
     @Override
+    public void getCurrentSizeRange(Point smallestSize, Point largestSize) {
+    }
+
+    @Override
     public void getDisplaySize(Point arg0) throws RemoteException {
     }
 

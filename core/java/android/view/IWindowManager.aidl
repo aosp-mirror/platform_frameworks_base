@@ -58,6 +58,7 @@ interface IWindowManager
     void getDisplaySize(out Point size);
     void getRealDisplaySize(out Point size);
     int getMaximumSizeDimension();
+    void getCurrentSizeRange(out Point smallestSize, out Point largestSize);
 
     void setForcedDisplaySize(int longDimen, int shortDimen);
     void clearForcedDisplaySize();

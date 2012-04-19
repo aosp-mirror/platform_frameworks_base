@@ -22542,6 +22542,7 @@ package android.view {
   }
 
   public class Display {
+    method public void getCurrentSizeRange(android.graphics.Point, android.graphics.Point);
     method public int getDisplayId();
     method public deprecated int getHeight();
     method public void getMetrics(android.util.DisplayMetrics);

@@ -461,6 +461,10 @@ public class WindowManagerService extends IWindowManager.Stub
     int mCurDisplayHeight = 0;
     int mAppDisplayWidth = 0;
     int mAppDisplayHeight = 0;
+    int mSmallestDisplayWidth = 0;
+    int mSmallestDisplayHeight = 0;
+    int mLargestDisplayWidth = 0;
+    int mLargestDisplayHeight = 0;
 
     int mRotation = 0;
     int mForcedAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -6068,12 +6072,21 @@ public class WindowManagerService extends IWindowManager.Stub
         return config;
     }
 
-    private int reduceConfigWidthSize(int curSize, int rotation, float density, int dw, int dh) {
-        int size = (int)(mPolicy.getConfigDisplayWidth(dw, dh, rotation) / density);
-        if (size < curSize) {
-            curSize = size;
+    private void adjustDisplaySizeRanges(int rotation, int dw, int dh) {
+        final int width = mPolicy.getConfigDisplayWidth(dw, dh, rotation);
+        if (width < mSmallestDisplayWidth) {
+            mSmallestDisplayWidth = width;
         }
-        return curSize;
+        if (width > mLargestDisplayWidth) {
+            mLargestDisplayWidth = width;
+        }
+        final int height = mPolicy.getConfigDisplayHeight(dw, dh, rotation);
+        if (height < mSmallestDisplayHeight) {
+            mSmallestDisplayHeight = height;
+        }
+        if (height > mLargestDisplayHeight) {
+            mLargestDisplayHeight = height;
+        }
     }
 
     private int reduceConfigLayout(int curLayout, int rotation, float density,
@@ -6155,7 +6168,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return curLayout;
     }
 
-    private void computeSmallestWidthAndScreenLayout(boolean rotated, int dw, int dh,
+    private void computeSizeRangesAndScreenLayout(boolean rotated, int dw, int dh,
             float density, Configuration outConfig) {
         // We need to determine the smallest width that will occur under normal
         // operation.  To this, start with the base screen size and compute the
@@ -6169,17 +6182,21 @@ public class WindowManagerService extends IWindowManager.Stub
             unrotDw = dw;
             unrotDh = dh;
         }
-        int sw = reduceConfigWidthSize(unrotDw, Surface.ROTATION_0, density, unrotDw, unrotDh);
-        sw = reduceConfigWidthSize(sw, Surface.ROTATION_90, density, unrotDh, unrotDw);
-        sw = reduceConfigWidthSize(sw, Surface.ROTATION_180, density, unrotDw, unrotDh);
-        sw = reduceConfigWidthSize(sw, Surface.ROTATION_270, density, unrotDh, unrotDw);
+        mSmallestDisplayWidth = 1<<30;
+        mSmallestDisplayHeight = 1<<30;
+        mLargestDisplayWidth = 0;
+        mLargestDisplayHeight = 0;
+        adjustDisplaySizeRanges(Surface.ROTATION_0, unrotDw, unrotDh);
+        adjustDisplaySizeRanges(Surface.ROTATION_90, unrotDh, unrotDw);
+        adjustDisplaySizeRanges(Surface.ROTATION_180, unrotDw, unrotDh);
+        adjustDisplaySizeRanges(Surface.ROTATION_270, unrotDh, unrotDw);
         int sl = Configuration.SCREENLAYOUT_SIZE_XLARGE
                 | Configuration.SCREENLAYOUT_LONG_YES;
         sl = reduceConfigLayout(sl, Surface.ROTATION_0, density, unrotDw, unrotDh);
         sl = reduceConfigLayout(sl, Surface.ROTATION_90, density, unrotDh, unrotDw);
         sl = reduceConfigLayout(sl, Surface.ROTATION_180, density, unrotDw, unrotDh);
         sl = reduceConfigLayout(sl, Surface.ROTATION_270, density, unrotDh, unrotDw);
-        outConfig.smallestScreenWidthDp = sw;
+        outConfig.smallestScreenWidthDp = (int)(mSmallestDisplayWidth / density);
         outConfig.screenLayout = sl;
     }
 
@@ -6289,7 +6306,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     / dm.density);
             config.screenHeightDp = (int)(mPolicy.getConfigDisplayHeight(dw, dh, mRotation)
                     / dm.density);
-            computeSmallestWidthAndScreenLayout(rotated, dw, dh, dm.density, config);
+            computeSizeRangesAndScreenLayout(rotated, dw, dh, dm.density, config);
 
             config.compatScreenWidthDp = (int)(config.screenWidthDp / mCompatibleScreenScale);
             config.compatScreenHeightDp = (int)(config.screenHeightDp / mCompatibleScreenScale);
@@ -7196,6 +7213,15 @@ public class WindowManagerService extends IWindowManager.Stub
             // Do this based on the raw screen size, until we are smarter.
             return mBaseDisplayWidth > mBaseDisplayHeight
                     ? mBaseDisplayWidth : mBaseDisplayHeight;
+        }
+    }
+
+    public void getCurrentSizeRange(Point smallestSize, Point largestSize) {
+        synchronized(mDisplaySizeLock) {
+            smallestSize.x = mSmallestDisplayWidth;
+            smallestSize.y = mSmallestDisplayHeight;
+            largestSize.x = mLargestDisplayWidth;
+            largestSize.y = mLargestDisplayHeight;
         }
     }
 
@@ -9391,14 +9417,25 @@ public class WindowManagerService extends IWindowManager.Stub
         pw.println();
         if (mDisplay != null) {
             pw.print("  Display: init="); pw.print(mInitialDisplayWidth); pw.print("x");
-                    pw.print(mInitialDisplayHeight); pw.print(" base=");
-                    pw.print(mBaseDisplayWidth); pw.print("x"); pw.print(mBaseDisplayHeight);
+                    pw.print(mInitialDisplayHeight);
+                    if (mInitialDisplayWidth != mBaseDisplayWidth
+                            || mInitialDisplayHeight != mBaseDisplayHeight) {
+                        pw.print(" base=");
+                        pw.print(mBaseDisplayWidth); pw.print("x"); pw.print(mBaseDisplayHeight);
+                    }
+                    final int rawWidth = mDisplay.getRawWidth();
+                    final int rawHeight = mDisplay.getRawHeight();
+                    if (rawWidth != mCurDisplayWidth || rawHeight != mCurDisplayHeight) {
+                        pw.print(" raw="); pw.print(rawWidth); pw.print("x"); pw.print(rawHeight);
+                    }
                     pw.print(" cur=");
                     pw.print(mCurDisplayWidth); pw.print("x"); pw.print(mCurDisplayHeight);
                     pw.print(" app=");
                     pw.print(mAppDisplayWidth); pw.print("x"); pw.print(mAppDisplayHeight);
-                    pw.print(" raw="); pw.print(mDisplay.getRawWidth());
-                    pw.print("x"); pw.println(mDisplay.getRawHeight());
+                    pw.print(" rng="); pw.print(mSmallestDisplayWidth);
+                    pw.print("x"); pw.print(mSmallestDisplayHeight);
+                    pw.print("-"); pw.print(mLargestDisplayWidth);
+                    pw.print("x"); pw.println(mLargestDisplayHeight);
         } else {
             pw.println("  NO DISPLAY");
         }
