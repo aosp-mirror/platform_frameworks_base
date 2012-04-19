@@ -161,10 +161,12 @@ public abstract class AbsActionBarView extends ViewGroup {
 
     @Override
     public void setVisibility(int visibility) {
-        if (mVisibilityAnim != null) {
-            mVisibilityAnim.end();
+        if (visibility != getVisibility()) {
+            if (mVisibilityAnim != null) {
+                mVisibilityAnim.end();
+            }
+            super.setVisibility(visibility);
         }
-        super.setVisibility(visibility);
     }
 
     public boolean showOverflowMenu() {
