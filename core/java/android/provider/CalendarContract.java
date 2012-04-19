@@ -122,7 +122,7 @@ public final class CalendarContract {
      * Intent Extras key: {@link EventsColumns#CUSTOM_APP_URI} for the event in
      * the {@link #ACTION_HANDLE_CUSTOM_EVENT} intent
      */
-    public static final String EXTRA_CUSTOM_APP_URI = "eventUri";
+    public static final String EXTRA_CUSTOM_APP_URI = "customAppUri";
 
     /**
      * Intent Extras key: The start time of an event or an instance of a
