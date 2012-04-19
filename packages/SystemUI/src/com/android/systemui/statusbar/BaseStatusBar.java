@@ -354,9 +354,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
+
         // XXX: temporary: while testing big notifications, auto-expand all of them
         ViewGroup.LayoutParams lp = row.getLayoutParams();
-        if (sbn.notification.bigContentView != null) {
+        if (large != null) {
             lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         } else {
             lp.height = minHeight;
@@ -372,9 +373,16 @@ public abstract class BaseStatusBar extends SystemUI implements
         // bind the click event to the content area
         ViewGroup content = (ViewGroup)row.findViewById(R.id.content);
         ViewGroup adaptive = (ViewGroup)row.findViewById(R.id.adaptive);
-        // XXX: update to allow controls within notification views
+
+        // Ensure that R.id.content is properly set to 64dp high if 1U
+        lp = content.getLayoutParams();
+        if (large == null) {
+            lp.height = minHeight;
+        }
+        content.setLayoutParams(lp);
+
         content.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-//        content.setOnFocusChangeListener(mFocusChangeListener);
+
         PendingIntent contentIntent = sbn.notification.contentIntent;
         if (contentIntent != null) {
             final View.OnClickListener listener = new NotificationClicker(contentIntent,

@@ -24,6 +24,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
 import android.os.Handler;
@@ -44,10 +45,10 @@ public class NotificationTestList extends TestActivity
     private final static String TAG = "NotificationTestList";
 
     NotificationManager mNM;
-    Vibrator mVibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE);
+    Vibrator mVibrator;
     Handler mHandler = new Handler();
 
-    long mActivityCreateTime = System.currentTimeMillis();
+    long mActivityCreateTime;
     long mChronometerBase = 0;
 
     boolean mProgressDone = true;
@@ -65,6 +66,13 @@ public class NotificationTestList extends TestActivity
         R.drawable.notification9
     };
     final int kUnnumberedIconResID = R.drawable.notificationx;
+
+    @Override
+    public void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
+        mVibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE);
+        mActivityCreateTime = System.currentTimeMillis();
+    }
 
     @Override
     protected String tag() {
