@@ -1199,13 +1199,13 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        // Execute enqueued actions on every traversal in case a detached view enqueued an action
+        getRunQueue().executeActions(attachInfo.mHandler);
+
         boolean insetsChanged = false;
 
         boolean layoutRequested = mLayoutRequested && !mStopped;
         if (layoutRequested) {
-            // Execute enqueued actions on every layout in case a view that was detached
-            // enqueued an action after being detached
-            getRunQueue().executeActions(attachInfo.mHandler);
 
             final Resources res = mView.getContext().getResources();
 
