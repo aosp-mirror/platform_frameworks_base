@@ -19,6 +19,7 @@ package android.provider;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ContentProviderClient;
@@ -96,6 +97,32 @@ public final class CalendarContract {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_EVENT_REMINDER = "android.intent.action.EVENT_REMINDER";
+
+    /**
+     * Activity Action: Display the event to the user in the custom app as
+     * specified in {@link EventsColumns#CUSTOM_APP_PACKAGE}. The custom app
+     * will be started via {@link Activity#startActivityForResult(Intent, int)}
+     * and it should call {@link Activity#setResult(int)} with
+     * {@link Activity#RESULT_OK} or {@link Activity#RESULT_CANCELED} to
+     * acknowledge whether the action was handled or not.
+     * <p>
+     * Input: {@link Intent#getData} has the event URI. The extra
+     * {@link #EXTRA_EVENT_BEGIN_TIME} has the start time of the instance. The
+     * extra {@link #EXTRA_CUSTOM_APP_URI} will have the
+     * {@link EventsColumns#CUSTOM_APP_URI}.
+     * <p>
+     * Output: {@link Activity#RESULT_OK} if this was handled; otherwise
+     * {@link Activity#RESULT_CANCELED}
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_HANDLE_CUSTOM_EVENT =
+        "android.provider.calendar.action.HANDLE_CUSTOM_EVENT";
+
+    /**
+     * Intent Extras key: {@link EventsColumns#CUSTOM_APP_URI} for the event in
+     * the {@link #ACTION_HANDLE_CUSTOM_EVENT} intent
+     */
+    public static final String EXTRA_CUSTOM_APP_URI = "eventUri";
 
     /**
      * Intent Extras key: The start time of an event or an instance of a
@@ -1176,6 +1203,22 @@ public final class CalendarContract {
          * <P>Type: INTEGER (boolean, readonly)</P>
          */
         public static final String CAN_INVITE_OTHERS = "canInviteOthers";
+
+        /**
+         * The package name of the custom app that can provide a richer
+         * experience for the event. See the ACTION TYPE
+         * {@link CalendarContract#ACTION_HANDLE_CUSTOM_EVENT} for details.
+         * Column name.
+         * <P> Type: TEXT </P>
+         */
+        public static final String CUSTOM_APP_PACKAGE = "customAppPackage";
+
+        /**
+         * The URI used by the custom app for the event. Column name.
+         * <P>Type: TEXT</P>
+         */
+        public static final String CUSTOM_APP_URI = "customAppUri";
+
     }
 
     /**
