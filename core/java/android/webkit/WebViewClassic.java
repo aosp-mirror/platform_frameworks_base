@@ -2439,34 +2439,51 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * version specific, and may not be able to be loaded by newer versions
      * of WebView.
      * @param stream The {@link OutputStream} to save to
-     * @return True if saved successfully
+     * @param callback The {@link ValueCallback} to call with the result
      */
-    public boolean saveViewState(OutputStream stream) {
-        try {
-            return ViewStateSerializer.serializeViewState(stream, this);
-        } catch (IOException e) {
-            Log.w(LOGTAG, "Failed to saveViewState", e);
+    public void saveViewState(OutputStream stream, ValueCallback<Boolean> callback) {
+        if (mWebViewCore == null) {
+            callback.onReceiveValue(false);
+            return;
         }
-        return false;
+        mWebViewCore.sendMessageAtFrontOfQueue(EventHub.SAVE_VIEW_STATE,
+                new WebViewCore.SaveViewStateRequest(stream, callback));
     }
 
     /**
      * Loads the view data from the input stream. See
      * {@link #saveViewState(OutputStream)} for more information.
      * @param stream The {@link InputStream} to load from
-     * @return True if loaded successfully
      */
-    public boolean loadViewState(InputStream stream) {
-        try {
-            mLoadedPicture = ViewStateSerializer.deserializeViewState(stream, this);
-            mBlockWebkitViewMessages = true;
-            setNewPicture(mLoadedPicture, true);
-            mLoadedPicture.mViewState = null;
-            return true;
-        } catch (IOException e) {
-            Log.w(LOGTAG, "Failed to loadViewState", e);
-        }
-        return false;
+    public void loadViewState(InputStream stream) {
+        mBlockWebkitViewMessages = true;
+        new AsyncTask<InputStream, Void, DrawData>() {
+
+            @Override
+            protected DrawData doInBackground(InputStream... params) {
+                try {
+                    return ViewStateSerializer.deserializeViewState(params[0]);
+                } catch (IOException e) {
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(DrawData draw) {
+                if (draw == null) {
+                    Log.e(LOGTAG, "Failed to load view state!");
+                    return;
+                }
+                int viewWidth = getViewWidth();
+                int viewHeight = getViewHeightWithTitle() - getTitleHeight();
+                draw.mViewSize = new Point(viewWidth, viewHeight);
+                draw.mViewState.mDefaultScale = getDefaultZoomScale();
+                mLoadedPicture = draw;
+                setNewPicture(mLoadedPicture, true);
+                mLoadedPicture.mViewState = null;
+            }
+
+        }.execute(stream);
     }
 
     /**
