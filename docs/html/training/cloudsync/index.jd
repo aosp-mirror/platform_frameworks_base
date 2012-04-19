@@ -1,0 +1,34 @@
+page.title=Syncing to the Cloud
+
+trainingnavtop=true
+startpage=true
+next.title=Syncing with App Engine
+next.link=aesync.html
+
+@jd:body
+
+<p>By providing powerful APIs for internet connectivity, the Android framework
+helps you build rich cloud-enabled apps that sync their data to a remote web
+service, making sure all your devices always stay in sync, and your valuable
+data is always backed up to the cloud.</p>
+
+<p>This class covers different strategies for cloud enabled applications.  It
+covers syncing data with the cloud using your own back-end web application, and
+backing up data using the cloud so that users can restore their data when
+installing your application on a new device.
+</p>
+
+<h2>Lessons</h2>
+
+<dl>
+  <dt><strong><a href="aesync.html">Syncing with App Engine.</a></strong></dt>
+  <dd>Learn how to create a paired App Engine app and Android app which share a
+  data model, authenticates using the AccountManager, and communicate with each
+  other via REST and C2DM.</dd>
+  <dt><strong><a href="backupapi.html">Using the Backup
+      API</a></strong></dt>
+  <dd>Learn how to integrate the Backup API into your Android Application, so
+  that user data such as preferences, notes, and high scores update seamlessly
+  across all of a user's devices</dd>
+</dl>
+

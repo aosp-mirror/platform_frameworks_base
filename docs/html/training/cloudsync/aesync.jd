@@ -1,0 +1,432 @@
+page.title=Syncing with App Engine
+parent.title=Syncing to the Cloud
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Using the Backup API
+next.link=backupapi.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you how to</h2>
+<ol>
+  <li><a href="#prepare">Prepare Your Environment</a></li>
+  <li><a href="#project">Create Your Project</a></li>
+  <li><a href="#data">Create the Data Layer</a></li>
+  <li><a href="#persistence">Create the Persistence Layer</a></li>
+  <li><a href="#androidapp">Query and Update from the Android App</a></li>
+  <li><a href="#serverc2dm">Configure the C2DM Server-Side</a></li>
+  <li><a href="#clientc2dm">Configure the C2DM Client-Side</a></li>
+</ol>
+<h2>You should also read</h2>
+    <ul>
+      <li><a
+        href="http://developers.google.com/appengine/">App Engine</a></li>
+      <li><a href="http://code.google.com/android/c2dm/">Android Cloud to Device
+        Messaging Framework</a></li>
+    </ul>
+<h2>Try it out</h2>
+
+<p>This lesson uses the Cloud Tasks sample code, originally shown at the
+<a href="http://www.youtube.com/watch?v=M7SxNNC429U">Android + AppEngine: A Developer's Dream Combination</a>
+talk at Google I/O.  You can use the sample application as a source of reusable code for your own
+application, or simply as a reference for how the Android and cloud pieces of the overall
+application fit together.  You can also build the sample application and see how it runs
+on your own device or emulator.</p>
+<p>
+  <a href="http://code.google.com/p/cloud-tasks-io/" class="button">Cloud Tasks
+  App</a>
+</p>
+
+</div>
+</div>
+
+<p>Writing an app that syncs to the cloud can be a challenge.  There are many little
+details to get right, like server-side auth, client-side auth, a shared data
+model, and an API.  One way to make this much easier is to use the Google Plugin
+for Eclipse, which handles a lot of the plumbing for you when building Android
+and App Engine applications that talk to each other.  This lesson walks you through building such a project.</p>
+
+<p>Following this lesson shows you how to:</p>
+<ul>
+  <li>Build Android and Appengine apps that can communicate with each other</li>
+  <li>Take advantage of Cloud to Device Messaging (C2DM) so your Android app doesn't have to poll for updates</li>
+</ul>
+
+<p>This lesson focuses on local development, and does not cover distribution
+(i.e, pushing your App Engine app live, or publishing your Android App to
+market), as those topics are covered extensively elsewhere.</p>
+
+<h2 id="prepare">Prepare Your Environment</h2>
+<p>If you want to follow along with the code example in this lesson, you must do
+the following to prepare your development environment:</p>
+<ul>
+<li>Install the <a href="http://code.google.com/eclipse/">Google Plugin for
+  Eclipse.</a></li>
+<li>Install the <a
+  href="http://code.google.com/webtoolkit/download.html">GWT SDK</a> and the <a
+  href="http://code.google.com/appengine/">Java App Engine SDK</a>. The <a
+  href="http://code.google.com/eclipse/docs/getting_started.html">Quick Start
+  Guide</a> shows you how to install these components.</li>
+<li>Sign up for <a href="http://code.google.com/android/c2dm/signup.html">C2DM
+  access</a>.  We strongly recommend <a
+  href="https://accounts.google.com/SignUp">creating a new Google account</a> specifically for
+connecting to C2DM.  The server component in this lesson uses this <em>role
+  account</em> repeatedly to authenticate with Google servers.
+</li>
+</ul>
+
+<h2 id="project">Create Your Projects</h2>
+<p>After installing the Google Plugin for Eclipse, notice that a new kind of Android project
+exists when you create a new Eclipse project:  The <strong>App Engine Connected
+  Android Project</strong> (under the <strong>Google</strong> project category).
+A wizard guides you through creating this project,
+during the course of which you are prompted to enter the account credentials for the role
+account you created.</p>
+
+<p class="note"><strong>Note:</strong> Remember to enter the credentials for
+your <i>role account</i> (the one you created to access C2DM services), not an
+account you'd log into as a user, or as an admin.</p>
+
+<p>Once you're done, you'll see two projects waiting for you in your
+workspace&mdash;An Android application and an App Engine application.  Hooray!
+These two applications are already fully functional&mdash; the wizard has
+created a sample application which lets you authenticate to the App Engine
+application from your Android device using AccountManager (no need to type in
+your credentials), and an App Engine app that can send messages to any logged-in
+device using C2DM.  In order to spin up your application and take it for a test
+drive, do the following:</p>
+
+<p>To spin up the Android application, make sure you have an AVD with a platform
+version of <em>at least</em> Android 2.2 (API Level 8).  Right click on the Android project in
+Eclipse, and go to <strong>Debug As &gt; Local App Engine Connected Android
+  Application</strong>.  This launches the emulator in such a way that it can
+test C2DM functionality (which typically works through Google Play).  It'll
+also launch a local instance of App Engine containing your awesome
+application.</p>
+
+<h2 id="data">Create the Data Layer</h2>
+
+<p>At this point you have a fully functional sample application running.  Now
+it's time to start changing the code to create your own application.</p>
+
+<p>First, create the data model that defines the data shared between
+the App Engine and Android applications.  To start, open up the source folder of
+your App Engine project, and navigate down to the <strong>(yourApp)-AppEngine
+  &gt; src &gt; (yourapp) &gt; server</strong> package.  Create a new class in there containing some data you want to
+store server-side. The code ends up looking something like this:</p>
+<pre>
+package com.cloudtasks.server;
+
+import javax.persistence.*;
+
+&#64;Entity
+public class Task {
+
+    private String emailAddress;
+    private String name;
+    private String userId;
+    private String note;
+
+    &#64;Id
+    &#64;GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    public Task() {
+    }
+
+    public String getEmailAddress() {
+        return this.emailAddress;
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+    ...
+}
+</pre>
+<p>Note the use of annotations:  <code>Entity</code>, <code>Id</code> and
+<code>GeneratedValue</code> are all part of the <a
+  href="http://www.oracle.com/technetwork/articles/javaee/jpa-137156.html">Java
+  Persistence API</a>.  Essentially, the <code>Entity</code> annotation goes
+above the class declaration, and indicates that this class represents an entity
+in your data layer.  The <code>Id</code> and <code>GeneratedValue</code>
+annotations, respectively, indicate the field used as a lookup key for this
+class, and how that id is generated (in this case,
+<code>GenerationType.IDENTITY</code> indicates that the is generated by
+the database).  You can find more on this topic in the App Engine documentation,
+on the page <a
+  href="http://code.google.com/appengine/docs/java/datastore/jpa/overview.html">Using
+  JPA with App Engine</a>.</p>
+
+<p>Once you've written all the classes that represent entities in your data
+layer, you need a way for the Android and App Engine applications to communicate
+about this data.  This communication is enabled by creating a Remote Procedure
+Call (RPC) service.
+Typically, this involves a lot of monotonous code.  Fortunately, there's an easy way!  Right
+click on the server project in your App Engine source folder, and in the context
+menu, navigate to <strong>New &gt; Other</strong> and then, in the resulting
+screen, select <strong>Google &gt; RPC Service.</strong>  A wizard appears, pre-populated
+with all the Entities you created in the previous step,
+which it found by seeking out the <code>&#64;Entity</code> annotation in the
+source files you added.  Pretty neat, right?  Click <strong>Finish</strong>, and the wizard
+creates a Service class with stub methods for the Create, Retrieve, Update and
+Delete (CRUD) operations of all your entities.</p>
+
+<h2 id="persistence">Create the Persistence Layer</h2>
+
+<p>The persistence layer is where your application data is stored
+long-term, so any information you want to keep for your users needs to go here.
+You have several options for writing your persistence layer, depending on
+what kind of data you want to store.  A few of the options hosted by Google
+(though you don't have to use these services) include <a
+  href="http://code.google.com/apis/storage/">Google Storage for Developers</a>
+and App Engine's built-in <a
+  href="http://code.google.com/appengine/docs/java/gettingstarted/usingdatastore.html">Datastore</a>.
+The sample code for this lesson uses DataStore code.</p>
+
+<p>Create a class in your <code>com.cloudtasks.server</code> package to handle
+persistence layer input and output.  In order to access the data store, use the <a
+  href="http://db.apache.org/jdo/api20/apidocs/javax/jdo/PersistenceManager.html">PersistenceManager</a>
+class.  You can generate an instance of this class using the PMF class in the
+<code>com.google.android.c2dm.server.PMF</code> package, and then use that to
+perform basic CRUD operations on your data store, like this:</p>
+<pre>
+/**
+* Remove this object from the data store.
+*/
+public void delete(Long id) {
+    PersistenceManager pm = PMF.get().getPersistenceManager();
+    try {
+        Task item = pm.getObjectById(Task.class, id);
+        pm.deletePersistent(item);
+    } finally {
+        pm.close();
+    }
+}
+</pre>
+
+<p>You can also use <a
+  href="http://code.google.com/appengine/docs/python/datastore/queryclass.html">Query</a>
+objects to retrieve data from your Datastore.  Here's an example of a method
+that searches out an object by its ID.</p>
+
+<pre>
+public Task find(Long id) {
+    if (id == null) {
+        return null;
+    }
+
+    PersistenceManager pm = PMF.get().getPersistenceManager();
+    try {
+        Query query = pm.newQuery("select from " + Task.class.getName()
+        + " where id==" + id.toString() + " && emailAddress=='" + getUserEmail() + "'");
+        List<Task> list = (List<Task>) query.execute();
+        return list.size() == 0 ? null : list.get(0);
+    } catch (RuntimeException e) {
+        System.out.println(e);
+        throw e;
+    } finally {
+        pm.close();
+    }
+}
+</pre>
+
+<p>For a good example of a class that encapsulates the persistence layer for
+you, check out the <a
+  href="http://code.google.com/p/cloud-tasks-io/source/browse/trunk/CloudTasks-AppEngine/src/com/cloudtasks/server/DataStore.java">DataStore</a>
+class in the Cloud Tasks app.</p>
+
+
+
+<h2 id="androidapp">Query and Update from the Android App</h2>
+
+<p>In order to keep in sync with the App Engine application, your Android application
+needs to know how to do two things:  Pull data from the cloud, and send data up
+to the cloud.  Much of the plumbing for this is generated by the
+plugin, but you need to wire it up to your Android user interface yourself.</p>
+
+<p>Pop open the source code for the main Activity in your project and look for
+<code>&lt;YourProjectName&gt; Activity.java</code>, then for the method
+<code>setHelloWorldScreenContent()</code>.  Obviously you're not building a
+HelloWorld app, so delete this method entirely and replace it
+with something relevant.  However, the boilerplate code has some very important
+characteristics.  For one, the code that communicates with the cloud is wrapped
+in an {@link android.os.AsyncTask} and therefore <em>not</em> hitting the
+network on the UI thread.  Also, it gives an easy template for how to access
+the cloud in your own code, using the <a
+  href="http://code.google.com/webtoolkit/doc/latest/DevGuideRequestFactory.html">RequestFactory</a>
+class generated that was auto-generated for you by the Eclipse plugin (called
+MyRequestFactory in the example below), and various {@code Request} types.</p>
+
+<p>For instance, if your server-side data model included an object called {@code
+Task} when you generated an RPC layer it automatically created a
+{@code TaskRequest} class for you, as well as a {@code TaskProxy} representing the individual
+task.  In code, requesting a list of all these tasks from the server looks
+like this:</p>
+
+<pre>
+public void fetchTasks (Long id) {
+  // Request is wrapped in an AsyncTask to avoid making a network request
+  // on the UI thread.
+    new AsyncTask<Long, Void, List<TaskProxy>>() {
+        &#64;Override
+        protected List<TaskProxy> doInBackground(Long... arguments) {
+            final List<TaskProxy> list = new ArrayList<TaskProxy>();
+            MyRequestFactory factory = Util.getRequestFactory(mContext,
+            MyRequestFactory.class);
+            TaskRequest taskRequest = factory.taskNinjaRequest();
+
+            if (arguments.length == 0 || arguments[0] == -1) {
+                factory.taskRequest().queryTasks().fire(new Receiver<List<TaskProxy>>() {
+                    &#64;Override
+                    public void onSuccess(List<TaskProxy> arg0) {
+                      list.addAll(arg0);
+                    }
+                });
+            } else {
+                newTask = true;
+                factory.taskRequest().readTask(arguments[0]).fire(new Receiver<TaskProxy>() {
+                    &#64;Override
+                    public void onSuccess(TaskProxy arg0) {
+                      list.add(arg0);
+                    }
+                });
+            }
+        return list;
+    }
+
+    &#64;Override
+    protected void onPostExecute(List<TaskProxy> result) {
+        TaskNinjaActivity.this.dump(result);
+    }
+
+    }.execute(id);
+}
+...
+
+public void dump (List<TaskProxy> tasks) {
+    for (TaskProxy task : tasks) {
+        Log.i("Task output", task.getName() + "\n" + task.getNote());
+    }
+}
+</pre>
+
+<p>This {@link android.os.AsyncTask} returns a list of
+<code>TaskProxy</code> objects, and sends it to the debug {@code dump()} method
+upon completion.  Note that if the argument list is empty, or the first argument
+is a -1, all tasks are retrieved from the server.  Otherwise, only the ones with
+IDs in the supplied list are returned.  All the fields you added to the task
+entity when building out the App Engine application are available via get/set
+methods in the <code>TaskProxy</code> class.</p>
+
+<p>In order to create new tasks and send them to the cloud, create a request
+object and use it to create a proxy object. Then populate the proxy object and
+call its update method.  Once again, this should be done in an
+<code>AsyncTask</code> to avoid doing networking on the UI thread.  The end
+result looks something like this.</p>
+
+<pre>
+new AsyncTask<Void, Void, Void>() {
+    &#64;Override
+    protected Void doInBackground(Void... arg0) {
+        MyRequestFactory factory = (MyRequestFactory)
+                Util.getRequestFactory(TasksActivity.this,
+                MyRequestFactory.class);
+        TaskRequest request = factory.taskRequest();
+
+        // Create your local proxy object, populate it
+        TaskProxy task = request.create(TaskProxy.class);
+        task.setName(taskName);
+        task.setNote(taskDetails);
+        task.setDueDate(dueDate);
+
+        // To the cloud!
+        request.updateTask(task).fire();
+        return null;
+    }
+}.execute();
+</pre>
+
+<h2 id="serverc2dm">Configure the C2DM Server-Side</h2>
+
+<p>In order to set up C2DM messages to be sent to your Android device, go back
+into your App Engine codebase, and open up the service class that was created
+when you generated your RPC layer.  If the name of your project is Foo,
+this class is called FooService.  Add a line to each of the methods for
+adding, deleting, or updating data so that a C2DM message is sent to the
+user's device.  Here's an example of an update task:
+</p>
+
+<pre>
+public static Task updateTask(Task task) {
+    task.setEmailAddress(DataStore.getUserEmail());
+    task = db.update(task);
+    DataStore.sendC2DMUpdate(TaskChange.UPDATE + TaskChange.SEPARATOR + task.getId());
+    return task;
+}
+
+// Helper method.  Given a String, send it to the current user's device via C2DM.
+public static void sendC2DMUpdate(String message) {
+    UserService userService = UserServiceFactory.getUserService();
+    User user = userService.getCurrentUser();
+    ServletContext context = RequestFactoryServlet.getThreadLocalRequest().getSession().getServletContext();
+    SendMessage.sendMessage(context, user.getEmail(), message);
+}
+</pre>
+
+<p>In the following example, a helper class, {@code TaskChange}, has been created with a few
+constants.  Creating such a helper class makes managing the communication
+between App Engine and Android apps much easier.  Just create it in the shared
+folder, define a few constants (flags for what kind of message you're sending
+and a seperator is typically enough), and you're done.  By way of example,
+the above code works off of a {@code TaskChange} class defined as this:</p>
+
+<pre>
+public class TaskChange {
+    public static String UPDATE = "Update";
+    public static String DELETE = "Delete";
+    public static String SEPARATOR = ":";
+}
+</pre>
+
+<h2 id="clientc2dm">Configure the C2DM Client-Side</h2>
+
+<p>In order to define the Android applications behavior when a C2DM is recieved,
+open up the <code>C2DMReceiver</code> class, and browse to the
+<code>onMessage()</code> method.  Tweak this method to update based on the content
+of the message.</p>
+<pre>
+//In your C2DMReceiver class
+
+public void notifyListener(Intent intent) {
+    if (listener != null) {
+        Bundle extras = intent.getExtras();
+        if (extras != null) {
+            String message = (String) extras.get("message");
+            String[] messages = message.split(Pattern.quote(TaskChange.SEPARATOR));
+            listener.onTaskUpdated(messages[0], Long.parseLong(messages[1]));
+        }
+    }
+}
+</pre>
+
+<pre>
+// Elsewhere in your code, wherever it makes sense to perform local updates
+public void onTasksUpdated(String messageType, Long id) {
+    if (messageType.equals(TaskChange.DELETE)) {
+        // Delete this task from your local data store
+        ...
+    } else {
+        // Call that monstrous Asynctask defined earlier.
+        fetchTasks(id);
+    }
+}
+</pre>
+<p>
+Once you have C2DM set up to trigger local updates, you're all done.
+Congratulations, you have a cloud-connected Android application!</p>
