@@ -24,6 +24,7 @@ import android.util.SparseIntArray;
 import android.hardware.input.InputManager;
 
 import java.lang.Character;
+import java.text.Normalizer;
 
 /**
  * Describes the keys provided by a keyboard device and their associated labels.
@@ -149,9 +150,22 @@ public class KeyCharacterMap implements Parcelable {
 
     /* Characters used to display placeholders for dead keys. */
     private static final int ACCENT_ACUTE = '\u00B4';
+    private static final int ACCENT_BREVE = '\u02D8';
+    private static final int ACCENT_CARON = '\u02C7';
+    private static final int ACCENT_CEDILLA = '\u00B8';
+    private static final int ACCENT_COMMA_ABOVE = '\u1FBD';
+    private static final int ACCENT_COMMA_ABOVE_RIGHT = '\u02BC';
+    private static final int ACCENT_DOT_ABOVE = '\u02D9';
+    private static final int ACCENT_DOUBLE_ACUTE = '\u02DD';
     private static final int ACCENT_GRAVE = '\u02CB';
     private static final int ACCENT_CIRCUMFLEX = '\u02C6';
+    private static final int ACCENT_MACRON = '\u00AF';
+    private static final int ACCENT_MACRON_BELOW = '\u02CD';
+    private static final int ACCENT_OGONEK = '\u02DB';
+    private static final int ACCENT_REVERSED_COMMA_ABOVE = '\u02BD';
+    private static final int ACCENT_RING_ABOVE = '\u02DA';
     private static final int ACCENT_TILDE = '\u02DC';
+    private static final int ACCENT_TURNED_COMMA_ABOVE = '\u02BB';
     private static final int ACCENT_UMLAUT = '\u00A8';
 
     /* Legacy dead key display characters used in previous versions of the API.
@@ -161,136 +175,66 @@ public class KeyCharacterMap implements Parcelable {
     private static final int ACCENT_TILDE_LEGACY = '~';
 
     /**
-     * Maps Unicode combining diacritical to display-form dead key
-     * (display character shifted left 16 bits).
+     * Maps Unicode combining diacritical to display-form dead key.
      */
-    private static final SparseIntArray COMBINING = new SparseIntArray();
+    private static final SparseIntArray sCombiningToAccent = new SparseIntArray();
+    private static final SparseIntArray sAccentToCombining = new SparseIntArray();
     static {
-        COMBINING.put('\u0300', ACCENT_GRAVE);
-        COMBINING.put('\u0301', ACCENT_ACUTE);
-        COMBINING.put('\u0302', ACCENT_CIRCUMFLEX);
-        COMBINING.put('\u0303', ACCENT_TILDE);
-        COMBINING.put('\u0308', ACCENT_UMLAUT);
+        addCombining('\u0300', ACCENT_GRAVE);
+        addCombining('\u0301', ACCENT_ACUTE);
+        addCombining('\u0302', ACCENT_CIRCUMFLEX);
+        addCombining('\u0303', ACCENT_TILDE);
+        addCombining('\u0304', ACCENT_MACRON);
+        addCombining('\u0306', ACCENT_BREVE);
+        addCombining('\u0307', ACCENT_DOT_ABOVE);
+        addCombining('\u0308', ACCENT_UMLAUT);
+        //addCombining('\u0309', ACCENT_HOOK_ABOVE);
+        addCombining('\u030A', ACCENT_RING_ABOVE);
+        addCombining('\u030B', ACCENT_DOUBLE_ACUTE);
+        addCombining('\u030C', ACCENT_CARON);
+        //addCombining('\u030D', ACCENT_VERTICAL_LINE_ABOVE);
+        //addCombining('\u030E', ACCENT_DOUBLE_VERTICAL_LINE_ABOVE);
+        //addCombining('\u030F', ACCENT_DOUBLE_GRAVE);
+        //addCombining('\u0310', ACCENT_CANDRABINDU);
+        //addCombining('\u0311', ACCENT_INVERTED_BREVE);
+        addCombining('\u0312', ACCENT_TURNED_COMMA_ABOVE);
+        addCombining('\u0313', ACCENT_COMMA_ABOVE);
+        addCombining('\u0314', ACCENT_REVERSED_COMMA_ABOVE);
+        addCombining('\u0315', ACCENT_COMMA_ABOVE_RIGHT);
+        //addCombining('\u031B', ACCENT_HORN);
+        //addCombining('\u0323', ACCENT_DOT_BELOW);
+        //addCombining('\u0326', ACCENT_COMMA_BELOW);
+        addCombining('\u0327', ACCENT_CEDILLA);
+        addCombining('\u0328', ACCENT_OGONEK);
+        //addCombining('\u0329', ACCENT_VERTICAL_LINE_BELOW);
+        addCombining('\u0331', ACCENT_MACRON_BELOW);
+        //addCombining('\u0342', ACCENT_PERISPOMENI);
+        //addCombining('\u0344', ACCENT_DIALYTIKA_TONOS);
+        //addCombining('\u0345', ACCENT_YPOGEGRAMMENI);
+
+        // One-way mappings to equivalent preferred accents.
+        sCombiningToAccent.append('\u0340', ACCENT_GRAVE);
+        sCombiningToAccent.append('\u0341', ACCENT_ACUTE);
+        sCombiningToAccent.append('\u0343', ACCENT_COMMA_ABOVE);
+
+        // One-way legacy mappings to preserve compatibility with older applications.
+        sAccentToCombining.append(ACCENT_GRAVE_LEGACY, '\u0300');
+        sAccentToCombining.append(ACCENT_CIRCUMFLEX_LEGACY, '\u0302');
+        sAccentToCombining.append(ACCENT_TILDE_LEGACY, '\u0303');
+    }
+
+    private static void addCombining(int combining, int accent) {
+        sCombiningToAccent.append(combining, accent);
+        sAccentToCombining.append(accent, combining);
     }
 
     /**
-     * Maps combinations of (display-form) dead key and second character
+     * Maps combinations of (display-form) combining key and second character
      * to combined output character.
+     * These mappings are derived from the Unicode NFC tables as needed.
      */
-    private static final SparseIntArray DEAD = new SparseIntArray();
-    static {
-        addDeadChar(ACCENT_ACUTE, 'A', '\u00C1');
-        addDeadChar(ACCENT_ACUTE, 'C', '\u0106');
-        addDeadChar(ACCENT_ACUTE, 'E', '\u00C9');
-        addDeadChar(ACCENT_ACUTE, 'G', '\u01F4');
-        addDeadChar(ACCENT_ACUTE, 'I', '\u00CD');
-        addDeadChar(ACCENT_ACUTE, 'K', '\u1E30');
-        addDeadChar(ACCENT_ACUTE, 'L', '\u0139');
-        addDeadChar(ACCENT_ACUTE, 'M', '\u1E3E');
-        addDeadChar(ACCENT_ACUTE, 'N', '\u0143');
-        addDeadChar(ACCENT_ACUTE, 'O', '\u00D3');
-        addDeadChar(ACCENT_ACUTE, 'P', '\u1E54');
-        addDeadChar(ACCENT_ACUTE, 'R', '\u0154');
-        addDeadChar(ACCENT_ACUTE, 'S', '\u015A');
-        addDeadChar(ACCENT_ACUTE, 'U', '\u00DA');
-        addDeadChar(ACCENT_ACUTE, 'W', '\u1E82');
-        addDeadChar(ACCENT_ACUTE, 'Y', '\u00DD');
-        addDeadChar(ACCENT_ACUTE, 'Z', '\u0179');
-        addDeadChar(ACCENT_ACUTE, 'a', '\u00E1');
-        addDeadChar(ACCENT_ACUTE, 'c', '\u0107');
-        addDeadChar(ACCENT_ACUTE, 'e', '\u00E9');
-        addDeadChar(ACCENT_ACUTE, 'g', '\u01F5');
-        addDeadChar(ACCENT_ACUTE, 'i', '\u00ED');
-        addDeadChar(ACCENT_ACUTE, 'k', '\u1E31');
-        addDeadChar(ACCENT_ACUTE, 'l', '\u013A');
-        addDeadChar(ACCENT_ACUTE, 'm', '\u1E3F');
-        addDeadChar(ACCENT_ACUTE, 'n', '\u0144');
-        addDeadChar(ACCENT_ACUTE, 'o', '\u00F3');
-        addDeadChar(ACCENT_ACUTE, 'p', '\u1E55');
-        addDeadChar(ACCENT_ACUTE, 'r', '\u0155');
-        addDeadChar(ACCENT_ACUTE, 's', '\u015B');
-        addDeadChar(ACCENT_ACUTE, 'u', '\u00FA');
-        addDeadChar(ACCENT_ACUTE, 'w', '\u1E83');
-        addDeadChar(ACCENT_ACUTE, 'y', '\u00FD');
-        addDeadChar(ACCENT_ACUTE, 'z', '\u017A');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'A', '\u00C2');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'C', '\u0108');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'E', '\u00CA');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'G', '\u011C');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'H', '\u0124');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'I', '\u00CE');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'J', '\u0134');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'O', '\u00D4');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'S', '\u015C');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'U', '\u00DB');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'W', '\u0174');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'Y', '\u0176');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'Z', '\u1E90');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'a', '\u00E2');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'c', '\u0109');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'e', '\u00EA');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'g', '\u011D');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'h', '\u0125');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'i', '\u00EE');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'j', '\u0135');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'o', '\u00F4');
-        addDeadChar(ACCENT_CIRCUMFLEX, 's', '\u015D');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'u', '\u00FB');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'w', '\u0175');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'y', '\u0177');
-        addDeadChar(ACCENT_CIRCUMFLEX, 'z', '\u1E91');
-        addDeadChar(ACCENT_GRAVE, 'A', '\u00C0');
-        addDeadChar(ACCENT_GRAVE, 'E', '\u00C8');
-        addDeadChar(ACCENT_GRAVE, 'I', '\u00CC');
-        addDeadChar(ACCENT_GRAVE, 'N', '\u01F8');
-        addDeadChar(ACCENT_GRAVE, 'O', '\u00D2');
-        addDeadChar(ACCENT_GRAVE, 'U', '\u00D9');
-        addDeadChar(ACCENT_GRAVE, 'W', '\u1E80');
-        addDeadChar(ACCENT_GRAVE, 'Y', '\u1EF2');
-        addDeadChar(ACCENT_GRAVE, 'a', '\u00E0');
-        addDeadChar(ACCENT_GRAVE, 'e', '\u00E8');
-        addDeadChar(ACCENT_GRAVE, 'i', '\u00EC');
-        addDeadChar(ACCENT_GRAVE, 'n', '\u01F9');
-        addDeadChar(ACCENT_GRAVE, 'o', '\u00F2');
-        addDeadChar(ACCENT_GRAVE, 'u', '\u00F9');
-        addDeadChar(ACCENT_GRAVE, 'w', '\u1E81');
-        addDeadChar(ACCENT_GRAVE, 'y', '\u1EF3');
-        addDeadChar(ACCENT_TILDE, 'A', '\u00C3');
-        addDeadChar(ACCENT_TILDE, 'E', '\u1EBC');
-        addDeadChar(ACCENT_TILDE, 'I', '\u0128');
-        addDeadChar(ACCENT_TILDE, 'N', '\u00D1');
-        addDeadChar(ACCENT_TILDE, 'O', '\u00D5');
-        addDeadChar(ACCENT_TILDE, 'U', '\u0168');
-        addDeadChar(ACCENT_TILDE, 'V', '\u1E7C');
-        addDeadChar(ACCENT_TILDE, 'Y', '\u1EF8');
-        addDeadChar(ACCENT_TILDE, 'a', '\u00E3');
-        addDeadChar(ACCENT_TILDE, 'e', '\u1EBD');
-        addDeadChar(ACCENT_TILDE, 'i', '\u0129');
-        addDeadChar(ACCENT_TILDE, 'n', '\u00F1');
-        addDeadChar(ACCENT_TILDE, 'o', '\u00F5');
-        addDeadChar(ACCENT_TILDE, 'u', '\u0169');
-        addDeadChar(ACCENT_TILDE, 'v', '\u1E7D');
-        addDeadChar(ACCENT_TILDE, 'y', '\u1EF9');
-        addDeadChar(ACCENT_UMLAUT, 'A', '\u00C4');
-        addDeadChar(ACCENT_UMLAUT, 'E', '\u00CB');
-        addDeadChar(ACCENT_UMLAUT, 'H', '\u1E26');
-        addDeadChar(ACCENT_UMLAUT, 'I', '\u00CF');
-        addDeadChar(ACCENT_UMLAUT, 'O', '\u00D6');
-        addDeadChar(ACCENT_UMLAUT, 'U', '\u00DC');
-        addDeadChar(ACCENT_UMLAUT, 'W', '\u1E84');
-        addDeadChar(ACCENT_UMLAUT, 'X', '\u1E8C');
-        addDeadChar(ACCENT_UMLAUT, 'Y', '\u0178');
-        addDeadChar(ACCENT_UMLAUT, 'a', '\u00E4');
-        addDeadChar(ACCENT_UMLAUT, 'e', '\u00EB');
-        addDeadChar(ACCENT_UMLAUT, 'h', '\u1E27');
-        addDeadChar(ACCENT_UMLAUT, 'i', '\u00EF');
-        addDeadChar(ACCENT_UMLAUT, 'o', '\u00F6');
-        addDeadChar(ACCENT_UMLAUT, 't', '\u1E97');
-        addDeadChar(ACCENT_UMLAUT, 'u', '\u00FC');
-        addDeadChar(ACCENT_UMLAUT, 'w', '\u1E85');
-        addDeadChar(ACCENT_UMLAUT, 'x', '\u1E8D');
-        addDeadChar(ACCENT_UMLAUT, 'y', '\u00FF');
-    }
+    private static final SparseIntArray sDeadKeyCache = new SparseIntArray();
+    private static final StringBuilder sDeadKeyBuilder = new StringBuilder();
 
     public static final Parcelable.Creator<KeyCharacterMap> CREATOR =
             new Parcelable.Creator<KeyCharacterMap>() {
@@ -387,7 +331,7 @@ public class KeyCharacterMap implements Parcelable {
         metaState = KeyEvent.normalizeMetaState(metaState);
         char ch = nativeGetCharacter(mPtr, keyCode, metaState);
 
-        int map = COMBINING.get(ch);
+        int map = sCombiningToAccent.get(ch);
         if (map != 0) {
             return map | COMBINING_ACCENT;
         } else {
@@ -503,14 +447,25 @@ public class KeyCharacterMap implements Parcelable {
      * @return The combined character, or 0 if the characters cannot be combined.
      */
     public static int getDeadChar(int accent, int c) {
-        if (accent == ACCENT_CIRCUMFLEX_LEGACY) {
-            accent = ACCENT_CIRCUMFLEX;
-        } else if (accent == ACCENT_GRAVE_LEGACY) {
-            accent = ACCENT_GRAVE;
-        } else if (accent == ACCENT_TILDE_LEGACY) {
-            accent = ACCENT_TILDE;
+        int combining = sAccentToCombining.get(accent);
+        if (combining == 0) {
+            return 0;
         }
-        return DEAD.get((accent << 16) | c);
+
+        final int combination = (combining << 16) | c;
+        int combined;
+        synchronized (sDeadKeyCache) {
+            combined = sDeadKeyCache.get(combination, -1);
+            if (combined == -1) {
+                sDeadKeyBuilder.setLength(0);
+                sDeadKeyBuilder.append((char)c);
+                sDeadKeyBuilder.append((char)combining);
+                String result = Normalizer.normalize(sDeadKeyBuilder, Normalizer.Form.NFC);
+                combined = result.length() == 1 ? result.charAt(0) : 0;
+                sDeadKeyCache.put(combination, combined);
+            }
+        }
+        return combined;
     }
 
     /**
@@ -721,10 +676,6 @@ public class KeyCharacterMap implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
-    }
-
-    private static void addDeadChar(int accent, int c, char combinedResult) {
-        DEAD.put((accent << 16) | c, combinedResult);
     }
 
     /**
