@@ -12485,10 +12485,14 @@ package android.net.nsd {
     method public void resolveService(android.net.nsd.NsdManager.Channel, java.lang.String, java.lang.String, android.net.nsd.NsdManager.DnsSdResolveListener);
     method public void stopServiceDiscovery(android.net.nsd.NsdManager.Channel, android.net.nsd.NsdManager.ActionListener);
     method public void unregisterService(android.net.nsd.NsdManager.Channel, int, android.net.nsd.NsdManager.ActionListener);
+    field public static final java.lang.String ACTION_NSD_STATE_CHANGED = "android.net.nsd.STATE_CHANGED";
     field public static final int ALREADY_ACTIVE = 3; // 0x3
     field public static final int BUSY = 2; // 0x2
     field public static final int ERROR = 0; // 0x0
+    field public static final java.lang.String EXTRA_NSD_STATE = "nsd_state";
     field public static final int MAX_REGS_REACHED = 4; // 0x4
+    field public static final int NSD_STATE_DISABLED = 1; // 0x1
+    field public static final int NSD_STATE_ENABLED = 2; // 0x2
     field public static final int UNSUPPORTED = 1; // 0x1
   }
 
