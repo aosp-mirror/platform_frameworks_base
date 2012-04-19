@@ -26,4 +26,5 @@ import android.os.Messenger;
 interface INsdManager
 {
     Messenger getMessenger();
+    void setEnabled(boolean enable);
 }
