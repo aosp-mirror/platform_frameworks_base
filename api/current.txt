@@ -10743,6 +10743,7 @@ package android.media {
     method public void setRecordPositionUpdateListener(android.media.AudioRecord.OnRecordPositionUpdateListener);
     method public void setRecordPositionUpdateListener(android.media.AudioRecord.OnRecordPositionUpdateListener, android.os.Handler);
     method public void startRecording() throws java.lang.IllegalStateException;
+    method public void startRecording(android.media.MediaSyncEvent) throws java.lang.IllegalStateException;
     method public void stop() throws java.lang.IllegalStateException;
     field public static final int ERROR = -1; // 0xffffffff
     field public static final int ERROR_BAD_VALUE = -2; // 0xfffffffe
@@ -11288,6 +11289,15 @@ package android.media {
     method public abstract void onScanCompleted(java.lang.String, android.net.Uri);
   }
 
+  public class MediaSyncEvent {
+    method public static android.media.MediaSyncEvent createEvent(int) throws java.lang.IllegalArgumentException;
+    method public int getAudioSessionId();
+    method public int getType();
+    method public android.media.MediaSyncEvent setAudioSessionId(int) throws java.lang.IllegalArgumentException;
+    field public static final int SYNC_EVENT_NONE = 0; // 0x0
+    field public static final int SYNC_EVENT_PRESENTATION_COMPLETE = 1; // 0x1
+  }
+
   public class RemoteControlClient {
     ctor public RemoteControlClient(android.app.PendingIntent);
     ctor public RemoteControlClient(android.app.PendingIntent, android.os.Looper);
@@ -11405,6 +11415,7 @@ package android.media {
 
   public class ToneGenerator {
     ctor public ToneGenerator(int, int);
+    method public final int getAudioSessionId();
     method public void release();
     method public boolean startTone(int);
     method public boolean startTone(int, int);
