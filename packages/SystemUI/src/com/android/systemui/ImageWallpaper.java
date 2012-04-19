@@ -155,6 +155,11 @@ public class ImageWallpaper extends WallpaperService {
             }
         }
 
+        public DrawableEngine() {
+            super();
+            setFixedSizeAllowed(true);
+        }
+
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             if (DEBUG) {
