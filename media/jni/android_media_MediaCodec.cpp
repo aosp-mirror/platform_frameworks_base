@@ -36,6 +36,7 @@
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/ALooper.h>
 #include <media/stagefright/foundation/AMessage.h>
+#include <media/stagefright/foundation/AString.h>
 #include <media/stagefright/MediaErrors.h>
 
 namespace android {
@@ -129,8 +130,10 @@ status_t JMediaCodec::flush() {
 
 status_t JMediaCodec::queueInputBuffer(
         size_t index,
-        size_t offset, size_t size, int64_t timeUs, uint32_t flags) {
-    return mCodec->queueInputBuffer(index, offset, size, timeUs, flags);
+        size_t offset, size_t size, int64_t timeUs, uint32_t flags,
+        AString *errorDetailMsg) {
+    return mCodec->queueInputBuffer(
+            index, offset, size, timeUs, flags, errorDetailMsg);
 }
 
 status_t JMediaCodec::queueSecureInputBuffer(
@@ -142,10 +145,11 @@ status_t JMediaCodec::queueSecureInputBuffer(
         const uint8_t iv[16],
         CryptoPlugin::Mode mode,
         int64_t presentationTimeUs,
-        uint32_t flags) {
+        uint32_t flags,
+        AString *errorDetailMsg) {
     return mCodec->queueSecureInputBuffer(
             index, offset, subSamples, numSubSamples, key, iv, mode,
-            presentationTimeUs, flags);
+            presentationTimeUs, flags, errorDetailMsg);
 }
 
 status_t JMediaCodec::dequeueInputBuffer(size_t *index, int64_t timeoutUs) {
@@ -251,7 +255,31 @@ static void android_media_MediaCodec_release(JNIEnv *env, jobject thiz) {
     setMediaCodec(env, thiz, NULL);
 }
 
-static jint throwExceptionAsNecessary(JNIEnv *env, status_t err) {
+static void throwCryptoException(JNIEnv *env, status_t err, const char *msg) {
+    jclass clazz = env->FindClass("android/media/MediaCodec$CryptoException");
+    CHECK(clazz != NULL);
+
+    jmethodID constructID =
+        env->GetMethodID(clazz, "<init>", "(ILjava/lang/String;)V");
+    CHECK(constructID != NULL);
+
+    jstring msgObj = env->NewStringUTF(msg != NULL ? msg : "Unknown Error");
+
+    jthrowable exception =
+        (jthrowable)env->NewObject(clazz, constructID, err, msgObj);
+
+    env->Throw(exception);
+}
+
+static jint throwExceptionAsNecessary(
+        JNIEnv *env, status_t err, const char *msg = NULL) {
+    if (err >= ERROR_DRM_WV_VENDOR_MIN && err <= ERROR_DRM_WV_VENDOR_MAX) {
+        // We'll throw our custom MediaCodec.CryptoException
+
+        throwCryptoException(env, err, msg);
+        return 0;
+    }
+
     switch (err) {
         case OK:
             return 0;
@@ -383,10 +411,13 @@ static void android_media_MediaCodec_queueInputBuffer(
         return;
     }
 
-    status_t err = codec->queueInputBuffer(
-            index, offset, size, timestampUs, flags);
+    AString errorDetailMsg;
 
-    throwExceptionAsNecessary(env, err);
+    status_t err = codec->queueInputBuffer(
+            index, offset, size, timestampUs, flags, &errorDetailMsg);
+
+    throwExceptionAsNecessary(
+            env, err, errorDetailMsg.empty() ? NULL : errorDetailMsg.c_str());
 }
 
 static void android_media_MediaCodec_queueSecureInputBuffer(
@@ -497,13 +528,17 @@ static void android_media_MediaCodec_queueSecureInputBuffer(
         }
     }
 
+    AString errorDetailMsg;
+
     if (err == OK) {
         err = codec->queueSecureInputBuffer(
                 index, offset,
                 subSamples, numSubSamples,
                 (const uint8_t *)key, (const uint8_t *)iv,
                 (CryptoPlugin::Mode)mode,
-                timestampUs, flags);
+                timestampUs,
+                flags,
+                &errorDetailMsg);
     }
 
     if (iv != NULL) {
@@ -519,7 +554,8 @@ static void android_media_MediaCodec_queueSecureInputBuffer(
     delete[] subSamples;
     subSamples = NULL;
 
-    throwExceptionAsNecessary(env, err);
+    throwExceptionAsNecessary(
+            env, err, errorDetailMsg.empty() ? NULL : errorDetailMsg.c_str());
 }
 
 static jint android_media_MediaCodec_dequeueInputBuffer(

@@ -28,6 +28,7 @@ namespace android {
 
 struct ALooper;
 struct AMessage;
+struct AString;
 struct ICrypto;
 struct ISurfaceTexture;
 struct MediaCodec;
@@ -52,7 +53,8 @@ struct JMediaCodec : public RefBase {
 
     status_t queueInputBuffer(
             size_t index,
-            size_t offset, size_t size, int64_t timeUs, uint32_t flags);
+            size_t offset, size_t size, int64_t timeUs, uint32_t flags,
+            AString *errorDetailMsg);
 
     status_t queueSecureInputBuffer(
             size_t index,
@@ -63,7 +65,8 @@ struct JMediaCodec : public RefBase {
             const uint8_t iv[16],
             CryptoPlugin::Mode mode,
             int64_t presentationTimeUs,
-            uint32_t flags);
+            uint32_t flags,
+            AString *errorDetailMsg);
 
     status_t dequeueInputBuffer(size_t *index, int64_t timeoutUs);
 

@@ -10972,8 +10972,8 @@ package android.media {
     method public java.nio.ByteBuffer[] getInputBuffers();
     method public java.nio.ByteBuffer[] getOutputBuffers();
     method public final java.util.Map<java.lang.String, java.lang.Object> getOutputFormat();
-    method public final void queueInputBuffer(int, int, int, long, int);
-    method public final void queueSecureInputBuffer(int, int, android.media.MediaCodec.CryptoInfo, long, int);
+    method public final void queueInputBuffer(int, int, int, long, int) throws android.media.MediaCodec.CryptoException;
+    method public final void queueSecureInputBuffer(int, int, android.media.MediaCodec.CryptoInfo, long, int) throws android.media.MediaCodec.CryptoException;
     method public final void release();
     method public final void releaseOutputBuffer(int, boolean);
     method public final void start();
@@ -10996,6 +10996,11 @@ package android.media {
     field public int offset;
     field public long presentationTimeUs;
     field public int size;
+  }
+
+  public static final class MediaCodec.CryptoException extends java.lang.RuntimeException {
+    ctor public MediaCodec.CryptoException(int, java.lang.String);
+    method public int getErrorCode();
   }
 
   public static final class MediaCodec.CryptoInfo {
