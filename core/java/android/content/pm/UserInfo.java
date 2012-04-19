@@ -43,12 +43,18 @@ public class UserInfo implements Parcelable {
 
     public int id;
     public String name;
+    public String iconPath;
     public int flags;
 
     public UserInfo(int id, String name, int flags) {
+        this(id, name, null, flags);
+    }
+
+    public UserInfo(int id, String name, String iconPath, int flags) {
         this.id = id;
         this.name = name;
         this.flags = flags;
+        this.iconPath = iconPath;
     }
 
     public boolean isPrimary() {
@@ -68,6 +74,7 @@ public class UserInfo implements Parcelable {
 
     public UserInfo(UserInfo orig) {
         name = orig.name;
+        iconPath = orig.iconPath;
         id = orig.id;
         flags = orig.flags;
     }
@@ -84,6 +91,7 @@ public class UserInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         dest.writeInt(id);
         dest.writeString(name);
+        dest.writeString(iconPath);
         dest.writeInt(flags);
     }
 
@@ -100,6 +108,7 @@ public class UserInfo implements Parcelable {
     private UserInfo(Parcel source) {
         id = source.readInt();
         name = source.readString();
+        iconPath = source.readString();
         flags = source.readInt();
     }
 }

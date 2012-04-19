@@ -16,6 +16,9 @@
 
 package com.android.server.pm;
 
+import static android.os.ParcelFileDescriptor.MODE_CREATE;
+import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
+
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 
@@ -24,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.Environment;
 import android.os.FileUtils;
+import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.os.UserId;
 import android.util.Log;
@@ -34,6 +38,7 @@ import android.util.Xml;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,9 +49,14 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 public class UserManager {
+
+    private static final String TAG = "UserManager";
+
     private static final String TAG_NAME = "name";
 
     private static final String ATTR_FLAGS = "flags";
+
+    private static final String ATTR_ICON_PATH = "icon";
 
     private static final String ATTR_ID = "id";
 
@@ -58,6 +68,7 @@ public class UserManager {
 
     private static final String USER_INFO_DIR = "system" + File.separator + "users";
     private static final String USER_LIST_FILENAME = "userlist.xml";
+    private static final String USER_PHOTO_FILENAME = "photo.png";
 
     private SparseArray<UserInfo> mUsers = new SparseArray<UserInfo>();
 
@@ -114,7 +125,7 @@ public class UserManager {
         }
     }
 
-    public void updateUserName(int userId, String name) {
+    public void setUserName(int userId, String name) {
         synchronized (mUsers) {
             UserInfo info = mUsers.get(userId);
             if (name != null && !name.equals(info.name)) {
@@ -122,6 +133,39 @@ public class UserManager {
                 writeUserLocked(info);
             }
         }
+    }
+
+    public ParcelFileDescriptor setUserIcon(int userId) {
+        synchronized (mUsers) {
+            UserInfo info = mUsers.get(userId);
+            if (info == null) return null;
+            ParcelFileDescriptor fd = updateIconBitmapLocked(info);
+            if (fd != null) {
+                writeUserLocked(info);
+            }
+            return fd;
+        }
+    }
+
+    private ParcelFileDescriptor updateIconBitmapLocked(UserInfo info) {
+        try {
+            File dir = new File(mUsersDir, Integer.toString(info.id));
+            File file = new File(dir, USER_PHOTO_FILENAME);
+            if (!dir.exists()) {
+                dir.mkdir();
+                FileUtils.setPermissions(
+                        dir.getPath(),
+                        FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
+                        -1, -1);
+            }
+            ParcelFileDescriptor fd = ParcelFileDescriptor.open(file,
+                    MODE_CREATE|MODE_READ_WRITE);
+            info.iconPath = file.getAbsolutePath();
+            return fd;
+        } catch (FileNotFoundException e) {
+            Slog.w(TAG, "Error setting photo for user ", e);
+        }
+        return null;
     }
 
     /**
@@ -187,7 +231,7 @@ public class UserManager {
 
     private void fallbackToSingleUserLocked() {
         // Create the primary user
-        UserInfo primary = new UserInfo(0, "Primary",
+        UserInfo primary = new UserInfo(0, "Primary", null,
                 UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY);
         mUsers.put(0, primary);
         updateUserIdsLocked();
@@ -219,6 +263,9 @@ public class UserManager {
             serializer.startTag(null, TAG_USER);
             serializer.attribute(null, ATTR_ID, Integer.toString(userInfo.id));
             serializer.attribute(null, ATTR_FLAGS, Integer.toString(userInfo.flags));
+            if (userInfo.iconPath != null) {
+                serializer.attribute(null,  ATTR_ICON_PATH, userInfo.iconPath);
+            }
 
             serializer.startTag(null, TAG_NAME);
             serializer.text(userInfo.name);
@@ -286,6 +333,7 @@ public class UserManager {
     private UserInfo readUser(int id) {
         int flags = 0;
         String name = null;
+        String iconPath = null;
 
         FileInputStream fis = null;
         try {
@@ -312,6 +360,7 @@ public class UserManager {
                 }
                 String flagString = parser.getAttributeValue(null, ATTR_FLAGS);
                 flags = Integer.parseInt(flagString);
+                iconPath = parser.getAttributeValue(null, ATTR_ICON_PATH);
 
                 while ((type = parser.next()) != XmlPullParser.START_TAG
                         && type != XmlPullParser.END_DOCUMENT) {
@@ -324,7 +373,7 @@ public class UserManager {
                 }
             }
 
-            UserInfo userInfo = new UserInfo(id, name, flags);
+            UserInfo userInfo = new UserInfo(id, name, iconPath, flags);
             return userInfo;
 
         } catch (IOException ioe) {
@@ -342,7 +391,7 @@ public class UserManager {
 
     public UserInfo createUser(String name, int flags) {
         int userId = getNextAvailableId();
-        UserInfo userInfo = new UserInfo(userId, name, flags);
+        UserInfo userInfo = new UserInfo(userId, name, null, flags);
         File userPath = new File(mBaseUserPath, Integer.toString(userId));
         if (!createPackageFolders(userId, userPath)) {
             return null;

@@ -29,6 +29,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ScaleDrawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Handler;
@@ -43,6 +45,7 @@ import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,6 +55,7 @@ import android.view.WindowManagerPolicy.WindowManagerFuncs;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -243,8 +247,10 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             for (final UserInfo user : users) {
                 boolean isCurrentUser = currentUser == null
                         ? user.id == 0 : (currentUser.id == user.id);
+                Drawable icon = user.iconPath != null ? Drawable.createFromPath(user.iconPath)
+                        : null;
                 SinglePressAction switchToUser = new SinglePressAction(
-                        com.android.internal.R.drawable.ic_menu_cc,
+                        com.android.internal.R.drawable.ic_menu_cc, icon,
                         (user.name != null ? user.name : "Primary")
                         + (isCurrentUser ? " \u2714" : "")) {
                     public void onPress() {
@@ -439,6 +445,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
      */
     private static abstract class SinglePressAction implements Action {
         private final int mIconResId;
+        private final Drawable mIcon;
         private final int mMessageResId;
         private final CharSequence mMessage;
 
@@ -446,13 +453,23 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mIconResId = iconResId;
             mMessageResId = messageResId;
             mMessage = null;
+            mIcon = null;
+        }
+
+        protected SinglePressAction(int iconResId, Drawable icon, CharSequence message) {
+            mIconResId = iconResId;
+            mMessageResId = 0;
+            mMessage = message;
+            mIcon = icon;
         }
 
         protected SinglePressAction(int iconResId, CharSequence message) {
             mIconResId = iconResId;
             mMessageResId = 0;
             mMessage = message;
+            mIcon = null;
         }
+
         public boolean isEnabled() {
             return true;
         }
@@ -471,8 +488,12 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             TextView messageView = (TextView) v.findViewById(R.id.message);
 
             v.findViewById(R.id.status).setVisibility(View.GONE);
-
-            icon.setImageDrawable(context.getResources().getDrawable(mIconResId));
+            if (mIcon != null) {
+                icon.setImageDrawable(mIcon);
+                icon.setScaleType(ScaleType.CENTER_CROP);
+            } else if (mIconResId != 0) {
+                icon.setImageDrawable(context.getResources().getDrawable(mIconResId));
+            }
             if (mMessage != null) {
                 messageView.setText(mMessage);
             } else {

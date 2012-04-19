@@ -19,6 +19,7 @@ package android.graphics;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 
 import java.io.BufferedInputStream;
@@ -303,6 +304,7 @@ public class BitmapFactory {
             /*  do nothing.
                 If the exception happened on open, bm will be null.
             */
+            Log.e("BitmapFactory", "Unable to decode stream: " + e);
         } finally {
             if (stream != null) {
                 try {

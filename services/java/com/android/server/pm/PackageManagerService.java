@@ -9388,9 +9388,15 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public void updateUserName(int userId, String name) {
+    public void setUserName(int userId, String name) {
         enforceSystemOrRoot("Only the system can rename users");
-        sUserManager.updateUserName(userId, name);
+        sUserManager.setUserName(userId, name);
+    }
+
+    @Override
+    public ParcelFileDescriptor setUserIcon(int userId) {
+        enforceSystemOrRoot("Only the system can update users");
+        return sUserManager.setUserIcon(userId);
     }
 
     @Override

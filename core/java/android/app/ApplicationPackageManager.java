@@ -1206,7 +1206,8 @@ final class ApplicationPackageManager extends PackageManager {
             return mPM.getUsers();
         } catch (RemoteException re) {
             ArrayList<UserInfo> users = new ArrayList<UserInfo>();
-            UserInfo primary = new UserInfo(0, "Root!", UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY);
+            UserInfo primary = new UserInfo(0, "Root!", null,
+                    UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY);
             users.add(primary);
             return users;
         }
@@ -1240,9 +1241,9 @@ final class ApplicationPackageManager extends PackageManager {
      * @hide
      */
     @Override
-    public void updateUserName(int id, String name) {
+    public void setUserName(int id, String name) {
         try {
-            mPM.updateUserName(id, name);
+            mPM.setUserName(id, name);
         } catch (RemoteException re) {
         }
     }

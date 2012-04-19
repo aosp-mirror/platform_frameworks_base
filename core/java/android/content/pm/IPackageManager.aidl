@@ -41,6 +41,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.content.IntentSender;
 
 /**
@@ -359,7 +360,8 @@ interface IPackageManager {
 
     UserInfo createUser(in String name, int flags);
     boolean removeUser(int userId);
-    void updateUserName(int userId, String name);
+    void setUserName(int userId, String name);
+    ParcelFileDescriptor setUserIcon(int userId);
 
     void installPackageWithVerification(in Uri packageURI, in IPackageInstallObserver observer,
             int flags, in String installerPackageName, in Uri verificationURI,

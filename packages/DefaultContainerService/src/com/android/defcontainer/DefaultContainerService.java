@@ -246,6 +246,7 @@ public class DefaultContainerService extends IntentService {
                 throw new IllegalStateException(e);
             }
         }
+
     };
 
     public DefaultContainerService() {

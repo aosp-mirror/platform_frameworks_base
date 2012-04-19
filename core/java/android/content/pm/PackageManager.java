@@ -2646,7 +2646,7 @@ public abstract class PackageManager {
      * @param name the new name for the user
      * @hide
      */
-    public abstract void updateUserName(int id, String name);
+    public abstract void setUserName(int id, String name);
 
     /**
      * Changes the user's properties specified by the flags.

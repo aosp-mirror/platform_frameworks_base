@@ -179,7 +179,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
                     @Override
                     public List<UserInfo> getUsers() {
                         final ArrayList<UserInfo> users = new ArrayList<UserInfo>();
-                        users.add(new UserInfo(USER_ID, "Primary", UserInfo.FLAG_PRIMARY));
+                        users.add(new UserInfo(USER_ID, "Primary", null, UserInfo.FLAG_PRIMARY));
                         users.add(new UserInfo(USER_ID_GUEST, "Guest", 0));
                         return users;
                     }

@@ -33,11 +33,12 @@
         android:orientation="horizontal">
         <ImageView
             android:id="@+android:id/icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_gravity="center"
-            android:minWidth="48dp"
-            android:paddingRight="@dimen/preference_item_padding_inner" />
+            android:scaleType="centerCrop"
+            android:layout_marginRight="@dimen/preference_item_padding_inner"
+             />
     </LinearLayout>
 
     <RelativeLayout

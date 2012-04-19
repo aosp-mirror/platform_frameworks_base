@@ -545,7 +545,7 @@ public class MockPackageManager extends PackageManager {
      * @hide
      */
     @Override
-    public void updateUserName(int id, String name) {
+    public void setUserName(int id, String name) {
         throw new UnsupportedOperationException();
     }
 
