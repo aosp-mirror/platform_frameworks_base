@@ -11138,13 +11138,19 @@ package android.media {
 
   public class MediaPlayer {
     ctor public MediaPlayer();
+    method public void addTimedTextSource(java.lang.String, java.lang.String) throws java.io.IOException, java.lang.IllegalArgumentException, java.lang.IllegalStateException;
+    method public void addTimedTextSource(android.content.Context, android.net.Uri, java.lang.String) throws java.io.IOException, java.lang.IllegalArgumentException, java.lang.IllegalStateException;
+    method public void addTimedTextSource(java.io.FileDescriptor, java.lang.String) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException;
+    method public void addTimedTextSource(java.io.FileDescriptor, long, long, java.lang.String) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException;
     method public void attachAuxEffect(int);
     method public static android.media.MediaPlayer create(android.content.Context, android.net.Uri);
     method public static android.media.MediaPlayer create(android.content.Context, android.net.Uri, android.view.SurfaceHolder);
     method public static android.media.MediaPlayer create(android.content.Context, int);
+    method public void deselectTrack(int) throws java.lang.IllegalStateException;
     method public int getAudioSessionId();
     method public int getCurrentPosition();
     method public int getDuration();
+    method public android.media.MediaPlayer.TrackInfo[] getTrackInfo() throws java.lang.IllegalStateException;
     method public int getVideoHeight();
     method public int getVideoWidth();
     method public boolean isLooping();
@@ -11155,6 +11161,7 @@ package android.media {
     method public void release();
     method public void reset();
     method public void seekTo(int) throws java.lang.IllegalStateException;
+    method public void selectTrack(int) throws java.lang.IllegalStateException;
     method public void setAudioSessionId(int) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException;
     method public void setAudioStreamType(int);
     method public void setAuxEffectSendLevel(float);
@@ -11172,6 +11179,7 @@ package android.media {
     method public void setOnInfoListener(android.media.MediaPlayer.OnInfoListener);
     method public void setOnPreparedListener(android.media.MediaPlayer.OnPreparedListener);
     method public void setOnSeekCompleteListener(android.media.MediaPlayer.OnSeekCompleteListener);
+    method public void setOnTimedTextListener(android.media.MediaPlayer.OnTimedTextListener);
     method public void setOnVideoSizeChangedListener(android.media.MediaPlayer.OnVideoSizeChangedListener);
     method public void setScreenOnWhilePlaying(boolean);
     method public void setSurface(android.view.Surface);
@@ -11189,6 +11197,7 @@ package android.media {
     field public static final int MEDIA_INFO_NOT_SEEKABLE = 801; // 0x321
     field public static final int MEDIA_INFO_UNKNOWN = 1; // 0x1
     field public static final int MEDIA_INFO_VIDEO_TRACK_LAGGING = 700; // 0x2bc
+    field public static final java.lang.String MEDIA_MIMETYPE_TEXT_SUBRIP = "application/x-subrip";
   }
 
   public static abstract interface MediaPlayer.OnBufferingUpdateListener {
@@ -11215,8 +11224,23 @@ package android.media {
     method public abstract void onSeekComplete(android.media.MediaPlayer);
   }
 
+  public static abstract interface MediaPlayer.OnTimedTextListener {
+    method public abstract void onTimedText(android.media.MediaPlayer, android.media.TimedText);
+  }
+
   public static abstract interface MediaPlayer.OnVideoSizeChangedListener {
     method public abstract void onVideoSizeChanged(android.media.MediaPlayer, int, int);
+  }
+
+  public static class MediaPlayer.TrackInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.lang.String getLanguage();
+    method public int getTrackType();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int MEDIA_TRACK_TYPE_AUDIO = 2; // 0x2
+    field public static final int MEDIA_TRACK_TYPE_TIMEDTEXT = 3; // 0x3
+    field public static final int MEDIA_TRACK_TYPE_UNKNOWN = 0; // 0x0
+    field public static final int MEDIA_TRACK_TYPE_VIDEO = 1; // 0x1
   }
 
   public class MediaRecorder {
@@ -11448,6 +11472,11 @@ package android.media {
     method public static android.graphics.Bitmap extractThumbnail(android.graphics.Bitmap, int, int);
     method public static android.graphics.Bitmap extractThumbnail(android.graphics.Bitmap, int, int, int);
     field public static final int OPTIONS_RECYCLE_INPUT = 2; // 0x2
+  }
+
+  public final class TimedText {
+    method public android.graphics.Rect getBounds();
+    method public java.lang.String getText();
   }
 
   public class ToneGenerator {

@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.graphics.Rect;
 import android.os.Parcel;
 import android.util.Log;
 import java.util.HashMap;
@@ -24,31 +25,48 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * Class to hold the timed text's metadata.
+ * Class to hold the timed text's metadata, including:
+ * <ul>
+ * <li> The characters for rendering</li>
+ * <li> The rendering postion for the timed text</li>
+ * </ul>
  *
- * {@hide}
+ * <p> To render the timed text, applications need to do the following:
+ *
+ * <ul>
+ * <li> Implement the {@link MediaPlayer.OnTimedTextListener} interface</li>
+ * <li> Register the {@link MediaPlayer.OnTimedTextListener} callback on a MediaPlayer object that is used for playback</li>
+ * <li> When a onTimedText callback is received, do the following:
+ * <ul>
+ * <li> call {@link #getText} to get the characters for rendering</li>
+ * <li> call {@link #getBounds} to get the text rendering area/region</li>
+ * </ul>
+ * </li>
+ * </ul>
+ *
+ * @see android.media.MediaPlayer
  */
-public class TimedText
+public final class TimedText
 {
     private static final int FIRST_PUBLIC_KEY                 = 1;
 
     // These keys must be in sync with the keys in TextDescription.h
-    public static final int KEY_DISPLAY_FLAGS                 = 1; // int
-    public static final int KEY_STYLE_FLAGS                   = 2; // int
-    public static final int KEY_BACKGROUND_COLOR_RGBA         = 3; // int
-    public static final int KEY_HIGHLIGHT_COLOR_RGBA          = 4; // int
-    public static final int KEY_SCROLL_DELAY                  = 5; // int
-    public static final int KEY_WRAP_TEXT                     = 6; // int
-    public static final int KEY_START_TIME                    = 7; // int
-    public static final int KEY_STRUCT_BLINKING_TEXT_LIST     = 8; // List<CharPos>
-    public static final int KEY_STRUCT_FONT_LIST              = 9; // List<Font>
-    public static final int KEY_STRUCT_HIGHLIGHT_LIST         = 10; // List<CharPos>
-    public static final int KEY_STRUCT_HYPER_TEXT_LIST        = 11; // List<HyperText>
-    public static final int KEY_STRUCT_KARAOKE_LIST           = 12; // List<Karaoke>
-    public static final int KEY_STRUCT_STYLE_LIST             = 13; // List<Style>
-    public static final int KEY_STRUCT_TEXT_POS               = 14; // TextPos
-    public static final int KEY_STRUCT_JUSTIFICATION          = 15; // Justification
-    public static final int KEY_STRUCT_TEXT                   = 16; // Text
+    private static final int KEY_DISPLAY_FLAGS                 = 1; // int
+    private static final int KEY_STYLE_FLAGS                   = 2; // int
+    private static final int KEY_BACKGROUND_COLOR_RGBA         = 3; // int
+    private static final int KEY_HIGHLIGHT_COLOR_RGBA          = 4; // int
+    private static final int KEY_SCROLL_DELAY                  = 5; // int
+    private static final int KEY_WRAP_TEXT                     = 6; // int
+    private static final int KEY_START_TIME                    = 7; // int
+    private static final int KEY_STRUCT_BLINKING_TEXT_LIST     = 8; // List<CharPos>
+    private static final int KEY_STRUCT_FONT_LIST              = 9; // List<Font>
+    private static final int KEY_STRUCT_HIGHLIGHT_LIST         = 10; // List<CharPos>
+    private static final int KEY_STRUCT_HYPER_TEXT_LIST        = 11; // List<HyperText>
+    private static final int KEY_STRUCT_KARAOKE_LIST           = 12; // List<Karaoke>
+    private static final int KEY_STRUCT_STYLE_LIST             = 13; // List<Style>
+    private static final int KEY_STRUCT_TEXT_POS               = 14; // TextPos
+    private static final int KEY_STRUCT_JUSTIFICATION          = 15; // Justification
+    private static final int KEY_STRUCT_TEXT                   = 16; // Text
 
     private static final int LAST_PUBLIC_KEY                  = 16;
 
@@ -85,219 +103,252 @@ public class TimedText
     private List<Style> mStyleList = null;
     private List<HyperText> mHyperTextList = null;
 
-    private TextPos mTextPos;
+    private Rect mTextBounds = null;
+    private String mTextChars = null;
+
     private Justification mJustification;
-    private Text mTextStruct;
-
-    /**
-     * Helper class to hold the text length and text content of
-     * one text sample. The member variables in this class are
-     * read-only.
-     */
-    public class Text {
-        /**
-         * The byte-count of this text sample
-         */
-        public int textLen;
-
-        /**
-         * The text sample
-         */
-        public byte[] text;
-
-        public Text() { }
-    }
 
     /**
      * Helper class to hold the start char offset and end char offset
      * for Blinking Text or Highlight Text. endChar is the end offset
      * of the text (startChar + number of characters to be highlighted
      * or blinked). The member variables in this class are read-only.
+     * {@hide}
      */
-    public class CharPos {
+    public static final class CharPos {
         /**
          * The offset of the start character
          */
-        public int startChar = -1;
+        public final int startChar;
 
         /**
          * The offset of the end character
          */
-        public int endChar = -1;
-
-        public CharPos() { }
-    }
-
-    /**
-     * Helper class to hold the box position to display the text sample.
-     * The member variables in this class are read-only.
-     */
-    public class TextPos {
-        /**
-         * The top position of the text
-         */
-        public int top = -1;
+        public final int endChar;
 
         /**
-         * The left position of the text
+         * Constuctor
+         * @param startChar the offset of the start character.
+         * @param endChar the offset of the end character.
          */
-        public int left = -1;
-
-        /**
-         * The bottom position of the text
-         */
-        public int bottom = -1;
-
-        /**
-         * The right position of the text
-         */
-        public int right = -1;
-
-        public TextPos() { }
+        public CharPos(int startChar, int endChar) {
+            this.startChar = startChar;
+            this.endChar = endChar;
+        }
     }
 
     /**
      * Helper class to hold the justification for text display in the text box.
      * The member variables in this class are read-only.
+     * {@hide}
      */
-    public class Justification {
+    public static final class Justification {
         /**
-         * horizontalJustification  0: left, 1: centered, -1: right
+         * horizontal justification  0: left, 1: centered, -1: right
          */
-        public int horizontalJustification = -1;
+        public final int horizontalJustification;
 
         /**
-         * verticalJustification  0: top, 1: centered, -1: bottom
+         * vertical justification  0: top, 1: centered, -1: bottom
          */
-        public int verticalJustification = -1;
+        public final int verticalJustification;
 
-        public Justification() { }
+        /**
+         * Constructor
+         * @param horizontal the horizontal justification of the text.
+         * @param vertical the vertical justification of the text.
+         */
+        public Justification(int horizontal, int vertical) {
+            this.horizontalJustification = horizontal;
+            this.verticalJustification = vertical;
+        }
     }
 
     /**
      * Helper class to hold the style information to display the text.
      * The member variables in this class are read-only.
+     * {@hide}
      */
-    public class Style {
+    public static final class Style {
         /**
          * The offset of the start character which applys this style
          */
-        public int startChar = -1;
+        public final int startChar;
 
         /**
          * The offset of the end character which applys this style
          */
-        public int endChar = -1;
+        public final int endChar;
 
         /**
          * ID of the font. This ID will be used to choose the font
          * to be used from the font list.
          */
-        public int fontID = -1;
+        public final int fontID;
 
         /**
          * True if the characters should be bold
          */
-        public boolean isBold = false;
+        public final boolean isBold;
 
         /**
          * True if the characters should be italic
          */
-        public boolean isItalic = false;
+        public final boolean isItalic;
 
         /**
          * True if the characters should be underlined
          */
-        public boolean isUnderlined = false;
+        public final boolean isUnderlined;
 
         /**
          * The size of the font
          */
-        public int fontSize = -1;
+        public final int fontSize;
 
         /**
          * To specify the RGBA color: 8 bits each of red, green, blue,
          * and an alpha(transparency) value
          */
-        public int colorRGBA = -1;
+        public final int colorRGBA;
 
-        public Style() { }
+        /**
+         * Constructor
+         * @param startChar the offset of the start character which applys this style
+         * @param endChar the offset of the end character which applys this style
+         * @param fontId the ID of the font.
+         * @param isBold whether the characters should be bold.
+         * @param isItalic whether the characters should be italic.
+         * @param isUnderlined whether the characters should be underlined.
+         * @param fontSize the size of the font.
+         * @param colorRGBA red, green, blue, and alpha value for color.
+         */
+        public Style(int startChar, int endChar, int fontId,
+                     boolean isBold, boolean isItalic, boolean isUnderlined,
+                     int fontSize, int colorRGBA) {
+            this.startChar = startChar;
+            this.endChar = endChar;
+            this.fontID = fontId;
+            this.isBold = isBold;
+            this.isItalic = isItalic;
+            this.isUnderlined = isUnderlined;
+            this.fontSize = fontSize;
+            this.colorRGBA = colorRGBA;
+        }
     }
 
     /**
      * Helper class to hold the font ID and name.
      * The member variables in this class are read-only.
+     * {@hide}
      */
-    public class Font {
+    public static final class Font {
         /**
          * The font ID
          */
-        public int ID = -1;
+        public final int ID;
 
         /**
          * The font name
          */
-        public String name;
+        public final String name;
 
-        public Font() { }
+        /**
+         * Constructor
+         * @param id the font ID.
+         * @param name the font name.
+         */
+        public Font(int id, String name) {
+            this.ID = id;
+            this.name = name;
+        }
     }
 
     /**
      * Helper class to hold the karaoke information.
      * The member variables in this class are read-only.
+     * {@hide}
      */
-    public class Karaoke {
+    public static final class Karaoke {
         /**
          * The start time (in milliseconds) to highlight the characters
          * specified by startChar and endChar.
          */
-        public int startTimeMs = -1;
+        public final int startTimeMs;
 
         /**
          * The end time (in milliseconds) to highlight the characters
          * specified by startChar and endChar.
          */
-        public int endTimeMs = -1;
+        public final int endTimeMs;
 
         /**
          * The offset of the start character to be highlighted
          */
-        public int startChar = -1;
+        public final int startChar;
 
         /**
          * The offset of the end character to be highlighted
          */
-        public int endChar = -1;
+        public final int endChar;
 
-        public Karaoke() { }
+        /**
+         * Constructor
+         * @param startTimeMs the start time (in milliseconds) to highlight
+         * the characters between startChar and endChar.
+         * @param endTimeMs the end time (in milliseconds) to highlight
+         * the characters between startChar and endChar.
+         * @param startChar the offset of the start character to be highlighted.
+         * @param endChar the offset of the end character to be highlighted.
+         */
+        public Karaoke(int startTimeMs, int endTimeMs, int startChar, int endChar) {
+            this.startTimeMs = startTimeMs;
+            this.endTimeMs = endTimeMs;
+            this.startChar = startChar;
+            this.endChar = endChar;
+        }
     }
 
     /**
      * Helper class to hold the hyper text information.
      * The member variables in this class are read-only.
+     * {@hide}
      */
-    public class HyperText {
+    public static final class HyperText {
         /**
          * The offset of the start character
          */
-        public int startChar = -1;
+        public final int startChar;
 
         /**
          * The offset of the end character
          */
-        public int endChar = -1;
+        public final int endChar;
 
         /**
          * The linked-to URL
          */
-        public String URL;
+        public final String URL;
 
         /**
          * The "alt" string for user display
          */
-        public String altString;
+        public final String altString;
 
-        public HyperText() { }
+
+        /**
+         * Constructor
+         * @param startChar the offset of the start character.
+         * @param endChar the offset of the end character.
+         * @param url the linked-to URL.
+         * @param alt the "alt" string for display.
+         */
+        public HyperText(int startChar, int endChar, String url, String alt) {
+            this.startChar = startChar;
+            this.endChar = endChar;
+            this.URL = url;
+            this.altString = alt;
+        }
     }
 
     /**
@@ -315,6 +366,29 @@ public class TimedText
     }
 
     /**
+     * Get the characters in the timed text.
+     *
+     * @return the characters as a String object in the TimedText. Applications
+     * should stop rendering previous timed text at the current rendering region if
+     * a null is returned, until the next non-null timed text is received.
+     */
+    public String getText() {
+        return mTextChars;
+    }
+
+    /**
+     * Get the rectangle area or region for rendering the timed text as specified
+     * by a Rect object.
+     *
+     * @return the rectangle region to render the characters in the timed text.
+     * If no bounds information is available (a null is returned), render the
+     * timed text at the center bottom of the display.
+     */
+    public Rect getBounds() {
+        return mTextBounds;
+    }
+
+    /*
      * Go over all the records, collecting metadata keys and fields in the
      * Parcel. These are stored in mKeyObjectMap for application to retrieve.
      * @return false if an error occurred during parsing. Otherwise, true.
@@ -339,11 +413,13 @@ public class TimedText
                 return false;
             }
 
-            mTextStruct = new Text();
-            mTextStruct.textLen = mParcel.readInt();
-
-            mTextStruct.text = mParcel.createByteArray();
-            mKeyObjectMap.put(type, mTextStruct);
+            int textLen = mParcel.readInt();
+            byte[] text = mParcel.createByteArray();
+            if (text == null || text.length == 0) {
+                mTextChars = null;
+            } else {
+                mTextChars = new String(text);
+            }
 
         } else if (type != KEY_GLOBAL_SETTING) {
             Log.w(TAG, "Invalid timed text key found: " + type);
@@ -408,10 +484,10 @@ public class TimedText
                     break;
                 }
                 case KEY_STRUCT_JUSTIFICATION: {
-                    mJustification = new Justification();
 
-                    mJustification.horizontalJustification = mParcel.readInt();
-                    mJustification.verticalJustification = mParcel.readInt();
+                    int horizontal = mParcel.readInt();
+                    int vertical = mParcel.readInt();
+                    mJustification = new Justification(horizontal, vertical);
 
                     object = mJustification;
                     break;
@@ -422,14 +498,12 @@ public class TimedText
                     break;
                 }
                 case KEY_STRUCT_TEXT_POS: {
-                    mTextPos = new TextPos();
+                    int top = mParcel.readInt();
+                    int left = mParcel.readInt();
+                    int bottom = mParcel.readInt();
+                    int right = mParcel.readInt();
+                    mTextBounds = new Rect(left, top, right, bottom);
 
-                    mTextPos.top = mParcel.readInt();
-                    mTextPos.left = mParcel.readInt();
-                    mTextPos.bottom = mParcel.readInt();
-                    mTextPos.right = mParcel.readInt();
-
-                    object = mTextPos;
                     break;
                 }
                 case KEY_SCROLL_DELAY: {
@@ -454,43 +528,49 @@ public class TimedText
         return true;
     }
 
-    /**
+    /*
      * To parse and store the Style list.
      */
     private void readStyle() {
-        Style style = new Style();
         boolean endOfStyle = false;
-
+        int startChar = -1;
+        int endChar = -1;
+        int fontId = -1;
+        boolean isBold = false;
+        boolean isItalic = false;
+        boolean isUnderlined = false;
+        int fontSize = -1;
+        int colorRGBA = -1;
         while (!endOfStyle && (mParcel.dataAvail() > 0)) {
             int key = mParcel.readInt();
             switch (key) {
                 case KEY_START_CHAR: {
-                    style.startChar = mParcel.readInt();
+                    startChar = mParcel.readInt();
                     break;
                 }
                 case KEY_END_CHAR: {
-                    style.endChar = mParcel.readInt();
+                    endChar = mParcel.readInt();
                     break;
                 }
                 case KEY_FONT_ID: {
-                    style.fontID = mParcel.readInt();
+                    fontId = mParcel.readInt();
                     break;
                 }
                 case KEY_STYLE_FLAGS: {
                     int flags = mParcel.readInt();
                     // In the absence of any bits set in flags, the text
                     // is plain. Otherwise, 1: bold, 2: italic, 4: underline
-                    style.isBold = ((flags % 2) == 1);
-                    style.isItalic = ((flags % 4) >= 2);
-                    style.isUnderlined = ((flags / 4) == 1);
+                    isBold = ((flags % 2) == 1);
+                    isItalic = ((flags % 4) >= 2);
+                    isUnderlined = ((flags / 4) == 1);
                     break;
                 }
                 case KEY_FONT_SIZE: {
-                    style.fontSize = mParcel.readInt();
+                    fontSize = mParcel.readInt();
                     break;
                 }
                 case KEY_TEXT_COLOR_RGBA: {
-                    style.colorRGBA = mParcel.readInt();
+                    colorRGBA = mParcel.readInt();
                     break;
                 }
                 default: {
@@ -503,26 +583,28 @@ public class TimedText
             }
         }
 
+        Style style = new Style(startChar, endChar, fontId, isBold,
+                                isItalic, isUnderlined, fontSize, colorRGBA);
         if (mStyleList == null) {
             mStyleList = new ArrayList<Style>();
         }
         mStyleList.add(style);
     }
 
-    /**
+    /*
      * To parse and store the Font list
      */
     private void readFont() {
         int entryCount = mParcel.readInt();
 
         for (int i = 0; i < entryCount; i++) {
-            Font font = new Font();
-
-            font.ID = mParcel.readInt();
+            int id = mParcel.readInt();
             int nameLen = mParcel.readInt();
 
             byte[] text = mParcel.createByteArray();
-            font.name = new String(text, 0, nameLen);
+            final String name = new String(text, 0, nameLen);
+
+            Font font = new Font(id, name);
 
             if (mFontList == null) {
                 mFontList = new ArrayList<Font>();
@@ -531,14 +613,13 @@ public class TimedText
         }
     }
 
-    /**
+    /*
      * To parse and store the Highlight list
      */
     private void readHighlight() {
-        CharPos pos = new CharPos();
-
-        pos.startChar = mParcel.readInt();
-        pos.endChar = mParcel.readInt();
+        int startChar = mParcel.readInt();
+        int endChar = mParcel.readInt();
+        CharPos pos = new CharPos(startChar, endChar);
 
         if (mHighlightPosList == null) {
             mHighlightPosList = new ArrayList<CharPos>();
@@ -546,19 +627,19 @@ public class TimedText
         mHighlightPosList.add(pos);
     }
 
-    /**
+    /*
      * To parse and store the Karaoke list
      */
     private void readKaraoke() {
         int entryCount = mParcel.readInt();
 
         for (int i = 0; i < entryCount; i++) {
-            Karaoke kara = new Karaoke();
-
-            kara.startTimeMs = mParcel.readInt();
-            kara.endTimeMs = mParcel.readInt();
-            kara.startChar = mParcel.readInt();
-            kara.endChar = mParcel.readInt();
+            int startTimeMs = mParcel.readInt();
+            int endTimeMs = mParcel.readInt();
+            int startChar = mParcel.readInt();
+            int endChar = mParcel.readInt();
+            Karaoke kara = new Karaoke(startTimeMs, endTimeMs,
+                                       startChar, endChar);
 
             if (mKaraokeList == null) {
                 mKaraokeList = new ArrayList<Karaoke>();
@@ -567,22 +648,22 @@ public class TimedText
         }
     }
 
-    /**
+    /*
      * To parse and store HyperText list
      */
     private void readHyperText() {
-        HyperText hyperText = new HyperText();
-
-        hyperText.startChar = mParcel.readInt();
-        hyperText.endChar = mParcel.readInt();
+        int startChar = mParcel.readInt();
+        int endChar = mParcel.readInt();
 
         int len = mParcel.readInt();
         byte[] url = mParcel.createByteArray();
-        hyperText.URL = new String(url, 0, len);
+        final String urlString = new String(url, 0, len);
 
         len = mParcel.readInt();
         byte[] alt = mParcel.createByteArray();
-        hyperText.altString = new String(alt, 0, len);
+        final String altString = new String(alt, 0, len);
+        HyperText hyperText = new HyperText(startChar, endChar, urlString, altString);
+
 
         if (mHyperTextList == null) {
             mHyperTextList = new ArrayList<HyperText>();
@@ -590,14 +671,13 @@ public class TimedText
         mHyperTextList.add(hyperText);
     }
 
-    /**
+    /*
      * To parse and store blinking text list
      */
     private void readBlinkingText() {
-        CharPos blinkingPos = new CharPos();
-
-        blinkingPos.startChar = mParcel.readInt();
-        blinkingPos.endChar = mParcel.readInt();
+        int startChar = mParcel.readInt();
+        int endChar = mParcel.readInt();
+        CharPos blinkingPos = new CharPos(startChar, endChar);
 
         if (mBlinkingPosList == null) {
             mBlinkingPosList = new ArrayList<CharPos>();
@@ -605,12 +685,12 @@ public class TimedText
         mBlinkingPosList.add(blinkingPos);
     }
 
-    /**
+    /*
      * To check whether the given key is valid.
      * @param key the key to be checked.
      * @return true if the key is a valid one. Otherwise, false.
      */
-    public boolean isValidKey(final int key) {
+    private boolean isValidKey(final int key) {
         if (!((key >= FIRST_PUBLIC_KEY) && (key <= LAST_PUBLIC_KEY))
                 && !((key >= FIRST_PRIVATE_KEY) && (key <= LAST_PRIVATE_KEY))) {
             return false;
@@ -618,34 +698,36 @@ public class TimedText
         return true;
     }
 
-    /**
+    /*
      * To check whether the given key is contained in this TimedText object.
      * @param key the key to be checked.
      * @return true if the key is contained in this TimedText object.
      *         Otherwise, false.
      */
-    public boolean containsKey(final int key) {
+    private boolean containsKey(final int key) {
         if (isValidKey(key) && mKeyObjectMap.containsKey(key)) {
             return true;
         }
         return false;
     }
-    /**
+
+    /*
      * @return a set of the keys contained in this TimedText object.
      */
-    public Set keySet() {
+    private Set keySet() {
         return mKeyObjectMap.keySet();
     }
 
-    /**
+    /*
      * To retrieve the object associated with the key. Caller must make sure
      * the key is present using the containsKey method otherwise a
      * RuntimeException will occur.
      * @param key the key used to retrieve the object.
-     * @return an object. The object could be an instanceof Integer, List, or
-     * any of the helper classes such as TextPos, Justification, and Text.
+     * @return an object. The object could be 1) an instance of Integer; 2) a
+     * List of CharPos, Karaoke, Font, Style, and HyperText, or 3) an instance of
+     * Justification.
      */
-    public Object getObject(final int key) {
+    private Object getObject(final int key) {
         if (containsKey(key)) {
             return mKeyObjectMap.get(key);
         } else {
