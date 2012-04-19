@@ -83,13 +83,11 @@ public class Visualizer {
 
     // to keep in sync with system/media/audio_effects/include/audio_effects/effect_visualizer.h
     /**
-     * @hide
      * Defines a capture mode where amplification is applied based on the content of the captured
      * data. This is the default Visualizer mode, and is suitable for music visualization.
      */
     public static final int SCALING_MODE_NORMALIZED = 0;
     /**
-     * @hide
      * Defines a capture mode where the playback volume will affect (scale) the range of the
      * captured data. A low playback volume will lead to low sample and fft values, and vice-versa.
      */
@@ -316,7 +314,6 @@ public class Visualizer {
     }
 
     /**
-     * @hide
      * Set the type of scaling applied on the captured visualization data.
      * @param mode see {@link #SCALING_MODE_NORMALIZED}
      *     and {@link #SCALING_MODE_AS_PLAYED}
@@ -336,7 +333,6 @@ public class Visualizer {
     }
 
     /**
-     * @hide
      * Returns the current scaling mode on the captured visualization data.
      * @return the scaling mode, see {@link #SCALING_MODE_NORMALIZED}
      *     and {@link #SCALING_MODE_AS_PLAYED}.
