@@ -314,6 +314,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mExpandedDialog = new ExpandedDialog(context);
         mPile = (NotificationRowLayout)expanded.findViewById(R.id.latestItems);
+        mPile.setLongPressListener(getNotificationLongClicker());
         mExpandedContents = mPile; // was: expanded.findViewById(R.id.notificationLinearLayout);
 
         mClearButton = expanded.findViewById(R.id.clear_all_button);
