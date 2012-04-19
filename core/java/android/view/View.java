@@ -12297,7 +12297,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         final int flags = parent.mGroupFlags;
         final boolean initialized = a.isInitialized();
         if (!initialized) {
-            a.initialize(mRight - mLeft, mBottom - mTop, getWidth(), getHeight());
+            a.initialize(mRight - mLeft, mBottom - mTop, parent.getWidth(), parent.getHeight());
             a.initializeInvalidateRegion(0, 0, mRight - mLeft, mBottom - mTop);
             onAnimationStart();
         }
