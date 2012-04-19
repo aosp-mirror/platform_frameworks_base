@@ -209,7 +209,7 @@ public abstract class DataConnection extends StateMachine {
     protected static final int EVENT_RIL_CONNECTED = BASE + 5;
     protected static final int EVENT_DISCONNECT_ALL = BASE + 6;
 
-    private static final int CMD_TO_STRING_COUNT = EVENT_DISCONNECT_ALL + 1;
+    private static final int CMD_TO_STRING_COUNT = EVENT_DISCONNECT_ALL - BASE + 1;
     private static String[] sCmdToString = new String[CMD_TO_STRING_COUNT];
     static {
         sCmdToString[EVENT_CONNECT - BASE] = "EVENT_CONNECT";
