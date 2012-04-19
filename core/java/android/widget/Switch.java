@@ -29,6 +29,8 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
+import android.text.method.AllCapsTransformationMethod;
+import android.text.method.TransformationMethod2;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -91,6 +93,7 @@ public class Switch extends CompoundButton {
     private ColorStateList mTextColors;
     private Layout mOnLayout;
     private Layout mOffLayout;
+    private TransformationMethod2 mSwitchTransformationMethod;
 
     @SuppressWarnings("hiding")
     private final Rect mTempRect = new Rect();
@@ -206,6 +209,15 @@ public class Switch extends CompoundButton {
                 TextAppearance_textStyle, -1);
 
         setSwitchTypefaceByIndex(typefaceIndex, styleIndex);
+
+        boolean allCaps = appearance.getBoolean(com.android.internal.R.styleable.
+                TextAppearance_textAllCaps, false);
+        if (allCaps) {
+            mSwitchTransformationMethod = new AllCapsTransformationMethod(getContext());
+            mSwitchTransformationMethod.setLengthChangesAllowed(true);
+        } else {
+            mSwitchTransformationMethod = null;
+        }
 
         appearance.recycle();
     }
@@ -526,8 +538,12 @@ public class Switch extends CompoundButton {
     }
 
     private Layout makeLayout(CharSequence text) {
-        return new StaticLayout(text, mTextPaint,
-                (int) Math.ceil(Layout.getDesiredWidth(text, mTextPaint)),
+        final CharSequence transformed = (mSwitchTransformationMethod != null)
+                    ? mSwitchTransformationMethod.getTransformation(text, this)
+                    : text;
+
+        return new StaticLayout(transformed, mTextPaint,
+                (int) Math.ceil(Layout.getDesiredWidth(transformed, mTextPaint)),
                 Layout.Alignment.ALIGN_NORMAL, 1.f, 0, true);
     }
 
