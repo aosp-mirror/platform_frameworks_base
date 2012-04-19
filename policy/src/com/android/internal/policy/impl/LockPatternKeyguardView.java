@@ -111,7 +111,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     private boolean mRequiresSim;
     // True if the biometric unlock should not be displayed.  For example, if there is an overlay on
     // lockscreen or the user is plugging in / unplugging the device.
-    private boolean mSupressBiometricUnlock;
+    private boolean mSuppressBiometricUnlock;
     //True if a dialog is currently displaying on top of this window
     //Unlike other overlays, this does not close with a power button cycle
     private boolean mHasDialog = false;
@@ -310,15 +310,17 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         }
 
         public void takeEmergencyCallAction() {
-            mSupressBiometricUnlock = true;
+            mSuppressBiometricUnlock = true;
 
-            if (mBiometricUnlock.installedAndSelected() && mBiometricUnlock.isRunning()) {
-                // Continue covering backup lock until dialer comes up or call is resumed
-                mBiometricUnlock.show(BIOMETRIC_AREA_EMERGENCY_DIALER_TIMEOUT);
+            if (mBiometricUnlock != null) {
+                if (mBiometricUnlock.isRunning()) {
+                    // Continue covering backup lock until dialer comes up or call is resumed
+                    mBiometricUnlock.show(BIOMETRIC_AREA_EMERGENCY_DIALER_TIMEOUT);
+                }
+
+                // We must ensure the biometric unlock is stopped when emergency call is pressed
+                mBiometricUnlock.stop();
             }
-
-            // The biometric unlock must be stopped if it is running when emergency call is pressed
-            mBiometricUnlock.stop();
 
             pokeWakelock(EMERGENCY_CALL_TIMEOUT);
             if (TelephonyManager.getDefault().getCallState()
@@ -410,6 +412,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         }
     };
 
+    // Indicates whether a biometric unlock method is in use
+    private boolean isBiometricUnlockInstalledAndSelected() {
+        return (mLockPatternUtils.usingBiometricWeak() &&
+                mLockPatternUtils.isBiometricWeakInstalled());
+    }
+
     /**
      * @param context Used to inflate, and create views.
      * @param callback Keyguard callback object for pokewakelock(), etc.
@@ -423,17 +431,22 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             LockPatternUtils lockPatternUtils, KeyguardWindowController controller) {
         super(context, callback);
 
-        mBiometricUnlock = new FaceUnlock(context, updateMonitor, lockPatternUtils,
-                mKeyguardScreenCallback);
         mConfiguration = context.getResources().getConfiguration();
         mEnableFallback = false;
         mRequiresSim = TextUtils.isEmpty(SystemProperties.get("keyguard.no_require_sim"));
         mUpdateMonitor = updateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mWindowController = controller;
-        mSupressBiometricUnlock = false;
+        mSuppressBiometricUnlock = false;
         mPluggedIn = mUpdateMonitor.isDevicePluggedIn();
         mScreenOn = ((PowerManager)context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
+
+        // If the biometric unlock is not being used, we don't bother constructing it.  Then we can
+        // simply check if it is null when deciding whether we should make calls to it.
+        if (isBiometricUnlockInstalledAndSelected()) {
+            mBiometricUnlock = new FaceUnlock(context, updateMonitor, lockPatternUtils,
+                    mKeyguardScreenCallback);
+        }
 
         mUpdateMonitor.registerInfoCallback(mInfoCallback);
 
@@ -530,8 +543,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         if (DEBUG) Log.d(TAG, "screen off");
         mScreenOn = false;
         mForgotPattern = false;
-        mSupressBiometricUnlock =
-                mUpdateMonitor.getPhoneState() != TelephonyManager.CALL_STATE_IDLE || mHasDialog;
+        if (mBiometricUnlock != null) {
+            mSuppressBiometricUnlock =
+                    mUpdateMonitor.getPhoneState() != TelephonyManager.CALL_STATE_IDLE
+                    || mHasDialog;
+        }
 
         // Emulate activity life-cycle for both lock and unlock screen.
         if (mLockScreen != null) {
@@ -543,8 +559,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
         saveWidgetState();
 
-        // The biometric unlock must stop when screen turns off.
-        mBiometricUnlock.stop();
+        if (mBiometricUnlock != null) {
+            // The biometric unlock must stop when screen turns off.
+            mBiometricUnlock.stop();
+        }
     }
 
     @Override
@@ -561,7 +579,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
         restoreWidgetState();
 
-        if (startBiometricUnlock) mBiometricUnlock.start(mSupressBiometricUnlock);
+        if (mBiometricUnlock != null && startBiometricUnlock) {
+            mBiometricUnlock.start(mSuppressBiometricUnlock);
+        }
     }
 
     private void saveWidgetState() {
@@ -587,6 +607,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     @Override
     public void onWindowFocusChanged (boolean hasWindowFocus) {
         if (DEBUG) Log.d(TAG, hasWindowFocus ? "focused" : "unfocused");
+
         boolean startBiometricUnlock = false;
         // Start the biometric unlock if and only if the screen is both on and focused
         synchronized(mBiometricUnlockStartupLock) {
@@ -594,12 +615,16 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             mWindowFocused = hasWindowFocus;
         }
         if (!hasWindowFocus) {
-            mSupressBiometricUnlock = true;
-            mBiometricUnlock.stop();
-            mBiometricUnlock.hide();
+            if (mBiometricUnlock != null) {
+                mSuppressBiometricUnlock = true;
+                mBiometricUnlock.stop();
+                mBiometricUnlock.hide();
+            }
         } else {
             mHasDialog = false;
-            if (startBiometricUnlock) mBiometricUnlock.start(mSupressBiometricUnlock);
+            if (mBiometricUnlock != null && startBiometricUnlock) {
+                mBiometricUnlock.start(mSuppressBiometricUnlock);
+            }
         }
     }
 
@@ -613,7 +638,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             ((KeyguardScreen) mUnlockScreen).onResume();
         }
 
-        if (!mBiometricUnlock.installedAndSelected() || mSupressBiometricUnlock) {
+        if (mBiometricUnlock != null && mSuppressBiometricUnlock) {
             mBiometricUnlock.hide();
         }
     }
@@ -648,9 +673,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
         removeCallbacks(mRecreateRunnable);
 
-        // When view is hidden, we need to stop the biometric unlock
-        // e.g., when device becomes unlocked
-        mBiometricUnlock.stop();
+        if (mBiometricUnlock != null) {
+            // When view is hidden, we need to stop the biometric unlock
+            // e.g., when device becomes unlocked
+            mBiometricUnlock.stop();
+        }
 
         super.onDetachedFromWindow();
     }
@@ -676,10 +703,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             // suppressed.
             //
             // However, if the biometric unlock is already running, we do not want to interrupt it.
-            if (mPluggedIn != pluggedIn && !mBiometricUnlock.isRunning()) {
+            if (mBiometricUnlock != null && mPluggedIn != pluggedIn
+                    && !mBiometricUnlock.isRunning()) {
                 mBiometricUnlock.stop();
                 mBiometricUnlock.hide();
-                mSupressBiometricUnlock = true;
+                mSuppressBiometricUnlock = true;
             }
             mPluggedIn = pluggedIn;
         }
@@ -695,8 +723,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         @Override
         public void onPhoneStateChanged(int phoneState) {
             if (DEBUG) Log.d(TAG, "phone state: " + phoneState);
-            if(phoneState == TelephonyManager.CALL_STATE_RINGING) {
-                mSupressBiometricUnlock = true;
+            if (mBiometricUnlock != null && phoneState == TelephonyManager.CALL_STATE_RINGING) {
+                mSuppressBiometricUnlock = true;
                 mBiometricUnlock.stop();
                 mBiometricUnlock.hide();
             }
@@ -704,7 +732,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
         @Override
         public void onUserChanged(int userId) {
-            mBiometricUnlock.stop();
+            if (mBiometricUnlock != null) {
+                mBiometricUnlock.stop();
+            }
             mLockPatternUtils.setCurrentUser(userId);
             updateScreen(getInitialMode(), true);
         }
@@ -767,7 +797,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             mUnlockScreen = null;
         }
         mUpdateMonitor.removeCallback(this);
-        mBiometricUnlock.cleanUp();
+        if (mBiometricUnlock != null) {
+            mBiometricUnlock.cleanUp();
+        }
     }
 
     private boolean isSecure() {
@@ -817,10 +849,13 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         final UnlockMode unlockMode = getUnlockMode();
         if (mode == Mode.UnlockScreen && unlockMode != UnlockMode.Unknown) {
             if (force || mUnlockScreen == null || unlockMode != mUnlockScreenMode) {
-                boolean restartBiometricUnlock = mBiometricUnlock.stop();
+                boolean restartBiometricUnlock = false;
+                if (mBiometricUnlock != null) {
+                    restartBiometricUnlock = mBiometricUnlock.stop();
+                }
                 recreateUnlockScreen(unlockMode);
-                if (restartBiometricUnlock) {
-                    mBiometricUnlock.start(mSupressBiometricUnlock);
+                if (mBiometricUnlock != null && restartBiometricUnlock) {
+                    mBiometricUnlock.start(mSuppressBiometricUnlock);
                 }
             }
         }
@@ -934,8 +969,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             throw new IllegalArgumentException("unknown unlock mode " + unlockMode);
         }
         initializeTransportControlView(unlockView);
-        // Only shows view if the biometric unlock is enabled
-        mBiometricUnlock.initializeAreaView(unlockView);
+
+        if (mBiometricUnlock != null) {
+            mBiometricUnlock.initializeAreaView(unlockView);
+        }
 
         mUnlockScreenMode = unlockMode;
         return unlockView;

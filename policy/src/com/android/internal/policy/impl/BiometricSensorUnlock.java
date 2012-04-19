@@ -19,9 +19,6 @@ package com.android.internal.policy.impl;
 import android.view.View;
 
 interface BiometricSensorUnlock {
-    // Returns 'true' if the biometric sensor is available and is selected by user.
-    public boolean installedAndSelected();
-
     // Returns 'true' if the biometric sensor has started its unlock procedure but has not yet
     // accepted or rejected the user.
     public boolean isRunning();

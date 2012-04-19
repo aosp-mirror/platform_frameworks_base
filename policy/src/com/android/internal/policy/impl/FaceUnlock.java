@@ -77,12 +77,6 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         mHandler = new Handler(this);
     }
 
-    // Indicates whether FaceLock is in use
-    public boolean installedAndSelected() {
-        return (mLockPatternUtils.usingBiometricWeak() &&
-                mLockPatternUtils.isBiometricWeakInstalled());
-    }
-
     public boolean isRunning() {
         return mServiceRunning;
     }
@@ -106,28 +100,26 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     // Tells FaceLock to stop and then unbinds from the FaceLock service
     public boolean stop() {
         boolean wasRunning = false;
-        if (installedAndSelected()) {
-            stopUi();
+        stopUi();
 
-            if (mBoundToService) {
-                wasRunning = true;
-                if (DEBUG) Log.d(TAG, "before unbind from FaceLock service");
-                if (mService != null) {
-                    try {
-                        mService.unregisterCallback(mFaceLockCallback);
-                    } catch (RemoteException e) {
-                        // Not much we can do
-                    }
+        if (mBoundToService) {
+            wasRunning = true;
+            if (DEBUG) Log.d(TAG, "before unbind from FaceLock service");
+            if (mService != null) {
+                try {
+                    mService.unregisterCallback(mFaceLockCallback);
+                } catch (RemoteException e) {
+                    // Not much we can do
                 }
-                mContext.unbindService(mConnection);
-                if (DEBUG) Log.d(TAG, "after unbind from FaceLock service");
-                mBoundToService = false;
-            } else {
-                // This is usually not an error when this happens.  Sometimes we will tell it to
-                // unbind multiple times because it's called from both onWindowFocusChanged and
-                // onDetachedFromWindow.
-                if (DEBUG) Log.d(TAG, "Attempt to unbind from FaceLock when not bound");
             }
+            mContext.unbindService(mConnection);
+            if (DEBUG) Log.d(TAG, "after unbind from FaceLock service");
+            mBoundToService = false;
+        } else {
+            // This is usually not an error when this happens.  Sometimes we will tell it to
+            // unbind multiple times because it's called from both onWindowFocusChanged and
+            // onDetachedFromWindow.
+            if (DEBUG) Log.d(TAG, "Attempt to unbind from FaceLock when not bound");
         }
 
         return wasRunning;
@@ -145,7 +137,6 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
                 (failedBackupAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT);
         if (tooManyFaceUnlockTries) Log.i(TAG, "tooManyFaceUnlockTries: " + tooManyFaceUnlockTries);
         if (mUpdateMonitor.getPhoneState() == TelephonyManager.CALL_STATE_IDLE
-                && installedAndSelected()
                 && !suppressBiometricUnlock
                 && !tooManyFaceUnlockTries
                 && !backupIsTimedOut) {
@@ -170,15 +161,11 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
 
     // Takes care of FaceLock area when layout is created
     public void initializeAreaView(View topView) {
-        if (installedAndSelected()) {
-            mAreaView = topView.findViewById(R.id.faceLockAreaView);
-            if (mAreaView == null) {
-                Log.e(TAG, "Layout does not have areaView and FaceLock is enabled");
-            } else {
-                show(0);
-            }
+        mAreaView = topView.findViewById(R.id.faceLockAreaView);
+        if (mAreaView == null) {
+            Log.e(TAG, "Layout does not have areaView and FaceLock is enabled");
         } else {
-            mAreaView = null; // Set to null if not using FaceLock
+            show(0);
         }
     }
 
@@ -236,18 +223,16 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     // Binds to FaceLock service.  This call does not tell it to start, but it causes the service
     // to call the onServiceConnected callback, which then starts FaceLock.
     private void bind() {
-        if (installedAndSelected()) {
-            if (!mBoundToService) {
-                if (DEBUG) Log.d(TAG, "before bind to FaceLock service");
-                mContext.bindService(new Intent(IFaceLockInterface.class.getName()),
-                        mConnection,
-                        Context.BIND_AUTO_CREATE,
-                        mLockPatternUtils.getCurrentUser());
-                if (DEBUG) Log.d(TAG, "after bind to FaceLock service");
-                mBoundToService = true;
-            } else {
-                Log.w(TAG, "Attempt to bind to FaceLock when already bound");
-            }
+        if (!mBoundToService) {
+            if (DEBUG) Log.d(TAG, "before bind to FaceLock service");
+            mContext.bindService(new Intent(IFaceLockInterface.class.getName()),
+                    mConnection,
+                    Context.BIND_AUTO_CREATE,
+                    mLockPatternUtils.getCurrentUser());
+            if (DEBUG) Log.d(TAG, "after bind to FaceLock service");
+            mBoundToService = true;
+        } else {
+            Log.w(TAG, "Attempt to bind to FaceLock when already bound");
         }
     }
 
@@ -289,41 +274,37 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
 
     // Tells the FaceLock service to start displaying its UI and perform recognition
     private void startUi(IBinder windowToken, int x, int y, int w, int h) {
-        if (installedAndSelected()) {
-            synchronized (mServiceRunningLock) {
-                if (!mServiceRunning) {
-                    if (DEBUG) Log.d(TAG, "Starting FaceLock");
-                    try {
-                        mService.startUi(windowToken, x, y, w, h,
-                                mLockPatternUtils.isBiometricWeakLivelinessEnabled());
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Caught exception starting FaceLock: " + e.toString());
-                        return;
-                    }
-                    mServiceRunning = true;
-                } else {
-                    if (DEBUG) Log.w(TAG, "startUi() attempted while running");
+        synchronized (mServiceRunningLock) {
+            if (!mServiceRunning) {
+                if (DEBUG) Log.d(TAG, "Starting FaceLock");
+                try {
+                    mService.startUi(windowToken, x, y, w, h,
+                            mLockPatternUtils.isBiometricWeakLivelinessEnabled());
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Caught exception starting FaceLock: " + e.toString());
+                    return;
                 }
+                mServiceRunning = true;
+            } else {
+                if (DEBUG) Log.w(TAG, "startUi() attempted while running");
             }
         }
     }
 
     // Tells the FaceLock service to stop displaying its UI and stop recognition
     private void stopUi() {
-        if (installedAndSelected()) {
-            // Note that attempting to stop FaceLock when it's not running is not an issue.
-            // FaceLock can return, which stops it and then we try to stop it when the
-            // screen is turned off.  That's why we check.
-            synchronized (mServiceRunningLock) {
-                if (mServiceRunning) {
-                    try {
-                        if (DEBUG) Log.d(TAG, "Stopping FaceLock");
-                        mService.stopUi();
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Caught exception stopping FaceLock: " + e.toString());
-                    }
-                    mServiceRunning = false;
+        // Note that attempting to stop FaceLock when it's not running is not an issue.
+        // FaceLock can return, which stops it and then we try to stop it when the
+        // screen is turned off.  That's why we check.
+        synchronized (mServiceRunningLock) {
+            if (mServiceRunning) {
+                try {
+                    if (DEBUG) Log.d(TAG, "Stopping FaceLock");
+                    mService.stopUi();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Caught exception stopping FaceLock: " + e.toString());
                 }
+                mServiceRunning = false;
             }
         }
     }
