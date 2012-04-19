@@ -123,7 +123,7 @@ public abstract class AbsSeekBar extends ProgressBar {
         invalidate();
         if (needUpdate) {
             updateThumbPos(getWidth(), getHeight());
-            if (thumb.isStateful()) {
+            if (thumb != null && thumb.isStateful()) {
                 // Note that if the states are different this won't work.
                 // For now, let's consider that an app bug.
                 int[] state = getDrawableState();
