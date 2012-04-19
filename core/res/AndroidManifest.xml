@@ -737,6 +737,14 @@
         android:label="@string/permlab_removeTasks"
         android:description="@string/permdesc_removeTasks" />
 
+    <!-- Allows an application to start any activity, regardless of permission
+         protection or exported state. @hide -->
+    <permission android:name="android.permission.START_ANY_ACTIVITY"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature"
+        android:label="@string/permlab_startAnyActivity"
+        android:description="@string/permdesc_startAnyActivity" />
+
     <!-- @hide Change the screen compatibility mode of applications -->
     <permission android:name="android.permission.SET_SCREEN_COMPATIBILITY"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"

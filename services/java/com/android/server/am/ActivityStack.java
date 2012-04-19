@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.START_ANY_ACTIVITY;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
@@ -2407,9 +2410,11 @@ final class ActivityStack {
             return err;
         }
 
-        final int perm = mService.checkComponentPermission(aInfo.permission, callingPid,
+        final int startAnyPerm = mService.checkPermission(
+                START_ANY_ACTIVITY, callingPid, callingUid);
+        final int componentPerm = mService.checkComponentPermission(aInfo.permission, callingPid,
                 callingUid, aInfo.applicationInfo.uid, aInfo.exported);
-        if (perm != PackageManager.PERMISSION_GRANTED) {
+        if (startAnyPerm != PERMISSION_GRANTED && componentPerm != PERMISSION_GRANTED) {
             if (resultRecord != null) {
                 sendActivityResultLocked(-1,
                     resultRecord, resultWho, requestCode,

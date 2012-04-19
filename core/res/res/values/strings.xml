@@ -538,6 +538,11 @@
         tasks and kill their apps. Malicious apps may disrupt
         the behavior of other apps.</string>
 
+    <!-- Title of an application permission, allowing an application to start any activity, regardless of permission protection or exported state. -->
+    <string name="permlab_startAnyActivity">start any activity</string>
+    <!-- Description of an application permission, allowing an application to start any activity, regardless of permission protection or exported state. -->
+    <string name="permdesc_startAnyActivity">Allows the app to start any activity, regardless of permission protection or exported state.</string>
+
     <!-- Title of an application permission, allowing control of app screen compatibility mode -->
     <string name="permlab_setScreenCompatibility">set screen compatibility</string>
     <!-- Description of an application permission, allowing control of app screen compatibility mode -->

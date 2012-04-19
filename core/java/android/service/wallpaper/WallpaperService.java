@@ -140,6 +140,7 @@ public abstract class WallpaperService extends Service {
         boolean mIsCreating;
         boolean mDrawingAllowed;
         boolean mOffsetsChanged;
+        boolean mFixedSizeAllowed;
         int mWidth;
         int mHeight;
         int mFormat;
@@ -211,7 +212,7 @@ public abstract class WallpaperService extends Service {
 
             @Override
             public void setFixedSize(int width, int height) {
-                if (Process.myUid() != Process.SYSTEM_UID) {
+                if (!mFixedSizeAllowed) {
                     // Regular apps can't do this.  It can only work for
                     // certain designs of window animations, so you can't
                     // rely on it.
@@ -385,7 +386,12 @@ public abstract class WallpaperService extends Service {
                 updateSurface(false, false, false);
             }
         }
-        
+
+        /** {@hide} */
+        public void setFixedSizeAllowed(boolean allowed) {
+            mFixedSizeAllowed = allowed;
+        }
+
         /**
          * Called once to initialize the engine.  After returning, the
          * engine's surface will be created by the framework.
