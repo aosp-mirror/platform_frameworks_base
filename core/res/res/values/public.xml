@@ -1002,6 +1002,7 @@
   <java-symbol type="drawable" name="ic_lockscreen_silent" />
   <java-symbol type="drawable" name="ic_lockscreen_unlock" />
   <java-symbol type="drawable" name="ic_lockscreen_search" />
+  <java-symbol type="drawable" name="notification_bg" />
 
   <java-symbol type="layout" name="action_bar_home" />
   <java-symbol type="layout" name="action_bar_title_item" />

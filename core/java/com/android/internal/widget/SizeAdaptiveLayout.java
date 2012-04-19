@@ -26,8 +26,11 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.StateListDrawable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.StateSet;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
@@ -90,8 +93,14 @@ public class SizeAdaptiveLayout extends ViewGroup {
     private void initialize() {
         mModestyPanel = new View(getContext());
         // If the SizeAdaptiveLayout has a solid background, use it as a transition hint.
-        if (getBackground() instanceof ColorDrawable) {
-            mModestyPanel.setBackgroundDrawable(getBackground());
+        Drawable background = getBackground();
+        if (background instanceof StateListDrawable) {
+            StateListDrawable sld = (StateListDrawable) background;
+            sld.setState(StateSet.WILD_CARD);
+            background = sld.getCurrent();
+        }
+        if (background instanceof ColorDrawable) {
+            mModestyPanel.setBackgroundDrawable(background);
         } else {
             mModestyPanel.setBackgroundColor(Color.BLACK);
         }

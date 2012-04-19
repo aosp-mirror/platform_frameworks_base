@@ -213,7 +213,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (version > 0 && version < Build.VERSION_CODES.GINGERBREAD) {
                 content.setBackgroundResource(R.drawable.notification_row_legacy_bg);
             } else {
-                content.setBackgroundResource(R.drawable.notification_row_bg);
+                content.setBackgroundResource(com.android.internal.R.drawable.notification_bg);
             }
         }
     }

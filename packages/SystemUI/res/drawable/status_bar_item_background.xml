@@ -19,7 +19,7 @@
     android:opacity="translucent"
     >
     <item
-        android:drawable="@drawable/notification_item_background_color"
+        android:drawable="@*android:drawable/notification_item_background_color"
         />
 </layer-list>
 

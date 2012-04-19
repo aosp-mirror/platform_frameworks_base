@@ -19,6 +19,7 @@ package com.android.internal.widget;
 import com.android.frameworks.coretests.R;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -425,6 +426,17 @@ public class SizeAdaptiveLayoutTest extends AndroidTestCase {
         ColorDrawable salColor = (ColorDrawable) mSizeAdaptiveLayout.getBackground();
         assertEquals("ModestyPanel color should match the SizeAdaptiveLayout",
                      panelColor.getColor(), salColor.getColor());
+    }
+
+    @SmallTest
+    public void testModestyPanelTracksStateListColor() {
+        inflate(R.layout.size_adaptive_color_statelist);
+        View panel = mSizeAdaptiveLayout.getModestyPanel();
+        assertEquals("ModestyPanel should have a ColorDrawable background" ,
+                     panel.getBackground().getClass(), ColorDrawable.class);
+        ColorDrawable panelColor = (ColorDrawable) panel.getBackground();
+        assertEquals("ModestyPanel color should match the SizeAdaptiveLayout",
+                     panelColor.getColor(), Color.RED);
     }
 
     @SmallTest
