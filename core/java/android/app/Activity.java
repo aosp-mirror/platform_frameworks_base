@@ -549,7 +549,7 @@ import java.util.HashMap;
  *         super.onCreate(savedInstanceState);
  *
  *         SharedPreferences mPrefs = getSharedPreferences();
- *         mCurViewMode = mPrefs.getInt("view_mode" DAY_VIEW_MODE);
+ *         mCurViewMode = mPrefs.getInt("view_mode", DAY_VIEW_MODE);
  *     }
  *
  *     protected void onPause() {
