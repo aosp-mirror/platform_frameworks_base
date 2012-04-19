@@ -3557,17 +3557,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 continue;
             }
 
-            if (!haveGroup) {
-                // We ignore any hidden applications on the top.
-                if (wtoken.hiddenRequested || wtoken.willBeHidden) {
-                    if (DEBUG_ORIENTATION) Slog.v(TAG, "Skipping " + wtoken
-                            + " -- hidden on top");
-                    continue;
-                }
-                haveGroup = true;
-                curGroup = wtoken.groupId;
-                lastOrientation = wtoken.requestedOrientation;
-            } else if (curGroup != wtoken.groupId) {
+            if (haveGroup == true && curGroup != wtoken.groupId) {
                 // If we have hit a new application group, and the bottom
                 // of the previous group didn't explicitly say to use
                 // the orientation behind it, and the last app was
@@ -3580,6 +3570,20 @@ public class WindowManagerService extends IWindowManager.Stub
                     return lastOrientation;
                 }
             }
+
+            // We ignore any hidden applications on the top.
+            if (wtoken.hiddenRequested || wtoken.willBeHidden) {
+                if (DEBUG_ORIENTATION) Slog.v(TAG, "Skipping " + wtoken
+                        + " -- hidden on top");
+                continue;
+            }
+
+            if (!haveGroup) {
+                haveGroup = true;
+                curGroup = wtoken.groupId;
+                lastOrientation = wtoken.requestedOrientation;
+            } 
+
             int or = wtoken.requestedOrientation;
             // If this application is fullscreen, and didn't explicitly say
             // to use the orientation behind it, then just take whatever
