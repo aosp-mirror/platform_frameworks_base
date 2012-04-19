@@ -11756,11 +11756,13 @@ package android.media.audiofx {
     method public int getFft(byte[]) throws java.lang.IllegalStateException;
     method public static int getMaxCaptureRate();
     method public int getSamplingRate() throws java.lang.IllegalStateException;
+    method public int getScalingMode() throws java.lang.IllegalStateException;
     method public int getWaveForm(byte[]) throws java.lang.IllegalStateException;
     method public void release();
     method public int setCaptureSize(int) throws java.lang.IllegalStateException;
     method public int setDataCaptureListener(android.media.audiofx.Visualizer.OnDataCaptureListener, int, boolean, boolean);
     method public int setEnabled(boolean) throws java.lang.IllegalStateException;
+    method public int setScalingMode(int) throws java.lang.IllegalStateException;
     field public static final int ALREADY_EXISTS = -2; // 0xfffffffe
     field public static final int ERROR = -1; // 0xffffffff
     field public static final int ERROR_BAD_VALUE = -4; // 0xfffffffc
@@ -11768,6 +11770,8 @@ package android.media.audiofx {
     field public static final int ERROR_INVALID_OPERATION = -5; // 0xfffffffb
     field public static final int ERROR_NO_INIT = -3; // 0xfffffffd
     field public static final int ERROR_NO_MEMORY = -6; // 0xfffffffa
+    field public static final int SCALING_MODE_AS_PLAYED = 1; // 0x1
+    field public static final int SCALING_MODE_NORMALIZED = 0; // 0x0
     field public static final int STATE_ENABLED = 2; // 0x2
     field public static final int STATE_INITIALIZED = 1; // 0x1
     field public static final int STATE_UNINITIALIZED = 0; // 0x0
