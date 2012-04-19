@@ -1577,26 +1577,39 @@ public class MediaPlayer
 
     /**
      * Returns an array of track information.
+     * If it is called in an invalid state, IllegalStateException will be thrown.
      *
-     * @return Array of track info. null if an error occured.
+     * @return Array of track info. The total number of tracks is the array length.
+     * Must be called again if an external source has been added after any of the
+     * addExternalSource methods are called.
      * {@hide}
      */
-    // FIXME: It returns timed text tracks' information for now. Other types of tracks will be
-    // supported in future.
     public TrackInfo[] getTrackInfo() {
         Parcel request = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         request.writeInterfaceToken(IMEDIA_PLAYER);
         request.writeInt(INVOKE_ID_GET_TRACK_INFO);
-        invoke(request, reply);
+        int status = invoke(request, reply);
+        if (status != 0) {
+            throw new IllegalStateException();
+        }
         TrackInfo trackInfo[] = reply.createTypedArray(TrackInfo.CREATOR);
         return trackInfo;
     }
 
+    /* Do not change these values without updating their counterparts
+     * in include/media/stagefright/MediaDefs.h and media/libstagefright/MediaDefs.cpp!
+     */
+    /**
+     * MIME type for SubRip (SRT) container. Used in addExternalSource APIs.
+     * {@hide}
+     */
+    public static final String MEDIA_MIMETYPE_TEXT_SUBRIP = "application/x-subrip";
+
     /*
      * A helper function to check if the mime type is supported by media framework.
      */
-    private boolean availableMimeTypeForExternalSource(String mimeType) {
+    private static boolean availableMimeTypeForExternalSource(String mimeType) {
         if (mimeType == MEDIA_MIMETYPE_TEXT_SUBRIP) {
             return true;
         }
@@ -1614,10 +1627,11 @@ public class MediaPlayer
      * additional tracks become available after this method call.
      *
      * @param path The file path of external source file.
+     * @param mimeType The mime type of the file. Must be one of the mime types listed above.
+     * @throws IOException if the file cannot be accessed or is corrupted.
+     * @throws IllegalArgumentException if the mimeType is not supported.
      * {@hide}
      */
-    // FIXME: define error codes and throws exceptions according to the error codes.
-    // (IllegalStateException, IOException).
     public void addExternalSource(String path, String mimeType)
             throws IOException, IllegalArgumentException {
         if (!availableMimeTypeForExternalSource(mimeType)) {
@@ -1647,10 +1661,11 @@ public class MediaPlayer
      *
      * @param context the Context to use when resolving the Uri
      * @param uri the Content URI of the data you want to play
+     * @param mimeType The mime type of the file. Must be one of the mime types listed above.
+     * @throws IOException if the file cannot be accessed or is corrupted.
+     * @throws IllegalArgumentException if the mimeType is not supported.
      * {@hide}
      */
-    // FIXME: define error codes and throws exceptions according to the error codes.
-    // (IllegalStateException, IOException).
     public void addExternalSource(Context context, Uri uri, String mimeType)
             throws IOException, IllegalArgumentException {
         String scheme = uri.getScheme();
@@ -1677,15 +1692,6 @@ public class MediaPlayer
         }
     }
 
-    /* Do not change these values without updating their counterparts
-     * in include/media/stagefright/MediaDefs.h and media/libstagefright/MediaDefs.cpp!
-     */
-    /**
-     * MIME type for SubRip (SRT) container. Used in {@link #addExternalSource()} APIs.
-     * {@hide}
-     */
-    public static final String MEDIA_MIMETYPE_TEXT_SUBRIP = "application/x-subrip";
-
     /**
      * Adds an external source file (FileDescriptor).
      * It is the caller's responsibility to close the file descriptor.
@@ -1697,14 +1703,10 @@ public class MediaPlayer
      * additional tracks become available after this method call.
      *
      * @param fd the FileDescriptor for the file you want to play
-     * @param mimeType A MIME type for the content. It can be null.
-     * <ul>
-     * <li>{@link #MEDIA_MIMETYPE_TEXT_SUBRIP}
-     * </ul>
+     * @param mimeType The mime type of the file. Must be one of the mime types listed above.
+     * @throws IllegalArgumentException if the mimeType is not supported.
      * {@hide}
      */
-    // FIXME: define error codes and throws exceptions according to the error codes.
-    // (IllegalStateException, IOException).
     public void addExternalSource(FileDescriptor fd, String mimeType)
             throws IllegalArgumentException {
         // intentionally less than LONG_MAX
@@ -1724,11 +1726,10 @@ public class MediaPlayer
      * @param fd the FileDescriptor for the file you want to play
      * @param offset the offset into the file where the data to be played starts, in bytes
      * @param length the length in bytes of the data to be played
-     * @param mimeType A MIME type for the content. It can be null.
+     * @param mimeType The mime type of the file. Must be one of the mime types listed above.
+     * @throws IllegalArgumentException if the mimeType is not supported.
      * {@hide}
      */
-    // FIXME: define error codes and throws exceptions according to the error codes.
-    // (IllegalStateException, IOException).
     public void addExternalSource(FileDescriptor fd, long offset, long length, String mimeType)
             throws IllegalArgumentException {
         if (!availableMimeTypeForExternalSource(mimeType)) {
@@ -1749,8 +1750,8 @@ public class MediaPlayer
     /**
      * Selects a track.
      * <p>
-     * If a MediaPlayer is in invalid state, it throws exception.
-     * If a MediaPlayer is in Started state, the selected track will be presented immediately.
+     * If a MediaPlayer is in invalid state, it throws an IllegalStateException exception.
+     * If a MediaPlayer is in <em>Started</em> state, the selected track is presented immediately.
      * If a MediaPlayer is not in Started state, it just marks the track to be played.
      * </p>
      * <p>
@@ -1758,37 +1759,57 @@ public class MediaPlayer
      * Audio, Timed Text), the most recent one will be chosen.
      * </p>
      * <p>
-     * The first audio and video tracks will be selected by default, even though this function is not
-     * called. However, no timed text track will be selected until this function is called.
+     * The first audio and video tracks are selected by default if available, even though
+     * this method is not called. However, no timed text track will be selected until
+     * this function is called.
      * </p>
+     * <p>
+     * Currently, only timed text tracks or audio tracks can be selected via this method.
+     * In addition, the support for selecting an audio track at runtime is pretty limited
+     * in that an audio track can only be selected in the <em>Prepared</em> state.
+     * </p>
+     * @param index the index of the track to be selected. The valid range of the index
+     * is 0..total number of track - 1. The total number of tracks as well as the type of
+     * each individual track can be found by calling {@link #getTrackInfo()} method.
+     * @see android.media.MediaPlayer.getTrackInfo
      * {@hide}
      */
-    // FIXME: define error codes and throws exceptions according to the error codes.
-    // (IllegalStateException, IOException, IllegalArgumentException).
     public void selectTrack(int index) {
-        Parcel request = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        request.writeInterfaceToken(IMEDIA_PLAYER);
-        request.writeInt(INVOKE_ID_SELECT_TRACK);
-        request.writeInt(index);
-        invoke(request, reply);
+        selectOrUnselectTrack(index, true /* select */);
     }
 
     /**
      * Unselect a track.
-     * If the track identified by index has not been selected before, it throws an exception.
+     * <p>
+     * Currently, the track must be a timed text track and no audio or video tracks can be
+     * unselected. If the timed text track identified by index has not been
+     * selected before, it throws an exception.
+     * </p>
+     * @param index the index of the track to be unselected. The valid range of the index
+     * is 0..total number of tracks - 1. The total number of tracks as well as the type of
+     * each individual track can be found by calling {@link #getTrackInfo()} method.
+     *
+     * @see android.media.MediaPlayer.getTrackInfo
      * {@hide}
      */
-    // FIXME: define error codes and throws exceptions according to the error codes.
-    // (IllegalStateException, IOException, IllegalArgumentException).
     public void unselectTrack(int index) {
+        selectOrUnselectTrack(index, false /* select */);
+    }
+
+    private void selectOrUnselectTrack(int index, boolean select) {
         Parcel request = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         request.writeInterfaceToken(IMEDIA_PLAYER);
-        request.writeInt(INVOKE_ID_UNSELECT_TRACK);
+        request.writeInt(select? INVOKE_ID_SELECT_TRACK: INVOKE_ID_UNSELECT_TRACK);
         request.writeInt(index);
-        invoke(request, reply);
+        int status = invoke(request, reply);
+        if (status != 0) {
+            String msg = select? "selectTrack ": "unselectTrack ";
+            msg += "failed for track index: " + index;
+            throw new RuntimeException(msg);
+        }
     }
+
 
     /**
      * @param reply Parcel with audio/video duration info for battery
