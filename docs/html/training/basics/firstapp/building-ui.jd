@@ -56,7 +56,8 @@ but it's especially important on Android because it allows you to define alterna
 different screen sizes. For example, you can create two versions of a layout and tell
 the system to use one on "small" screens and the other on "large" screens. For more information,
 see the class about <a
-href="{@docRoot}training/supporting-hardware/index.html">Supporting Various Hardware</a>.</p>
+href="{@docRoot}training/basics/supporting-devices/index.html">Supporting Different
+Hardware</a>.</p>
 </div>
 </div>
 
