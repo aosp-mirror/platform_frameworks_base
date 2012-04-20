@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.util.Slog;
 import com.google.android.collect.Lists;
 
 import java.util.ArrayList;
@@ -32,12 +33,14 @@ public class NativeDaemonEvent {
     private final int mCode;
     private final String mMessage;
     private final String mRawEvent;
+    private String[] mParsed;
 
     private NativeDaemonEvent(int cmdNumber, int code, String message, String rawEvent) {
         mCmdNumber = cmdNumber;
         mCode = code;
         mMessage = message;
         mRawEvent = rawEvent;
+        mParsed = null;
     }
 
     public int getCmdNumber() {
@@ -165,5 +168,87 @@ public class NativeDaemonEvent {
             }
         }
         return result.toArray(new String[result.size()]);
+    }
+
+    /**
+     * Find the Nth field of the event.
+     *
+     * This ignores and code or cmdNum, the first return value is given for N=0.
+     * Also understands "\"quoted\" multiword responses" and tries them as a single field
+     */
+    public String getField(int n) {
+        if (mParsed == null) {
+            mParsed = unescapeArgs(mRawEvent);
+        }
+        n += 2; // skip code and command#
+        if (n > mParsed.length) return null;
+            return mParsed[n];
+        }
+
+    public static String[] unescapeArgs(String rawEvent) {
+        final boolean DEBUG_ROUTINE = false;
+        final String LOGTAG = "unescapeArgs";
+        final ArrayList<String> parsed = new ArrayList<String>();
+        final int length = rawEvent.length();
+        int current = 0;
+        int wordEnd = -1;
+        boolean quoted = false;
+
+        if (DEBUG_ROUTINE) Slog.e(LOGTAG, "parsing '" + rawEvent + "'");
+        if (rawEvent.charAt(current) == '\"') {
+            quoted = true;
+            current++;
+        }
+        while (current < length) {
+            // find the end of the word
+            if (quoted) {
+                wordEnd = current;
+                while ((wordEnd = rawEvent.indexOf('\"', wordEnd)) != -1) {
+                    if (rawEvent.charAt(wordEnd - 1) != '\\') {
+                        break;
+                    } else {
+                        wordEnd++; // skip this escaped quote and keep looking
+                    }
+                }
+            } else {
+                wordEnd = rawEvent.indexOf(' ', current);
+            }
+            // if we didn't find the end-o-word token, take the rest of the string
+            if (wordEnd == -1) wordEnd = length;
+            String word = rawEvent.substring(current, wordEnd);
+            current += word.length();
+            if (!quoted) {
+                word = word.trim();
+            } else {
+                current++;  // skip the trailing quote
+            }
+            // unescape stuff within the word
+            word.replace("\\\\", "\\");
+            word.replace("\\\"", "\"");
+
+            if (DEBUG_ROUTINE) Slog.e(LOGTAG, "found '" + word + "'");
+            parsed.add(word);
+
+            // find the beginning of the next word - either of these options
+            int nextSpace = rawEvent.indexOf(' ', current);
+            int nextQuote = rawEvent.indexOf(" \"", current);
+            if (DEBUG_ROUTINE) {
+                Slog.e(LOGTAG, "nextSpace=" + nextSpace + ", nextQuote=" + nextQuote);
+            }
+            if (nextQuote > -1 && nextQuote <= nextSpace) {
+                quoted = true;
+                current = nextQuote + 2;
+            } else {
+                quoted = false;
+                if (nextSpace > -1) {
+                    current = nextSpace + 1;
+                }
+            } // else we just start the next word after the current and read til the end
+            if (DEBUG_ROUTINE) {
+                Slog.e(LOGTAG, "next loop - current=" + current +
+                        ", length=" + length + ", quoted=" + quoted);
+            }
+        }
+        return parsed.toArray(new String[parsed.size()]);
     }
 }
