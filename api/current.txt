@@ -23928,7 +23928,7 @@ package android.view {
     method public void onWindowSystemUiVisibilityChanged(int);
     method protected void onWindowVisibilityChanged(int);
     method protected boolean overScrollBy(int, int, int, int, int, int, int, int, boolean);
-    method public boolean performAccessibilityAction(int);
+    method public boolean performAccessibilityAction(int, android.os.Bundle);
     method public boolean performClick();
     method public boolean performHapticFeedback(int);
     method public boolean performHapticFeedback(int, int);
@@ -24997,6 +24997,7 @@ package android.view.accessibility {
     method public int getChildCount();
     method public java.lang.CharSequence getClassName();
     method public java.lang.CharSequence getContentDescription();
+    method public java.lang.CharSequence[] getGranularities();
     method public java.lang.CharSequence getPackageName();
     method public android.view.accessibility.AccessibilityNodeInfo getParent();
     method public java.lang.CharSequence getText();
@@ -25017,6 +25018,7 @@ package android.view.accessibility {
     method public static android.view.accessibility.AccessibilityNodeInfo obtain();
     method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.accessibility.AccessibilityNodeInfo);
     method public boolean performAction(int);
+    method public boolean performAction(int, android.os.Bundle);
     method public void recycle();
     method public void setAccessibilityFocused(boolean);
     method public void setBoundsInParent(android.graphics.Rect);
@@ -25029,6 +25031,7 @@ package android.view.accessibility {
     method public void setEnabled(boolean);
     method public void setFocusable(boolean);
     method public void setFocused(boolean);
+    method public void setGranularities(java.lang.CharSequence[]);
     method public void setLongClickable(boolean);
     method public void setPackageName(java.lang.CharSequence);
     method public void setParent(android.view.View);
@@ -25041,12 +25044,15 @@ package android.view.accessibility {
     method public void setText(java.lang.CharSequence);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ACTION_ACCESSIBILITY_FOCUS = 64; // 0x40
+    field public static final java.lang.String ACTION_ARGUMENT_GRANULARITY = "ACTION_ARGUMENT_GRANULARITY";
     field public static final int ACTION_CLEAR_ACCESSIBILITY_FOCUS = 128; // 0x80
     field public static final int ACTION_CLEAR_FOCUS = 2; // 0x2
     field public static final int ACTION_CLEAR_SELECTION = 8; // 0x8
     field public static final int ACTION_CLICK = 16; // 0x10
     field public static final int ACTION_FOCUS = 1; // 0x1
     field public static final int ACTION_LONG_CLICK = 32; // 0x20
+    field public static final int ACTION_NEXT_AT_GRANULARITY = 256; // 0x100
+    field public static final int ACTION_PREVIOUS_AT_GRANULARITY = 512; // 0x200
     field public static final int ACTION_SELECT = 4; // 0x4
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int FOCUS_ACCESSIBILITY = 2; // 0x2
@@ -25059,7 +25065,7 @@ package android.view.accessibility {
     method public android.view.accessibility.AccessibilityNodeInfo createAccessibilityNodeInfo(int);
     method public android.view.accessibility.AccessibilityNodeInfo findAccessibilitiyFocus(int);
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(java.lang.String, int);
-    method public boolean performAccessibilityAction(int, int);
+    method public boolean performAction(int, int, android.os.Bundle);
   }
 
   public class AccessibilityRecord {

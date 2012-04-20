@@ -17,6 +17,7 @@
 package android.view.accessibility;
 
 import android.accessibilityservice.AccessibilityService;
+import android.os.Bundle;
 import android.view.View;
 
 import java.util.List;
@@ -47,12 +48,13 @@ import java.util.List;
  *     getAccessibilityNodeProvider(
  *         if (mAccessibilityNodeProvider == null) {
  *             mAccessibilityNodeProvider = new AccessibilityNodeProvider() {
- *                 public boolean performAccessibilityAction(int action, int virtualDescendantId) {
+ *                 public boolean performAction(int action, int virtualDescendantId) {
  *                     // Implementation.
  *                     return false;
  *                 }
  *
- *                 public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByText(String text, int virtualDescendantId) {
+ *                 public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByText(String text,
+ *                         int virtualDescendantId) {
  *                     // Implementation.
  *                     return null;
  *                 }
@@ -99,15 +101,16 @@ public abstract class AccessibilityNodeProvider {
      * host View, with the given <code>virtualViewId</code> or the host View itself
      * if <code>virtualViewId</code> equals to {@link View#NO_ID}.
      *
-     * @param action The action to perform.
      * @param virtualViewId A client defined virtual view id.
+     * @param action The action to perform.
+     * @param arguments Optional action arguments.
      * @return True if the action was performed.
      *
-     * @see View#performAccessibilityAction(int)
+     * @see View#performAccessibilityAction(int, Bundle)
      * @see #createAccessibilityNodeInfo(int)
      * @see AccessibilityNodeInfo
      */
-    public boolean performAccessibilityAction(int action, int virtualViewId) {
+    public boolean performAction(int virtualViewId, int action, Bundle arguments) {
         return false;
     }
 

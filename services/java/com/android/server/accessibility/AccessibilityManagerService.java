@@ -41,6 +41,7 @@ import android.hardware.input.InputManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -1547,7 +1548,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         @Override
         public boolean performAccessibilityAction(int accessibilityWindowId,
-                long accessibilityNodeId, int action, int interactionId,
+                long accessibilityNodeId, int action, Bundle arguments, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, long interrogatingTid) {
             final int resolvedWindowId = resolveAccessibilityWindowId(accessibilityWindowId);
             IAccessibilityInteractionConnection connection = null;
@@ -1568,8 +1569,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 final int flags = (mIncludeNotImportantViews) ?
                         AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
                 final int interrogatingPid = Binder.getCallingPid();
-                connection.performAccessibilityAction(accessibilityNodeId, action, interactionId,
-                        callback, flags, interrogatingPid, interrogatingTid);
+                connection.performAccessibilityAction(accessibilityNodeId, action, arguments,
+                        interactionId, callback, flags, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
                     Slog.e(LOG_TAG, "Error calling performAccessibilityAction()");
@@ -1698,7 +1699,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             | AccessibilityNodeInfo.ACTION_SELECT
             | AccessibilityNodeInfo.ACTION_CLEAR_SELECTION
             | AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS
-            | AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS;
+            | AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS
+            | AccessibilityNodeInfo.ACTION_NEXT_AT_GRANULARITY
+            | AccessibilityNodeInfo.ACTION_PREVIOUS_AT_GRANULARITY;
 
         private static final int RETRIEVAL_ALLOWING_EVENT_TYPES =
             AccessibilityEvent.TYPE_VIEW_CLICKED

@@ -19,6 +19,7 @@ package android.accessibilityservice;
 import android.accessibilityservice.AccessibilityService.Callbacks;
 import android.accessibilityservice.AccessibilityService.IAccessibilityServiceClientWrapper;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -444,10 +445,12 @@ public class UiTestAutomationBridge {
      *
      * @param accessibilityNodeId A unique node id (accessibility and virtual descendant id).
      * @param action The action to perform.
+     * @param arguments Optional action arguments.
      * @return Whether the action was performed.
      */
-    public boolean performAccessibilityActionInActiveWindow(long accessibilityNodeId, int action) {
-        return performAccessibilityAction(ACTIVE_WINDOW_ID, accessibilityNodeId, action);
+    public boolean performAccessibilityActionInActiveWindow(long accessibilityNodeId, int action,
+            Bundle arguments) {
+        return performAccessibilityAction(ACTIVE_WINDOW_ID, accessibilityNodeId, action, arguments);
     }
 
     /**
@@ -457,15 +460,16 @@ public class UiTestAutomationBridge {
      *     {@link #ACTIVE_WINDOW_ID} to query the currently active window.
      * @param accessibilityNodeId A unique node id (accessibility and virtual descendant id).
      * @param action The action to perform.
+     * @param arguments Optional action arguments.
      * @return Whether the action was performed.
      */
     public boolean performAccessibilityAction(int accessibilityWindowId, long accessibilityNodeId,
-            int action) {
+            int action, Bundle arguments) {
         // Cache the id to avoid locking
         final int connectionId = mConnectionId;
         ensureValidConnection(connectionId);
         return AccessibilityInteractionClient.getInstance().performAccessibilityAction(connectionId,
-                accessibilityWindowId, accessibilityNodeId, action);
+                accessibilityWindowId, accessibilityNodeId, action, arguments);
     }
 
     /**

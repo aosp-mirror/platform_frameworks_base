@@ -17,9 +17,9 @@
 package android.view.accessibility;
 
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
 import android.util.SparseLongArray;
 import android.view.View;
 
@@ -120,6 +120,80 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Action that clears accessibility focus of the node.
      */
     public static final int ACTION_CLEAR_ACCESSIBILITY_FOCUS = 0x00000080;
+
+    /**
+     * Action that requests from the node to go to the next entity in its content
+     * at a given granularity. For example, move to the next word, link, etc.
+     * <p>
+     * <strong>Arguments:</strong>
+     * <ul>
+     * <li>
+     * {@link #ACTION_ARGUMENT_GRANULARITY}
+     * </li>
+     * <li>
+     * </p>
+     * <p>
+     * <strong>Example:</strong>
+     * <code><pre><p>
+     *   // Assume the first granularity was presented to the user and she is
+     *   // making an explicit action to traverse the node at that granularity.
+     *   CharSequence granularity = info.getGranularity(0);
+     *   Bundle arguments = new Bundle();
+     *   arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_GRANULARITY, granularity);
+     *   info.performAction(AccessibilityNodeInfo.ACTION_NEXT_AT_GRANULARITY, arguments);
+     * </code></pre></p>
+     * </li>
+     * </ul>
+     * </p>
+     * @see #setGranularities(CharSequence[])
+     * @see #getGranularities()
+     */
+    public static final int ACTION_NEXT_AT_GRANULARITY = 0x00000100;
+
+    /**
+     * Action that requests from the node to go to the previous entity in its content
+     * at a given granularity. For example, move to the next word, link, etc.
+     * <p>
+     * <strong>Arguments:</strong>
+     * <ul>
+     * <li>
+     *  {@link #ACTION_ARGUMENT_GRANULARITY}
+     * </li>
+     * <li>
+     * </p>
+     * <p>
+     * <strong>Example:</strong>
+     * <code><pre><p>
+     *   // Assume the first granularity was presented to the user and she is
+     *   // making an explicit action to traverse the node at that granularity.
+     *   CharSequence granularity = info.getGranularity(0);
+     *   Bundle arguments = new Bundle();
+     *   arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_GRANULARITY, granularity);
+     *   info.performAction(AccessibilityNodeInfo.ACTION_NEXT_AT_GRANULARITY, arguments);
+     * </code></pre></p>
+     * </li>
+     * </ul>
+     * </p>
+     * @see #setGranularities(CharSequence[])
+     * @see #getGranularities()
+     */
+    public static final int ACTION_PREVIOUS_AT_GRANULARITY = 0x00000200;
+
+    /**
+     * Argument for which content granularity to be used when traversing the node content.
+     * <p>
+     * <strong>Actions:</strong>
+     * <ul>
+     * <li>
+     * {@link #ACTION_PREVIOUS_AT_GRANULARITY}
+     * </li>
+     * <li>
+     * {@link #ACTION_PREVIOUS_AT_GRANULARITY}
+     * </li>
+     * </ul>
+     * </p>
+     */
+    public static final String ACTION_ARGUMENT_GRANULARITY = "ACTION_ARGUMENT_GRANULARITY";
 
     /**
      * The input focus.
@@ -231,8 +305,10 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CharSequence mText;
     private CharSequence mContentDescription;
 
-    private SparseLongArray mChildNodeIds = new SparseLongArray();
+    private final SparseLongArray mChildNodeIds = new SparseLongArray();
     private int mActions;
+
+    private CharSequence[] mGranularities;
 
     private int mConnectionId = UNDEFINED;
 
@@ -458,6 +534,32 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Sets the granularities for traversing the content of this node.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param granularities The granularity names.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setGranularities(CharSequence[] granularities) {
+        enforceNotSealed();
+        mGranularities = granularities;
+    }
+
+    /**
+     * Gets the granularities for traversing the content of this node.
+     *
+     * @return The count.
+     */
+    public CharSequence[] getGranularities() {
+        return mGranularities;
+    }
+
+    /**
      * Performs an action on the node.
      * <p>
      *   <strong>Note:</strong> An action can be performed only if the request is made
@@ -475,7 +577,31 @@ public class AccessibilityNodeInfo implements Parcelable {
             return false;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
-        return client.performAccessibilityAction(mConnectionId, mWindowId, mSourceNodeId, action);
+        return client.performAccessibilityAction(mConnectionId, mWindowId, mSourceNodeId,
+                action, null);
+    }
+
+    /**
+     * Performs an action on the node.
+     * <p>
+     *   <strong>Note:</strong> An action can be performed only if the request is made
+     *   from an {@link android.accessibilityservice.AccessibilityService}.
+     * </p>
+     *
+     * @param action The action to perform.
+     * @param arguments A bundle with additional arguments.
+     * @return True if the action was performed.
+     *
+     * @throws IllegalStateException If called outside of an AccessibilityService.
+     */
+    public boolean performAction(int action, Bundle arguments) {
+        enforceSealed();
+        if (!canPerformRequestOverConnection(mSourceNodeId)) {
+            return false;
+        }
+        AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
+        return client.performAccessibilityAction(mConnectionId, mWindowId, mSourceNodeId,
+                action, arguments);
     }
 
     /**
@@ -1215,6 +1341,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeLong(mParentNodeId);
         parcel.writeInt(mConnectionId);
 
+        parcel.writeCharSequenceArray(mGranularities);
+
         SparseLongArray childIds = mChildNodeIds;
         final int childIdsSize = childIds.size();
         parcel.writeInt(childIdsSize);
@@ -1236,10 +1364,10 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         parcel.writeInt(mBooleanProperties);
 
-        TextUtils.writeToParcel(mPackageName, parcel, flags);
-        TextUtils.writeToParcel(mClassName, parcel, flags);
-        TextUtils.writeToParcel(mText, parcel, flags);
-        TextUtils.writeToParcel(mContentDescription, parcel, flags);
+        parcel.writeCharSequence(mPackageName);
+        parcel.writeCharSequence(mClassName);
+        parcel.writeCharSequence(mText);
+        parcel.writeCharSequence(mContentDescription);
 
         // Since instances of this class are fetched via synchronous i.e. blocking
         // calls in IPCs we always recycle as soon as the instance is marshaled.
@@ -1251,6 +1379,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @param other The other instance.
      */
+    @SuppressWarnings("unchecked")
     private void init(AccessibilityNodeInfo other) {
         mSealed = other.mSealed;
         mSourceNodeId = other.mSourceNodeId;
@@ -1265,7 +1394,11 @@ public class AccessibilityNodeInfo implements Parcelable {
         mContentDescription = other.mContentDescription;
         mActions= other.mActions;
         mBooleanProperties = other.mBooleanProperties;
-        mChildNodeIds = other.mChildNodeIds.clone();
+        mGranularities = other.mGranularities.clone();
+        final int otherChildIdCount = other.mChildNodeIds.size();
+        for (int i = 0; i < otherChildIdCount; i++) {
+            mChildNodeIds.put(i, other.mChildNodeIds.valueAt(i));    
+        }
     }
 
     /**
@@ -1279,6 +1412,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         mWindowId = parcel.readInt();
         mParentNodeId = parcel.readLong();
         mConnectionId = parcel.readInt();
+
+        mGranularities = parcel.readCharSequenceArray();
 
         SparseLongArray childIds = mChildNodeIds;
         final int childrenSize = parcel.readInt();
@@ -1301,10 +1436,10 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         mBooleanProperties = parcel.readInt();
 
-        mPackageName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
-        mClassName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
-        mText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
-        mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
+        mPackageName = parcel.readCharSequence();
+        mClassName = parcel.readCharSequence();
+        mText = parcel.readCharSequence();
+        mContentDescription = parcel.readCharSequence();
     }
 
     /**
@@ -1316,6 +1451,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mParentNodeId = ROOT_NODE_ID;
         mWindowId = UNDEFINED;
         mConnectionId = UNDEFINED;
+        mGranularities = null;
         mChildNodeIds.clear();
         mBoundsInParent.set(0, 0, 0, 0);
         mBoundsInScreen.set(0, 0, 0, 0);
@@ -1394,6 +1530,17 @@ public class AccessibilityNodeInfo implements Parcelable {
             builder.append("; accessibilityViewId: " + getAccessibilityViewId(mSourceNodeId));
             builder.append("; virtualDescendantId: " + getVirtualDescendantId(mSourceNodeId));
             builder.append("; mParentNodeId: " + mParentNodeId);
+
+            CharSequence[] granularities = mGranularities;
+            builder.append("; granularities: [");
+            for (int i = 0, count = granularities.length; i < count; i++) {
+                builder.append(granularities[i]);
+                if (i < count - 1) {
+                    builder.append(", ");
+                }
+            }
+            builder.append("]");
+
             SparseLongArray childIds = mChildNodeIds;
             builder.append("; childAccessibilityIds: [");
             for (int i = 0, count = childIds.size(); i < count; i++) {
@@ -1401,8 +1548,8 @@ public class AccessibilityNodeInfo implements Parcelable {
                 if (i < count - 1) {
                     builder.append(", ");
                 }
-           }
-           builder.append("]");
+            }
+            builder.append("]");
         }
 
         builder.append("; boundsInParent: " + mBoundsInParent);

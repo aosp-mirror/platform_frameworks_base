@@ -5160,12 +5160,13 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void performAccessibilityAction(long accessibilityNodeId, int action,
-                int interactionId, IAccessibilityInteractionConnectionCallback callback,
-                int flags, int interogatingPid, long interrogatingTid) {
+                Bundle arguments, int interactionId,
+                IAccessibilityInteractionConnectionCallback callback, int flags,
+                int interogatingPid, long interrogatingTid) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
-                    .performAccessibilityActionClientThread(accessibilityNodeId, action,
+                    .performAccessibilityActionClientThread(accessibilityNodeId, action, arguments,
                             interactionId, callback, flags, interogatingPid, interrogatingTid);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
