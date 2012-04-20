@@ -69,7 +69,7 @@ public class SearchManagerService extends ISearchManager.Stub {
     private synchronized Searchables getSearchables() {
         if (mSearchables == null) {
             Log.i(TAG, "Building list of searchable activities");
-            new MyPackageMonitor().register(mContext, true);
+            new MyPackageMonitor().register(mContext, null, true);
             mSearchables = new Searchables(mContext);
             mSearchables.buildSearchableList();
         }

@@ -365,7 +365,7 @@ public class ActivityChooserModel extends DataSetObservable {
         } else {
             mHistoryFileName = historyFileName;
         }
-        mPackageMonitor.register(mContext, true);
+        mPackageMonitor.register(mContext, null, true);
     }
 
     /**

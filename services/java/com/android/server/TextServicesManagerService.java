@@ -77,7 +77,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         mSystemReady = false;
         mContext = context;
         mMonitor = new TextServicesMonitor();
-        mMonitor.register(context, true);
+        mMonitor.register(context, null, true);
         synchronized (mSpellCheckerMap) {
             buildSpellCheckerMapLocked(context, mSpellCheckerList, mSpellCheckerMap);
         }
