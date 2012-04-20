@@ -13,25 +13,29 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.internal.widget.SizeAdaptiveLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:internal="http://schemas.android.com/apk/prv/res/android"
-    android:background="@android:drawable/notification_bg"
-    android:id="@+id/status_bar_latest_event_content"
+    android:background="@drawable/size_adaptive_statelist"
+    android:id="@+id/multi1"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    internal:layout_minHeight="65dp"
-    internal:layout_maxHeight="unbounded"
-    >
-    <ImageView
-        android:id="@+id/big_picture"
-        android:layout_width="match_parent"
-        android:layout_height="192dp"
-        android:scaleType="centerCrop"
+    android:layout_height="64dp" >
+
+    <include
+        android:id="@+id/one_u"
+        layout="@layout/size_adaptive_one_u"
+        android:layout_width="fill_parent"
+        android:layout_height="64dp"
+        internal:layout_minHeight="64dp"
+        internal:layout_maxHeight="64dp"
         />
-    <include layout="@layout/notification_template_base" 
-        android:layout_width="match_parent"
+
+    <include
+        android:id="@+id/four_u"
+        layout="@layout/size_adaptive_four_u"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="192dp"
-        />
-</FrameLayout>
+        internal:layout_minHeight="65dp"
+        internal:layout_maxHeight="unbounded"/>
+
+</com.android.internal.widget.SizeAdaptiveLayout>

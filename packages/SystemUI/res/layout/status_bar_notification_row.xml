@@ -1,6 +1,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@*android:drawable/notification_bg"
     >
 
     <Button
@@ -20,11 +21,10 @@
         android:layout_marginBottom="@dimen/notification_divider_height"
         android:focusable="true"
         android:clickable="true"
-        android:background="@drawable/notification_row_bg"
         >
 
         <com.android.internal.widget.SizeAdaptiveLayout android:id="@+id/adaptive"
-           android:background="@android:color/background_dark"
+           android:background="@*android:drawable/notification_bg"
            android:layout_width="match_parent"
            android:layout_height="wrap_content" />
 
@@ -34,7 +34,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/notification_divider_height"
         android:gravity="bottom"
-        android:background="@drawable/status_bar_notification_row_background_color"
+        android:background="@*android:drawable/notification_bg"
         />
 
 </FrameLayout>
