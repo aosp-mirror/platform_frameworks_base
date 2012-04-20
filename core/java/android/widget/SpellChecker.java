@@ -21,10 +21,12 @@ import android.text.Editable;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.text.method.WordIterator;
 import android.text.style.SpellCheckSpan;
 import android.text.style.SuggestionSpan;
 import android.util.Log;
+import android.util.LruCache;
 import android.view.textservice.SentenceSuggestionsInfo;
 import android.view.textservice.SpellCheckerSession;
 import android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener;
@@ -95,6 +97,10 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
     private Runnable mSpellRunnable;
 
+    private static final int SUGGESTION_SPAN_CACHE_SIZE = 10;
+    private final LruCache<Long, SuggestionSpan> mSuggestionSpanCache =
+            new LruCache<Long, SuggestionSpan>(SUGGESTION_SPAN_CACHE_SIZE);
+
     public SpellChecker(TextView textView) {
         mTextView = textView;
 
@@ -126,6 +132,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         // Restore SpellCheckSpans in pool
         for (int i = 0; i < mLength; i++) {
+            // Resets id and progress to invalidate spell check span
             mSpellCheckSpans[i].setSpellCheckInProgress(false);
             mIds[i] = -1;
         }
@@ -133,6 +140,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         // Remove existing misspelled SuggestionSpans
         mTextView.removeMisspelledSpans((Editable) mTextView.getText());
+        mSuggestionSpanCache.evictAll();
     }
 
     private void setLocale(Locale locale) {
@@ -199,6 +207,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
     public void removeSpellCheckSpan(SpellCheckSpan spellCheckSpan) {
         for (int i = 0; i < mLength; i++) {
             if (mSpellCheckSpans[i] == spellCheckSpan) {
+                // Resets id and progress to invalidate spell check span
                 mSpellCheckSpans[i].setSpellCheckInProgress(false);
                 mIds[i] = -1;
                 return;
@@ -211,6 +220,9 @@ public class SpellChecker implements SpellCheckerSessionListener {
     }
 
     public void spellCheck(int start, int end) {
+        if (DBG) {
+            Log.d(TAG, "Start spell-checking: " + start + ", " + end);
+        }
         final Locale locale = mTextView.getTextServicesLocale();
         final boolean isSessionActive = isSessionActive();
         if (mCurrentLocale == null || (!(mCurrentLocale.equals(locale)))) {
@@ -238,6 +250,9 @@ public class SpellChecker implements SpellCheckerSessionListener {
             }
         }
 
+        if (DBG) {
+            Log.d(TAG, "new spell parser.");
+        }
         // No available parser found in pool, create a new one
         SpellParser[] newSpellParsers = new SpellParser[length + 1];
         System.arraycopy(mSpellParsers, 0, newSpellParsers, 0, length);
@@ -260,13 +275,22 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         for (int i = 0; i < mLength; i++) {
             final SpellCheckSpan spellCheckSpan = mSpellCheckSpans[i];
-            if (spellCheckSpan.isSpellCheckInProgress()) continue;
+            if (mIds[i] < 0 || spellCheckSpan.isSpellCheckInProgress()) continue;
 
             final int start = editable.getSpanStart(spellCheckSpan);
             final int end = editable.getSpanEnd(spellCheckSpan);
 
             // Do not check this word if the user is currently editing it
-            if (start >= 0 && end > start && (selectionEnd < start || selectionStart > end)) {
+            final boolean isEditing;
+            if (mIsSentenceSpellCheckSupported) {
+                // Allow the overlap of the cursor and the first boundary of the spell check span
+                // no to skip the spell check of the following word because the
+                // following word will never be spell-checked even if the user finishes composing
+                isEditing = selectionEnd <= start || selectionStart > end;
+            } else {
+                isEditing = selectionEnd < start || selectionStart > end;
+            }
+            if (start >= 0 && end > start && isEditing) {
                 final String word = (editable instanceof SpannableStringBuilder) ?
                         ((SpannableStringBuilder) editable).substring(start, end) :
                         editable.subSequence(start, end).toString();
@@ -372,6 +396,9 @@ public class SpellChecker implements SpellCheckerSessionListener {
     }
 
     private void scheduleNewSpellCheck() {
+        if (DBG) {
+            Log.i(TAG, "schedule new spell check.");
+        }
         if (mSpellRunnable == null) {
             mSpellRunnable = new Runnable() {
                 @Override
@@ -423,6 +450,20 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         SuggestionSpan suggestionSpan = new SuggestionSpan(mTextView.getContext(), suggestions,
                 SuggestionSpan.FLAG_EASY_CORRECT | SuggestionSpan.FLAG_MISSPELLED);
+        // TODO: Remove mIsSentenceSpellCheckSupported by extracting an interface
+        // to share the logic of word level spell checker and sentence level spell checker
+        if (mIsSentenceSpellCheckSupported) {
+            final long key = TextUtils.packRangeInLong(start, end);
+            final SuggestionSpan tempSuggestionSpan = mSuggestionSpanCache.get(key);
+            if (tempSuggestionSpan != null) {
+                if (DBG) {
+                    Log.i(TAG, "Cached span on the same position is cleard. "
+                            + editable.subSequence(start, end));
+                }
+                editable.removeSpan(tempSuggestionSpan);
+            }
+            mSuggestionSpanCache.put(key, suggestionSpan);
+        }
         editable.setSpan(suggestionSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         mTextView.invalidateRegion(start, end, false /* No cursor involved */);
@@ -447,10 +488,17 @@ public class SpellChecker implements SpellCheckerSessionListener {
         }
 
         private void setRangeSpan(Editable editable, int start, int end) {
+            if (DBG) {
+                Log.d(TAG, "set next range span: " + start + ", " + end);
+            }
             editable.setSpan(mRange, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
         private void removeRangeSpan(Editable editable) {
+            if (DBG) {
+                Log.d(TAG, "Remove range span." + editable.getSpanStart(editable)
+                        + editable.getSpanEnd(editable));
+            }
             editable.removeSpan(mRange);
         }
 
@@ -484,6 +532,9 @@ public class SpellChecker implements SpellCheckerSessionListener {
                 wordEnd = mWordIterator.getEnd(wordStart);
             }
             if (wordEnd == BreakIterator.DONE) {
+                if (DBG) {
+                    Log.i(TAG, "No more spell check.");
+                }
                 removeRangeSpan(editable);
                 return;
             }
@@ -499,47 +550,72 @@ public class SpellChecker implements SpellCheckerSessionListener {
             boolean scheduleOtherSpellCheck = false;
 
             if (mIsSentenceSpellCheckSupported) {
-                int regionEnd;
                 if (wordIteratorWindowEnd < end) {
+                    if (DBG) {
+                        Log.i(TAG, "schedule other spell check.");
+                    }
                     // Several batches needed on that region. Cut after last previous word
-                    regionEnd = mWordIterator.preceding(wordIteratorWindowEnd);
                     scheduleOtherSpellCheck = true;
-                } else {
-                    regionEnd = mWordIterator.preceding(end);
                 }
-                boolean correct = regionEnd != BreakIterator.DONE;
+                int spellCheckEnd = mWordIterator.preceding(wordIteratorWindowEnd);
+                boolean correct = spellCheckEnd != BreakIterator.DONE;
                 if (correct) {
-                    regionEnd = mWordIterator.getEnd(regionEnd);
-                    correct = regionEnd != BreakIterator.DONE;
+                    spellCheckEnd = mWordIterator.getEnd(spellCheckEnd);
+                    correct = spellCheckEnd != BreakIterator.DONE;
                 }
                 if (!correct) {
-                    editable.removeSpan(mRange);
+                    if (DBG) {
+                        Log.i(TAG, "Incorrect range span.");
+                    }
+                    removeRangeSpan(editable);
                     return;
                 }
-                // Stop spell checking when there are no characters in the range.
-                if (wordEnd < start) {
-                    return;
-                }
-                // TODO: Find the start position of the sentence.
-                final int spellCheckStart =  wordStart;
-                if (regionEnd <= spellCheckStart) {
-                    return;
-                }
-                final int selectionStart = Selection.getSelectionStart(editable);
-                final int selectionEnd = Selection.getSelectionEnd(editable);
-                if (DBG) {
-                    Log.d(TAG, "addSpellCheckSpan: "
-                            + editable.subSequence(spellCheckStart, regionEnd)
-                            + ", regionEnd = " + regionEnd + ", spellCheckStart = "
-                            + spellCheckStart + ", sel start = " + selectionStart + ", sel end ="
-                            + selectionEnd);
-                }
-                // Do not check this word if the user is currently editing it
-                if (spellCheckStart >= 0 && regionEnd > spellCheckStart
-                        && (selectionEnd < spellCheckStart || selectionStart > regionEnd)) {
-                    addSpellCheckSpan(editable, spellCheckStart, regionEnd);
-                }
-                wordStart = regionEnd;
+                do {
+                    // TODO: Find the start position of the sentence.
+                    int spellCheckStart = wordStart;
+                    boolean createSpellCheckSpan = true;
+                    // Cancel or merge overlapped spell check spans
+                    for (int i = 0; i < mLength; ++i) {
+                        final SpellCheckSpan spellCheckSpan = mSpellCheckSpans[i];
+                        if (mIds[i] < 0 || spellCheckSpan.isSpellCheckInProgress()) {
+                            continue;
+                        }
+                        final int spanStart = editable.getSpanStart(spellCheckSpan);
+                        final int spanEnd = editable.getSpanEnd(spellCheckSpan);
+                        if (spanEnd < spellCheckStart || spellCheckEnd < spanStart) {
+                            // No need to merge
+                            continue;
+                        }
+                        if (spanStart <= spellCheckStart && spellCheckEnd <= spanEnd) {
+                            // There is a completely overlapped spell check span
+                            // skip this span
+                            createSpellCheckSpan = false;
+                            if (DBG) {
+                                Log.i(TAG, "The range is overrapped. Skip spell check.");
+                            }
+                            break;
+                        }
+                        removeSpellCheckSpan(spellCheckSpan);
+                        spellCheckStart = Math.min(spanStart, spellCheckStart);
+                        spellCheckEnd = Math.max(spanEnd, spellCheckEnd);
+                    }
+
+                    if (DBG) {
+                        Log.d(TAG, "addSpellCheckSpan: "
+                                + ", End = " + spellCheckEnd + ", Start = " + spellCheckStart
+                                + ", next = " + scheduleOtherSpellCheck + "\n"
+                                + editable.subSequence(spellCheckStart, spellCheckEnd));
+                    }
+
+                    // Stop spell checking when there are no characters in the range.
+                    if (spellCheckEnd < start) {
+                        break;
+                    }
+                    if (createSpellCheckSpan) {
+                        addSpellCheckSpan(editable, spellCheckStart, spellCheckEnd);
+                    }
+                } while (false);
+                wordStart = spellCheckEnd;
             } else {
                 while (wordStart <= end) {
                     if (wordEnd >= start && wordEnd > wordStart) {
