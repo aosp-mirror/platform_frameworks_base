@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"للسماح للتطبيق بتلقي رسائل الوسائط المتعددة ومعالجتها. قد تراقب بعض التطبيقات الضارة رسائلك أو تحذفها بدون عرضها لك."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"تلقي بث الطوارئ"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"للسماح للتطبيق بتلقي رسائل بث الطوارئ ومعالجتها. لا يتوفر هذا الإذن سوى لتطبيقات النظام."</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"إرسال رسائل قصيرة SMS"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"للسماح للتطبيق بإرسال رسائل قصيرة SMS. قد تكلفك التطبيقات الضارة المال من خلال إرسال رسائل بدون تأكيدك."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"إرسال رسائل قصيرة SMS بدون تأكيد"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"للسماح لتطبيق ما بنقل المهام إلى المقدمة والخلفية. قد تفرض التطبيقات الضارة نفسها إلى المقدمة بدون تحكم منك."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"إيقاف التطبيقات التي قيد التشغيل"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"للسماح للتطبيق بإزالة المهام وإنهاء تطبيقاتها. قد تعطل التطبيقات الضارة عمل التطبيقات الأخرى."</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"تعيين توافق الشاشة"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"السماح للتطبيق بالتحكم في وضع التوافق مع شاشة التطبيقات الأخرى. قد تتسبب التطبيقات الضارة في تعطيل سلوك التطبيقات الأخرى."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"تمكين تصحيح أخطاء التطبيق"</string>

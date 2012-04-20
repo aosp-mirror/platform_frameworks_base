@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"允许应用接收和处理彩信。恶意应用可能会监视您的短信，或删除短信而不向您显示。"</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"接收紧急广播"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"允许应用接收和处理紧急广播消息。此权限仅适用于系统应用。"</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"发送短信"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"允许应用发送短信。恶意应用可能会未经您的确认而发送短信，由此产生相关费用。"</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"不经确认直接发送短信"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"允许应用将任务移动到前台和后台。恶意应用可能会不受您的控制，强行让自己处于前台。"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"停止正在运行的应用"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"允许该应用删除任务并终止这些任务的应用。恶意应用可以籍此影响其他应用的行为。"</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"设置屏幕兼容性"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"允许该应用控制其他应用的屏幕兼容模式。恶意应用可以籍此影响其他应用的行为。"</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"启用应用调试"</string>
@@ -1011,8 +1019,8 @@
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;在发送大量短信。是否允许该应用继续发送短信？"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"允许"</string>
     <string name="sms_control_no" msgid="625438561395534982">"拒绝"</string>
-    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"向短码发送短信吗？"</string>
-    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"发送付费短信吗？"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"是否向短码发送短信？"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"是否发送付费短信？"</string>
     <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;想要向 &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;（这似乎是一个短信短码）发送短信。&lt;p&gt;向某些短码发送短信可能会导致您的移动帐户因使用付费服务而扣费。&lt;p&gt;是否允许该应用发送短信？"</string>
     <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;想要向 &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;（这是一个付费短信短码）发送短信。&lt;p&gt;&lt;b&gt;向该地址发送短信会导致您的移动帐户因使用付费服务而扣费&lt;/b&gt;。&lt;p&gt;是否允许该应用发送短信？"</string>
     <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"发送短信"</string>

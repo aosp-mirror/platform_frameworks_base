@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Permite aplicaţiei să primească şi să proceseze mesaje MMS. Aplicaţiile rău intenţionate pot să monitorizeze mesajele sau să le şteargă fără să vi le arate."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"primeşte mesaje difuzate de urgenţă"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Permite aplicaţiei să primească şi să proceseze mesajele difuzate de urgenţă. Această permisiune este disponibilă numai pentru aplicaţiile de sistem."</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"trimitere mesaje SMS"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Permite aplicaţiei să trimită mesaje SMS. Aplicaţiile rău intenţionate pot să vă genereze costuri, deoarece trimit mesaje fără confirmarea dvs."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"trimitere mesaje SMS fără confirmare"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permite aplicaţiei să mute activităţile în prim-plan şi în fundal. Aplicaţiile rău intenţionate pot să apară forţat în prim-plan, fără ca dvs. să puteţi controla acest lucru."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"oprire aplicaţii care rulează"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Permite aplicaţiei să elimine sarcini şi să închidă aplicaţiile corespunzătoare acestora. Aplicaţiile rău intenţionate pot perturba comportamentul altor aplicaţii."</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"setaţi compatibilitatea ecranului"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Permite aplicaţiei să controleze modul de compatibilitate a ecranului pentru alte aplicaţii. Aplicaţiile rău intenţionate pot afecta comportamentul altor aplicaţii."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"activare depanare aplicaţie"</string>

@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Leidžiama programai gauti ir apdoroti MMS pranešimus. Kenkėjiškos programos gali stebėti jūsų pranešimus ar ištrinti juos neparodydamos jų jums."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"gauti kritinės padėties transliacijas"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Leidžiama programai gauti ir apdoroti skubiai pateikiamus pranešimus. Šis leidimas galimas tik sistemos programoms."</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"siųsti SMS pranešimus"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Leidžiama programai siųsti SMS pranešimus. Kenkėjiškos programos gali siųsti mokamus pranešimus be jūsų patvirtinimo."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"siųsti SMS pranešimus be patvirtinimo"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Leidžiama programai užduotis perkelti į priekinį planą ir į foną. Kenkėjiškos programos gali priverstinai persikelti į priekį be jūsų įsikišimo."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"sustabdyti vykdomas programas"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Leidžiama programai pašalinti užduotis ir panaikinti jų programas. Kenkėjiškos programos gali trikdyti kitų programų veikimą."</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"nustatyti ekrano suderinamumo režimą"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Programai leidžiama valdyti kitų programų ekrano suderinamumo režimą. Kenkėjiškos programos gali kliudyti veikti kitoms programoms."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"įgalinti programos derinimą"</string>

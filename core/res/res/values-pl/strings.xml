@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Pozwala aplikacji na odbieranie i przetwarzanie wiadomości MMS. Złośliwe aplikacje mogą monitorować wiadomości lub usuwać je, zanim zostaną wyświetlone."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"odbiór emisji alarmowych"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Pozwala aplikacji na odbieranie i przetwarzanie komunikatów transmisji alarmowych. To pozwolenie jest dostępne tylko dla aplikacji systemowych."</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"wysyłanie wiadomości SMS"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Pozwala aplikacji na wysyłanie wiadomości SMS. Złośliwe aplikacje mogą generować koszty, wysyłając wiadomości bez Twojej wiedzy."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"wysyłanie wiadomości SMS bez potwierdzenia"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Pozwala aplikacji na przenoszenie zadań między tłem i pierwszym planem. Złośliwe aplikacje mogą wymusić przeniesienie się na pierwszy plan bez Twojego udziału."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"zatrzymywanie uruchomionych aplikacji"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Umożliwia aplikacji usuwanie zadań i kończenie powiązanych z nimi aplikacji. Złośliwe aplikacje mogą zakłócić działanie innych aplikacji."</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"ustaw zgodność ekranu"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Pozwala aplikacji na sterowanie trybem zgodności ekranu innych aplikacji. Złośliwe aplikacje mogą zmienić zachowanie innych programów."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"włączenie debugowania aplikacji"</string>

@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"앱이 MMS 메시지를 받고 처리할 수 있도록 허용합니다. 이 경우 악성 앱이 메시지를 모니터링하거나 사용자가 보기 전에 삭제할 수 있습니다."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"긴급 방송 수신"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"앱이 긴급 브로드캐스트 메시지를 수신하고 처리할 수 있도록 허용합니다. 이 권한은 시스템 앱에만 사용할 수 있습니다."</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS 메시지 보내기"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"앱이 SMS 메시지를 보낼 수 있도록 허용합니다. 이 경우 악성 앱이 사용자의 확인 없이 메시지를 전송하여 요금이 부과될 수 있습니다."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"확인 없이 SMS 메시지 보내기"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"앱이 작업을 포그라운드나 백그라운드로 이동할 수 있도록 허용합니다. 이 경우 악성 앱이 사용자의 조작 없이 앞으로 이동할 수 있습니다."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"실행 중인 앱 중지"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"애플리케이션이 작업을 삭제하거나 다른 애플리케이션을 중지시킬 수 있도록 허용합니다. 이 경우 악성 애플리케이션이 다른 애플리케이션의 동작을 멈추게 할 수 있습니다."</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"화면 호환성 설정"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"앱이 다른 애플리케이션의 화면 호환성 모드를 제어할 수 있도록 허용합니다. 이 경우 악성 애플리케이션이 다른 애플리케이션의 동작을 멈추게 할 수 있습니다."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"앱 디버깅 사용"</string>
@@ -1012,9 +1020,9 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"허용"</string>
     <string name="sms_control_no" msgid="625438561395534982">"거부"</string>
     <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"SMS를 단축 코드로 보내시겠습니까?"</string>
-    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"프리미엄 SMS를 보내도록 하시겠습니까?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"프리미엄 SMS를 보내시겠습니까?"</string>
     <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;이(가) SMS 단축 코드로 추정되는 문자 메시지를 &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;(으)로 보내려 합니다.&lt;p&gt;문자 메시지를 단축 코드로 보내면 사용자의 모바일 계정에 프리미엄 서비스 요금이 청구될 수 있습니다.&lt;p&gt;해당 앱이 메시지를 보내도록 하시겠습니까?"</string>
-    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;이(가) 문자 메시지를 프리미엄 SMS 단축 코드인 &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;(으)로 보내려 합니다.&lt;p&gt;&lt;b&gt;이 목적지로 메시지를 보내면 사용자의 모바일 계정에 프리미엄 서비스 요금이 청구됩니다.&lt;/b&gt;&lt;p&gt;해당 앱이 메시지를 보내도록 하시겠습니까?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;이(가) 문자 메시지를 프리미엄 SMS 단축 코드인 &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;(으)로 보내려 합니다.&lt;p&gt;&lt;b&gt;메시지를 보내면 사용자의 모바일 계정에 프리미엄 서비스 요금이 청구됩니다.&lt;/b&gt;&lt;p&gt;해당 앱이 메시지를 보내도록 하시겠습니까?"</string>
     <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"메시지 보내기"</string>
     <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"보내지 않음"</string>
     <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"악성 앱 신고"</string>

@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Дазваляе прыкладанням атрымліваць і апрацоўваць MMS-паведамленні. Шкоднасныя прыкладанні могуць адсочваць вашы паведамленні або выдаляць іх, не паказваючы вам."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"атрымліваць экстраныя трансляцыі"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Дазваляе прыкладанням атрымліваць і апрацоўваць экстраныя паведамленні. Гэты дазвол даступны толькі для сістэмных прыкладанняў."</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"адпраўляць SMS"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Дазваляе прыкладанням дасылаць SMS-паведамленні. Шкоднасныя прыкладанні могуць каштаваць вам грошай з-за адпраўкі паведамленняў без вашага пацвярджэння."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"адпраўляць SMS-паведамленні без пацверджання"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Дазваляе прыкладанням перамяшчаць заданні на ​​пярэдні план і фон. Шкоднасныя прыкладанні могуць прымусова рабіць сябе асноўнымі без вашага ведама."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"спыніць запушчаныя прыкладанні"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Дазваляе прыкладанням выдаляць заданні і спыняць прыкладанні, якія іх выкарыстоўваюць. Шкоднасныя прыкладаннi могуць перашкодзiць працы іншых прыкладанняў."</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"усталяваць сумяшчальнасць экранаў"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Дазваляе прыкладанню кіраваць рэжымам сумяшчальнасці экранаў іншых прыкладанняў. Шкоднаснае ПЗ можа перашкодзiць працы іншых прыкладанняў."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"уключыць адладку прыкладання"</string>

@@ -251,6 +251,10 @@
     <skip />
     <!-- no translation found for permdesc_receiveEmergencyBroadcast (848524070262431974) -->
     <skip />
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"trametter messadis SMS"</string>
     <!-- no translation found for permdesc_sendSms (906546667507626156) -->
     <skip />
@@ -282,6 +286,10 @@
     <!-- no translation found for permlab_removeTasks (6821513401870377403) -->
     <skip />
     <!-- no translation found for permdesc_removeTasks (1394714352062635493) -->
+    <skip />
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
     <skip />
     <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
     <skip />
