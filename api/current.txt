@@ -4303,10 +4303,13 @@ package android.appwidget {
     method protected void prepareView(android.view.View);
     method public void setAppWidget(int, android.appwidget.AppWidgetProviderInfo);
     method public void updateAppWidget(android.widget.RemoteViews);
+    method public void updateAppWidgetExtras(android.os.Bundle);
+    method public void updateAppWidgetSize(android.os.Bundle, int, int, int, int);
   }
 
   public class AppWidgetManager {
     method public void bindAppWidgetId(int, android.content.ComponentName);
+    method public android.os.Bundle getAppWidgetExtras(int);
     method public int[] getAppWidgetIds(android.content.ComponentName);
     method public android.appwidget.AppWidgetProviderInfo getAppWidgetInfo(int);
     method public java.util.List<android.appwidget.AppWidgetProviderInfo> getInstalledProviders();
@@ -4318,14 +4321,21 @@ package android.appwidget {
     method public void updateAppWidget(int[], android.widget.RemoteViews);
     method public void updateAppWidget(int, android.widget.RemoteViews);
     method public void updateAppWidget(android.content.ComponentName, android.widget.RemoteViews);
+    method public void updateAppWidgetExtras(int, android.os.Bundle);
     field public static final java.lang.String ACTION_APPWIDGET_CONFIGURE = "android.appwidget.action.APPWIDGET_CONFIGURE";
     field public static final java.lang.String ACTION_APPWIDGET_DELETED = "android.appwidget.action.APPWIDGET_DELETED";
     field public static final java.lang.String ACTION_APPWIDGET_DISABLED = "android.appwidget.action.APPWIDGET_DISABLED";
     field public static final java.lang.String ACTION_APPWIDGET_ENABLED = "android.appwidget.action.APPWIDGET_ENABLED";
+    field public static final java.lang.String ACTION_APPWIDGET_EXTRAS_CHANGED = "android.appwidget.action.APPWIDGET_UPDATE_EXTRAS";
     field public static final java.lang.String ACTION_APPWIDGET_PICK = "android.appwidget.action.APPWIDGET_PICK";
     field public static final java.lang.String ACTION_APPWIDGET_UPDATE = "android.appwidget.action.APPWIDGET_UPDATE";
+    field public static final java.lang.String EXTRA_APPWIDGET_EXTRAS = "appWidgetExtras";
     field public static final java.lang.String EXTRA_APPWIDGET_ID = "appWidgetId";
     field public static final java.lang.String EXTRA_APPWIDGET_IDS = "appWidgetIds";
+    field public static final java.lang.String EXTRA_APPWIDGET_MAX_HEIGHT = "appWidgetMaxHeight";
+    field public static final java.lang.String EXTRA_APPWIDGET_MAX_WIDTH = "appWidgetMaxWidth";
+    field public static final java.lang.String EXTRA_APPWIDGET_MIN_HEIGHT = "appWidgetMinHeight";
+    field public static final java.lang.String EXTRA_APPWIDGET_MIN_WIDTH = "appWidgetMinWidth";
     field public static final java.lang.String EXTRA_CUSTOM_EXTRAS = "customExtras";
     field public static final java.lang.String EXTRA_CUSTOM_INFO = "customInfo";
     field public static final int INVALID_APPWIDGET_ID = 0; // 0x0
@@ -4334,6 +4344,7 @@ package android.appwidget {
 
   public class AppWidgetProvider extends android.content.BroadcastReceiver {
     ctor public AppWidgetProvider();
+    method public void onAppWidgetExtrasChanged(android.content.Context, android.appwidget.AppWidgetManager, int, android.os.Bundle);
     method public void onDeleted(android.content.Context, int[]);
     method public void onDisabled(android.content.Context);
     method public void onEnabled(android.content.Context);

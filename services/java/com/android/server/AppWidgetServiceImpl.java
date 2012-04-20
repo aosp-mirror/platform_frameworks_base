@@ -113,6 +113,7 @@ class AppWidgetServiceImpl {
         int appWidgetId;
         Provider provider;
         RemoteViews views;
+        Bundle extras;
         Host host;
     }
 
@@ -756,6 +757,38 @@ class AppWidgetServiceImpl {
             for (int i = 0; i < N; i++) {
                 AppWidgetId id = lookupAppWidgetIdLocked(appWidgetIds[i]);
                 updateAppWidgetInstanceLocked(id, views);
+            }
+        }
+    }
+
+    public void updateAppWidgetExtras(int appWidgetId, Bundle extras) {
+        synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
+            AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
+
+            if (id == null) {
+                return;
+            }
+            Provider p = id.provider;
+            id.extras = extras;
+
+            // send the broacast saying that this appWidgetId has been deleted
+            Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_EXTRAS_CHANGED);
+            intent.setComponent(p.info.provider);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id.appWidgetId);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_EXTRAS, extras);
+            mContext.sendBroadcast(intent, mUserId);
+        }
+    }
+
+    public Bundle getAppWidgetExtras(int appWidgetId) {
+        synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
+            AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
+            if (id != null && id.extras != null) {
+                return id.extras;
+            } else {
+                return Bundle.EMPTY;
             }
         }
     }

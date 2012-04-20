@@ -28,6 +28,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -204,6 +205,45 @@ public class AppWidgetHostView extends FrameLayout {
         if (jail == null) jail = new ParcelableSparseArray();
 
         super.dispatchRestoreInstanceState(jail);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int oldWidth = getMeasuredWidth();
+        int oldHeight = getMeasuredHeight();
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int newWidth = getMeasuredWidth();
+        int newHeight = getMeasuredHeight();
+
+        // TODO: this is just a hack for now -- we actually have the AppWidgetHost
+        // be responsible for updating the size of the widget.
+        if (oldWidth != newWidth || oldHeight != newHeight) {
+            final float density = mContext.getResources().getDisplayMetrics().density;
+            final int newWidthDips = (int) (newWidth / density);
+            final int newHeightDips = (int) (newHeight / density);
+            updateAppWidgetSize(null, newWidthDips, newHeightDips, newWidthDips, newHeightDips);
+        }
+    }
+
+    /**
+     * Provide guidance about the size of this widget to the AppWidgetManager. This information
+     * gets embedded into the AppWidgetExtras and causes a callback to the AppWidgetProvider.
+     *
+     *  @see AppWidgetProvider#onAppWidgetExtrasChanged(Context, AppWidgetManager, int, Bundle)
+     */
+    public void updateAppWidgetSize(Bundle extras, int minWidth, int minHeight, int maxWidth, int maxHeight) {
+        if (extras == null) {
+            extras = new Bundle();
+        }
+        extras.putInt(AppWidgetManager.EXTRA_APPWIDGET_MIN_WIDTH, minWidth);
+        extras.putInt(AppWidgetManager.EXTRA_APPWIDGET_MIN_HEIGHT, minHeight);
+        extras.putInt(AppWidgetManager.EXTRA_APPWIDGET_MAX_WIDTH, maxWidth);
+        extras.putInt(AppWidgetManager.EXTRA_APPWIDGET_MAX_HEIGHT, maxHeight);
+        updateAppWidgetExtras(extras);
+    }
+
+    public void updateAppWidgetExtras(Bundle extras) {
+        AppWidgetManager.getInstance(mContext).updateAppWidgetExtras(mAppWidgetId, extras);
     }
 
     /** {@inheritDoc} */
