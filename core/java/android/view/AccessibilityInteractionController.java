@@ -58,9 +58,14 @@ final class AccessibilityInteractionController {
 
     private final AccessibilityNodePrefetcher mPrefetcher;
 
+    private final long mMyLooperThreadId;
+
+    private final int mMyProcessId;
+
     public AccessibilityInteractionController(ViewRootImpl viewRootImpl) {
-        // mView is never null - the caller has already checked.
-        Looper looper = viewRootImpl.mView.mContext.getMainLooper();
+        Looper looper =  viewRootImpl.mHandler.getLooper();
+        mMyLooperThreadId = looper.getThread().getId();
+        mMyProcessId = Process.myPid();
         mHandler = new PrivateHandler(looper);
         mViewRootImpl = viewRootImpl;
         mPrefetcher = new AccessibilityNodePrefetcher();
@@ -137,8 +142,7 @@ final class AccessibilityInteractionController {
         // thread in this process, set the message as a static reference so
         // after this call completes the same thread but in the interrogating
         // client can handle the message to generate the result.
-        if (interrogatingPid == Process.myPid()
-                && interrogatingTid == Looper.getMainLooper().getThread().getId()) {
+        if (interrogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId) {
             AccessibilityInteractionClient.getInstanceForThread(
                     interrogatingTid).setSameThreadMessage(message);
         } else {
@@ -169,7 +173,7 @@ final class AccessibilityInteractionController {
             } else {
                 root = findViewByAccessibilityId(accessibilityViewId);
             }
-            if (root != null && isDisplayedOnScreen(root)) {
+            if (root != null && root.isDisplayedOnScreen()) {
                 mPrefetcher.prefetchAccessibilityNodeInfos(root, virtualDescendantId, flags, infos);
             }
         } finally {
@@ -199,8 +203,7 @@ final class AccessibilityInteractionController {
         // thread in this process, set the message as a static reference so
         // after this call completes the same thread but in the interrogating
         // client can handle the message to generate the result.
-        if (interrogatingPid == Process.myPid()
-                && interrogatingTid == Looper.getMainLooper().getThread().getId()) {
+        if (interrogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId) {
             AccessibilityInteractionClient.getInstanceForThread(
                     interrogatingTid).setSameThreadMessage(message);
         } else {
@@ -232,7 +235,7 @@ final class AccessibilityInteractionController {
             }
             if (root != null) {
                 View target = root.findViewById(viewId);
-                if (target != null && isDisplayedOnScreen(target)) {
+                if (target != null && target.isDisplayedOnScreen()) {
                     info = target.createAccessibilityNodeInfo();
                 }
             }
@@ -263,8 +266,7 @@ final class AccessibilityInteractionController {
         // thread in this process, set the message as a static reference so
         // after this call completes the same thread but in the interrogating
         // client can handle the message to generate the result.
-        if (interrogatingPid == Process.myPid()
-                && interrogatingTid == Looper.getMainLooper().getThread().getId()) {
+        if (interrogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId) {
             AccessibilityInteractionClient.getInstanceForThread(
                     interrogatingTid).setSameThreadMessage(message);
         } else {
@@ -295,7 +297,7 @@ final class AccessibilityInteractionController {
             } else {
                 root = mViewRootImpl.mView;
             }
-            if (root != null && isDisplayedOnScreen(root)) {
+            if (root != null && root.isDisplayedOnScreen()) {
                 AccessibilityNodeProvider provider = root.getAccessibilityNodeProvider();
                 if (provider != null) {
                     infos = provider.findAccessibilityNodeInfosByText(text,
@@ -312,7 +314,7 @@ final class AccessibilityInteractionController {
                         final int viewCount = foundViews.size();
                         for (int i = 0; i < viewCount; i++) {
                             View foundView = foundViews.get(i);
-                            if (isDisplayedOnScreen(foundView)) {
+                            if (foundView.isDisplayedOnScreen()) {
                                 provider = foundView.getAccessibilityNodeProvider();
                                 if (provider != null) {
                                     List<AccessibilityNodeInfo> infosFromProvider =
@@ -356,8 +358,7 @@ final class AccessibilityInteractionController {
         // thread in this process, set the message as a static reference so
         // after this call completes the same thread but in the interrogating
         // client can handle the message to generate the result.
-        if (interogatingPid == Process.myPid()
-                && interrogatingTid == Looper.getMainLooper().getThread().getId()) {
+        if (interogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId) {
             AccessibilityInteractionClient.getInstanceForThread(
                     interrogatingTid).setSameThreadMessage(message);
         } else {
@@ -388,7 +389,7 @@ final class AccessibilityInteractionController {
             } else {
                 root = mViewRootImpl.mView;
             }
-            if (root != null && isDisplayedOnScreen(root)) {
+            if (root != null && root.isDisplayedOnScreen()) {
                 switch (focusType) {
                     case AccessibilityNodeInfo.FOCUS_ACCESSIBILITY: {
                         View host = mViewRootImpl.mAccessibilityFocusedHost;
@@ -409,7 +410,7 @@ final class AccessibilityInteractionController {
                     case AccessibilityNodeInfo.FOCUS_INPUT: {
                         // Input focus cannot go to virtual views.
                         View target = root.findFocus();
-                        if (target != null && isDisplayedOnScreen(target)) {
+                        if (target != null && target.isDisplayedOnScreen()) {
                             focused = target.createAccessibilityNodeInfo();
                         }
                     } break;
@@ -444,8 +445,7 @@ final class AccessibilityInteractionController {
         // thread in this process, set the message as a static reference so
         // after this call completes the same thread but in the interrogating
         // client can handle the message to generate the result.
-        if (interogatingPid == Process.myPid()
-                && interrogatingTid == Looper.getMainLooper().getThread().getId()) {
+        if (interogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId) {
             AccessibilityInteractionClient.getInstanceForThread(
                     interrogatingTid).setSameThreadMessage(message);
         } else {
@@ -476,7 +476,7 @@ final class AccessibilityInteractionController {
             } else {
                 root = mViewRootImpl.mView;
             }
-            if (root != null && isDisplayedOnScreen(root)) {
+            if (root != null && root.isDisplayedOnScreen()) {
                 if ((direction & View.FOCUS_ACCESSIBILITY) ==  View.FOCUS_ACCESSIBILITY) {
                     AccessibilityNodeProvider provider = root.getAccessibilityNodeProvider();
                     if (provider != null) {
@@ -530,8 +530,7 @@ final class AccessibilityInteractionController {
         // thread in this process, set the message as a static reference so
         // after this call completes the same thread but in the interrogating
         // client can handle the message to generate the result.
-        if (interogatingPid == Process.myPid()
-                && interrogatingTid == Looper.getMainLooper().getThread().getId()) {
+        if (interogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId) {
             AccessibilityInteractionClient.getInstanceForThread(
                     interrogatingTid).setSameThreadMessage(message);
         } else {
@@ -562,7 +561,7 @@ final class AccessibilityInteractionController {
             } else {
                 target = mViewRootImpl.mView;
             }
-            if (target != null && isDisplayedOnScreen(target)) {
+            if (target != null && target.isDisplayedOnScreen()) {
                 AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
                 if (provider != null) {
                     succeeded = provider.performAccessibilityAction(action, virtualDescendantId);
@@ -586,28 +585,10 @@ final class AccessibilityInteractionController {
             return null;
         }
         View foundView = root.findViewByAccessibilityId(accessibilityId);
-        if (foundView != null && !isDisplayedOnScreen(foundView)) {
+        if (foundView != null && !foundView.isDisplayedOnScreen()) {
             return null;
         }
         return foundView;
-    }
-
-    /**
-     * Computes whether a view is visible on the screen.
-     *
-     * @param view The view to check.
-     * @return Whether the view is visible on the screen.
-     */
-    private boolean isDisplayedOnScreen(View view) {
-        // The first two checks are made also made by isShown() which
-        // however traverses the tree up to the parent to catch that.
-        // Therefore, we do some fail fast check to minimize the up
-        // tree traversal.
-        return (view.mAttachInfo != null
-                && view.mAttachInfo.mWindowVisibility == View.VISIBLE
-                && view.getAlpha() > 0
-                && view.isShown()
-                && view.getGlobalVisibleRect(mViewRootImpl.mTempRect));
     }
 
     /**
@@ -684,7 +665,7 @@ final class AccessibilityInteractionController {
                     }
                     View child = children.getChildAt(i);
                     if (child.getAccessibilityViewId() != current.getAccessibilityViewId()
-                            &&  isDisplayedOnScreen(child)) {
+                            &&  child.isDisplayedOnScreen()) {
                         AccessibilityNodeInfo info = null;
                         AccessibilityNodeProvider provider = child.getAccessibilityNodeProvider();
                         if (provider == null) {
@@ -718,7 +699,7 @@ final class AccessibilityInteractionController {
                     return;
                 }
                 View child = children.getChildAt(i);
-                if ( isDisplayedOnScreen(child)) {
+                if (child.isDisplayedOnScreen()) {
                     AccessibilityNodeProvider provider = child.getAccessibilityNodeProvider();
                     if (provider == null) {
                         AccessibilityNodeInfo info = child.createAccessibilityNodeInfo();
