@@ -1,0 +1,74 @@
+page.title=Building a Dynamic UI with Fragments
+
+trainingnavtop=true
+startpage=true
+next.title=Using the Android Support Library
+next.link=support-lib.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li>Basic knowledge of the Activity lifecycle (see <a
+href="{@docRoot}training/basics/activity-lifecycle/index.html">Managing the Activity
+Lifecycle</a>)</li>
+  <li>Experience building <a href="{@docRoot}guide/topics/ui/declaring-layout.html">XML
+layouts</a></li>
+</ul>
+
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a></li>
+  <li><a href="{@docRoot}guide/practices/tablets-and-handsets.html">Supporting Tablets and
+Handsets</a></li>
+</ul>
+
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/FragmentBasics.zip"
+class="button">Download the sample</a>
+ <p class="filename">FragmentBasics.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>To create a dynamic and multi-pane user interface on Android, you need to encapsulate
+UI components and activity behaviors into modules that you can swap into and out of
+your activities. You can create these modules with the {@link android.app.Fragment} class, which
+behaves somewhat like a nested activity that can define its own layout and manage its own
+lifecycle.</p>
+
+<p>When a fragment specifies its own layout, it can be configured in different combinations with
+other fragments inside an activity to modify your layout configuration for different screen
+sizes (a small screen might show one fragment at a time, but a large screen can show two or
+more).</p>
+
+<p>This class shows you how to create a dynamic user experience with fragments and optimize your
+app's user experience for devices with different screen sizes, all while continuing to support
+devices running versions as old as Android 1.6.</p>
+
+<h2>Lessons</h2>
+ 
+<dl>
+  <dt><b><a href="support-lib.html">Using the Android Support Library</a></b></dt>
+    <dd>Learn how to use more recent framework APIs in earlier versions of Android by bundling
+the Android Support Library into your app.</dd>
+  <dt><b><a href="creating.html">Creating a Fragment</a></b></dt>
+    <dd>Learn how to build a fragment and implement basic behaviors within its callback
+methods.</dd>
+  <dt><b><a href="fragment-ui.html">Building a Flexible UI</a></b></dt>
+    <dd>Learn how to build your app with layouts that provide different fragment configurations for
+different screens.</dd>
+  <dt><b><a href="communicating.html">Communicating with Other Fragments</a></b></dt>
+    <dd>Learn how to set up communication paths from a fragment to the activity and other
+fragments.</dd>
+</dl> 
+
