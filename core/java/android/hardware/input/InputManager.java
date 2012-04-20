@@ -268,6 +268,8 @@ public final class InputManager {
         synchronized (mInputDevicesLock) {
             int index = findInputDeviceListenerLocked(listener);
             if (index >= 0) {
+                InputDeviceListenerDelegate d = mInputDeviceListeners.get(index);
+                d.removeCallbacksAndMessages(null);
                 mInputDeviceListeners.remove(index);
             }
         }
