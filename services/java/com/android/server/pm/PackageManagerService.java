@@ -6067,10 +6067,23 @@ public class PackageManagerService extends IPackageManager.Stub {
                         Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 ret = imcs.copyResource(packageURI, out);
             } finally {
-                try { if (out != null) out.close(); } catch (IOException e) {}
+                IoUtils.closeQuietly(out);
                 mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
 
+            if (isFwdLocked()) {
+                final File destResourceFile = new File(getResourcePath());
+
+                // Copy the public files
+                try {
+                    PackageHelper.extractPublicFiles(codeFileName, destResourceFile);
+                } catch (IOException e) {
+                    Slog.e(TAG, "Couldn't create a new zip file for the public parts of a"
+                            + " forward-locked app.");
+                    destResourceFile.delete();
+                    return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+                }
+            }
             return ret;
         }
 
@@ -6086,21 +6099,29 @@ public class PackageManagerService extends IPackageManager.Stub {
                 cleanUp();
                 return false;
             } else {
-                // Rename based on packageName
-                File codeFile = new File(getCodePath());
-                String apkName = getNextCodePath(oldCodePath, pkgName, ".apk");
-                File desFile = new File(installDir, apkName + ".apk");
-                if (!codeFile.renameTo(desFile)) {
+                final File oldCodeFile = new File(getCodePath());
+                final File oldResourceFile = new File(getResourcePath());
+
+                // Rename APK file based on packageName
+                final String apkName = getNextCodePath(oldCodePath, pkgName, ".apk");
+                final File newCodeFile = new File(installDir, apkName + ".apk");
+                if (!oldCodeFile.renameTo(newCodeFile)) {
                     return false;
                 }
-                // Reset paths since the file has been renamed.
-                codeFileName = desFile.getPath();
+                codeFileName = newCodeFile.getPath();
+
+                // Rename public resource file if it's forward-locked.
+                final File newResFile = new File(getResourcePathFromCodePath());
+                if (isFwdLocked() && !oldResourceFile.renameTo(newResFile)) {
+                    return false;
+                }
                 resourceFileName = getResourcePathFromCodePath();
-                // Set permissions
+
+                // Attempt to set permissions
                 if (!setPermissions()) {
-                    // Failed setting permissions.
                     return false;
                 }
+
                 return true;
             }
         }
@@ -6116,11 +6137,26 @@ public class PackageManagerService extends IPackageManager.Stub {
             return resourceFileName;
         }
 
-        String getResourcePathFromCodePath() {
-            String codePath = getCodePath();
-            if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
-                String apkNameOnly = getApkName(codePath);
-                return mAppInstallDir.getPath() + "/" + apkNameOnly + ".zip";
+        private String getResourcePathFromCodePath() {
+            final String codePath = getCodePath();
+            if (isFwdLocked()) {
+                final StringBuilder sb = new StringBuilder();
+
+                sb.append(mAppInstallDir.getPath());
+                sb.append('/');
+                sb.append(getApkName(codePath));
+                sb.append(".zip");
+
+                /*
+                 * If our APK is a temporary file, mark the resource as a
+                 * temporary file as well so it can be cleaned up after
+                 * catastrophic failure.
+                 */
+                if (codePath.endsWith(".tmp")) {
+                    sb.append(".tmp");
+                }
+
+                return sb.toString();
             } else {
                 return codePath;
             }
@@ -6941,15 +6977,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         // TODO Gross hack but fix later. Ideally move this to be a post installation
         // check after alloting uid.
         if (isForwardLocked(newPackage)) {
-            File destResourceFile = new File(newPackage.applicationInfo.publicSourceDir);
-            try {
-                extractPublicFiles(newPackage, destResourceFile);
-            } catch (IOException e) {
-                Slog.e(TAG, "Couldn't create a new zip file for the public parts of a" +
-                           " forward-locked app.");
-                destResourceFile.delete();
-                return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-            }
             retCode = mInstaller.setForwardLockPerm(getApkName(newPackage.mPath),
                     newPackage.applicationInfo.uid);
         } else {
@@ -6984,67 +7011,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private static boolean isUpdatedSystemApp(PackageParser.Package pkg) {
         return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
-    }
-
-    private void extractPublicFiles(PackageParser.Package newPackage,
-                                    File publicZipFile) throws IOException {
-        final FileOutputStream fstr = new FileOutputStream(publicZipFile);
-        final ZipOutputStream publicZipOutStream = new ZipOutputStream(fstr);
-        try {
-            final ZipFile privateZip = new ZipFile(newPackage.mPath);
-            try {
-                // Copy manifest, resources.arsc and res directory to public zip
-
-                final Enumeration<? extends ZipEntry> privateZipEntries = privateZip.entries();
-                while (privateZipEntries.hasMoreElements()) {
-                    final ZipEntry zipEntry = privateZipEntries.nextElement();
-                    final String zipEntryName = zipEntry.getName();
-                    if ("AndroidManifest.xml".equals(zipEntryName)
-                            || "resources.arsc".equals(zipEntryName)
-                            || zipEntryName.startsWith("res/")) {
-                        copyZipEntry(zipEntry, privateZip, publicZipOutStream);
-                    }
-                }
-            } finally {
-                try { privateZip.close(); } catch (IOException e) { }
-            }
-
-            publicZipOutStream.finish();
-            publicZipOutStream.flush();
-            FileUtils.sync(fstr);
-            publicZipOutStream.close();
-            FileUtils.setPermissions(publicZipFile.getAbsolutePath(), FileUtils.S_IRUSR
-                    | FileUtils.S_IWUSR | FileUtils.S_IRGRP | FileUtils.S_IROTH, -1, -1);
-        } finally {
-            IoUtils.closeQuietly(publicZipOutStream);
-        }
-    }
-
-    private static void copyZipEntry(ZipEntry zipEntry,
-                                     ZipFile inZipFile,
-                                     ZipOutputStream outZipStream) throws IOException {
-        byte[] buffer = new byte[4096];
-        int num;
-
-        ZipEntry newEntry;
-        if (zipEntry.getMethod() == ZipEntry.STORED) {
-            // Preserve the STORED method of the input entry.
-            newEntry = new ZipEntry(zipEntry);
-        } else {
-            // Create a new entry so that the compressed len is recomputed.
-            newEntry = new ZipEntry(zipEntry.getName());
-        }
-        outZipStream.putNextEntry(newEntry);
-
-        final InputStream data = inZipFile.getInputStream(zipEntry);
-        try {
-            while ((num = data.read(buffer)) > 0) {
-                outZipStream.write(buffer, 0, num);
-            }
-            outZipStream.flush();
-        } finally {
-            IoUtils.closeQuietly(data);
-        }
     }
 
     private void deleteTempPackageFiles() {
