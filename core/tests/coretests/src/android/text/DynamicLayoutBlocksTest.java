@@ -45,18 +45,18 @@ public class DynamicLayoutBlocksTest extends TestCase {
     public void printBlocks(String message) {
         System.out.print(message);
         for (int i = 0; i < dl.getNumberOfBlocks(); i++) {
-            System.out.print("  " + Integer.toString(dl.getBlockEnds()[i]));
+            System.out.print("  " + Integer.toString(dl.getBlockEndLines()[i]));
         }
         System.out.println();
     }
 
     public void checkInvariants() {
         assertTrue(dl.getNumberOfBlocks() > 0);
-        assertTrue(dl.getNumberOfBlocks() <= dl.getBlockEnds().length);
-        assertEquals(dl.getBlockEnds().length, dl.getBlockIndices().length);
+        assertTrue(dl.getNumberOfBlocks() <= dl.getBlockEndLines().length);
+        assertEquals(dl.getBlockEndLines().length, dl.getBlockIndices().length);
 
         for (int i = 1; i < dl.getNumberOfBlocks(); i++) {
-            assertTrue(dl.getBlockEnds()[i] > dl.getBlockEnds()[i-1]);
+            assertTrue(dl.getBlockEndLines()[i] > dl.getBlockEndLines()[i-1]);
         }
     }
 
@@ -78,7 +78,7 @@ public class DynamicLayoutBlocksTest extends TestCase {
         }
 
         for (int i = 0; i < dl.getNumberOfBlocks(); i++) {
-            assertEquals(ends[i], dl.getBlockEnds()[i]);
+            assertEquals(ends[i], dl.getBlockEndLines()[i]);
             assertEquals(indices[i], dl.getBlockIndices()[i]);
         }
     }
