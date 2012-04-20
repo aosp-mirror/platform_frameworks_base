@@ -11063,11 +11063,13 @@ package android.media {
     ctor public MediaExtractor();
     method public boolean advance();
     method public int countTracks();
+    method public long getCachedDuration();
     method public boolean getSampleCryptoInfo(android.media.MediaCodec.CryptoInfo);
     method public int getSampleFlags();
     method public long getSampleTime();
     method public int getSampleTrackIndex();
     method public java.util.Map<java.lang.String, java.lang.Object> getTrackFormat(int);
+    method public boolean hasCacheReachedEndOfStream();
     method public int readSampleData(java.nio.ByteBuffer, int);
     method public final void release();
     method public void seekTo(long);
