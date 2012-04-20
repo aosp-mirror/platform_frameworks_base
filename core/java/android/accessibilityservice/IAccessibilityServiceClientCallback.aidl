@@ -1,5 +1,5 @@
 /*
-** Copyright 2009, The Android Open Source Project
+** Copyright 2012, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -16,22 +16,15 @@
 
 package android.accessibilityservice;
 
-import android.accessibilityservice.IAccessibilityServiceClientCallback;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.view.accessibility.AccessibilityEvent;
 
 /**
- * Top-level interface to an accessibility service component.
+ * Callback for IAccessibilityServiceClient.
  *
  * @hide
  */
- oneway interface IAccessibilityServiceClient {
+ oneway interface IAccessibilityServiceClientCallback {
 
-    void setConnection(in IAccessibilityServiceConnection connection, int connectionId);
-
-    void onAccessibilityEvent(in AccessibilityEvent event);
-
-    void onInterrupt();
-
-    void onGesture(int gesture, in IAccessibilityServiceClientCallback callback, int interactionId);
+    void setGestureResult(int gestureId, boolean handled, int interactionId);
 }

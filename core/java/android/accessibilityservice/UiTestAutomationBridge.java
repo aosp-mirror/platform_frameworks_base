@@ -177,8 +177,8 @@ public class UiTestAutomationBridge {
             }
 
             @Override
-            public void onGesture(int gestureId) {
-                /* do nothing */
+            public boolean onGesture(int gestureId) {
+                return false;
             }
         });
 

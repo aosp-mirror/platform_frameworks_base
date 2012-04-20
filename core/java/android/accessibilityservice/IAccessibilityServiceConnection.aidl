@@ -167,5 +167,5 @@ interface IAccessibilityServiceConnection {
      * @param action The action to perform.
      * @return Whether the action was performed.
      */
-    boolean perfromGlobalAction(int action);
+    boolean performGlobalAction(int action);
 }

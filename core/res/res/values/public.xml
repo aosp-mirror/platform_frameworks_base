@@ -3599,5 +3599,6 @@
   <public type="attr" name="parentActivityName" />
 
   <public type="attr" name="importantForAccessibility"/>
+  <public type="attr" name="canHandleGestures"/>
 
 </resources>
