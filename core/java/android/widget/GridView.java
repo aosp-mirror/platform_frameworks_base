@@ -1463,6 +1463,9 @@ public class GridView extends AbsListView {
             mResurrectToPosition = position;
         }
         mLayoutMode = LAYOUT_SET_SELECTION;
+        if (mPositionScroller != null) {
+            mPositionScroller.stop();
+        }
         requestLayout();
     }
 
@@ -1474,6 +1477,10 @@ public class GridView extends AbsListView {
     @Override
     void setSelectionInt(int position) {
         int previousSelectedPosition = mNextSelectedPosition;
+
+        if (mPositionScroller != null) {
+            mPositionScroller.stop();
+        }
 
         setNextSelectedPositionInt(position);
         layoutChildren();

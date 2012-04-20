@@ -403,7 +403,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * Handles scrolling between positions within the list.
      */
-    private PositionScroller mPositionScroller;
+    PositionScroller mPositionScroller;
 
     /**
      * The offset in pixels form the top of the AdapterView to the top
@@ -3080,6 +3080,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             return isClickable() || isLongClickable();
         }
 
+        if (mPositionScroller != null) {
+            mPositionScroller.stop();
+        }
+
         if (mFastScroller != null) {
             boolean intercepted = mFastScroller.onTouchEvent(ev);
             if (intercepted) {
@@ -3564,6 +3568,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         int action = ev.getAction();
         View v;
 
+        if (mPositionScroller != null) {
+            mPositionScroller.stop();
+        }
+
         if (mFastScroller != null) {
             boolean intercepted = mFastScroller.onInterceptTouchEvent(ev);
             if (intercepted) {
@@ -3748,7 +3756,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mScroller.fling(0, initialY, 0, initialVelocity,
                     0, Integer.MAX_VALUE, 0, Integer.MAX_VALUE);
             mTouchMode = TOUCH_MODE_FLING;
-            post(this);
+            postOnAnimation(this);
 
             if (PROFILE_FLINGING) {
                 if (!mFlingProfilingStarted) {
@@ -3766,7 +3774,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (mScroller.springBack(0, mScrollY, 0, 0, 0, 0)) {
                 mTouchMode = TOUCH_MODE_OVERFLING;
                 invalidate();
-                post(this);
+                postOnAnimation(this);
             } else {
                 mTouchMode = TOUCH_MODE_REST;
                 reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
@@ -3778,7 +3786,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     Integer.MIN_VALUE, Integer.MAX_VALUE, 0, getHeight());
             mTouchMode = TOUCH_MODE_OVERFLING;
             invalidate();
-            post(this);
+            postOnAnimation(this);
         }
 
         void edgeReached(int delta) {
@@ -3800,7 +3808,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
             }
             invalidate();
-            post(this);
+            postOnAnimation(this);
         }
 
         void startScroll(int distance, int duration) {
@@ -3808,7 +3816,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mLastFlingY = initialY;
             mScroller.startScroll(0, initialY, 0, distance, duration);
             mTouchMode = TOUCH_MODE_FLING;
-            post(this);
+            postOnAnimation(this);
         }
 
         void endFling() {
@@ -3907,7 +3915,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 if (more && !atEnd) {
                     if (atEdge) invalidate();
                     mLastFlingY = y;
-                    post(this);
+                    postOnAnimation(this);
                 } else {
                     endFling();
 
@@ -3948,7 +3956,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         }
                     } else {
                         invalidate();
-                        post(this);
+                        postOnAnimation(this);
                     }
                 } else {
                     endFling();
@@ -3958,7 +3966,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
         }
     }
-
 
     class PositionScroller implements Runnable {
         private static final int SCROLL_DURATION = 400;
@@ -4009,7 +4016,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mBoundPos = INVALID_POSITION;
             mLastSeenPos = INVALID_POSITION;
 
-            post(this);
+            postOnAnimation(this);
         }
 
         void start(int position, int boundPosition) {
@@ -4070,7 +4077,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mBoundPos = boundPosition;
             mLastSeenPos = INVALID_POSITION;
 
-            post(this);
+            postOnAnimation(this);
         }
 
         void startWithOffset(int position, int offset) {
@@ -4079,6 +4086,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         void startWithOffset(int position, int offset, int duration) {
             stop();
+
+            offset += getPaddingTop();
 
             mTargetPos = position;
             mOffsetFromTop = offset;
@@ -4108,7 +4117,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     (int) (duration / screenTravelCount);
             mLastSeenPos = INVALID_POSITION;
 
-            post(this);
+            postOnAnimation(this);
         }
 
         void stop() {
@@ -4116,10 +4125,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         public void run() {
-            if (mTouchMode != TOUCH_MODE_FLING && mLastSeenPos != INVALID_POSITION) {
-                return;
-            }
-
             final int listHeight = getHeight();
             final int firstPos = mFirstPosition;
 
@@ -4134,7 +4139,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
                 if (lastPos == mLastSeenPos) {
                     // No new views, let things keep going.
-                    post(this);
+                    postOnAnimation(this);
                     return;
                 }
 
@@ -4142,14 +4147,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 final int lastViewHeight = lastView.getHeight();
                 final int lastViewTop = lastView.getTop();
                 final int lastViewPixelsShowing = listHeight - lastViewTop;
-                final int extraScroll = lastPos < mItemCount - 1 ? mExtraScroll : mListPadding.bottom;
+                final int extraScroll = lastPos < mItemCount - 1 ?
+                        Math.max(mListPadding.bottom, mExtraScroll) : mListPadding.bottom;
 
-                smoothScrollBy(lastViewHeight - lastViewPixelsShowing + extraScroll,
-                        mScrollDuration);
+                final int scrollBy = lastViewHeight - lastViewPixelsShowing + extraScroll;
+                smoothScrollBy(scrollBy, mScrollDuration);
 
                 mLastSeenPos = lastPos;
                 if (lastPos < mTargetPos) {
-                    post(this);
+                    postOnAnimation(this);
                 }
                 break;
             }
@@ -4166,21 +4172,21 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
                 if (nextPos == mLastSeenPos) {
                     // No new views, let things keep going.
-                    post(this);
+                    postOnAnimation(this);
                     return;
                 }
 
                 final View nextView = getChildAt(nextViewIndex);
                 final int nextViewHeight = nextView.getHeight();
                 final int nextViewTop = nextView.getTop();
-                final int extraScroll = mExtraScroll;
+                final int extraScroll = Math.max(mListPadding.bottom, mExtraScroll);
                 if (nextPos < mBoundPos) {
                     smoothScrollBy(Math.max(0, nextViewHeight + nextViewTop - extraScroll),
                             mScrollDuration);
 
                     mLastSeenPos = nextPos;
 
-                    post(this);
+                    postOnAnimation(this);
                 } else  {
                     if (nextViewTop > extraScroll) {
                         smoothScrollBy(nextViewTop - extraScroll, mScrollDuration);
@@ -4192,7 +4198,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             case MOVE_UP_POS: {
                 if (firstPos == mLastSeenPos) {
                     // No new views, let things keep going.
-                    post(this);
+                    postOnAnimation(this);
                     return;
                 }
 
@@ -4201,14 +4207,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     return;
                 }
                 final int firstViewTop = firstView.getTop();
-                final int extraScroll = firstPos > 0 ? mExtraScroll : mListPadding.top;
+                final int extraScroll = firstPos > 0 ?
+                        Math.max(mExtraScroll, mListPadding.top) : mListPadding.top;
 
                 smoothScrollBy(firstViewTop - extraScroll, mScrollDuration);
 
                 mLastSeenPos = firstPos;
 
                 if (firstPos > mTargetPos) {
-                    post(this);
+                    postOnAnimation(this);
                 }
                 break;
             }
@@ -4230,12 +4237,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 final int lastViewHeight = lastView.getHeight();
                 final int lastViewTop = lastView.getTop();
                 final int lastViewPixelsShowing = listHeight - lastViewTop;
+                final int extraScroll = Math.max(mListPadding.top, mExtraScroll);
                 mLastSeenPos = lastPos;
                 if (lastPos > mBoundPos) {
-                    smoothScrollBy(-(lastViewPixelsShowing - mExtraScroll), mScrollDuration);
-                    post(this);
+                    smoothScrollBy(-(lastViewPixelsShowing - extraScroll), mScrollDuration);
+                    postOnAnimation(this);
                 } else {
-                    final int bottom = listHeight - mExtraScroll;
+                    final int bottom = listHeight - extraScroll;
                     final int lastViewBottom = lastViewTop + lastViewHeight;
                     if (bottom > lastViewBottom) {
                         smoothScrollBy(-(bottom - lastViewBottom), mScrollDuration);
@@ -4270,10 +4278,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 final float modifier = Math.min(Math.abs(screenTravelCount), 1.f);
                 if (position < firstPos) {
                     smoothScrollBy((int) (-getHeight() * modifier), mScrollDuration);
-                    post(this);
+                    postOnAnimation(this);
                 } else if (position > lastPos) {
                     smoothScrollBy((int) (getHeight() * modifier), mScrollDuration);
-                    post(this);
+                    postOnAnimation(this);
                 } else {
                     // On-screen, just scroll.
                     final int targetTop = getChildAt(position - firstPos).getTop();
@@ -4620,7 +4628,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         // invalidate before moving the children to avoid unnecessary invalidate
         // calls to bubble up from the children all the way to the top
         if (!awakenScrollBars()) {
-            invalidate();
+           invalidate();
         }
 
         offsetChildrenTopAndBottom(incrementalDeltaY);
