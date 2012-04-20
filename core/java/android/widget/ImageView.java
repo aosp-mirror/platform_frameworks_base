@@ -200,26 +200,8 @@ public class ImageView extends View {
     }
 
     @Override
-    protected boolean onSetAlpha(int alpha) {
-        if (!USE_DISPLAY_LIST_PROPERTIES && getBackground() == null) {
-            int scale = alpha + (alpha >> 7);
-            if (mViewAlphaScale != scale) {
-                mViewAlphaScale = scale;
-                mColorMod = true;
-                applyColorMod();
-            }
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public boolean hasOverlappingRendering() {
-        if (!USE_DISPLAY_LIST_PROPERTIES) {
-            return super.hasOverlappingRendering();
-        } else {
-            return (getBackground() != null);
-        }
+        return (getBackground() != null);
     }
 
     @Override

@@ -48,13 +48,11 @@ public abstract class HardwareCanvas extends Canvas {
      * Invoked after all drawing operation have been performed.
      */
     public abstract void onPostDraw();
-    
+
     /**
      * Draws the specified display list onto this canvas.
-     * 
+     *
      * @param displayList The display list to replay.
-     * @param width The width of the display list.
-     * @param height The height of the display list.
      * @param dirty The dirty region to redraw in the next pass, matters only
      *        if this method returns true, can be null.
      * @param flags Optional flags about drawing, see {@link DisplayList} for
@@ -63,8 +61,7 @@ public abstract class HardwareCanvas extends Canvas {
      * @return One of {@link DisplayList#STATUS_DONE}, {@link DisplayList#STATUS_DRAW} or
      *         {@link DisplayList#STATUS_INVOKE}
      */
-    public abstract int drawDisplayList(DisplayList displayList, int width, int height,
-            Rect dirty, int flags);
+    public abstract int drawDisplayList(DisplayList displayList, Rect dirty, int flags);
 
     /**
      * Outputs the specified display list to the log. This method exists for use by

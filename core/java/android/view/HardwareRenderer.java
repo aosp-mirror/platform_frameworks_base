@@ -1099,8 +1099,7 @@ public abstract class HardwareRenderer {
                                 drawDisplayListStartTime = System.nanoTime();
                             }
 
-                            int status = canvas.drawDisplayList(displayList,
-                                    view.getWidth(), view.getHeight(), mRedrawClip,
+                            int status = canvas.drawDisplayList(displayList, mRedrawClip,
                                     DisplayList.FLAG_CLIP_CHILDREN);
 
                             if (mProfileEnabled) {

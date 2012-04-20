@@ -1372,17 +1372,13 @@ void OpenGLRenderer::finishDrawTexture() {
 // Drawing
 ///////////////////////////////////////////////////////////////////////////////
 
-status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, uint32_t width, uint32_t height,
+status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList,
         Rect& dirty, int32_t flags, uint32_t level) {
-
-    if (!USE_DISPLAY_LIST_PROPERTIES && quickReject(0, 0, width, height)) {
-        return false;
-    }
 
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)
     // will be performed by the display list itself
     if (displayList && displayList->isRenderable()) {
-        return displayList->replay(*this, width, height, dirty, flags, level);
+        return displayList->replay(*this, dirty, flags, level);
     }
 
     return DrawGlInfo::kStatusDone;
@@ -2463,8 +2459,7 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
         interrupt();
         renderer->setViewport(layer->layer.getWidth(), layer->layer.getHeight());
         renderer->prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, !layer->isBlend());
-        renderer->drawDisplayList(layer->displayList, layer->getWidth(), layer->getHeight(),
-                dirty, DisplayList::kReplayFlag_ClipChildren);
+        renderer->drawDisplayList(layer->displayList, dirty, DisplayList::kReplayFlag_ClipChildren);
         renderer->finish();
         resume();
 

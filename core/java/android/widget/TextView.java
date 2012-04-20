@@ -261,8 +261,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // System wide time for last cut or copy action.
     static long LAST_CUT_OR_COPY_TIME;
 
-    private int mCurrentAlpha = 255;
-
     private ColorStateList mTextColor;
     private ColorStateList mHintTextColor;
     private ColorStateList mLinkTextColor;
@@ -4270,41 +4268,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
-    protected boolean onSetAlpha(int alpha) {
-        // Alpha is supported if and only if the drawing can be done in one pass.
-        // TODO text with spans with a background color currently do not respect this alpha.
-        if (!USE_DISPLAY_LIST_PROPERTIES &&
-                (getBackground() != null || mText instanceof Spannable || hasSelection())) {
-            if (mCurrentAlpha != alpha) {
-                mCurrentAlpha = alpha;
-                final Drawables dr = mDrawables;
-                if (dr != null) {
-                    if (dr.mDrawableLeft != null) dr.mDrawableLeft.mutate().setAlpha(alpha);
-                    if (dr.mDrawableTop != null) dr.mDrawableTop.mutate().setAlpha(alpha);
-                    if (dr.mDrawableRight != null) dr.mDrawableRight.mutate().setAlpha(alpha);
-                    if (dr.mDrawableBottom != null) dr.mDrawableBottom.mutate().setAlpha(alpha);
-                    if (dr.mDrawableStart != null) dr.mDrawableStart.mutate().setAlpha(alpha);
-                    if (dr.mDrawableEnd != null) dr.mDrawableEnd.mutate().setAlpha(alpha);
-                }
-                if (mEditor != null) getEditor().invalidateTextDisplayList();
-            }
-            return true;
-        }
-
-        if (mCurrentAlpha != 255) {
-            if (mEditor != null) getEditor().invalidateTextDisplayList();
-        }
-        mCurrentAlpha = 255;
-        return false;
-    }
-
-    @Override
     public boolean hasOverlappingRendering() {
-        if (!USE_DISPLAY_LIST_PROPERTIES) {
-            return super.hasOverlappingRendering();
-        } else {
-            return (getBackground() != null || mText instanceof Spannable || hasSelection());
-        }
+        return (getBackground() != null || mText instanceof Spannable || hasSelection());
     }
 
     /**
@@ -4412,10 +4377,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                     // XXX should pass to skin instead of drawing directly
                     highlightPaint.setColor(mCurTextColor);
-                    if (mCurrentAlpha != 255) {
-                        highlightPaint.setAlpha(
-                                (mCurrentAlpha * Color.alpha(mCurTextColor)) / 255);
-                    }
                     highlightPaint.setStyle(Paint.Style.STROKE);
                     highlight = mHighlightPath;
                 }
@@ -4429,10 +4390,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 // XXX should pass to skin instead of drawing directly
                 highlightPaint.setColor(mHighlightColor);
-                if (mCurrentAlpha != 255) {
-                    highlightPaint.setAlpha(
-                            (mCurrentAlpha * Color.alpha(mHighlightColor)) / 255);
-                }
                 highlightPaint.setStyle(Paint.Style.FILL);
 
                 highlight = mHighlightPath;
@@ -4443,8 +4400,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mCurrentAlpha <= ViewConfiguration.ALPHA_THRESHOLD_INT) return;
-
         restartMarqueeIfNeeded();
 
         // Draw the background for this view
@@ -4531,10 +4486,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         mTextPaint.setColor(color);
-        if (mCurrentAlpha != 255) {
-            // If set, the alpha will override the color's alpha. Multiply the alphas.
-            mTextPaint.setAlpha((mCurrentAlpha * Color.alpha(color)) / 255);
-        }
         mTextPaint.drawableState = getDrawableState();
 
         canvas.save();
@@ -7138,7 +7089,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected float getLeftFadingEdgeStrength() {
-        if (mCurrentAlpha <= ViewConfiguration.ALPHA_THRESHOLD_INT) return 0.0f;
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE &&
                 mMarqueeFadeMode != MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
             if (mMarquee != null && !mMarquee.isStopped()) {
@@ -7168,7 +7118,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected float getRightFadingEdgeStrength() {
-        if (mCurrentAlpha <= ViewConfiguration.ALPHA_THRESHOLD_INT) return 0.0f;
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE &&
                 mMarqueeFadeMode != MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
             if (mMarquee != null && !mMarquee.isStopped()) {

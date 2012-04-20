@@ -1286,18 +1286,16 @@ public class Editor {
                     } finally {
                         hardwareCanvas.onPostDraw();
                         blockDisplayList.end();
-                        if (View.USE_DISPLAY_LIST_PROPERTIES) {
-                            blockDisplayList.setLeftTopRightBottom(0, top, width, bottom);
-                            // Same as drawDisplayList below, handled by our TextView's parent
-                            blockDisplayList.setClipChildren(false);
-                        }
+                        blockDisplayList.setLeftTopRightBottom(0, top, width, bottom);
+                        // Same as drawDisplayList below, handled by our TextView's parent
+                        blockDisplayList.setClipChildren(false);
                     }
                 }
 
                 // TODO When View.USE_DISPLAY_LIST_PROPERTIES is the only code path, the
                 // width and height parameters should be removed and the bounds set above in
                 // setLeftTopRightBottom should be used instead for quick rejection.
-                ((HardwareCanvas) canvas).drawDisplayList(blockDisplayList, width, height, null,
+                ((HardwareCanvas) canvas).drawDisplayList(blockDisplayList, null,
                         0 /* no child clipping, our TextView parent enforces it */);
                 endOfPreviousBlock = blockEndLine;
             }

@@ -835,7 +835,7 @@ public class ViewPropertyAnimator {
      */
     private void setValue(int propertyConstant, float value) {
         final View.TransformationInfo info = mView.mTransformationInfo;
-        DisplayList displayList = View.USE_DISPLAY_LIST_PROPERTIES ? mView.mDisplayList : null;
+        final DisplayList displayList = mView.mDisplayList;
         switch (propertyConstant) {
             case TRANSLATION_X:
                 info.mTranslationX = value;
@@ -997,8 +997,7 @@ public class ViewPropertyAnimator {
                 // Shouldn't happen, but just to play it safe
                 return;
             }
-            boolean useDisplayListProperties = View.USE_DISPLAY_LIST_PROPERTIES &&
-                    mView.mDisplayList != null;
+            boolean useDisplayListProperties = mView.mDisplayList != null;
 
             // alpha requires slightly different treatment than the other (transform) properties.
             // The logic in setAlpha() is not simply setting mAlpha, plus the invalidation

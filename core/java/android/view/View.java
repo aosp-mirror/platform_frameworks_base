@@ -1531,14 +1531,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     static final ThreadLocal<Rect> sThreadLocal = new ThreadLocal<Rect>();
 
     /**
-     * Temporary flag, used to enable processing of View properties in the native DisplayList
-     * object instead of during draw(). Soon to be enabled by default for hardware-accelerated
-     * apps.
-     * @hide
-     */
-    public static final boolean USE_DISPLAY_LIST_PROPERTIES = true;
-
-    /**
      * Map used to store views' tags.
      */
     private SparseArray<Object> mKeyedTags;
@@ -8269,7 +8261,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         info.mMatrixDirty = true;
 
         invalidateViewProperty(false, false);
-        if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+        if (mDisplayList != null) {
             mDisplayList.setCameraDistance(-Math.abs(distance) / dpi);
         }
     }
@@ -8311,7 +8303,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.mRotation = rotation;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+            if (mDisplayList != null) {
                 mDisplayList.setRotation(rotation);
             }
         }
@@ -8358,7 +8350,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.mRotationY = rotationY;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+            if (mDisplayList != null) {
                 mDisplayList.setRotationY(rotationY);
             }
         }
@@ -8405,7 +8397,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.mRotationX = rotationX;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+            if (mDisplayList != null) {
                 mDisplayList.setRotationX(rotationX);
             }
         }
@@ -8444,7 +8436,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.mScaleX = scaleX;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+            if (mDisplayList != null) {
                 mDisplayList.setScaleX(scaleX);
             }
         }
@@ -8483,7 +8475,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.mScaleY = scaleY;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+            if (mDisplayList != null) {
                 mDisplayList.setScaleY(scaleY);
             }
         }
@@ -8530,7 +8522,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.mPivotX = pivotX;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+            if (mDisplayList != null) {
                 mDisplayList.setPivotX(pivotX);
             }
         }
@@ -8576,7 +8568,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.mPivotY = pivotY;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+            if (mDisplayList != null) {
                 mDisplayList.setPivotY(pivotY);
             }
         }
@@ -8642,7 +8634,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             } else {
                 mPrivateFlags &= ~ALPHA_SET;
                 invalidateViewProperty(true, false);
-                if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                if (mDisplayList != null) {
                     mDisplayList.setAlpha(alpha);
                 }
             }
@@ -8669,7 +8661,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 return true;
             } else {
                 mPrivateFlags &= ~ALPHA_SET;
-                if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                if (mDisplayList != null) {
                     mDisplayList.setAlpha(alpha);
                 }
             }
@@ -8721,7 +8713,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             int oldHeight = mBottom - mTop;
 
             mTop = top;
-            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+            if (mDisplayList != null) {
                 mDisplayList.setTop(mTop);
             }
 
@@ -8790,7 +8782,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             int oldHeight = mBottom - mTop;
 
             mBottom = bottom;
-            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+            if (mDisplayList != null) {
                 mDisplayList.setBottom(mBottom);
             }
 
@@ -8853,7 +8845,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             int height = mBottom - mTop;
 
             mLeft = left;
-            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+            if (mDisplayList != null) {
                 mDisplayList.setLeft(left);
             }
 
@@ -8869,9 +8861,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             }
             mBackgroundSizeChanged = true;
             invalidateParentIfNeeded();
-            if (USE_DISPLAY_LIST_PROPERTIES) {
-
-            }
         }
     }
 
@@ -8916,7 +8905,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             int height = mBottom - mTop;
 
             mRight = right;
-            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+            if (mDisplayList != null) {
                 mDisplayList.setRight(mRight);
             }
 
@@ -9013,7 +9002,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.mTranslationX = translationX;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+            if (mDisplayList != null) {
                 mDisplayList.setTranslationX(translationX);
             }
         }
@@ -9050,7 +9039,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.mTranslationY = translationY;
             info.mMatrixDirty = true;
             invalidateViewProperty(false, true);
-            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+            if (mDisplayList != null) {
                 mDisplayList.setTranslationY(translationY);
             }
         }
@@ -9161,7 +9150,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             final boolean matrixIsIdentity = mTransformationInfo == null
                     || mTransformationInfo.mMatrixIsIdentity;
             if (matrixIsIdentity) {
-                if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                if (mDisplayList != null) {
                     invalidateViewProperty(false, false);
                 } else {
                     final ViewParent p = mParent;
@@ -9189,7 +9178,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             mTop += offset;
             mBottom += offset;
-            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+            if (mDisplayList != null) {
                 mDisplayList.offsetTopBottom(offset);
                 invalidateViewProperty(false, false);
             } else {
@@ -9212,7 +9201,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             final boolean matrixIsIdentity = mTransformationInfo == null
                     || mTransformationInfo.mMatrixIsIdentity;
             if (matrixIsIdentity) {
-                if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                if (mDisplayList != null) {
                     invalidateViewProperty(false, false);
                 } else {
                     final ViewParent p = mParent;
@@ -9237,7 +9226,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             mLeft += offset;
             mRight += offset;
-            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+            if (mDisplayList != null) {
                 mDisplayList.offsetLeftRight(offset);
                 invalidateViewProperty(false, false);
             } else {
@@ -9666,8 +9655,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * list properties are not being used in this view
      */
     void invalidateViewProperty(boolean invalidateParent, boolean forceRedraw) {
-        if (!USE_DISPLAY_LIST_PROPERTIES || mDisplayList == null ||
-                (mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION) {
+        if (mDisplayList == null || (mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION) {
             if (invalidateParent) {
                 invalidateParentCaches();
             }
@@ -11759,7 +11747,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 int layerType = (
                         !(mParent instanceof ViewGroup) || ((ViewGroup)mParent).mDrawLayers) ?
                         getLayerType() : LAYER_TYPE_NONE;
-                if (!isLayer && layerType != LAYER_TYPE_NONE && USE_DISPLAY_LIST_PROPERTIES) {
+                if (!isLayer && layerType != LAYER_TYPE_NONE) {
                     if (layerType == LAYER_TYPE_HARDWARE) {
                         final HardwareLayer layer = getHardwareLayer();
                         if (layer != null && layer.isValid()) {
@@ -11782,9 +11770,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
                     computeScroll();
 
-                    if (!USE_DISPLAY_LIST_PROPERTIES) {
-                        restoreCount = canvas.save();
-                    }
                     canvas.translate(-mScrollX, -mScrollY);
                     if (!isLayer) {
                         mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
@@ -11799,16 +11784,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     }
                 }
             } finally {
-                if (USE_DISPLAY_LIST_PROPERTIES) {
-                    canvas.restoreToCount(restoreCount);
-                }
                 canvas.onPostDraw();
 
                 displayList.end();
-                if (USE_DISPLAY_LIST_PROPERTIES) {
-                    displayList.setCaching(caching);
-                }
-                if (isLayer && USE_DISPLAY_LIST_PROPERTIES) {
+                displayList.setCaching(caching);
+                if (isLayer) {
                     displayList.setLeftTopRightBottom(0, 0, width, height);
                 } else {
                     setDisplayListProperties(displayList);
@@ -12400,7 +12380,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * previously-set transform values
      */
     void setDisplayListProperties(DisplayList displayList) {
-        if (USE_DISPLAY_LIST_PROPERTIES && displayList != null) {
+        if (displayList != null) {
             displayList.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
             displayList.setHasOverlappingRendering(hasOverlappingRendering());
             if (mParent instanceof ViewGroup) {
@@ -12460,8 +12440,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * to be called from anywhere else other than ViewGroup.drawChild().
      */
     boolean draw(Canvas canvas, ViewGroup parent, long drawingTime) {
-        boolean useDisplayListProperties = USE_DISPLAY_LIST_PROPERTIES && mAttachInfo != null &&
-                mAttachInfo.mHardwareAccelerated;
+        boolean useDisplayListProperties = mAttachInfo != null && mAttachInfo.mHardwareAccelerated;
         boolean more = false;
         final boolean childHasIdentityMatrix = hasIdentityMatrix();
         final int flags = parent.mGroupFlags;
@@ -12722,8 +12701,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     }
                 } else {
                     mPrivateFlags &= ~DIRTY_MASK;
-                    ((HardwareCanvas) canvas).drawDisplayList(displayList,
-                            mRight - mLeft, mBottom - mTop, null, flags);
+                    ((HardwareCanvas) canvas).drawDisplayList(displayList, null, flags);
                 }
             }
         } else if (cache != null) {
@@ -13211,7 +13189,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             mTop = top;
             mRight = right;
             mBottom = bottom;
-            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+            if (mDisplayList != null) {
                 mDisplayList.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
             }
 

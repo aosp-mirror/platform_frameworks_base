@@ -49,10 +49,6 @@ namespace uirenderer {
     #define DISPLAY_LIST_LOGD(...)
 #endif
 
-// Set to 1 to enable native processing of View properties. 0 by default. Eventually this
-// will go away and we will always use this approach for accelerated apps.
-#define USE_DISPLAY_LIST_PROPERTIES 1
-
 #define TRANSLATION 0x0001
 #define ROTATION    0x0002
 #define ROTATION_3D 0x0004
@@ -127,8 +123,7 @@ public:
 
     static const char* OP_NAMES[];
 
-    void setViewProperties(OpenGLRenderer& renderer, uint32_t width, uint32_t height,
-            uint32_t level);
+    void setViewProperties(OpenGLRenderer& renderer, uint32_t level);
     void outputViewProperties(OpenGLRenderer& renderer, char* indent);
 
     ANDROID_API size_t getSize();
@@ -137,8 +132,7 @@ public:
 
     void initFromDisplayListRenderer(const DisplayListRenderer& recorder, bool reusing = false);
 
-    status_t replay(OpenGLRenderer& renderer, uint32_t width, uint32_t height,
-            Rect& dirty, int32_t flags, uint32_t level = 0);
+    status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, uint32_t level = 0);
 
     void output(OpenGLRenderer& renderer, uint32_t level = 0);
 
@@ -393,6 +387,14 @@ public:
         mCaching = caching;
     }
 
+    int getWidth() {
+        return mWidth;
+    }
+
+    int getHeight() {
+        return mHeight;
+    }
+
 private:
     void init();
 
@@ -563,8 +565,8 @@ public:
 
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
-    virtual status_t drawDisplayList(DisplayList* displayList, uint32_t width, uint32_t height,
-            Rect& dirty, int32_t flags, uint32_t level = 0);
+    virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t flags,
+            uint32_t level = 0);
     virtual void drawLayer(Layer* layer, float x, float y, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
