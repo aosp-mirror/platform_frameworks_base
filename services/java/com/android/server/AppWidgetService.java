@@ -28,6 +28,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Pair;
@@ -258,6 +259,16 @@ class AppWidgetService extends IAppWidgetService.Stub
     @Override
     public RemoteViews getAppWidgetViews(int appWidgetId) throws RemoteException {
         return getImplForUser().getAppWidgetViews(appWidgetId);
+    }
+
+    @Override
+    public void updateAppWidgetExtras(int appWidgetId, Bundle extras) {
+        getImplForUser().updateAppWidgetExtras(appWidgetId, extras);
+    }
+
+    @Override
+    public Bundle getAppWidgetExtras(int appWidgetId) {
+        return getImplForUser().getAppWidgetExtras(appWidgetId);
     }
 
     static int[] getAppWidgetIds(Provider p) {

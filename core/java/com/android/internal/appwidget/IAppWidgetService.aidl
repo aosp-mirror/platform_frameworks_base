@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.appwidget.AppWidgetProviderInfo;
 import com.android.internal.appwidget.IAppWidgetHost;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.widget.RemoteViews;
 
@@ -42,6 +43,8 @@ interface IAppWidgetService {
     // for AppWidgetManager
     //
     void updateAppWidgetIds(in int[] appWidgetIds, in RemoteViews views);
+    void updateAppWidgetExtras(int appWidgetId, in Bundle extras);
+    Bundle getAppWidgetExtras(int appWidgetId);
     void partiallyUpdateAppWidgetIds(in int[] appWidgetIds, in RemoteViews views);
     void updateAppWidgetProvider(in ComponentName provider, in RemoteViews views);
     void notifyAppWidgetViewDataChanged(in int[] appWidgetIds, int viewId);

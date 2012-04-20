@@ -74,6 +74,16 @@ public class AppWidgetProvider extends BroadcastReceiver {
                 this.onDeleted(context, new int[] { appWidgetId });
             }
         }
+        else if (AppWidgetManager.ACTION_APPWIDGET_EXTRAS_CHANGED.equals(action)) {
+            Bundle extras = intent.getExtras();
+            if (extras != null && extras.containsKey(AppWidgetManager.EXTRA_APPWIDGET_ID)
+                    && extras.containsKey(AppWidgetManager.EXTRA_APPWIDGET_EXTRAS)) {
+                int appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID);
+                Bundle widgetExtras = extras.getBundle(AppWidgetManager.EXTRA_APPWIDGET_EXTRAS);
+                this.onAppWidgetExtrasChanged(context, AppWidgetManager.getInstance(context),
+                        appWidgetId, widgetExtras);
+            }
+        }
         else if (AppWidgetManager.ACTION_APPWIDGET_ENABLED.equals(action)) {
             this.onEnabled(context);
         }
@@ -82,7 +92,7 @@ public class AppWidgetProvider extends BroadcastReceiver {
         }
     }
     // END_INCLUDE(onReceive)
-    
+
     /**
      * Called in response to the {@link AppWidgetManager#ACTION_APPWIDGET_UPDATE} broadcast when
      * this AppWidget provider is being asked to provide {@link android.widget.RemoteViews RemoteViews}
@@ -102,7 +112,26 @@ public class AppWidgetProvider extends BroadcastReceiver {
      */
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
     }
-    
+
+    /**
+     * Called in response to the {@link AppWidgetManager#ACTION_APPWIDGET_EXTRAS_CHANGED}
+     * broadcast when this widget has been layed out at a new size.
+     *
+     * {@more}
+     *
+     * @param context   The {@link android.content.Context Context} in which this receiver is
+     *                  running.
+     * @param appWidgetManager A {@link AppWidgetManager} object you can call {@link
+     *                  AppWidgetManager#updateAppWidget} on.
+     * @param appWidgetId The appWidgetId of the widget who's size changed.
+     * @param newExtras The appWidgetId of the widget who's size changed.
+     *
+     * @see AppWidgetManager#ACTION_APPWIDGET_EXTRAS_CHANGED
+     */
+    public void onAppWidgetExtrasChanged(Context context, AppWidgetManager appWidgetManager,
+            int appWidgetId, Bundle newExtras) {
+    }
+
     /**
      * Called in response to the {@link AppWidgetManager#ACTION_APPWIDGET_DELETED} broadcast when
      * one or more AppWidget instances have been deleted.  Override this method to implement

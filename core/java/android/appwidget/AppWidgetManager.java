@@ -19,6 +19,7 @@ package android.appwidget;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -109,6 +110,32 @@ public class AppWidgetManager {
     public static final String EXTRA_APPWIDGET_ID = "appWidgetId";
 
     /**
+     * An bundle extra that contains the lower bound on the current width, in dips, of a widget instance.
+     */
+    public static final String EXTRA_APPWIDGET_MIN_WIDTH = "appWidgetMinWidth";
+
+    /**
+     * An bundle extra that contains the lower bound on the current height, in dips, of a widget instance.
+     */
+    public static final String EXTRA_APPWIDGET_MIN_HEIGHT = "appWidgetMinHeight";
+
+    /**
+     * An bundle extra that contains the upper bound on the current width, in dips, of a widget instance.
+     */
+    public static final String EXTRA_APPWIDGET_MAX_WIDTH = "appWidgetMaxWidth";
+
+    /**
+     * An bundle extra that contains the upper bound on the current width, in dips, of a widget instance.
+     */
+    public static final String EXTRA_APPWIDGET_MAX_HEIGHT = "appWidgetMaxHeight";
+
+    /**
+     * An intent extra which points to a bundle of extra information for a particular widget id.
+     * In particular this bundle can contain EXTRA_APPWIDGET_WIDTH and EXTRA_APPWIDGET_HEIGHT.
+     */
+    public static final String EXTRA_APPWIDGET_EXTRAS = "appWidgetExtras";
+
+    /**
      * An intent extra that contains multiple appWidgetIds.
      * <p>
      * The value will be an int array that can be retrieved like this:
@@ -159,6 +186,14 @@ public class AppWidgetManager {
      * @see AppWidgetProvider#onUpdate AppWidgetProvider.onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds)
      */
     public static final String ACTION_APPWIDGET_UPDATE = "android.appwidget.action.APPWIDGET_UPDATE";
+
+    /**
+     * Sent when the custom extras for an AppWidget change.
+     *
+     * @see AppWidgetProvider#onAppWidgetExtrasChanged AppWidgetProvider#onAppWidgetExtrasChanged(
+     *      Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newExtras)
+     */
+    public static final String ACTION_APPWIDGET_EXTRAS_CHANGED = "android.appwidget.action.APPWIDGET_UPDATE_EXTRAS";
 
     /**
      * Sent when an instance of an AppWidget is deleted from its host.
@@ -245,6 +280,46 @@ public class AppWidgetManager {
     public void updateAppWidget(int[] appWidgetIds, RemoteViews views) {
         try {
             sService.updateAppWidgetIds(appWidgetIds, views);
+        }
+        catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+    }
+
+    /**
+     * Update the extras for a given widget instance.
+     *
+     * The extras can be used to embed additional information about this widget to be accessed
+     * by the associated widget's AppWidgetProvider.
+     *
+     * @see #getAppWidgetExtras(int)
+     *
+     * @param appWidgetId    The AppWidget instances for which to set the RemoteViews.
+     * @param extras         The extras to associate with this widget
+     */
+    public void updateAppWidgetExtras(int appWidgetId, Bundle extras) {
+        try {
+            sService.updateAppWidgetExtras(appWidgetId, extras);
+        }
+        catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+    }
+
+    /**
+     * Get the extras associated with a given widget instance.
+     *
+     * The extras can be used to embed additional information about this widget to be accessed
+     * by the associated widget's AppWidgetProvider.
+     *
+     * @see #updateAppWidgetExtras(int, Bundle)
+     *
+     * @param appWidgetId     The AppWidget instances for which to set the RemoteViews.
+     * @return                The extras associated with the given widget instance.
+     */
+    public Bundle getAppWidgetExtras(int appWidgetId) {
+        try {
+            return sService.getAppWidgetExtras(appWidgetId);
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
