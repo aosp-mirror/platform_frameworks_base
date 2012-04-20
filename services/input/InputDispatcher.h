@@ -926,6 +926,7 @@ private:
         void copyFrom(const TouchState& other);
         void addOrUpdateWindow(const sp<InputWindowHandle>& windowHandle,
                 int32_t targetFlags, BitSet32 pointerIds);
+        void removeWindow(const sp<InputWindowHandle>& windowHandle);
         void filterNonAsIsTouchWindows();
         sp<InputWindowHandle> getFirstForegroundWindowHandle() const;
         bool isSlippery() const;

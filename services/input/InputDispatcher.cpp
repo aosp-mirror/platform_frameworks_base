@@ -970,14 +970,17 @@ void InputDispatcher::resumeAfterTargetsNotReadyTimeoutLocked(nsecs_t newTimeout
         // Give up.
         mInputTargetWaitTimeoutExpired = true;
 
-        // Release the touch targets.
-        mTouchState.reset();
-
         // Input state will not be realistic.  Mark it out of sync.
         if (inputChannel.get()) {
             ssize_t connectionIndex = getConnectionIndexLocked(inputChannel);
             if (connectionIndex >= 0) {
                 sp<Connection> connection = mConnectionsByFd.valueAt(connectionIndex);
+                sp<InputWindowHandle> windowHandle = connection->inputWindowHandle;
+
+                if (windowHandle != NULL) {
+                    mTouchState.removeWindow(windowHandle);
+                }
+
                 if (connection->status == Connection::STATUS_NORMAL) {
                     CancelationOptions options(CancelationOptions::CANCEL_ALL_EVENTS,
                             "application not responding");
@@ -4144,6 +4147,15 @@ void InputDispatcher::TouchState::addOrUpdateWindow(const sp<InputWindowHandle>&
     touchedWindow.windowHandle = windowHandle;
     touchedWindow.targetFlags = targetFlags;
     touchedWindow.pointerIds = pointerIds;
+}
+
+void InputDispatcher::TouchState::removeWindow(const sp<InputWindowHandle>& windowHandle) {
+    for (size_t i = 0; i < windows.size(); i++) {
+        if (windows.itemAt(i).windowHandle == windowHandle) {
+            windows.removeAt(i);
+            return;
+        }
+    }
 }
 
 void InputDispatcher::TouchState::filterNonAsIsTouchWindows() {
