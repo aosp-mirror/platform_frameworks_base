@@ -82,8 +82,9 @@ Android doesn't support touchscreen interaction for TV devices, most TVs don't h
 and interacting with a TV using a touchscreen is not consistent with the 10 foot environment. For 
 these reasons, users interact with Android-powered TVs using a remote. In consideration of this, 
 ensure that every control in your app can be accessed with the D-pad. Refer back to the previous two lessons 
-<a href="{@docRoot}training/tv/optimizing-layouts-tv">Optimizing Layouts for TV</a> and 
-<a href="{@docRoot}training/tv/optimizing-navigation-tv">Optimize Navigation for TV</a> for more details 
+<a href="{@docRoot}training/tv/optimizing-layouts-tv.html">Optimizing Layouts for TV</a> and 
+<a href="{@docRoot}training/tv/optimizing-navigation-tv.html">Optimize Navigation for TV</a> for
+more details 
 on this topic. The Android system assumes that a device has a touchscreen, so if you want your application 
 to run on a TV, you must <strong>explicitly</strong> disable the touchscreen requirement in your manifest file:
 <pre>
