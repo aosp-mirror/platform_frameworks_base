@@ -72,6 +72,8 @@ public class WebSettingsClassic extends WebSettings {
     private boolean         mBlockNetworkImage = false;
     private boolean         mBlockNetworkLoads;
     private boolean         mJavaScriptEnabled = false;
+    private boolean         mAllowUniversalAccessFromFileURLs = false;
+    private boolean         mAllowFileAccessFromFileURLs = false;
     private boolean         mHardwareAccelSkia = false;
     private boolean         mShowVisualIndicator = false;
     private PluginState     mPluginState = PluginState.OFF;
@@ -286,6 +288,13 @@ public class WebSettingsClassic extends WebSettings {
         mBlockNetworkLoads = mContext.checkPermission(
                 "android.permission.INTERNET", android.os.Process.myPid(),
                 android.os.Process.myUid()) != PackageManager.PERMISSION_GRANTED;
+
+        // SDK specific settings. See issue 6212665
+        if (mContext.getApplicationInfo().targetSdkVersion <
+                Build.VERSION_CODES.JELLY_BEAN) {
+            mAllowUniversalAccessFromFileURLs = true;
+            mAllowFileAccessFromFileURLs = true;
+        }
     }
 
     private static final String ACCEPT_LANG_FOR_US_LOCALE = "en-US";
@@ -1101,6 +1110,28 @@ public class WebSettingsClassic extends WebSettings {
     }
 
     /**
+     * @see android.webkit.WebSettings#setAllowUniversalAccessFromFileURLs
+     */
+    @Override
+    public synchronized void setAllowUniversalAccessFromFileURLs(boolean flag) {
+        if (mAllowUniversalAccessFromFileURLs != flag) {
+            mAllowUniversalAccessFromFileURLs = flag;
+            postSync();
+        }
+    }
+
+    /**
+     * @see android.webkit.WebSettings#setAllowFileAccessFromFileURLs
+     */
+    @Override
+    public synchronized void setAllowFileAccessFromFileURLs(boolean flag) {
+        if (mAllowFileAccessFromFileURLs != flag) {
+            mAllowFileAccessFromFileURLs = flag;
+            postSync();
+        }
+    }
+
+    /**
      * Tell the WebView to use Skia's hardware accelerated rendering path
      * @param flag True if the WebView should use Skia's hw-accel path
      */
@@ -1321,6 +1352,22 @@ public class WebSettingsClassic extends WebSettings {
     @Override
     public synchronized boolean getJavaScriptEnabled() {
         return mJavaScriptEnabled;
+    }
+
+    /**
+     * @see android.webkit.WebSettings#getAllowUniversalFileAccessFromFileURLs
+     */
+    @Override
+    public synchronized boolean getAllowUniversalAccessFromFileURLs() {
+        return mAllowUniversalAccessFromFileURLs;
+    }
+
+    /**
+     * @see android.webkit.WebSettings#getAllowFileAccessFromFileURLs
+     */
+    @Override
+    public synchronized boolean getAllowFileAccessFromFileURLs() {
+        return mAllowFileAccessFromFileURLs;
     }
 
     /**

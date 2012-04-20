@@ -17,6 +17,7 @@
 package android.webkit;
 
 import android.os.Message;
+import android.os.Build;
 
 /**
  * Manages settings state for a WebView. When a WebView is first created, it
@@ -29,7 +30,7 @@ import android.os.Message;
 // This is (effectively) an abstract base class; concrete WebViewProviders must
 // create a class derived from this, and return an instance of it in the
 // WebViewProvider.getWebSettingsProvider() method implementation.
-public class WebSettings {
+public abstract class WebSettings {
     // TODO: Remove MustOverrideException and make all methods throwing it abstract instead;
     // needs API file update.
     private static class MustOverrideException extends RuntimeException {
@@ -771,6 +772,29 @@ public class WebSettings {
     }
 
     /**
+     * Configure scripting (such as XmlHttpRequest) access from file scheme URLs
+     * to any origin. Note, calling this method with a true argument value also
+     * implies calling setAllowFileAccessFromFileURLs with a true. The default
+     * value is false for API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
+     * and higher and true otherwise.
+     *
+   . * @param flag True if the WebView should allow scripting access from file
+     *                  scheme URLs to any origin
+     */
+    public abstract void setAllowUniversalAccessFromFileURLs(boolean flag);
+
+    /**
+     * Configure scripting (such as XmlHttpRequest) access from file scheme URLs
+     * to file origin. The default value is false for API level
+     * {@link android.os.Build.VERSION_CODES#JELLY_BEAN} and higher and true
+     * otherwise.
+     *
+     * @param flag True if the WebView should allow scripting access from file
+     *                  scheme URLs to file origin
+     */
+    public abstract void setAllowFileAccessFromFileURLs(boolean flag);
+
+    /**
      * Tell the WebView to enable plugins.
      * @param flag True if the WebView should load plugins.
      * @deprecated This method has been deprecated in favor of
@@ -910,6 +934,26 @@ public class WebSettings {
     public synchronized boolean getJavaScriptEnabled() {
         throw new MustOverrideException();
     }
+
+    /**
+     * Return true if scripting access {see @setAllowUniversalAccessFromFileURLs} from
+     * file URLs to any origin is enabled. The default value is false for API level
+     * {@link android.os.Build.VERSION_CODES#JELLY_BEAN} and higher and true otherwise.
+     *
+     * @return True if the WebView allows scripting access from file scheme requests
+     *              to any origin
+     */
+    public abstract boolean getAllowUniversalAccessFromFileURLs();
+
+    /**
+     * Return true if scripting access {see @setAllowFileAccessFromFileURLs} from file
+     * URLs to file origin is enabled. The default value is false for API level
+     * {@link android.os.Build.VERSION_CODES#JELLY_BEAN} and higher, and true otherwise.
+     *
+     * @return True if the WebView allows scripting access from file scheme requests
+     *              to file origin
+     */
+    public abstract boolean getAllowFileAccessFromFileURLs();
 
     /**
      * Return true if plugins are enabled.
