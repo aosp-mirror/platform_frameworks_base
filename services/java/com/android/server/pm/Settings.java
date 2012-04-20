@@ -2300,12 +2300,15 @@ final class Settings {
     }
 
     private List<UserInfo> getAllUsers() {
+        long id = Binder.clearCallingIdentity();
         try {
             return AppGlobals.getPackageManager().getUsers();
         } catch (RemoteException re) {
             // Local to system process, shouldn't happen
         } catch (NullPointerException npe) {
             // packagemanager not yet initialized
+        } finally {
+            Binder.restoreCallingIdentity(id);
         }
         return null;
     }
@@ -2347,6 +2350,7 @@ final class Settings {
         final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         final Date date = new Date();
         boolean printedSomething = false;
+        List<UserInfo> users = getAllUsers();
         for (final PackageSetting ps : mPackages.values()) {
             if (packageName != null && !packageName.equals(ps.realName)
                     && !packageName.equals(ps.name)) {
@@ -2447,7 +2451,6 @@ final class Settings {
             pw.print(" haveGids="); pw.println(ps.haveGids);
             pw.print("    pkgFlags=0x"); pw.print(Integer.toHexString(ps.pkgFlags));
             pw.print(" installStatus="); pw.print(ps.installStatus);
-            List<UserInfo> users = getAllUsers();
             for (UserInfo user : users) {
                 pw.print(" User "); pw.print(user.id); pw.print(": ");
                 pw.print(" stopped=");
