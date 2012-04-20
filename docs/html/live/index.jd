@@ -26,7 +26,7 @@ livecasts on YouTube and videos of past sessions or follow us on
           developers joining on air via the moderator queue. </p>
           
           <div id="objectWrapper">
-            <img width="560" height="315" src="{@docRoot}images/LivePocketGemsTitleCard.png" frameborder="0" allowfullscreen></iframe>
+            <iframe width="560" height="315" src="http://www.youtube.com/embed/-wkXan-xNqA" frameborder="0" allowfullscreen></iframe>
           </div>
 
     </div><!-- end mainBodyLeft -->
@@ -50,7 +50,7 @@ livecasts on YouTube and videos of past sessions or follow us on
 
         <h3 style="color:#000;font-size:12px;">Join</h3>
           <p style="line-height:1.5em;">
-            <a style="text-decoration:none" href="http://www.youtube.com/user/androiddevelopers">Watch live on YouTube</a><br />
+            <a style="text-decoration:none" href="http://www.youtube.com/embed/-wkXan-xNqA">>Watch on YouTube</a><br />
             <a style="text-decoration:none" href="http://www.google.com/moderator/#15/e=1fd27e&t=1fd27e.40">Submit a question</a><br />
             <a style="text-decoration:none" href="https://www.google.com/calendar/ical/g2ilcr0iki4olp10aluid7gl70%40group.calendar.google.com/public/basic.ics">Add to calendar</a> (iCal)
           </p>
