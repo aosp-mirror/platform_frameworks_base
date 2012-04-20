@@ -284,7 +284,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected abstract WindowManager.LayoutParams getRecentsLayoutParams(
             LayoutParams layoutParams);
 
-    protected void updateRecentsPanel() {
+    protected void updateRecentsPanel(int recentsResId) {
         // Recents Panel
         boolean visible = false;
         ArrayList<TaskDescription> recentTasksList = null;
@@ -301,7 +301,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         // Provide RecentsPanelView with a temporary parent to allow layout params to work.
         LinearLayout tmpRoot = new LinearLayout(mContext);
         mRecentsPanel = (RecentsPanelView) LayoutInflater.from(mContext).inflate(
-                 R.layout.status_bar_recent_panel, tmpRoot, false);
+                recentsResId, tmpRoot, false);
         mRecentsPanel.setRecentTasksLoader(mRecentTasksLoader);
         mRecentTasksLoader.setRecentsPanel(mRecentsPanel);
         mRecentsPanel.setOnTouchListener(

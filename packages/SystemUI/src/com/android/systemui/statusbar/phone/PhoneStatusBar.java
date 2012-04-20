@@ -288,6 +288,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         try {
             boolean showNav = mWindowManager.hasNavigationBar();
+            if (DEBUG) Slog.v(TAG, "hasNavigationBar=" + showNav);
             if (showNav) {
                 mNavigationBarView =
                     (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
@@ -388,9 +389,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         return lp;
     }
 
-    @Override
     protected void updateRecentsPanel() {
-        super.updateRecentsPanel();
+        super.updateRecentsPanel(R.layout.status_bar_recent_panel);
         // Make .03 alpha the minimum so you always see the item a bit-- slightly below
         // .03, the item disappears entirely (as if alpha = 0) and that discontinuity looks
         // a bit jarring
@@ -422,6 +422,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     // For small-screen devices (read: phones) that lack hardware navigation buttons
     private void addNavigationBar() {
+        if (DEBUG) Slog.v(TAG, "addNavigationBar: about to add " + mNavigationBarView);
         if (mNavigationBarView == null) return;
 
         prepareNavigationBarView();

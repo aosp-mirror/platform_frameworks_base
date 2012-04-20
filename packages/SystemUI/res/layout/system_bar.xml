@@ -19,13 +19,13 @@
 <com.android.systemui.statusbar.tablet.TabletStatusBarView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
-    android:background="@drawable/status_bar_background"
+    android:background="@drawable/system_bar_background"
     >
     
     <FrameLayout
         android:id="@+id/bar_contents_holder"
         android:layout_width="match_parent"
-        android:layout_height="@*android:dimen/status_bar_height"
+        android:layout_height="@*android:dimen/system_bar_height"
         android:layout_gravity="bottom"
         >
         <RelativeLayout
@@ -36,7 +36,7 @@
             >
 
             <!-- notification icons & panel access -->
-            <include layout="@layout/status_bar_notification_area" 
+            <include layout="@layout/system_bar_notification_area" 
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_alignParentRight="true"

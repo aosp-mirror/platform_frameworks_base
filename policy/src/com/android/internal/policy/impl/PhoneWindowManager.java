@@ -310,8 +310,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowState mNavigationBar = null;
     boolean mHasNavigationBar = false;
     boolean mCanHideNavigationBar = false;
-    boolean mNavigationBarOnBottom = true;
-    int mNavigationBarWidth = 0, mNavigationBarHeight = 0;
+    boolean mNavigationBarCanMove = false; // can the navigation bar ever move to the side?
+    boolean mNavigationBarOnBottom = true; // is the navigation bar on the bottom *right now*?
+    int[] mNavigationBarHeightForRotation = new int[4];
+    int[] mNavigationBarWidthForRotation = new int[4];
 
     WindowState mKeyguard = null;
     KeyguardViewMediator mKeyguardMediator;
@@ -972,19 +974,38 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mStatusBarHeight = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
-        mNavigationBarHeight = mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.navigation_bar_height);
-        mNavigationBarWidth = mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.navigation_bar_width);
 
-        // Determine whether the status bar can hide based on the size
-        // of the screen.  We assume sizes >= 600dp are tablets where we
-        // will use the system bar.
-        // XXX: This will change to 720dp soon.
+        mNavigationBarHeightForRotation[Surface.ROTATION_0] =
+        mNavigationBarHeightForRotation[Surface.ROTATION_90] =
+        mNavigationBarHeightForRotation[Surface.ROTATION_180] =
+        mNavigationBarHeightForRotation[Surface.ROTATION_270] =
+                mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.navigation_bar_height);
+        mNavigationBarWidthForRotation[Surface.ROTATION_0] =
+        mNavigationBarWidthForRotation[Surface.ROTATION_90] =
+        mNavigationBarWidthForRotation[Surface.ROTATION_180] =
+        mNavigationBarWidthForRotation[Surface.ROTATION_270] =
+                mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.navigation_bar_width);
+
+        // SystemUI (status bar) layout policy
         int shortSizeDp = shortSize
                 * DisplayMetrics.DENSITY_DEFAULT
                 / DisplayMetrics.DENSITY_DEVICE;
-        mHasSystemNavBar = shortSizeDp >= 600;
+
+        if (shortSizeDp < 600) {
+            // 0-599dp: "phone" UI with a separate status & navigation bar
+            mHasSystemNavBar = false;
+            mNavigationBarCanMove = true;
+        } else if (shortSizeDp < 720) {
+            // 600-719dp: "phone" UI with modifications for larger screens
+            mHasSystemNavBar = false;
+            mNavigationBarCanMove = false;
+        } else {
+            // 720dp: "tablet" UI with a single combined status & navigation bar
+            mHasSystemNavBar = true;
+            mNavigationBarCanMove = false;
+        }
 
         if (!mHasSystemNavBar) {
             mHasNavigationBar = mContext.getResources().getBoolean(
@@ -1007,7 +1028,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             int longSizeDp = longSize
                     * DisplayMetrics.DENSITY_DEFAULT
                     / DisplayMetrics.DENSITY_DEVICE;
-            int barHeightDp = mNavigationBarHeight
+            int barHeightDp = mNavigationBarHeightForRotation[mLandscapeRotation]
                     * DisplayMetrics.DENSITY_DEFAULT
                     / DisplayMetrics.DENSITY_DEVICE;
             int aspect = ((shortSizeDp-barHeightDp) * 16) / longSizeDp;
@@ -1354,8 +1375,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mHasNavigationBar) {
             // For a basic navigation bar, when we are in landscape mode we place
             // the navigation bar to the side.
-            if (fullWidth > fullHeight) {
-                return fullWidth - mNavigationBarWidth;
+            if (mNavigationBarCanMove && fullWidth > fullHeight) {
+                return fullWidth - mNavigationBarWidthForRotation[rotation];
             }
         }
         return fullWidth;
@@ -1364,13 +1385,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation) {
         if (mHasSystemNavBar) {
             // For the system navigation bar, we always place it at the bottom.
-            return fullHeight - mNavigationBarHeight;
+            return fullHeight - mNavigationBarHeightForRotation[rotation];
         }
         if (mHasNavigationBar) {
             // For a basic navigation bar, when we are in portrait mode we place
             // the navigation bar to the bottom.
-            if (fullWidth < fullHeight) {
-                return fullHeight - mNavigationBarHeight;
+            if (!mNavigationBarCanMove || fullWidth < fullHeight) {
+                return fullHeight - mNavigationBarHeightForRotation[rotation];
             }
         }
         return fullHeight;
@@ -2181,10 +2202,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // size.  We need to do this directly, instead of relying on
             // it to bubble up from the nav bar, because this needs to
             // change atomically with screen rotations.
-            mNavigationBarOnBottom = !mHasNavigationBar || displayWidth < displayHeight;
+            mNavigationBarOnBottom = (!mNavigationBarCanMove || displayWidth < displayHeight);
             if (mNavigationBarOnBottom) {
                 // It's a system nav bar or a portrait screen; nav bar goes on bottom.
-                int top = displayHeight - mNavigationBarHeight;
+                int top = displayHeight - mNavigationBarHeightForRotation[displayRotation];
                 if (mHdmiPlugged) {
                     if (top > mExternalDisplayHeight) {
                         top = mExternalDisplayHeight;
@@ -2202,7 +2223,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             } else {
                 // Landscape screen; nav bar goes to the right.
-                int left = displayWidth - mNavigationBarWidth;
+                int left = displayWidth - mNavigationBarWidthForRotation[displayRotation];
                 if (mHdmiPlugged) {
                     if (left > mExternalDisplayWidth) {
                         left = mExternalDisplayWidth;

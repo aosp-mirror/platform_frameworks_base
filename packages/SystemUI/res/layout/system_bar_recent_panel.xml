@@ -20,11 +20,14 @@
 
 <com.android.systemui.recent.RecentsPanelView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/recents_root"
     android:layout_height="match_parent"
     android:layout_width="wrap_content"
     android:clipToPadding="false"
-    android:clipChildren="false">
+    android:clipChildren="false"
+    systemui:recentItemLayout="@layout/system_bar_recent_item"
+    >
 
     <FrameLayout
         android:id="@+id/recents_bg_protect"
@@ -32,7 +35,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@*android:dimen/status_bar_height"
+        android:layout_marginBottom="@*android:dimen/system_bar_height"
         android:clipToPadding="false"
         android:clipChildren="false">
 
@@ -59,7 +62,7 @@
 
         </com.android.systemui.recent.RecentsVerticalScrollView>
 
-        <include layout="@layout/status_bar_no_recent_apps"
+        <include layout="@layout/system_bar_no_recent_apps"
             android:id="@+id/recents_no_apps"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -72,7 +75,7 @@
     <com.android.systemui.recent.StatusBarTouchProxy
         android:id="@+id/status_bar_touch_proxy"
         android:layout_width="match_parent"
-        android:layout_height="@*android:dimen/status_bar_height"
+        android:layout_height="@*android:dimen/system_bar_height"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
     />

@@ -33,9 +33,9 @@
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="@*android:dimen/status_bar_height"
+        android:layout_height="@*android:dimen/system_bar_height"
         android:layout_weight="1"
-        android:background="@drawable/status_bar_ticker_background"
+        android:background="@drawable/system_bar_ticker_background"
         >
         
         <ImageView android:id="@+id/left_icon"

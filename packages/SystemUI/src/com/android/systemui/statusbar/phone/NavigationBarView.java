@@ -275,11 +275,6 @@ public class NavigationBarView extends LinearLayout {
                                                 ? findViewById(R.id.rot90)
                                                 : findViewById(R.id.rot270);
 
-        for (View v : mRotatedViews) {
-            // this helps avoid drawing artifacts with glowing navigation keys 
-            ViewGroup group = (ViewGroup) v.findViewById(R.id.nav_buttons);
-            group.setMotionEventSplittingEnabled(false);
-        }
         mCurrentView = mRotatedViews[Surface.ROTATION_0];
     }
 
