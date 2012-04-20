@@ -315,7 +315,8 @@ additional processing needs to be done, your UI grinds to a halt.</p>
 <p>The same asynchronous processing and caching methods from the previous section can be implemented
 here. However, you also need to wary of concurrency issues as the {@link android.widget.GridView}
 recycles its children views. To handle this, use the techniques discussed in the <a
-href="process-bitmap#concurrency">Processing Bitmaps Off the UI Thread</a> lesson. Here is the updated
+href="process-bitmap.html#concurrency">Processing Bitmaps Off the UI Thread</a> lesson. Here is the
+updated
 solution:</p>
 
 <pre>
