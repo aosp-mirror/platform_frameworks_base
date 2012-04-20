@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"MMSメッセージの受信と処理をアプリに許可します。この許可を悪意のあるアプリに利用されると、メッセージが監視されたり、表示されずに削除されたりする恐れがあります。"</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"緊急放送の受信"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"緊急ブロードキャストメッセージの受信と処理をアプリに許可します。これはシステムアプリのみが利用できる権限です。"</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMSメッセージの送信"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"SMSメッセージの送信をアプリに許可します。この許可を悪意のあるアプリに利用されると、ユーザーの確認なしでメッセージが送信され、料金が発生する恐れがあります。"</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"確認せずにSMSメッセージを送信する"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"タスクをフォアグラウンドやバックグラウンドに移動することをアプリに許可します。この許可を悪意のあるアプリに利用されると、悪意のあるアプリが強制的に優先される恐れがあります。"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"実行中のアプリの停止"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"タスクの削除とアプリの終了をアプリに許可します。この許可を悪意のあるアプリケーションに利用されると、他のアプリの動作が妨害される恐れがあります。"</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"画面互換性の設定"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"他のアプリの画面互換性モードをコントロールすることをアプリに許可します。この許可を悪意のあるアプリに利用されると、他のアプリの動作が中断される恐れがあります。"</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"アプリのデバッグの有効化"</string>

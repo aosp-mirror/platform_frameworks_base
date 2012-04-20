@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Дозволяє програмі отримувати й обробляти MMS повідомлення. Шкідливі програми можуть відстежувати ваші повідомлення чи видаляти їх, навіть не показуючи вам."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"отримувати повідомлення екстрених служб"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Дозволяє програмі отримувати й обробляти повідомлення екстрених служб. Цей дозвіл доступний лише для системних програм."</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"надсил. SMS повідом."</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Дозволяє програмі надсилати SMS повідомлення. Шкідливі програми можуть надсилати повідомлення без вашого підтвердження, заставляючи вас платити."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"надсилати SMS-повідомлення без підтвердження"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Дозволяє програмі переміщувати завдання в активні чи фонові вікна. Шкідливі програми можуть примусово ставати активними без вашого відома."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"зупиняти запущені програми"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Дозволяє програмі видаляти завдання та примусово припиняти роботу відповідних програм. Шкідливі програми можуть переривати роботу інших програм."</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"установити сумісність екрана"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Дозволяє програмі контролювати режим сумісності екрана інших програм. Шкідливі програми можуть переривати роботу інших програм."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"вмикати налагодження програми"</string>

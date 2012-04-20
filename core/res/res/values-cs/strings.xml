@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Umožňuje aplikaci přijmout a zpracovat zprávy MMS. Škodlivé aplikace mohou sledovat vaše zprávy nebo je smazat, aniž by se vám zobrazily."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"příjem nouzového vysílání"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Umožňuje aplikaci přijmout a zpracovat zprávy tísňového vysílání. Toto oprávnění je dostupné pouze pro systémové aplikace."</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"odesílaní zpráv SMS"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Umožňuje aplikaci odesílat zprávy SMS. Škodlivé aplikace vás mohou připravit o peníze odesíláním zpráv bez vašeho svolení."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"posílat zprávy SMS bez potvrzení"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Umožňuje aplikaci přesunout úlohy na popředí nebo pozadí. Škodlivé aplikace mohou vynutit zobrazení na popředí bez vašeho svolení."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"zastavení činnosti aplikací"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Umožňuje aplikaci odstranit úlohy a ukončit jejich aplikace. Škodlivé aplikace mohou narušit chování ostatních aplikací."</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"nastavit kompatibilitu obrazovky"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Umožňuje aplikaci ovládat režim kompatibility obrazovky v ostatních aplikacích. Škodlivé aplikace mohou narušit chování ostatních aplikací."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"povolení ladění aplikací"</string>
@@ -1011,9 +1019,9 @@
     <string name="sms_control_message" msgid="3867899169651496433">"Aplikace &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;odesílá velký počet SMS zpráv. Chcete aplikaci povolit, aby zprávy odesílala i nadále?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Povolit"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Odmítnout"</string>
-    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Odeslat SMS na prémiové číslo?"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Odeslat SMS?"</string>
     <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Odeslat zprávu Premium SMS?"</string>
-    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"Aplikace&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; chce odeslat zprávu na číslo &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, což je zřejmě číslo služby Premium SMS.&lt;p&gt;Za odesílání zpráv na určitá prémiová čísla mohou být na mobilní účet naúčtovány poplatky za prémiové služby.&lt;p&gt;Chcete aplikaci povolit odeslání zprávy?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"Aplikace&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; chce odeslat zprávu na číslo &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, což je zřejmě číslo služby SMS.&lt;p&gt;Za odesílání zpráv na určitá čísla mohou být na mobilní účet naúčtovány poplatky za prémiové služby.&lt;p&gt;Chcete aplikaci povolit odeslání zprávy?"</string>
     <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"Aplikace &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; chce poslat zprávu na číslo &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, což je číslo služby Premium SMS.&lt;p&gt;&lt;b&gt;Pokud zprávu odešlete na toto číslo, budou vám na mobilní účet naúčtovány poplatky za prémiové služby.&lt;/b&gt;&lt;p&gt;Chcete aplikaci povolit odeslání zprávy?"</string>
     <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Odeslat zprávu"</string>
     <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Neodesílat"</string>

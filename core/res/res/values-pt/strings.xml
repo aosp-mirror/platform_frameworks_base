@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Permite que o aplicativo receba e processe mensagens MMS. Aplicativos maliciosos podem monitorar suas mensagens ou excluí-las sem mostrá-las a você."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"receber transmissões de emergência"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Permite que o aplicativo receba e processe mensagens de transmissão de emergência. Esta permissão só está disponível para aplicativos do sistema."</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"enviar mensagens SMS"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Permite que o aplicativo envie mensagens SMS. Aplicativos maliciosos podem gerar gastos ao enviar mensagens sem sua confirmação."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"enviar mensagens SMS sem confirmação"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permite que o aplicativo mova tarefas para o primeiro plano e para o plano de fundo. Aplicativos maliciosos podem forçar-se para a primeiro plano sem que você tenha controle sobre a ação."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"parar os aplicativos em execução"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Permite que um aplicativo remova tarefas e elimine seus aplicativos. Aplicativos maliciosos podem interferir no comportamento de outros aplicativos."</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"definir a compatibilidade de tela"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Permite que o aplicativo controle o modo de compatibilidade de tela de outros aplicativos. Aplicativos maliciosos podem interromper o comportamento de outros aplicativos."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"ativar depuração do aplicativo"</string>

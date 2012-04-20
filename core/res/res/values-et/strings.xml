@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Võimaldab rakendusel vastu võtta ja töödelda multimeediumsõnumeid. Pahatahtlikud rakendused võivad teie sõnumeid jälgida või neid kustutada teile näitamata."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"hädaabiteadete vastuvõtmine"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Võimaldab rakendusel vastu võtta ja töödelda hädaabisõnumeid. See õigus on saadaval ainult süsteemirakendustele."</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"saada SMS-sõnumeid"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Võimaldab rakendusel saata SMS-sõnumeid. Pahatahtlikud rakendused võivad teile kulukaks minna, kui saadavad sõnumeid teie nõusolekuta."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"lühisõnumite saatmine ilma kinnituseta"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Võimaldab rakendusel teisaldada ülesanded esiplaanile ja taustale. Pahatahtlikud rakendused võivad sundida end esiplaanile tulema teie loata."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"käitatud rakenduste peatamine"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Võimaldab rakendusel eemaldada ülesanded ja peatada nende rakendused. Pahatahtlikud rakendused võivad häirida teiste rakenduste käitumist."</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"kuva ühilduvuse seadmine"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Võimaldab rakendusel juhtida teiste rakenduste kuva ühilduvuse režiimi. Pahatahtlikud rakendused võivad teisi rakendusi häirida."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"Rakenduse silumise lubamine"</string>
@@ -1014,7 +1022,7 @@
     <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Kas saata SMS lühinumbrile?"</string>
     <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Kas saata tasuline SMS?"</string>
     <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tahab saata tekstsõnumi adressaadile &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, mis paistab olevat SMS-i lühinumber.&lt;p&gt;Mõnele lühinumbrile saadetud sõnumi eest võidakse teie mobiilikontole esitada arve tasuliste teenuste eest.&lt;p&gt;Kas lubate rakendusel selle sõnumi saata?"</string>
-    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tahab saata tekstisõnumi adressaadile &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, mis on tasulise SMS-i lühinumber.&lt;p&gt;&lt;b&gt;Kui saadate sõnumi sellele adressaadile, esitatakse teie mobiilikontole arve tasuliste teenuste eest.&lt;/b&gt;&lt;p&gt;Kas lubate rakendusel sõnumi saata?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tahab saata tekstsõnumi adressaadile &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, mis on tasulise SMS-i lühinumber.&lt;p&gt;&lt;b&gt;Kui saadate sõnumi sellele adressaadile, esitatakse teie mobiilikontole arve tasuliste teenuste eest.&lt;/b&gt;&lt;p&gt;Kas lubate rakendusel sõnumi saata?"</string>
     <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Saada sõnum"</string>
     <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Ära saada"</string>
     <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Teata pahatahtlikust rakend."</string>

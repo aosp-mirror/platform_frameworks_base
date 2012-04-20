@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Inaruhusu programu kupokea na kuchakata jumbe za MMS. Programu hasidi zinaweza  kufuatilia jumbe zako au kuzifuta bila kukuonyesha."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"Pokea matangazo ya dharura"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Inaruhusu programu kupokea na kuchakata jumbe za dharura. Ruhusa hii inapatikana tu kwa programu za mfumo."</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"tuma ujumbe wa SMS"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Inaruhusu programu kutuma jumbe za SMS. Programu hasidi zinaweza kukugharimu fedha kwa kutuma jumbe bila uthibitisho wako."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"Tuma ujumbe wa SMS bila ya thibitisho"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Inaruhusu programu kusongesha kazi kwenye mandhari-mbele na mandhari-nyuma. Programu hasidi zinaweza kujilazimisha mbele bila udhibiti wako."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"Komesha programu zinazoendeshwa"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Huruhusu programu kuondoa majukumu na kuua programu zao. Programu hasidi zinaweza kutatiza tabia ya programu zingine."</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"weka utangamano wa skrini"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Huruhusu programu kudhibiti hali ya utangamano wa skrini ya programu zingine. Programu hasidi zinaweza kuvunja mwenendo wa programu zingine."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"wezesha utatuaji wa programu"</string>

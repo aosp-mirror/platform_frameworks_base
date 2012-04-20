@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Laat die program toe om MMS-boodskappe te ontvang en te verwerk. Kwaadwillige programme kan jou boodskappe monitor of uitvee sonder om dit aan jou te wys."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"ontvang nooduitsendings"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Laat die program toe om nooduitsending-boodskappe te ontvang en te verwerk. Hierdie toestemming is net beskikbaar vir stelselprogramme."</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"stuur SMS-boodskappe"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Laat die program toe om SMS-boodskappe te stuur. Kwaadwillige programme kan jou geld kos deur boodskappe te stuur sonder jou bevestiging."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"stuur sms-boodskappe met geen bestiging"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Laat die program toe om take na die voorgrond en agtergrond te skuif. Kwaadwillige programme kan hulself sonder jou beheer na vore dwing."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"stop lopende programme"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Laat die program toe om take te verwyder en hul programme te dood. Kwaadwillige programme kan die gedrag van ander programme ontwrig."</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"stel skermversoenbaarheid"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Laat die program toe om om die skermversoenbaarheid-modus van ander programme te beheer. Kwaadwillige programme kan die gedrag van ander programme breek."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"aktiveer programontfouting"</string>

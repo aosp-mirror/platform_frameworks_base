@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Разрешава на приложението да получава и обработва MMS съобщения. Злонамерените приложения могат да наблюдават съобщенията ви или да ги изтрият, без да ви ги покажат."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"получаване на спешни излъчвания"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Разрешава на приложението да получава и обработва спешни съобщения за излъчване. Това разрешение е налице само за системни приложения."</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"изпращане на SMS съобщения"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Разрешава на приложението да изпраща SMS съобщения. Злонамерените приложения могат да ви въвлекат в разходи, като изпращат съобщения без потвърждение от ваша страна."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"изпращане на SMS съобщения без потвърждаване"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Разрешава на приложението да прехвърля задачи на преден и на заден план. Злонамерените приложения могат сами да се изведат на преден план без ваша намеса."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"спиране на изпълняваните приложения"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Разрешава на приложението да премахва задачи и да прекратява приложенията им. Злонамерените приложения могат да нарушат поведението на други приложения."</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"задаване на съвместимост на екрана"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Разрешава на приложението да контролира режима на съвместимост на екрана на други приложения. Злонамерените програми могат да нарушат поведението на други приложения."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"активиране на отстраняването на грешки в приложения"</string>

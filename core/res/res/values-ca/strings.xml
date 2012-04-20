@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Permet que l\'aplicació rebi i processi missatges MMS. Les aplicacions malicioses poden supervisar els missatges o suprimir-los sense mostrar-te\'ls."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"recepció d\'emissions d\'emergència"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Permet que l\'aplicació rebi i processi missatges de difusió d\'emergència. Aquest permís només està disponible per a les aplicacions del sistema."</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"enviar missatges SMS"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Permet que l\'aplicació enviï missatges SMS. Les aplicacions malicioses poden enviar missatges sense la teva confirmació, cosa que et pot fer gastar diners."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"enviament de missatges SMS sense confirmació"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permet que l\'aplicació desplaci tasques en primer o segon pla. Les aplicacions malicioses poden aparèixer en primer pla sense el teu consentiment."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"atura les aplicacions que s\'estan executant"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Permet que l\'aplicació elimini tasques i finalitzi les seves aplicacions. Les aplicacions malicioses poden alterar el comportament d\'altres aplicacions."</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"definició de la compatibilitat de pantalla"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Permet que l\'aplicació controli el mode de compatibilitat de pantalla d\'altres aplicacions. És possible que les aplicacions malicioses interrompin el comportament d\'altres aplicacions."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"activa la depuració d\'aplicacions"</string>

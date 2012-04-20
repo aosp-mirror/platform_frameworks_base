@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Omogućuje aplikaciji primanje i obradu MMS poruka. Zlonamjerne aplikacije mogu nadzirati vaše poruke ili ih brisati, a da vam ih ne pokažu."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"primanje hitnih odašiljanja"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Omogućuje aplikaciji primanje i obradu poruka hitnih odašiljanja. Ta je dozvola dostupna samo aplikacijama sustava."</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"slanje SMS poruka"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Omogućuje aplikaciji slanje SMS poruka. Zlonamjerne aplikacije mogu vam prouzročiti troškove šaljući poruke bez vašeg znanja."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"slanje SMS poruka bez potvrde"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Omogućuje aplikaciji da premjesti zadatke u prednji plan ili pozadinu. Zlonamjerne aplikacije mogu na silu doći u prednji plan bez vašeg nadzora."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"zaustavljanje pokrenutih aplikacija"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Omogućuje aplikaciji uklanjanje zadataka i uklanjanje njihovih aplikacija. Zlonamjerne aplikacije mogu poremetiti rad drugih aplikacija."</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"postavljanje kompatibilnosti sa zaslonom"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Aplikaciji omogućuje upravljanje načinom kompatibilnosti aplikacija sa zaslonom. Zlonamjerne aplikacije mogu prekinuti takvo ponašanje ostalih aplikacija."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"omogućavanje rješavanja programskih pogrešaka u aplikaciji"</string>

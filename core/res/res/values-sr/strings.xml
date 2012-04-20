@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Дозвољава апликацији да прима и обрађује MMS поруке. Злонамерне апликације могу да надгледају поруке или да их бришу, а да вам их не прикажу."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"пријем хитних преноса"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Дозвољава апликацији да прима и обрађује поруке хитног преноса. Ова дозвола је доступна само за системске апликације."</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"слање SMS порука"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Дозвољава апликацији да шаље SMS поруке. Злонамерне апликације могу да шаљу поруке без ваше потврде, што вам  може изазвати трошкове."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"слање SMS порука без потврде"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Дозвољава апликацији да премешта задатке у први план и у позадину. Злонамерне апликације могу на тај начин да принудно пређу у први план без ваше контроле."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"заустављање покренутих апликација"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Дозвољава апликацији да уклања задатке и уништава њихове апликације. Злонамерне апликације могу да поремете понашање других апликација."</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"подешавање компатибилности екрана"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Дозвољава апликацији да контролише режим компатибилности екрана других апликација. Злонамерне апликације могу да угрозе понашање других апликација."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"омогућавање отклањања грешака у апликацији"</string>

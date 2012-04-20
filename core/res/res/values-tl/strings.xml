@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Pinapayagan ang app na tumanggap at magproseso ng mga mensaheng MMS. Maaaring subaybayan ng nakakahamak na apps ang iyong mga mensahe o tanggalin ang mga ito nang hindi ipinapakita ang mga ito sa iyo."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"makatanggap ng mga emergency broadcast"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Pinapayagan ang app na tumanggap at magproseso ng mga mensahe ng broadcast na pang-emergency. Available lamang ang pahintulot na ito sa apps ng system."</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"magpadala ng mga SMS na mensahe"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Pinapayagan ang app na magpadala ng mga mensaheng SMS. Maaari kang magastusan ng nakakahamak na apps sa pamamagitan ng pagpapadala ng mga mensahe nang wala ang iyong pagkumpirma."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"magpadala ng mga SMS na mensahe nang walang pagkumpirma"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Pinapayagan ang app na ilipat ang mga gawain sa foreground at background. Maaaring puwersahin ng nakakahamak na apps ang mga sarili nito sa harapan nang wala ang iyong pagkontrol."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"ihinto ang pagpapatakbo ng apps"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Pinapayagan ang app na mag-alis ng mga gawain at i-off ang apps nito. Maaaring maantala ng nakakahamak na apps ang pagkilos ng iba pang apps."</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"itakda ang pagkakatugma ng screen"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Pinapayagan ang app na kontrolin ang mode ng pagkakatugma ng screen ng iba pang mga application. Maaaring sirain ng mga nakakahamak na application ang pag-uugali ng iba pang mga application."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"paganahin ang pag-debug ng app"</string>

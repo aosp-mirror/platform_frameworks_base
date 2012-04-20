@@ -199,6 +199,10 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"ኤም ኤም ኤስ መልዕክቶችን ለመቀበል እና ለማስኬድ ለመተግበሪያው ይፈቅዳሉ፡፡ ተንኮል አዘል መተግበሪያዎች አንተን ሳያሳዩ ሊሰርዙዎቸው ወይም መልዕክቶችህን ሊቆጣጠሩ ይችላሉ፡፡"</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"የአደጋ ጊዜ ስርጭቶችን ተቀበል"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"ድንገተኛ የስርጭት መልዕክቶችን ለመቀበል እና ለማስኬድ ለመተግበሪያው ይፈቅዳሉ፡፡ ይሄ ፍቃድ ለስርዓት መተግበሪዎች ብቻ ነው የሚገኘው፡፡"</string>
+    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
+    <skip />
+    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"የSMS መልዕክቶች ላክ"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"ኤስ ኤም ኤስ መልዕክቶችን መላክ ለመተግበሪያው ይፈቅዳሉ፡፡ ያላንተ ማረጋገጫ ተንኮል አዘል መተግበሪያዎች መልዕክቶችን በመላክ ገንዘብ ሊያስወጡህ ይችላሉ፡፡"</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"ያለ ምንም ማረጋገጫ የSMS መልዕክቶች ላክ"</string>
@@ -217,6 +221,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"ወደ ግንባር ዎይ እና ዳራ ስራዎችን ለማንቀሳቀስ ለመተግበሪያው ይፈቅዳሉ፡፡ ያለአንተ ቁጥጥር  ተንኮል አዘል መተግበሪያዎች ራሳቸውን ወደፊት መምጣት ሊያስገድዱ ይችላሉ፡፡"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"የአሂድ ትግበራዎች አቁም"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"ተግባሮችን ለማስወገድ እና መተግበሪያዎቻቸውን ለመግደል ለመተግበሪያ ይፈቅዳል። ጎጂ የሆኑ መተግበሪያዎች የሌሎችን መተግበሪያዎችን ባህሪ ሊያውኩ ይችላሉ።"</string>
+    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
+    <skip />
+    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
+    <skip />
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"የማያ ገጽ ተኳኋኝነት መድብ"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"መተግበሪያው የሌሎች መተግበሪያዎች የማያ ገጽ ተኳኋኝነት ሁናቴ እንዲቆጣጠር ይፈቅዳል። ተንኮለኛ መተግበሪያዎች የሌሎች መተግበሪያዎች ባህሪ ሊሰብሩ ይችላሉ።"</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"የትግበራ ማረሚያ አንቃ"</string>
@@ -1008,7 +1016,7 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"ፒን፦"</string>
     <string name="select_character" msgid="3365550120617701745">"ቁምፊ አስገባ"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"የSMS መልዕክቶች መበላክ ላይ"</string>
-    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ቁጥሩ ብዙ የሆኑ የኤስ.ኤም.ኤስ. መልዕቶችን እየላከ ነው። ይሄ መተግበሪያ መልዕክቶችን መላኩን እንዲቀጥል መፍቀድ ትፈልጋለህ?"</string>
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ቁጥራቸው ብዙ የሆኑ የኤስ.ኤም.ኤስ. መልዕክቶችን እየላከ ነው። ይሄ መተግበሪያ መልዕክቶችን መላኩን እንዲቀጥል መፍቀድ ትፈልጋለህ?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"ፍቀድ"</string>
     <string name="sms_control_no" msgid="625438561395534982">"ከልክል"</string>
     <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"ኤስ.ኤም.ኤስ. ለአጭር ኮድ ይላክ?"</string>
