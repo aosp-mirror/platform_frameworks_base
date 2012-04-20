@@ -75,6 +75,9 @@ public class WindowAnimator {
     DimAnimator mDimAnimator = null;
     DimAnimator.Parameters mDimParams = null;
 
+    static final int WALLPAPER_ACTION_PENDING = 1;
+    int mPendingActions;
+
     WindowAnimator(final WindowManagerService service, final Context context,
             final WindowManagerPolicy policy) {
         mService = service;
@@ -364,7 +367,9 @@ public class WindowAnimator {
             for (int i=unForceHiding.size()-1; i>=0; i--) {
                 Animation a = mPolicy.createForceHideEnterAnimation(wallpaperInUnForceHiding);
                 if (a != null) {
-                    unForceHiding.get(i).setAnimation(a);
+                    final WindowStateAnimator winAnimator = unForceHiding.get(i);
+                    winAnimator.setAnimation(a);
+                    winAnimator.mAnimationIsEntrance = true;
                 }
             }
         }
@@ -421,13 +426,16 @@ public class WindowAnimator {
         mWindowAnimationBackgroundColor = 0;
 
         updateWindowsAndWallpaperLocked();
+        if ((mPendingLayoutChanges & WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
+            mPendingActions |= WALLPAPER_ACTION_PENDING;
+        }
 
         if (mTokenMayBeDrawn) {
             testTokenMayBeDrawnLocked();
         }
     }
 
-    void animate() {
+    synchronized void animate() {
         mPendingLayoutChanges = 0;
         mCurrentTime = SystemClock.uptimeMillis();
         mBulkUpdateParams = 0;
@@ -553,5 +561,9 @@ public class WindowAnimator {
             mAnimDw = animDw;
             mAnimDh = animDh;
         }
+    }
+
+    synchronized void clearPendingActions() {
+        mPendingActions = 0;
     }
 }

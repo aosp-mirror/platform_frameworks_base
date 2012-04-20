@@ -186,6 +186,7 @@ class WindowStateAnimator {
         if (mAnimation != null) {
             mAnimation.cancel();
             mAnimation = null;
+            mLocalAnimating = false;
             destroySurfaceLocked();
         }
     }
@@ -262,9 +263,6 @@ class WindowStateAnimator {
             // If the display is frozen, and there is a pending animation,
             // clear it and make sure we run the cleanup code.
             mAnimating = true;
-            mLocalAnimating = true;
-            mAnimation.cancel();
-            mAnimation = null;
         }
 
         if (!mAnimating && !mLocalAnimating) {
@@ -878,11 +876,14 @@ class WindowStateAnimator {
                 ": " + mWin.mShownFrame +
                 ", alpha=" + mTransformation.getAlpha() + ", mShownAlpha=" + mShownAlpha);
             return;
+        } else if (mWin.mIsWallpaper &&
+                    (mAnimator.mPendingActions & WindowAnimator.WALLPAPER_ACTION_PENDING) != 0) {
+            return;
         }
 
         if (WindowManagerService.localLOGV) Slog.v(
-            TAG, "computeShownFrameLocked: " + this +
-            " not attached, mAlpha=" + mAlpha);
+                TAG, "computeShownFrameLocked: " + this +
+                " not attached, mAlpha=" + mAlpha);
         mWin.mShownFrame.set(mWin.mFrame);
         if (mWin.mXOffset != 0 || mWin.mYOffset != 0) {
             mWin.mShownFrame.offset(mWin.mXOffset, mWin.mYOffset);
@@ -920,19 +921,19 @@ class WindowStateAnimator {
             mSurfaceH = height;
         }
 
-        if (mSurfaceX != w.mShownFrame.left
-                || mSurfaceY != w.mShownFrame.top) {
+        final float left = w.mShownFrame.left;
+        final float top = w.mShownFrame.top;
+        if (mSurfaceX != left || mSurfaceY != top) {
             try {
                 if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
-                        "POS " + w.mShownFrame.left
-                        + ", " + w.mShownFrame.top, null);
-                mSurfaceX = w.mShownFrame.left;
-                mSurfaceY = w.mShownFrame.top;
-                mSurface.setPosition(w.mShownFrame.left, w.mShownFrame.top);
+                        "POS " + left + ", " + top, null);
+                mSurfaceX = left;
+                mSurfaceY = top;
+                mSurface.setPosition(left, top);
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Error positioning surface of " + w
-                        + " pos=(" + w.mShownFrame.left
-                        + "," + w.mShownFrame.top + ")", e);
+                        + " pos=(" + left
+                        + "," + top + ")", e);
                 if (!recoveringMemory) {
                     mService.reclaimSomeSurfaceMemoryLocked(this, "position", true);
                 }
@@ -1177,12 +1178,7 @@ class WindowStateAnimator {
                     // will do an animation to reveal it from behind the
                     // starting window, so there is no need for it to also
                     // be doing its own stuff.
-                    if (mAnimation != null) {
-                        mAnimation.cancel();
-                        mAnimation = null;
-                        // Make sure we clean up the animation.
-                        mAnimating = true;
-                    }
+                    clearAnimation();
                     mService.mFinishedStarting.add(mWin.mAppToken);
                     mService.mH.sendEmptyMessage(H.FINISHED_STARTING);
                 }
@@ -1286,6 +1282,7 @@ class WindowStateAnimator {
             if (WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
                     "applyAnimation: win=" + this
                     + " anim=" + anim + " attr=0x" + Integer.toHexString(attr)
+                    + " a=" + a
                     + " mAnimation=" + mAnimation
                     + " isEntrance=" + isEntrance);
             if (a != null) {

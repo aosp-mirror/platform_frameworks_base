@@ -1629,9 +1629,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         "Found wallpaper activity: #" + i + "=" + w);
                 foundW = w;
                 foundI = i;
-                if (w == mWallpaperTarget && ((w.mAppToken != null
-                        && w.mAppToken.mAppAnimator.animation != null)
-                        || w.mWinAnimator.mAnimation != null)) {
+                if (w == mWallpaperTarget && w.mWinAnimator.isAnimating()) {
                     // The current wallpaper target is animating, so we'll
                     // look behind it for another possible target and figure
                     // out what is going on below.
@@ -6618,6 +6616,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int SET_WALLPAPER_OFFSET = ANIMATOR_WHAT_OFFSET + 2;
         public static final int SET_DIM_PARAMETERS = ANIMATOR_WHAT_OFFSET + 3;
         public static final int SET_MOVE_ANIMATION = ANIMATOR_WHAT_OFFSET + 4;
+        public static final int CLEAR_PENDING_ACTIONS = ANIMATOR_WHAT_OFFSET + 5;
 
         private Session mLastReportedHold;
 
@@ -7070,7 +7069,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
 
                         if (doRequest) {
-                            requestTraversalLocked();
+                            mH.sendEmptyMessage(CLEAR_PENDING_ACTIONS);
+                            performLayoutAndPlaceSurfacesLocked();
                         }
                     }
                     break;
@@ -7109,6 +7109,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     winAnimator.mAnimDh = params.mAnimDh;
 
                     scheduleAnimationLocked();
+                    break;
+                }
+
+                case CLEAR_PENDING_ACTIONS: {
+                    mAnimator.clearPendingActions();
                     break;
                 }
             }
