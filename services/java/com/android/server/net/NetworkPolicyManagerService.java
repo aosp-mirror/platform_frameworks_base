@@ -30,6 +30,8 @@ import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
+import static android.net.ConnectivityManager.isNetworkTypeMobile;
+import static android.net.NetworkPolicy.CYCLE_NONE;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
@@ -48,6 +50,14 @@ import static android.net.NetworkTemplate.MATCH_MOBILE_ALL;
 import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.TrafficStats.MB_IN_BYTES;
+import static android.net.wifi.WifiInfo.removeDoubleQuotes;
+import static android.net.wifi.WifiManager.CHANGE_REASON_ADDED;
+import static android.net.wifi.WifiManager.CHANGE_REASON_REMOVED;
+import static android.net.wifi.WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION;
+import static android.net.wifi.WifiManager.EXTRA_CHANGE_REASON;
+import static android.net.wifi.WifiManager.EXTRA_NETWORK_INFO;
+import static android.net.wifi.WifiManager.EXTRA_WIFI_CONFIGURATION;
+import static android.net.wifi.WifiManager.EXTRA_WIFI_INFO;
 import static android.telephony.TelephonyManager.SIM_STATE_READY;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static com.android.internal.util.ArrayUtils.appendInt;
@@ -84,10 +94,14 @@ import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.NetworkIdentity;
+import android.net.NetworkInfo;
 import android.net.NetworkPolicy;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkState;
 import android.net.NetworkTemplate;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
@@ -355,6 +369,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mContext.registerReceiver(mSnoozeWarningReceiver, snoozeWarningFilter,
                 MANAGE_NETWORK_POLICY, mHandler);
 
+        // listen for configured wifi networks to be removed
+        final IntentFilter wifiConfigFilter = new IntentFilter(CONFIGURED_NETWORKS_CHANGED_ACTION);
+        mContext.registerReceiver(
+                mWifiConfigReceiver, wifiConfigFilter, CONNECTIVITY_INTERNAL, mHandler);
+
+        // listen for wifi state changes to catch metered hint
+        final IntentFilter wifiStateFilter = new IntentFilter(
+                WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        mContext.registerReceiver(
+                mWifiStateReceiver, wifiStateFilter, CONNECTIVITY_INTERNAL, mHandler);
+
     }
 
     private IProcessObserver mProcessObserver = new IProcessObserver.Stub() {
@@ -459,6 +484,73 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             final NetworkTemplate template = intent.getParcelableExtra(EXTRA_NETWORK_TEMPLATE);
             performSnooze(template, TYPE_WARNING);
+        }
+    };
+
+    /**
+     * Receiver that watches for {@link WifiConfiguration} to be changed.
+     */
+    private BroadcastReceiver mWifiConfigReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // on background handler thread, and verified CONNECTIVITY_INTERNAL
+            // permission above.
+
+            final int reason = intent.getIntExtra(EXTRA_CHANGE_REASON, CHANGE_REASON_ADDED);
+            if (reason == CHANGE_REASON_REMOVED) {
+                final WifiConfiguration config = intent.getParcelableExtra(
+                        EXTRA_WIFI_CONFIGURATION);
+                final NetworkTemplate template = NetworkTemplate.buildTemplateWifi(
+                        removeDoubleQuotes(config.SSID));
+                synchronized (mRulesLock) {
+                    if (mNetworkPolicy.containsKey(template)) {
+                        mNetworkPolicy.remove(template);
+                        writePolicyLocked();
+                    }
+                }
+            }
+        }
+    };
+
+    /**
+     * Receiver that watches {@link WifiInfo} state changes to infer metered
+     * state. Ignores hints when policy is user-defined.
+     */
+    private BroadcastReceiver mWifiStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // on background handler thread, and verified CONNECTIVITY_INTERNAL
+            // permission above.
+
+            // ignore when not connected
+            final NetworkInfo netInfo = intent.getParcelableExtra(EXTRA_NETWORK_INFO);
+            if (!netInfo.isConnected()) return;
+
+            final WifiInfo info = intent.getParcelableExtra(EXTRA_WIFI_INFO);
+            final boolean meteredHint = info.getMeteredHint();
+
+            final NetworkTemplate template = NetworkTemplate.buildTemplateWifi(
+                    removeDoubleQuotes(info.getSSID()));
+            synchronized (mRulesLock) {
+                NetworkPolicy policy = mNetworkPolicy.get(template);
+                if (policy == null && meteredHint) {
+                    // policy doesn't exist, and AP is hinting that it's
+                    // metered: create an inferred policy.
+                    policy = new NetworkPolicy(template, CYCLE_NONE, Time.TIMEZONE_UTC,
+                            WARNING_DISABLED, LIMIT_DISABLED, SNOOZE_NEVER, SNOOZE_NEVER,
+                            meteredHint, true);
+                    addNetworkPolicyLocked(policy);
+
+                } else if (policy != null && policy.inferred) {
+                    // policy exists, and was inferred: update its current
+                    // metered state.
+                    policy.metered = meteredHint;
+
+                    // since this is inferred for each wifi session, just update
+                    // rules without persisting.
+                    updateNetworkRulesLocked();
+                }
+            }
         }
     };
 
@@ -974,9 +1066,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final String cycleTimezone = time.timezone;
 
             final NetworkTemplate template = buildTemplateMobileAll(subscriberId);
-            mNetworkPolicy.put(template, new NetworkPolicy(template, cycleDay, cycleTimezone,
-                    warningBytes, LIMIT_DISABLED, SNOOZE_NEVER, SNOOZE_NEVER, true, true));
-            writePolicyLocked();
+            final NetworkPolicy policy = new NetworkPolicy(template, cycleDay, cycleTimezone,
+                    warningBytes, LIMIT_DISABLED, SNOOZE_NEVER, SNOOZE_NEVER, true, true);
+            addNetworkPolicyLocked(policy);
         }
     }
 
@@ -1269,6 +1361,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    private void addNetworkPolicyLocked(NetworkPolicy policy) {
+        mNetworkPolicy.put(policy.template, policy);
+
+        updateNetworkEnabledLocked();
+        updateNetworkRulesLocked();
+        updateNotificationsLocked();
+        writePolicyLocked();
+    }
+
     @Override
     public NetworkPolicy[] getNetworkPolicies() {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
@@ -1402,6 +1503,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (policy != null) {
             return policy.metered;
         } else {
+            final int type = state.networkInfo.getType();
+            if (isNetworkTypeMobile(type) || type == TYPE_WIMAX) {
+                return true;
+            }
             return false;
         }
     }
