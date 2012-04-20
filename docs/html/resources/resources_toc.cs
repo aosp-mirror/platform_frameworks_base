@@ -77,6 +77,30 @@
           </li>
         </ul>
       </li>
+      
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>training/basics/fragments/index.html">
+            <span class="en">Building a Dynamic UI with Fragments<span class="new">&nbsp;new!</span></span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/basics/fragments/support-lib.html">
+            <span class="en">Using the Support Library</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/fragments/creating.html">
+            <span class="en">Creating a Fragment</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/fragments/fragment-ui.html">
+            <span class="en">Building a Flexible UI</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/fragments/communicating.html">
+            <span class="en">Communicating with Other Fragments</span>
+          </a>
+          </li>
+        </ul>
+      </li>
 
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>training/basics/intents/index.html">
