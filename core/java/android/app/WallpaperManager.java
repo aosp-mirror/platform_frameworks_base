@@ -67,6 +67,23 @@ public class WallpaperManager {
             = "android.service.wallpaper.LIVE_WALLPAPER_CHOOSER";
 
     /**
+     * Directly launch live wallpaper preview, allowing the user to immediately
+     * confirm to switch to a specific live wallpaper.  You must specify
+     * {@link #EXTRA_LIVE_WALLPAPER_COMPONENT} with the ComponentName of
+     * a live wallpaper component that is to be shown.
+     */
+    public static final String ACTION_CHANGE_LIVE_WALLPAPER
+            = "android.service.wallpaper.CHANGE_LIVE_WALLPAPER";
+
+    /**
+     * Extra in {@link #ACTION_CHANGE_LIVE_WALLPAPER} that specifies the
+     * ComponentName of a live wallpaper that should be shown as a preview,
+     * for the user to confirm.
+     */
+    public static final String EXTRA_LIVE_WALLPAPER_COMPONENT
+            = "android.service.wallpaper.extra.LIVE_WALLPAPER_COMPONENT";
+
+    /**
      * Manifest entry for activities that respond to {@link Intent#ACTION_SET_WALLPAPER}
      * which allows them to provide a custom large icon associated with this action.
      */

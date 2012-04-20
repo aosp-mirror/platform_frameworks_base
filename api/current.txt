@@ -4069,10 +4069,12 @@ package android.app {
     method public void setWallpaperOffsetSteps(float, float);
     method public void setWallpaperOffsets(android.os.IBinder, float, float);
     method public void suggestDesiredDimensions(int, int);
+    field public static final java.lang.String ACTION_CHANGE_LIVE_WALLPAPER = "android.service.wallpaper.CHANGE_LIVE_WALLPAPER";
     field public static final java.lang.String ACTION_LIVE_WALLPAPER_CHOOSER = "android.service.wallpaper.LIVE_WALLPAPER_CHOOSER";
     field public static final java.lang.String COMMAND_DROP = "android.home.drop";
     field public static final java.lang.String COMMAND_SECONDARY_TAP = "android.wallpaper.secondaryTap";
     field public static final java.lang.String COMMAND_TAP = "android.wallpaper.tap";
+    field public static final java.lang.String EXTRA_LIVE_WALLPAPER_COMPONENT = "android.service.wallpaper.extra.LIVE_WALLPAPER_COMPONENT";
     field public static final java.lang.String WALLPAPER_PREVIEW_META_DATA = "android.wallpaper.preview";
   }
 
