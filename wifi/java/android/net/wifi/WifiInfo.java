@@ -68,8 +68,13 @@ public class WifiInfo implements Parcelable {
     private int mLinkSpeed;
 
     private InetAddress mIpAddress;
-
     private String mMacAddress;
+
+    /**
+     * Flag indicating that AP has hinted that upstream connection is metered,
+     * and sensitive to heavy data transfers.
+     */
+    private boolean mMeteredHint;
 
     WifiInfo() {
         mSSID = null;
@@ -96,6 +101,7 @@ public class WifiInfo implements Parcelable {
             mLinkSpeed = source.mLinkSpeed;
             mIpAddress = source.mIpAddress;
             mMacAddress = source.mMacAddress;
+            mMeteredHint = source.mMeteredHint;
         }
     }
 
@@ -166,6 +172,16 @@ public class WifiInfo implements Parcelable {
 
     public String getMacAddress() {
         return mMacAddress;
+    }
+
+    /** {@hide} */
+    public void setMeteredHint(boolean meteredHint) {
+        mMeteredHint = meteredHint;
+    }
+
+    /** {@hide} */
+    public boolean getMeteredHint() {
+        return mMeteredHint;
     }
 
     void setNetworkId(int id) {
@@ -248,6 +264,15 @@ public class WifiInfo implements Parcelable {
         }
     }
 
+    /** {@hide} */
+    public static String removeDoubleQuotes(String string) {
+        final int length = string.length();
+        if ((length > 1) && (string.charAt(0) == '"') && (string.charAt(length - 1) == '"')) {
+            return string.substring(1, length - 1);
+        }
+        return string;
+    }
+
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
@@ -260,7 +285,8 @@ public class WifiInfo implements Parcelable {
             append(mSupplicantState == null ? none : mSupplicantState).
             append(", RSSI: ").append(mRssi).
             append(", Link speed: ").append(mLinkSpeed).
-            append(", Net ID: ").append(mNetworkId);
+            append(", Net ID: ").append(mNetworkId).
+            append(", Metered hint: ").append(mMeteredHint);
 
         return sb.toString();
     }
@@ -284,6 +310,7 @@ public class WifiInfo implements Parcelable {
         dest.writeString(getSSID());
         dest.writeString(mBSSID);
         dest.writeString(mMacAddress);
+        dest.writeInt(mMeteredHint ? 1 : 0);
         mSupplicantState.writeToParcel(dest, flags);
     }
 
@@ -303,6 +330,7 @@ public class WifiInfo implements Parcelable {
                 info.setSSID(in.readString());
                 info.mBSSID = in.readString();
                 info.mMacAddress = in.readString();
+                info.mMeteredHint = in.readInt() != 0;
                 info.mSupplicantState = SupplicantState.CREATOR.createFromParcel(in);
                 return info;
             }

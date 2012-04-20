@@ -142,6 +142,14 @@ public class DhcpInfoInternal {
         }
     }
 
+    /**
+     * Test if this DHCP lease includes vendor hint that network link is
+     * metered, and sensitive to heavy data transfers.
+     */
+    public boolean hasMeteredHint() {
+        return "ANDROID_METERED".equals(vendorInfo);
+    }
+
     public String toString() {
         String routeString = "";
         for (RouteInfo route : mRoutes) routeString += route.toString() + " | ";

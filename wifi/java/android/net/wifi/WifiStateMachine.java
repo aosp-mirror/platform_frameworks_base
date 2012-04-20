@@ -1642,6 +1642,7 @@ public class WifiStateMachine extends StateMachine {
         mWifiInfo.setNetworkId(WifiConfiguration.INVALID_NETWORK_ID);
         mWifiInfo.setRssi(MIN_RSSI);
         mWifiInfo.setLinkSpeed(-1);
+        mWifiInfo.setMeteredHint(false);
 
         setNetworkDetailedState(DetailedState.DISCONNECTED);
         mWifiConfigStore.updateStatus(mLastNetworkId, DetailedState.DISCONNECTED);
@@ -1713,6 +1714,7 @@ public class WifiStateMachine extends StateMachine {
         mWifiConfigStore.setIpConfiguration(mLastNetworkId, dhcpInfoInternal);
         InetAddress addr = NetworkUtils.numericToInetAddress(dhcpInfoInternal.ipAddress);
         mWifiInfo.setInetAddress(addr);
+        mWifiInfo.setMeteredHint(dhcpInfoInternal.hasMeteredHint());
         if (getNetworkDetailedState() == DetailedState.CONNECTED) {
             //DHCP renewal in connected state
             LinkProperties linkProperties = dhcpInfoInternal.makeLinkProperties();
@@ -1735,6 +1737,7 @@ public class WifiStateMachine extends StateMachine {
         loge("IP configuration failed");
 
         mWifiInfo.setInetAddress(null);
+        mWifiInfo.setMeteredHint(false);
         /**
          * If we've exceeded the maximum number of retries for DHCP
          * to a given network, disable the network
