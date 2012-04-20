@@ -19239,6 +19239,7 @@ package android.renderscript {
     method public deprecated void setVar(int, boolean);
     method public deprecated void setVar(int, android.renderscript.BaseObj);
     method public deprecated void setVar(int, android.renderscript.FieldPacker);
+    method public deprecated void setVar(int, android.renderscript.FieldPacker, android.renderscript.Element, int[]);
   }
 
   public static class Script.Builder {
