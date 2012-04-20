@@ -63,9 +63,8 @@ API level to the latest release:
 Android or don't exist in the platform at all and merely provide additional support to you when
 developing specific application features.</p>
 
-<p>You can find all the API reference documentation for the Support Library included in the
-platform docs in the {@link android.support.v4} package. For which API references are available
-at {@link android.support.v4}.</p>
+<p>You can find all the API reference documentation for the Support Library in the
+platform docs at {@link android.support.v4.app android.support.v4.*}.</p>
 
 <div class="warning"><p><strong>Warning:</strong> To be sure that you don't accidentally use new
 APIs on an older system version, be certain that you import the {@link

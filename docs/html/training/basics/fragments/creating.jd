@@ -6,7 +6,7 @@ trainingnavtop=true
 previous.title=Using the Android Support Library
 previous.link=support-lib.html
 next.title=Building a Flexible UI
-next.link=fragment-ui.html 
+next.link=fragment-ui.html
 
 @jd:body
 
