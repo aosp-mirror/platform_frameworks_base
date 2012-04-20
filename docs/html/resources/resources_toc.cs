@@ -528,8 +528,8 @@ class="new">&nbsp;new!</span></span>
           </li>
           <li><a href="<?cs var:toroot ?>training/displaying-bitmaps/display-bitmap.html">
             <span class="en">Displaying Bitmaps in Your UI</span>
-          </li>
-        <ul>
+          </a></li>
+        </ul>
       </li>
 
 
