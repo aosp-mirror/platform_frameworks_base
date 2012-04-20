@@ -1,7 +1,7 @@
 <ul>
   <li>
     <span class="heading">
-      <span class="en">Android Training</span>
+      <span class="en">Basic Training</span>
     </span>
     <ul>
       
@@ -9,6 +9,124 @@
             <span class="en">Orientation</span>
           </a>
       </li>
+
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>training/basics/firstapp/index.html">
+            <span class="en">Building Your First App<span class="new">&nbsp;new!</span></span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/basics/firstapp/creating-project.html">
+            <span class="en">Creating an Android Project</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/firstapp/running-app.html">
+            <span class="en">Running Your Application</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/firstapp/building-ui.html">
+            <span class="en">Building a Simple User Interface</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/firstapp/starting-activity.html">
+            <span class="en">Starting Another Activity</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/index.html">
+            <span class="en">Managing the Activity Lifecycle<span class="new">&nbsp;new!</span></span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/starting.html">
+            <span class="en">Starting an Activity</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/pausing.html">
+            <span class="en">Pausing and Resuming an Activity</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/stopping.html">
+            <span class="en">Stopping and Restarting an Activity</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/recreating.html">
+            <span class="en">Recreating an Activity</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+      
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>training/basics/supporting-devices/index.html">
+            <span class="en">Supporting Different Devices<span class="new">&nbsp;new!</span></span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/basics/supporting-devices/languages.html">
+            <span class="en">Supporting Different Languages</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/supporting-devices/screens.html">
+            <span class="en">Supporting Different Screens</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/supporting-devices/platforms.html">
+            <span class="en">Supporting Different Platform Versions</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>training/basics/intents/index.html">
+            <span class="en">Interacting with Other Apps<span class="new">&nbsp;new!</span></span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/basics/intents/sending.html">
+            <span class="en">Sending the User to Another App</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/intents/result.html">
+            <span class="en">Getting a Result from the Activity</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/intents/filters.html">
+            <span class="en">Allowing Other Apps to Start Your Activity</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>training/basics/location/index.html">
+            <span class="en">Making Your App Location Aware<span class="new">&nbsp;new!</span></span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/basics/location/locationmanager.html">
+            <span class="en">Using the Location Manager</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/location/currentlocation.html">
+            <span class="en">Obtaining the Current Location</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/location/geocoding.html">
+            <span class="en">Displaying a Location Address</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+      
+    </ul>
+  </li>
+    
+    
+  <li>
+    <span class="heading">
+      <span class="en">Advanced Training</span>
+    </span>
+    <ul>
 
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>training/multiscreen/index.html">

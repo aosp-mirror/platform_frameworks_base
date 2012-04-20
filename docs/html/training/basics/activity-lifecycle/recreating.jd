@@ -1,0 +1,177 @@
+page.title=Recreating an Activity
+parent.title=Managing the Activity Lifecycle
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Stopping and Restarting an Activity
+previous.link=stopping.html
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>This lesson teaches you to</h2>
+    <ol>
+      <li><a href="#SaveState">Save Your Activity State</a></li>
+      <li><a href="#RestoreState">Restore Your Activity State</a></li>
+    </ol>
+    
+    <h2>You should also read</h2>
+    <ul>
+      <li><a href="{@docRoot}training/basics/supporting-devices/screens.html">Supporting
+Different Screens</a></li>
+      <li><a
+href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime Changes</a></li>
+      <li><a href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a>
+      </li>
+    </ul>
+
+  </div>
+</div>
+
+<p>There are a few scenarios in which your activity is destroyed due to normal app behavior, such as
+when the user presses the <em>Back</em> button or your activity signals its own destruction by
+calling {@link android.app.Activity#finish()}. The system may also destory your activity if it's
+currently stopped and hasn't been used in a long time or the foreground activity requires more
+resources so the system must shut down background processes to recover memory.</p>
+
+<p>When your activity is destroyed because the user presses <em>Back</em> or the activity finishes
+itself, the system's concept of that {@link android.app.Activity} instance is gone forever because
+the behavior indicates the activity is no longer needed. However, if the system destroys
+the activity due to system constraints (rather than normal app behavior), then althought the actual
+{@link android.app.Activity} instance is gone, the system remembers that it existed such that if
+the user navigates back to it, the system creates a new instance of the activity using a set of
+saved data that describes the state of the activity when it was destroyed. The saved data that the
+system uses to restore the previous state is called the "instance state" and is a collection of
+key-value pairs stored in a {@link android.os.Bundle} object.</p>
+
+<p class="caution"><strong>Caution:</strong> Your activity will be destroyed and recreated each time
+the user rotates the screen. When the screen changes orientation, the system destroys and recreates
+the foreground activity because the screen configuration has changed and your activity might need to
+load alternative resources (such as the layout).</p>
+
+<p>By default, the system uses the {@link android.os.Bundle} instance state to saves information
+about each {@link android.view.View} object in your activity layout (such as the text value entered
+into an {@link android.widget.EditText} object). So, if your activity instance is destroyed and
+recreated, the state of the layout is automatically restored to its previous state. However, your
+activity might have more state information that you'd like to restore, such as member variables that
+track the user's progress in the activity.</p>
+
+<p>In order for you to add additional data to the saved instance state for your activity, there's an
+additional callback method in the activity lifecycle that's not shown in the illustration from
+previous lessons. The method is {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()} and the system calls it when the user is leaving your activity. When the
+system calls this method, it passes the {@link android.os.Bundle} object that will be saved in the
+event that your activity is destroyed unexpectedly so you can add additional information to it. Then
+if the system must recreate the activity instance after it was destroyed, it passes the same {@link
+android.os.Bundle} object to your activity's {@link android.app.Activity#onRestoreInstanceState
+onRestoreInstanceState()} method and also to your {@link android.app.Activity#onCreate onCreate()}
+method.</p>
+
+<img src="{@docRoot}images/training/basics/basic-lifecycle-savestate.png" />
+<p class="img-caption"><strong>Figure 2.</strong> As the system begins to stop your activity, it
+calls {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} (1) so you can specify
+additional state data you'd like to save in case the {@link android.app.Activity} instance must be
+recreated.
+If the activity is destroyed and the same instance must be recreated, the system passes the state
+data defined at (1) to both the {@link android.app.Activity#onCreate onCreate()} method
+(2) and the {@link android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} method
+(3).</p>
+
+
+
+<h2 id="SaveState">Save Your Activity State</h2>
+
+<p>As your activity begins to stop, the system calls {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()} so your activity can save state information with a collection of key-value
+pairs. The default implementation of this method saves information about the state of the activity's
+view hierarchy, such as the text in an {@link android.widget.EditText} widget or the scroll position
+of a {@link android.widget.ListView}.</p>
+
+<p>To save additional state information for your activity, you must
+implement {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} and add
+key-value pairs to the {@link android.os.Bundle} object. For example:</p>
+
+<pre>
+static final String STATE_SCORE = "playerScore";
+static final String STATE_LEVEL = "playerLevel";
+...
+
+&#64;Override
+public void onSaveInstanceState(Bundle savedInstanceState) {
+    // Save the user's current game state
+    savedInstanceState.putInt(STATE_SCORE, mCurrentScore);
+    savedInstanceState.putInt(STATE_LEVEL, mCurrentLevel);
+    
+    // Always call the superclass so it can save the view hierarchy state
+    super.onSaveInstanceState(savedInstanceState);
+}
+</pre>
+
+<p class="caution"><strong>Caution:</strong> Always call the superclass implementation of {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} so the default implementation
+can save the state of the view hierarchy.</p>
+
+
+
+<h2 id="RestoreState">Restore Your Activity State</h2>
+
+<p>When your activity is recreated after it was previously destroyed, you can recover your saved
+state from the {@link android.os.Bundle} that the system
+passes your activity. Both the {@link android.app.Activity#onCreate onCreate()} and {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} callback methods receive
+the same {@link android.os.Bundle} that containes the instance state information.</p>
+
+<p>Because the {@link android.app.Activity#onCreate onCreate()} method is called whether the
+system is creating a new instance of your activity or recreating a previous one, you must check
+whether the state {@link android.os.Bundle} is null before you attempt to read it. If it is null,
+then the system is creating a new instance of the activity, instead of restoring a previous one
+that was destroyed.</p>
+
+<p>For example, here's how you can restore some state data in {@link android.app.Activity#onCreate
+onCreate()}:</p>
+
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState); // Always call the superclass first
+   
+    // Check whether we're recreating a previously destroyed instance
+    if (savedInstanceState != null) {
+        // Restore value of members from saved state
+        mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
+        mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);
+    } else {
+        // Probably initialize members with default values for a new instance
+    }
+    ...
+}
+</pre>
+
+<p>Instead of restoring the state during {@link android.app.Activity#onCreate onCreate()} you
+may choose to implement {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}, which the system calls
+after the {@link android.app.Activity#onStart()} method. The system calls {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} only if there is a saved
+state to restore, so you do not need to check whether the {@link android.os.Bundle} is null:</p>
+        
+<pre>
+public void onRestoreInstanceState(Bundle savedInstanceState) {
+    // Always call the superclass so it can restore the view hierarchy
+    super.onRestoreInstanceState(savedInstanceState);
+   
+    // Restore state members from saved instance
+    mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
+    mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);
+}
+</pre>
+
+<p class="caution"><strong>Caution:</strong> Always call the superclass implementation of {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} so the default implementation
+can restore the state of the view hierarchy.</p>
+
+<p>To learn more about recreating your activity due to a
+restart event at runtime (such as when the screen rotates), read <a
+href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime Changes</a>.</p>
+
