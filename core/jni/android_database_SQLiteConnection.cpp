@@ -120,6 +120,13 @@ static jint nativeOpen(JNIEnv* env, jclass clazz, jstring pathStr, jint openFlag
         return 0;
     }
 
+    // Check that the database is really read/write when that is what we asked for.
+    if ((sqliteFlags & SQLITE_OPEN_READWRITE) && sqlite3_db_readonly(db, NULL)) {
+        throw_sqlite3_exception(env, db, "Could not open the database in read/write mode.");
+        sqlite3_close(db);
+        return 0;
+    }
+
     // Set the default busy handler to retry for 1000ms and then return SQLITE_BUSY
     err = sqlite3_busy_timeout(db, 1000 /* ms */);
     if (err != SQLITE_OK) {
