@@ -84,7 +84,7 @@ public final class AccessibilityInteractionClient
 
     private final Object mInstanceLock = new Object();
 
-    private int mInteractionId = -1;
+    private volatile int mInteractionId = -1;
 
     private AccessibilityNodeInfo mFindAccessibilityNodeInfoResult;
 
@@ -147,6 +147,18 @@ public final class AccessibilityInteractionClient
             mSameThreadMessage = message;
             mInstanceLock.notifyAll();
         }
+    }
+
+    /**
+     * Gets the root {@link AccessibilityNodeInfo} in the currently active window.
+     *
+     * @param connectionId The id of a connection for interacting with the system.
+     * @return The root {@link AccessibilityNodeInfo} if found, null otherwise.
+     */
+    public AccessibilityNodeInfo getRootInActiveWindow(int connectionId) {
+        return findAccessibilityNodeInfoByAccessibilityId(connectionId,
+                AccessibilityNodeInfo.ACTIVE_WINDOW_ID, AccessibilityNodeInfo.ROOT_NODE_ID,
+                AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS);
     }
 
     /**

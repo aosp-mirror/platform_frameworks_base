@@ -294,6 +294,7 @@ package android {
     field public static final int cacheColorHint = 16843009; // 0x1010101
     field public static final int calendarViewShown = 16843596; // 0x101034c
     field public static final int calendarViewStyle = 16843613; // 0x101035d
+    field public static final int canHandleGestures = 16843699; // 0x10103b3
     field public static final int canRetrieveWindowContent = 16843653; // 0x1010385
     field public static final int candidatesTextStyleSpans = 16843312; // 0x1010230
     field public static final deprecated int capitalize = 16843113; // 0x1010169
@@ -1997,7 +1998,7 @@ package android.accessibilityservice {
     method public final android.accessibilityservice.AccessibilityServiceInfo getServiceInfo();
     method public abstract void onAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     method public final android.os.IBinder onBind(android.content.Intent);
-    method protected void onGesture(int);
+    method protected boolean onGesture(int);
     method public abstract void onInterrupt();
     method protected void onServiceConnected();
     method public final boolean performGlobalAction(int);
@@ -2020,6 +2021,8 @@ package android.accessibilityservice {
     field public static final int GESTURE_SWIPE_UP_AND_DOWN = 7; // 0x7
     field public static final int GESTURE_SWIPE_UP_AND_LEFT = 15; // 0xf
     field public static final int GESTURE_SWIPE_UP_AND_RIGHT = 16; // 0x10
+    field public static final int GESTURE_TWO_FINGER_LONG_PRESS = 20; // 0x14
+    field public static final int GESTURE_TWO_FINGER_TAP = 19; // 0x13
     field public static final int GLOBAL_ACTION_BACK = 1; // 0x1
     field public static final int GLOBAL_ACTION_HOME = 2; // 0x2
     field public static final int GLOBAL_ACTION_NOTIFICATIONS = 4; // 0x4
@@ -2033,6 +2036,7 @@ package android.accessibilityservice {
     method public int describeContents();
     method public static java.lang.String feedbackTypeToString(int);
     method public static java.lang.String flagToString(int);
+    method public boolean getCanHandleGestures();
     method public boolean getCanRetrieveWindowContent();
     method public deprecated java.lang.String getDescription();
     method public java.lang.String getId();

@@ -224,6 +224,11 @@ public class AccessibilityServiceInfo implements Parcelable {
     private boolean mCanRetrieveWindowContent;
 
     /**
+     * Flag whether this accessibility service can handle gestures.
+     */
+    private boolean mCanHandleGestures;
+
+    /**
      * Resource id of the description of the accessibility service.
      */
     private int mDescriptionResId;
@@ -303,6 +308,8 @@ public class AccessibilityServiceInfo implements Parcelable {
             mCanRetrieveWindowContent = asAttributes.getBoolean(
                     com.android.internal.R.styleable.AccessibilityService_canRetrieveWindowContent,
                     false);
+            mCanHandleGestures = asAttributes.getBoolean(
+                    com.android.internal.R.styleable.AccessibilityService_canHandleGestures, false);
             TypedValue peekedValue = asAttributes.peekValue(
                     com.android.internal.R.styleable.AccessibilityService_description);
             if (peekedValue != null) {
@@ -378,10 +385,22 @@ public class AccessibilityServiceInfo implements Parcelable {
      *    <strong>Statically set from
      *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
      * </p>
-     * @return True window content can be retrieved.
+     * @return True if window content can be retrieved.
      */
     public boolean getCanRetrieveWindowContent() {
         return mCanRetrieveWindowContent;
+    }
+
+    /**
+     * Whether this service can handle gestures.
+     * <p>
+     *    <strong>Statically set from
+     *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
+     * </p>
+     * @return True if the service can handle gestures.
+     */
+    public boolean getCanHandleGestures() {
+        return mCanHandleGestures;
     }
 
     /**

@@ -152,7 +152,7 @@ public class TouchExplorer {
          *
          * @param gestureId The gesture id.
          */
-        public void onGesture(int gestureId);
+        public boolean onGesture(int gestureId);
     }
 
     /**
