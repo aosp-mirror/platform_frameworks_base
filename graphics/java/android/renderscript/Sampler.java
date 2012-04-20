@@ -27,18 +27,32 @@ import android.util.Log;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-/**
+/** @deprecated renderscript is deprecated in J
  * Sampler object which defines how data is extracted from textures. Samplers
  * are attached to Program objects (currently only ProgramFragment) when those objects
  * need to access texture data.
  **/
 public class Sampler extends BaseObj {
+    /** @deprecated renderscript is deprecated in J
+    */
     public enum Value {
+        /** @deprecated renderscript is deprecated in J
+        */
         NEAREST (0),
+        /** @deprecated renderscript is deprecated in J
+        */
         LINEAR (1),
+        /** @deprecated renderscript is deprecated in J
+        */
         LINEAR_MIP_LINEAR (2),
+        /** @deprecated renderscript is deprecated in J
+        */
         LINEAR_MIP_NEAREST (5),
+        /** @deprecated renderscript is deprecated in J
+        */
         WRAP (3),
+        /** @deprecated renderscript is deprecated in J
+        */
         CLAMP (4);
 
         int mID;
@@ -58,42 +72,42 @@ public class Sampler extends BaseObj {
         super(id, rs);
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
      * @return minification setting for the sampler
      */
     public Value getMinification() {
         return mMin;
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
      * @return magnification setting for the sampler
      */
     public Value getMagnification() {
         return mMag;
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
      * @return S wrapping mode for the sampler
      */
     public Value getWrapS() {
         return mWrapS;
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
      * @return T wrapping mode for the sampler
      */
     public Value getWrapT() {
         return mWrapT;
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
      * @return anisotropy setting for the sampler
      */
     public float getAnisotropy() {
         return mAniso;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Retrieve a sampler with min and mag set to nearest and wrap modes set to
      * clamp.
      *
@@ -113,7 +127,7 @@ public class Sampler extends BaseObj {
         return rs.mSampler_CLAMP_NEAREST;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Retrieve a sampler with min and mag set to linear and wrap modes set to
      * clamp.
      *
@@ -133,7 +147,7 @@ public class Sampler extends BaseObj {
         return rs.mSampler_CLAMP_LINEAR;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Retrieve a sampler with ag set to linear, min linear mipmap linear, and
      * to and wrap modes set to clamp.
      *
@@ -153,7 +167,7 @@ public class Sampler extends BaseObj {
         return rs.mSampler_CLAMP_LINEAR_MIP_LINEAR;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Retrieve a sampler with min and mag set to nearest and wrap modes set to
      * wrap.
      *
@@ -173,7 +187,7 @@ public class Sampler extends BaseObj {
         return rs.mSampler_WRAP_NEAREST;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Retrieve a sampler with min and mag set to nearest and wrap modes set to
      * wrap.
      *
@@ -193,7 +207,7 @@ public class Sampler extends BaseObj {
         return rs.mSampler_WRAP_LINEAR;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Retrieve a sampler with ag set to linear, min linear mipmap linear, and
      * to and wrap modes set to wrap.
      *
@@ -214,7 +228,7 @@ public class Sampler extends BaseObj {
     }
 
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Builder for creating non-standard samplers.  Usefull if mix and match of
      * wrap modes is necesary or if anisotropic filtering is desired.
      *

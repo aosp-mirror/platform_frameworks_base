@@ -18,7 +18,7 @@ package android.renderscript;
 
 import android.util.Log;
 
-/**
+/** @deprecated renderscript is deprecated in J
  * BaseObj is the base class for interfacing with native renderscript objects.
  * It primarly contains code for tracking the native object ID and forcably
  * disconecting the object from the native allocation for early cleanup.
@@ -39,7 +39,7 @@ public class BaseObj {
         mID = id;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Lookup the native object ID for this object.  Primarily used by the
      * generated reflected code.
      *
@@ -73,7 +73,7 @@ public class BaseObj {
     private String mName;
     RenderScript mRS;
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * setName assigns a name to an object.  This object can later be looked up
      * by this name.  This name will also be retained if the object is written
      * to an A3D file.
@@ -103,7 +103,7 @@ public class BaseObj {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * @return name of the renderscript object
      */
     public String getName() {
@@ -124,7 +124,7 @@ public class BaseObj {
         super.finalize();
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * destroy disconnects the object from the native object effectively
      * rendering this java object dead.  The primary use is to force immediate
      * cleanup of resources when it is believed the GC will not respond quickly
@@ -138,7 +138,7 @@ public class BaseObj {
         mRS.nObjDestroy(mID);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * If an object came from an a3d file, java fields need to be
      * created with objects from the native layer
      */
@@ -147,7 +147,7 @@ public class BaseObj {
         mName = mRS.nGetName(getID(mRS));
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Calculates the hash code value for a BaseObj.
      *
      * @return int
@@ -157,7 +157,7 @@ public class BaseObj {
         return mID;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Compare the current BaseObj with another BaseObj for equality.
      *
      * @param obj The object to check equality with.

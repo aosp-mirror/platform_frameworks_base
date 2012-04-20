@@ -27,7 +27,7 @@ import android.graphics.SurfaceTexture;
 import android.util.Log;
 import android.util.TypedValue;
 
-/**
+/** @deprecated renderscript is deprecated in J
  * <p>
  * Memory allocation class for renderscript.  An allocation combines a
  * {@link android.renderscript.Type} with the memory to provide storage for user data and objects.
@@ -93,7 +93,7 @@ public class Allocation extends BaseObj {
     int mCurrentCount;
 
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * The usage of the allocation.  These signal to renderscript
      * where to place the allocation in memory.
      *
@@ -102,14 +102,14 @@ public class Allocation extends BaseObj {
      */
     public static final int USAGE_SCRIPT = 0x0001;
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * GRAPHICS_TEXTURE The allocation will be used as a texture
      * source by one or more graphics programs.
      *
      */
     public static final int USAGE_GRAPHICS_TEXTURE = 0x0002;
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * GRAPHICS_VERTEX The allocation will be used as a graphics
      * mesh.
      *
@@ -117,21 +117,21 @@ public class Allocation extends BaseObj {
     public static final int USAGE_GRAPHICS_VERTEX = 0x0004;
 
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * GRAPHICS_CONSTANTS The allocation will be used as the source
      * of shader constants by one or more programs.
      *
      */
     public static final int USAGE_GRAPHICS_CONSTANTS = 0x0008;
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * USAGE_GRAPHICS_RENDER_TARGET The allocation will be used as a
      * target for offscreen rendering
      *
      */
     public static final int USAGE_GRAPHICS_RENDER_TARGET = 0x0010;
 
-    /**
+    /** @hide renderscript is deprecated in J
      * USAGE_IO_INPUT The allocation will be used as SurfaceTexture
      * consumer.  This usage will cause the allocation to be created
      * read only.
@@ -139,7 +139,7 @@ public class Allocation extends BaseObj {
      */
     public static final int USAGE_IO_INPUT = 0x0020;
 
-    /**
+    /** @hide renderscript is deprecated in J
      * USAGE_IO_OUTPUT The allocation will be used as a
      * SurfaceTexture producer.  The dimensions and format of the
      * SurfaceTexture will be forced to those of the allocation.
@@ -147,25 +147,25 @@ public class Allocation extends BaseObj {
      */
     public static final int USAGE_IO_OUTPUT = 0x0040;
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Controls mipmap behavior when using the bitmap creation and
      * update functions.
      */
     public enum MipmapControl {
-        /**
+        /** @deprecated renderscript is deprecated in J
          * No mipmaps will be generated and the type generated from the
          * incoming bitmap will not contain additional LODs.
          */
         MIPMAP_NONE(0),
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * A Full mipmap chain will be created in script memory.  The
          * type of the allocation will contain a full mipmap chain.  On
          * upload to graphics the full chain will be transfered.
          */
         MIPMAP_FULL(1),
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * The type of the allocation will be the same as MIPMAP_NONE.
          * It will not contain mipmaps.  On upload to graphics the
          * graphics copy of the allocation data will contain a full
@@ -188,7 +188,7 @@ public class Allocation extends BaseObj {
     }
 
 
-   /**
+   /** @hide renderscript is deprecated in J
      * Get the element of the type of the Allocation.
      *
      * @return Element that describes the structure of data in the
@@ -199,7 +199,7 @@ public class Allocation extends BaseObj {
         return mType.getElement();
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
      * Get the usage flags of the Allocation.
      *
      * @return usage flags associated with the allocation. e.g.
@@ -210,7 +210,7 @@ public class Allocation extends BaseObj {
         return mUsage;
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
      * Get the size of the Allocation in bytes.
      *
      * @return size of the Allocation in bytes.
@@ -326,7 +326,7 @@ public class Allocation extends BaseObj {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Get the type of the Allocation.
      *
      * @return Type
@@ -336,7 +336,7 @@ public class Allocation extends BaseObj {
         return mType;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Propagate changes from one usage of the allocation to the
      * remaining usages of the allocation.
      *
@@ -355,7 +355,7 @@ public class Allocation extends BaseObj {
         mRS.nAllocationSyncAll(getIDSafe(), srcLocation);
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
      * Send a buffer to the output stream.  The contents of the
      * Allocation will be undefined after this operation.
      *
@@ -369,7 +369,7 @@ public class Allocation extends BaseObj {
         mRS.nAllocationIoSend(getID(mRS));
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Delete once code is updated.
      * @hide
      */
@@ -377,7 +377,7 @@ public class Allocation extends BaseObj {
         ioSend();
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
      * Receive the latest input into the Allocation.
      *
      */
@@ -390,7 +390,7 @@ public class Allocation extends BaseObj {
         mRS.nAllocationIoReceive(getID(mRS));
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy an array of RS objects to the allocation.
      *
      * @param d Source array.
@@ -461,7 +461,7 @@ public class Allocation extends BaseObj {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy an allocation from an array.  This variant is not type
      * checked which allows an application to fill in structured
      * data from an array.
@@ -472,7 +472,7 @@ public class Allocation extends BaseObj {
         mRS.validate();
         copy1DRangeFromUnchecked(0, mCurrentCount, d);
     }
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy an allocation from an array.  This variant is not type
      * checked which allows an application to fill in structured
      * data from an array.
@@ -483,7 +483,7 @@ public class Allocation extends BaseObj {
         mRS.validate();
         copy1DRangeFromUnchecked(0, mCurrentCount, d);
     }
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy an allocation from an array.  This variant is not type
      * checked which allows an application to fill in structured
      * data from an array.
@@ -494,7 +494,7 @@ public class Allocation extends BaseObj {
         mRS.validate();
         copy1DRangeFromUnchecked(0, mCurrentCount, d);
     }
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy an allocation from an array.  This variant is not type
      * checked which allows an application to fill in structured
      * data from an array.
@@ -506,7 +506,7 @@ public class Allocation extends BaseObj {
         copy1DRangeFromUnchecked(0, mCurrentCount, d);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy an allocation from an array.  This variant is type
      * checked and will generate exceptions if the Allocation type
      * is not a 32 bit integer type.
@@ -518,7 +518,7 @@ public class Allocation extends BaseObj {
         copy1DRangeFrom(0, mCurrentCount, d);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy an allocation from an array.  This variant is type
      * checked and will generate exceptions if the Allocation type
      * is not a 16 bit integer type.
@@ -530,7 +530,7 @@ public class Allocation extends BaseObj {
         copy1DRangeFrom(0, mCurrentCount, d);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy an allocation from an array.  This variant is type
      * checked and will generate exceptions if the Allocation type
      * is not a 8 bit integer type.
@@ -542,7 +542,7 @@ public class Allocation extends BaseObj {
         copy1DRangeFrom(0, mCurrentCount, d);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy an allocation from an array.  This variant is type
      * checked and will generate exceptions if the Allocation type
      * is not a 32 bit float type.
@@ -554,7 +554,7 @@ public class Allocation extends BaseObj {
         copy1DRangeFrom(0, mCurrentCount, d);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy an allocation from a bitmap.  The height, width, and
      * format of the bitmap must match the existing allocation.
      *
@@ -567,7 +567,7 @@ public class Allocation extends BaseObj {
         mRS.nAllocationCopyFromBitmap(getID(mRS), b);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * This is only intended to be used by auto-generate code reflected from the
      * renderscript script files.
      *
@@ -587,7 +587,7 @@ public class Allocation extends BaseObj {
         copy1DRangeFromUnchecked(xoff, count, data);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * This is only intended to be used by auto-generate code reflected from the
      * renderscript script files.
      *
@@ -634,7 +634,7 @@ public class Allocation extends BaseObj {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Generate a mipmap chain.  Requires the type of the allocation
      * include mipmaps.
      *
@@ -648,7 +648,7 @@ public class Allocation extends BaseObj {
         mRS.nAllocationGenerateMipmaps(getID(mRS));
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy part of an allocation from an array.  This variant is
      * not type checked which allows an application to fill in
      * structured data from an array.
@@ -662,7 +662,7 @@ public class Allocation extends BaseObj {
         data1DChecks(off, count, d.length * 4, dataSize);
         mRS.nAllocationData1D(getIDSafe(), off, mSelectedLOD, count, d, dataSize);
     }
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy part of an allocation from an array.  This variant is
      * not type checked which allows an application to fill in
      * structured data from an array.
@@ -676,7 +676,7 @@ public class Allocation extends BaseObj {
         data1DChecks(off, count, d.length * 2, dataSize);
         mRS.nAllocationData1D(getIDSafe(), off, mSelectedLOD, count, d, dataSize);
     }
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy part of an allocation from an array.  This variant is
      * not type checked which allows an application to fill in
      * structured data from an array.
@@ -690,7 +690,7 @@ public class Allocation extends BaseObj {
         data1DChecks(off, count, d.length, dataSize);
         mRS.nAllocationData1D(getIDSafe(), off, mSelectedLOD, count, d, dataSize);
     }
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy part of an allocation from an array.  This variant is
      * not type checked which allows an application to fill in
      * structured data from an array.
@@ -705,7 +705,7 @@ public class Allocation extends BaseObj {
         mRS.nAllocationData1D(getIDSafe(), off, mSelectedLOD, count, d, dataSize);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy part of an allocation from an array.  This variant is
      * type checked and will generate exceptions if the Allocation
      * type is not a 32 bit integer type.
@@ -719,7 +719,7 @@ public class Allocation extends BaseObj {
         copy1DRangeFromUnchecked(off, count, d);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy part of an allocation from an array.  This variant is
      * type checked and will generate exceptions if the Allocation
      * type is not a 16 bit integer type.
@@ -733,7 +733,7 @@ public class Allocation extends BaseObj {
         copy1DRangeFromUnchecked(off, count, d);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy part of an allocation from an array.  This variant is
      * type checked and will generate exceptions if the Allocation
      * type is not a 8 bit integer type.
@@ -747,7 +747,7 @@ public class Allocation extends BaseObj {
         copy1DRangeFromUnchecked(off, count, d);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy part of an allocation from an array.  This variant is
      * type checked and will generate exceptions if the Allocation
      * type is not a 32 bit float type.
@@ -761,7 +761,7 @@ public class Allocation extends BaseObj {
         copy1DRangeFromUnchecked(off, count, d);
     }
 
-     /**
+     /** @deprecated renderscript is deprecated in J
      * Copy part of an allocation from another allocation.
      *
      * @param off The offset of the first element to be copied.
@@ -794,7 +794,7 @@ public class Allocation extends BaseObj {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy a rectangular region from the array into the allocation.
      * The incoming array is assumed to be tightly packed.
      *
@@ -811,6 +811,8 @@ public class Allocation extends BaseObj {
                               w, h, data, data.length);
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, short[] data) {
         mRS.validate();
         validate2DRange(xoff, yoff, w, h);
@@ -818,6 +820,8 @@ public class Allocation extends BaseObj {
                               w, h, data, data.length * 2);
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, int[] data) {
         mRS.validate();
         validate2DRange(xoff, yoff, w, h);
@@ -825,6 +829,8 @@ public class Allocation extends BaseObj {
                               w, h, data, data.length * 4);
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, float[] data) {
         mRS.validate();
         validate2DRange(xoff, yoff, w, h);
@@ -832,7 +838,7 @@ public class Allocation extends BaseObj {
                               w, h, data, data.length * 4);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy a rectangular region into the allocation from another
      * allocation.
      *
@@ -854,7 +860,7 @@ public class Allocation extends BaseObj {
                               data.mSelectedLOD, data.mSelectedFace.mID);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy a bitmap into an allocation.  The height and width of
      * the update will use the height and width of the incoming
      * bitmap.
@@ -871,7 +877,7 @@ public class Allocation extends BaseObj {
     }
 
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy from the Allocation into a Bitmap.  The bitmap must
      * match the dimensions of the Allocation.
      *
@@ -884,7 +890,7 @@ public class Allocation extends BaseObj {
         mRS.nAllocationCopyToBitmap(getID(mRS), b);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy from the Allocation into a byte array.  The array must
      * be at least as large as the Allocation.  The allocation must
      * be of an 8 bit elemental type.
@@ -897,7 +903,7 @@ public class Allocation extends BaseObj {
         mRS.nAllocationRead(getID(mRS), d);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy from the Allocation into a short array.  The array must
      * be at least as large as the Allocation.  The allocation must
      * be of an 16 bit elemental type.
@@ -910,7 +916,7 @@ public class Allocation extends BaseObj {
         mRS.nAllocationRead(getID(mRS), d);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy from the Allocation into a int array.  The array must be
      * at least as large as the Allocation.  The allocation must be
      * of an 32 bit elemental type.
@@ -923,7 +929,7 @@ public class Allocation extends BaseObj {
         mRS.nAllocationRead(getID(mRS), d);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Copy from the Allocation into a float array.  The array must
      * be at least as large as the Allocation.  The allocation must
      * be of an 32 bit float elemental type.
@@ -936,7 +942,7 @@ public class Allocation extends BaseObj {
         mRS.nAllocationRead(getID(mRS), d);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Resize a 1D allocation.  The contents of the allocation are
      * preserved.  If new elements are allocated objects are created
      * with null contents and the new region is otherwise undefined.
@@ -961,7 +967,7 @@ public class Allocation extends BaseObj {
         updateCacheInfo(mType);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Resize a 2D allocation.  The contents of the allocation are
      * preserved.  If new elements are allocated objects are created
      * with null contents and the new region is otherwise undefined.
@@ -1002,7 +1008,7 @@ public class Allocation extends BaseObj {
         mBitmapOptions.inScaled = false;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      *
      * @param type renderscript type describing data layout
      * @param mips specifies desired mipmap behaviour for the
@@ -1022,7 +1028,7 @@ public class Allocation extends BaseObj {
         return new Allocation(id, rs, type, usage);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Creates a renderscript allocation with the size specified by
      * the type and no mipmaps generated by default
      *
@@ -1037,7 +1043,7 @@ public class Allocation extends BaseObj {
         return createTyped(rs, type, MipmapControl.MIPMAP_NONE, usage);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Creates a renderscript allocation for use by the script with
      * the size specified by the type and no mipmaps generated by
      * default
@@ -1051,7 +1057,7 @@ public class Allocation extends BaseObj {
         return createTyped(rs, type, MipmapControl.MIPMAP_NONE, USAGE_SCRIPT);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Creates a renderscript allocation with a specified number of
      * given elements
      *
@@ -1077,7 +1083,7 @@ public class Allocation extends BaseObj {
         return new Allocation(id, rs, t, usage);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Creates a renderscript allocation with a specified number of
      * given elements
      *
@@ -1118,7 +1124,7 @@ public class Allocation extends BaseObj {
         return tb.create();
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Creates a renderscript allocation from a bitmap
      *
      * @param rs Context to which the allocation will belong.
@@ -1144,7 +1150,7 @@ public class Allocation extends BaseObj {
         return new Allocation(id, rs, t, usage);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      *
      *
      * @hide
@@ -1162,7 +1168,7 @@ public class Allocation extends BaseObj {
         return st;
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
      * For allocations used with io operations, returns the handle
      * onto a raw buffer that is being managed by the screen
      * compositor.
@@ -1174,7 +1180,7 @@ public class Allocation extends BaseObj {
         return new Surface(getSurfaceTexture());
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
      * Associate a surface for io output with this allocation
      *
      * @param sur Surface to associate with allocation
@@ -1188,7 +1194,7 @@ public class Allocation extends BaseObj {
         mRS.nAllocationSetSurface(getID(mRS), sur);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * @hide
      */
     public void setSurfaceTexture(SurfaceTexture st) {
@@ -1201,7 +1207,7 @@ public class Allocation extends BaseObj {
         mRS.nAllocationSetSurface(getID(mRS), s);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Creates a non-mipmapped renderscript allocation to use as a
      * graphics texture
      *
@@ -1216,7 +1222,7 @@ public class Allocation extends BaseObj {
                                 USAGE_GRAPHICS_TEXTURE);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Creates a cubemap allocation from a bitmap containing the
      * horizontal list of cube faces. Each individual face must be
      * the same size and power of 2
@@ -1264,7 +1270,7 @@ public class Allocation extends BaseObj {
         return new Allocation(id, rs, t, usage);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Creates a non-mipmapped cubemap allocation for use as a
      * graphics texture from a bitmap containing the horizontal list
      * of cube faces. Each individual face must be the same size and
@@ -1283,7 +1289,7 @@ public class Allocation extends BaseObj {
                                        USAGE_GRAPHICS_TEXTURE);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Creates a cubemap allocation from 6 bitmaps containing
      * the cube faces. All the faces must be the same size and
      * power of 2
@@ -1350,7 +1356,7 @@ public class Allocation extends BaseObj {
         return cubemap;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Creates a non-mipmapped cubemap allocation for use as a
      * graphics texture from 6 bitmaps containing
      * the cube faces. All the faces must be the same size and
@@ -1379,7 +1385,7 @@ public class Allocation extends BaseObj {
                                           USAGE_GRAPHICS_TEXTURE);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Creates a renderscript allocation from the bitmap referenced
      * by resource id
      *
@@ -1407,7 +1413,7 @@ public class Allocation extends BaseObj {
         return alloc;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Creates a non-mipmapped renderscript allocation to use as a
      * graphics texture from the bitmap referenced by resource id
      *
@@ -1426,7 +1432,7 @@ public class Allocation extends BaseObj {
                                         USAGE_GRAPHICS_TEXTURE);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Creates a renderscript allocation containing string data
      * encoded in UTF-8 format
      *

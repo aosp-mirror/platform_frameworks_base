@@ -28,7 +28,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.TextureView;
 
-/**
+/** @deprecated renderscript is deprecated in J
  * The Texture View for a graphics renderscript (RenderScriptGL)
  * to draw on.
  *
@@ -37,7 +37,7 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
     private RenderScriptGL mRS;
     private SurfaceTexture mSurfaceTexture;
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Standard View constructor. In order to render something, you
      * must call {@link android.opengl.GLSurfaceView#setRenderer} to
      * register a renderer.
@@ -48,7 +48,7 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
         //Log.v(RenderScript.LOG_TAG, "RSSurfaceView");
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Standard View constructor. In order to render something, you
      * must call {@link android.opengl.GLSurfaceView#setRenderer} to
      * register a renderer.
@@ -102,7 +102,7 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
         mSurfaceTexture = surface;
     }
 
-   /**
+   /** @deprecated renderscript is deprecated in J
      * Inform the view that the activity is paused. The owner of this view must
      * call this method when the activity is paused. Calling this method will
      * pause the rendering thread.
@@ -114,7 +114,7 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Inform the view that the activity is resumed. The owner of this view must
      * call this method when the activity is resumed. Calling this method will
      * recreate the OpenGL display and resume the rendering
@@ -127,7 +127,7 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Create a new RenderScriptGL object and attach it to the
      * TextureView if present.
      *
@@ -145,7 +145,7 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
         return rs;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Destroy the RenderScriptGL object associated with this
      * TextureView.
      */
@@ -154,7 +154,7 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
         mRS = null;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Set a new RenderScriptGL object.  This also will attach the
      * new object to the TextureView if present.
      *
@@ -167,7 +167,7 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Returns the previously set RenderScriptGL object.
      *
      * @return RenderScriptGL

@@ -20,7 +20,7 @@ import java.lang.Math;
 import android.util.Log;
 
 
-/**
+/** @deprecated renderscript is deprecated in J
  * Class for exposing the native Renderscript long3 type back to the Android system.
  **/
 public class Long3 {

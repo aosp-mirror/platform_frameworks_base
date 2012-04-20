@@ -25,7 +25,7 @@ import android.content.res.Resources;
 import android.util.Log;
 
 
-/**
+/** @deprecated renderscript is deprecated in J
  *
  * Program is a base class for all the objects that modify
  * various stages of the graphics pipeline
@@ -37,14 +37,18 @@ public class Program extends BaseObj {
     static final int MAX_CONSTANT = 8;
     static final int MAX_TEXTURE = 8;
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      *
      * TextureType specifies what textures are attached to Program
      * objects
      *
      **/
     public enum TextureType {
+        /** @deprecated renderscript is deprecated in J
+        */
         TEXTURE_2D (0),
+        /** @deprecated renderscript is deprecated in J
+        */
         TEXTURE_CUBE (1);
 
         int mID;
@@ -77,7 +81,7 @@ public class Program extends BaseObj {
         super(id, rs);
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
      * Program object can have zero or more constant allocations
      * associated with it. This method returns the total count.
      * @return number of constant input types
@@ -86,7 +90,7 @@ public class Program extends BaseObj {
         return mConstants != null ? mConstants.length : 0;
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
      * Returns the type of the constant buffer used in the program
      * object. It could be used to query internal elements or create
      * an allocation to store constant data.
@@ -100,7 +104,7 @@ public class Program extends BaseObj {
         return mConstants[slot];
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
      * Returns the number of textures used in this program object
      * @return number of texture inputs
      */
@@ -108,7 +112,7 @@ public class Program extends BaseObj {
         return mTextureCount;
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
      * Returns the type of texture at a given slot. e.g. 2D or Cube
      * @param slot index of the texture input
      * @return texture input type
@@ -120,7 +124,7 @@ public class Program extends BaseObj {
         return mTextures[slot];
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
      * Returns the name of the texture input at a given slot. e.g.
      * tex0, diffuse, spec
      * @param slot index of the texture input
@@ -133,7 +137,7 @@ public class Program extends BaseObj {
         return mTextureNames[slot];
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Binds a constant buffer to be used as uniform inputs to the
      * program
      *
@@ -153,7 +157,7 @@ public class Program extends BaseObj {
         mRS.nProgramBindConstants(getID(mRS), slot, id);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Binds a texture to be used in the program
      *
      * @param va allocation containing texture data
@@ -175,7 +179,7 @@ public class Program extends BaseObj {
         mRS.nProgramBindTexture(getID(mRS), slot, id);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Binds an object that describes how a texture at the
      * corresponding location is sampled
      *
@@ -210,7 +214,8 @@ public class Program extends BaseObj {
         int mTextureCount;
         String mShader;
 
-
+        /** @deprecated renderscript is deprecated in J
+        */
         protected BaseProgramBuilder(RenderScript rs) {
             mRS = rs;
             mInputs = new Element[MAX_INPUT];
@@ -224,7 +229,7 @@ public class Program extends BaseObj {
             mTextureNames = new String[MAX_TEXTURE];
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Sets the GLSL shader code to be used in the program
          *
          * @param s GLSL shader string
@@ -235,7 +240,7 @@ public class Program extends BaseObj {
             return this;
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Sets the GLSL shader code to be used in the program
          *
          * @param resources application resources
@@ -281,7 +286,7 @@ public class Program extends BaseObj {
             return this;
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Queries the index of the last added constant buffer type
          *
          */
@@ -289,7 +294,7 @@ public class Program extends BaseObj {
             return mConstantCount - 1;
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Queries the index of the last added texture type
          *
          */
@@ -297,7 +302,7 @@ public class Program extends BaseObj {
             return mTextureCount - 1;
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Adds constant (uniform) inputs to the program
          *
          * @param t Type that describes the layout of the Allocation
@@ -317,7 +322,7 @@ public class Program extends BaseObj {
             return this;
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Adds a texture input to the Program
          *
          * @param texType describes that the texture to append it (2D,
@@ -329,7 +334,7 @@ public class Program extends BaseObj {
             return this;
         }
 
-        /**
+        /** @hide renderscript is deprecated in J
          * Adds a texture input to the Program
          *
          * @param texType describes that the texture to append it (2D,
@@ -349,6 +354,8 @@ public class Program extends BaseObj {
             return this;
         }
 
+        /** @deprecated renderscript is deprecated in J
+        */
         protected void initProgram(Program p) {
             p.mInputs = new Element[mInputCount];
             System.arraycopy(mInputs, 0, p.mInputs, 0, mInputCount);

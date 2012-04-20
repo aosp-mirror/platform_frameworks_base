@@ -16,11 +16,11 @@
 
 package android.renderscript;
 
-/**
+/** @deprecated renderscript is deprecated in J
  *
  **/
 public class Script extends BaseObj {
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Only intended for use by generated reflected code.
      *
      * @param slot
@@ -29,7 +29,7 @@ public class Script extends BaseObj {
         mRS.nScriptInvoke(getID(mRS), slot);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Only intended for use by generated reflected code.
      *
      * @param slot
@@ -43,7 +43,7 @@ public class Script extends BaseObj {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Only intended for use by generated reflected code.
      *
      * @param slot
@@ -77,7 +77,7 @@ public class Script extends BaseObj {
     }
 
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Only intended for use by generated reflected code.
      *
      * @param va
@@ -92,7 +92,7 @@ public class Script extends BaseObj {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Only intended for use by generated reflected code.
      *
      * @param index
@@ -102,7 +102,7 @@ public class Script extends BaseObj {
         mRS.nScriptSetVarF(getID(mRS), index, v);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Only intended for use by generated reflected code.
      *
      * @param index
@@ -112,7 +112,7 @@ public class Script extends BaseObj {
         mRS.nScriptSetVarD(getID(mRS), index, v);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Only intended for use by generated reflected code.
      *
      * @param index
@@ -122,7 +122,7 @@ public class Script extends BaseObj {
         mRS.nScriptSetVarI(getID(mRS), index, v);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Only intended for use by generated reflected code.
      *
      * @param index
@@ -132,7 +132,7 @@ public class Script extends BaseObj {
         mRS.nScriptSetVarJ(getID(mRS), index, v);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Only intended for use by generated reflected code.
      *
      * @param index
@@ -142,7 +142,7 @@ public class Script extends BaseObj {
         mRS.nScriptSetVarI(getID(mRS), index, v ? 1 : 0);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Only intended for use by generated reflected code.
      *
      * @param index
@@ -152,7 +152,7 @@ public class Script extends BaseObj {
         mRS.nScriptSetVarObj(getID(mRS), index, (o == null) ? 0 : o.getID(mRS));
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Only intended for use by generated reflected code.
      *
      * @param index
@@ -162,6 +162,8 @@ public class Script extends BaseObj {
         mRS.nScriptSetVarV(getID(mRS), index, v.getData());
     }
 
+    /** @deprecated renderscript is deprecated in J
+    */
     public void setTimeZone(String timeZone) {
         mRS.validate();
         try {

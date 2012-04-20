@@ -27,7 +27,7 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.util.TypedValue;
 
-/**
+/** @deprecated renderscript is deprecated in J
  * FileA3D allows users to load Renderscript objects from files
  * or resources stored on disk. It could be used to load items
  * such as 3D geometry data converted to a Renderscript format from
@@ -40,17 +40,17 @@ import android.util.TypedValue;
  **/
 public class FileA3D extends BaseObj {
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Specifies what renderscript object type is contained within
     * the FileA3D IndexEntry
     **/
     public enum EntryType {
 
-        /**
+        /** @deprecated renderscript is deprecated in J
         * Unknown or or invalid object, nothing will be loaded
         **/
         UNKNOWN (0),
-        /**
+        /** @deprecated renderscript is deprecated in J
         * Renderscript Mesh object
         **/
         MESH (1);
@@ -65,7 +65,7 @@ public class FileA3D extends BaseObj {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * IndexEntry contains information about one of the Renderscript
     * objects inside the file's index. It could be used to query the
     * object's type and also name and load the object itself if
@@ -79,7 +79,7 @@ public class FileA3D extends BaseObj {
         EntryType mEntryType;
         BaseObj mLoadedObj;
 
-        /**
+        /** @deprecated renderscript is deprecated in J
         * Returns the name of a renderscript object the index entry
         * describes
         *
@@ -91,7 +91,7 @@ public class FileA3D extends BaseObj {
             return mName;
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
         * Returns the type of a renderscript object the index entry
         * describes
         * @return type of a renderscript object the index entry
@@ -101,7 +101,7 @@ public class FileA3D extends BaseObj {
             return mEntryType;
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
         * Used to load the object described by the index entry
         * @return base renderscript object described by the entry
         */
@@ -111,7 +111,7 @@ public class FileA3D extends BaseObj {
             return obj;
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
         * Used to load the mesh described by the index entry, object
         * described by the index entry must be a renderscript mesh
         *
@@ -181,7 +181,7 @@ public class FileA3D extends BaseObj {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Returns the number of objects stored inside the a3d file
     *
     * @return the number of objects stored inside the a3d file
@@ -193,7 +193,7 @@ public class FileA3D extends BaseObj {
         return mFileEntries.length;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Returns an index entry from the list of all objects inside
     * FileA3D
     *
@@ -208,7 +208,7 @@ public class FileA3D extends BaseObj {
         return mFileEntries[index];
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Creates a FileA3D object from an asset stored on disk
     *
     * @param rs Context to which the object will belong.
@@ -229,7 +229,7 @@ public class FileA3D extends BaseObj {
         return fa3d;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Creates a FileA3D object from a file stored on disk
     *
     * @param rs Context to which the object will belong.
@@ -248,7 +248,7 @@ public class FileA3D extends BaseObj {
         return fa3d;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Creates a FileA3D object from a file stored on disk
     *
     * @param rs Context to which the object will belong.
@@ -260,7 +260,7 @@ public class FileA3D extends BaseObj {
         return createFromFile(rs, path.getAbsolutePath());
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Creates a FileA3D object from an application resource
     *
     * @param rs Context to which the object will belong.

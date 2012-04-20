@@ -32,7 +32,7 @@ import android.view.Surface;
 
 
 
-/**
+/** @deprecated renderscript is deprecated in J
  * Renderscript base master class.  An instance of this class creates native
  * worker threads for processing commands from this object.  This base class
  * does not provide any extended capabilities beyond simple data processing.
@@ -736,7 +736,7 @@ public class RenderScript {
     ///////////////////////////////////////////////////////////////////////////////////
     //
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Base class application should derive from for handling RS messages
      * coming from their scripts.  When a script calls sendToClient the data
      * fields will be filled in and then the run method called by a message
@@ -751,7 +751,7 @@ public class RenderScript {
         public void run() {
         }
     }
-    /**
+    /** @deprecated renderscript is deprecated in J
      * If an application is expecting messages it should set this field to an
      * instance of RSMessage.  This instance will receive all the user messages
      * sent from sendToClient by scripts from this context.
@@ -766,7 +766,7 @@ public class RenderScript {
         return mMessageCallback;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Runtime error base class.  An application should derive from this class
      * if it wishes to install an error handler.  When errors occur at runtime
      * the fields in this class will be filled and the run method called.
@@ -779,7 +779,7 @@ public class RenderScript {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Application Error handler.  All runtime errors will be dispatched to the
      * instance of RSAsyncError set here.  If this field is null a
      * RSRuntimeException will instead be thrown with details about the error.
@@ -795,7 +795,7 @@ public class RenderScript {
         return mErrorCallback;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * RenderScript worker threads priority enumeration.  The default value is
      * NORMAL.  Applications wishing to do background processing such as
      * wallpapers should set their priority to LOW to avoid starving forground
@@ -818,7 +818,7 @@ public class RenderScript {
     }
 
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Change the priority of the worker threads for this context.
      *
      * @param p New priority to be set.
@@ -915,7 +915,7 @@ public class RenderScript {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Gets the application context associated with the RenderScript context.
      *
      * @return The application context.
@@ -924,7 +924,7 @@ public class RenderScript {
         return mApplicationContext;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Create a basic RenderScript context.
      *
      * @hide
@@ -944,7 +944,7 @@ public class RenderScript {
         return rs;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Create a basic RenderScript context.
      *
      * @param ctx The context.
@@ -955,7 +955,7 @@ public class RenderScript {
         return create(ctx, v);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Print the currently available debugging information about the state of
      * the RS context to the log.
      *
@@ -965,7 +965,7 @@ public class RenderScript {
         nContextDump(0);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Wait for any commands in the fifo between the java bindings and native to
      * be processed.
      *
@@ -974,7 +974,7 @@ public class RenderScript {
         nContextFinish();
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Destroy this renderscript context.  Once this function is called its no
      * longer legal to use this or any objects created by this context.
      *

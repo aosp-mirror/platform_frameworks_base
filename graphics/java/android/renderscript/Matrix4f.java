@@ -20,13 +20,13 @@ import java.lang.Math;
 import android.util.Log;
 
 
-/**
+/** @deprecated renderscript is deprecated in J
  * Class for exposing the native Renderscript rs_matrix4x4 type back to the Android system.
  *
  **/
 public class Matrix4f {
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Creates a new identity 4x4 matrix
     */
     public Matrix4f() {
@@ -34,7 +34,7 @@ public class Matrix4f {
         loadIdentity();
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Creates a new matrix and sets its values from the given
     * parameter
     *
@@ -46,7 +46,7 @@ public class Matrix4f {
         System.arraycopy(dataArray, 0, mMat, 0, mMat.length);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Return a reference to the internal array representing matrix
     * values. Modifying this array will also change the matrix
     *
@@ -56,7 +56,7 @@ public class Matrix4f {
         return mMat;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Returns the value for a given row and column
     *
     * @param i row of the value to return
@@ -68,7 +68,7 @@ public class Matrix4f {
         return mMat[i*4 + j];
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets the value for a given row and column
     *
     * @param i row of the value to set
@@ -78,7 +78,7 @@ public class Matrix4f {
         mMat[i*4 + j] = v;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets the matrix values to identity
     */
     public void loadIdentity() {
@@ -103,7 +103,7 @@ public class Matrix4f {
         mMat[15] = 1;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets the values of the matrix to those of the parameter
     *
     * @param src matrix to load the values from
@@ -112,7 +112,7 @@ public class Matrix4f {
         System.arraycopy(src.getArray(), 0, mMat, 0, mMat.length);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets current values to be a rotation matrix of certain angle
     * about a given axis
     *
@@ -159,7 +159,7 @@ public class Matrix4f {
         mMat[10] = z*z*nc +  c;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets current values to be a scale matrix of given dimensions
     *
     * @param x scale component x
@@ -173,7 +173,7 @@ public class Matrix4f {
         mMat[10] = z;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets current values to be a translation matrix of given
     * dimensions
     *
@@ -188,7 +188,7 @@ public class Matrix4f {
         mMat[14] = z;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets current values to be the result of multiplying two given
     * matrices
     *
@@ -215,7 +215,7 @@ public class Matrix4f {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Set current values to be an orthographic projection matrix
     *
     * @param l location of the left vertical clipping plane
@@ -235,7 +235,7 @@ public class Matrix4f {
         mMat[14]= -(f + n) / (f - n);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Set current values to be an orthographic projection matrix
     * with the right and bottom clipping planes set to the given
     * values. Left and top clipping planes are set to 0. Near and
@@ -249,7 +249,7 @@ public class Matrix4f {
         loadOrtho(0,w, h,0, -1,1);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets current values to be a perspective projection matrix
     *
     * @param l location of the left vertical clipping plane
@@ -272,7 +272,7 @@ public class Matrix4f {
         mMat[15]= 0;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets current values to be a perspective projection matrix
     *
     * @param fovy vertical field of view angle in degrees
@@ -288,7 +288,7 @@ public class Matrix4f {
         loadFrustum(left, right, bottom, top, near, far);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Helper function to set the current values to a perspective
     * projection matrix with aspect ratio defined by the parameters
     * and (near, far), (bottom, top) mapping to (-1, 1) at z = 0
@@ -321,7 +321,7 @@ public class Matrix4f {
         load(m1);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Post-multiplies the current matrix by a given parameter
     *
     * @param rhs right hand side to multiply by
@@ -331,7 +331,7 @@ public class Matrix4f {
         tmp.loadMultiply(this, rhs);
         load(tmp);
     }
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Modifies the current matrix by post-multiplying it with a
     * rotation matrix of certain angle about a given axis
     *
@@ -346,7 +346,7 @@ public class Matrix4f {
         multiply(tmp);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Modifies the current matrix by post-multiplying it with a
     * scale matrix of given dimensions
     *
@@ -360,7 +360,7 @@ public class Matrix4f {
         multiply(tmp);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Modifies the current matrix by post-multiplying it with a
     * translation matrix of given dimensions
     *
@@ -392,7 +392,7 @@ public class Matrix4f {
         return cofactor;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets the current matrix to its inverse
     */
     public boolean inverse() {
@@ -421,7 +421,7 @@ public class Matrix4f {
         return true;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets the current matrix to its inverse transpose
     */
     public boolean inverseTranspose() {
@@ -449,7 +449,7 @@ public class Matrix4f {
         return true;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets the current matrix to its transpose
     */
     public void transpose() {

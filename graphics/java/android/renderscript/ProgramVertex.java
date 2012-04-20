@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- /**
+ /** @deprecated renderscript is deprecated in J
  * <p>The Renderscript vertex program, also known as a vertex shader, describes a stage in
  * the graphics pipeline responsible for manipulating geometric data in a user-defined way.
  * The object is constructed by providing the Renderscript system with the following data:</p>
@@ -42,7 +42,7 @@ import android.graphics.Matrix;
 import android.util.Log;
 
 
-/**
+/** @deprecated renderscript is deprecated in J
  * ProgramVertex, also know as a vertex shader, describes a
  * stage in the graphics pipeline responsible for manipulating
  * geometric data in a user-defined way.
@@ -54,14 +54,14 @@ public class ProgramVertex extends Program {
         super(id, rs);
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
      * @return number of input attribute elements
      */
     public int getInputCount() {
         return mInputs != null ? mInputs.length : 0;
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
      * @param slot location of the input to return
      * @return input attribute element
      */
@@ -72,7 +72,7 @@ public class ProgramVertex extends Program {
         return mInputs[slot];
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Builder class for creating ProgramVertex objects.
     * The builder starts empty and the user must minimally provide
     * the GLSL shader code, and the varying inputs. Constant, or
@@ -81,7 +81,7 @@ public class ProgramVertex extends Program {
     *
     **/
     public static class Builder extends BaseProgramBuilder {
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Create a builder object.
          *
          * @param rs Context to which the program will belong.
@@ -90,7 +90,7 @@ public class ProgramVertex extends Program {
             super(rs);
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Add varying inputs to the program
          *
          * @param e element describing the layout of the varying input
@@ -109,7 +109,7 @@ public class ProgramVertex extends Program {
             return this;
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Creates ProgramVertex from the current state of the builder
          *
          * @return  ProgramVertex

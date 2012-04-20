@@ -21,7 +21,7 @@ import android.graphics.Matrix;
 import android.util.Log;
 
 
-/**
+/** @deprecated renderscript is deprecated in J
  * ProgramVertexFixedFunction is a helper class that provides a
  * simple way to create a fixed function emulation vertex shader
  * without writing any GLSL code.
@@ -33,7 +33,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         super(id, rs);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Binds the constant buffer containing fixed function emulation
      * matrices
      *
@@ -61,7 +61,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
             return this;
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Creates ProgramVertexFixedFunction from the current state of
          * the builder
          *
@@ -103,7 +103,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         String mShader;
         RenderScript mRS;
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Creates a builder for fixed function vertex program
          *
          * @param rs Context to which the program will belong.
@@ -112,7 +112,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
             mRS = rs;
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Specifies whether texture matrix calculations are to be added
          * to the shader
          *
@@ -152,7 +152,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
             mShader += "}\n";
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Creates ProgramVertexFixedFunction from the current state of
          * the builder
          *
@@ -176,7 +176,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Helper class to store modelview, projection and texture
      * matrices for ProgramVertexFixedFunction
      *
@@ -196,7 +196,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         }
         private FieldPacker mIOBuffer;
 
-        /**
+        /** @deprecated renderscript is deprecated in J
         * Creates a buffer to store fixed function emulation matrices
         *
         * @param rs Context to which the allocation will belong.
@@ -215,7 +215,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
             setTexture(new Matrix4f());
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
         * Forces deallocation of memory backing the contant matrices.
         * Normally, this is unnecessary and will be garbage collected
         *
@@ -233,7 +233,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
             mAlloc.setFromFieldPacker(0, mIOBuffer);
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
         * Sets the modelview matrix in the fixed function matrix buffer
         *
         * @param m modelview matrix
@@ -243,7 +243,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
             addToBuffer(MODELVIEW_OFFSET*4, m);
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
         * Sets the projection matrix in the fixed function matrix buffer
         *
         * @param m projection matrix
@@ -253,7 +253,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
             addToBuffer(PROJECTION_OFFSET*4, m);
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
         * Sets the texture matrix in the fixed function matrix buffer.
         * Texture matrix must be enabled in the
         * ProgramVertexFixedFunction builder for the shader to utilize

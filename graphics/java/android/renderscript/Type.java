@@ -20,7 +20,7 @@ package android.renderscript;
 import java.lang.reflect.Field;
 import android.util.Log;
 
-/**
+/** @deprecated renderscript is deprecated in J
  * <p>Type is an allocation template. It consists of an Element and one or more
  * dimensions. It describes only the layout of memory but does not allocate any
  * storage for the data that is described.</p>
@@ -70,7 +70,7 @@ public class Type extends BaseObj {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Return the element associated with this Type.
      *
      * @return Element
@@ -79,7 +79,7 @@ public class Type extends BaseObj {
         return mElement;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Return the value of the X dimension.
      *
      * @return int
@@ -88,7 +88,7 @@ public class Type extends BaseObj {
         return mDimX;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Return the value of the Y dimension or 0 for a 1D allocation.
      *
      * @return int
@@ -97,7 +97,7 @@ public class Type extends BaseObj {
         return mDimY;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Return the value of the Z dimension or 0 for a 1D or 2D allocation.
      *
      * @return int
@@ -106,7 +106,7 @@ public class Type extends BaseObj {
         return mDimZ;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Return if the Type has a mipmap chain.
      *
      * @return boolean
@@ -115,7 +115,7 @@ public class Type extends BaseObj {
         return mDimMipmaps;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Return if the Type is a cube map.
      *
      * @return boolean
@@ -124,7 +124,7 @@ public class Type extends BaseObj {
         return mDimFaces;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Return the total number of accessable cells in the Type.
      *
      * @return int
@@ -196,7 +196,7 @@ public class Type extends BaseObj {
         calcElementCount();
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Builder class for Type.
      *
      */
@@ -210,7 +210,7 @@ public class Type extends BaseObj {
 
         Element mElement;
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Create a new builder object.
          *
          * @param rs
@@ -222,7 +222,7 @@ public class Type extends BaseObj {
             mElement = e;
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Add a dimension to the Type.
          *
          *
@@ -255,7 +255,7 @@ public class Type extends BaseObj {
         }
 
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Validate structure and create a new type.
          *
          * @return Type
