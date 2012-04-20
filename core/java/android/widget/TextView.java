@@ -6860,7 +6860,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 ims.mContentChanged = true;
             }
-            if (mEditor != null) getEditor().invalidateTextDisplayList();
+            if (mEditor != null) {
+                if (oldStart >= 0) getEditor().invalidateTextDisplayList(mLayout, oldStart, oldEnd);
+                if (newStart >= 0) getEditor().invalidateTextDisplayList(mLayout, newStart, newEnd);
+            }
         }
 
         if (MetaKeyKeyListener.isMetaTracker(buf, what)) {

@@ -1339,6 +1339,38 @@ public class Editor {
         if (translate) canvas.translate(0, -cursorOffsetVertical);
     }
 
+    /**
+     * Invalidates all the sub-display lists that overlap the specified character range
+     */
+    void invalidateTextDisplayList(Layout layout, int start, int end) {
+        if (mTextDisplayLists != null && layout instanceof DynamicLayout) {
+            final int firstLine = layout.getLineForOffset(start);
+            final int lastLine = layout.getLineForOffset(end);
+
+            DynamicLayout dynamicLayout = (DynamicLayout) layout;
+            int[] blockEndLines = dynamicLayout.getBlockEndLines();
+            int[] blockIndices = dynamicLayout.getBlockIndices();
+            final int numberOfBlocks = dynamicLayout.getNumberOfBlocks();
+
+            int i = 0;
+            // Skip the blocks before firstLine
+            while (i < numberOfBlocks) {
+                if (blockEndLines[i] >= firstLine) break;
+                i++;
+            }
+
+            // Invalidate all subsequent blocks until lastLine is passed
+            while (i < numberOfBlocks) {
+                final int blockIndex = blockIndices[i];
+                if (blockIndex != DynamicLayout.INVALID_BLOCK_INDEX) {
+                    mTextDisplayLists[blockIndex].invalidate();
+                }
+                if (blockEndLines[i] >= lastLine) break;
+                i++;
+            }
+        }
+    }
+
     void invalidateTextDisplayList() {
         if (mTextDisplayLists != null) {
             for (int i = 0; i < mTextDisplayLists.length; i++) {
