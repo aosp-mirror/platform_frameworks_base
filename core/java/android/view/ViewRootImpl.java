@@ -59,6 +59,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TypedValue;
+import android.view.KeyCharacterMap.FallbackAction;
 import android.view.View.AttachInfo;
 import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
@@ -322,6 +323,8 @@ public final class ViewRootImpl implements ViewParent,
     HashSet<View> mTempHashSet;
 
     private final int mDensity;
+
+    final KeyCharacterMap.FallbackAction mFallbackAction = new KeyCharacterMap.FallbackAction();
 
     /**
      * Consistency verifier for debugging purposes.
@@ -4381,6 +4384,31 @@ public final class ViewRootImpl implements ViewParent,
         Message msg = mHandler.obtainMessage(MSG_DISPATCH_KEY_FROM_IME, event);
         msg.setAsynchronous(true);
         mHandler.sendMessage(msg);
+    }
+
+    public void dispatchUnhandledKey(KeyEvent event) {
+        if ((event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
+            final KeyCharacterMap kcm = event.getKeyCharacterMap();
+            final int keyCode = event.getKeyCode();
+            final int metaState = event.getMetaState();
+
+            KeyEvent fallbackEvent = null;
+            synchronized (mFallbackAction) {
+                // Check for fallback actions specified by the key character map.
+                if (kcm.getFallbackAction(keyCode, metaState, mFallbackAction)) {
+                    int flags = event.getFlags() | KeyEvent.FLAG_FALLBACK;
+                    fallbackEvent = KeyEvent.obtain(
+                            event.getDownTime(), event.getEventTime(),
+                            event.getAction(), mFallbackAction.keyCode,
+                            event.getRepeatCount(), mFallbackAction.metaState,
+                            event.getDeviceId(), event.getScanCode(),
+                            flags, event.getSource(), null);
+                }
+            }
+            if (fallbackEvent != null) {
+                dispatchKey(fallbackEvent);
+            }
+        }
     }
 
     public void dispatchAppVisibility(boolean visible) {
