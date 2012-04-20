@@ -34,7 +34,7 @@ Intent Filters</a></li>
 from applications. Think about how users interact with your application, and what data types you 
 want to receive from other applications. For example, a social networking application would likely 
 be interested in receiving text content, like an interesting web URL, from another app. The 
-<a href="https://play.google.com/store/details?id=com.google.android.apps.plus">Google+ Android
+<a href="https://play.google.com/store/apps/details?id=com.google.android.apps.plus">Google+ Android
 application</a> 
 accepts both text <em>and</em> single or multiple images. With this app, a user can easily start a 
 new Google+ post with photos from the Android Gallery app.</p>

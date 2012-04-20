@@ -50,11 +50,14 @@ cues are needed.</p>
 
 <p>Fortunately, it's easy to add labels to UI elements in your application that
 can be read out loud to your user by a speech-based accessibility service like <a
-  href="https://market.android.com/details?id=com.google.android.marvin.talkback">TalkBack</a>.
+href="https://play.google.com/store/apps/details?id=com.google.android.marvin.talkback">TalkBack</a>
+.
 If you have a label that's likely not to change during the lifecycle of the
 application (such as "Pause" or "Purchase"), you can add it via the XML layout,
 by setting a UI element's <a
-  href="{@docRoot}reference/android/view.View#attr_android:contentDescription">android:contentDescription</a> attribute, like in this
+ 
+href="{@docRoot}reference/android/view/View.html#attr_android:contentDescription"
+>{@code android:contentDescription}</a> attribute, like in this
 example:</p>
 <pre>
 &lt;Button
@@ -83,7 +86,7 @@ the noise a user needs to navigate in order to pull useful information from your
 interface.</p>
 
 <p>Try it out!  Download <a
-  href="https://market.android.com/details?id=com.google.android.marvin.talkback">TalkBack</a>
+href="https://play.google.com/store/apps/details?id=com.google.android.marvin.talkback">TalkBack</a>
 (an accessibility service published by Google) and enable it in <strong>Settings
   &gt; Accessibility &gt; TalkBack</strong>.  Then navigate around your own
 application and listen for the audible cues provided by TalkBack.</p>
@@ -101,21 +104,21 @@ modification can be
 done at runtime using the
 {@link android.view.View#setFocusable View.setFocusable()} method on that UI
 control, or by setting the <a
-  href="{@docRoot}android.view.View#attr_android:focusable">{@code
+  href="{@docRoot}reference/android/view/View.html#attr_android:focusable">{@code
   android:focusable}</a>
 attrubute in your XML layout files.</p>
 
 <p>Also, each UI control has 4 attributes,
-<a href="{@docRoot}reference/android/view/View#attr_android:nextFocusUp">{@code
+<a href="{@docRoot}reference/android/view/View.html#attr_android:nextFocusUp">{@code
   android:nextFocusUp}</a>,
 <a
-  href="{@docRoot}reference/android/view/View#attr_android:nextFocusDown">{@code
+  href="{@docRoot}reference/android/view/View.html#attr_android:nextFocusDown">{@code
   android:nextFocusDown}</a>,
 <a
-  href="{@docRoot}reference/android/view/View#attr_android:nextFocusLeft">{@code
+  href="{@docRoot}reference/android/view/View.html#attr_android:nextFocusLeft">{@code
   android:nextFocusLeft}</a>,
 and <a
-  href="{@docRoot}reference/android/view/View#attr_android:nextFocusRight">{@code
+  href="{@docRoot}reference/android/view/View.html#attr_android:nextFocusRight">{@code
   android:nextFocusRight}</a>,
 which you can use to designate
 the next view to receive focus when the user navigates in that direction.  While
@@ -178,7 +181,8 @@ public void onTextChanged(String before, String after) {
 <p>Be sure to test the accessibility functionality as you add it to your
 application.  In order to test the content descriptions and Accessibility
 events, install and enable an accessibility service.  One option is <a
-  href="https://play.google.com/store/details?id=com.google.android.marvin.talkback">Talkback</a>,
+href="https://play.google.com/store/apps/details?id=com.google.android.marvin.talkback">Talkback</a>
+,
 a free, open source screen reader available on Google Play.  With the service
 enabled, test all the navigation flows through your application and listen to
 the spoken feedback.</p>
