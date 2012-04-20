@@ -4680,6 +4680,23 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
+     * Computes whether this view is visible on the screen.
+     *
+     * @return Whether the view is visible on the screen.
+     */
+    boolean isDisplayedOnScreen() {
+        // The first two checks are made also made by isShown() which
+        // however traverses the tree up to the parent to catch that.
+        // Therefore, we do some fail fast check to minimize the up
+        // tree traversal.
+        return (mAttachInfo != null
+                && mAttachInfo.mWindowVisibility == View.VISIBLE
+                && getAlpha() > 0
+                && isShown()
+                && getGlobalVisibleRect(mAttachInfo.mTmpInvalRect));
+    }
+
+    /**
      * Sets a delegate for implementing accessibility support via compositon as
      * opposed to inheritance. The delegate's primary use is for implementing
      * backwards compatible widgets. For more details see {@link AccessibilityDelegate}.
@@ -6301,9 +6318,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     boolean includeForAccessibility() {
         if (mAttachInfo != null) {
             if (!mAttachInfo.mIncludeNotImportantViews) {
-                return isImportantForAccessibility();
+                return isImportantForAccessibility() && isDisplayedOnScreen();
             } else {
-                return true;
+                return isDisplayedOnScreen();
             }
         }
         return false;
