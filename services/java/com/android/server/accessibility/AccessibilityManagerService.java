@@ -1007,10 +1007,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             synchronized (mGestureLock) {
                 Thread worker = new Thread(this, THREAD_NAME);
                 worker.start();
-                try {
-                    mGestureLock.wait();
-                } catch (InterruptedException ie) {
-                    /*  ignore */
+                while (mHandler == null) {
+                    try {
+                        mGestureLock.wait();
+                    } catch (InterruptedException ie) {
+                        /*  ignore */
+                    }
                 }
             }
         }
@@ -1044,7 +1046,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     IAccessibilityServiceClient service =
                         (IAccessibilityServiceClient) message.obj;
                     final int gestureId = message.arg1;
-                    final int interactionId = message.arg1;
+                    final int interactionId = message.arg2;
 
                     try {
                         service.onGesture(gestureId, this, interactionId);
