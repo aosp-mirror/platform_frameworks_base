@@ -19,6 +19,7 @@ package android.view.accessibility;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
@@ -408,17 +409,18 @@ public final class AccessibilityInteractionClient
      *     {@link android.view.accessibility.AccessibilityNodeInfo#ROOT_NODE_ID}
      *     to start from the root.
      * @param action The action to perform.
+     * @param arguments Optional action arguments.
      * @return Whether the action was performed.
      */
     public boolean performAccessibilityAction(int connectionId, int accessibilityWindowId,
-            long accessibilityNodeId, int action) {
+            long accessibilityNodeId, int action, Bundle arguments) {
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 final boolean success = connection.performAccessibilityAction(
-                        accessibilityWindowId, accessibilityNodeId, action, interactionId, this,
-                        Thread.currentThread().getId());
+                        accessibilityWindowId, accessibilityNodeId, action, arguments,
+                        interactionId, this, Thread.currentThread().getId());
                 if (success) {
                     return getPerformAccessibilityActionResultAndClear(interactionId);
                 }

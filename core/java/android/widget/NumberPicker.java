@@ -26,6 +26,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Spanned;
@@ -2068,7 +2069,7 @@ public class NumberPicker extends LinearLayout {
         }
 
         @Override
-        public boolean performAccessibilityAction(int action, int virtualViewId) {
+        public boolean performAction(int virtualViewId, int action, Bundle arguments) {
             switch (virtualViewId) {
                 case VIRTUAL_VIEW_ID_INPUT: {
                     switch (action) {
@@ -2086,7 +2087,7 @@ public class NumberPicker extends LinearLayout {
                     }
                 } break;
             }
-            return super.performAccessibilityAction(action, virtualViewId);
+            return super.performAction(virtualViewId, action, arguments);
         }
 
         public void sendAccessibilityEventForVirtualView(int virtualViewId, int eventType) {

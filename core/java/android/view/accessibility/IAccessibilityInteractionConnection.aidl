@@ -16,6 +16,7 @@
 
 package android.view.accessibility;
 
+import android.os.Bundle;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 
@@ -47,7 +48,7 @@ oneway interface IAccessibilityInteractionConnection {
         IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
         long interrogatingTid);
 
-    void performAccessibilityAction(long accessibilityNodeId, int action, int interactionId,
-        IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-        long interrogatingTid);
+    void performAccessibilityAction(long accessibilityNodeId, int action, in Bundle arguments,
+        int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
+        int interrogatingPid, long interrogatingTid);
 }

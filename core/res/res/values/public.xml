@@ -865,6 +865,10 @@
   <java-symbol type="string" name="yesterday" />
   <java-symbol type="string" name="imei" />
   <java-symbol type="string" name="meid" />
+  <java-symbol type="string" name="granularity_label_character" />
+  <java-symbol type="string" name="granularity_label_word" />
+  <java-symbol type="string" name="granularity_label_link" />
+  <java-symbol type="string" name="granularity_label_line" />
 
   <java-symbol type="plurals" name="abbrev_in_num_days" />
   <java-symbol type="plurals" name="abbrev_in_num_hours" />

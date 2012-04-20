@@ -39,6 +39,7 @@ import android.graphics.Region;
 import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -6390,7 +6391,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @param action The action to perform.
      * @return Whether the action was performed.
      */
-    public boolean performAccessibilityAction(int action) {
+    public boolean performAccessibilityAction(int action, Bundle args) {
         switch (action) {
             case AccessibilityNodeInfo.ACTION_CLICK: {
                 if (isClickable()) {

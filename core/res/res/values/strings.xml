@@ -2027,6 +2027,15 @@
     <!-- Label for ALT modifier key.  Must be short to fit on key! -->
     <string name="password_keyboard_label_alt_key">ALT</string>
 
+    <!-- Label for granularity to traverse the content on an AccessibilityNodeInfo by character. Only spoken to the user. [CHAR LIMIT=NONE] -->
+    <string name="granularity_label_character">character</string>
+    <!-- Label for granularity to traverse the content on an AccessibilityNodeInfo by word. Only spoken to the user. [CHAR LIMIT=NONE] -->
+    <string name="granularity_label_word">word</string>
+    <!-- Label for granularity to traverse the content on an AccessibilityNodeInfo by link. Only spoken to the user. [CHAR LIMIT=NONE] -->
+    <string name="granularity_label_link">link</string>
+    <!-- Label for granularity to traverse the content on an AccessibilityNodeInfo by line. Only spoken to the user. [CHAR LIMIT=NONE] -->
+    <string name="granularity_label_line">line</string>
+
     <!-- A format string for 12-hour time of day, just the hour, not the minute, with lower-case "am" or "pm" (example: "3pm"). -->
     <string name="hour_ampm">"<xliff:g id="hour" example="3">%-l</xliff:g><xliff:g id="ampm" example="pm">%P</xliff:g>"</string>
 

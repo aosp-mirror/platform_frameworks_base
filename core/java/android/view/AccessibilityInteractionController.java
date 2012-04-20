@@ -18,6 +18,7 @@ package android.view;
 
 import static android.view.accessibility.AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -514,8 +515,9 @@ final class AccessibilityInteractionController {
     }
 
     public void performAccessibilityActionClientThread(long accessibilityNodeId, int action,
-            int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
-            int interogatingPid, long interrogatingTid) {
+            Bundle arguments, int interactionId,
+            IAccessibilityInteractionConnectionCallback callback, int flags, int interogatingPid,
+            long interrogatingTid) {
         Message message = mHandler.obtainMessage();
         message.what = PrivateHandler.MSG_PERFORM_ACCESSIBILITY_ACTION;
         message.arg1 = flags;
@@ -525,6 +527,7 @@ final class AccessibilityInteractionController {
         args.argi2 = action;
         args.argi3 = interactionId;
         args.arg1 = callback;
+        args.arg2 = arguments;
         message.obj = args;
         // If the interrogation is performed by the same thread as the main UI
         // thread in this process, set the message as a static reference so
@@ -547,6 +550,7 @@ final class AccessibilityInteractionController {
         final int interactionId = args.argi3;
         final IAccessibilityInteractionConnectionCallback callback =
             (IAccessibilityInteractionConnectionCallback) args.arg1;
+        Bundle arguments = (Bundle) args.arg2;
         mPool.release(args);
         boolean succeeded = false;
         try {
@@ -564,9 +568,10 @@ final class AccessibilityInteractionController {
             if (target != null && target.isDisplayedOnScreen()) {
                 AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
                 if (provider != null) {
-                    succeeded = provider.performAccessibilityAction(action, virtualDescendantId);
+                    succeeded = provider.performAction(virtualDescendantId, action,
+                            arguments);
                 } else if (virtualDescendantId == View.NO_ID) {
-                    succeeded = target.performAccessibilityAction(action);
+                    succeeded = target.performAccessibilityAction(action, arguments);
                 }
             }
         } finally {

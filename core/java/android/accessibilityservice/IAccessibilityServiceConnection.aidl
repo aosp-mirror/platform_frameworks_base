@@ -16,6 +16,7 @@
 
 package android.accessibilityservice;
 
+import android.os.Bundle;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
@@ -147,14 +148,15 @@ interface IAccessibilityServiceConnection {
      *     {@link android.view.accessibility.AccessibilityNodeInfo#ROOT_NODE_ID}
      *     to start from the root.
      * @param action The action to perform.
+     * @param arguments Optional action arguments.
      * @param interactionId The id of the interaction for matching with the callback result.
      * @param callback Callback which to receive the result.
      * @param threadId The id of the calling thread.
      * @return Whether the action was performed.
      */
     boolean performAccessibilityAction(int accessibilityWindowId, long accessibilityNodeId,
-        int action, int interactionId, IAccessibilityInteractionConnectionCallback callback,
-        long threadId);
+        int action, in Bundle arguments, int interactionId,
+        IAccessibilityInteractionConnectionCallback callback, long threadId);
 
     /**
      * @return The associated accessibility service info.
