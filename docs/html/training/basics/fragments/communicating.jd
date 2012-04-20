@@ -4,7 +4,7 @@ parent.link=index.html
 
 trainingnavtop=true
 previous.title=Building a Flexible UI
-previous.link=fragment-ui.html 
+previous.link=fragment-ui.html
 
 @jd:body
 

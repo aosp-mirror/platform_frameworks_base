@@ -143,7 +143,15 @@ private boolean isSameProvider(String provider1, String provider2) {
 
 <h2 id="TaskTerminateUpdates">Terminate Location Updates</h2>
 
-<p>When you are done with using location data, you should terminate location update to reduce unnecessary consumption of power and network bandwidth.  For example, if the user navigates away from an activity where location updates are displayed, you should stop location update by calling {@link android.location.LocationManager#removeUpdates(android.location.LocationListener) removeUpdates()} in {@link android.app.Activity#onStop()}.  ({@link android.app.Activity#onStop()} is called when the activity is no longer visible.  If you want to learn more about activity lifecycle, read up on the <a href="/training/basic-activity-lifecycle/stopping.html">Starting and Stopping an Activity</a> lesson.</p>
+<p>When you are done with using location data, you should terminate location update to reduce
+unnecessary consumption of power and network bandwidth.  For example, if the user navigates away
+from an activity where location updates are displayed, you should stop location update by calling
+{@link android.location.LocationManager#removeUpdates(android.location.LocationListener)
+removeUpdates()} in {@link android.app.Activity#onStop()}.  ({@link android.app.Activity#onStop()}
+is called when the activity is no longer visible.  If you want to learn more about activity
+lifecycle, read up on the <a
+href="{@docRoot}training/basics/activity-lifecycle/stopping.html">Stopping and Restarting an
+Activity</a> lesson.</p>
 
 <pre>
 protected void onStop() {
