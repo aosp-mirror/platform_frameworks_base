@@ -128,7 +128,7 @@ can also be <em>implicit</em>, in which case the {@link android.content.Intent} 
 the desired component, but allows any app installed on the device to respond to the intent
 as long as it satisfies the meta-data specifications for the action that's specified in various
 {@link android.content.Intent} parameters. For more informations, see the class about <a
-href="{@docRoot}training/intents/index.html">Interacting with Other Apps</a>.</p>
+href="{@docRoot}training/basics/intents/index.html">Interacting with Other Apps</a>.</p>
 </div>
 </div>
 
@@ -301,7 +301,8 @@ on Android 4.0.
 
 <p>To learn more about building Android apps, continue to follow the
 basic training classes. The next class is <a
-href="{@docRoot}training/activity-lifecycle/index.html">Managing the Activity Lifecycle</a>.</p>
+href="{@docRoot}training/basics/activity-lifecycle/index.html">Managing the Activity
+Lifecycle</a>.</p>
 
 
 

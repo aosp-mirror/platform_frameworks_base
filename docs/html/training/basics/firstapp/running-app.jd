@@ -35,7 +35,7 @@ next.link=building-ui.html
 </div> 
 
 
-<p>If you followed the <a href="{@docRoot}creating-project.html">previous lesson</a> to create an
+<p>If you followed the <a href="creating-project.html">previous lesson</a> to create an
 Android project, it includes a default set of "Hello World" source files that allow you to
 run the app right away.</p>
 
