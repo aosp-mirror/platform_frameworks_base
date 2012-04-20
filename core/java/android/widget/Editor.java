@@ -1241,24 +1241,21 @@ public class Editor {
             }
 
             DynamicLayout dynamicLayout = (DynamicLayout) layout;
-            int[] blockEnds = dynamicLayout.getBlockEnds();
+            int[] blockEndLines = dynamicLayout.getBlockEndLines();
             int[] blockIndices = dynamicLayout.getBlockIndices();
             final int numberOfBlocks = dynamicLayout.getNumberOfBlocks();
 
-            final int mScrollX = mTextView.getScrollX();
-            final int mScrollY = mTextView.getScrollY();
-            canvas.translate(mScrollX, mScrollY);
             int endOfPreviousBlock = -1;
             int searchStartIndex = 0;
             for (int i = 0; i < numberOfBlocks; i++) {
-                int blockEnd = blockEnds[i];
+                int blockEndLine = blockEndLines[i];
                 int blockIndex = blockIndices[i];
 
                 final boolean blockIsInvalid = blockIndex == DynamicLayout.INVALID_BLOCK_INDEX;
                 if (blockIsInvalid) {
                     blockIndex = getAvailableDisplayListIndex(blockIndices, numberOfBlocks,
                             searchStartIndex);
-                    // Dynamic layout internal block indices structure is updated from Editor
+                    // Note how dynamic layout's internal block indices get updated from Editor
                     blockIndices[i] = blockIndex;
                     searchStartIndex = blockIndex + 1;
                 }
@@ -1272,28 +1269,38 @@ public class Editor {
                 }
 
                 if (!blockDisplayList.isValid()) {
+                    final int blockBeginLine = endOfPreviousBlock + 1;
+                    final int top = layout.getLineTop(blockBeginLine);
+                    final int bottom = layout.getLineBottom(blockEndLine);
+
                     final HardwareCanvas hardwareCanvas = blockDisplayList.start();
                     try {
-                        hardwareCanvas.setViewport(width, height);
+                        hardwareCanvas.setViewport(width, bottom - top);
                         // The dirty rect should always be null for a display list
                         hardwareCanvas.onPreDraw(null);
-                        hardwareCanvas.translate(-mScrollX, -mScrollY);
-                        layout.drawText(hardwareCanvas, endOfPreviousBlock + 1, blockEnd);
-                        hardwareCanvas.translate(mScrollX, mScrollY);
+                        // drawText is always relative to TextView's origin, this translation brings
+                        // this range of text back to the top of the viewport
+                        hardwareCanvas.translate(0, -top);
+                        layout.drawText(hardwareCanvas, blockBeginLine, blockEndLine);
+                        hardwareCanvas.translate(0, top);
                     } finally {
                         hardwareCanvas.onPostDraw();
                         blockDisplayList.end();
                         if (View.USE_DISPLAY_LIST_PROPERTIES) {
-                            blockDisplayList.setLeftTopRightBottom(0, 0, width, height);
+                            blockDisplayList.setLeftTopRightBottom(0, top, width, bottom);
+                            // Same as drawDisplayList below, handled by our TextView's parent
+                            blockDisplayList.setClipChildren(false);
                         }
                     }
                 }
 
+                // TODO When View.USE_DISPLAY_LIST_PROPERTIES is the only code path, the
+                // width and height parameters should be removed and the bounds set above in
+                // setLeftTopRightBottom should be used instead for quick rejection.
                 ((HardwareCanvas) canvas).drawDisplayList(blockDisplayList, width, height, null,
-                        DisplayList.FLAG_CLIP_CHILDREN);
-                endOfPreviousBlock = blockEnd;
+                        0 /* no child clipping, our TextView parent enforces it */);
+                endOfPreviousBlock = blockEndLine;
             }
-            canvas.translate(-mScrollX, -mScrollY);
         } else {
             // Boring layout is used for empty and hint text
             layout.drawText(canvas, firstLine, lastLine);
@@ -1572,11 +1579,9 @@ public class Editor {
     }
 
     void onScrollChanged() {
-            if (mPositionListener != null) {
-                mPositionListener.onScrollChanged();
-            }
-            // Internal scroll affects the clip boundaries
-            invalidateTextDisplayList();
+        if (mPositionListener != null) {
+            mPositionListener.onScrollChanged();
+        }
     }
 
     /**

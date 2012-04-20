@@ -117,7 +117,7 @@ public class DynamicLayout extends Layout
 
         mObjects = new PackedObjectVector<Directions>(1);
 
-        mBlockEnds = new int[] { 0 };
+        mBlockEndLines = new int[] { 0 };
         mBlockIndices = new int[] { INVALID_BLOCK_INDEX };
         mNumberOfBlocks = 1;
 
@@ -391,23 +391,23 @@ public class DynamicLayout extends Layout
         int firstBlock = -1;
         int lastBlock = -1;
         for (int i = 0; i < mNumberOfBlocks; i++) {
-            if (mBlockEnds[i] >= startLine) {
+            if (mBlockEndLines[i] >= startLine) {
                 firstBlock = i;
                 break;
             }
         }
         for (int i = firstBlock; i < mNumberOfBlocks; i++) {
-            if (mBlockEnds[i] >= endLine) {
+            if (mBlockEndLines[i] >= endLine) {
                 lastBlock = i;
                 break;
             }
         }
-        final int lastBlockEndLine = mBlockEnds[lastBlock];
+        final int lastBlockEndLine = mBlockEndLines[lastBlock];
 
         boolean createBlockBefore = startLine > (firstBlock == 0 ? 0 :
-                mBlockEnds[firstBlock - 1] + 1);
+                mBlockEndLines[firstBlock - 1] + 1);
         boolean createBlock = newLineCount > 0;
-        boolean createBlockAfter = endLine < mBlockEnds[lastBlock];
+        boolean createBlockAfter = endLine < mBlockEndLines[lastBlock];
 
         int numAddedBlocks = 0;
         if (createBlockBefore) numAddedBlocks++;
@@ -419,27 +419,27 @@ public class DynamicLayout extends Layout
 
         if (newNumberOfBlocks == 0) {
             // Even when text is empty, there is actually one line and hence one block
-            mBlockEnds[0] = 0;
+            mBlockEndLines[0] = 0;
             mBlockIndices[0] = INVALID_BLOCK_INDEX;
             mNumberOfBlocks = 1;
             return;
         }
 
-        if (newNumberOfBlocks > mBlockEnds.length) {
+        if (newNumberOfBlocks > mBlockEndLines.length) {
             final int newSize = ArrayUtils.idealIntArraySize(newNumberOfBlocks);
-            int[] blockEnds = new int[newSize];
+            int[] blockEndLines = new int[newSize];
             int[] blockIndices = new int[newSize];
-            System.arraycopy(mBlockEnds, 0, blockEnds, 0, firstBlock);
+            System.arraycopy(mBlockEndLines, 0, blockEndLines, 0, firstBlock);
             System.arraycopy(mBlockIndices, 0, blockIndices, 0, firstBlock);
-            System.arraycopy(mBlockEnds, lastBlock + 1,
-                    blockEnds, firstBlock + numAddedBlocks, mNumberOfBlocks - lastBlock - 1);
+            System.arraycopy(mBlockEndLines, lastBlock + 1,
+                    blockEndLines, firstBlock + numAddedBlocks, mNumberOfBlocks - lastBlock - 1);
             System.arraycopy(mBlockIndices, lastBlock + 1,
                     blockIndices, firstBlock + numAddedBlocks, mNumberOfBlocks - lastBlock - 1);
-            mBlockEnds = blockEnds;
+            mBlockEndLines = blockEndLines;
             mBlockIndices = blockIndices;
         } else {
-            System.arraycopy(mBlockEnds, lastBlock + 1,
-                    mBlockEnds, firstBlock + numAddedBlocks, mNumberOfBlocks - lastBlock - 1);
+            System.arraycopy(mBlockEndLines, lastBlock + 1,
+                    mBlockEndLines, firstBlock + numAddedBlocks, mNumberOfBlocks - lastBlock - 1);
             System.arraycopy(mBlockIndices, lastBlock + 1,
                     mBlockIndices, firstBlock + numAddedBlocks, mNumberOfBlocks - lastBlock - 1);
         }
@@ -447,24 +447,24 @@ public class DynamicLayout extends Layout
         mNumberOfBlocks = newNumberOfBlocks;
         final int deltaLines = newLineCount - (endLine - startLine + 1);
         for (int i = firstBlock + numAddedBlocks; i < mNumberOfBlocks; i++) {
-            mBlockEnds[i] += deltaLines;
+            mBlockEndLines[i] += deltaLines;
         }
 
         int blockIndex = firstBlock;
         if (createBlockBefore) {
-            mBlockEnds[blockIndex] = startLine - 1;
+            mBlockEndLines[blockIndex] = startLine - 1;
             mBlockIndices[blockIndex] = INVALID_BLOCK_INDEX;
             blockIndex++;
         }
 
         if (createBlock) {
-            mBlockEnds[blockIndex] = startLine + newLineCount - 1;
+            mBlockEndLines[blockIndex] = startLine + newLineCount - 1;
             mBlockIndices[blockIndex] = INVALID_BLOCK_INDEX;
             blockIndex++;
         }
 
         if (createBlockAfter) {
-            mBlockEnds[blockIndex] = lastBlockEndLine + deltaLines;
+            mBlockEndLines[blockIndex] = lastBlockEndLine + deltaLines;
             mBlockIndices[blockIndex] = INVALID_BLOCK_INDEX;
         }
     }
@@ -473,10 +473,10 @@ public class DynamicLayout extends Layout
      * This package private method is used for test purposes only
      * @hide
      */
-    void setBlocksDataForTest(int[] blockEnds, int[] blockIndices, int numberOfBlocks) {
-        mBlockEnds = new int[blockEnds.length];
+    void setBlocksDataForTest(int[] blockEndLines, int[] blockIndices, int numberOfBlocks) {
+        mBlockEndLines = new int[blockEndLines.length];
         mBlockIndices = new int[blockIndices.length];
-        System.arraycopy(blockEnds, 0, mBlockEnds, 0, blockEnds.length);
+        System.arraycopy(blockEndLines, 0, mBlockEndLines, 0, blockEndLines.length);
         System.arraycopy(blockIndices, 0, mBlockIndices, 0, blockIndices.length);
         mNumberOfBlocks = numberOfBlocks;
     }
@@ -484,8 +484,8 @@ public class DynamicLayout extends Layout
     /**
      * @hide
      */
-    public int[] getBlockEnds() {
-        return mBlockEnds;
+    public int[] getBlockEndLines() {
+        return mBlockEndLines;
     }
 
     /**
@@ -633,8 +633,8 @@ public class DynamicLayout extends Layout
      * @hide
      */
     public static final int INVALID_BLOCK_INDEX = -1;
-    // Stores the line numbers of the last line of each block
-    private int[] mBlockEnds;
+    // Stores the line numbers of the last line of each block (inclusive)
+    private int[] mBlockEndLines;
     // The indices of this block's display list in TextView's internal display list array or
     // INVALID_BLOCK_INDEX if this block has been invalidated during an edition
     private int[] mBlockIndices;
