@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.net.http.SslError;
 import android.os.Message;
 import android.view.KeyEvent;
+import android.view.ViewRootImpl;
 
 public class WebViewClient {
 
@@ -273,6 +274,10 @@ public class WebViewClient {
      * @param event The key event.
      */
     public void onUnhandledKeyEvent(WebView view, KeyEvent event) {
+        ViewRootImpl root = view.getViewRootImpl();
+        if (root != null) {
+            root.dispatchUnhandledKey(event);
+        }
     }
 
     /**
