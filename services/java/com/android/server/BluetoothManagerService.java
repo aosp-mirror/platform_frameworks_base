@@ -124,6 +124,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         mCallbacks = new ArrayList<IBluetoothManagerCallback>();
         mStateChangeCallbacks = new ArrayList<IBluetoothStateChangeCallback>();
         IntentFilter mFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        mFilter.addAction(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED);
         registerForAirplaneMode(mFilter);
         mContext.registerReceiver(mReceiver, mFilter);
         boolean airplaneModeOn = isAirplaneModeOn();
@@ -294,6 +295,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             }
             if (!isConnected()) mBinding = true;
         }
+
         Message msg = mHandler.obtainMessage(MESSAGE_ENABLE);
         msg.arg1=1; //persist
         mHandler.sendMessage(msg);
@@ -342,12 +344,30 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     public String getAddress() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH ADMIN permission");
+        synchronized(mConnection) {
+            if (mBluetooth != null) {
+                try {
+                    return mBluetooth.getAddress();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "getAddress(): Unable to retrieve address remotely..Returning cached address",e);
+                }
+            }
+        }
         return mAddress;
     }
 
     public String getName() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH ADMIN permission");
+        synchronized(mConnection) {
+            if (mBluetooth != null) {
+                try {
+                    return mBluetooth.getName();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "getName(): Unable to retrieve name remotely..Returning cached name",e);
+                }
+            }
+        }
         return mName;
     }
 
