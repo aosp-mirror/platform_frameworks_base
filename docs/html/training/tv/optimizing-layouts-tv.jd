@@ -186,8 +186,8 @@ cause out-of-memory errors in your app. To avoid this, follow these tips:
       {@link android.graphics.Bitmap} views that are no longer needed.
   </li>
   <li>Use {@link java.lang.ref.WeakReference} for storing references 
-      to {@link android.graphics.Bitmap} objects in a in-memory 
-      <a href="{@link java.util.Collection}.</li>
+      to {@link android.graphics.Bitmap} objects in an in-memory 
+      {@link java.util.Collection}.</li>
   <li>If you fetch images from the network, use {@link android.os.AsyncTask} 
       to fetch them and store them on the SD card for faster access.
       Never do network transactions on the application's UI thread.
