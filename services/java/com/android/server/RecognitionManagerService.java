@@ -65,7 +65,7 @@ public class RecognitionManagerService extends Binder {
     RecognitionManagerService(Context context) {
         mContext = context;
         mMonitor = new MyPackageMonitor();
-        mMonitor.register(context, true);
+        mMonitor.register(context, null, true);
     }
     
     public void systemReady() {

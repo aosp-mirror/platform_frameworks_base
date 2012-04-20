@@ -21,6 +21,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 
 import java.util.HashSet;
 
@@ -32,7 +35,11 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     static final IntentFilter sPackageFilt = new IntentFilter();
     static final IntentFilter sNonDataFilt = new IntentFilter();
     static final IntentFilter sExternalFilt = new IntentFilter();
-    
+
+    static final Object sLock = new Object();
+    static HandlerThread sBackgroundThread;
+    static Handler sBackgroundHandler;
+
     static {
         sPackageFilt.addAction(Intent.ACTION_PACKAGE_ADDED);
         sPackageFilt.addAction(Intent.ACTION_PACKAGE_REMOVED);
@@ -49,6 +56,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     final HashSet<String> mUpdatingPackages = new HashSet<String>();
     
     Context mRegisteredContext;
+    Handler mRegisteredHandler;
     String[] mDisappearingPackages;
     String[] mAppearingPackages;
     String[] mModifiedPackages;
@@ -57,18 +65,35 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     
     String[] mTempArray = new String[1];
     
-    public void register(Context context, boolean externalStorage) {
+    public void register(Context context, Looper thread, boolean externalStorage) {
         if (mRegisteredContext != null) {
             throw new IllegalStateException("Already registered");
         }
         mRegisteredContext = context;
-        context.registerReceiver(this, sPackageFilt);
-        context.registerReceiver(this, sNonDataFilt);
+        if (thread == null) {
+            synchronized (sLock) {
+                if (sBackgroundThread == null) {
+                    sBackgroundThread = new HandlerThread("PackageMonitor",
+                            android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                    sBackgroundThread.start();
+                    sBackgroundHandler = new Handler(sBackgroundThread.getLooper());
+                }
+                mRegisteredHandler = sBackgroundHandler;
+            }
+        } else {
+            mRegisteredHandler = new Handler(thread);
+        }
+        context.registerReceiver(this, sPackageFilt, null, mRegisteredHandler);
+        context.registerReceiver(this, sNonDataFilt, null, mRegisteredHandler);
         if (externalStorage) {
-            context.registerReceiver(this, sExternalFilt);
+            context.registerReceiver(this, sExternalFilt, null, mRegisteredHandler);
         }
     }
-    
+
+    public Handler getRegisteredHandler() {
+        return mRegisteredHandler;
+    }
+
     public void unregister() {
         if (mRegisteredContext == null) {
             throw new IllegalStateException("Not registered");

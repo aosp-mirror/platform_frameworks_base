@@ -282,11 +282,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         };
 
         // package changes
-        monitor.register(context, true);
+        monitor.register(context, null, true);
 
         // boot completed
         IntentFilter bootFiler = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
-        mContext.registerReceiver(monitor, bootFiler);
+        mContext.registerReceiver(monitor, bootFiler, null, monitor.getRegisteredHandler());
     }
 
     /**

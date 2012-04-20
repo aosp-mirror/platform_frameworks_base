@@ -451,7 +451,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public DevicePolicyManagerService(Context context) {
         mContext = context;
         mMonitor = new MyPackageMonitor();
-        mMonitor.register(context, true);
+        mMonitor.register(context, null, true);
         mWakeLock = ((PowerManager)context.getSystemService(Context.POWER_SERVICE))
                 .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DPM");
         IntentFilter filter = new IntentFilter();

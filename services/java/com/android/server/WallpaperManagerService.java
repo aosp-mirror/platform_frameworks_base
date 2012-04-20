@@ -295,7 +295,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                             || !wallpaper.wallpaperComponent.getPackageName().equals(packageName)) {
                         continue;
                     }
-                    doPackagesChanged(true, wallpaper);
+                    doPackagesChangedLocked(true, wallpaper);
                 }
             }
         }
@@ -315,66 +315,68 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
 
         @Override
         public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
-            boolean changed = false;
-            for (int i = 0; i < mWallpaperMap.size(); i++) {
-                WallpaperData wallpaper = mWallpaperMap.valueAt(i);
-                boolean res = doPackagesChanged(doit, wallpaper);
-                changed |= res;
+            synchronized (mLock) {
+                boolean changed = false;
+                for (int i = 0; i < mWallpaperMap.size(); i++) {
+                    WallpaperData wallpaper = mWallpaperMap.valueAt(i);
+                    boolean res = doPackagesChangedLocked(doit, wallpaper);
+                    changed |= res;
+                }
+                return changed;
             }
-            return changed;
         }
 
         @Override
         public void onSomePackagesChanged() {
-            for (int i = 0; i < mWallpaperMap.size(); i++) {
-                WallpaperData wallpaper = mWallpaperMap.valueAt(i);
-                doPackagesChanged(true, wallpaper);
+            synchronized (mLock) {
+                for (int i = 0; i < mWallpaperMap.size(); i++) {
+                    WallpaperData wallpaper = mWallpaperMap.valueAt(i);
+                    doPackagesChangedLocked(true, wallpaper);
+                }
             }
         }
 
-        boolean doPackagesChanged(boolean doit, WallpaperData wallpaper) {
+        boolean doPackagesChangedLocked(boolean doit, WallpaperData wallpaper) {
             boolean changed = false;
-            synchronized (mLock) {
-                if (wallpaper.wallpaperComponent != null) {
-                    int change = isPackageDisappearing(wallpaper.wallpaperComponent
-                            .getPackageName());
-                    if (change == PACKAGE_PERMANENT_CHANGE
-                            || change == PACKAGE_TEMPORARY_CHANGE) {
-                        changed = true;
-                        if (doit) {
-                            Slog.w(TAG, "Wallpaper uninstalled, removing: "
-                                    + wallpaper.wallpaperComponent);
-                            clearWallpaperLocked(false, wallpaper.userId);
-                        }
-                    }
-                }
-                if (wallpaper.nextWallpaperComponent != null) {
-                    int change = isPackageDisappearing(wallpaper.nextWallpaperComponent
-                            .getPackageName());
-                    if (change == PACKAGE_PERMANENT_CHANGE
-                            || change == PACKAGE_TEMPORARY_CHANGE) {
-                        wallpaper.nextWallpaperComponent = null;
-                    }
-                }
-                if (wallpaper.wallpaperComponent != null
-                        && isPackageModified(wallpaper.wallpaperComponent.getPackageName())) {
-                    try {
-                        mContext.getPackageManager().getServiceInfo(
-                                wallpaper.wallpaperComponent, 0);
-                    } catch (NameNotFoundException e) {
-                        Slog.w(TAG, "Wallpaper component gone, removing: "
+            if (wallpaper.wallpaperComponent != null) {
+                int change = isPackageDisappearing(wallpaper.wallpaperComponent
+                        .getPackageName());
+                if (change == PACKAGE_PERMANENT_CHANGE
+                        || change == PACKAGE_TEMPORARY_CHANGE) {
+                    changed = true;
+                    if (doit) {
+                        Slog.w(TAG, "Wallpaper uninstalled, removing: "
                                 + wallpaper.wallpaperComponent);
                         clearWallpaperLocked(false, wallpaper.userId);
                     }
                 }
-                if (wallpaper.nextWallpaperComponent != null
-                        && isPackageModified(wallpaper.nextWallpaperComponent.getPackageName())) {
-                    try {
-                        mContext.getPackageManager().getServiceInfo(
-                                wallpaper.nextWallpaperComponent, 0);
-                    } catch (NameNotFoundException e) {
-                        wallpaper.nextWallpaperComponent = null;
-                    }
+            }
+            if (wallpaper.nextWallpaperComponent != null) {
+                int change = isPackageDisappearing(wallpaper.nextWallpaperComponent
+                        .getPackageName());
+                if (change == PACKAGE_PERMANENT_CHANGE
+                        || change == PACKAGE_TEMPORARY_CHANGE) {
+                    wallpaper.nextWallpaperComponent = null;
+                }
+            }
+            if (wallpaper.wallpaperComponent != null
+                    && isPackageModified(wallpaper.wallpaperComponent.getPackageName())) {
+                try {
+                    mContext.getPackageManager().getServiceInfo(
+                            wallpaper.wallpaperComponent, 0);
+                } catch (NameNotFoundException e) {
+                    Slog.w(TAG, "Wallpaper component gone, removing: "
+                            + wallpaper.wallpaperComponent);
+                    clearWallpaperLocked(false, wallpaper.userId);
+                }
+            }
+            if (wallpaper.nextWallpaperComponent != null
+                    && isPackageModified(wallpaper.nextWallpaperComponent.getPackageName())) {
+                try {
+                    mContext.getPackageManager().getServiceInfo(
+                            wallpaper.nextWallpaperComponent, 0);
+                } catch (NameNotFoundException e) {
+                    wallpaper.nextWallpaperComponent = null;
                 }
             }
             return changed;
@@ -387,7 +389,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         mMonitor = new MyPackageMonitor();
-        mMonitor.register(context, true);
+        mMonitor.register(context, null, true);
         WALLPAPER_BASE_DIR.mkdirs();
         loadSettingsLocked(0);
     }

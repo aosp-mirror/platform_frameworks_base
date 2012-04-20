@@ -511,7 +511,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 com.android.internal.R.string.config_networkLocationProvider);
         mGeocodeProviderPackageName = resources.getString(
                 com.android.internal.R.string.config_geocodeProvider);
-        mPackageMonitor.register(context, true);
+        mPackageMonitor.register(context, null, true);
 
         if (LOCAL_LOGV) {
             Slog.v(TAG, "Constructed LocationManager Service");
