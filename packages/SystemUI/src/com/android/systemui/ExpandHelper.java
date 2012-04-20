@@ -17,6 +17,7 @@
 
 package com.android.systemui;
 
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.RectF;
@@ -38,6 +39,8 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     private static final String TAG = "ExpandHelper";
     protected static final boolean DEBUG = false;
     private static final long EXPAND_DURATION = 250;
+    private static final long GLOW_DURATION = 150;
+
 
     // amount of overstretch for maximum brightness expressed in U
     // 2f: maximum brightness is stretching a 1U to 3U, or a 4U to 6U
@@ -60,7 +63,10 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     private Callback mCallback;
     private ScaleGestureDetector mDetector;
     private ViewScaler mScaler;
-    private ObjectAnimator mAnimation;
+    private ObjectAnimator mScaleAnimation;
+    private AnimatorSet mGlowAnimationSet;
+    private ObjectAnimator mGlowTopAnimation;
+    private ObjectAnimator mGlowBottomAnimation;
 
     private int mSmallSize;
     private int mLargeSize;
@@ -110,6 +116,16 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         mContext = context;
         mCallback = callback;
         mScaler = new ViewScaler();
+
+        mScaleAnimation = ObjectAnimator.ofFloat(mScaler, "height", 0f);
+        mScaleAnimation.setDuration(EXPAND_DURATION);
+
+        mGlowTopAnimation = ObjectAnimator.ofFloat(null, "alpha", 0f);
+        mGlowBottomAnimation = ObjectAnimator.ofFloat(null, "alpha", 0f);
+        mGlowAnimationSet = new AnimatorSet();
+        mGlowAnimationSet.play(mGlowTopAnimation).with(mGlowBottomAnimation);
+        mGlowAnimationSet.setDuration(GLOW_DURATION);
+
         mDetector =
                 new ScaleGestureDetector(context,
                                          new ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -155,11 +171,22 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         });
     }
     public void setGlow(float glow) {
-        if (mCurrViewTopGlow != null) {
-            mCurrViewTopGlow.setAlpha(glow);
-        }
-        if (mCurrViewBottomGlow != null) {
-            mCurrViewBottomGlow.setAlpha(glow);
+        if (!mGlowAnimationSet.isRunning()) {
+            if (mCurrViewTopGlow != null && mCurrViewBottomGlow != null) {
+                if (glow == 0f || mCurrViewTopGlow.getAlpha() == 0f) { 
+                    // animate glow in and out
+                    mGlowTopAnimation.setTarget(mCurrViewTopGlow);
+                    mGlowBottomAnimation.setTarget(mCurrViewBottomGlow);
+                    mGlowTopAnimation.setFloatValues(glow);
+                    mGlowBottomAnimation.setFloatValues(glow);
+                    mGlowAnimationSet.setupStartValues();
+                    mGlowAnimationSet.start();
+                } else {
+                    // set it explicitly in reponse to touches.
+                    mCurrViewTopGlow.setAlpha(glow);
+                    mCurrViewBottomGlow.setAlpha(glow);
+                }
+            }
         }
     }
 
@@ -216,8 +243,12 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
             h = (force || h < mNaturalHeight) ? mSmallSize : mNaturalHeight;
         }
         if (DEBUG && mCurrView != null) mCurrView.setBackgroundColor(0);
-        mAnimation = ObjectAnimator.ofFloat(mScaler, "height", h).setDuration(EXPAND_DURATION);
-        mAnimation.start();
+        if (mScaleAnimation.isRunning()) {
+            mScaleAnimation.cancel();
+        }
+        mScaleAnimation.setFloatValues(h);
+        mScaleAnimation.setupStartValues();
+        mScaleAnimation.start();
         mStretching = false;
         setGlow(0f);
         clearView();
