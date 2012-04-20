@@ -1,0 +1,155 @@
+page.title=Creating a Fragment
+parent.title=Building a Dynamic UI with Fragments
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Using the Android Support Library
+previous.link=support-lib.html
+next.title=Building a Flexible UI
+next.link=fragment-ui.html 
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Create">Create a Fragment Class</a></li>
+  <li><a href="#AddInLayout">Add a Fragment to an Activity using XML</a></li>
+</ol>
+
+    <h2>You should also read</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a></li>
+    </ul>
+
+<h2>Try it out</h2>
+    
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/FragmentBasics.zip"
+class="button">Download the sample</a>
+ <p class="filename">FragmentBasics.zip</p>
+</div>
+
+  </div>
+</div>
+
+<p>You can think of a fragment as a modular section of an activity, which has its own lifecycle,
+receives its own input events, and which you can add or remove while the activity is running (sort
+of like a "sub activity" that you can reuse in different activities). This lesson shows how to
+extend the {@link android.support.v4.app.Fragment} class using the Support Library so your app
+remains compatible with devices running system versions as old as Android 1.6.</p>
+
+<p class="note"><strong>Note:</strong> If you decide for other reasons that the minimum
+API level your app requires is 11 or higher, you don't need to use the Support
+Library and can instead use the framework's built in {@link android.app.Fragment} class and related
+APIs. Just be aware that this lesson is focused on using the APIs from the Support Library, which
+use a specific package signature and sometimes slightly different API names than the versions
+included in the platform.</p>
+
+
+
+<h2 id="Create">Create a Fragment Class</h2>
+
+<p>To create a fragment, extend the {@link android.support.v4.app.Fragment} class, then override 
+key lifecycle methods to insert your app logic, similar to the way you would with an {@link
+android.app.Activity} class.</p>
+
+<p>One difference when creating a {@link android.support.v4.app.Fragment} is that you must use the
+{@link android.support.v4.app.Fragment#onCreateView onCreateView()} callback to define the layout.
+In fact, this is the only callback you need in order to get a fragment running. For
+example, here's a simple fragment that specifies its own layout:</p>
+
+<pre>
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
+
+public class ArticleFragment extends Fragment {
+    &#64;Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, 
+        Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.article_view, container, false);
+    }
+}
+</pre>
+
+<p>Just like an activity, a fragment should implement other lifecycle callbacks that allow you to
+manage its state as it is added or removed from the activity and as the activity transitions
+between its lifecycle states. For instance, when the activity's {@link
+android.app.Activity#onPause()} method is called, any fragments in the activity also receive a call
+to {@link android.support.v4.app.Fragment#onPause()}.</p>
+
+<p>More information about the fragment lifecycle and callback methods is available in the <a
+href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> developer guide.</p>
+
+
+
+<h2 id="AddInLayout">Add a Fragment to an Activity using XML</h2> 
+
+<p>While fragments are reusable, modular UI components, each instance of a {@link
+android.support.v4.app.Fragment} class must be associated with a parent {@link
+android.support.v4.app.FragmentActivity}. You can achieve this association by defining each
+fragment within your activity layout XML file.</p>
+
+<p class="note"><strong>Note:</strong> {@link android.support.v4.app.FragmentActivity} is a
+special activity provided in the Support Library to handle fragments on system versions older than
+API level 11. If the lowest system version you support is API level 11 or higher, then you can use a
+regular {@link android.app.Activity}.</p>
+
+<p>Here is an example layout file that adds two fragments to an activity when the device
+screen is considered "large" (specified by the <code>large</code> qualifier in the directory
+name).</p>
+
+<p><code>res/layout-large/news_articles.xml:</code></p>
+<pre>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    &lt;fragment android:name="com.example.android.fragments.HeadlinesFragment"
+              android:id="@+id/headlines_fragment"
+              android:layout_weight="1"
+              android:layout_width="0dp"
+              android:layout_height="match_parent" />
+
+    &lt;fragment android:name="com.example.android.fragments.ArticleFragment"
+              android:id="@+id/article_fragment"
+              android:layout_weight="2"
+              android:layout_width="0dp"
+              android:layout_height="match_parent" />
+
+&lt;/LinearLayout>
+</pre>
+
+<p class="note"><strong>Tip:</strong> For more information about creating layouts for different
+screen sizes, read <a href="{@docRoot}training/multiscreen/screensizes.html">Supporting Different
+Screen Sizes</a>.</p>
+
+<p>Here's how an activity applies this layout:</p>
+
+<pre>
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+
+public class MainActivity extends FragmentActivity {
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.news_articles);
+    }
+}
+</pre>
+
+
+<p class="note"><strong>Note:</strong> When you add a fragment to an activity layout by defining
+the fragment in the layout XML file, you <em>cannot</em> remove the fragment at runtime. If you plan
+to swap your fragments in and out during user interaction, you must add the fragment to the activity
+when the activity first starts, as shown in the next lesson.</p>
+
+
+
