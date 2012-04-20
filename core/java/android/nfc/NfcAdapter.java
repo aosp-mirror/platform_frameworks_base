@@ -574,9 +574,10 @@ public final class NfcAdapter {
      *
      * @hide
      */
+
     public boolean disable() {
         try {
-            return sService.disable();
+            return sService.disable(true);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return false;
