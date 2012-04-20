@@ -3909,6 +3909,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 mSelectCursorExtent.offset(dx, dy);
                 mSelectCursorExtentTextQuad.offset(dx, dy);
             }
+        } else if (mHandleAlpha.getAlpha() > 0) {
+            // stop fading as we're not going to move with the layer.
+            mHandleAlphaAnimator.end();
         }
         if (mAutoCompletePopup != null &&
                 mCurrentScrollingLayerId == mEditTextLayerId) {
@@ -4490,9 +4493,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
 
         canvas.restoreToCount(saveCount);
-        if (mSelectingText) {
-            drawTextSelectionHandles(canvas);
-        }
+        drawTextSelectionHandles(canvas);
 
         if (extras == DRAW_EXTRAS_CURSOR_RING) {
             if (mTouchMode == TOUCH_SHORTPRESS_START_MODE) {
@@ -4730,6 +4731,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     private void onZoomAnimationStart() {
+        if (!mSelectingText && mHandleAlpha.getAlpha() > 0) {
+            mHandleAlphaAnimator.end();
+        }
     }
 
     private void onZoomAnimationEnd() {
@@ -4760,6 +4764,36 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private final DrawFilter mScrollFilter =
             new PaintFlagsDrawFilter(SCROLL_BITS, 0);
 
+    private class SelectionHandleAlpha {
+        private int mAlpha = 0;
+        public void setAlpha(int alpha) {
+            mAlpha = alpha;
+            if (mSelectHandleCenter != null) {
+                mSelectHandleCenter.setAlpha(alpha);
+                mSelectHandleLeft.setAlpha(alpha);
+                mSelectHandleRight.setAlpha(alpha);
+                // TODO: Use partial invalidate
+                invalidate();
+            }
+        }
+
+        public int getAlpha() {
+            return mAlpha;
+        }
+
+    }
+
+    private void startSelectingText() {
+        mSelectingText = true;
+        mHandleAlphaAnimator.setIntValues(255);
+        mHandleAlphaAnimator.start();
+    }
+    private void endSelectingText() {
+        mSelectingText = false;
+        mHandleAlphaAnimator.setIntValues(0);
+        mHandleAlphaAnimator.start();
+    }
+
     private void ensureSelectionHandles() {
         if (mSelectHandleCenter == null) {
             mSelectHandleCenter = mContext.getResources().getDrawable(
@@ -4768,6 +4802,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     com.android.internal.R.drawable.text_select_handle_left);
             mSelectHandleRight = mContext.getResources().getDrawable(
                     com.android.internal.R.drawable.text_select_handle_right);
+            mHandleAlpha.setAlpha(mHandleAlpha.getAlpha());
             mSelectHandleCenterOffset = new Point(0,
                     -mSelectHandleCenter.getIntrinsicHeight());
             mSelectHandleLeftOffset = new Point(0,
@@ -4779,31 +4814,40 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     private void drawTextSelectionHandles(Canvas canvas) {
+        if (mHandleAlpha.getAlpha() == 0) {
+            return;
+        }
         ensureSelectionHandles();
-        int[] handles = new int[4];
-        getSelectionHandles(handles);
-        int start_x = contentToViewDimension(handles[0]);
-        int start_y = contentToViewDimension(handles[1]);
-        int end_x = contentToViewDimension(handles[2]);
-        int end_y = contentToViewDimension(handles[3]);
+        if (mSelectingText) {
+            int[] handles = new int[4];
+            getSelectionHandles(handles);
+            int start_x = contentToViewDimension(handles[0]);
+            int start_y = contentToViewDimension(handles[1]);
+            int end_x = contentToViewDimension(handles[2]);
+            int end_y = contentToViewDimension(handles[3]);
+
+            if (mIsCaretSelection) {
+                // Caret handle is centered
+                start_x -= (mSelectHandleCenter.getIntrinsicWidth() / 2);
+                mSelectHandleCenter.setBounds(start_x, start_y,
+                        start_x + mSelectHandleCenter.getIntrinsicWidth(),
+                        start_y + mSelectHandleCenter.getIntrinsicHeight());
+            } else {
+                // Magic formula copied from TextView
+                start_x -= (mSelectHandleLeft.getIntrinsicWidth() * 3) / 4;
+                mSelectHandleLeft.setBounds(start_x, start_y,
+                        start_x + mSelectHandleLeft.getIntrinsicWidth(),
+                        start_y + mSelectHandleLeft.getIntrinsicHeight());
+                end_x -= mSelectHandleRight.getIntrinsicWidth() / 4;
+                mSelectHandleRight.setBounds(end_x, end_y,
+                        end_x + mSelectHandleRight.getIntrinsicWidth(),
+                        end_y + mSelectHandleRight.getIntrinsicHeight());
+            }
+        }
 
         if (mIsCaretSelection) {
-            // Caret handle is centered
-            start_x -= (mSelectHandleCenter.getIntrinsicWidth() / 2);
-            mSelectHandleCenter.setBounds(start_x, start_y,
-                    start_x + mSelectHandleCenter.getIntrinsicWidth(),
-                    start_y + mSelectHandleCenter.getIntrinsicHeight());
             mSelectHandleCenter.draw(canvas);
         } else {
-            // Magic formula copied from TextView
-            start_x -= (mSelectHandleLeft.getIntrinsicWidth() * 3) / 4;
-            mSelectHandleLeft.setBounds(start_x, start_y,
-                    start_x + mSelectHandleLeft.getIntrinsicWidth(),
-                    start_y + mSelectHandleLeft.getIntrinsicHeight());
-            end_x -= mSelectHandleRight.getIntrinsicWidth() / 4;
-            mSelectHandleRight.setBounds(end_x, end_y,
-                    end_x + mSelectHandleRight.getIntrinsicWidth(),
-                    end_y + mSelectHandleRight.getIntrinsicHeight());
             mSelectHandleLeft.draw(canvas);
             mSelectHandleRight.draw(canvas);
         }
@@ -5457,7 +5501,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             selectionDone();
             return false;
         }
-        mSelectingText = true;
+        startSelectingText();
         mTouchMode = TOUCH_DRAG_MODE;
         return true;
     }
@@ -5511,7 +5555,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     void selectionDone() {
         if (mSelectingText) {
             hidePasteButton();
-            mSelectingText = false;
+            endSelectingText();
             // finish is idempotent, so this is fine even if selectionDone was
             // called by mSelectCallback.onDestroyActionMode
             if (mSelectCallback != null) {
@@ -6643,6 +6687,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private long mTrackballUpTime = 0;
     private long mLastCursorTime = 0;
     private Rect mLastCursorBounds;
+    private SelectionHandleAlpha mHandleAlpha = new SelectionHandleAlpha();
+    private ObjectAnimator mHandleAlphaAnimator =
+            ObjectAnimator.ofInt(mHandleAlpha, "alpha", 0);
 
     // Set by default; BrowserActivity clears to interpret trackball data
     // directly for movement. Currently, the framework only passes
