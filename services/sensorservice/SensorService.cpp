@@ -316,7 +316,7 @@ void SensorService::sortEventBuffer(sensors_event_t* buffer, size_t count)
         static int cmp(void const* lhs, void const* rhs) {
             sensors_event_t const* l = static_cast<sensors_event_t const*>(lhs);
             sensors_event_t const* r = static_cast<sensors_event_t const*>(rhs);
-            return r->timestamp - l->timestamp;
+            return l->timestamp - r->timestamp;
         }
     };
     qsort(buffer, count, sizeof(sensors_event_t), compar::cmp);
