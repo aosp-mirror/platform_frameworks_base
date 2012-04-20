@@ -181,6 +181,8 @@ public class WebSettings {
     private boolean         mBlockNetworkImage = false;
     private boolean         mBlockNetworkLoads;
     private boolean         mJavaScriptEnabled = false;
+    private boolean         mAllowUniversalAccessFromFileURLs = true;
+    private boolean         mAllowFileAccessFromFileURLs = true;
     private boolean         mHardwareAccelSkia = false;
     private boolean         mShowVisualIndicator = false;
     private PluginState     mPluginState = PluginState.OFF;
@@ -1264,6 +1266,47 @@ public class WebSettings {
     }
 
     /**
+     * Sets whether JavaScript running in the context of a file scheme URL
+     * should be allowed to access content from any origin. This includes
+     * access to content from other file scheme URLs. See
+     * {@link #setAllowFileAccessFromFileURLs}. To enable the most restrictive,
+     * and therefore secure policy, this setting should be disabled.
+     * <p>
+     * The default value is true.
+     *
+     * @param flag whether JavaScript running in the context of a file scheme
+     *             URL should be allowed to access content from any origin
+     * @hide
+     */
+    public synchronized void setAllowUniversalAccessFromFileURLs(boolean flag) {
+        if (mAllowUniversalAccessFromFileURLs != flag) {
+            mAllowUniversalAccessFromFileURLs = flag;
+            postSync();
+        }
+    }
+
+    /**
+     * Sets whether JavaScript running in the context of a file scheme URL
+     * should be allowed to access content from other file scheme URLs. To
+     * enable the most restrictive, and therefore secure policy, this setting
+     * should be disabled. Note that the value of this setting is ignored if
+     * the value of {@link #getAllowUniversalAccessFromFileURLs} is true.
+     * <p>
+     * The default value is true.
+     *
+     * @param flag whether JavaScript running in the context of a file scheme
+     *             URL should be allowed to access content from other file
+     *             scheme URLs
+     * @hide
+     */
+    public synchronized void setAllowFileAccessFromFileURLs(boolean flag) {
+        if (mAllowFileAccessFromFileURLs != flag) {
+            mAllowFileAccessFromFileURLs = flag;
+            postSync();
+        }
+    }
+
+    /**
      * Tell the WebView to use Skia's hardware accelerated rendering path
      * @param flag True if the WebView should use Skia's hw-accel path
      * @hide
@@ -1497,6 +1540,33 @@ public class WebSettings {
      */
     public synchronized boolean getJavaScriptEnabled() {
         return mJavaScriptEnabled;
+    }
+
+    /**
+     * Gets whether JavaScript running in the context of a file scheme URL can
+     * access content from any origin. This includes access to content from
+     * other file scheme URLs.
+     *
+     * @return whether JavaScript running in the context of a file scheme URL
+     *         can access content from any origin
+     * @see #setAllowUniversalAccessFromFileURLs
+     * @hide
+     */
+    public synchronized boolean getAllowUniversalAccessFromFileURLs() {
+        return mAllowUniversalAccessFromFileURLs;
+    }
+
+    /**
+     * Gets whether JavaScript running in the context of a file scheme URL can
+     * access content from other file scheme URLs.
+     *
+     * @return whether JavaScript running in the context of a file scheme URL
+     *         can access content from other file scheme URLs
+     * @see #setAllowFileAccessFromFileURLs
+     * @hide
+     */
+    public synchronized boolean getAllowFileAccessFromFileURLs() {
+        return mAllowFileAccessFromFileURLs;
     }
 
     /**
