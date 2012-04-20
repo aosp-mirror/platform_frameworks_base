@@ -667,20 +667,21 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
     InfoCallbackImpl mInfoCallback = new InfoCallbackImpl() {
 
-        /**
-         * When somebody plugs in or unplugs the device, we don't want to display the biometric
-         * unlock.
-         */
         @Override
         public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn,
                 int batteryLevel) {
-            mSupressBiometricUnlock |= mPluggedIn != pluggedIn;
-            mPluggedIn = pluggedIn;
-            // If it's already running, don't close it down: the unplug didn't start it
-            if (!mBiometricUnlock.isRunning()) {
+            // When someone plugs in or unplugs the device, we hide the biometric sensor area and
+            // suppress its startup for the next onScreenTurnedOn().  Since plugging/unplugging
+            // causes the screen to turn on, the biometric unlock would start if it wasn't
+            // suppressed.
+            //
+            // However, if the biometric unlock is already running, we do not want to interrupt it.
+            if (mPluggedIn != pluggedIn && !mBiometricUnlock.isRunning()) {
                 mBiometricUnlock.stop();
                 mBiometricUnlock.hide();
+                mSupressBiometricUnlock = true;
             }
+            mPluggedIn = pluggedIn;
         }
 
         @Override
