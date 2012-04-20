@@ -2508,13 +2508,13 @@ public class Camera {
         }
 
         /**
-         * Sets the rotation angle in degrees relative to the orientation of
-         * the camera. This affects the pictures returned from JPEG {@link
-         * PictureCallback}. The camera driver may set orientation in the
-         * EXIF header without rotating the picture. Or the driver may rotate
-         * the picture and the EXIF thumbnail. If the Jpeg picture is rotated,
-         * the orientation in the EXIF header will be missing or 1 (row #0 is
-         * top and column #0 is left side).
+         * Sets the clockwise rotation angle in degrees relative to the
+         * orientation of the camera. This affects the pictures returned from
+         * JPEG {@link PictureCallback}. The camera driver may set orientation
+         * in the EXIF header without rotating the picture. Or the driver may
+         * rotate the picture and the EXIF thumbnail. If the Jpeg picture is
+         * rotated, the orientation in the EXIF header will be missing or 1
+         * (row #0 is top and column #0 is left side).
          *
          * <p>If applications want to rotate the picture to match the orientation
          * of what users see, apps should use {@link
