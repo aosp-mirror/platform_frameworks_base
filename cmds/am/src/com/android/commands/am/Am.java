@@ -194,6 +194,12 @@ public class Am {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
                 intent.putExtra(key, Uri.parse(value));
+            } else if (opt.equals("--ecn")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                ComponentName cn = ComponentName.unflattenFromString(value);
+                if (cn == null) throw new IllegalArgumentException("Bad component name: " + value);
+                intent.putExtra(key, cn);
             } else if (opt.equals("--eia")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
@@ -1366,6 +1372,7 @@ public class Am {
                 "    [--el <EXTRA_KEY> <EXTRA_LONG_VALUE> ...]\n" +
                 "    [--ef <EXTRA_KEY> <EXTRA_FLOAT_VALUE> ...]\n" +
                 "    [--eu <EXTRA_KEY> <EXTRA_URI_VALUE> ...]\n" +
+                "    [--ecn <EXTRA_KEY> <EXTRA_COMPONENT_NAME_VALUE>]\n" +
                 "    [--eia <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]\n" +
                 "    [--ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]\n" +
                 "    [--efa <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]\n" +
