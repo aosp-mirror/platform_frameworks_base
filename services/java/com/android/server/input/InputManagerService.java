@@ -26,6 +26,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -56,6 +58,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import android.server.BluetoothService;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -106,6 +109,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
     private final Callbacks mCallbacks;
     private final InputManagerHandler mHandler;
     private boolean mSystemReady;
+    private BluetoothService mBluetoothService;
 
     // Persistent data store.  Must be locked each time during use.
     private final PersistentDataStore mDataStore = new PersistentDataStore();
@@ -167,6 +171,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
             int repeat, int token);
     private static native void nativeCancelVibrate(int ptr, int deviceId, int token);
     private static native void nativeReloadKeyboardLayouts(int ptr);
+    private static native void nativeReloadDeviceAliases(int ptr);
     private static native String nativeDump(int ptr);
     private static native void nativeMonitor(int ptr);
 
@@ -217,12 +222,12 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
         updateShowTouchesFromSettings();
     }
 
-    public void systemReady() {
+    public void systemReady(BluetoothService bluetoothService) {
         if (DEBUG) {
             Slog.d(TAG, "System ready.");
         }
+        mBluetoothService = bluetoothService;
         mSystemReady = true;
-        reloadKeyboardLayouts();
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
@@ -237,10 +242,28 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
                 reloadKeyboardLayouts();
             }
         }, filter, null, mHandler);
+
+        filter = new IntentFilter(BluetoothDevice.ACTION_ALIAS_CHANGED);
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Bluetooth alias changed, reloading device names.");
+                }
+                reloadDeviceAliases();
+            }
+        }, filter, null, mHandler);
+
+        reloadKeyboardLayouts();
+        reloadDeviceAliases();
     }
 
     private void reloadKeyboardLayouts() {
         nativeReloadKeyboardLayouts(mPtr);
+    }
+
+    private void reloadDeviceAliases() {
+        nativeReloadDeviceAliases(mPtr);
     }
 
     public void setDisplaySize(int displayId, int width, int height,
@@ -1119,6 +1142,15 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
             return null;
         }
         return result;
+    }
+
+    // Native callback.
+    private String getDeviceAlias(String uniqueId) {
+        if (mBluetoothService != null &&
+                BluetoothAdapter.checkBluetoothAddress(uniqueId)) {
+            return mBluetoothService.getRemoteAlias(uniqueId);
+        }
+        return null;
     }
 
 

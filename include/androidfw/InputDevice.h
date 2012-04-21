@@ -66,13 +66,16 @@ public:
         float fuzz;
     };
 
-    void initialize(int32_t id, int32_t generation,
-            const String8& name, const String8& descriptor);
+    void initialize(int32_t id, int32_t generation, const InputDeviceIdentifier& identifier,
+            const String8& alias);
 
     inline int32_t getId() const { return mId; }
     inline int32_t getGeneration() const { return mGeneration; }
-    inline const String8 getName() const { return mName; }
-    inline const String8 getDescriptor() const { return mDescriptor; }
+    inline const InputDeviceIdentifier& getIdentifier() const { return mIdentifier; }
+    inline const String8& getAlias() const { return mAlias; }
+    inline const String8& getDisplayName() const {
+        return mAlias.isEmpty() ? mIdentifier.name : mAlias;
+    }
     inline uint32_t getSources() const { return mSources; }
 
     const MotionRange* getMotionRange(int32_t axis, uint32_t source) const;
@@ -103,8 +106,8 @@ public:
 private:
     int32_t mId;
     int32_t mGeneration;
-    String8 mName;
-    String8 mDescriptor;
+    InputDeviceIdentifier mIdentifier;
+    String8 mAlias;
     uint32_t mSources;
     int32_t mKeyboardType;
     sp<KeyCharacterMap> mKeyCharacterMap;

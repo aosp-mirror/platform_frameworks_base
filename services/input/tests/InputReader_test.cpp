@@ -174,6 +174,10 @@ private:
     virtual sp<KeyCharacterMap> getKeyboardLayoutOverlay(const String8& inputDeviceDescriptor) {
         return NULL;
     }
+
+    virtual String8 getDeviceAlias(const InputDeviceIdentifier& identifier) {
+        return String8::empty();
+    }
 };
 
 
@@ -1081,7 +1085,7 @@ TEST_F(InputReaderTest, GetInputDevices) {
 
     ASSERT_EQ(1U, inputDevices.size());
     ASSERT_EQ(1, inputDevices[0].getId());
-    ASSERT_STREQ("keyboard", inputDevices[0].getName().string());
+    ASSERT_STREQ("keyboard", inputDevices[0].getIdentifier().name.string());
     ASSERT_EQ(AINPUT_KEYBOARD_TYPE_NON_ALPHABETIC, inputDevices[0].getKeyboardType());
     ASSERT_EQ(AINPUT_SOURCE_KEYBOARD, inputDevices[0].getSources());
     ASSERT_EQ(size_t(0), inputDevices[0].getMotionRanges().size());
@@ -1090,7 +1094,7 @@ TEST_F(InputReaderTest, GetInputDevices) {
     inputDevices = mFakePolicy->getInputDevices();
     ASSERT_EQ(1U, inputDevices.size());
     ASSERT_EQ(1, inputDevices[0].getId());
-    ASSERT_STREQ("keyboard", inputDevices[0].getName().string());
+    ASSERT_STREQ("keyboard", inputDevices[0].getIdentifier().name.string());
     ASSERT_EQ(AINPUT_KEYBOARD_TYPE_NON_ALPHABETIC, inputDevices[0].getKeyboardType());
     ASSERT_EQ(AINPUT_SOURCE_KEYBOARD, inputDevices[0].getSources());
     ASSERT_EQ(size_t(0), inputDevices[0].getMotionRanges().size());
@@ -1311,7 +1315,7 @@ TEST_F(InputDeviceTest, WhenNoMappersAreRegistered_DeviceIsIgnored) {
     InputDeviceInfo info;
     mDevice->getDeviceInfo(&info);
     ASSERT_EQ(DEVICE_ID, info.getId());
-    ASSERT_STREQ(DEVICE_NAME, info.getName().string());
+    ASSERT_STREQ(DEVICE_NAME, info.getIdentifier().name.string());
     ASSERT_EQ(AINPUT_KEYBOARD_TYPE_NONE, info.getKeyboardType());
     ASSERT_EQ(AINPUT_SOURCE_UNKNOWN, info.getSources());
 
@@ -1381,7 +1385,7 @@ TEST_F(InputDeviceTest, WhenMappersAreRegistered_DeviceIsNotIgnoredAndForwardsRe
     InputDeviceInfo info;
     mDevice->getDeviceInfo(&info);
     ASSERT_EQ(DEVICE_ID, info.getId());
-    ASSERT_STREQ(DEVICE_NAME, info.getName().string());
+    ASSERT_STREQ(DEVICE_NAME, info.getIdentifier().name.string());
     ASSERT_EQ(AINPUT_KEYBOARD_TYPE_ALPHABETIC, info.getKeyboardType());
     ASSERT_EQ(uint32_t(AINPUT_SOURCE_KEYBOARD | AINPUT_SOURCE_TOUCHSCREEN), info.getSources());
 

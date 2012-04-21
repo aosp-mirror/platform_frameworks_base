@@ -70,6 +70,9 @@ struct InputReaderConfiguration {
         // The keyboard layouts must be reloaded.
         CHANGE_KEYBOARD_LAYOUTS = 1 << 4,
 
+        // The device name alias supplied by the may have changed for some devices.
+        CHANGE_DEVICE_ALIAS = 1 << 5,
+
         // All devices must be reopened.
         CHANGE_MUST_REOPEN = 1 << 31,
     };
@@ -228,6 +231,9 @@ public:
 
     /* Gets the keyboard layout for a particular input device. */
     virtual sp<KeyCharacterMap> getKeyboardLayoutOverlay(const String8& inputDeviceDescriptor) = 0;
+
+    /* Gets a user-supplied alias for a particular input device, or an empty string if none. */
+    virtual String8 getDeviceAlias(const InputDeviceIdentifier& identifier) = 0;
 };
 
 
@@ -528,6 +534,7 @@ private:
     int32_t mId;
     int32_t mGeneration;
     InputDeviceIdentifier mIdentifier;
+    String8 mAlias;
     uint32_t mClasses;
 
     Vector<InputMapper*> mMappers;

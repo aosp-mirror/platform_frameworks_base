@@ -918,7 +918,7 @@ void InputDevice::dump(String8& dump) {
     getDeviceInfo(& deviceInfo);
 
     dump.appendFormat(INDENT "Device %d: %s\n", deviceInfo.getId(),
-            deviceInfo.getName().string());
+            deviceInfo.getDisplayName().string());
     dump.appendFormat(INDENT2 "Generation: %d\n", mGeneration);
     dump.appendFormat(INDENT2 "IsExternal: %s\n", toString(mIsExternal));
     dump.appendFormat(INDENT2 "Sources: 0x%08x\n", deviceInfo.getSources());
@@ -967,6 +967,16 @@ void InputDevice::configure(nsecs_t when, const InputReaderConfiguration* config
                 sp<KeyCharacterMap> keyboardLayout =
                         mContext->getPolicy()->getKeyboardLayoutOverlay(mIdentifier.descriptor);
                 if (mContext->getEventHub()->setKeyboardLayoutOverlay(mId, keyboardLayout)) {
+                    bumpGeneration();
+                }
+            }
+        }
+
+        if (!changes || (changes & InputReaderConfiguration::CHANGE_DEVICE_ALIAS)) {
+            if (!(mClasses & INPUT_DEVICE_CLASS_VIRTUAL)) {
+                String8 alias = mContext->getPolicy()->getDeviceAlias(mIdentifier);
+                if (mAlias != alias) {
+                    mAlias = alias;
                     bumpGeneration();
                 }
             }
@@ -1039,7 +1049,7 @@ void InputDevice::timeoutExpired(nsecs_t when) {
 }
 
 void InputDevice::getDeviceInfo(InputDeviceInfo* outDeviceInfo) {
-    outDeviceInfo->initialize(mId, mGeneration, mIdentifier.name, mIdentifier.descriptor);
+    outDeviceInfo->initialize(mId, mGeneration, mIdentifier, mAlias);
 
     size_t numMappers = mMappers.size();
     for (size_t i = 0; i < numMappers; i++) {
