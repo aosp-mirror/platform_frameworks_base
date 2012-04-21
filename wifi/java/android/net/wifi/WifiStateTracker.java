@@ -141,7 +141,7 @@ public class WifiStateTracker implements NetworkStateTracker {
 
     @Override
     public void setPolicyDataEnable(boolean enabled) {
-        Slog.w(TAG, "ignoring setPolicyDataEnable(" + enabled + ")");
+        // ignored
     }
 
     /**

@@ -420,6 +420,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @Override
     public INetworkStatsSession openSession() {
         mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
+        assertBandwidthControlEnabled();
 
         // return an IBinder which holds strong references to any loaded stats
         // for its lifetime; when caller closes only weak references remain.
@@ -486,6 +487,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @Override
     public long getNetworkTotalBytes(NetworkTemplate template, long start, long end) {
         mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
+        assertBandwidthControlEnabled();
         return mDevStatsCached.getSummary(template, start, end).getTotalBytes();
     }
 
@@ -494,6 +496,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         if (Binder.getCallingUid() != uid) {
             mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
         }
+        assertBandwidthControlEnabled();
 
         // TODO: switch to data layer stats once kernel exports
         // for now, read network layer stats and flatten across all ifaces
@@ -565,6 +568,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @Override
     public void forceUpdate() {
         mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
+        assertBandwidthControlEnabled();
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -1038,6 +1042,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             }
         }
     };
+
+    private void assertBandwidthControlEnabled() {
+        if (!isBandwidthControlEnabled()) {
+            throw new IllegalStateException("Bandwidth module disabled");
+        }
+    }
 
     private boolean isBandwidthControlEnabled() {
         try {
