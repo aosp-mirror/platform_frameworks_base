@@ -1314,7 +1314,10 @@ final class ActivityStack {
         // If we are sleeping, and there is no resumed activity, and the top
         // activity is paused, well that is the state we want.
         if ((mService.mSleeping || mService.mShuttingDown)
-                && mLastPausedActivity == next && next.state == ActivityState.PAUSED) {
+                && mLastPausedActivity == next
+                && (next.state == ActivityState.PAUSED
+                    || next.state == ActivityState.STOPPED
+                    || next.state == ActivityState.STOPPING)) {
             // Make sure we have executed any pending transitions, since there
             // should be nothing left to do at this point.
             mService.mWindowManager.executeAppTransition();
