@@ -1394,7 +1394,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mContentDescription = other.mContentDescription;
         mActions= other.mActions;
         mBooleanProperties = other.mBooleanProperties;
-        mGranularities = other.mGranularities.clone();
+        mGranularities = (other.mGranularities) != null ? other.mGranularities.clone() : null;
         final int otherChildIdCount = other.mChildNodeIds.size();
         for (int i = 0; i < otherChildIdCount; i++) {
             mChildNodeIds.put(i, other.mChildNodeIds.valueAt(i));    

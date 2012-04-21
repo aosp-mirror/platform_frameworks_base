@@ -1008,7 +1008,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             synchronized (mGestureLock) {
                 Thread worker = new Thread(this, THREAD_NAME);
                 worker.start();
-                while (mHandler == null) {
+                while (mHandlerCaller == null) {
                     try {
                         mGestureLock.wait();
                     } catch (InterruptedException ie) {
