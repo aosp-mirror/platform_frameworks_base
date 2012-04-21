@@ -1781,18 +1781,32 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Returns the time (in ms) when this specific event was generated.
+     * Retrieve the time this event occurred,
+     * in the {@link android.os.SystemClock#uptimeMillis} time base.
+     *
+     * @return Returns the time this event occurred,
+     * in the {@link android.os.SystemClock#uptimeMillis} time base.
      */
+    @Override
     public final long getEventTime() {
         return nativeGetEventTimeNanos(mNativePtr, HISTORY_CURRENT) / NS_PER_MS;
     }
 
     /**
-     * Returns the time (in ns) when this specific event was generated.
+     * Retrieve the time this event occurred,
+     * in the {@link android.os.SystemClock#uptimeMillis} time base but with
+     * nanosecond precision.
+     * <p>
      * The value is in nanosecond precision but it may not have nanosecond accuracy.
+     * </p>
+     *
+     * @return Returns the time this event occurred,
+     * in the {@link android.os.SystemClock#uptimeMillis} time base but with
+     * nanosecond precision.
      *
      * @hide
      */
+    @Override
     public final long getEventTimeNano() {
         return nativeGetEventTimeNanos(mNativePtr, HISTORY_CURRENT);
     }
@@ -2234,16 +2248,48 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
     /**
      * Returns the time that a historical movement occurred between this event
-     * and the previous event.  Only applies to ACTION_MOVE events.
+     * and the previous event, in the {@link android.os.SystemClock#uptimeMillis} time base.
+     * <p>
+     * This only applies to ACTION_MOVE events.
+     * </p>
      *
      * @param pos Which historical value to return; must be less than
      * {@link #getHistorySize}
+     * @return Returns the time that a historical movement occurred between this
+     * event and the previous event,
+     * in the {@link android.os.SystemClock#uptimeMillis} time base.
      *
      * @see #getHistorySize
      * @see #getEventTime
      */
     public final long getHistoricalEventTime(int pos) {
         return nativeGetEventTimeNanos(mNativePtr, pos) / NS_PER_MS;
+    }
+
+    /**
+     * Returns the time that a historical movement occurred between this event
+     * and the previous event, in the {@link android.os.SystemClock#uptimeMillis} time base
+     * but with nanosecond (instead of millisecond) precision.
+     * <p>
+     * This only applies to ACTION_MOVE events.
+     * </p><p>
+     * The value is in nanosecond precision but it may not have nanosecond accuracy.
+     * </p>
+     *
+     * @param pos Which historical value to return; must be less than
+     * {@link #getHistorySize}
+     * @return Returns the time that a historical movement occurred between this
+     * event and the previous event,
+     * in the {@link android.os.SystemClock#uptimeMillis} time base but with
+     * nanosecond (instead of millisecond) precision.
+     *
+     * @see #getHistorySize
+     * @see #getEventTime
+     *
+     * @hide
+     */
+    public final long getHistoricalEventTimeNano(int pos) {
+        return nativeGetEventTimeNanos(mNativePtr, pos);
     }
 
     /**

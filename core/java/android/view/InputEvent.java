@@ -159,8 +159,26 @@ public abstract class InputEvent implements Parcelable {
     public abstract void setTainted(boolean tainted);
 
     /**
-     * Returns the time (in ns) when this specific event was generated.
+     * Retrieve the time this event occurred,
+     * in the {@link android.os.SystemClock#uptimeMillis} time base.
+     *
+     * @return Returns the time this event occurred,
+     * in the {@link android.os.SystemClock#uptimeMillis} time base.
+     */
+    public abstract long getEventTime();
+
+    /**
+     * Retrieve the time this event occurred,
+     * in the {@link android.os.SystemClock#uptimeMillis} time base but with
+     * nanosecond (instead of millisecond) precision.
+     * <p>
      * The value is in nanosecond precision but it may not have nanosecond accuracy.
+     * </p>
+     *
+     * @return Returns the time this event occurred,
+     * in the {@link android.os.SystemClock#uptimeMillis} time base but with
+     * nanosecond (instead of millisecond) precision.
+     *
      * @hide
      */
     public abstract long getEventTimeNano();

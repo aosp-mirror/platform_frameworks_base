@@ -2375,17 +2375,31 @@ public class KeyEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Retrieve the time this event occurred, 
+     * Retrieve the time this event occurred,
      * in the {@link android.os.SystemClock#uptimeMillis} time base.
-     * 
+     *
      * @return Returns the time this event occurred, 
      * in the {@link android.os.SystemClock#uptimeMillis} time base.
      */
+    @Override
     public final long getEventTime() {
         return mEventTime;
     }
 
-    /** @hide */
+    /**
+     * Retrieve the time this event occurred,
+     * in the {@link android.os.SystemClock#uptimeMillis} time base but with
+     * nanosecond (instead of millisecond) precision.
+     * <p>
+     * The value is in nanosecond precision but it may not have nanosecond accuracy.
+     * </p>
+     *
+     * @return Returns the time this event occurred,
+     * in the {@link android.os.SystemClock#uptimeMillis} time base but with
+     * nanosecond (instead of millisecond) precision.
+     *
+     * @hide
+     */
     @Override
     public final long getEventTimeNano() {
         return mEventTime * 1000000L;

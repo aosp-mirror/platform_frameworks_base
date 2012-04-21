@@ -22716,6 +22716,7 @@ package android.view {
     method public int describeContents();
     method public final android.view.InputDevice getDevice();
     method public abstract int getDeviceId();
+    method public abstract long getEventTime();
     method public abstract int getSource();
     field public static final android.os.Parcelable.Creator CREATOR;
   }
