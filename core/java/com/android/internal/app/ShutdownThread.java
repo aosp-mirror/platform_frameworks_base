@@ -64,10 +64,14 @@ public final class ShutdownThread extends Thread {
     private static boolean sIsStarted = false;
     
     private static boolean mReboot;
+    private static boolean mRebootSafeMode;
     private static String mRebootReason;
 
     // Provides shutdown assurance in case the system_server is killed
     public static final String SHUTDOWN_ACTION_PROPERTY = "sys.shutdown.requested";
+
+    // Indicates whether we are rebooting into safe mode
+    public static final String REBOOT_SAFEMODE_PROPERTY = "persist.sys.safemode";
 
     // static instance of this thread
     private static final ShutdownThread sInstance = new ShutdownThread();
@@ -92,6 +96,12 @@ public final class ShutdownThread extends Thread {
      * @param confirm true if user confirmation is needed before shutting down.
      */
     public static void shutdown(final Context context, boolean confirm) {
+        mReboot = false;
+        mRebootSafeMode = false;
+        shutdownInner(context, confirm);
+    }
+
+    static void shutdownInner(final Context context, boolean confirm) {
         // ensure that only one thread is trying to power down.
         // any additional calls are just returned
         synchronized (sIsStartedGuard) {
@@ -103,16 +113,20 @@ public final class ShutdownThread extends Thread {
 
         final int longPressBehavior = context.getResources().getInteger(
                         com.android.internal.R.integer.config_longPressOnPowerBehavior);
-        final int resourceId = longPressBehavior == 2
-                ? com.android.internal.R.string.shutdown_confirm_question
-                : com.android.internal.R.string.shutdown_confirm;
+        final int resourceId = mRebootSafeMode
+                ? com.android.internal.R.string.reboot_safemode_confirm
+                : (longPressBehavior == 2
+                        ? com.android.internal.R.string.shutdown_confirm_question
+                        : com.android.internal.R.string.shutdown_confirm);
 
         Log.d(TAG, "Notifying thread to start shutdown longPressBehavior=" + longPressBehavior);
 
         if (confirm) {
             final CloseDialogReceiver closer = new CloseDialogReceiver(context);
             final AlertDialog dialog = new AlertDialog.Builder(context)
-                    .setTitle(com.android.internal.R.string.power_off)
+                    .setTitle(mRebootSafeMode
+                            ? com.android.internal.R.string.reboot_safemode_title
+                            : com.android.internal.R.string.power_off)
                     .setMessage(resourceId)
                     .setPositiveButton(com.android.internal.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
@@ -162,8 +176,23 @@ public final class ShutdownThread extends Thread {
      */
     public static void reboot(final Context context, String reason, boolean confirm) {
         mReboot = true;
+        mRebootSafeMode = false;
         mRebootReason = reason;
-        shutdown(context, confirm);
+        shutdownInner(context, confirm);
+    }
+
+    /**
+     * Request a reboot into safe mode.  Must be called from a Looper thread in which its UI
+     * is shown.
+     *
+     * @param context Context used to display the shutdown progress dialog.
+     * @param confirm true if user confirmation is needed before shutting down.
+     */
+    public static void rebootSafeMode(final Context context, boolean confirm) {
+        mReboot = true;
+        mRebootSafeMode = true;
+        mRebootReason = null;
+        shutdownInner(context, confirm);
     }
 
     private static void beginShutdownSequence(Context context) {
@@ -252,6 +281,14 @@ public final class ShutdownThread extends Thread {
         {
             String reason = (mReboot ? "1" : "0") + (mRebootReason != null ? mRebootReason : "");
             SystemProperties.set(SHUTDOWN_ACTION_PROPERTY, reason);
+        }
+
+        /*
+         * If we are rebooting into safe mode, write a system property
+         * indicating so.
+         */
+        if (mRebootSafeMode) {
+            SystemProperties.set(REBOOT_SAFEMODE_PROPERTY, "1");
         }
 
         Log.i(TAG, "Sending shutdown broadcast...");

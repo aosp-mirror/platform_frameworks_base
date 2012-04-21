@@ -48,6 +48,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -181,6 +182,11 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     ShutdownThread.shutdown(mContext, true);
                 }
 
+                public boolean onLongPress() {
+                    ShutdownThread.rebootSafeMode(mContext, true);
+                    return true;
+                }
+
                 public boolean showDuringKeyguard() {
                     return true;
                 }
@@ -242,6 +248,15 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         final AlertDialog dialog = ab.create();
         dialog.getListView().setItemsCanFocus(true);
+        dialog.getListView().setLongClickable(true);
+        dialog.getListView().setOnItemLongClickListener(
+                new AdapterView.OnItemLongClickListener() {
+                    @Override
+                    public boolean onItemLongClick(AdapterView<?> parent, View view, int position,
+                            long id) {
+                        return mAdapter.getItem(position).onLongPress();
+                    }
+        });
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
 
         dialog.setOnDismissListener(this);
@@ -365,6 +380,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         void onPress();
 
+        public boolean onLongPress();
+
         /**
          * @return whether this action should appear in the dialog when the keygaurd
          *    is showing.
@@ -405,6 +422,10 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
 
         abstract public void onPress();
+
+        public boolean onLongPress() {
+            return false;
+        }
 
         public View create(
                 Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
@@ -530,6 +551,10 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             changeStateFromPress(nowOn);
         }
 
+        public boolean onLongPress() {
+            return false;
+        }
+
         public boolean isEnabled() {
             return !mState.inTransition();
         }
@@ -597,6 +622,10 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
 
         public void onPress() {
+        }
+
+        public boolean onLongPress() {
+            return false;
         }
 
         public boolean showDuringKeyguard() {

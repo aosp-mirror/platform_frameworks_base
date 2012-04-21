@@ -315,6 +315,15 @@
          power off dialog instead of the global actions menu. -->
     <string name="shutdown_confirm_question">Do you want to shut down?</string>
 
+    <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
+    <string name="reboot_safemode_title">Reboot to safe mode</string>
+
+    <!-- Shutdown Confirmation Dialog.  Message in the confirmation dialog
+         when the user asks to reboot into safe mode. [CHAR LIMIT=NONE] -->
+    <string name="reboot_safemode_confirm">Do you want to reboot into safe mode?
+         This will disable all third party applications you have installed.
+         They will be restored when you reboot again.</string>
+
     <!-- Recent Tasks dialog: title
      TODO: this should move to SystemUI.apk, but the code for the old
             recent dialog is still in the framework
