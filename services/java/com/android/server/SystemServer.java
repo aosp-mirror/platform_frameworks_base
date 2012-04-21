@@ -726,6 +726,7 @@ class ServerThread extends Thread {
         final StatusBarManagerService statusBarF = statusBar;
         final DreamManagerService dreamyF = dreamy;
         final InputManagerService inputManagerF = inputManager;
+        final BluetoothService bluetoothF = bluetooth;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -838,7 +839,7 @@ class ServerThread extends Thread {
                     reportWtf("making DreamManagerService ready", e);
                 }
                 try {
-                    if (inputManagerF != null) inputManagerF.systemReady();
+                    if (inputManagerF != null) inputManagerF.systemReady(bluetoothF);
                 } catch (Throwable e) {
                     reportWtf("making InputManagerService ready", e);
                 }

@@ -160,6 +160,18 @@ public final class BluetoothDevice implements Parcelable {
             "android.bluetooth.device.action.NAME_CHANGED";
 
     /**
+     * Broadcast Action: Indicates the alias of a remote device has been
+     * changed.
+     * <p>Always contains the extra field {@link #EXTRA_DEVICE}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ALIAS_CHANGED =
+            "android.bluetooth.device.action.ALIAS_CHANGED";
+
+    /**
      * Broadcast Action: Indicates a change in the bond state of a remote
      * device. For example, if a device is bonded (paired).
      * <p>Always contains the extra fields {@link #EXTRA_DEVICE}, {@link

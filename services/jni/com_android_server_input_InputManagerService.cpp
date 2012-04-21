@@ -83,6 +83,7 @@ static struct {
     jmethodID getPointerLayer;
     jmethodID getPointerIcon;
     jmethodID getKeyboardLayoutOverlay;
+    jmethodID getDeviceAlias;
 } gServiceClassInfo;
 
 static struct {
@@ -183,7 +184,6 @@ public:
     void setSystemUiVisibility(int32_t visibility);
     void setPointerSpeed(int32_t speed);
     void setShowTouches(bool enabled);
-    void reloadKeyboardLayouts();
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -191,6 +191,7 @@ public:
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId);
     virtual void notifyInputDevicesChanged(const Vector<InputDeviceInfo>& inputDevices);
     virtual sp<KeyCharacterMap> getKeyboardLayoutOverlay(const String8& inputDeviceDescriptor);
+    virtual String8 getDeviceAlias(const InputDeviceIdentifier& identifier);
 
     /* --- InputDispatcherPolicyInterface implementation --- */
 
@@ -551,6 +552,21 @@ sp<KeyCharacterMap> NativeInputManager::getKeyboardLayoutOverlay(
     return result;
 }
 
+String8 NativeInputManager::getDeviceAlias(const InputDeviceIdentifier& identifier) {
+    JNIEnv* env = jniEnv();
+
+    ScopedLocalRef<jstring> uniqueIdObj(env, env->NewStringUTF(identifier.uniqueId.string()));
+    ScopedLocalRef<jstring> aliasObj(env, jstring(env->CallObjectMethod(mServiceObj,
+            gServiceClassInfo.getDeviceAlias, uniqueIdObj.get())));
+    String8 result;
+    if (aliasObj.get()) {
+        ScopedUtfChars aliasChars(env, aliasObj.get());
+        result.setTo(aliasChars.c_str());
+    }
+    checkAndClearExceptionFromCallback(env, "getDeviceAlias");
+    return result;
+}
+
 void NativeInputManager::notifySwitch(nsecs_t when, int32_t switchCode,
         int32_t switchValue, uint32_t policyFlags) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
@@ -755,11 +771,6 @@ void NativeInputManager::setShowTouches(bool enabled) {
 
     mInputManager->getReader()->requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_SHOW_TOUCHES);
-}
-
-void NativeInputManager::reloadKeyboardLayouts() {
-    mInputManager->getReader()->requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_KEYBOARD_LAYOUTS);
 }
 
 bool NativeInputManager::isScreenOn() {
@@ -1296,7 +1307,16 @@ static void nativeReloadKeyboardLayouts(JNIEnv* env,
         jclass clazz, jint ptr) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->reloadKeyboardLayouts();
+    im->getInputManager()->getReader()->requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_KEYBOARD_LAYOUTS);
+}
+
+static void nativeReloadDeviceAliases(JNIEnv* env,
+        jclass clazz, jint ptr) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    im->getInputManager()->getReader()->requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_DEVICE_ALIAS);
 }
 
 static jstring nativeDump(JNIEnv* env, jclass clazz, jint ptr) {
@@ -1366,6 +1386,8 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeCancelVibrate },
     { "nativeReloadKeyboardLayouts", "(I)V",
             (void*) nativeReloadKeyboardLayouts },
+    { "nativeReloadDeviceAliases", "(I)V",
+            (void*) nativeReloadDeviceAliases },
     { "nativeDump", "(I)Ljava/lang/String;",
             (void*) nativeDump },
     { "nativeMonitor", "(I)V",
@@ -1463,6 +1485,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.getKeyboardLayoutOverlay, clazz,
             "getKeyboardLayoutOverlay", "(Ljava/lang/String;)[Ljava/lang/String;");
+
+    GET_METHOD_ID(gServiceClassInfo.getDeviceAlias, clazz,
+            "getDeviceAlias", "(Ljava/lang/String;)Ljava/lang/String;");
 
     // InputDevice
 
