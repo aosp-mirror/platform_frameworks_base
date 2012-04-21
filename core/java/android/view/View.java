@@ -1045,12 +1045,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public static final int ACCESSIBILITY_FOCUS_DOWN = FOCUS_DOWN | FOCUS_ACCESSIBILITY;
 
     /**
-     * Use with {@link #focusSearch(int)}. Move acessibility focus to the next view.
+     * Use with {@link #focusSearch(int)}. Move acessibility focus forward.
      */
     public static final int ACCESSIBILITY_FOCUS_FORWARD = FOCUS_FORWARD | FOCUS_ACCESSIBILITY;
 
     /**
-     * Use with {@link #focusSearch(int)}. Move acessibility focus to the previous view.
+     * Use with {@link #focusSearch(int)}. Move acessibility focus backward.
      */
     public static final int ACCESSIBILITY_FOCUS_BACKWARD = FOCUS_BACKWARD | FOCUS_ACCESSIBILITY;
 
@@ -1063,6 +1063,16 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Use with {@link #focusSearch(int)}. Move acessibility focus out of a view.
      */
     public static final int ACCESSIBILITY_FOCUS_OUT = 0x00000008 | FOCUS_ACCESSIBILITY;
+
+    /**
+     * Use with {@link #focusSearch(int)}. Move acessibility focus to the next view.
+     */
+    public static final int ACCESSIBILITY_FOCUS_NEXT = 0x00000010 | FOCUS_ACCESSIBILITY;
+
+    /**
+     * Use with {@link #focusSearch(int)}. Move acessibility focus to the previous view.
+     */
+    public static final int ACCESSIBILITY_FOCUS_PREVIOUS = 0x00000020 | FOCUS_ACCESSIBILITY;
 
     /**
      * Bits of {@link #getMeasuredWidthAndState()} and
