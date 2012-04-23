@@ -291,7 +291,7 @@ current user has purchased it. Using Google Play Licensing is optional even if y
 releasing your app through Google Play.</p>
 
 <p>For more information about Google Play Licensing Service and how to use it in your
-application, see <a href="{@docRoot}guide/market/licensing.html">Application Licensing</a>.</p>
+application, see <a href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a>.</p>
 
 <h2 id="publishing-build">Building Your Application for Release</h2>
 
