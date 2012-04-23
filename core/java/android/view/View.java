@@ -45,6 +45,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
@@ -16912,6 +16913,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
          * The drawable for highlighting accessibility focus.
          */
         Drawable mAccessibilityFocusDrawable;
+
+        /**
+         * Show where the margins, bounds and layout bounds are for each view.
+         */
+        final boolean mDebugLayout = SystemProperties.getBoolean("debug.layout", false);
 
         /**
          * Creates a new set of attachment information with the specified
