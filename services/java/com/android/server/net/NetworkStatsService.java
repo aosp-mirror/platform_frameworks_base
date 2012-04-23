@@ -1050,11 +1050,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     private boolean isBandwidthControlEnabled() {
+        final long token = Binder.clearCallingIdentity();
         try {
             return mNetworkManager.isBandwidthControlEnabled();
         } catch (RemoteException e) {
             // ignored; service lives in system_server
             return false;
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
