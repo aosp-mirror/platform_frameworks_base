@@ -1225,7 +1225,6 @@ public class Editor {
     private void drawHardwareAccelerated(Canvas canvas, Layout layout, Path highlight,
             Paint highlightPaint, int cursorOffsetVertical) {
         final int width = mTextView.getWidth();
-        final int height = mTextView.getHeight();
 
         final long lineRange = layout.getLineRangeForDraw(canvas);
         int firstLine = TextUtils.unpackRangeStartFromLong(lineRange);
@@ -1245,6 +1244,10 @@ public class Editor {
             int[] blockIndices = dynamicLayout.getBlockIndices();
             final int numberOfBlocks = dynamicLayout.getNumberOfBlocks();
 
+            final int scrollX = mTextView.getScrollX();
+            final int scrollY = mTextView.getScrollY();
+            canvas.translate(scrollX, scrollY);
+            
             int endOfPreviousBlock = -1;
             int searchStartIndex = 0;
             for (int i = 0; i < numberOfBlocks; i++) {
@@ -1280,9 +1283,9 @@ public class Editor {
                         hardwareCanvas.onPreDraw(null);
                         // drawText is always relative to TextView's origin, this translation brings
                         // this range of text back to the top of the viewport
-                        hardwareCanvas.translate(0, -top);
+                        hardwareCanvas.translate(-scrollX, -top);
                         layout.drawText(hardwareCanvas, blockBeginLine, blockEndLine);
-                        hardwareCanvas.translate(0, top);
+                        hardwareCanvas.translate(scrollX, top);
                     } finally {
                         hardwareCanvas.onPostDraw();
                         blockDisplayList.end();
@@ -1298,6 +1301,8 @@ public class Editor {
                 ((HardwareCanvas) canvas).drawDisplayList(blockDisplayList, null,
                         0 /* no child clipping, our TextView parent enforces it */);
                 endOfPreviousBlock = blockEndLine;
+                
+                canvas.translate(-scrollX, -scrollY);
             }
         } else {
             // Boring layout is used for empty and hint text
