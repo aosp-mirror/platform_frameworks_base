@@ -17,6 +17,7 @@ next.link=result.html
   <li><a href="#Build">Build an Implicit Intent</a></li>
   <li><a href="#Verify">Verify There is an App to Receive the Intent</a></li>
   <li><a href="#StartActivity">Start an Activity with the Intent</a></li>
+  <li><a href="#AppChooser">Show an App Chooser</a></li>
 </ol>
 
 <h2>You should also read</h2>
@@ -206,6 +207,47 @@ if (isIntentSafe) {
 }
 </pre>
 
+
+
+<h2 id="AppChooser">Show an App Chooser</h2>
+
+<div class="figure" style="width:200px">
+  <img src="{@docRoot}images/training/basics/intent-chooser.png" alt="" />
+  <p class="img-caption"><strong>Figure 2.</strong> Example of the chooser dialog that appears
+when you use {@link android.content.Intent#createChooser createChooser()} to ensure
+that the user is always shown a list of apps that respond to your intent.</p>
+</div>
+
+<p>Notice that when you start an activity by passing your {@link android.content.Intent} to {@link
+android.app.Activity#startActivity startActivity()} and there is more than one app that responds to
+the intent, the user can select which app to use by default (by selecting a checkbox at the bottom
+of the dialog; see figure 1). This is nice when performing an action for which the user
+generally wants to use the same app every time, such as when opening a web page (users
+likely use just one web browser) or taking a photo (users likely prefer one camera). However, if
+the action to be performed could be handled by multiple apps and the user might
+prefer a different app each time&mdash;such as a "share" action, for which users might have several
+apps through which they might share an item&mdash;you should explicitly show a chooser dialog,
+which forces the user to select which app to use for the action every time (the user cannot select a
+default app for the action).</p>
+
+<p>To show the chooser, create an {@link android.content.Intent} using {@link
+android.content.Intent#createChooser createChooser()} and pass it to {@link
+android.app.Activity#startActivity startActivity()}. For example:</p>
+
+<pre>
+Intent intent = new Intent(Intent.ACTION_SEND);
+...
+
+// Always use string resources for UI text. This says something like "Share this photo with"
+String title = getResources().getText(R.string.chooser_title);
+// Create and start the chooser
+Intent chooser = Intent.createChooser(intent, title);
+startActivity(chooser);
+</pre>
+
+<p>This displays a dialog with a list of apps that respond to the intent passed to the {@link
+android.content.Intent#createChooser createChooser()} method and uses the supplied text as the
+dialog title.</p>
 
 
 
