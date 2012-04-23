@@ -91,8 +91,10 @@ public class TaskStackBuilder implements Iterable<Intent> {
 
     /**
      * Add the activity parent chain as specified by the
-     * {@link android.R.attr#parentActivityName parentActivityName} attribute of the activity
-     * (or activity-alias) element in the application's manifest to the task stack builder.
+     * {@link Activity#getParentActivityIntent() getParentActivityIntent()} method of the activity
+     * specified and the {@link android.R.attr#parentActivityName parentActivityName} attributes
+     * of each successive activity (or activity-alias) element in the application's manifest
+     * to the task stack builder.
      *
      * @param sourceActivity All parents of this activity will be added
      * @return This TaskStackBuilder for method chaining
@@ -144,6 +146,41 @@ public class TaskStackBuilder implements Iterable<Intent> {
                 if (parentActivity != null) {
                     parent = new Intent().setComponent(
                             new ComponentName(mSourceContext, parentActivity));
+                } else {
+                    parent = null;
+                }
+            }
+        } catch (NameNotFoundException e) {
+            Log.e(TAG, "Bad ComponentName while traversing activity parent metadata");
+            throw new IllegalArgumentException(e);
+        }
+        return this;
+    }
+
+    /**
+     * Add the activity parent chain as specified by the
+     * {@link android.R.attr#parentActivityName parentActivityName} attribute of the activity
+     * (or activity-alias) element in the application's manifest to the task stack builder.
+     *
+     * @param sourceActivityName Must specify an Activity component. All parents of
+     *                           this activity will be added
+     * @return This TaskStackBuilder for method chaining
+     */
+    public TaskStackBuilder addParentStack(ComponentName sourceActivityName) {
+        final int insertAt = mIntents.size();
+        PackageManager pm = mSourceContext.getPackageManager();
+        try {
+            ActivityInfo info = pm.getActivityInfo(sourceActivityName, 0);
+            String parentActivity = info.parentActivityName;
+            Intent parent = new Intent().setComponent(
+                    new ComponentName(info.packageName, parentActivity));
+            while (parent != null) {
+                mIntents.add(insertAt, parent);
+                info = pm.getActivityInfo(parent.getComponent(), 0);
+                parentActivity = info.parentActivityName;
+                if (parentActivity != null) {
+                    parent = new Intent().setComponent(
+                            new ComponentName(info.packageName, parentActivity));
                 } else {
                     parent = null;
                 }

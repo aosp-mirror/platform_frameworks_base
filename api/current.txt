@@ -3999,6 +3999,7 @@ package android.app {
     method public android.app.TaskStackBuilder addNextIntent(android.content.Intent);
     method public android.app.TaskStackBuilder addParentStack(android.app.Activity);
     method public android.app.TaskStackBuilder addParentStack(java.lang.Class<?>);
+    method public android.app.TaskStackBuilder addParentStack(android.content.ComponentName);
     method public static android.app.TaskStackBuilder from(android.content.Context);
     method public android.content.Intent getIntent(int);
     method public int getIntentCount();
