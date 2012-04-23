@@ -2582,6 +2582,7 @@ public class Editor {
                 // There is no way to know if the word was indeed added. Re-check.
                 // TODO The ExtractEditText should remove the span in the original text instead
                 editable.removeSpan(suggestionInfo.suggestionSpan);
+                Selection.setSelection(editable, spanEnd);
                 updateSpellCheckSpans(spanStart, spanEnd, false);
             } else {
                 // SuggestionSpans are removed by replace: save them before
