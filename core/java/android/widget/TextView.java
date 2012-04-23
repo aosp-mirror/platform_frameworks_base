@@ -2312,6 +2312,27 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Sets whether the soft input method will be made visible when this
+     * TextView gets focused. The default is true.
+     * @hide
+     */
+    @android.view.RemotableViewMethod
+    public final void setShowSoftInputOnFocus(boolean show) {
+        createEditorIfNeeded("setShowSoftInputOnFocus");
+        mEditor.mShowSoftInputOnFocus = show;
+    }
+
+    /**
+     * Returns whether the soft input method will be made visible when this
+     * TextView gets focused. The default is true.
+     * @hide
+     */
+    public final boolean getShowSoftInputOnFocus() {
+        // When there is no Editor, return default true value
+        return mEditor == null || mEditor.mShowSoftInputOnFocus;
+    }
+
+    /**
      * Gives the text a shadow of the specified radius and color, the specified
      * distance from its normal position.
      *
@@ -4981,7 +5002,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 && mLayout != null && onCheckIsTextEditor()) {
                             InputMethodManager imm = InputMethodManager.peekInstance();
                             viewClicked(imm);
-                            if (imm != null) {
+                            if (imm != null && getShowSoftInputOnFocus()) {
                                 imm.showSoftInput(this, 0);
                             }
                         }
@@ -7014,7 +7035,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // Show the IME, except when selecting in read-only text.
                 final InputMethodManager imm = InputMethodManager.peekInstance();
                 viewClicked(imm);
-                if (!textIsSelectable) {
+                if (!textIsSelectable && mEditor.mShowSoftInputOnFocus) {
                     handled |= imm != null && imm.showSoftInput(this, 0);
                 }
 

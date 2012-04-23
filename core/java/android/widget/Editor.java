@@ -151,6 +151,7 @@ public class Editor {
     boolean mShowErrorAfterAttach;
 
     boolean mInBatchEditControllers;
+    boolean mShowSoftInputOnFocus = true;
 
     SuggestionsPopupWindow mSuggestionsPopupWindow;
     SuggestionRangeSpan mSuggestionRangeSpan;
@@ -1437,7 +1438,7 @@ public class Editor {
         }
 
         final boolean selectionStarted = mSelectionActionMode != null || willExtract;
-        if (selectionStarted && !mTextView.isTextSelectable()) {
+        if (selectionStarted && !mTextView.isTextSelectable() && mShowSoftInputOnFocus) {
             // Show the IME to be able to replace text, except when selecting non editable text.
             final InputMethodManager imm = InputMethodManager.peekInstance();
             if (imm != null) {
