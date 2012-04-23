@@ -65,7 +65,7 @@ import java.util.UUID;
  */
 public final class BluetoothDevice implements Parcelable {
     private static final String TAG = "BluetoothDevice";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     /**
      * Sentinel error value for this class. Guaranteed to not equal any other
