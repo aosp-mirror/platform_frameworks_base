@@ -251,11 +251,9 @@ class ServerThread extends Thread {
                     bluetooth.initAfterA2dpRegistration();
                 }
 
-                int airplaneModeOn = Settings.System.getInt(mContentResolver,
-                        Settings.System.AIRPLANE_MODE_ON, 0);
                 int bluetoothOn = Settings.Secure.getInt(mContentResolver,
                     Settings.Secure.BLUETOOTH_ON, 0);
-                if (airplaneModeOn == 0 && bluetoothOn != 0) {
+                if (bluetoothOn != 0) {
                     bluetooth.enable();
                 }
             }
