@@ -24080,11 +24080,7 @@ package android.view {
     field public static final int ACCESSIBILITY_FOCUS_BACKWARD = 4097; // 0x1001
     field public static final int ACCESSIBILITY_FOCUS_DOWN = 4226; // 0x1082
     field public static final int ACCESSIBILITY_FOCUS_FORWARD = 4098; // 0x1002
-    field public static final int ACCESSIBILITY_FOCUS_IN = 4100; // 0x1004
     field public static final int ACCESSIBILITY_FOCUS_LEFT = 4113; // 0x1011
-    field public static final int ACCESSIBILITY_FOCUS_NEXT = 4112; // 0x1010
-    field public static final int ACCESSIBILITY_FOCUS_OUT = 4104; // 0x1008
-    field public static final int ACCESSIBILITY_FOCUS_PREVIOUS = 4128; // 0x1020
     field public static final int ACCESSIBILITY_FOCUS_RIGHT = 4162; // 0x1042
     field public static final int ACCESSIBILITY_FOCUS_UP = 4129; // 0x1021
     field public static final android.util.Property ALPHA;

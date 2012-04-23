@@ -1149,10 +1149,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             AccessibilityNodeInfo next = null;
             switch (gestureId) {
                 case AccessibilityService.GESTURE_SWIPE_UP: {
-                    next = current.focusSearch(View.ACCESSIBILITY_FOCUS_OUT);
+                    // TODO:
                 } break;
                 case AccessibilityService.GESTURE_SWIPE_DOWN: {
-                    next = current.focusSearch(View.ACCESSIBILITY_FOCUS_IN);
+                    // TODO:
                 } break;
                 case AccessibilityService.GESTURE_SWIPE_LEFT: {
                     // TODO: Implement the RTL support.
@@ -1694,6 +1694,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     final class SecurityPolicy {
         private static final int VALID_ACTIONS =
             AccessibilityNodeInfo.ACTION_CLICK
+            | AccessibilityNodeInfo.ACTION_LONG_CLICK
             | AccessibilityNodeInfo.ACTION_FOCUS
             | AccessibilityNodeInfo.ACTION_CLEAR_FOCUS
             | AccessibilityNodeInfo.ACTION_SELECT

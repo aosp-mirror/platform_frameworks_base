@@ -168,8 +168,6 @@ public abstract class AccessibilityNodeProvider {
      *
      * @param direction The direction in which to search for a focus candidate.
      *     Values are
-     *     {@link View#ACCESSIBILITY_FOCUS_IN},
-     *     {@link View#ACCESSIBILITY_FOCUS_OUT},
      *     {@link View#ACCESSIBILITY_FOCUS_FORWARD},
      *     {@link View#ACCESSIBILITY_FOCUS_BACKWARD},
      *     {@link View#ACCESSIBILITY_FOCUS_UP},
