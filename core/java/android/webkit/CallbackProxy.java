@@ -1047,15 +1047,7 @@ class CallbackProxy extends Handler {
         Message msg = obtainMessage(OVERRIDE_URL);
         msg.getData().putString("url", url);
         msg.obj = res;
-        synchronized (this) {
-            sendMessage(msg);
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                Log.e(LOGTAG, "Caught exception while waiting for overrideUrl");
-                Log.e(LOGTAG, Log.getStackTraceString(e));
-            }
-        }
+        sendMessageToUiThreadSync(msg);
         return res.getResult().booleanValue();
     }
 
@@ -1223,16 +1215,7 @@ class CallbackProxy extends Handler {
         bundle.putString("host", schemePlusHost);
         bundle.putString("username", username);
         bundle.putString("password", password);
-        synchronized (this) {
-            sendMessage(msg);
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                Log.e(LOGTAG,
-                        "Caught exception while waiting for onSavePassword");
-                Log.e(LOGTAG, Log.getStackTraceString(e));
-            }
-        }
+        sendMessageToUiThreadSync(msg);
         // Doesn't matter here
         return false;
     }
@@ -1281,18 +1264,8 @@ class CallbackProxy extends Handler {
             mWebView.getWebView().new WebViewTransport();
         final Message msg = obtainMessage(NOTIFY);
         msg.obj = transport;
-        synchronized (this) {
-            sendMessage(obtainMessage(CREATE_WINDOW, dialog ? 1 : 0,
-                    userGesture ? 1 : 0, msg));
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                Log.e(LOGTAG,
-                        "Caught exception while waiting for createWindow");
-                Log.e(LOGTAG, Log.getStackTraceString(e));
-            }
-        }
-
+        sendMessageToUiThreadSync(obtainMessage(CREATE_WINDOW, dialog ? 1 : 0,
+                userGesture ? 1 : 0, msg));
         WebViewClassic w = WebViewClassic.fromWebView(transport.getWebView());
         if (w != null) {
             WebViewCore core = w.getWebViewCore();
@@ -1375,15 +1348,7 @@ class CallbackProxy extends Handler {
         Message alert = obtainMessage(JS_ALERT, result);
         alert.getData().putString("message", message);
         alert.getData().putString("url", url);
-        synchronized (this) {
-            sendMessage(alert);
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                Log.e(LOGTAG, "Caught exception while waiting for jsAlert");
-                Log.e(LOGTAG, Log.getStackTraceString(e));
-            }
-        }
+        sendMessageToUiThreadSync(alert);
     }
 
     public boolean onJsConfirm(String url, String message) {
@@ -1396,15 +1361,7 @@ class CallbackProxy extends Handler {
         Message confirm = obtainMessage(JS_CONFIRM, result);
         confirm.getData().putString("message", message);
         confirm.getData().putString("url", url);
-        synchronized (this) {
-            sendMessage(confirm);
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                Log.e(LOGTAG, "Caught exception while waiting for jsConfirm");
-                Log.e(LOGTAG, Log.getStackTraceString(e));
-            }
-        }
+        sendMessageToUiThreadSync(confirm);
         return result.mJsResult.getResult();
     }
 
@@ -1419,15 +1376,7 @@ class CallbackProxy extends Handler {
         prompt.getData().putString("message", message);
         prompt.getData().putString("default", defaultValue);
         prompt.getData().putString("url", url);
-        synchronized (this) {
-            sendMessage(prompt);
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                Log.e(LOGTAG, "Caught exception while waiting for jsPrompt");
-                Log.e(LOGTAG, Log.getStackTraceString(e));
-            }
-        }
+        sendMessageToUiThreadSync(prompt);
         return result.mJsResult.getStringResult();
     }
 
@@ -1441,15 +1390,7 @@ class CallbackProxy extends Handler {
         Message confirm = obtainMessage(JS_UNLOAD, result);
         confirm.getData().putString("message", message);
         confirm.getData().putString("url", url);
-        synchronized (this) {
-            sendMessage(confirm);
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                Log.e(LOGTAG, "Caught exception while waiting for jsUnload");
-                Log.e(LOGTAG, Log.getStackTraceString(e));
-            }
-        }
+        sendMessageToUiThreadSync(confirm);
         return result.mJsResult.getResult();
     }
 
@@ -1586,15 +1527,7 @@ class CallbackProxy extends Handler {
         }
         JsResultReceiver result = new JsResultReceiver();
         Message timeout = obtainMessage(JS_TIMEOUT, result);
-        synchronized (this) {
-            sendMessage(timeout);
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                Log.e(LOGTAG, "Caught exception while waiting for jsUnload");
-                Log.e(LOGTAG, Log.getStackTraceString(e));
-            }
-        }
+        sendMessageToUiThreadSync(timeout);
         return result.mJsResult.getResult();
     }
 
@@ -1655,16 +1588,7 @@ class CallbackProxy extends Handler {
         UploadFile uploadFile = new UploadFile();
         UploadFileMessageData data = new UploadFileMessageData(uploadFile, acceptType, capture);
         myMessage.obj = data;
-        synchronized (this) {
-            sendMessage(myMessage);
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                Log.e(LOGTAG,
-                        "Caught exception while waiting for openFileChooser");
-                Log.e(LOGTAG, Log.getStackTraceString(e));
-            }
-        }
+        sendMessageToUiThreadSync(myMessage);
         return uploadFile.getResult();
     }
 
@@ -1722,5 +1646,17 @@ class CallbackProxy extends Handler {
         msg.getData().putInt("id", id);
 
         sendMessage(msg);
+    }
+
+    private synchronized void sendMessageToUiThreadSync(Message msg) {
+        sendMessage(msg);
+        WebCoreThreadWatchdog.pause();
+        try {
+            wait();
+        } catch (InterruptedException e) {
+            Log.e(LOGTAG, "Caught exception waiting for synchronous UI message to be processed");
+            Log.e(LOGTAG, Log.getStackTraceString(e));
+        }
+        WebCoreThreadWatchdog.resume();
     }
 }
