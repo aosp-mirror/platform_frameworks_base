@@ -253,17 +253,13 @@ import java.util.Map;
  * and {@link WebChromeClient#onHideCustomView()} are required,
  * {@link WebChromeClient#getVideoLoadingProgressView()} is optional.
  * </p>
- *
- *
  */
-/*
- * Implementation notes.
- * The WebView is a thin API class that delegates its public API to a backend WebViewProvider
- * class instance. WebView extends {@link AbsoluteLayout} for backward compatibility reasons.
- * Methods are delegated to the provider implementation: all public API methods introduced in this
- * file are fully delegated, whereas public and protected methods from the View base classes are
- * only delegated where a specific need exists for them to do so.
- */
+// Implementation notes.
+// The WebView is a thin API class that delegates its public API to a backend WebViewProvider
+// class instance. WebView extends {@link AbsoluteLayout} for backward compatibility reasons.
+// Methods are delegated to the provider implementation: all public API methods introduced in this
+// file are fully delegated, whereas public and protected methods from the View base classes are
+// only delegated where a specific need exists for them to do so.
 @Widget
 public class WebView extends AbsoluteLayout
         implements ViewTreeObserver.OnGlobalFocusChangeListener,
