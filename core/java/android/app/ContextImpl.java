@@ -1480,7 +1480,9 @@ class ContextImpl extends Context {
     public Context createPackageContext(String packageName, int flags)
         throws PackageManager.NameNotFoundException {
         if (packageName.equals("system") || packageName.equals("android")) {
-            return new ContextImpl(mMainThread.getSystemContext());
+            final ContextImpl context = new ContextImpl(mMainThread.getSystemContext());
+            context.mBasePackageName = mBasePackageName;
+            return context;
         }
 
         LoadedApk pi =
