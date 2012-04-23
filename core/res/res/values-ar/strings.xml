@@ -146,6 +146,10 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"سيتم إيقاف تشغيل الجهاز اللوحي."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"سيتم إيقاف تشغيل هاتفك."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"هل تريد إيقاف التشغيل؟"</string>
+    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
+    <skip />
+    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
+    <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"حديثة"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"ليست هناك تطبيقات حديثة."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"خيارات الجهاز اللوحي"</string>
@@ -199,10 +203,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"للسماح للتطبيق بتلقي رسائل الوسائط المتعددة ومعالجتها. قد تراقب بعض التطبيقات الضارة رسائلك أو تحذفها بدون عرضها لك."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"تلقي بث الطوارئ"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"للسماح للتطبيق بتلقي رسائل بث الطوارئ ومعالجتها. لا يتوفر هذا الإذن سوى لتطبيقات النظام."</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"قراءة رسائل بث الخلية"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"السماح للتطبيق بقراءة رسائل بث الخلية التي يتلقاها هذا الجهاز. يتم تسليم تنبيهات بث الخلية في بعض المواقع لتحذيرك من حالات طارئة. يمكن أن تتداخل التطبيقات الضارة مع أداء أو تشغيل الجهاز عندما يتم تلقي بث خلية طارئ."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"إرسال رسائل قصيرة SMS"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"للسماح للتطبيق بإرسال رسائل قصيرة SMS. قد تكلفك التطبيقات الضارة المال من خلال إرسال رسائل بدون تأكيدك."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"إرسال رسائل قصيرة SMS بدون تأكيد"</string>
@@ -221,10 +223,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"للسماح لتطبيق ما بنقل المهام إلى المقدمة والخلفية. قد تفرض التطبيقات الضارة نفسها إلى المقدمة بدون تحكم منك."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"إيقاف التطبيقات التي قيد التشغيل"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"للسماح للتطبيق بإزالة المهام وإنهاء تطبيقاتها. قد تعطل التطبيقات الضارة عمل التطبيقات الأخرى."</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"بدء أي نشاط"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"للسماح للتطبيق ببدء أي نشاط، بغض النظر عن حماية الإذن أو حالة التصدير."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"تعيين توافق الشاشة"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"السماح للتطبيق بالتحكم في وضع التوافق مع شاشة التطبيقات الأخرى. قد تتسبب التطبيقات الضارة في تعطيل سلوك التطبيقات الأخرى."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"تمكين تصحيح أخطاء التطبيق"</string>
@@ -742,6 +742,14 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ب ت ث"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <!-- no translation found for granularity_label_character (7336470535385009523) -->
+    <skip />
+    <!-- no translation found for granularity_label_word (7075570328374918660) -->
+    <skip />
+    <!-- no translation found for granularity_label_link (5815508880782488267) -->
+    <skip />
+    <!-- no translation found for granularity_label_line (5764267235026120888) -->
+    <skip />
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"أخفق اختبار المصنع"</string>

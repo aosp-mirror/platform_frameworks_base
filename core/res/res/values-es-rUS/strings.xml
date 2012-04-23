@@ -146,6 +146,10 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tu tablet se apagará."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Tu dispositivo se apagará."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"¿Deseas apagarlo?"</string>
+    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
+    <skip />
+    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
+    <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"Reciente"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"No hay aplicaciones recientes."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Opciones de tablet"</string>
@@ -199,10 +203,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Permite que la aplicación reciba y procese mensajes MMS. Las aplicaciones maliciosas pueden controlar tus mensajes o eliminarlos sin mostrártelos."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"recibir mensajes de emergencia"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Permite que la aplicación reciba y procese mensajes de emergencia. Este permiso sólo está disponible para las aplicaciones del sistema."</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"Leer mensajes de difusión celular"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite a la aplicación leer los mensajes de difusión celular que recibe tu dispositivo. En algunas ubicaciones, las alertas de difusión celular se envían para advertir situaciones de emergencia. Las aplicaciones maliciosas pueden afectar el rendimiento o funcionamiento de tu dispositivo cuando se recibe un un mensaje de difusión celular de emergencia."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"enviar mensajes SMS"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Permite que la aplicación envíe mensajes SMS. Las aplicaciones maliciosas pueden generar gastos a causa del envío de mensajes sin tu confirmación."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"Enviar mensajes SMS sin confirmación"</string>
@@ -221,10 +223,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permite que la aplicación mueva tareas al primero o segundo plano. Las aplicaciones maliciosas pueden forzar su paso al primer plano sin que tú las controles."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"detener las aplicaciones en ejecución"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Permite que la aplicación elimine tareas y cierre sus aplicaciones. Las aplicaciones malintencionadas pueden usar este permiso para interferir en el comportamiento de otras aplicaciones."</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"Iniciar cualquier actividad"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Permite a la aplicación iniciar una actividad, sin importar si fue exportada ni si se encuentra protegida por permisos."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"Definir compatibilidad de pantalla"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Permite a la aplicación controlar el modo de compatibilidad de las pantallas de otras aplicaciones. Las aplicaciones malintencionadas pueden interrumpir el funcionamiento de otras aplicaciones."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"activar depuración de aplicación"</string>
@@ -742,6 +742,14 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <!-- no translation found for granularity_label_character (7336470535385009523) -->
+    <skip />
+    <!-- no translation found for granularity_label_word (7075570328374918660) -->
+    <skip />
+    <!-- no translation found for granularity_label_link (5815508880782488267) -->
+    <skip />
+    <!-- no translation found for granularity_label_line (5764267235026120888) -->
+    <skip />
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Error en la prueba de fábrica"</string>

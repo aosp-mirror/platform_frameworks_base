@@ -146,6 +146,10 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Kompyuta yako ndogo itazima."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Simu yako itazima."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Unataka kuzima?"</string>
+    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
+    <skip />
+    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
+    <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"Za hivi karibuni"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Hakuna programu za hivi karibuni."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Chaguo za kompyuta ndogo"</string>
@@ -742,6 +746,14 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <!-- no translation found for granularity_label_character (7336470535385009523) -->
+    <skip />
+    <!-- no translation found for granularity_label_word (7075570328374918660) -->
+    <skip />
+    <!-- no translation found for granularity_label_link (5815508880782488267) -->
+    <skip />
+    <!-- no translation found for granularity_label_line (5764267235026120888) -->
+    <skip />
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Jaribio la kiwanda limeshindikana"</string>
@@ -1016,16 +1028,16 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="select_character" msgid="3365550120617701745">"Ingiza kibambo"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Inatuma ujumbe wa SMS"</string>
-    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; inatuma idadi kubwa ya ujumbe wa SMS. Je, unataka kuruhusu programu hii kuendelea kutuma ujumbe?"</string>
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; inatuma idadi kubwa ya jumbe za SMS. Je, unataka kuruhusu programu hii kuendelea kutuma jumbe?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Ruhusu"</string>
-    <string name="sms_control_no" msgid="625438561395534982">"Kataa"</string>
-    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Tuma ujumbe mfupi kwa msimbo mfupi?"</string>
-    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Tuma ujumbe mfupi wa ada?"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Kataza"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Tuma SMS kwa msimbo mfupi?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Tuma SMS ya ada?"</string>
     <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ingependa kutuma ujumbe kwa  &lt;b&gt;i<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, ambayo inaonekana kama msimbo mfupi wa ujumbe mfupi.&lt;p&gt;Kutuma ujumbe mfupi kwa baadhi ya misimbo mifupi kunaweza kusababisha akaunti yako ya simu kulipishwa huduma ya ada.&lt;p&gt;Je, unataka kuruhusu programu hii kutuma ujumbe?"</string>
-    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ingetaka kutuma ujumbe wa maandishi kwa &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, ambayo ni msimbo mfupi wa SMS ya ada.&lt;p&gt;&lt;b&gt;Kutuma ujumbe kwa mwisho huu kutasababisha akaunti yako ya simu kulipishwa kwa huduma ya ada.&lt;/b&gt;&lt;p&gt;Je, unataka kuruhusu programu hii kutuma ujumbe?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ingetaka kutuma ujumbe wa maandishi kwa &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, ambayo ni msimbo mfupi wa SMS ya ada.&lt;p&gt;&lt;b&gt;Kutuma ujumbe mahali hapa kutasababisha akaunti yako ya simu kulipishwa kwa huduma ya ada.&lt;/b&gt;&lt;p&gt;Je, unataka kuruhusu programu hii kutuma ujumbe?"</string>
     <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Tuma ujumbe"</string>
     <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Usitume"</string>
-    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Ripoti programu mbaya"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Ripoti programu hasidi"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Kadi ya SIM imeondolewa"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"mtandao wa simu hutapatika hadi uanzishe upya na SIM kadi halali iliyoingizwa."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Kwisha"</string>

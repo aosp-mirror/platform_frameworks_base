@@ -146,6 +146,10 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Jou tablet gaan nou afskakel."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Jou foon gaan nou afsit."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Wil jy afskakel?"</string>
+    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
+    <skip />
+    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
+    <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"Onlangs"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Geen onlangse programme nie."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Tablet-opsies"</string>
@@ -199,10 +203,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Laat die program toe om MMS-boodskappe te ontvang en te verwerk. Kwaadwillige programme kan jou boodskappe monitor of uitvee sonder om dit aan jou te wys."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"ontvang nooduitsendings"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Laat die program toe om nooduitsending-boodskappe te ontvang en te verwerk. Hierdie toestemming is net beskikbaar vir stelselprogramme."</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lees seluitsending-boodskappe"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Laat die program toe om seluitsending-boodskappe te lees wat deur jou toestel ontvang word. Seluitsending-waarskuwings word in sommige plekke afgelewer om jou van noodsituasies te waarsku. Kwaadwillige programme mag inmeng met die prestasie of die werking van jou toestel wanneer \'n noodgeval se seluitsending ontvang word."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"stuur SMS-boodskappe"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Laat die program toe om SMS-boodskappe te stuur. Kwaadwillige programme kan jou geld kos deur boodskappe te stuur sonder jou bevestiging."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"stuur sms-boodskappe met geen bestiging"</string>
@@ -221,10 +223,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Laat die program toe om take na die voorgrond en agtergrond te skuif. Kwaadwillige programme kan hulself sonder jou beheer na vore dwing."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"stop lopende programme"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Laat die program toe om take te verwyder en hul programme te dood. Kwaadwillige programme kan die gedrag van ander programme ontwrig."</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"begin enige aktiwiteit"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Laat die program toe om \'n aktiwiteit te begin, ongeag van toestemming-beskerming of uitgevoerde status."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"stel skermversoenbaarheid"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Laat die program toe om om die skermversoenbaarheid-modus van ander programme te beheer. Kwaadwillige programme kan die gedrag van ander programme breek."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"aktiveer programontfouting"</string>
@@ -742,6 +742,14 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <!-- no translation found for granularity_label_character (7336470535385009523) -->
+    <skip />
+    <!-- no translation found for granularity_label_word (7075570328374918660) -->
+    <skip />
+    <!-- no translation found for granularity_label_link (5815508880782488267) -->
+    <skip />
+    <!-- no translation found for granularity_label_line (5764267235026120888) -->
+    <skip />
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Fabriektoets het gefaal"</string>

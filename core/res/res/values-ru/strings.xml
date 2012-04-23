@@ -146,6 +146,10 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Планшетный ПК будет отключен."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Телефон будет выключен."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Завершить работу?"</string>
+    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
+    <skip />
+    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
+    <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"Недавние"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Список пуст"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Настройки планшетного ПК"</string>
@@ -199,10 +203,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Приложение сможет получать и обрабатывать MMS. Вредоносные программы смогут отслеживать и удалять сообщения, не показывая их."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"принимать экстренные вызовы"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Приложение сможет получать и обрабатывать экстренные сообщения рассылок. Это разрешение доступно только для системных приложений."</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"Читать сообщения рассылки"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Приложение сможет считывать сообщения рассылки, полученные вашим устройством. В ряде стран вам будут приходить уведомления об экстренных ситуациях. В этом случае вредоносные программы могут помешать работе вашего устройства."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"отправлять SMS-сообщения"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Приложение сможет отправлять SMS. Вредоносные программы смогут отправлять SMS без вашего подтверждения, что приведет к непредвиденным расходам."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"отправка SMS без подтверждения"</string>
@@ -221,10 +223,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Приложение сможет перемещать задачи в режим активного или фонового выполнения. Вредоносные программы смогут переводить себя в активный режим без вашего ведома."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"остановка запущенных приложений"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Приложение сможет удалять задачи и собственные программы. Вредоносное ПО при этом сможет нарушать работу других приложений."</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"Совершать любые действия"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Приложение сможет совершать любые действия независимо от наличия разрешений и состояния."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"Установка режима совместимости"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Приложение сможет управлять режимом совместимости экрана других приложений. Вредоносное ПО может привести к сбоям в работе других программ."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"включение отладки приложений"</string>
@@ -742,6 +742,14 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"АБВ"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <!-- no translation found for granularity_label_character (7336470535385009523) -->
+    <skip />
+    <!-- no translation found for granularity_label_word (7075570328374918660) -->
+    <skip />
+    <!-- no translation found for granularity_label_link (5815508880782488267) -->
+    <skip />
+    <!-- no translation found for granularity_label_line (5764267235026120888) -->
+    <skip />
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Не удалось провести стандартный тест"</string>
