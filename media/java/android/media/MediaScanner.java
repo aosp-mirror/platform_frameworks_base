@@ -1770,8 +1770,10 @@ public class MediaScanner
         Iterator<FileEntry> iterator = mPlayLists.iterator();
         Cursor fileList = null;
         try {
+            // use the files uri and projection because we need the format column,
+            // but restrict the query to just audio files
             fileList = mMediaProvider.query(mFilesUri, FILES_PRESCAN_PROJECTION,
-                    null, null, null, null);
+                    "media_type=2", null, null, null);
             while (iterator.hasNext()) {
                 FileEntry entry = iterator.next();
                 // only process playlist files if they are new or have been modified since the last scan
