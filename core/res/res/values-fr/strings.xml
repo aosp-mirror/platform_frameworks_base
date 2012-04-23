@@ -146,6 +146,10 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Votre tablette va s\'éteindre."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Votre téléphone va s\'éteindre."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Voulez-vous éteindre le téléphone ?"</string>
+    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
+    <skip />
+    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
+    <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"Récentes"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Aucune application récente"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Options de la tablette"</string>
@@ -199,10 +203,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Permet à l\'application de recevoir et de traiter des MMS. Des applications malveillantes peuvent surveiller vos messages ou les supprimer avant même que vous puissiez les voir."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"recevoir les messages de diffusion d\'urgence"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Permet à l\'application de recevoir et de traiter les messages d\'urgence. Cette autorisation n\'est disponible que pour les applications système."</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lire les messages reçus via un canal de diffusion cellulaire"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permet à l\'application de lire les messages que votre appareil reçoit via un canal de diffusion cellulaire. Dans certaines zones géographiques, des alertes vous sont envoyées afin de vous prévenir en cas de situation d\'urgence. Les applications malveillantes peuvent venir perturber les performances ou le fonctionnement de votre appareil lorsqu\'un message est reçu via un canal de diffusion cellulaire."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"Envoi de messages SMS"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Permet à l\'application d\'envoyer des SMS. Des applications malveillantes peuvent engendrer des frais en envoyant des messages à votre insu."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"envoyer des SMS sans confirmation"</string>
@@ -221,10 +223,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permet à l\'application de faire passer les tâches de premier plan en arrière-plan. Des applications malveillantes peuvent exploiter cette fonctionnalité pour passer au premier plan sans votre consentement."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"arrêter les applications en cours d\'exécution"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Permet à l\'application de supprimer des tâches et de fermer les applications qui les exécutent. Des applications malveillantes peuvent exploiter cette fonctionnalité pour perturber le comportement des autres applications."</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"démarrer n\'importe quelle activité"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Permet à l\'application de démarrer n\'importe quelle activité, quels que soient l\'état exporté ou le degré de protection appliqué à l\'autorisation."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"définir la compatibilité de l\'écran"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Permettre de contrôler le mode de compatibilité de l\'écran des autres applications. Des applications malveillantes peuvent perturber le fonctionnement d\'autres applications."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"activer le débogage des applications"</string>
@@ -742,6 +742,14 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <!-- no translation found for granularity_label_character (7336470535385009523) -->
+    <skip />
+    <!-- no translation found for granularity_label_word (7075570328374918660) -->
+    <skip />
+    <!-- no translation found for granularity_label_link (5815508880782488267) -->
+    <skip />
+    <!-- no translation found for granularity_label_line (5764267235026120888) -->
+    <skip />
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Échec du test usine"</string>

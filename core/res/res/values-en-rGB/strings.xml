@@ -146,6 +146,10 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Your tablet will shut down."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Your phone will shut down."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Do you want to shut down?"</string>
+    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
+    <skip />
+    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
+    <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"Recent"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"No recent apps"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Tablet options"</string>
@@ -199,10 +203,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Allows the app to receive and process MMS messages. Malicious apps may monitor your messages or delete them without showing them to you."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"receive emergency broadcasts"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Allows the app to receive and process emergency broadcast messages. This permission is only available for system apps."</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"read mobile broadcast messages"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Allows the app to read mobile broadcast messages received by your device. Cell broadcast alerts are delivered in some locations to warn you of emergency situations. Malicious apps may interfere with the performance or operation of your device when an emergency mobile broadcast is received."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"send SMS messages"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Allows the app to send SMS messages. Malicious apps may cost you money by sending messages without your confirmation."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"send SMS messages with no confirmation"</string>
@@ -221,10 +223,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Allows the app to move tasks to the foreground and background. Malicious apps may force themselves to the front without your control."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"stop running apps"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Allows the app to remove tasks and kill their apps. Malicious apps may disrupt the behaviour of other apps."</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"start any activity"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Allows the app to start any activity, regardless of permission protection or exported state."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"set screen compatibility"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Allows the app to control the screen compatibility mode of other applications. Malicious applications may break the behaviour of other applications."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"enable app debugging"</string>
@@ -742,6 +742,14 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <!-- no translation found for granularity_label_character (7336470535385009523) -->
+    <skip />
+    <!-- no translation found for granularity_label_word (7075570328374918660) -->
+    <skip />
+    <!-- no translation found for granularity_label_link (5815508880782488267) -->
+    <skip />
+    <!-- no translation found for granularity_label_line (5764267235026120888) -->
+    <skip />
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Factory test failed"</string>

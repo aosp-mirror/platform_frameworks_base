@@ -146,6 +146,10 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Din tabletcomputer slukkes nu."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Din telefon slukkes nu."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Vil du slukke?"</string>
+    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
+    <skip />
+    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
+    <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"Seneste"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Der er ingen seneste apps."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Valgmuligheder for tabletcomputeren"</string>
@@ -199,10 +203,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Tillader, at appen kan modtage og behandle mms-beskeder. Ondsindede apps kan overvåge dine beskeder eller slette dem uden at vise dem til dig."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"modtage nødudsendelser"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Tillader, at appen kan modtage og behandle nødtransmissioner. Denne tilladelse er kun tilgængelig for systemapps."</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"læse mobiltransmissionsbeskeder"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tillader, at appen læser mobiltransmissionsbeskeder, der modtages af din enhed. I nogle områder sendes mobiltransmissionsbeskeder for at advare om nødsituationer. Ondsindede apps kan forstyrre ydelsen eller driften af ​din ​enhed, når en mobiltransmission om en nødsituation modtages."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"send sms-beskeder"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Tillader, at appen kan sende sms-beskeder. Ondsindede apps kan medføre store omkostninger ved at sende beskeder uden din bekræftelse."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"sende sms-meddelelser uden bekræftelse"</string>
@@ -221,10 +223,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Tillader, at appen kan flytte opgaver til forgrunden og baggrunden. Ondsindede apps kan tvinge sig selv i forgrunden uden din kontrol."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"stoppe kørsel af apps"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Tillader, at en app kan fjerne opgaver og lukke deres apps. Ondsindede apps kan forstyrre adfærden for andre apps."</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"starte en aktivitet"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Tillader, at appen starter en hvilken som helst aktivitet, uanset tilladelsesbeskyttelse eller eksportstatus."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"indstil skærmens kompatibilitet"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Tillader, at appen kontrollerer kompatibilitetstilstanden for skærme i andre applikationer. Ondsindede applikationer kan forstyrre andre applikationers adfærd."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"aktivere fejlretning af appen"</string>
@@ -742,6 +742,14 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <!-- no translation found for granularity_label_character (7336470535385009523) -->
+    <skip />
+    <!-- no translation found for granularity_label_word (7075570328374918660) -->
+    <skip />
+    <!-- no translation found for granularity_label_link (5815508880782488267) -->
+    <skip />
+    <!-- no translation found for granularity_label_line (5764267235026120888) -->
+    <skip />
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Fabrikstest mislykkedes"</string>

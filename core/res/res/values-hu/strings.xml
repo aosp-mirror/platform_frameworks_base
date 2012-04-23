@@ -146,6 +146,10 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"A táblagép ki fog kapcsolni."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"A telefon le fog állni."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Kikapcsolja?"</string>
+    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
+    <skip />
+    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
+    <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"Legutóbbiak"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Nincs újabb alkalmazás."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Táblagép beállításait"</string>
@@ -199,10 +203,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Lehetővé teszi az alkalmazás számára, hogy MMS-eket fogadjon és dolgozzon fel. A rosszindulatú alkalmazások megfigyelhetik vagy törölhetik az üzeneteket anélkül, hogy Ön látná azokat."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"vészhelyzeti közlemények fogadása"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Lehetővé teszi az alkalmazás számára vészhelyzeti üzenetek fogadását és feldolgozását. Ez az engedély csak rendszeralkalmazások számára érhető el."</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"cellán belüli üzenetek olvasása"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Lehetővé teszi az alkalmazás számára az eszközre érkező cellán belüli üzenetek olvasását. Bizonyos helyeken figyelmeztető üzeneteket kaphat a cellán belül a vészhelyzetekről. A rosszindulatú alkalmazások befolyásolhatják az eszköz  teljesítményét vagy működését vészhelyzeti cellaüzenet érkezésekor."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS-ek küldése"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Lehetővé teszi az alkalmazás számára SMS üzeneteket küldését. A rosszindulatú alkalmazások pénzbe kerülő üzeneteket küldhetnek az Ön jóváhagyása nélkül."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"SMS üzenetek küldése megerősítés nélkül"</string>
@@ -221,10 +223,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Lehetővé teszi az alkalmazás számára, hogy feladatokat helyezzen át az előtérből a háttérbe és fordítva. A rosszindulatú alkalmazások az előtérbe helyezhetik magukat az Ön engedélye nélkül."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"futó alkalmazások leállítása"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Lehetővé teszi, hogy az alkalmazás feladatokat távolítson el és leállítsa azok alkalmazásait. Rosszindulatú alkalmazások megzavarhatják más alkalmazások viselkedését."</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"bármely tevékenység elindítása"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Lehetővé teszi az alkalmazás számára bármely tevékenység elindítását az engedélyektől és exportált állapottól függetlenül."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"Képernyő-kompatibilitás beállítása"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Lehetővé teszi, hogy az alkalmazás szabályozza az egyéb alkalmazások képernyő-kompatibilitási módját. A kártékony alkalmazások megzavarhatják a többi alkalmazás viselkedését."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"alkalmazások hibakeresésének bekapcsolása"</string>
@@ -742,6 +742,14 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <!-- no translation found for granularity_label_character (7336470535385009523) -->
+    <skip />
+    <!-- no translation found for granularity_label_word (7075570328374918660) -->
+    <skip />
+    <!-- no translation found for granularity_label_link (5815508880782488267) -->
+    <skip />
+    <!-- no translation found for granularity_label_line (5764267235026120888) -->
+    <skip />
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"A gyári teszt sikertelen"</string>
