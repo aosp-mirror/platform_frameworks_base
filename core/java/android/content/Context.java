@@ -1928,6 +1928,17 @@ public abstract class Context {
     public static final String INPUT_SERVICE = "input";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.os.SchedulingPolicyService} for managing scheduling policy.
+     *
+     * @see #getSystemService
+     * @see android.os.SchedulingPolicyService
+     *
+     * @hide
+     */
+    public static final String SCHEDULING_POLICY_SERVICE = "scheduling_policy";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

@@ -30,6 +30,7 @@ import android.media.AudioService;
 import android.net.wifi.p2p.WifiP2pService;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.SchedulingPolicyService;
 import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
@@ -154,6 +155,10 @@ class ServerThread extends Thread {
 
             Slog.i(TAG, "Telephony Registry");
             ServiceManager.addService("telephony.registry", new TelephonyRegistry(context));
+
+            Slog.i(TAG, "Scheduling Policy");
+            ServiceManager.addService(Context.SCHEDULING_POLICY_SERVICE,
+                    new SchedulingPolicyService());
 
             AttributeCache.init(context);
 

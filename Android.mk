@@ -132,6 +132,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IPermissionController.aidl \
 	core/java/android/os/IPowerManager.aidl \
 	core/java/android/os/IRemoteCallback.aidl \
+	core/java/android/os/ISchedulingPolicyService.aidl \
 	core/java/android/os/IUpdateLock.aidl \
 	core/java/android/os/IVibratorService.aidl \
 	core/java/android/service/dreams/IDreamManager.aidl \
