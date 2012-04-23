@@ -143,18 +143,16 @@ void DisplayList::destroyDisplayListDeferred(DisplayList* displayList) {
 void DisplayList::clearResources() {
     sk_free((void*) mReader.base());
 
-    if (USE_DISPLAY_LIST_PROPERTIES) {
-        delete mTransformMatrix;
-        delete mTransformCamera;
-        delete mTransformMatrix3D;
-        delete mStaticMatrix;
-        delete mAnimationMatrix;
-        mTransformMatrix = NULL;
-        mTransformCamera = NULL;
-        mTransformMatrix3D = NULL;
-        mStaticMatrix = NULL;
-        mAnimationMatrix = NULL;
-    }
+    delete mTransformMatrix;
+    delete mTransformCamera;
+    delete mTransformMatrix3D;
+    delete mStaticMatrix;
+    delete mAnimationMatrix;
+    mTransformMatrix = NULL;
+    mTransformCamera = NULL;
+    mTransformMatrix3D = NULL;
+    mStaticMatrix = NULL;
+    mAnimationMatrix = NULL;
 
     Caches& caches = Caches::getInstance();
 
@@ -274,6 +272,7 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
     indent[count] = '\0';
     ALOGD("%sStart display list (%p, %s)", (char*) indent + 2, this, mName.string());
 
+    ALOGD("%s%s %d", indent, "Save", SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     int saveCount = renderer.getSaveCount() - 1;
 
     outputViewProperties(renderer, (char*) indent);
@@ -377,11 +376,9 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
             break;
             case DrawDisplayList: {
                 DisplayList* displayList = getDisplayList();
-                uint32_t width = getUInt();
-                uint32_t height = getUInt();
                 int32_t flags = getInt();
                 ALOGD("%s%s %p, %dx%d, 0x%x %d", (char*) indent, OP_NAMES[op],
-                        displayList, width, height, flags, level + 1);
+                        displayList, mWidth, mHeight, flags, level + 1);
                 renderer.outputDisplayList(displayList, level + 1);
             }
             break;
@@ -664,64 +661,60 @@ void DisplayList::updateMatrix() {
 }
 
 void DisplayList::outputViewProperties(OpenGLRenderer& renderer, char* indent) {
-    if (USE_DISPLAY_LIST_PROPERTIES) {
-        updateMatrix();
-        if (mLeft != 0 || mTop != 0) {
-            ALOGD("%s%s %d, %d", indent, "Translate (left, top)", mLeft, mTop);
-        }
-        if (mStaticMatrix) {
+    updateMatrix();
+    if (mLeft != 0 || mTop != 0) {
+        ALOGD("%s%s %d, %d", indent, "Translate (left, top)", mLeft, mTop);
+    }
+    if (mStaticMatrix) {
+        ALOGD("%s%s %p: [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f]",
+                indent, "ConcatMatrix (static)", mStaticMatrix,
+                mStaticMatrix->get(0), mStaticMatrix->get(1),
+                mStaticMatrix->get(2), mStaticMatrix->get(3),
+                mStaticMatrix->get(4), mStaticMatrix->get(5),
+                mStaticMatrix->get(6), mStaticMatrix->get(7),
+                mStaticMatrix->get(8));
+    }
+    if (mAnimationMatrix) {
+        ALOGD("%s%s %p: [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f]",
+                indent, "ConcatMatrix (animation)", mAnimationMatrix,
+                mAnimationMatrix->get(0), mAnimationMatrix->get(1),
+                mAnimationMatrix->get(2), mAnimationMatrix->get(3),
+                mAnimationMatrix->get(4), mAnimationMatrix->get(5),
+                mAnimationMatrix->get(6), mAnimationMatrix->get(7),
+                mAnimationMatrix->get(8));
+    }
+    if (mMatrixFlags != 0) {
+        if (mMatrixFlags == TRANSLATION) {
+            ALOGD("%s%s %f, %f", indent, "Translate", mTranslationX, mTranslationY);
+        } else {
             ALOGD("%s%s %p: [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f]",
-                    indent, "ConcatMatrix (static)", mStaticMatrix,
-                    mStaticMatrix->get(0), mStaticMatrix->get(1),
-                    mStaticMatrix->get(2), mStaticMatrix->get(3),
-                    mStaticMatrix->get(4), mStaticMatrix->get(5),
-                    mStaticMatrix->get(6), mStaticMatrix->get(7),
-                    mStaticMatrix->get(8));
+                    indent, "ConcatMatrix", mTransformMatrix,
+                    mTransformMatrix->get(0), mTransformMatrix->get(1),
+                    mTransformMatrix->get(2), mTransformMatrix->get(3),
+                    mTransformMatrix->get(4), mTransformMatrix->get(5),
+                    mTransformMatrix->get(6), mTransformMatrix->get(7),
+                    mTransformMatrix->get(8));
         }
-        if (mAnimationMatrix) {
-            ALOGD("%s%s %p: [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f]",
-                    indent, "ConcatMatrix (animation)", mAnimationMatrix,
-                    mAnimationMatrix->get(0), mAnimationMatrix->get(1),
-                    mAnimationMatrix->get(2), mAnimationMatrix->get(3),
-                    mAnimationMatrix->get(4), mAnimationMatrix->get(5),
-                    mAnimationMatrix->get(6), mAnimationMatrix->get(7),
-                    mAnimationMatrix->get(8));
-        }
-        if (mMatrixFlags != 0) {
-            if (mMatrixFlags == TRANSLATION) {
-                ALOGD("%s%s %f, %f", indent, "Translate", mTranslationX, mTranslationY);
-            } else {
-                ALOGD("%s%s %p: [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f]",
-                        indent, "ConcatMatrix", mTransformMatrix,
-                        mTransformMatrix->get(0), mTransformMatrix->get(1),
-                        mTransformMatrix->get(2), mTransformMatrix->get(3),
-                        mTransformMatrix->get(4), mTransformMatrix->get(5),
-                        mTransformMatrix->get(6), mTransformMatrix->get(7),
-                        mTransformMatrix->get(8));
-            }
-        }
-        if (mAlpha < 1 && !mCaching) {
-            // TODO: should be able to store the size of a DL at record time and not
-            // have to pass it into this call. In fact, this information might be in the
-            // location/size info that we store with the new native transform data.
-            int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
-            if (mClipChildren) {
-                flags |= SkCanvas::kClipToLayer_SaveFlag;
-            }
-            ALOGD("%s%s %.2f, %.2f, %.2f, %.2f, %d, 0x%x", indent, "SaveLayerAlpha",
-                    (float) 0, (float) 0, (float) mRight - mLeft, (float) mBottom - mTop,
-                    mMultipliedAlpha, flags);
-        }
+    }
+    if (mAlpha < 1 && !mCaching) {
+        // TODO: should be able to store the size of a DL at record time and not
+        // have to pass it into this call. In fact, this information might be in the
+        // location/size info that we store with the new native transform data.
+        int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
         if (mClipChildren) {
-            ALOGD("%s%s %.2f, %.2f, %.2f, %.2f", indent, "ClipRect", 0.0f, 0.0f,
-                    (float) mRight - mLeft, (float) mBottom - mTop);
+            flags |= SkCanvas::kClipToLayer_SaveFlag;
         }
+        ALOGD("%s%s %.2f, %.2f, %.2f, %.2f, %d, 0x%x", indent, "SaveLayerAlpha",
+                (float) 0, (float) 0, (float) mRight - mLeft, (float) mBottom - mTop,
+                mMultipliedAlpha, flags);
+    }
+    if (mClipChildren) {
+        ALOGD("%s%s %.2f, %.2f, %.2f, %.2f", indent, "ClipRect", 0.0f, 0.0f,
+                (float) mRight - mLeft, (float) mBottom - mTop);
     }
 }
 
-void DisplayList::setViewProperties(OpenGLRenderer& renderer, uint32_t width, uint32_t height,
-        uint32_t level) {
-    if (USE_DISPLAY_LIST_PROPERTIES) {
+void DisplayList::setViewProperties(OpenGLRenderer& renderer, uint32_t level) {
 #if DEBUG_DISPLAY_LIST
         uint32_t count = (level + 1) * 2;
         char indent[count + 1];
@@ -730,73 +723,72 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, uint32_t width, ui
         }
         indent[count] = '\0';
 #endif
-        updateMatrix();
-        if (mLeft != 0 || mTop != 0) {
-            DISPLAY_LIST_LOGD("%s%s %d, %d", indent, "Translate (left, top)", mLeft, mTop);
-            renderer.translate(mLeft, mTop);
-        }
-        if (mStaticMatrix) {
+    updateMatrix();
+    if (mLeft != 0 || mTop != 0) {
+        DISPLAY_LIST_LOGD("%s%s %d, %d", indent, "Translate (left, top)", mLeft, mTop);
+        renderer.translate(mLeft, mTop);
+    }
+    if (mStaticMatrix) {
+        DISPLAY_LIST_LOGD(
+                "%s%s %p: [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f]",
+                indent, "ConcatMatrix (static)", mStaticMatrix,
+                mStaticMatrix->get(0), mStaticMatrix->get(1),
+                mStaticMatrix->get(2), mStaticMatrix->get(3),
+                mStaticMatrix->get(4), mStaticMatrix->get(5),
+                mStaticMatrix->get(6), mStaticMatrix->get(7),
+                mStaticMatrix->get(8));
+        renderer.concatMatrix(mStaticMatrix);
+    } else if (mAnimationMatrix) {
+        DISPLAY_LIST_LOGD(
+                "%s%s %p: [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f]",
+                indent, "ConcatMatrix (animation)", mAnimationMatrix,
+                mAnimationMatrix->get(0), mAnimationMatrix->get(1),
+                mAnimationMatrix->get(2), mAnimationMatrix->get(3),
+                mAnimationMatrix->get(4), mAnimationMatrix->get(5),
+                mAnimationMatrix->get(6), mAnimationMatrix->get(7),
+                mAnimationMatrix->get(8));
+        renderer.concatMatrix(mAnimationMatrix);
+    }
+    if (mMatrixFlags != 0) {
+        if (mMatrixFlags == TRANSLATION) {
+            DISPLAY_LIST_LOGD("%s%s %f, %f", indent, "Translate", mTranslationX, mTranslationY);
+            renderer.translate(mTranslationX, mTranslationY);
+        } else {
             DISPLAY_LIST_LOGD(
                     "%s%s %p: [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f]",
-                    indent, "ConcatMatrix (static)", mStaticMatrix,
-                    mStaticMatrix->get(0), mStaticMatrix->get(1),
-                    mStaticMatrix->get(2), mStaticMatrix->get(3),
-                    mStaticMatrix->get(4), mStaticMatrix->get(5),
-                    mStaticMatrix->get(6), mStaticMatrix->get(7),
-                    mStaticMatrix->get(8));
-            renderer.concatMatrix(mStaticMatrix);
-        } else if (mAnimationMatrix) {
-            DISPLAY_LIST_LOGD(
-                    "%s%s %p: [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f]",
-                    indent, "ConcatMatrix (animation)", mAnimationMatrix,
-                    mAnimationMatrix->get(0), mAnimationMatrix->get(1),
-                    mAnimationMatrix->get(2), mAnimationMatrix->get(3),
-                    mAnimationMatrix->get(4), mAnimationMatrix->get(5),
-                    mAnimationMatrix->get(6), mAnimationMatrix->get(7),
-                    mAnimationMatrix->get(8));
-            renderer.concatMatrix(mAnimationMatrix);
+                    indent, "ConcatMatrix", mTransformMatrix,
+                    mTransformMatrix->get(0), mTransformMatrix->get(1),
+                    mTransformMatrix->get(2), mTransformMatrix->get(3),
+                    mTransformMatrix->get(4), mTransformMatrix->get(5),
+                    mTransformMatrix->get(6), mTransformMatrix->get(7),
+                    mTransformMatrix->get(8));
+            renderer.concatMatrix(mTransformMatrix);
         }
-        if (mMatrixFlags != 0) {
-            if (mMatrixFlags == TRANSLATION) {
-                DISPLAY_LIST_LOGD("%s%s %f, %f", indent, "Translate", mTranslationX, mTranslationY);
-                renderer.translate(mTranslationX, mTranslationY);
-            } else {
-                DISPLAY_LIST_LOGD(
-                        "%s%s %p: [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f]",
-                        indent, "ConcatMatrix", mTransformMatrix,
-                        mTransformMatrix->get(0), mTransformMatrix->get(1),
-                        mTransformMatrix->get(2), mTransformMatrix->get(3),
-                        mTransformMatrix->get(4), mTransformMatrix->get(5),
-                        mTransformMatrix->get(6), mTransformMatrix->get(7),
-                        mTransformMatrix->get(8));
-                renderer.concatMatrix(mTransformMatrix);
+    }
+    if (mAlpha < 1 && !mCaching) {
+        if (!mHasOverlappingRendering) {
+            DISPLAY_LIST_LOGD("%s%s %.2f", indent, "SetAlpha", mAlpha);
+            renderer.setAlpha(mAlpha);
+        } else {
+            // TODO: should be able to store the size of a DL at record time and not
+            // have to pass it into this call. In fact, this information might be in the
+            // location/size info that we store with the new native transform data.
+            int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
+            if (mClipChildren) {
+                flags |= SkCanvas::kClipToLayer_SaveFlag;
             }
+            DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %d, 0x%x", indent, "SaveLayerAlpha",
+                    (float) 0, (float) 0, (float) mRight - mLeft, (float) mBottom - mTop,
+                    mMultipliedAlpha, flags);
+            renderer.saveLayerAlpha(0, 0, mRight - mLeft, mBottom - mTop,
+                    mMultipliedAlpha, flags);
         }
-        if (mAlpha < 1 && !mCaching) {
-            if (!mHasOverlappingRendering) {
-                DISPLAY_LIST_LOGD("%s%s %.2f", indent, "SetAlpha", mAlpha);
-                renderer.setAlpha(mAlpha);
-            } else {
-                // TODO: should be able to store the size of a DL at record time and not
-                // have to pass it into this call. In fact, this information might be in the
-                // location/size info that we store with the new native transform data.
-                int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
-                if (mClipChildren) {
-                    flags |= SkCanvas::kClipToLayer_SaveFlag;
-                }
-                DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %d, 0x%x", indent, "SaveLayerAlpha",
-                        (float) 0, (float) 0, (float) mRight - mLeft, (float) mBottom - mTop,
-                        mMultipliedAlpha, flags);
-                renderer.saveLayerAlpha(0, 0, mRight - mLeft, mBottom - mTop,
-                        mMultipliedAlpha, flags);
-            }
-        }
-        if (mClipChildren) {
-            DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f", indent, "ClipRect", 0.0f, 0.0f,
-                    (float) mRight - mLeft, (float) mBottom - mTop);
-            renderer.clipRect(0, 0, mRight - mLeft, mBottom - mTop,
-                    SkRegion::kIntersect_Op);
-        }
+    }
+    if (mClipChildren) {
+        DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f", indent, "ClipRect", 0.0f, 0.0f,
+                (float) mRight - mLeft, (float) mBottom - mTop);
+        renderer.clipRect(0, 0, mRight - mLeft, mBottom - mTop,
+                SkRegion::kIntersect_Op);
     }
 }
 
@@ -805,8 +797,7 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, uint32_t width, ui
  * in the output() function, since that function processes the same list of opcodes for the
  * purposes of logging display list info for a given view.
  */
-status_t DisplayList::replay(OpenGLRenderer& renderer, uint32_t width,
-        uint32_t height, Rect& dirty, int32_t flags, uint32_t level) {
+status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, uint32_t level) {
     status_t drawGlStatus = 0;
     TextContainer text;
     mReader.rewind();
@@ -825,14 +816,11 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, uint32_t width,
 #endif
 
     renderer.startMark(mName.string());
-    int restoreTo = 0;
-    if (USE_DISPLAY_LIST_PROPERTIES) {
-        DISPLAY_LIST_LOGD("%s%s %d", indent, "Save",
-                SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
-        restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
-    }
-    setViewProperties(renderer, width, height, level);
-    if (USE_DISPLAY_LIST_PROPERTIES && renderer.quickReject(0, 0, width, height)) {
+    int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+    DISPLAY_LIST_LOGD("%s%s %d %d", indent, "Save",
+            SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag, restoreTo);
+    setViewProperties(renderer, level);
+    if (renderer.quickReject(0, 0, mWidth, mHeight)) {
         DISPLAY_LIST_LOGD("%s%s %d", (char*) indent, "RestoreToCount", restoreTo);
         renderer.restoreToCount(restoreTo);
         renderer.endMark();
@@ -963,13 +951,10 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, uint32_t width,
             break;
             case DrawDisplayList: {
                 DisplayList* displayList = getDisplayList();
-                uint32_t width = getUInt();
-                uint32_t height = getUInt();
                 int32_t flags = getInt();
                 DISPLAY_LIST_LOGD("%s%s %p, %dx%d, 0x%x %d", (char*) indent, OP_NAMES[op],
-                        displayList, width, height, flags, level + 1);
-                drawGlStatus |= renderer.drawDisplayList(displayList, width,
-                        height, dirty, flags, level + 1);
+                        displayList, mWidth, mHeight, flags, level + 1);
+                drawGlStatus |= renderer.drawDisplayList(displayList, dirty, flags, level + 1);
             }
             break;
             case DrawLayer: {
@@ -1247,10 +1232,8 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, uint32_t width,
         }
     }
 
-    if (USE_DISPLAY_LIST_PROPERTIES) {
-        DISPLAY_LIST_LOGD("%s%s %d", (char*) indent, "RestoreToCount", restoreTo);
-        renderer.restoreToCount(restoreTo);
-    }
+    DISPLAY_LIST_LOGD("%s%s %d", (char*) indent, "RestoreToCount", restoreTo);
+    renderer.restoreToCount(restoreTo);
     renderer.endMark();
 
     DISPLAY_LIST_LOGD("%sDone (%p, %s), returning %d", (char*) indent + 2, this, mName.string(),
@@ -1437,13 +1420,12 @@ bool DisplayListRenderer::clipRect(float left, float top, float right, float bot
 }
 
 status_t DisplayListRenderer::drawDisplayList(DisplayList* displayList,
-        uint32_t width, uint32_t height, Rect& dirty, int32_t flags, uint32_t level) {
+        Rect& dirty, int32_t flags, uint32_t level) {
     // dirty is an out parameter and should not be recorded,
     // it matters only when replaying the display list
 
     addOp(DisplayList::DrawDisplayList);
     addDisplayList(displayList);
-    addSize(width, height);
     addInt(flags);
     return DrawGlInfo::kStatusDone;
 }

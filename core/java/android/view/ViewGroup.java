@@ -2898,12 +2898,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         boolean previousValue = (mGroupFlags & FLAG_CLIP_CHILDREN) == FLAG_CLIP_CHILDREN;
         if (clipChildren != previousValue) {
             setBooleanFlag(FLAG_CLIP_CHILDREN, clipChildren);
-            if (USE_DISPLAY_LIST_PROPERTIES) {
-                for (int i = 0; i < mChildrenCount; ++i) {
-                    View child = getChildAt(i);
-                    if (child.mDisplayList != null) {
-                        child.mDisplayList.setClipChildren(clipChildren);
-                    }
+            for (int i = 0; i < mChildrenCount; ++i) {
+                View child = getChildAt(i);
+                if (child.mDisplayList != null) {
+                    child.mDisplayList.setClipChildren(clipChildren);
                 }
             }
         }
@@ -4229,7 +4227,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final View v = children[i];
             v.mTop += offset;
             v.mBottom += offset;
-            if (USE_DISPLAY_LIST_PROPERTIES && v.mDisplayList != null) {
+            if (v.mDisplayList != null) {
                 v.mDisplayList.offsetTopBottom(offset);
                 invalidateViewProperty(false, false);
             }
