@@ -429,8 +429,10 @@ public class WindowManagerImpl implements WindowManager {
 
     /**
      * @param level See {@link android.content.ComponentCallbacks}
+     *
+     * @hide
      */
-    public void trimMemory(int level) {
+    public void startTrimMemory(int level) {
         if (HardwareRenderer.isAvailable()) {
             // On low-end gfx devices we trim when memory is moderate;
             // on high-end devices we do this when low.
@@ -447,18 +449,21 @@ public class WindowManagerImpl implements WindowManager {
                     }
                 }
                 // Force a full memory flush
-                HardwareRenderer.trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
                 mNeedsEglTerminate = true;
+                HardwareRenderer.startTrimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
                 return;
             }
-            HardwareRenderer.trimMemory(level);
+
+            HardwareRenderer.startTrimMemory(level);
         }
     }
 
     /**
      * @hide
      */
-    public void terminateEgl() {
+    public void endTrimMemory() {
+        HardwareRenderer.endTrimMemory();
+
         if (mNeedsEglTerminate) {
             ManagedEGLContext.doTerminate();
             mNeedsEglTerminate = false;

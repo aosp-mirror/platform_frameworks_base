@@ -484,7 +484,28 @@ public abstract class HardwareRenderer {
      *              see {@link android.content.ComponentCallbacks}
      */
     static void trimMemory(int level) {
-        Gl20Renderer.trimMemory(level);
+        startTrimMemory(level);
+        endTrimMemory();
+    }
+
+    /**
+     * Starts the process of trimming memory. Usually this call will setup
+     * hardware rendering context and reclaim memory.Extra cleanup might
+     * be required by calling {@link #endTrimMemory()}.
+     * 
+     * @param level Hint about the amount of memory that should be trimmed,
+     *              see {@link android.content.ComponentCallbacks}
+     */
+    static void startTrimMemory(int level) {
+        Gl20Renderer.startTrimMemory(level);
+    }
+
+    /**
+     * Finishes the process of trimming memory. This method will usually
+     * cleanup special resources used by the memory trimming process.
+     */
+    static void endTrimMemory() {
+        Gl20Renderer.endTrimMemory();
     }
 
     /**
@@ -1122,12 +1143,15 @@ public abstract class HardwareRenderer {
                         callbacks.onHardwarePostDraw(canvas);
                         canvas.restoreToCount(saveCount);
                         view.mRecreateDisplayList = false;
+
                         mFrameCount++;
+
                         if (mDebugDirtyRegions) {
                             if (mDebugPaint == null) {
                                 mDebugPaint = new Paint();
                                 mDebugPaint.setColor(0x7fff0000);
                             }
+
                             if (dirty != null && (mFrameCount & 1) == 0) {
                                 canvas.drawRect(dirty, mDebugPaint);
                             }
@@ -1446,7 +1470,7 @@ public abstract class HardwareRenderer {
             return null;
         }
 
-        static void trimMemory(int level) {
+        static void startTrimMemory(int level) {
             if (sEgl == null || sEglConfig == null) return;
 
             Gl20RendererEglContext managedContext =
@@ -1463,9 +1487,12 @@ public abstract class HardwareRenderer {
             } else if (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
                 GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_MODERATE);
             }
+        }
 
-            sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                    EGL_NO_CONTEXT);
+        static void endTrimMemory() {
+            if (sEgl != null && sEglDisplay != null) {
+                sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+            }
         }
 
         private static void usePbufferSurface(EGLContext eglContext) {

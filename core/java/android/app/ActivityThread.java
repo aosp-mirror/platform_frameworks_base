@@ -3765,9 +3765,11 @@ public final class ActivityThread {
 
     final void handleTrimMemory(int level) {
         if (DEBUG_MEMORY_TRIM) Slog.v(TAG, "Trimming memory to level: " + level);
-        WindowManagerImpl.getDefault().trimMemory(level);
-        ArrayList<ComponentCallbacks2> callbacks;
 
+        final WindowManagerImpl windowManager = WindowManagerImpl.getDefault();
+        windowManager.startTrimMemory(level);
+
+        ArrayList<ComponentCallbacks2> callbacks;
         synchronized (mPackages) {
             callbacks = collectComponentCallbacksLocked(true, null);
         }
@@ -3776,7 +3778,8 @@ public final class ActivityThread {
         for (int i = 0; i < N; i++) {
             callbacks.get(i).onTrimMemory(level);
         }
-        WindowManagerImpl.getDefault().terminateEgl();
+
+        windowManager.endTrimMemory();        
     }
 
     private void setupGraphicsSupport(LoadedApk info) {
