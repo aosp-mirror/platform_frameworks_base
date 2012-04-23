@@ -132,7 +132,7 @@ InputDeviceInfo::InputDeviceInfo() {
 
 InputDeviceInfo::InputDeviceInfo(const InputDeviceInfo& other) :
         mId(other.mId), mGeneration(other.mGeneration), mIdentifier(other.mIdentifier),
-        mSources(other.mSources),
+        mAlias(other.mAlias), mSources(other.mSources),
         mKeyboardType(other.mKeyboardType),
         mKeyCharacterMap(other.mKeyCharacterMap),
         mHasVibrator(other.mHasVibrator),

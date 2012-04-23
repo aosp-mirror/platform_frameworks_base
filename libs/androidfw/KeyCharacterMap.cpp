@@ -713,8 +713,8 @@ status_t KeyCharacterMap::Parser::parse() {
             }
 
             mTokenizer->skipDelimiters(WHITESPACE);
-            if (!mTokenizer->isEol()) {
-                ALOGE("%s: Expected end of line, got '%s'.",
+            if (!mTokenizer->isEol() && mTokenizer->peekChar() != '#') {
+                ALOGE("%s: Expected end of line or trailing comment, got '%s'.",
                         mTokenizer->getLocation().string(),
                         mTokenizer->peekRemainderOfLine().string());
                 return BAD_VALUE;
@@ -973,7 +973,7 @@ status_t KeyCharacterMap::Parser::parseKeyProperty() {
         }
 
         mTokenizer->skipDelimiters(WHITESPACE);
-    } while (!mTokenizer->isEol());
+    } while (!mTokenizer->isEol() && mTokenizer->peekChar() != '#');
 
     // Add the behavior.
     for (size_t i = 0; i < properties.size(); i++) {
