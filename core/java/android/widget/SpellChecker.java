@@ -60,6 +60,8 @@ public class SpellChecker implements SpellCheckerSessionListener {
     // Pause between each spell check to keep the UI smooth
     private final static int SPELL_PAUSE_DURATION = 400; // milliseconds
 
+    private static final int MIN_SENTENCE_LENGTH = 50;
+
     private static final int USE_SPAN_RANGE = -1;
 
     private final TextView mTextView;
@@ -508,11 +510,10 @@ public class SpellChecker implements SpellCheckerSessionListener {
                 if (wordEnd < start) {
                     return;
                 }
-                wordStart = regionEnd;
                 // TODO: Find the start position of the sentence.
                 // Set span with the context
                 final int spellCheckStart =  Math.max(
-                        0, Math.min(wordStart, regionEnd - WORD_ITERATOR_INTERVAL));
+                        0, Math.min(wordStart, regionEnd - MIN_SENTENCE_LENGTH));
                 if (regionEnd <= spellCheckStart) {
                     return;
                 }
@@ -530,6 +531,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
                         && (selectionEnd < spellCheckStart || selectionStart > regionEnd)) {
                     addSpellCheckSpan(editable, spellCheckStart, regionEnd);
                 }
+                wordStart = regionEnd;
             } else {
                 while (wordStart <= end) {
                     if (wordEnd >= start && wordEnd > wordStart) {
