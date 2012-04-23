@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-<!--    android:background="@drawable/status_bar_closed_default_background" -->
+<!--    android:background="@drawable/system_bar_closed_default_background" -->
 <com.android.systemui.statusbar.tablet.NotificationPanel
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
@@ -26,7 +26,7 @@
 
     <ImageView android:id="@+id/clear_all_button"
         android:layout_width="wrap_content"
-        android:layout_height="@*android:dimen/status_bar_height"
+        android:layout_height="@*android:dimen/system_bar_height"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
         android:layout_marginRight="20dp"
@@ -46,7 +46,7 @@
         android:layout_marginBottom="8dp"
         >
 
-        <include layout="@layout/status_bar_notification_panel_title"
+        <include layout="@layout/system_bar_notification_panel_title"
             android:layout_width="478dp"
             android:layout_height="224dp"
             android:layout_alignParentTop="true"

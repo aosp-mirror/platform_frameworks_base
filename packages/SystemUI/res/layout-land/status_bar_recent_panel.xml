@@ -20,9 +20,12 @@
 
 <com.android.systemui.recent.RecentsPanelView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/recents_root"
     android:layout_height="match_parent"
-    android:layout_width="match_parent">
+    android:layout_width="match_parent"
+    systemui:recentItemLayout="@layout/status_bar_recent_item"
+    >
 
     <FrameLayout
         android:id="@+id/recents_bg_protect"

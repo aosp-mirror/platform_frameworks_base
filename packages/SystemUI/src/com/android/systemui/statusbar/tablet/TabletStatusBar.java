@@ -225,7 +225,7 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         // Notification Panel
         mNotificationPanel = (NotificationPanel)View.inflate(context,
-                R.layout.status_bar_notification_panel, null);
+                R.layout.system_bar_notification_panel, null);
         mNotificationPanel.setBar(this);
         mNotificationPanel.show(false, false);
         mNotificationPanel.setOnTouchListener(
@@ -286,7 +286,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         // Notification preview window
         if (NOTIFICATION_PEEK_ENABLED) {
             mNotificationPeekWindow = (NotificationPeekPanel) View.inflate(context,
-                    R.layout.status_bar_notification_peek, null);
+                    R.layout.system_bar_notification_peek, null);
             mNotificationPeekWindow.setBar(this);
 
             mNotificationPeekRow = (ViewGroup) mNotificationPeekWindow.findViewById(R.id.content);
@@ -330,7 +330,7 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         // Input methods Panel
         mInputMethodsPanel = (InputMethodsPanel) View.inflate(context,
-                R.layout.status_bar_input_methods_panel, null);
+                R.layout.system_bar_input_methods_panel, null);
         mInputMethodsPanel.setHardKeyboardEnabledChangeListener(this);
         mInputMethodsPanel.setOnTouchListener(new TouchOutsideListener(
                 MSG_CLOSE_INPUT_METHODS_PANEL, mInputMethodsPanel));
@@ -353,7 +353,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         
         // Compatibility mode selector panel
         mCompatModePanel = (CompatModePanel) View.inflate(context,
-                R.layout.status_bar_compat_mode_panel, null);
+                R.layout.system_bar_compat_mode_panel, null);
         mCompatModePanel.setOnTouchListener(new TouchOutsideListener(
                 MSG_CLOSE_COMPAT_MODE_PANEL, mCompatModePanel));
         mCompatModePanel.setTrigger(mCompatModeButton);
@@ -465,7 +465,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         loadDimens();
 
         final TabletStatusBarView sb = (TabletStatusBarView)View.inflate(
-                context, R.layout.status_bar, null);
+                context, R.layout.system_bar, null);
         mStatusBarView = sb;
 
         sb.setHandler(mHandler);
@@ -647,7 +647,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     protected void updateRecentsPanel() {
-        super.updateRecentsPanel();
+        super.updateRecentsPanel(R.layout.system_bar_recent_panel);
         mRecentsPanel.setStatusBarView(mStatusBarView);
     }
 

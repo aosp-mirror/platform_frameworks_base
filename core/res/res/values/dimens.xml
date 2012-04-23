@@ -34,16 +34,22 @@
     <dimen name="status_bar_height">25dip</dimen>
     <!-- Height of the bottom navigation / system bar. -->
     <dimen name="navigation_bar_height">48dp</dimen>
+    <!-- Height of the bottom navigation bar in portrait -->
+    <dimen name="navigation_bar_height_portrait">@dimen/navigation_bar_height</dimen>
     <!-- Width of the navigation bar when it is placed vertically on the screen -->
     <dimen name="navigation_bar_width">42dp</dimen>
     <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">24dip</dimen>
     <!-- Size of the giant number (unread count) in the notifications -->
     <dimen name="status_bar_content_number_size">48sp</dimen>
+    <!-- Height of the system bar (combined status & navigation); used by
+         SystemUI internally, not respected by the window manager. -->
+    <dimen name="system_bar_height">@dimen/navigation_bar_height</dimen>
     <!-- Height of notification icons in the system bar -->
     <dimen name="system_bar_icon_size">32dip</dimen>
     <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
     <dimen name="status_bar_edge_ignore">5dp</dimen>
+
     <!-- Size of the fastscroll hint letter -->
     <dimen name="fastscroll_overlay_size">104dp</dimen>
     <!-- Width of the fastscroll thumb -->
@@ -221,5 +227,4 @@
          action bar tabs from becoming too wide on a wide screen when only
          a few are present. -->
     <dimen name="action_bar_stacked_tab_max_width">180dp</dimen>
-
 </resources>

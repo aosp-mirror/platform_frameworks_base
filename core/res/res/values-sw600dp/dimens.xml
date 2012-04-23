@@ -18,13 +18,6 @@
 */
 -->
 <resources>
-    <!-- Height of the status bar -->
-    <dimen name="status_bar_height">48dip</dimen>
-    <!-- Width and height of a single notification icon in the status bar -->
-    <dimen name="status_bar_icon_size">24dip</dimen>
-    <!-- Size of the giant number (unread count) in the notifications -->
-    <dimen name="status_bar_content_number_size">48sp</dimen>
-
     <!-- The maximum number of action buttons that should be permitted within
          an action bar/action mode. This will be used to determine how many
          showAsAction="ifRoom" items can fit. "always" items can override this. -->
@@ -82,5 +75,8 @@
          (the screen is in landscape). This may be either a fraction or a dimension.-->
     <item type="dimen" name="dialog_fixed_height_minor">90%</item>
 
+    <!-- Height of the bottom navigation bar in portrait; on sw600dp devices
+         this is a bit taller -->
+    <dimen name="navigation_bar_height_portrait">56dp</dimen>
 </resources>
 

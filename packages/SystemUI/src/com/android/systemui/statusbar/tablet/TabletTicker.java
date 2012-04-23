@@ -264,7 +264,7 @@ public class TabletTicker
             iconId = R.id.left_icon;
         }
         if (n.tickerView != null) {
-            group = (ViewGroup)inflater.inflate(R.layout.status_bar_ticker_panel, null, false);
+            group = (ViewGroup)inflater.inflate(R.layout.system_bar_ticker_panel, null, false);
             ViewGroup content = (FrameLayout) group.findViewById(R.id.ticker_expanded);
             View expanded = null;
             Exception exception = null;
@@ -285,7 +285,7 @@ public class TabletTicker
                     ViewGroup.LayoutParams.MATCH_PARENT);
             content.addView(expanded, lp);
         } else if (n.tickerText != null) {
-            group = (ViewGroup)inflater.inflate(R.layout.status_bar_ticker_compat, mWindow, false);
+            group = (ViewGroup)inflater.inflate(R.layout.system_bar_ticker_compat, mWindow, false);
             final Drawable icon = StatusBarIconView.getIcon(mContext,
                     new StatusBarIcon(notification.pkg, n.icon, n.iconLevel, 0, n.tickerText));
             ImageView iv = (ImageView)group.findViewById(iconId);

@@ -29,4 +29,9 @@
     <drawable name="recents_callout_line">#99ffffff</drawable>
     <drawable name="notification_item_background_legacy_color">#ffaaaaaa</drawable>
     <drawable name="intruder_bg_pressed">#ff33B5E5</drawable>
+
+    <!-- ==================== system bar only ==================== -->
+    <drawable name="system_bar_background">#ff000000</drawable>
+    <!-- the darkening filter applied to notifications -->
+    <drawable name="notification_icon_area_smoke">#aa000000</drawable>
 </resources>

@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Shader.TileMode;
@@ -89,6 +90,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private TaskDescriptionAdapter mListAdapter;
     private int mThumbnailWidth;
     private boolean mFitThumbnailToXY;
+    private int mRecentItemLayoutId;
 
     public static interface OnRecentsPanelVisibilityChangedListener {
         public void onRecentsPanelVisibilityChanged(boolean visible);
@@ -142,7 +144,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
 
         public View createView(ViewGroup parent) {
-            View convertView = mInflater.inflate(R.layout.status_bar_recent_item, parent, false);
+            View convertView = mInflater.inflate(mRecentItemLayoutId, parent, false);
             ViewHolder holder = new ViewHolder();
             holder.thumbnailView = convertView.findViewById(R.id.app_thumbnail);
             holder.thumbnailViewImage =
@@ -421,6 +423,11 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         super(context, attrs, defStyle);
         mContext = context;
         updateValuesFromResources();
+
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RecentsPanelView,
+                defStyle, 0);
+
+        mRecentItemLayoutId = a.getResourceId(R.styleable.RecentsPanelView_recentItemLayout, 0);
     }
 
     public void updateValuesFromResources() {
@@ -432,6 +439,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+
         mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mRecentsContainer = (ViewGroup) findViewById(R.id.recents_container);
         mStatusBarTouchProxy = (StatusBarTouchProxy) findViewById(R.id.status_bar_touch_proxy);

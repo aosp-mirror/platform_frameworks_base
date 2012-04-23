@@ -225,7 +225,7 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel,
         }
         final CharSequence imiName = getIMIName(imi);
         final Drawable icon = getSubtypeIcon(imi, subtype);
-        final View view = View.inflate(mContext, R.layout.status_bar_input_methods_item, null);
+        final View view = View.inflate(mContext, R.layout.system_bar_input_methods_item, null);
         final ImageView subtypeIcon = (ImageView)view.findViewById(R.id.item_icon);
         final TextView itemTitle = (TextView)view.findViewById(R.id.item_title);
         final TextView itemSubtitle = (TextView)view.findViewById(R.id.item_subtitle);
