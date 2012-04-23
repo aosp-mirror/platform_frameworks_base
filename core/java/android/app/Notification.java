@@ -1450,7 +1450,7 @@ public class Notification implements Parcelable
         private RemoteViews makeBigContentView() {
             if (mActions.size() == 0) return null;
 
-            return applyStandardTemplateWithActions(R.layout.notification_template_base);
+            return applyStandardTemplateWithActions(R.layout.notification_template_big_base);
         }
 
         private RemoteViews generateActionButton(Action action) {
