@@ -32,4 +32,6 @@ interface IMediaContainerService {
     boolean checkExternalFreeStorage(in Uri fileUri);
     ObbInfo getObbInfo(in String filename);
     long calculateDirectorySize(in String directory);
+    /** Return file system stats: [0] is total bytes, [1] is available bytes */
+    long[] getFileSystemStats(in String path);
 }
