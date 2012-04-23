@@ -50,6 +50,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import libcore.io.ErrnoException;
+import libcore.io.Libcore;
+import libcore.io.StructStatFs;
+
 /*
  * This service copies a downloaded apk to a file passed in as
  * a ParcelFileDescriptor or to a newly created container specified
@@ -201,6 +205,18 @@ public class DefaultContainerService extends IntentService {
                 return MeasurementUtils.measureDirectory(path);
             } else {
                 return 0L;
+            }
+        }
+
+        @Override
+        public long[] getFileSystemStats(String path) {
+            try {
+                final StructStatFs stat = Libcore.os.statfs(path);
+                final long totalSize = stat.f_blocks * stat.f_bsize;
+                final long availSize = stat.f_bavail * stat.f_bsize;
+                return new long[] { totalSize, availSize };
+            } catch (ErrnoException e) {
+                throw new IllegalStateException(e);
             }
         }
     };
