@@ -167,7 +167,8 @@ public class CookieManager {
      *         file scheme URLs
      */
     public static boolean allowFileSchemeCookies() {
-        throw new MustOverrideException();
+        // TODO: indirect this via the WebViewFactoryProvider.Statics interface. http://b/6379925
+        return CookieManagerClassic.allowFileSchemeCookies();
     }
 
     /**
@@ -181,6 +182,7 @@ public class CookieManager {
      * {@link WebView} or CookieManager instance has been created.
      */
     public static void setAcceptFileSchemeCookies(boolean accept) {
-        throw new MustOverrideException();
+        // TODO: indirect this via the WebViewFactoryProvider.Statics interface. http://b/6379925
+        CookieManagerClassic.setAcceptFileSchemeCookies(accept);
     }
 }
