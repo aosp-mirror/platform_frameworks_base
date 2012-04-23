@@ -55,7 +55,7 @@ import java.util.Map;
  * through a history, zoom in and out, perform text searches and more.</p>
  * <p>To enable the built-in zoom, set
  * {@link #getSettings() WebSettings}.{@link WebSettings#setBuiltInZoomControls(boolean)}
- * (introduced in API version 3).
+ * (introduced in API level {@link android.os.Build.VERSION_CODES#CUPCAKE}).
  * <p>Note that, in order for your Activity to access the Internet and load web pages
  * in a WebView, you must add the {@code INTERNET} permissions to your
  * Android Manifest file:</p>
@@ -199,8 +199,9 @@ import java.util.Map;
  * appearance on a medium density screen. So, it applies 1.5x scaling on a high density screen
  * (because its pixels are smaller) and 0.75x scaling on a low density screen (because its pixels
  * are bigger).
- * Starting with API Level 5 (Android 2.0), WebView supports DOM, CSS, and meta tag features to help
- * you (as a web developer) target screens with different screen densities.</p>
+ * Starting with API level {@link android.os.Build.VERSION_CODES#ECLAIR}, WebView supports DOM, CSS,
+ * and meta tag features to help you (as a web developer) target screens with different screen
+ * densities.</p>
  * <p>Here's a summary of the features you can use to handle different screen densities:</p>
  * <ul>
  * <li>The {@code window.devicePixelRatio} DOM property. The value of this property specifies the
@@ -1528,13 +1529,13 @@ public class WebView extends AbsoluteLayout
      * Gets the zoom controls for the WebView, as a separate View. The caller is
      * responsible for inserting this View into the layout hierarchy.
      * <p/>
-     * API Level 3 introduced built-in zoom mechanisms for the WebView, as
-     * opposed to these separate zoom controls. The built-in mechanisms are
-     * preferred and can be enabled using
-     * {@link WebSettings#setBuiltInZoomControls}.
+     * API level {@link android.os.Build.VERSION_CODES#CUPCAKE} introduced
+     * built-in zoom mechanisms for the WebView, as opposed to these separate
+     * zoom controls. The built-in mechanisms are preferred and can be enabled
+     * using {@link WebSettings#setBuiltInZoomControls}.
      *
      * @deprecated The built-in zoom mechanisms are preferred.
-     * @hide since API version 16.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
      */
     @Deprecated
     public View getZoomControls() {
