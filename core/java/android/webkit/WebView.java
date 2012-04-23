@@ -268,12 +268,7 @@ public class WebView extends AbsoluteLayout
         implements ViewTreeObserver.OnGlobalFocusChangeListener,
         ViewGroup.OnHierarchyChangeListener {
 
-    // Default Provider factory class name.
-    private static final String DEFAULT_WEB_VIEW_FACTORY = "android.webkit.WebViewClassic$Factory";
-
     private static final String LOGTAG = "webview_proxy";
-    // TODO: flip DEBUG to always be disabled.
-    private static final boolean DEBUG = true;
 
     /**
      *  Transportation object for returning WebView across thread boundaries.
@@ -1702,16 +1697,11 @@ public class WebView extends AbsoluteLayout
     // Private internal stuff
     //-------------------------------------------------------------------------
 
-    // Cache the factory both for efficiency, and ensure any one process gets all webviews from the
-    // same provider.
-    private static WebViewFactoryProvider sProviderFactory;
-
     private WebViewProvider mProvider;
 
     private void ensureProviderCreated() {
         checkThread();
         if (mProvider == null) {
-            if (DEBUG) Log.v(LOGTAG, "instantiating webview provider instance");
             // As this can get called during the base class constructor chain, pass the minimum
             // number of dependencies here; the rest are deferred to init().
             mProvider = getFactory().createWebView(this, new PrivateAccess());
@@ -1722,30 +1712,7 @@ public class WebView extends AbsoluteLayout
         // For now the main purpose of this function (and the factory abstration) is to keep
         // us honest and minimize usage of WebViewClassic internals when binding the proxy.
         checkThread();
-        if (sProviderFactory != null) return sProviderFactory;
-
-        sProviderFactory = getFactoryByName(DEFAULT_WEB_VIEW_FACTORY);
-        if (sProviderFactory == null) {
-            if (DEBUG) Log.v (LOGTAG, "Falling back to explicit linkage");
-            sProviderFactory = new WebViewClassic.Factory();
-        }
-        return sProviderFactory;
-    }
-
-    private static WebViewFactoryProvider getFactoryByName(String providerName) {
-        try {
-            if (DEBUG) Log.v(LOGTAG, "attempt to load class " + providerName);
-            Class<?> c = Class.forName(providerName);
-            if (DEBUG) Log.v(LOGTAG, "instantiating factory");
-            return (WebViewFactoryProvider) c.newInstance();
-        } catch (ClassNotFoundException e) {
-            Log.e(LOGTAG, "error loading " + providerName, e);
-        } catch (IllegalAccessException e) {
-            Log.e(LOGTAG, "error loading " + providerName, e);
-        } catch (InstantiationException e) {
-            Log.e(LOGTAG, "error loading " + providerName, e);
-        }
-        return null;
+        return WebViewFactory.getProvider();
     }
 
     private static void checkThread() {

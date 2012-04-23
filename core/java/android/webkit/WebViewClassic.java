@@ -1459,14 +1459,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     static class Factory implements WebViewFactoryProvider,  WebViewFactoryProvider.Statics {
         @Override
-        public WebViewProvider createWebView(WebView webView, WebView.PrivateAccess privateAccess) {
-            return new WebViewClassic(webView, privateAccess);
-        }
-
-        @Override
-        public Statics getStatics() { return this; }
-
-        @Override
         public String findAddress(String addr) {
             return WebViewClassic.findAddress(addr);
         }
@@ -1479,6 +1471,33 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             }
         }
 
+        @Override
+        public Statics getStatics() { return this; }
+
+        @Override
+        public WebViewProvider createWebView(WebView webView, WebView.PrivateAccess privateAccess) {
+            return new WebViewClassic(webView, privateAccess);
+        }
+
+        @Override
+        public GeolocationPermissions getGeolocationPermissions() {
+            return GeolocationPermissionsClassic.getInstance();
+        }
+
+        @Override
+        public CookieManager getCookieManager() {
+            return CookieManagerClassic.getInstance();
+        }
+
+        @Override
+        public WebIconDatabase getWebIconDatabase() {
+            return WebIconDatabaseClassic.getInstance();
+        }
+
+        @Override
+        public WebStorage getWebStorage() {
+            return WebStorageClassic.getInstance();
+        }
     }
 
     private void onHandleUiEvent(MotionEvent event, int eventType, int flags) {

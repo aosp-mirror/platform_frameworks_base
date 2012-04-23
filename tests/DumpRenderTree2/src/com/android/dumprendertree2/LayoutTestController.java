@@ -66,7 +66,7 @@ public class LayoutTestController {
 
     public void setAppCacheMaximumSize(long size) {
         Log.i(LOG_TAG, "setAppCacheMaximumSize() called with: " + size);
-        WebStorage.getInstance().setAppCacheMaximumSize(size);
+        android.webkit.WebStorageClassic.getInstance().setAppCacheMaximumSize(size);
     }
 
     public void setCanOpenWindows() {

@@ -23,18 +23,6 @@ package android.webkit;
  * @hide
  */
 public interface WebViewFactoryProvider {
-
-    /**
-     * Construct a new WebView provider.
-     * @param webView the WebView instance bound to this implementation instance. Note it will not
-     * necessarily be fully constructed at the point of this call: defer real initialization to
-     * WebViewProvider.init().
-     * @param privateAccess provides access into WebView internal methods.
-     */
-    WebViewProvider createWebView(WebView webView, WebView.PrivateAccess privateAccess);
-
-    Statics getStatics();
-
     /**
      * This Interface provides glue for implementing the backend of WebView static methods which
      * cannot be implemented in-situ in the proxy class.
@@ -53,4 +41,43 @@ public interface WebViewFactoryProvider {
          */
         void setPlatformNotificationsEnabled(boolean enable);
     }
+
+    Statics getStatics();
+
+    /**
+     * Construct a new WebViewProvider.
+     * @param webView the WebView instance bound to this implementation instance. Note it will not
+     * necessarily be fully constructed at the point of this call: defer real initialization to
+     * WebViewProvider.init().
+     * @param privateAccess provides access into WebView internal methods.
+     */
+    WebViewProvider createWebView(WebView webView, WebView.PrivateAccess privateAccess);
+
+    /**
+     * Gets the singleton GeolocationPermissions instance for this WebView implementation. The
+     * implementation must return the same instance on subsequent calls.
+     * @return the single GeolocationPermissions instance.
+     */
+    GeolocationPermissions getGeolocationPermissions();
+
+    /**
+     * Gets the singleton CookieManager instance for this WebView implementation. The
+     * implementation must return the same instance on subsequent calls.
+     * @return the singleton CookieManager instance.
+     */
+    CookieManager getCookieManager();
+
+    /**
+     * Gets the singleton WebIconDatabase instance for this WebView implementation. The
+     * implementation must return the same instance on subsequent calls.
+     * @return the singleton WebIconDatabase instance.
+     */
+    WebIconDatabase getWebIconDatabase();
+
+    /**
+     * Gets the singleton WebStorage instance for this WebView implementation. The
+     * implementation must return the same instance on subsequent calls.
+     * @return the singleton WebStorage instance.
+     */
+    WebStorage getWebStorage();
 }

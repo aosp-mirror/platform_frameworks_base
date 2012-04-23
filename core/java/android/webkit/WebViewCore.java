@@ -189,10 +189,10 @@ public final class WebViewCore {
         // The WebIconDatabase needs to be initialized within the UI thread so
         // just request the instance here.
         WebIconDatabase.getInstance();
-        // Create the WebStorage singleton and the UI handler
-        WebStorage.getInstance().createUIHandler();
+        // Create the WebStorageClassic singleton and the UI handler
+        WebStorageClassic.getInstance().createUIHandler();
         // Create the UI handler for GeolocationPermissions
-        GeolocationPermissions.getInstance().createUIHandler();
+        GeolocationPermissionsClassic.getInstance().createUIHandler();
 
         // Get the memory class of the current device. V8 will use these values
         // to GC more effectively.
@@ -227,11 +227,11 @@ public final class WebViewCore {
         // Sync the native settings and also create the WebCore thread handler.
         mSettings.syncSettingsAndCreateHandler(mBrowserFrame);
         // Create the handler and transfer messages for the IconDatabase
-        WebIconDatabase.getInstance().createHandler();
-        // Create the handler for WebStorage
-        WebStorage.getInstance().createHandler();
+        WebIconDatabaseClassic.getInstance().createHandler();
+        // Create the handler for WebStorageClassic
+        WebStorageClassic.getInstance().createHandler();
         // Create the handler for GeolocationPermissions.
-        GeolocationPermissions.getInstance().createHandler();
+        GeolocationPermissionsClassic.getInstance().createHandler();
         // The transferMessages call will transfer all pending messages to the
         // WebCore thread handler.
         mEventHub.transferMessages();
@@ -1308,20 +1308,20 @@ public final class WebViewCore {
                             break;
 
                         case LOAD_URL: {
-                            CookieManager.getInstance().waitForCookieOperationsToComplete();
+                            CookieManagerClassic.getInstance().waitForCookieOperationsToComplete();
                             GetUrlData param = (GetUrlData) msg.obj;
                             loadUrl(param.mUrl, param.mExtraHeaders);
                             break;
                         }
 
                         case POST_URL: {
-                            CookieManager.getInstance().waitForCookieOperationsToComplete();
+                            CookieManagerClassic.getInstance().waitForCookieOperationsToComplete();
                             PostUrlData param = (PostUrlData) msg.obj;
                             mBrowserFrame.postUrl(param.mUrl, param.mPostData);
                             break;
                         }
                         case LOAD_DATA:
-                            CookieManager.getInstance().waitForCookieOperationsToComplete();
+                            CookieManagerClassic.getInstance().waitForCookieOperationsToComplete();
                             BaseUrlData loadParams = (BaseUrlData) msg.obj;
                             String baseUrl = loadParams.mBaseUrl;
                             if (baseUrl != null) {
@@ -2129,7 +2129,7 @@ public final class WebViewCore {
     // Utility method for exceededDatabaseQuota and reachedMaxAppCacheSize
     // callbacks. Computes the sum of database quota for all origins.
     private long getUsedQuota() {
-        WebStorage webStorage = WebStorage.getInstance();
+        WebStorageClassic webStorage = WebStorageClassic.getInstance();
         Collection<WebStorage.Origin> origins = webStorage.getOriginsSync();
 
         if (origins == null) {

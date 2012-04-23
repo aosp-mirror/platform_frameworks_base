@@ -27,18 +27,10 @@ import android.os.Build;
  * been destroyed, any method call on WebSettings will throw an
  * IllegalStateException.
  */
-// This is (effectively) an abstract base class; concrete WebViewProviders must
+// This is an abstract base class: concrete WebViewProviders must
 // create a class derived from this, and return an instance of it in the
 // WebViewProvider.getWebSettingsProvider() method implementation.
 public abstract class WebSettings {
-    // TODO: Remove MustOverrideException and make all methods throwing it abstract instead;
-    // needs API file update.
-    private static class MustOverrideException extends RuntimeException {
-        MustOverrideException() {
-            super("abstract function called: must be overriden!");
-        }
-    }
-
     /**
      * Enum for controlling the layout of html.
      * NORMAL means no rendering changes.
