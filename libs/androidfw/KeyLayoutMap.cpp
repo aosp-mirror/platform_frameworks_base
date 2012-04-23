@@ -185,8 +185,8 @@ status_t KeyLayoutMap::Parser::parse() {
             }
 
             mTokenizer->skipDelimiters(WHITESPACE);
-            if (!mTokenizer->isEol()) {
-                ALOGE("%s: Expected end of line, got '%s'.",
+            if (!mTokenizer->isEol() && mTokenizer->peekChar() != '#') {
+                ALOGE("%s: Expected end of line or trailing comment, got '%s'.",
                         mTokenizer->getLocation().string(),
                         mTokenizer->peekRemainderOfLine().string());
                 return BAD_VALUE;
@@ -234,7 +234,7 @@ status_t KeyLayoutMap::Parser::parseKey() {
     uint32_t flags = 0;
     for (;;) {
         mTokenizer->skipDelimiters(WHITESPACE);
-        if (mTokenizer->isEol()) break;
+        if (mTokenizer->isEol() || mTokenizer->peekChar() == '#') break;
 
         String8 flagToken = mTokenizer->nextToken(WHITESPACE);
         uint32_t flag = getKeyFlagByLabel(flagToken.string());
@@ -332,7 +332,7 @@ status_t KeyLayoutMap::Parser::parseAxis() {
 
     for (;;) {
         mTokenizer->skipDelimiters(WHITESPACE);
-        if (mTokenizer->isEol()) {
+        if (mTokenizer->isEol() || mTokenizer->peekChar() == '#') {
             break;
         }
         String8 keywordToken = mTokenizer->nextToken(WHITESPACE);
