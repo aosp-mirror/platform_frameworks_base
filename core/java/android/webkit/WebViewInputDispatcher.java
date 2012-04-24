@@ -436,7 +436,7 @@ final class WebViewInputDispatcher {
             return false;
         }
         long downDuration = event.getEventTime() - event.getDownTime();
-        return downDuration < TAP_TIMEOUT;
+        return downDuration < LONG_PRESS_TIMEOUT;
     }
 
     private void enqueueDoubleTapLocked(MotionEvent event) {
