@@ -247,7 +247,7 @@ void OpenGLRenderer::attachFunctor(Functor* functor) {
 
 status_t OpenGLRenderer::invokeFunctors(Rect& dirty) {
     status_t result = DrawGlInfo::kStatusDone;
-    size_t count = functors.size();
+    size_t count = mFunctors.size();
 
     if (count > 0) {
         SortedVector<Functor*> functors(mFunctors);
