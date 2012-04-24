@@ -94,7 +94,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     public boolean handleMessage(Message msg) {
         String event = (String) msg.obj;
         try {
-            if (!mCallbacks.onEvent(msg.what, event, event.split(" "))) {
+            if (!mCallbacks.onEvent(msg.what, event, NativeDaemonEvent.unescapeArgs(event))) {
                 log(String.format("Unhandled event '%s'", event));
             }
         } catch (Exception e) {
