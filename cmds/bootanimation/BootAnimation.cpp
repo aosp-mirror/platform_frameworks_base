@@ -509,7 +509,7 @@ bool BootAnimation::movie()
                 nsecs_t now = systemTime();
                 nsecs_t delay = frameDuration - (now - lastFrame);
                 lastFrame = now;
-                long wait = ns2us(frameDuration);
+                long wait = ns2us(delay);
                 if (wait > 0)
                     usleep(wait);
             }
