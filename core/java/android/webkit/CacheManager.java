@@ -56,6 +56,7 @@ public final class CacheManager {
      * Represents a resource stored in the HTTP cache. Instances of this class
      * can be obtained by calling
      * {@link CacheManager#getCacheFile CacheManager.getCacheFile(String, Map<String, String>))}.
+     *
      * @deprecated Access to the HTTP cache will be removed in a future release.
      */
     @Deprecated
@@ -81,7 +82,8 @@ public final class CacheManager {
 
         /**
          * Gets the status code of this cache entry.
-         * @return The status code of this cache entry
+         *
+         * @return the status code of this cache entry
          */
         public int getHttpStatusCode() {
             return httpStatusCode;
@@ -89,7 +91,8 @@ public final class CacheManager {
 
         /**
          * Gets the content length of this cache entry.
-         * @return The content length of this cache entry
+         *
+         * @return the content length of this cache entry
          */
         public long getContentLength() {
             return contentLength;
@@ -99,7 +102,8 @@ public final class CacheManager {
          * Gets the path of the file used to store the content of this cache
          * entry, relative to the base directory of the cache. See
          * {@link CacheManager#getCacheFileBaseDir CacheManager.getCacheFileBaseDir()}.
-         * @return The path of the file used to store this cache entry
+         *
+         * @return the path of the file used to store this cache entry
          */
         public String getLocalPath() {
             return localPath;
@@ -108,7 +112,8 @@ public final class CacheManager {
         /**
          * Gets the expiry date of this cache entry, expressed in milliseconds
          * since midnight, January 1, 1970 UTC.
-         * @return The expiry date of this cache entry
+         *
+         * @return the expiry date of this cache entry
          */
         public long getExpires() {
             return expires;
@@ -116,7 +121,8 @@ public final class CacheManager {
 
         /**
          * Gets the expiry date of this cache entry, expressed as a string.
-         * @return The expiry date of this cache entry
+         *
+         * @return the expiry date of this cache entry
          *
          */
         public String getExpiresString() {
@@ -126,7 +132,8 @@ public final class CacheManager {
         /**
          * Gets the date at which this cache entry was last modified, expressed
          * as a string.
-         * @return The date at which this cache entry was last modified
+         *
+         * @return the date at which this cache entry was last modified
          */
         public String getLastModified() {
             return lastModified;
@@ -134,7 +141,8 @@ public final class CacheManager {
 
         /**
          * Gets the entity tag of this cache entry.
-         * @return The entity tag of this cache entry
+         *
+         * @return the entity tag of this cache entry
          */
         public String getETag() {
             return etag;
@@ -142,7 +150,8 @@ public final class CacheManager {
 
         /**
          * Gets the MIME type of this cache entry.
-         * @return The MIME type of this cache entry
+         *
+         * @return the MIME type of this cache entry
          */
         public String getMimeType() {
             return mimeType;
@@ -151,7 +160,8 @@ public final class CacheManager {
         /**
          * Gets the value of the HTTP 'Location' header with which this cache
          * entry was received.
-         * @return The HTTP 'Location' header for this cache entry
+         *
+         * @return the HTTP 'Location' header for this cache entry
          */
         public String getLocation() {
             return location;
@@ -159,7 +169,8 @@ public final class CacheManager {
 
         /**
          * Gets the encoding of this cache entry.
-         * @return The encoding of this cache entry
+         *
+         * @return the encoding of this cache entry
          */
         public String getEncoding() {
             return encoding;
@@ -168,7 +179,8 @@ public final class CacheManager {
         /**
          * Gets the value of the HTTP 'Content-Disposition' header with which
          * this cache entry was received.
-         * @return The HTTP 'Content-Disposition' header for this cache entry
+         *
+         * @return the HTTP 'Content-Disposition' header for this cache entry
          *
          */
         public String getContentDisposition() {
@@ -179,7 +191,8 @@ public final class CacheManager {
          * Gets the input stream to the content of this cache entry, to allow
          * content to be read. See
          * {@link CacheManager#getCacheFile CacheManager.getCacheFile(String, Map<String, String>)}.
-         * @return An input stream to the content of this cache entry
+         *
+         * @return an input stream to the content of this cache entry
          */
         public InputStream getInputStream() {
             return inStream;
@@ -189,7 +202,8 @@ public final class CacheManager {
          * Gets an output stream to the content of this cache entry, to allow
          * content to be written. See
          * {@link CacheManager#saveCacheFile CacheManager.saveCacheFile(String, CacheResult)}.
-         * @return An output stream to the content of this cache entry
+         *
+         * @return an output stream to the content of this cache entry
          */
         // Note that this is always null for objects returned by getCacheFile()!
         public OutputStream getOutputStream() {
@@ -199,7 +213,8 @@ public final class CacheManager {
 
         /**
          * Sets an input stream to the content of this cache entry.
-         * @param stream An input stream to the content of this cache entry
+         *
+         * @param stream an input stream to the content of this cache entry
          */
         public void setInputStream(InputStream stream) {
             this.inStream = stream;
@@ -207,7 +222,8 @@ public final class CacheManager {
 
         /**
          * Sets the encoding of this cache entry.
-         * @param encoding The encoding of this cache entry
+         *
+         * @param encoding the encoding of this cache entry
          */
         public void setEncoding(String encoding) {
             this.encoding = encoding;
@@ -225,7 +241,8 @@ public final class CacheManager {
      * Initializes the HTTP cache. This method must be called before any
      * CacheManager methods are used. Note that this is called automatically
      * when a {@link WebView} is created.
-     * @param context The application context
+     *
+     * @param context the application context
      */
     static void init(Context context) {
         // This isn't actually where the real cache lives, but where we put files for the
@@ -240,7 +257,8 @@ public final class CacheManager {
      * Gets the base directory in which the files used to store the contents of
      * cache entries are placed. See
      * {@link CacheManager.CacheResult#getLocalPath CacheManager.CacheResult.getLocalPath()}.
-     * @return The base directory of the cache
+     *
+     * @return the base directory of the cache
      * @deprecated Access to the HTTP cache will be removed in a future release.
      */
     @Deprecated
@@ -250,7 +268,8 @@ public final class CacheManager {
 
     /**
      * Gets whether the HTTP cache is disabled.
-     * @return True if the HTTP cache is disabled
+     *
+     * @return true if the HTTP cache is disabled
      * @deprecated Access to the HTTP cache will be removed in a future release.
      */
     @Deprecated
@@ -262,8 +281,9 @@ public final class CacheManager {
      * Starts a cache transaction. Returns true if this is the only running
      * transaction. Otherwise, this transaction is nested inside currently
      * running transactions and false is returned.
-     * @return True if this is the only running transaction
-     * @deprecated This method no longer has any effect and always returns false
+     *
+     * @return true if this is the only running transaction
+     * @deprecated This method no longer has any effect and always returns false.
      */
     @Deprecated
     public static boolean startCacheTransaction() {
@@ -273,8 +293,9 @@ public final class CacheManager {
     /**
      * Ends the innermost cache transaction and returns whether this was the
      * only running transaction.
-     * @return True if this was the only running transaction
-     * @deprecated This method no longer has any effect and always returns false
+     *
+     * @return true if this was the only running transaction
+     * @deprecated This method no longer has any effect and always returns false.
      */
     @Deprecated
     public static boolean endCacheTransaction() {
@@ -287,10 +308,11 @@ public final class CacheManager {
      * entry needs validation, appropriate headers will be added to the map.
      * The input stream of the CacheEntry object should be closed by the caller
      * when access to the underlying file is no longer required.
-     * @param url The URL for which a cache entry is requested
-     * @param headers A map from HTTP header name to value, to be populated
+     *
+     * @param url the URL for which a cache entry is requested
+     * @param headers a map from HTTP header name to value, to be populated
      *                for the returned cache entry
-     * @return The cache entry for the specified URL
+     * @return the cache entry for the specified URL
      * @deprecated Access to the HTTP cache will be removed in a future release.
      */
     @Deprecated
@@ -345,14 +367,15 @@ public final class CacheManager {
     }
 
     /**
-     * Given a url and its full headers, returns CacheResult if a local cache
+     * Given a URL and its full headers, gets a CacheResult if a local cache
      * can be stored. Otherwise returns null. The mimetype is passed in so that
      * the function can use the mimetype that will be passed to WebCore which
      * could be different from the mimetype defined in the headers.
      * forceCache is for out-of-package callers to force creation of a
      * CacheResult, and is used to supply surrogate responses for URL
      * interception.
-     * @return CacheResult for a given url
+     *
+     * @return a CacheResult for a given URL
      */
     static CacheResult createCacheFile(String url, int statusCode,
             Headers headers, String mimeType, boolean forceCache) {
@@ -363,8 +386,9 @@ public final class CacheManager {
     /**
      * Adds a cache entry to the HTTP cache for the specicifed URL. Also closes
      * the cache entry's output stream.
-     * @param url The URL for which the cache entry should be added
-     * @param cacheResult The cache entry to add
+     *
+     * @param url the URL for which the cache entry should be added
+     * @param cacheResult the cache entry to add
      * @deprecated Access to the HTTP cache will be removed in a future release.
      */
     @Deprecated
@@ -401,9 +425,9 @@ public final class CacheManager {
     }
 
     /**
-     * Remove all cache files.
+     * Removes all cache files.
      *
-     * @return Whether the removal succeeded.
+     * @return whether the removal succeeded
      */
     static boolean removeAllCacheFiles() {
         // delete cache files in a separate thread to not block UI.
