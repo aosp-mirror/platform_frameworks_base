@@ -37,6 +37,7 @@
 
     <!-- WindowManager -->
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.READ_FRAME_BUFFER" />
     <uses-permission android:name="android.permission.MANAGE_APP_TOKENS" />
     <uses-permission android:name="android.permission.SET_ORIENTATION" />
