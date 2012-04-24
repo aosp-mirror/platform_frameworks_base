@@ -131,6 +131,11 @@ public final class BluetoothPan implements BluetoothProfile {
         mContext = context;
         mServiceListener = l;
         mAdapter = BluetoothAdapter.getDefaultAdapter();
+        try {
+            mAdapter.getBluetoothManager().registerStateChangeCallback(mStateChangeCallback);
+        } catch (RemoteException re) {
+            Log.w(TAG,"Unable to register BluetoothStateChangeCallback",re);
+        }
         Log.d(TAG, "BluetoothPan() call bindService");
         if (!context.bindService(new Intent(IBluetoothPan.class.getName()),
                                  mConnection, 0)) {
@@ -146,7 +151,42 @@ public final class BluetoothPan implements BluetoothProfile {
             mConnection = null;
         }
         mServiceListener = null;
+        try {
+            mAdapter.getBluetoothManager().unregisterStateChangeCallback(mStateChangeCallback);
+        } catch (RemoteException re) {
+            Log.w(TAG,"Unable to register BluetoothStateChangeCallback",re);
+        }
     }
+
+    protected void finalize() {
+        close();
+    }
+
+    private IBluetoothStateChangeCallback mStateChangeCallback = new IBluetoothStateChangeCallback.Stub() {
+
+        @Override
+        public void onBluetoothStateChange(boolean on) throws RemoteException {
+            //Handle enable request to bind again.
+            if (on) {
+                Log.d(TAG, "onBluetoothStateChange(on) call bindService");
+                if (!mContext.bindService(new Intent(IBluetoothPan.class.getName()),
+                                     mConnection, 0)) {
+                    Log.e(TAG, "Could not bind to Bluetooth HID Service");
+                }
+                Log.d(TAG, "BluetoothPan(), bindService called");
+            } else {
+                if (DBG) Log.d(TAG,"Unbinding service...");
+                synchronized (mConnection) {
+                    try {
+                        mPanService = null;
+                        mContext.unbindService(mConnection);
+                    } catch (Exception re) {
+                        Log.e(TAG,"",re);
+                    }
+                }
+            }
+        }
+    };
 
     /**
      * Initiate connection to a profile of the remote bluetooth device.

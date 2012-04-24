@@ -31,6 +31,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -407,10 +408,6 @@ public final class BluetoothAdapter {
      * @throws IllegalArgumentException if address is invalid
      */
     public BluetoothDevice getRemoteDevice(String address) {
-        if (mService == null) {
-            Log.e(TAG, "BT not enabled. Cannot create Remote Device");
-            return null;
-        }
         return new BluetoothDevice(address);
     }
 
@@ -504,7 +501,6 @@ public final class BluetoothAdapter {
      *         immediate error
      */
     public boolean enable() {
-
         boolean enabled = false;
         try {
             return mManagerService.enable();
@@ -1212,6 +1208,11 @@ public final class BluetoothAdapter {
                 if (DBG) Log.d(TAG, "onBluetoothServiceUp: " + bluetoothService);
                 synchronized (mManagerCallback) {
                     mService = bluetoothService;
+                    for (IBluetoothManagerCallback cb : mBluetoothManagerCallbackList ){
+                        try {
+                            cb.onBluetoothServiceUp(bluetoothService);
+                        } catch (Exception e)  { Log.e(TAG,"",e);}
+                    }
                 }
             }
 
@@ -1219,6 +1220,11 @@ public final class BluetoothAdapter {
                 if (DBG) Log.d(TAG, "onBluetoothServiceDown: " + mService);
                 synchronized (mManagerCallback) {
                     mService = null;
+                    for (IBluetoothManagerCallback cb : mBluetoothManagerCallbackList ){
+                        try {
+                            cb.onBluetoothServiceDown();
+                        } catch (Exception e)  { Log.e(TAG,"",e);}
+                    }
                 }
             }
     };
@@ -1354,9 +1360,20 @@ public final class BluetoothAdapter {
             return mManagerService;
     }
 
-    /*package*/ IBluetooth getBluetoothService() {
+    private ArrayList<IBluetoothManagerCallback> mBluetoothManagerCallbackList = new ArrayList<IBluetoothManagerCallback>();
+    //private IBluetoothStateChangeCallback mBluetoothStateChangeCallback;
+    /*package*/ IBluetooth getBluetoothService(IBluetoothManagerCallback cb) {
         synchronized (mManagerCallback) {
-            return mService;
+            if (!mBluetoothManagerCallbackList.contains(cb)) {
+                mBluetoothManagerCallbackList.add(cb);
+            }
+        }
+        return mService;
+    }
+
+    /*package*/ void removeServiceStateCallback(IBluetoothManagerCallback cb) {
+        synchronized (mManagerCallback) {
+            mBluetoothManagerCallbackList.remove(cb);
         }
     }
 }

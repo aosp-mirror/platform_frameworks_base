@@ -485,12 +485,28 @@ public final class BluetoothDevice implements Parcelable {
         synchronized (BluetoothDevice.class) {
             if (sService == null) {
                 BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-                sService = adapter.getBluetoothService();
+                sService = adapter.getBluetoothService(mStateChangeCallback);
             }
         }
         return sService;
     }
 
+    static IBluetoothManagerCallback mStateChangeCallback = new IBluetoothManagerCallback.Stub() {
+
+        public void onBluetoothServiceUp(IBluetooth bluetoothService)
+                throws RemoteException {
+            synchronized (BluetoothDevice.class) {
+                sService = bluetoothService;
+            }
+        }
+
+        public void onBluetoothServiceDown()
+            throws RemoteException {
+            synchronized (BluetoothDevice.class) {
+                sService = null;
+            }
+        }
+    };
     /**
      * Create a new BluetoothDevice
      * Bluetooth MAC address must be upper case, such as "00:11:22:33:AA:BB",
