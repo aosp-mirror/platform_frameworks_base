@@ -959,24 +959,33 @@
     <string name="permlab_readContacts">read contact data</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readContacts" product="tablet">Allows the app to read all
-        of the contact (address) data stored on your tablet. Malicious apps
-        may use this to send your data to other people.</string>
+        the data about your contacts stored on your tablet, including the frequency
+        with which you've called, emailed, or communicated in other ways with specific
+        individuals. This helps with auto-completion of email addresses and other convenient
+        features. Malicious apps can use this permission to send your contact data to
+        other people.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readContacts" product="default">Allows the app to read all
-        of the contact (address) data stored on your phone. Malicious apps
-        may use this to send your data to other people.</string>
+        the data about your contacts stored on your phone, including the frequency
+        with which you've called, emailed, or communicated in other ways with specific
+        individuals. This helps with auto-completion of email addresses and other convenient
+        features. Malicious apps can use this permission to send your contact data to
+        other people.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_writeContacts">write contact data</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeContacts" product="tablet">Allows the app to modify the
-        contact (address) data stored on your tablet. Malicious
-        apps may use this to erase or modify your contact data.</string>
+    <string name="permdesc_writeContacts" product="tablet">Allows the app to modify
+        the data about your contacts stored on your tablet, including the frequency
+        with which you've called, emailed, or communicated in other ways with specific
+        individuals. This helps with auto-completion of email addresses and other convenient
+        features. Malicious apps may use this to erase or modify your contact data.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeContacts" product="default">Allows the app to modify the
-        contact (address) data stored on your phone. Malicious
-        apps may use this to erase or modify your contact data.</string>
-
+    <string name="permdesc_writeContacts" product="default">Allows the app to modify
+        the data about your contacts stored on your phone, including the frequency
+        with which you've called, emailed, or communicated in other ways with specific
+        individuals. This helps with auto-completion of email addresses and other convenient
+        features. Malicious apps may use this to erase or modify your contact data.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCallLog">read call log</string>
