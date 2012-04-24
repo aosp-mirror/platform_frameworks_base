@@ -550,6 +550,10 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* chars
         return;
     }
 
+    // To be filled in later
+    for (size_t i = 0; i < count; i++) {
+        outAdvances->add(0);
+    }
     UErrorCode error = U_ZERO_ERROR;
     bool useNormalizedString = false;
     for (ssize_t i = count - 1; i >= 0; --i) {
@@ -691,23 +695,11 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* chars
 
         logGlyphs(mShaperItem);
 #endif
-        if (isRTL) {
-            endScriptRun = startScriptRun;
-#if DEBUG_GLYPHS
-            ALOGD("Updated endScriptRun = %d", int(endScriptRun));
-#endif
-        } else {
-            startScriptRun = endScriptRun;
-#if DEBUG_GLYPHS
-            ALOGD("Updated startScriptRun = %d", int(startScriptRun));
-#endif
-        }
 
         if (mShaperItem.advances == NULL || mShaperItem.num_glyphs == 0) {
 #if DEBUG_GLYPHS
             ALOGD("Advances array is empty or num_glypth = 0");
 #endif
-            outAdvances->insertAt(0, outAdvances->size(), countScriptRun);
             continue;
         }
 
@@ -721,15 +713,13 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* chars
         // Get Advances and their total
         jfloat currentAdvance = HBFixedToFloat(mShaperItem.advances[mShaperItem.log_clusters[0]]);
         jfloat totalFontRunAdvance = currentAdvance;
-        outAdvances->add(currentAdvance);
+        outAdvances->replaceAt(currentAdvance, startScriptRun);
         for (size_t i = 1; i < countScriptRun; i++) {
             size_t clusterPrevious = mShaperItem.log_clusters[i - 1];
             size_t cluster = mShaperItem.log_clusters[i];
-            if (cluster == clusterPrevious) {
-                outAdvances->add(0);
-            } else {
+            if (cluster != clusterPrevious) {
                 currentAdvance = HBFixedToFloat(mShaperItem.advances[mShaperItem.log_clusters[i]]);
-                outAdvances->add(currentAdvance);
+                outAdvances->replaceAt(currentAdvance, startScriptRun + i);
             }
         }
         // TODO: can be removed and go back in the previous loop when Harfbuzz log clusters are fixed
@@ -746,6 +736,7 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* chars
                     (*outAdvances)[i], mShaperItem.log_clusters[i], totalFontRunAdvance);
         }
 #endif
+
         // Get Glyphs and reverse them in place if RTL
         if (outGlyphs) {
             size_t countGlyphs = mShaperItem.num_glyphs;
