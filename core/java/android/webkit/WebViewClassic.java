@@ -4413,7 +4413,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             Rect glRectViewport = mGLViewportEmpty ? null : mGLRectViewport;
             Rect viewRectViewport = mGLViewportEmpty ? null : mViewRectViewport;
 
-            int functor = nativeGetDrawGLFunction(mNativeClass, glRectViewport,
+            int functor = nativeCreateDrawGLFunction(mNativeClass, glRectViewport,
                     viewRectViewport, mVisibleContentRect, getScale(), extras);
             ((HardwareCanvas) canvas).callDrawGLFunction(functor);
             if (mHardwareAccelSkia != getSettings().getHardwareAccelSkiaEnabled()) {
@@ -5754,7 +5754,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             mGLViewportEmpty = true;
         }
         calcOurContentVisibleRectF(mVisibleContentRect);
-        nativeUpdateDrawGLFunction(mGLViewportEmpty ? null : mGLRectViewport,
+        nativeUpdateDrawGLFunction(mNativeClass, mGLViewportEmpty ? null : mGLRectViewport,
                 mGLViewportEmpty ? null : mViewRectViewport,
                 mVisibleContentRect, getScale());
     }
@@ -8759,9 +8759,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             int color, int extra, boolean splitIfNeeded);
     private native void     nativeDumpDisplayTree(String urlOrNull);
     private native boolean  nativeEvaluateLayersAnimations(int nativeInstance);
-    private native int      nativeGetDrawGLFunction(int nativeInstance, Rect rect,
+    private native int      nativeCreateDrawGLFunction(int nativeInstance, Rect rect,
             Rect viewRect, RectF visibleRect, float scale, int extras);
-    private native void     nativeUpdateDrawGLFunction(Rect rect, Rect viewRect,
+    private native int      nativeGetDrawGLFunction(int nativeInstance);
+    private native void     nativeUpdateDrawGLFunction(int nativeInstance, Rect rect, Rect viewRect,
             RectF visibleRect, float scale);
     private native String   nativeGetSelection();
     private native Rect     nativeLayerBounds(int layer);
