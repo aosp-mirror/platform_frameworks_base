@@ -139,6 +139,5 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"מיקום מוגדר על ידי GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"נקה את כל ההתראות."</string>
     <string name="dreams_dock_launcher" msgid="3541196417659166245">"הפעלת שומר מסך"</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (1163547729015390250) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"פרטי יישום"</string>
 </resources>
