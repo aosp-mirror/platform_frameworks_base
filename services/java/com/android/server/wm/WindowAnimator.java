@@ -394,6 +394,8 @@ public class WindowAnimator {
                             "Setting mOrientationChangeComplete=true because wtoken "
                             + wtoken + " numInteresting=" + numInteresting
                             + " numDrawn=" + wtoken.numDrawnWindows);
+                    // This will set mOrientationChangeComplete and cause a pass through layout.
+                    mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                 }
             } else if (!wtoken.allDrawn) {
                 int numInteresting = wtoken.numInterestingWindows;
