@@ -30,8 +30,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-import com.android.internal.R;
 import android.widget.RemoteViews.RemoteView;
+import com.android.internal.R;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -209,7 +209,6 @@ public class GridLayout extends ViewGroup {
     // Misc constants
 
     static final String TAG = GridLayout.class.getName();
-    static final boolean DEBUG = false;
     static final int MAX_SIZE = 100000;
     static final int DEFAULT_CONTAINER_MARGIN = 0;
     static final int UNINITIALIZED_HASH = 0;
@@ -249,9 +248,6 @@ public class GridLayout extends ViewGroup {
      */
     public GridLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        if (DEBUG) {
-            setWillNotDraw(false);
-        }
         defaultGap = context.getResources().getDimensionPixelOffset(R.dimen.default_gap);
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.GridLayout);
         try {
@@ -772,56 +768,53 @@ public class GridLayout extends ViewGroup {
         }
     }
 
-    private static void drawRect(Canvas canvas, int x1, int y1, int x2, int y2, Paint paint) {
-        canvas.drawRect(x1, y1, x2 - 1, y2 - 1, paint);
+    /**
+     * @hide
+     */
+    @Override
+    protected void onDebugDrawMargins(Canvas canvas) {
+        // Apply defaults, so as to remove UNDEFINED values
+        LayoutParams lp = new LayoutParams();
+        for (int i = 0; i < getChildCount(); i++) {
+            View c = getChildAt(i);
+            lp.setMargins(
+                    getMargin1(c, true, true),
+                    getMargin1(c, false, true),
+                    getMargin1(c, true, false),
+                    getMargin1(c, false, false));
+            lp.onDebugDraw(c, canvas);
+        }
     }
 
+    /**
+     * @hide
+     */
     @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+    protected void onDebugDraw(Canvas canvas) {
+        int height = getHeight() - getPaddingTop() - getPaddingBottom();
+        int width = getWidth() - getPaddingLeft() - getPaddingRight();
 
-        if (DEBUG) {
-            int height = getHeight() - getPaddingTop() - getPaddingBottom();
-            int width = getWidth() - getPaddingLeft() - getPaddingRight();
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(Color.argb(50, 255, 255, 255));
 
-            Paint paint = new Paint();
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(Color.argb(50, 255, 255, 255));
-
-            int[] xs = horizontalAxis.locations;
-            if (xs != null) {
-                for (int i = 0, length = xs.length; i < length; i++) {
-                    int x = xs[i];
-                    drawLine(canvas, x, 0, x, height - 1, paint);
-                }
-            }
-
-            int[] ys = verticalAxis.locations;
-            if (ys != null) {
-                for (int i = 0, length = ys.length; i < length; i++) {
-                    int y = ys[i];
-                    drawLine(canvas, 0, y, width - 1, y, paint);
-                }
-            }
-
-            // Draw bounds
-            paint.setColor(Color.BLUE);
-            for (int i = 0; i < getChildCount(); i++) {
-                View c = getChildAt(i);
-                drawRect(canvas, c.getLeft(), c.getTop(), c.getRight(), c.getBottom(), paint);
-            }
-
-            // Draw margins
-            paint.setColor(Color.MAGENTA);
-            for (int i = 0; i < getChildCount(); i++) {
-                View c = getChildAt(i);
-                drawRect(canvas,
-                        c.getLeft() - getMargin1(c, true, true),
-                        c.getTop() - getMargin1(c, false, true),
-                        c.getRight() + getMargin1(c, true, false),
-                        c.getBottom() + getMargin1(c, false, false), paint);
+        int[] xs = horizontalAxis.locations;
+        if (xs != null) {
+            for (int i = 0, length = xs.length; i < length; i++) {
+                int x = xs[i];
+                drawLine(canvas, x, 0, x, height - 1, paint);
             }
         }
+
+        int[] ys = verticalAxis.locations;
+        if (ys != null) {
+            for (int i = 0, length = ys.length; i < length; i++) {
+                int y = ys[i];
+                drawLine(canvas, 0, y, width - 1, y, paint);
+            }
+        }
+
+        super.onDebugDraw(canvas);
     }
 
     // Add/remove

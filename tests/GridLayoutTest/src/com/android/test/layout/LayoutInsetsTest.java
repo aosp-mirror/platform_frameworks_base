@@ -2,23 +2,14 @@ package com.android.test.layout;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.GridLayout;
-import android.widget.Space;
 import android.widget.TextView;
 
-import static android.text.InputType.TYPE_CLASS_TEXT;
-import static android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
-import static android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD;
 import static android.widget.GridLayout.*;
-import static android.widget.GridLayout.FILL;
-import static android.widget.GridLayout.spec;
 
 public class LayoutInsetsTest extends Activity {
     public static View create(Context context) {

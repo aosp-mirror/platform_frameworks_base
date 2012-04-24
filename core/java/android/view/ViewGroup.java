@@ -22,6 +22,8 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
@@ -420,9 +422,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         initFromAttributes(context, attrs);
     }
 
+    private boolean debugDraw() {
+        return mAttachInfo != null && mAttachInfo.mDebugLayout;
+    }
+
     private void initViewGroup() {
         // ViewGroup doesn't draw by default
-        setFlags(WILL_NOT_DRAW, DRAW_MASK);
+        if (!debugDraw()) {
+            setFlags(WILL_NOT_DRAW, DRAW_MASK);
+        }
         mGroupFlags |= FLAG_CLIP_CHILDREN;
         mGroupFlags |= FLAG_CLIP_TO_PADDING;
         mGroupFlags |= FLAG_ANIMATION_DONE;
@@ -2650,6 +2658,52 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return b;
     }
 
+    private static void drawRect(Canvas canvas, int x1, int y1, int x2, int y2, Paint paint) {
+        canvas.drawRect(x1, y1, x2 - 1, y2 - 1, paint);
+    }
+
+    /**
+     * @hide
+     */
+    protected void onDebugDrawMargins(Canvas canvas) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View c = getChildAt(i);
+            c.getLayoutParams().onDebugDraw(this, canvas);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    protected void onDebugDraw(Canvas canvas) {
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.STROKE);
+
+        // Draw optical bounds
+        if (getLayoutMode() == LAYOUT_BOUNDS) {
+            paint.setColor(Color.RED);
+            for (int i = 0; i < getChildCount(); i++) {
+                View c = getChildAt(i);
+                Insets insets = c.getLayoutInsets();
+                drawRect(canvas,
+                        c.getLeft() + insets.left,
+                        c.getTop() + insets.top,
+                        c.getRight() - insets.right,
+                        c.getBottom() - insets.bottom, paint);
+            }
+        }
+
+        // Draw bounds
+        paint.setColor(Color.BLUE);
+        for (int i = 0; i < getChildCount(); i++) {
+            View c = getChildAt(i);
+            drawRect(canvas, c.getLeft(), c.getTop(), c.getRight(), c.getBottom(), paint);
+        }
+
+        // Draw margins
+        onDebugDrawMargins(canvas);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -2739,6 +2793,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 final View child = disappearingChildren.get(i);
                 more |= drawChild(canvas, child, drawingTime);
             }
+        }
+
+        if (debugDraw()) {
+            onDebugDraw(canvas);
         }
 
         if (clipToPadding) {
@@ -5469,6 +5527,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         /**
+         * Use {@code canvas} to draw suitable debugging annotations for these LayoutParameters.
+         *
+         * @param view the view that contains these layout parameters
+         * @param canvas the canvas on which to draw
+         *
+         * @hide
+         */
+        public void onDebugDraw(View view, Canvas canvas) {
+        }
+
+        /**
          * Converts the specified size to a readable String.
          *
          * @param size the size to convert
@@ -5717,6 +5786,22 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     rightMargin = (endMargin > DEFAULT_RELATIVE) ? endMargin : rightMargin;
                     break;
             }
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void onDebugDraw(View view, Canvas canvas) {
+            Paint paint = new Paint();
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setColor(Color.MAGENTA);
+
+            drawRect(canvas,
+                    view.getLeft() - leftMargin,
+                    view.getTop() - topMargin,
+                    view.getRight() + rightMargin,
+                    view.getBottom() + bottomMargin, paint);
         }
     }
 
