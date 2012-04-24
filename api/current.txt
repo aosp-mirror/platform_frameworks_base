@@ -417,7 +417,7 @@ package android {
     field public static final int editorExtras = 16843300; // 0x1010224
     field public static final int ellipsize = 16842923; // 0x10100ab
     field public static final int ems = 16843096; // 0x1010158
-    field public static final deprecated int enabled = 16842766; // 0x101000e
+    field public static final int enabled = 16842766; // 0x101000e
     field public static final int endColor = 16843166; // 0x101019e
     field public static final deprecated int endYear = 16843133; // 0x101017d
     field public static final int enterFadeDuration = 16843532; // 0x101030c
