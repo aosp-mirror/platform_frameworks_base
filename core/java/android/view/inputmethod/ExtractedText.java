@@ -45,7 +45,7 @@ public class ExtractedText implements Parcelable {
     /**
      * If the content is a report of a partial text change, this is the offset
      * where the change ends.  Note that the actual text may be larger or
-     * smaller than the difference between this and {@link #partialEndOffset},
+     * smaller than the difference between this and {@link #partialStartOffset},
      * meaning a reduction or increase, respectively, in the total text.
      */
     public int partialEndOffset;

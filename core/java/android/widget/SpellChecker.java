@@ -212,6 +212,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
     public void spellCheck(int start, int end) {
         final Locale locale = mTextView.getTextServicesLocale();
+        final boolean isSessionActive = isSessionActive();
         if (mCurrentLocale == null || (!(mCurrentLocale.equals(locale)))) {
             setLocale(locale);
             // Re-check the entire text
@@ -219,13 +220,13 @@ public class SpellChecker implements SpellCheckerSessionListener {
             end = mTextView.getText().length();
         } else {
             final boolean spellCheckerActivated = mTextServicesManager.isSpellCheckerEnabled();
-            if (isSessionActive() != spellCheckerActivated) {
+            if (isSessionActive != spellCheckerActivated) {
                 // Spell checker has been turned of or off since last spellCheck
                 resetSession();
             }
         }
 
-        if (!isSessionActive()) return;
+        if (!isSessionActive) return;
 
         // Find first available SpellParser from pool
         final int length = mSpellParsers.length;
