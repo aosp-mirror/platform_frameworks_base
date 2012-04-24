@@ -133,16 +133,6 @@ public class NumberPicker extends LinearLayout {
     private static final int UNSCALED_DEFAULT_SELECTION_DIVIDERS_DISTANCE = 48;
 
     /**
-     * The default unscaled minimal distance for a swipe to be considered a fling.
-     */
-    private static final int UNSCALED_DEFAULT_MIN_FLING_DISTANCE = 150;
-
-    /**
-     * Coefficient for adjusting touch scroll distance.
-     */
-    private static final float TOUCH_SCROLL_DECELERATION_COEFFICIENT = 2.0f;
-
-    /**
      * The resource id for the default layout.
      */
     private static final int DEFAULT_LAYOUT_RESOURCE_ID = R.layout.number_picker;
@@ -233,11 +223,6 @@ public class NumberPicker extends LinearLayout {
     private final int mTextSize;
 
     /**
-     * The minimal distance for a swipe to be considered a fling.
-     */
-    private final int mMinFlingDistance;
-
-    /**
      * The height of the gap between text elements if the selector wheel.
      */
     private int mSelectorTextGapHeight;
@@ -296,6 +281,11 @@ public class NumberPicker extends LinearLayout {
      * The {@link Paint} for drawing the selector.
      */
     private final Paint mSelectorWheelPaint;
+
+    /**
+     * The {@link Drawable} for pressed virtual (increment/decrement) buttons.
+     */
+    private final Drawable mVirtualButtonPressedDrawable;
 
     /**
      * The height of a selector element (text + gap).
@@ -435,9 +425,24 @@ public class NumberPicker extends LinearLayout {
     private int mLastHoveredChildVirtualViewId;
 
     /**
+     * Whether the increment virtual button is pressed.
+     */
+    private boolean mIncrementVirtualButtonPressed;
+
+    /**
+     * Whether the decrement virtual button is pressed.
+     */
+    private boolean mDecrementVirtualButtonPressed;
+
+    /**
      * Provider to report to clients the semantic structure of this widget.
      */
     private AccessibilityNodeProviderImpl mAccessibilityNodeProvider;
+
+    /**
+     * Helper class for managing pressed state of the virtual buttons.
+     */
+    private final PressedStateHelper mPressedStateHelper;
 
     /**
      * Interface to listen for changes of the current value.
@@ -553,12 +558,6 @@ public class NumberPicker extends LinearLayout {
         mSelectionDividersDistance = attributesArray.getDimensionPixelSize(
                 R.styleable.NumberPicker_selectionDividersDistance, defSelectionDividerDistance);
 
-        final int defMinFlingDistance = (int) TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP, UNSCALED_DEFAULT_MIN_FLING_DISTANCE,
-                getResources().getDisplayMetrics());
-        mMinFlingDistance = attributesArray.getDimensionPixelSize(
-                R.styleable.NumberPicker_minFlingDistance, defMinFlingDistance);
-
         mMinHeight = attributesArray.getDimensionPixelSize(
                 R.styleable.NumberPicker_internalMinHeight, SIZE_UNSPECIFIED);
 
@@ -581,7 +580,12 @@ public class NumberPicker extends LinearLayout {
 
         mComputeMaxWidth = (mMaxWidth == SIZE_UNSPECIFIED);
 
+        mVirtualButtonPressedDrawable = attributesArray.getDrawable(
+                R.styleable.NumberPicker_virtualButtonPressedDrawable);
+
         attributesArray.recycle();
+
+        mPressedStateHelper = new PressedStateHelper();
 
         // By default Linearlayout that we extend is not drawn. This is
         // its draw() method is not called but dispatchDraw() is called
@@ -776,7 +780,19 @@ public class NumberPicker extends LinearLayout {
                 mLastDownEventTime = event.getEventTime();
                 mIngonreMoveEvents = false;
                 mShowSoftInputOnTap = false;
-                // Make sure we wupport flinging inside scrollables.
+                // Handle pressed state before any state change.
+                if (mLastDownEventY < mTopSelectionDividerTop) {
+                    if (mScrollState == OnScrollListener.SCROLL_STATE_IDLE) {
+                        mPressedStateHelper.buttonPressDelayed(
+                                PressedStateHelper.BUTTON_DECREMENT);
+                    }
+                } else if (mLastDownEventY > mBottomSelectionDividerBottom) {
+                    if (mScrollState == OnScrollListener.SCROLL_STATE_IDLE) {
+                        mPressedStateHelper.buttonPressDelayed(
+                                PressedStateHelper.BUTTON_INCREMENT);
+                    }
+                }
+                // Make sure we support flinging inside scrollables.
                 getParent().requestDisallowInterceptTouchEvent(true);
                 if (!mFlingScroller.isFinished()) {
                     mFlingScroller.forceFinished(true);
@@ -826,8 +842,7 @@ public class NumberPicker extends LinearLayout {
                         onScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
                     }
                 } else {
-                    int deltaMoveY = (int) ((currentMoveY - mLastDownOrMoveEventY)
-                            / TOUCH_SCROLL_DECELERATION_COEFFICIENT);
+                    int deltaMoveY = (int) ((currentMoveY - mLastDownOrMoveEventY));
                     scrollBy(0, deltaMoveY);
                     invalidate();
                 }
@@ -836,23 +851,12 @@ public class NumberPicker extends LinearLayout {
             case MotionEvent.ACTION_UP: {
                 removeBeginSoftInputCommand();
                 removeChangeCurrentByOneFromLongPress();
+                mPressedStateHelper.cancel();
                 VelocityTracker velocityTracker = mVelocityTracker;
                 velocityTracker.computeCurrentVelocity(1000, mMaximumFlingVelocity);
                 int initialVelocity = (int) velocityTracker.getYVelocity();
                 if (Math.abs(initialVelocity) > mMinimumFlingVelocity) {
-                    int deltaMove = (int) (event.getY() - mLastDownEventY);
-                    int absDeltaMoveY = Math.abs(deltaMove);
-                    if (absDeltaMoveY > mMinFlingDistance) {
-                        fling(initialVelocity);
-                    } else {
-                        final int normalizedDeltaMove =
-                            (int) (absDeltaMoveY / TOUCH_SCROLL_DECELERATION_COEFFICIENT);
-                        if (normalizedDeltaMove < mSelectorElementHeight) {
-                            snapToNextValue(deltaMove < 0);
-                        } else {
-                            snapToClosestValue();
-                        }
-                    }
+                    fling(initialVelocity);
                     onScrollStateChange(OnScrollListener.SCROLL_STATE_FLING);
                 } else {
                     int eventY = (int) event.getY();
@@ -867,8 +871,12 @@ public class NumberPicker extends LinearLayout {
                                     - SELECTOR_MIDDLE_ITEM_INDEX;
                             if (selectorIndexOffset > 0) {
                                 changeValueByOne(true);
+                                mPressedStateHelper.buttonTapped(
+                                        PressedStateHelper.BUTTON_INCREMENT);
                             } else if (selectorIndexOffset < 0) {
                                 changeValueByOne(false);
+                                mPressedStateHelper.buttonTapped(
+                                        PressedStateHelper.BUTTON_DECREMENT);
                             }
                         }
                     } else {
@@ -1356,6 +1364,22 @@ public class NumberPicker extends LinearLayout {
         float x = (mRight - mLeft) / 2;
         float y = mCurrentScrollOffset;
 
+        // draw the virtual buttons pressed state if needed
+        if (mVirtualButtonPressedDrawable != null
+                && mScrollState == OnScrollListener.SCROLL_STATE_IDLE) {
+            if (mDecrementVirtualButtonPressed) {
+                mVirtualButtonPressedDrawable.setState(PRESSED_STATE_SET);
+                mVirtualButtonPressedDrawable.setBounds(0, 0, mRight, mTopSelectionDividerTop);
+                mVirtualButtonPressedDrawable.draw(canvas);
+            }
+            if (mIncrementVirtualButtonPressed) {
+                mVirtualButtonPressedDrawable.setState(PRESSED_STATE_SET);
+                mVirtualButtonPressedDrawable.setBounds(0, mBottomSelectionDividerBottom, mRight,
+                        mBottom);
+                mVirtualButtonPressedDrawable.draw(canvas);
+            }
+        }
+
         // draw the selector wheel
         int[] selectorIndices = mSelectorIndices;
         for (int i = 0; i < selectorIndices.length; i++) {
@@ -1465,15 +1489,15 @@ public class NumberPicker extends LinearLayout {
      */
     private void initializeSelectorWheelIndices() {
         mSelectorIndexToStringCache.clear();
-        int[] selectorIdices = mSelectorIndices;
+        int[] selectorIndices = mSelectorIndices;
         int current = getValue();
         for (int i = 0; i < mSelectorIndices.length; i++) {
             int selectorIndex = current + (i - SELECTOR_MIDDLE_ITEM_INDEX);
             if (mWrapSelectorWheel) {
                 selectorIndex = getWrappedSelectorIndex(selectorIndex);
             }
-            mSelectorIndices[i] = selectorIndex;
-            ensureCachedScrollSelectorValue(mSelectorIndices[i]);
+            selectorIndices[i] = selectorIndex;
+            ensureCachedScrollSelectorValue(selectorIndices[i]);
         }
     }
 
@@ -1775,6 +1799,7 @@ public class NumberPicker extends LinearLayout {
         if (mBeginSoftInputOnLongPressCommand != null) {
             removeCallbacks(mBeginSoftInputOnLongPressCommand);
         }
+        mPressedStateHelper.cancel();
     }
 
     /**
@@ -1910,39 +1935,80 @@ public class NumberPicker extends LinearLayout {
         return false;
     }
 
-    private void snapToNextValue(boolean increment) {
-        int deltaY = mCurrentScrollOffset - mInitialScrollOffset;
-        int amountToScroll = 0;
-        if (deltaY != 0) {
-            mPreviousScrollerY = 0;
-            if (deltaY > 0) {
-                if (increment) {
-                    amountToScroll = - deltaY;
-                } else {
-                    amountToScroll = mSelectorElementHeight - deltaY;
-                }
-            } else {
-                if (increment) {
-                    amountToScroll = - mSelectorElementHeight - deltaY;
-                } else {
-                    amountToScroll = - deltaY;
-                }
-            }
-            mFlingScroller.startScroll(0, 0, 0, amountToScroll, SNAP_SCROLL_DURATION);
-            invalidate();
-        }
-    }
+    class PressedStateHelper implements Runnable {
+        public static final int BUTTON_INCREMENT = 1;
+        public static final int BUTTON_DECREMENT = 2;
 
-    private void snapToClosestValue() {
-        // adjust to the closest value
-        int deltaY = mInitialScrollOffset - mCurrentScrollOffset;
-        if (deltaY != 0) {
-            mPreviousScrollerY = 0;
-            if (Math.abs(deltaY) > mSelectorElementHeight / 2) {
-                deltaY += (deltaY > 0) ? -mSelectorElementHeight : mSelectorElementHeight;
+        private final int MODE_PRESS = 1;
+        private final int MODE_TAPPED = 2;
+
+        private int mManagedButton;
+        private int mMode;
+
+        public void cancel() {
+            mMode = 0;
+            mManagedButton = 0;
+            NumberPicker.this.removeCallbacks(this);
+            if (mIncrementVirtualButtonPressed) {
+                mIncrementVirtualButtonPressed = false;
+                invalidate(0, mBottomSelectionDividerBottom, mRight, mBottom);
             }
-            mFlingScroller.startScroll(0, 0, 0, deltaY, SNAP_SCROLL_DURATION);
-            invalidate();
+            mDecrementVirtualButtonPressed = false;
+            if (mDecrementVirtualButtonPressed) {
+                invalidate(0, 0, mRight, mTopSelectionDividerTop);
+            }
+        }
+
+        public void buttonPressDelayed(int button) {
+            cancel();
+            mMode = MODE_PRESS;
+            mManagedButton = button;
+            NumberPicker.this.postDelayed(this, ViewConfiguration.getTapTimeout());
+        }
+
+        public void buttonTapped(int button) {
+            cancel();
+            mMode = MODE_TAPPED;
+            mManagedButton = button;
+            NumberPicker.this.post(this);
+        }
+
+        @Override
+        public void run() {
+            switch (mMode) {
+                case MODE_PRESS: {
+                    switch (mManagedButton) {
+                        case BUTTON_INCREMENT: {
+                            mIncrementVirtualButtonPressed = true;
+                            invalidate(0, mBottomSelectionDividerBottom, mRight, mBottom);
+                        } break;
+                        case BUTTON_DECREMENT: {
+                            mDecrementVirtualButtonPressed = true;
+                            invalidate(0, 0, mRight, mTopSelectionDividerTop);
+                        }
+                    }
+                } break;
+                case MODE_TAPPED: {
+                    switch (mManagedButton) {
+                        case BUTTON_INCREMENT: {
+                            if (!mIncrementVirtualButtonPressed) {
+                                NumberPicker.this.postDelayed(this,
+                                        ViewConfiguration.getPressedStateDuration());
+                            }
+                            mIncrementVirtualButtonPressed ^= true;
+                            invalidate(0, mBottomSelectionDividerBottom, mRight, mBottom);
+                        } break;
+                        case BUTTON_DECREMENT: {
+                            if (!mDecrementVirtualButtonPressed) {
+                                NumberPicker.this.postDelayed(this,
+                                        ViewConfiguration.getPressedStateDuration());
+                            }
+                            mDecrementVirtualButtonPressed ^= true;
+                            invalidate(0, 0, mRight, mTopSelectionDividerTop);
+                        }
+                    }
+                } break;
+            }
         }
     }
 
