@@ -159,27 +159,13 @@ class CookieManagerClassic extends CookieManager {
         nativeFlushCookieStore();
     }
 
-    /**
-     * Gets whether the application's {@link WebView} instances send and accept
-     * cookies for file scheme URLs.
-     * @return True if {@link WebView} instances send and accept cookies for
-     *         file scheme URLs
-     */
-    public static boolean allowFileSchemeCookies() {
+    @Override
+    protected boolean allowFileSchemeCookiesImpl() {
         return nativeAcceptFileSchemeCookies();
     }
 
-    /**
-     * Sets whether the application's {@link WebView} instances should send and
-     * accept cookies for file scheme URLs.
-     * Use of cookies with file scheme URLs is potentially insecure. Do not use
-     * this feature unless you can be sure that no unintentional sharing of
-     * cookie data can take place.
-     * <p>
-     * Note that calls to this method will have no effect if made after a
-     * {@link WebView} or CookieManager instance has been created.
-     */
-    public static void setAcceptFileSchemeCookies(boolean accept) {
+    @Override
+    protected void setAcceptFileSchemeCookiesImpl(boolean accept) {
         nativeSetAcceptFileSchemeCookies(accept);
     }
 
