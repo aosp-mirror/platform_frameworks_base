@@ -393,4 +393,23 @@ public class JavaBridgeBasicsTest extends JavaBridgeTestBase {
         // LIVECONNECT_COMPLIANCE: Should be able to enumerate members.
         assertEquals("", mTestController.waitForStringValue());
     }
+
+    // java.lang.reflect only allows access to public methods and fields. See b/6386557.
+    public void testReflectPublicMethod() throws Throwable {
+        injectObjectAndReload(new Object() {
+            public String method() { return "foo"; }
+        }, "testObject");
+        assertEquals("foo", executeJavaScriptAndGetStringResult(
+                "testObject.getClass().getMethod('method', null).invoke(testObject, null)" +
+                ".toString()"));
+    }
+
+    // java.lang.reflect only allows access to public methods and fields. See b/6386557.
+    public void testReflectPublicField() throws Throwable {
+        injectObjectAndReload(new Object() {
+            public String field = "foo";
+        }, "testObject");
+        assertEquals("foo", executeJavaScriptAndGetStringResult(
+                "testObject.getClass().getField('field').get(testObject).toString()"));
+    }
 }
