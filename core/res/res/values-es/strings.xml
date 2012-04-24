@@ -342,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Permite que la aplicación envíe emisiones que permanecen en el dispositivo una vez que la emisión ha finalizado. Las aplicaciones malintencionadas pueden ralentizar el tablet o volverlo inestable al hacer que use demasiada memoria."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Permite que la aplicación envíe emisiones persistentes, que permanecen en el dispositivo una vez que la emisión haya finalizado. Las aplicaciones malintencionadas pueden ralentizar el teléfono o volverlo inestable al hacer que use demasiada memoria."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"leer los datos de contacto"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Permite que la aplicación lea todos los datos (direcciones) de contactos almacenados en el dispositivo. Las aplicaciones malintencionadas pueden usar este permiso para enviar datos a otros usuarios."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Permite que la aplicación lea todos los datos (direcciones) de contactos almacenados en el dispositivo. Las aplicaciones malintencionadas pueden usar este permiso para enviar datos a otros usuarios."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"escribir datos de contacto"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Permite que la aplicación lea todos los datos (direcciones) de contactos almacenados en el tablet. Las aplicaciones malintencionadas pueden usar este permiso para borrar o modificar los datos de contactos."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Permite que la aplicación consulte todos los datos (direcciones) de contactos almacenados en el teléfono. Las aplicaciones malintencionadas pueden usar este permiso para borrar o modificar los datos de contactos."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"leer el registro de llamadas"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Permite que la aplicación lea el registro de llamadas del tablet, incluidos datos sobre llamadas entrantes y salientes. Las aplicaciones malintencionadas pueden usar este permiso para enviar tus datos a otros usuarios."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Permite que la aplicación lea el registro de llamadas del teléfono, incluidos datos sobre llamadas entrantes y salientes. Las aplicaciones malintencionadas pueden usar este permiso para enviar tus datos a otros usuarios."</string>

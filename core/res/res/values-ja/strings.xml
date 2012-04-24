@@ -203,10 +203,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"MMSメッセージの受信と処理をアプリに許可します。この許可を悪意のあるアプリに利用されると、メッセージが監視されたり、表示されずに削除されたりする恐れがあります。"</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"緊急放送の受信"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"緊急ブロードキャストメッセージの受信と処理をアプリに許可します。これはシステムアプリのみが利用できる権限です。"</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"エリアメールSMSの読み取り"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"端末で受信したエリアメールSMSの読み取りをアプリに許可します。エリアメール警報は、緊急事態を警告する目的で一部の地域に配信されます。緊急エリアメールの受信時に、悪意のあるアプリによって端末の動作や処理が妨害される恐れがあります。"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMSメッセージの送信"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"SMSメッセージの送信をアプリに許可します。この許可を悪意のあるアプリに利用されると、ユーザーの確認なしでメッセージが送信され、料金が発生する恐れがあります。"</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"確認せずにSMSメッセージを送信する"</string>
@@ -225,10 +223,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"タスクをフォアグラウンドやバックグラウンドに移動することをアプリに許可します。この許可を悪意のあるアプリに利用されると、悪意のあるアプリが強制的に優先される恐れがあります。"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"実行中のアプリの停止"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"タスクの削除とアプリの終了をアプリに許可します。この許可を悪意のあるアプリケーションに利用されると、他のアプリの動作が妨害される恐れがあります。"</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"すべてのアクティビティの開始"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"権限による保護やエクスポートされた状態を問わず、すべてのアクティビティを開始することをアプリに許可します。"</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"画面互換性の設定"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"他のアプリの画面互換性モードをコントロールすることをアプリに許可します。この許可を悪意のあるアプリに利用されると、他のアプリの動作が中断される恐れがあります。"</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"アプリのデバッグの有効化"</string>
@@ -346,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"配信が終了してもメモリに残るstickyブロードキャストの配信をアプリに許可します。この許可を悪意のあるアプリに利用されると、メモリの使用量が増えてタブレットの動作が遅くなったり不安定になったりする恐れがあります。"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"配信が終了してもメモリに残るstickyブロードキャストの配信をアプリに許可します。この許可を悪意のあるアプリに利用されると、メモリの使用量が増えて携帯端末の動作が遅くなったり不安定になったりする恐れがあります。"</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"連絡先データの読み取り"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"タブレットに保存されている連絡先（アドレス）データの読み取りをアプリに許可します。この許可を悪意のあるアプリケーションに利用されると、データが他人に送信される恐れがあります。"</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"携帯端末に保存されている連絡先（アドレス）データの読み取りをアプリに許可します。この許可を悪意のあるアプリケーションに利用されると、データが他人に送信される恐れがあります。"</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"連絡先データの書き込み"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"タブレットに保存されている連絡先（アドレス）データの変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、連絡先データが消去または変更される恐れがあります。"</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"携帯端末に保存されている連絡先（アドレス）データの変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、連絡先データが消去または変更される恐れがあります。"</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"通話履歴の読み取り"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"タブレットの通話履歴（着信や発信のデータなど）の読み取りをアプリに許可します。この許可を悪意のあるアプリに利用されると、データが他のユーザーに送信される恐れがあります。"</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"携帯端末の通話履歴（着信や発信のデータなど）の読み取りをアプリに許可します。この許可を悪意のあるアプリに利用されると、データが他のユーザーに送信される恐れがあります。"</string>

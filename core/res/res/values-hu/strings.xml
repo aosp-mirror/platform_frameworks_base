@@ -342,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Lehetővé teszi az alkalmazás számára a ragadós üzenetek küldését, amelyek a sugárzás után is megmaradnak. A rosszindulatú alkalmazások lelassíthatják vagy instabillá tehetik a táblagépet a túlzott memóriahasználattal."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Lehetővé teszi az alkalmazás számára ragadós üzenetek küldését, amelyek a sugárzás után is megmaradnak. A rosszindulatú alkalmazások lelassíthatják vagy instabillá tehetik a táblagépet a túlzott memóriahasználattal."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"névjegyadatok olvasása"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Lehetővé teszi az alkalmazás számára, hogy elolvassa a táblagépen található összes felhasználói adatot (címet). A rosszindulatú alkalmazások kihasználhatják ezt arra, hogy elküldjék az adatokat másoknak."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Lehetővé teszi az alkalmazás számára, hogy elolvassa a telefonban található összes felhasználói adatot (címet). A rosszindulatú alkalmazások kihasználhatják ezt arra, hogy elküldjék az adatokat másoknak."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"névjegyadatok írása"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Lehetővé teszi az alkalmazás számára, hogy módosítsa a táblagépen tárolt névjegy- (cím-) adatokat. A rosszindulatú alkalmazások felhasználhatják ezt a névjegyadatok törlésére vagy módosítására."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Lehetővé teszi az alkalmazás számára, hogy módosítsa a telefonon tárolt névjegy- (cím-) adatokat. A rosszindulatú alkalmazások felhasználhatják ezt a névjegyadatok törlésére vagy módosítására."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"Híváslista beolvasása"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Lehetővé teszi, hogy az alkalmazás hozzáférjen a táblagép híváslistájához, beleértve a bejövő és kimenő hívások adatait. A rosszindulatú alkalmazások ezt arra használhatják, hogy az adatait elküldjék másoknak."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Lehetővé teszi, hogy az alkalmazás hozzáférjen híváslistájához, beleértve a bejövő és kimenő hívások adatait. A rosszindulatú alkalmazások ezt arra használhatják, hogy az adatait elküldjék másoknak."</string>

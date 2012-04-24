@@ -203,10 +203,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Дозвољава апликацији да прима и обрађује MMS поруке. Злонамерне апликације могу да надгледају поруке или да их бришу, а да вам их не прикажу."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"пријем хитних преноса"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Дозвољава апликацији да прима и обрађује поруке хитног преноса. Ова дозвола је доступна само за системске апликације."</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"читање порука инфо сервиса"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Омогућава апликацији да чита поруке инфо сервиса које уређај прима. Упозорења инфо сервиса се на неким локацијама примају као упозорења на хитне случајеве. Злонамерне апликације могу да утичу на учинак или ометају функционисање уређаја када се прими порука инфо сервиса о хитном случају."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"слање SMS порука"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Дозвољава апликацији да шаље SMS поруке. Злонамерне апликације могу да шаљу поруке без ваше потврде, што вам  може изазвати трошкове."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"слање SMS порука без потврде"</string>
@@ -225,10 +223,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Дозвољава апликацији да премешта задатке у први план и у позадину. Злонамерне апликације могу на тај начин да принудно пређу у први план без ваше контроле."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"заустављање покренутих апликација"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Дозвољава апликацији да уклања задатке и уништава њихове апликације. Злонамерне апликације могу да поремете понашање других апликација."</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"покретање било које активности"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Омогућава да апликација покрене било коју активност, без обзира на заштиту дозволе или стање извоза."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"подешавање компатибилности екрана"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Дозвољава апликацији да контролише режим компатибилности екрана других апликација. Злонамерне апликације могу да угрозе понашање других апликација."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"омогућавање отклањања грешака у апликацији"</string>
@@ -346,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Дозвољава апликацији да шаље пријемчива емитовања, која остају по завршетку емитовања. Злонамерне апликације могу да успоре или дестабилизују таблет тиме што ће га приморати да троши превише меморије."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Дозвољава апликацији да шаље пријемчива емитовања, која остају по завршетку емитовања. Злонамерне апликације могу да успоре или дестабилизују телефон тиме што ће га приморати да троши превише меморије."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"читање података о контактима"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Дозвољава апликацији да чита све податке о контактима (адресама) сачуване на таблету. Злонамерне апликације могу то да искористе за слање података другим особама."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Дозвољава апликацији да чита све податке о контактима (адресама) сачуване на телефону. Злонамерне апликације могу то да искористе за слање података другим особама."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"уписивање података о контактима"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Дозвољава апликацији да измени податке о контакту (адреси) сачуване на таблету. Злонамерне апликације могу то да искористе да би избрисале или измениле податке о контакту."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Дозвољава апликацији да измени податке о контакту (адреси) сачуване на телефону. Злонамерне апликације могу то да искористе да би избрисале или измениле податке о контакту."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"читање евиденције позива"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Дозвољава апликацији да чита евиденцију позива на таблету, укључујући податке о долазним и одлазним позивима. Злонамерне апликације могу ово да користе да би слале податке другим људима."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Дозвољава апликацији да чита евиденцију позива на телефону, укључујући податке о долазним и одлазним позивима. Злонамерне апликације могу ово да користе да би слале податке другим људима."</string>

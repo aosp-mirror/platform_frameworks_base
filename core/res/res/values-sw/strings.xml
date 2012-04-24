@@ -203,10 +203,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Inaruhusu programu kupokea na kuchakata jumbe za MMS. Programu hasidi zinaweza  kufuatilia jumbe zako au kuzifuta bila kukuonyesha."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"Pokea matangazo ya dharura"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Inaruhusu programu kupokea na kuchakata jumbe za dharura. Ruhusa hii inapatikana tu kwa programu za mfumo."</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"soma ujumbe wa matangazo ya simu"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Huruhusu programu kusoma ujumbe wa matangazo ya simu yaliyopokewa na kifaa chako. Taarifa za matangazo ya simu huwasilishwa katika maeneo mengine ili kukuonya juu ya hali za dharura. Huenda programu mbaya zikatatiza utendajikazi au shughuli ya kifaa chako wakati matangazo ya simu ya dharura yamepokewa."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"tuma ujumbe wa SMS"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Inaruhusu programu kutuma jumbe za SMS. Programu hasidi zinaweza kukugharimu fedha kwa kutuma jumbe bila uthibitisho wako."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"Tuma ujumbe wa SMS bila ya thibitisho"</string>
@@ -225,10 +223,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Inaruhusu programu kusongesha kazi kwenye mandhari-mbele na mandhari-nyuma. Programu hasidi zinaweza kujilazimisha mbele bila udhibiti wako."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"Komesha programu zinazoendeshwa"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Huruhusu programu kuondoa majukumu na kuua programu zao. Programu hasidi zinaweza kutatiza tabia ya programu zingine."</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"anzisha shughuli yoyote"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Huruhusu programu kuanzisha shughuli yoyote, haijalishi ulinzi wa idhini au hali iliyofichuliwa."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"weka utangamano wa skrini"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Huruhusu programu kudhibiti hali ya utangamano wa skrini ya programu zingine. Programu hasidi zinaweza kuvunja mwenendo wa programu zingine."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"wezesha utatuaji wa programu"</string>
@@ -346,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Inaruhusu programu kutuma matangazo nata, ambayo hubakia baada ya matangazo kuisha. Programu hasidi zinaweza fanya kompyuta kibao kufanya kazi polepole au kuifanya isiwe thabiti kwa kuifanya itumie kumbukumbu kubwa zaidi."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Inaruhusu programu kutuma matangazo nata, ambayo hubakia baada ya matangazo kuisha. Programu hasidi zinaweza fanya simu kufanya kazi polepole au kuifanya isiwe thabiti kwa kuifanya itumie kumbukumbu kubwa zaidi."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"soma data ya anwani"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Inaruhusu Programu kusoma data zote za  mwasiliani(anwani) zilohifadhiwa kwa  kompyuta yako kibao. Programu hasidi zinaweza kutumia hii kutuma data zako kwa watu wengine."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Inaruhusu Programu kusoma data zote za  mwasiliani(anwani) zilizohifadhiwa kwenye simu yako. Programu hasidi zinaweza kutumia hii kutuma data zako kwa watu wengine."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"andika data ya anwani"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Inaruhusu programu kurekebisha data ya mwasiliani(anwani) iliyohifadhiwa kwenye kompyuta yako ki. programu hasidi zinaweza tumia hii kufuta au kurekebisha data yako ya mwasiliani."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Inaruhusu programu kurekebisha data ya mwasiliani(anwani) iliyohifadhiwa kwenye simu yako. Programu hasidi zinaweza kutumia hii kufuta au kurekebisha data yako ya mwasiliani."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"soma rajisi ya simu"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Huruhusu programu kusoma rajisi ya simu ya kompyuta kibao yako, ikiwa ni pamoja na simu zinazoingia na kutoka. Huenda programu hasidi zikatumia hii ili kutuma data yako kwa watu wengine."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Huruhusu programu kusoma rajisi ya simu yako, ikiwa ni pamoja na data kuhusu simu zinazoingia na kutoka. Huenda programu hasidi zikatumia hii ili kutuma data yako kwa watu wengine."</string>

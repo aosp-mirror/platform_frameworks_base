@@ -346,11 +346,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Programu omogoča hitro pošiljanje fiksnih oddaj, ki ostanejo po koncu oddajanja. Zaradi zlonamernih programov je lahko delovanje tabličnega računalnika počasno ali nestabilno ali tablični računalnik zaradi njih porabi preveč pomnilnika."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Programu omogoča hitro pošiljanje fiksnih oddaj, ki ostanejo po koncu oddajanja. Zaradi zlonamernih programov je delovanje telefona lahko počasno ali nestabilno ali tablični računalnik zaradi njih porabi preveč pomnilnika."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"branje podatkov stika"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Programu omogoča branje vseh podatkov stikov (naslov), ki so shranjeni v tabličnem računalniku. Zlonamerni programi lahko to uporabijo za pošiljanje podatkov drugim."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Programu omogoča branje vseh podatkov stikov (naslov), ki so shranjeni v telefonu. Zlonamerni programi lahko to uporabijo za pošiljanje podatkov drugim."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"pisanje podatkov stika"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Programu omogoča spreminjanje podatkov stikov (naslov), shranjenih v tabličnem računalniku. Zlonamerni programi lahko to uporabijo za brisanje ali spreminjanje podatkov stika."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Programu omogoča spreminjanje podatkov stikov (naslov), shranjenih v telefonu. Zlonamerni programi lahko to uporabijo za brisanje ali spreminjanje podatkov stika."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"branje dnevnika klicev"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Aplikaciji dovoli branje dnevnika klicev v tabličnem računalniku, vključno s podatki o dohodnih in odhodnih klicih. Zlonamerne aplikacije lahko tako pošiljajo vaše podatke drugim."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Aplikaciji dovoli branje dnevnika klicev v telefonu, vključno s podatki o dohodnih in odhodnih klicih. Zlonamerne aplikacije lahko tako pošiljajo vaše podatke drugim."</string>

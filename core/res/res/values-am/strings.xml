@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"ጡባዊዎ ይዘጋል።"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"ስልክዎ ይዘጋል።"</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"ዘግተህ መውጣት  ትፈልጋለህ?"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"ወደ ጥንቁቅ ሁናቴ ውስጥ ዳግም አስጀምር"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"ወደ ጥንቁቅ ሁናቴ ውስጥ ዳግም ማስጀመር ትፈልጋለህ? ይሄ ሁሉንም የጫንካቸው የሶስተኛ ወገን መተግበሪያዎችን ያሰናክላል።  እንደገና ዳግም ስታስጀምር ይመለስሉሃል።"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"የቅርብ ጊዜ"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"ምንም የቅርብ ጊዜ ትግበራዎች የሉም"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"የጡባዊ አማራጮች"</string>
@@ -342,11 +340,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"ስርጭቱ ከተጠናቀቀ በኋላ የሚቀሩ፣ አጣባቂ ስርጭቶችን ለመላክ ለመተግበሪያው ይፈቅዳል፡፡ በጣም ብዙ ማህደረ ትውስታ  እንዲጠቀም በማድረግ ተንኮል አዘል መተግበሪያዎች ጡባዊ ተኮን እንዲቀራፈፍ ወይም ያልተረጋጋ እንዲሆን ሊያደርጉት ይችላሉ፡፡"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"ስርጭቱ ከተጠናቀቀ በኋላ የሚቀሩ፣ አጣባቂ ስርጭቶችን ለመላክ ለመተግበሪያው ይፈቅዳሉ፡፡ በጣም ብዙ ማህደረ ትውስታ  እንዲጠቀም በማድረግ ጎጂ መተግበሪያዎች ስልኩን እንዲቀራፈፍ ወይም ያልተረጋጋ እንዲሆን ሊያደርጉት ይችላሉ፡፡"</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"የዕውቂያ ውሂብ አንበብ"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"ጡባዊ ተኮህ ላይ የተከማቸውን ሁሉንም የእውቅያ(አድራሻ) ውሂብ ለማንበብ ለመተግበሪያው ይፈቅዳሉ፡፡  ወደ ሌሎች ሰዎች ውሂብህን ለመላክ ተንኮል አዘል  መተግበሪያዎች ይሄንን ሊጠቀሙበት ይችላሉ፡፡"</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"ሰልክህ ላይ የተከማቸውን ሁሉንም የእውቅያ(አድራሻ) ውሂብ ለማንበብ ለመተግበሪያው ይፈቅዳሉ፡፡  ወደ ሌሎች ሰዎች ውሂብህን ለመላክ ጎጂ መተግበሪያዎች ይሄንን ሊጠቀሙበት ይችላሉ፡፡"</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"የእውቂያ ውሂብ ፃፍ"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"በጡባዊ ተኮህ ላይ የተከማቹ የእውቂያ(አድራሻ) ውሂብ ለመቀየር ለመተግበሪያው ይፈቅዳሉ፡፡ የእውቅያ ውሂብህን ለመደምሰስ ወይም ለመቀየር ተንኮል አዘል መተግበሪያዎች ሊጠቀሙት ይችላሉ፡፡"</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"በስልክህ ላይ የተከማቹ የእውቂያ(አድራሻ) ውሂብ ለመቀየር ለመተግበሪያው ይፈቅዳሉ፡፡ የእውቅያ ውሂብህን ለመደምሰስ ወይም ለመቀየር ተንኮል አዘል መተግበሪያዎች ሊጠቀሙት ይችላሉ፡፡"</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"የጥሪ ምዝግብ ማስታወሻን አንብብ"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"ስለ ገቢ እና ወጪ ጥሪዎችን ውሂብ ጨምሮ፣ የጡባዊ ተኮህን ምዝግብ ማስታወሻ እንዲያነብ ለመተግበሪያው ይፈቅዳል። ይሄንን ተንኮል አዘል መተግበሪያዎች ለሌሎች ሰዎች ውሂብህን ለመላክ ሊጠቀሙበት ይችላሉ።"</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"ስለ ገቢ እና ወጪ ጥሪዎችን ውሂብ ጨምሮ፣ የስልክ ጥሪህን ምዝግብ ማስታወሻ እንዲያነብ ለመተግበሪያው ይፈቅዳል። ይሄንን ተንኮል አዘል መተግበሪያዎች ለሌሎች ሰዎች ውሂብህን ለመላክ ሊጠቀሙበት ይችላሉ።"</string>
@@ -742,14 +744,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"ቁምፊ"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"ቃል"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"አገናኝ"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"መስመር"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"የፋብሪካሙከራ ተስኗል"</string>

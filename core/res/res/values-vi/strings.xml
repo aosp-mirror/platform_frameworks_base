@@ -203,10 +203,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Cho phép ứng dụng nhận và xử lý tin nhắn MMS. Ứng dụng độc hại có thể theo dõi tin nhắn của bạn hoặc xóa tin nhắn mà không hiển thị chúng cho bạn."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"nhận các truyền phát khẩn cấp"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Cho phép ứng dụng nhận và xử lý tin nhắn truyền phát khẩn cấp. Quyền này chỉ sẵn có cho các ứng dụng hệ thống."</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"đọc tin nhắn quảng bá"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Cho phép ứng dụng đọc tin nhắn quảng bá mà thiết bị của bạn nhận được. Tin nhắn quảng bá cảnh báo được gửi ở một số địa điểm nhằm cảnh báo cho bạn về các tình huống khẩn cấp. Các ứng dụng độc hại có thể gây ảnh hưởng đến hiệu suất hoặc hoạt động của thiết bị của bạn khi nhận được tin nhắn quảng bá khẩn cấp."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"gửi tin nhắn SMS"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Cho phép ứng dụng gửi tin nhắn SMS. Ứng dụng độc hại có thể khiến bạn tốn tiền bằng cách gửi tin nhắn mà không cần xác nhận của bạn."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"gửi tin nhắn SMS mà không cần xác nhận"</string>
@@ -225,10 +223,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Cho phép ứng dụng di chuyển công việc sang nền trước và nền sau. Ứng dụng độc hại có thể tự hiển thị ở nền trước mà không chịu sự kiểm soát của bạn."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"dừng các ứng dụng đang chạy"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Cho phép ứng dụng xóa công việc và loại bỏ các ứng dụng của chúng. Ứng dụng độc hại có thể làm gián đoạn hoạt động của các ứng dụng khác."</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"bắt đầu mọi hoạt động"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Cho phép ứng dụng bắt đầu mọi hoạt động, bất kể là bảo vệ quyền hay trạng thái xuất."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"đặt độ tương thích màn hình"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Cho phép ứng dụng kiểm soát chế độ tương thích màn hình của ứng dụng khác. Các ứng dụng độc hại có thể phá vỡ hoạt động của các ứng dụng khác."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"bật gỡ lỗi ứng dụng"</string>
@@ -346,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Cho phép ứng dụng gửi nội dung truyền phát hấp dẫn người xem. Nội dung này sẽ vẫn còn sau khi quá trình truyền phát kết thúc. Ứng dụng độc hại có thể làm cho máy tính bảng bị chậm hoặc không ổn định bằng cách khiến máy tính bảng sử dụng quá nhiều bộ nhớ."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Cho phép ứng dụng gửi nội dung truyền phát hấp dẫn người xem. Nội dung này sẽ vẫn còn sau khi quá trình truyền phát kết thúc. Ứng dụng độc hại có thể làm cho điện thoại bị chậm hoặc không ổn định bằng cách khiến điện thoại sử dụng quá nhiều bộ nhớ."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"đọc dữ liệu liên hệ"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Cho phép ứng dụng đọc tất cả dữ liệu (địa chỉ) liên hệ được lưu trữ trên máy tính bảng. Ứng dụng độc hại có thể sử dụng quyền này để gửi dữ liệu của bạn cho người khác."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Cho phép ứng dụng đọc tất cả dữ liệu (địa chỉ) liên hệ được lưu trữ trên điện thoại. Ứng dụng độc hại có thể sử dụng quyền này để gửi dữ liệu của bạn cho người khác."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"ghi dữ liệu liên hệ"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Cho phép ứng dụng sửa đổi dữ liệu (địa chỉ) liên hệ được lưu trữ trên máy tính bảng của bạn. Ứng dụng độc hại có thể sử dụng quyền này để xóa hoặc sửa đổi dữ liệu liên hệ của bạn."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Cho phép ứng dụng sửa đổi dữ liệu (địa chỉ) liên hệ được lưu trữ trên điện thoại của bạn. Ứng dụng độc hại có thể sử dụng quyền này để xóa hoặc sửa đổi dữ liệu liên hệ của bạn."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"đọc nhật ký cuộc gọi"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Cho phép ứng dụng đọc nhật ký cuộc gọi trên máy tính bảng của bạn, bao gồm dữ liệu về các cuộc gọi đến và gọi đi. Các ứng dụng độc hại có thể sử dụng quyền này để gửi dữ liệu của bạn cho những người khác."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Cho phép ứng dụng đọc nhật ký cuộc gọi trên điện thoại của bạn, bao gồm dữ liệu về các cuộc gọi đến và gọi đi. Các ứng dụng độc hại có thể sử dụng quyền này để gửi dữ liệu của bạn cho những người khác."</string>

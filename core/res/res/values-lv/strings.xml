@@ -342,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Ļauj lietotnei sūtīt piesaistošas apraides, kas tiek saglabātas pēc apraides pabeigšanas. Ļaunprātīgas lietotnes var palēnināt planšetdatora darbību vai padarīt tā darbību nestabilu, liekot izmantot pārāk daudz atmiņas."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Ļauj lietotnei sūtīt piesaistošas apraides, kas tiek saglabātas pēc apraides pabeigšanas. Ļaunprātīgas lietotnes var palēnināt tālruņa darbību vai padarīt tā darbību nestabilu, liekot izmantot pārāk daudz atmiņas."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"lasīt kontaktpersonu datus"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Ļauj lietotnei lasīt visus jūsu planšetdatorā saglabāto kontaktpersonu (adrešu) datus. Ļaunprātīgas lietotnes to var izmantot, lai jūsu datus sūtītu citām personām."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Ļauj lietotnei lasīt visus jūsu tālrunī saglabāto kontaktpersonu (adrešu) datus. Ļaunprātīgas lietotnes to var izmantot, lai jūsu datus sūtītu citām personām."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"rakstīt kontaktpersonu datus"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Ļauj lietotnei modificēt planšetdatorā saglabātos kontaktpersonu (adrešu) datus. Ļaunprātīgas lietotnes to var izmantot, lai dzēstu vai modificētu kontaktpersonu datus."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Ļauj lietotnei modificēt tālrunī saglabātos kontaktpersonu (adrešu) datus. Ļaunprātīgas lietotnes to var izmantot, lai dzēstu vai modificētu kontaktpersonu datus."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"nolasīt zvanu žurnālu"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Ļauj lietotnei nolasīt planšetdatora zvanu žurnālu, tostarp ienākošo un izejošo zvanu datus. Ļaunprātīgas lietotnes var to izmantot, lai sūtītu jūsu datus citām personām."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Ļauj lietotnei nolasīt tālruņa zvanu žurnālu, tostarp ienākošo un izejošo zvanu datus. Ļaunprātīgas lietotnes var to izmantot, lai sūtītu jūsu datus citām personām."</string>

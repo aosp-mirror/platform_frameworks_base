@@ -342,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Ermöglicht der App, dauerhafte Broadcasts zu senden, die auch nach Ende des Broadcasts bestehen bleiben. Schädliche Apps können das Tablet langsam oder unstabil machen, indem zuviel Speicherplatz belegt wird."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Ermöglicht der App, dauerhafte Broadcasts zu senden, die auch nach Ende des Broadcasts bestehen bleiben. Schädliche Apps können das Telefon langsam oder unstabil machen, indem zuviel Speicherplatz belegt wird."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"Kontaktdaten lesen"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Ermöglicht der App, alle auf Ihrem Tablet gespeicherten Kontaktdaten (Adressen) zu lesen. Schädliche Apps können so Ihre Daten an andere senden."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Ermöglicht der App, alle auf Ihrem Telefon gespeicherten Kontaktdaten (Adressen) zu lesen. Schädliche Apps können so Ihre Daten an andere senden."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"Kontaktdaten schreiben"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Ermöglicht der App, die auf Ihrem Tablet gespeicherten Kontaktdaten (Adressen) zu ändern. Schädliche Apps können so Ihre Kontaktdaten löschen oder ändern."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Ermöglicht der App, die auf Ihrem Telefon gespeicherten Kontaktdaten (Adressen) zu ändern. Schädliche Apps können so Ihre Kontaktdaten löschen oder ändern."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"Anrufprotokoll lesen"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Ermöglicht der App, das Anrufprotokoll Ihres Tablets zu lesen, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so Ihre Daten an Dritte senden."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Ermöglicht der App, das Anrufprotokoll Ihres Telefons zu lesen, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so Ihre Daten an Dritte senden."</string>

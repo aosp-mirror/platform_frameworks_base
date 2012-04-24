@@ -342,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Allows the app to send sticky broadcasts, which remain after the broadcast ends. Malicious apps may make the tablet slow or unstable by causing it to use too much memory."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Allows the app to send sticky broadcasts, which remain after the broadcast ends. Malicious apps may make the phone slow or unstable by causing it to use too much memory."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"read contact data"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Allows the app to read all of the contact (address) data stored on your tablet. Malicious apps may use this to send your data to other people."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Allows the app to read all of the contact (address) data stored on your phone. Malicious apps may use this to send your data to other people."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"write contact data"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Allows the app to modify the contact (address) data stored on your tablet. Malicious apps may use this to erase or modify your contact data."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Allows the app to modify the contact (address) data stored on your phone. Malicious apps may use this to erase or modify your contact data."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"read call log"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Allows the app to read your tablet\'s call log, including data about incoming and outgoing calls. Malicious apps may use this to send your data to other people."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Allows the app to read your phone\'s call log, including data about incoming and outgoing calls. Malicious apps may use this to send your data to other people."</string>

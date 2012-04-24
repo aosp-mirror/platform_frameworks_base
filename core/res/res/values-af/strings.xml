@@ -342,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Laat die program toe om klewerige uitsendings te stuur, wat oorbly nadat die uitsending klaar is. Kwaadwillige programme kan die tablet stadig of onstabiel maak deurdat dit te veel geheue gebruik."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Laat die program toe om klewerige uitsendings te stuur, wat oorbly nadat die uitsending klaar is. Kwaadwillige programme kan die foon stadig of onstabiel maak deurdat dit te veel geheue gebruik."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"lees kontakdata"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Laat die program toe om al die kontakdata (adresse) te lees wat op jou tablet gestoor is. Kwaadwillige programme kan dit dalk gebruik om jou data na ander mense te stuur."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Laat die program toe om al die kontakdata (adresse) te lees wat op jou foon gestoor is. Kwaadwillige programme kan dit dalk gebruik om jou data na ander mense te stuur."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"skryf kontakdata"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Laat die program toe om die kontakdata (adresse) wat op jou tablet gestoor is, te verander. Kwaadwillige programme kan dit dalk gebruik om jou kontakdata uit te vee of te verander."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Laat die program toe om die kontakdata (adresse) wat op jou foon gestoor is, te verander. Kwaadwillige programme kan dit dalk gebruik om jou kontakdata uit te vee of te verander."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"lees oproeprekord"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Laat die program toe om jou tablet se oproeprekord, insluitende data oor inkomende en uitgaande oproepe, te lees. Kwaadwillige programme kan dit gebruik om jou data na ander mense te stuur."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Laat die program toe om jou foon se oproeprekord, insluitende data oor inkomende en uitgaande oproepe, te lees. Kwaadwillige programme kan dit gebruik om jou data na ander mense te stuur."</string>
@@ -1028,8 +1032,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Laat toe"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Weier"</string>
     <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Stuur SMS na kortkode?"</string>
-    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Stuur \'n premium SMS?"</string>
-    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; wil graag \'n SMS stuur aan &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, wat lyk asof dit \'n SMS-kortkode is.&lt;p&gt;Die stuur van SMS\'e na sommige kortkodes kan veroorsaak dat jou selfoonrekening gedebiteer word vir premium dienste.&lt;p&gt;Wil jy hierdie program toelaat om die boodskap te stuur?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Stuur \'n premium-SMS?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; wil graag \'n SMS stuur aan &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, wat lyk asof dit \'n SMS-kortkode is.&lt;p&gt;Die stuur van SMS\'e na sommige kortkodes kan veroorsaak dat jou selfoonrekening gedebiteer word vir premiumdienste.&lt;p&gt;Wil jy hierdie program toelaat om die boodskap te stuur?"</string>
     <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; wil graag \'n SMS stuur aan &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, wat \'n betaalde SMS-kortkode is.&lt;p&gt;&lt;b&gt;As jy \'n boodskap na hierdie bestemming stuur, sal jou selfoonrekening gedebiteer word vir betaalde dienste.&lt;/b&gt;&lt;p&gt;Wil jy hierdie program toelaat om die boodskap te stuur?"</string>
     <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Stuur boodskap"</string>
     <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Moenie stuur nie"</string>
