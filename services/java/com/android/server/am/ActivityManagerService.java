@@ -5489,6 +5489,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             enforceCallingPermission(android.Manifest.permission.GET_TASKS,
                     "getRecentTasks()");
+            final boolean detailed = checkCallingPermission(
+                    android.Manifest.permission.GET_DETAILED_TASKS)
+                    == PackageManager.PERMISSION_GRANTED;
 
             IPackageManager pm = AppGlobals.getPackageManager();
             
@@ -5517,6 +5520,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     rti.persistentId = tr.taskId;
                     rti.baseIntent = new Intent(
                             tr.intent != null ? tr.intent : tr.affinityIntent);
+                    if (!detailed) {
+                        rti.baseIntent.replaceExtras((Bundle)null);
+                    }
                     rti.origActivity = tr.origActivity;
                     rti.description = tr.lastDescription;
                     
