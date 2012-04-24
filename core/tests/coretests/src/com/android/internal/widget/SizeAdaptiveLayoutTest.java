@@ -449,10 +449,42 @@ public class SizeAdaptiveLayoutTest extends AndroidTestCase {
                    panel.getBackground() instanceof ColorDrawable);
     }
 
+    @SmallTest
+    public void testOpenSmallEvenWhenLargeIsActuallySmall() {
+        inflate(R.layout.size_adaptive_lies);
+        SizeAdaptiveLayout.LayoutParams lp =
+          (SizeAdaptiveLayout.LayoutParams) mSmallView.getLayoutParams();
+        int height = (int) lp.minHeight;
+
+        measureAndLayout(height);
+
+        assertEquals("1U should be visible",
+                View.VISIBLE,
+                mSmallView.getVisibility());
+        assertTrue("1U should also have been measured",
+                   mSmallView.getMeasuredHeight() > 0);
+    }
+
+    @SmallTest
+    public void testOpenLargeEvenWhenLargeIsActuallySmall() {
+        inflate(R.layout.size_adaptive_lies);
+        SizeAdaptiveLayout.LayoutParams lp =
+          (SizeAdaptiveLayout.LayoutParams) mLargeView.getLayoutParams();
+        int height = (int) lp.minHeight;
+
+        measureAndLayout(height);
+
+        assertEquals("4U should be visible",
+                View.VISIBLE,
+                mLargeView.getVisibility());
+        assertTrue("4U should also have been measured",
+                   mLargeView.getMeasuredHeight() > 0);
+    }
+
     private void measureAndLayout(int height) {
         // manually measure it, and lay it out
         int measureSpec = View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.AT_MOST);
         mSizeAdaptiveLayout.measure(500, measureSpec);
-        mSizeAdaptiveLayout.layout(0, 0, 500, height);
+        mSizeAdaptiveLayout.layout(0, 0, 500, mSizeAdaptiveLayout.getMeasuredHeight());
     }
 }

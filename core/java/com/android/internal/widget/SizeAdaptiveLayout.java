@@ -16,6 +16,8 @@
 
 package com.android.internal.widget;
 
+import java.lang.Math;
+
 import com.android.internal.R;
 
 import android.animation.Animator;
@@ -157,9 +159,29 @@ public class SizeAdaptiveLayout extends ViewGroup {
         int childState = combineMeasuredStates(0, model.getMeasuredState());
         if (DEBUG) Log.d(TAG, "measured child at: " + childHeight);
         int resolvedWidth = resolveSizeAndState(childWidth, widthMeasureSpec, childState);
-        int resolvedheight = resolveSizeAndState(childHeight, heightMeasureSpec, childState);
-        setMeasuredDimension(resolvedWidth, resolvedheight);
-        if (DEBUG) Log.d(TAG, "resolved to: " + resolvedheight);
+        int resolvedHeight = resolveSizeAndState(childHeight, heightMeasureSpec, childState);
+        if (DEBUG) Log.d(TAG, "resolved to: " + resolvedHeight);
+        int boundedHeight = clampSizeToBounds(resolvedHeight, model);
+        if (DEBUG) Log.d(TAG, "bounded to: " + boundedHeight);
+        setMeasuredDimension(resolvedWidth, boundedHeight);
+    }
+
+    private int clampSizeToBounds(int measuredHeight, View child) {
+        SizeAdaptiveLayout.LayoutParams lp =
+                (SizeAdaptiveLayout.LayoutParams) child.getLayoutParams();
+        int heightIn = View.MEASURED_SIZE_MASK & measuredHeight;
+        int height = Math.max(heightIn, lp.minHeight);
+        if (lp.maxHeight != SizeAdaptiveLayout.LayoutParams.UNBOUNDED) {
+            height = Math.min(height, lp.maxHeight);
+        }
+
+        if (heightIn != height) {
+            Log.d(TAG, this + "child view " + child + " " +
+                  "measured out of bounds at " + heightIn +"px " +
+                  "clamped to " + height + "px");
+        }
+
+        return height;
     }
 
     //TODO extend to width and height
