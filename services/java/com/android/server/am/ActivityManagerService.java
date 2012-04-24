@@ -13398,7 +13398,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public boolean targetTaskAffinityMatchesActivity(IBinder token, String destAffinity) {
         ActivityRecord srec = ActivityRecord.forToken(token);
-        return srec.task.affinity != null && srec.task.affinity.equals(destAffinity);
+        return srec != null && srec.task.affinity != null &&
+                srec.task.affinity.equals(destAffinity);
     }
 
     public boolean navigateUpTo(IBinder token, Intent destIntent, int resultCode,
@@ -13407,6 +13408,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         synchronized (this) {
             ActivityRecord srec = ActivityRecord.forToken(token);
+            if (srec == null) {
+                return false;
+            }
             ArrayList<ActivityRecord> history = srec.stack.mHistory;
             final int start = history.indexOf(srec);
             if (start < 0) {
