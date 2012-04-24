@@ -1399,30 +1399,33 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * This method injects the supplied Java object into the WebView. The
-     * object is injected into the JavaScript context of the main frame, using
-     * the supplied name. This allows the Java object to be accessed from
-     * JavaScript. Note that that injected objects will not appear in
-     * JavaScript until the page is next (re)loaded. For example:
+     * Injects the supplied Java object into this WebView. The object is
+     * injected into the JavaScript context of the main frame, using the
+     * supplied name. This allows the Java object's public methods to be
+     * accessed from JavaScript. Note that that injected objects will not
+     * appear in JavaScript until the page is next (re)loaded. For example:
      * <pre> webView.addJavascriptInterface(new Object(), "injectedObject");
      * webView.loadData("<!DOCTYPE html><title></title>", "text/html", null);
      * webView.loadUrl("javascript:alert(injectedObject.toString())");</pre>
-     * <p><strong>IMPORTANT:</strong>
+     * <p>
+     * <strong>IMPORTANT:</strong>
      * <ul>
-     * <li> addJavascriptInterface() can be used to allow JavaScript to control
-     * the host application. This is a powerful feature, but also presents a
-     * security risk. Use of this method in a WebView containing untrusted
-     * content could allow an attacker to manipulate the host application in
-     * unintended ways, executing Java code with the permissions of the host
-     * application. Use extreme care when using this method in a WebView which
-     * could contain untrusted content.
+     * <li> This method can be used to allow JavaScript to control the host
+     * application. This is a powerful feature, but also presents a security
+     * risk, particularly as JavaScript could use reflection to access an
+     * injected object's public fields. Use of this method in a WebView
+     * containing untrusted content could allow an attacker to manipulate the
+     * host application in unintended ways, executing Java code with the
+     * permissions of the host application. Use extreme care when using this
+     * method in a WebView which could contain untrusted content.</li>
      * <li> JavaScript interacts with Java object on a private, background
      * thread of the WebView. Care is therefore required to maintain thread
      * safety.</li>
-     * </ul></p>
-     * @param object The Java object to inject into the WebView's JavaScript
+     * </ul>
+     *
+     * @param object the Java object to inject into this WebView's JavaScript
      *               context. Null values are ignored.
-     * @param name The name used to expose the instance in JavaScript.
+     * @param name the name used to expose the object in JavaScript
      */
     public void addJavascriptInterface(Object object, String name) {
         checkThread();
@@ -1430,12 +1433,15 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Removes a previously added JavaScript interface with the given name.
-     * @param interfaceName The name of the interface to remove.
+     * Removes a previously injected Java object from this WebView. Note that
+     * the removal will not be reflected in JavaScript until the page is next
+     * (re)loaded. See {@link #addJavascriptInterface}.
+     *
+     * @param name the name used to expose the object in JavaScript
      */
-    public void removeJavascriptInterface(String interfaceName) {
+    public void removeJavascriptInterface(String name) {
         checkThread();
-        mProvider.removeJavascriptInterface(interfaceName);
+        mProvider.removeJavascriptInterface(name);
     }
 
     /**
