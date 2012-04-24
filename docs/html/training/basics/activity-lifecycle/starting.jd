@@ -79,9 +79,9 @@ ensures your app behaves well in several ways, including that it:</p>
 while using your app.</li>
   <li>Does not consume valuable system resources when the user is not actively using
 it.</li>
-  <li>Does not loose the user's progress if they leave your app and return to it at a
+  <li>Does not lose the user's progress if they leave your app and return to it at a
 later time.</li>
-  <li>Does not crash of loose the user's progress when the screen rotates between
+  <li>Does not crash or lose the user's progress when the screen rotates between
 landscape and portrait orientation.</li>
 </ul>
 
@@ -257,7 +257,7 @@ activity until they switch to a different activity.</p>
 <h2 id="Destroy">Destroy the Activity</h2>
 
 <p>While the activity's first lifecycle callback is {@link android.app.Activity#onCreate
-onCreate()}, it's very last callback is  {@link android.app.Activity#onDestroy}. The system calls
+onCreate()}, its very last callback is  {@link android.app.Activity#onDestroy}. The system calls
 this method on your activity as the final
 signal that your activity instance is being completely removed from the system memory.</p>
 
