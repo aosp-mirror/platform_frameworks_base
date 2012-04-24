@@ -1770,12 +1770,11 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
-     * android.net.NsdManager} for handling management of network service
+     * android.net.nsd.NsdManager} for handling management of network service
      * discovery
      *
-     * @hide
      * @see #getSystemService
-     * @see android.net.NsdManager
+     * @see android.net.nsd.NsdManager
      */
     public static final String NSD_SERVICE = "servicediscovery";
 
