@@ -1092,7 +1092,8 @@ public abstract class PackageManager {
             = "android.content.pm.extra.VERIFICATION_INSTALL_FLAGS";
 
     /** {@hide} */
-    public static final boolean DEFAULT_ENFORCE_READ_EXTERNAL_STORAGE = !"user".equals(Build.TYPE);
+    // TODO: enable this for userdebug and eng builds; see 6389556
+    public static final boolean DEFAULT_ENFORCE_READ_EXTERNAL_STORAGE = false;
 
     /**
      * Retrieve overall information about an application package that is
