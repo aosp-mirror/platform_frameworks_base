@@ -342,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Tillåter att appen skickar sticky broadcasts, som finns kvar när sändningen är slut. Skadliga appar kan göra pekdatorn seg eller instabil genom att se till att den använder för mycket minne."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Tillåter att appen skickar sticky broadcasts, som finns kvar när sändningen är slut. Skadliga appar kan göra mobilen seg eller instabil genom att använda för mycket minne."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"läsa kontaktinformation"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Tillåter att appen läser alla kontaktuppgifter (adresser) som lagras på pekdatorn. Skadliga appar kan använda detta för att skicka dina data till andra personer."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Tillåter att appen läser alla kontaktuppgifter (adresser) som lagras på mobilen. Skadliga appar kan använda detta för att skicka dina data till andra personer."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"skriva kontaktuppgifter"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Tillåter att appen ändrar kontaktuppgifter (adresser) som lagras på pekdatorn. Skadliga appar kan använda detta för att radera eller ändra kontaktuppgifter."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Tillåter att appen ändrar kontaktuppgifter (adresser) som lagras på mobilen. Skadliga appar kan använda detta för att radera eller ändra kontaktuppgifter."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"läs samtalslogg"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Tillåter att appen läser pekdatorns samtalslista, inklusive uppgifter om inkommande och utgående samtal. Skadliga appar kan använda informationen för att skicka dina data till andra personer."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Tillåter att appen läser mobilens samtalslista, inklusive uppgifter om inkommande och utgående samtal. Skadliga appar kan använda informationen för att skicka dina data till andra personer."</string>

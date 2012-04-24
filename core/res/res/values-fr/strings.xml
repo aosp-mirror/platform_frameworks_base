@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Votre tablette va s\'éteindre."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Votre téléphone va s\'éteindre."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Voulez-vous éteindre le téléphone ?"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"Redémarrer en mode sans échec"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"Voulez-vous redémarrer en mode sans échec ? Cette opération aura pour effet de désactiver toutes les applications tierces que vous avez installées. Elles seront réactivées au prochain redémarrage."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Récentes"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Aucune application récente"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Options de la tablette"</string>
@@ -342,11 +340,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Permet à l\'application d\'envoyer des diffusions \"persistantes\", qui perdurent après la fin de la diffusion. Des applications malveillantes peuvent ainsi ralentir la tablette ou la rendre instable en l\'obligeant à utiliser trop de mémoire."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Permet à l\'application d\'envoyer des diffusions \"persistantes\", qui perdurent une fois la diffusion terminée. Des applications malveillantes peuvent ainsi ralentir le téléphone ou le rendre instable en l\'obligeant à utiliser trop de mémoire."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"Accès aux données des contacts"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Permet à l\'application de lire toutes les coordonnées (adresses) de vos contacts qui sont stockées sur votre tablette. Des applications malveillantes peuvent exploiter cette fonctionnalité pour envoyer ces coordonnées à d\'autres personnes."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Permet à l\'application de lire toutes les coordonnées (adresses) de vos contacts qui sont stockées sur votre téléphone. Des applications malveillantes peuvent exploiter cette fonctionnalité pour envoyer ces coordonnées à d\'autres personnes."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"Édition des données d\'un contact"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Permet à l\'application de modifier les coordonnées (adresses) de vos contacts qui sont stockées sur votre tablette. Des applications malveillantes peuvent exploiter cette fonctionnalité pour effacer ou modifier ces coordonnées."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Permet à l\'application de modifier les coordonnées (adresses) de vos contacts qui sont stockées sur votre téléphone. Des applications malveillantes peuvent exploiter cette fonctionnalité pour effacer ou modifier ces coordonnées."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"lire le journal d\'appels"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Permet à l\'application de lire le journal d\'appels de votre tablette, y compris les données relatives aux appels entrants et sortants. Des applications malveillantes peuvent utiliser cette fonctionnalité pour envoyer vos données à des tiers."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Permet à l\'application de lire le journal d\'appels de votre téléphone, y compris les données relatives aux appels entrants et sortants. Des applications malveillantes peuvent utiliser cette fonctionnalité pour envoyer vos données à des tiers."</string>
@@ -742,14 +744,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"caractère"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"mot"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"lien"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"ligne"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Échec du test usine"</string>

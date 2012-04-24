@@ -342,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Ivumela ukuthi insiza ithumele ukusakaza okunamathelayo, okusalayo emva kokuba ukusakazwa sekuphelile. Izinsiza ezinobungozi zingenzaa amakhompyutha epeni ukuthi ahambe kancane noma angasebenzi kahle ngokuthi asebenzise imemori enkulu kakhulu."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Ivumela ukuthi insiza ithumele ukusakaza okunamathelayo, okusalayo emva kokuba ukusakazwa sekuphelile. Izinsiza ezinobungozi zingenzaa amakhompyutha epeni ukuthi ahambe kancane noma angasebenzi kahle ngokuthi asebenzise imemori enkulu kakhulu."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"funda idatha yothintana naye"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Ivumela insiza ukuthi ifunde wonke amakheli oxhumana nabo agcinwe ekhompyutheni yakho yepeni. Izinsiza ezinobungozi zingasebenzisa lokhu ukuthumela imininingwane yakho kwabanye abantu."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Ivumela insiza ukuthi ifunde wonke amakheli oxhumana nabo gcinwe ocingweni lwakho. Izinsiza ezinobungozi zingasebenzisa lokhu ukuthumela imininingwane yakho kwabanye abantu."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"bhala idatha yothintana naye"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Ivumela insiza ukuthi iguqule imininingwane yekheli lokuxhumana eligcinwe ekhompyutheni yakho yepeni. Izinsiza ezinobungozi zingasebenzisa lokhu ukususa noma ziguqule ulwazi lwakho lokuxhuana."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Ivumela insiza ukuthi iguqule imininingwane yekheli lokuxhumana eligcinwe ocingweni lwakho. Izinsiza ezinobungozi zingasebenzisa lokhu ukususa noma ziguqule ulwazi lwakho lokuxhuana."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"funda irekhodi lamakholi"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Ivumela uhlelo lokusebenza ukufunda irekhodi lamakholi lethubhulethi yakho, kufaka phakathi idatha mayelana namakholi angenayo naphumayo. Izinhlelo zikusebenza ezingalungile zingasebenzisa lokhu ukuthumela idatha kwabanye abantu."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Ivumela uhlelo lokusebenza ukufunda irekhodi lamakholi akho, kufaka phakathi idatha mayelana namakholi aphumayo nangenayo. Izinhlelo zokusebenza ezingalungile zingasebenzisa lokhu ukuthumela idatha kwabanye abantu."</string>

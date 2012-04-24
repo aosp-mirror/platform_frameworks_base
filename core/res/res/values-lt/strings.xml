@@ -342,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Leidžiama programai siųsti užsifiksuojančias transliacijas, kurios išlieka pasibaigus transliacijai. Kenkėjiškos programos gali sulėtinti planšetinį kompiuterį ar padaryti jį nestabilų versdamos naudoti per daug atminties."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Leidžiama programai siųsti užsifiksuojančias transliacijas, kurios išlieka pasibaigus transliacijai. Kenkėjiškos programos gali sulėtinti telefoną ar padaryti jį nestabilų versdamos jį naudoti per daug atminties."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"skaityti adresato duomenis"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Leidžiama programai skaityti visus kontaktinius (adresų) duomenis, saugomus planšetiniame kompiuteryje. Kenkėjiškos programos gali tai naudoti, kad siųstų jūsų duomenis kitiems žmonėms."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Leidžiama programai skaityti visus kontaktinius (adresų) duomenis, saugomus telefone. Kenkėjiškos programos gali tai naudoti, kad siųstų jūsų duomenis kitiems žmonėms."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"rašyti adresatų duomenis"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Leidžiama programai keisti planšetiniame kompiuteryje saugomus kontaktinius (adreso) duomenis. Kenkėjiškos programos gali tai naudoti, kad ištrintų ar pakeistų jūsų kontaktinius duomenis."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Leidžiama programai keisti telefone saugomus kontaktinius (adreso) duomenis. Kenkėjiškos programos gali tai naudoti, kad ištrintų ar pakeistų jūsų kontaktinius duomenis."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"skaityti skambučių žurnalą"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Programai leidžiama skaityti planšetinio kompiuterio skambučių žurnalą, įskaitant duomenis apie gaunamus ir siunčiamus skambučius. Kenkėjiškos programos tai gali naudoti, kad išsiųstų jūsų duomenis kitiems žmonėms."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Programai leidžiama skaityti telefono skambučių žurnalą, įskaitant duomenis apie gaunamus ir siunčiamus skambučius. Kenkėjiškos programos tai gali naudoti, kad išsiųstų jūsų duomenis kitiems žmonėms."</string>

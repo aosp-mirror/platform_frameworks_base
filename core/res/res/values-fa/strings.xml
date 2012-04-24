@@ -203,10 +203,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"به برنامه اجازه می‎دهد تا پیامهای MMS را دریافت و پردازش کند. برنامه‎های مخرب پیامهای شما را کنترل می‎کنند یا بدون نشان دادن آنها به شما آنها را پاک می‎کنند."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"دریافت پخش های اضطراری"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"به برنامه اجازه می‎دهد تا پیامهای پخش اضطراری را دریافت و پردازش کند. این مجوز فقط برای برنامه‎های سیستم در دسترس است."</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"خواندن پیام‌های پخش سلولی"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"به برنامه اجازه می‎دهد پیامهای پخش سلولی دستگاه شما را بخواند. هشدارهای پخش سلولی در برخی از موقعیت‌های مکانی تحویل داده می‎شوند تا موقعیت‌های اضطراری را به شما اعلام کنند. وقتی پخش سلولی دریافت می‎شود، ممکن است برنامه‎های مخرب در عملکرد یا کارکرد دستگاه شما اختلال ایجاد کنند."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"ارسال پیامک ها"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"به برنامه اجازه می‎دهد پیامهای کوتاه ارسال کند. ممکن است برنامه‎های مخرب با ارسال پیام بدون تایید شما برای شما هزینه داشته باشند."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"ارسال پیامک بدون تأیید"</string>
@@ -225,10 +223,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"به برنامه اجازه می‎دهد تا کارها را به پیش زمینه و پس زمینه منتقل کند. برنامه‎های مخرب می‎توانند بدون کنترل به اجبار خود را به جلو منتقل کنند."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"متوقف کردن برنامه‎های در حال اجرا"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"به برنامه اجازه می‎دهد تا کارها را حذف کند و برنامه‎های آنها را متوقف کند. برنامه‎های مخرب می‌توانند در اجرای برنامه‎های دیگر اختلال ایجاد ‎کنند."</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"شروع هر نوع فعالیت"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"به برنامه اجازه می‎دهد هر فعالیتی را شروع کند بدون اینکه وضعیت صادرشده یا حفاظت با مجوز در نظر گرفته شود."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"تنظیم سازگاری با صفحه نمایش"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"به برنامه کاربردی اجازه کنترل حالت سازگاری صفحه نمایش برای برنامه‌های دیگر را می‌دهد. برنامه‌های خرابکار ممکن است باعث کارکرد نادرست دیگر برنامه‌ها شوند."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"فعال کردن عیب‌یابی برنامه"</string>
@@ -346,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"به برنامه اجازه می‎دهد تا پخشهای ماندگار را که پس از اتمام پخش باقی می‎مانند ارسال شوند. برنامه‎های مخرب می‎توانند با استفاده بیش از حد از حافظه وضعیت آن را ناپایدار سازند یا باعث کند شدن رایانه لوحی شوند."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"به برنامه اجازه می‎دهد تا پخشهای ماندگار را که پس از اتمام پخش باقی می‎مانند ارسال کند. برنامه‎های مخرب می‎توانند با استفاده بیش از حد از حافظه تلفن را کند یا ناپایدار کنند."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"خواندن اطلاعات تماس"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"به برنامه اجازه می‎دهد همه داده‎های مخاطب را که در رایانه لوحی شما ذخیره شده بخواند. برنامه‎های مخرب می‎توانند از آن استفاده کنند و داده‎های شما را برای اشخاص دیگر ارسال کنند."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"به برنامه اجازه می‎دهد تا همه داده‎های مخاطب (آدرس) را بخواند. برنامه‎های مخرب می‎توانند از آن استفاده کنند تا داده‎های شما را به افراد دیگر بفرستند."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"نوشتن اطلاعات تماس"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"به برنامه اجازه می‎دهد داده‎های مخاطب ذخیره شده در رایانه لوحی را تغییر دهد. برنامه‎های مخرب می‎توانند از آن استفاده کنند تا داده‎های تماس شما را تغییر دهند یا پاک کنند."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"به برنامه اجازه می‎دهد تا داده‎های مخاطب (آدرس) را که در تلفن ذخیره شده تغییر دهد. برنامه‎های مخرب می‎توانند از این استفاده کنند تا داده‎های تماس شما را پاک کنند یا تغییر دهند."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"خواندن گزارش تماس"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"به برنامه اجازه می‌دهد گزارشات تماس رایانه لوحی شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را بخواند. برنامه‌های مخرب ممکن است از این ویژگی برای ارسال داده‌های شما به دیگران استفاده کنند."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"به برنامه اجازه می‌دهد گزارشات تماس تلفنی شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را بخواند. برنامه‌های مخرب ممکن است از این ویژگی برای ارسال داده‌های شما به دیگران استفاده کنند."</string>

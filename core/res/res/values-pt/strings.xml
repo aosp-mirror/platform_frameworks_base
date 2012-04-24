@@ -203,10 +203,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Permite que o aplicativo receba e processe mensagens MMS. Aplicativos maliciosos podem monitorar suas mensagens ou excluí-las sem mostrá-las a você."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"receber transmissões de emergência"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Permite que o aplicativo receba e processe mensagens de transmissão de emergência. Esta permissão só está disponível para aplicativos do sistema."</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"ler mensagens de difusão celular"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite que o aplicativo leia mensagens de difusão celular recebidas por seu dispositivo. Alertas de difusão celular são recebidos em alguns locais para avisar você de situações de emergência. Aplicativos maliciosos podem interferir no desempenho ou funcionamento de seu dispositivo quando uma difusão celular de emergência é recebida."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"enviar mensagens SMS"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Permite que o aplicativo envie mensagens SMS. Aplicativos maliciosos podem gerar gastos ao enviar mensagens sem sua confirmação."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"enviar mensagens SMS sem confirmação"</string>
@@ -225,10 +223,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permite que o aplicativo mova tarefas para o primeiro plano e para o plano de fundo. Aplicativos maliciosos podem forçar-se para a primeiro plano sem que você tenha controle sobre a ação."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"parar os aplicativos em execução"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Permite que um aplicativo remova tarefas e elimine seus aplicativos. Aplicativos maliciosos podem interferir no comportamento de outros aplicativos."</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"iniciar qualquer atividade"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Permite que o aplicativo inicie qualquer atividade, independentemente da permissão ou do estado exportado."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"definir a compatibilidade de tela"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Permite que o aplicativo controle o modo de compatibilidade de tela de outros aplicativos. Aplicativos maliciosos podem interromper o comportamento de outros aplicativos."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"ativar depuração do aplicativo"</string>
@@ -346,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Permite que o aplicativo envie transmissões fixas, que permaneçam depois que a transmissão terminar. Aplicativos maliciosos podem desacelerar ou desestabilizar o tablet, fazendo com que ele utilize muita memória."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Permite que o aplicativo envie transmissões fixas, que permanecem depois que a transmissão termina. Aplicativos maliciosos podem deixar o telefone lento ou instável, fazendo com que ele use muita memória."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"ler dados do contato"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Permite que o aplicativo leia todos os dados dos contatos (endereços) armazenados em seu tablet. Aplicativos maliciosos podem usar este recurso para enviar seus dados para outras pessoas."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Permite que o aplicativo leia todos os dados de contatos (endereço) armazenados em seu telefone. Aplicativos maliciosos podem usar isso para enviar seus dados para outras pessoas."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"gravar dados de contato"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Permite que o aplicativo modifique os dados de contato (endereço) armazenados em seu tablet. Aplicativos maliciosos podem usar esse recurso para apagar ou modificar seus dados de contato."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Permite que o aplicativo modifique os dados de contato (endereço) armazenados em seu telefone. Aplicativos maliciosos podem usar esse recurso para apagar ou modificar seus dados de contato."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"ler registro de chamadas"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Permite que o aplicativo leia o registro de chamadas de seu tablet, incluindo dados sobre chamadas recebidas e efetuadas. Aplicativos maliciosos podem usar esta permissão para enviar seus dados para outras pessoas."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Permite que o aplicativo leia o registro de chamadas de seu telefone, incluindo dados sobre chamadas recebidas e efetuadas. Aplicativos maliciosos podem usar esta permissão para enviar seus dados para outras pessoas."</string>

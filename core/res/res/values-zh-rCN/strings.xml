@@ -203,10 +203,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"允许应用接收和处理彩信。恶意应用可能会监视您的短信，或删除短信而不向您显示。"</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"接收紧急广播"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"允许应用接收和处理紧急广播消息。此权限仅适用于系统应用。"</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"读取小区广播消息"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"允许应用读取您的设备收到的小区广播消息。小区广播提醒是在某些地区发送的，用于发布紧急情况警告。恶意应用可能会在您收到小区紧急广播时干扰您设备的性能或操作。"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"发送短信"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"允许应用发送短信。恶意应用可能会未经您的确认而发送短信，由此产生相关费用。"</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"不经确认直接发送短信"</string>
@@ -225,10 +223,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"允许应用将任务移动到前台和后台。恶意应用可能会不受您的控制，强行让自己处于前台。"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"停止正在运行的应用"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"允许该应用删除任务并终止这些任务的应用。恶意应用可以籍此影响其他应用的行为。"</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"开始任何活动"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"允许该应用开始任何活动（不考虑权限保护或导出状态）。"</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"设置屏幕兼容性"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"允许该应用控制其他应用的屏幕兼容模式。恶意应用可以籍此影响其他应用的行为。"</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"启用应用调试"</string>
@@ -346,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"允许应用发送持久广播，此类广播在结束后仍会保留。恶意应用可能会导致平板电脑使用过多内存，从而使速度变慢或变得不稳定。"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"允许应用发送持久广播，此类广播在结束后仍会保留。恶意应用可能会导致手机使用过多内存，从而使速度变慢或变得不稳定。"</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"读取联系人数据"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"允许应用读取您平板电脑上存储的所有联系人（地址）数据。恶意应用可能借此将您的数据发送给其他人。"</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"允许应用读取您手机上存储的所有联系人（地址）数据。恶意应用可能借此将您的数据发送给其他人。"</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"写入联系数据"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"允许应用读取您平板电脑上存储的联系人（地址）数据。恶意应用可能借此清除或修改您的联系人数据。"</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"允许应用修改您手机上存储的联系人（地址）数据。恶意应用可能借此清除或修改您的联系人数据。"</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"读取通话记录"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"允许该应用读取平板电脑的通话记录，包括有关来电和外拨电话的数据。恶意应用可能会借此将您的数据发送给他人。"</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"允许该应用读取手机的通话记录，包括有关来电和外拨电话的数据。恶意应用可能会借此将您的数据发送给他人。"</string>

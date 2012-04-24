@@ -203,10 +203,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Membenarkan apl untuk menerima dan memproses mesej MMS. Apl hasad boleh memantau mesej anda atau memadamnya tanpa menunjukkannya kepada anda."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"terima siaran kecemasan"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Membenarkan apl untuk menerima dan memproses mesej siaran kecemasan. Kebenaran ini hanya tersedia kepada apl sistem."</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"baca mesej siaran sel"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Membolehkan apl membaca mesej siaran sel yang diterima oleh peranti anda. Isyarat siaran sel dihantar di beberapa lokasi untuk memberi amaran kepada anda tentang situasi kecemasan. Apl hasad boleh mengganggu prestasi atau operasi peranti anda apabila siaran sel kecemasan diterima."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"hantar mesej SMS"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Membenarkan apl untuk menghantar mesej SMS. Apl hasad boleh menyebabkan anda kehilangan wang dengan menghantar mesej tanpa pengesahan anda."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"hantar mesej SMS tanpa pengesahan"</string>
@@ -225,10 +223,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Membenarkan apl untuk memindahkan tugasan ke latar depan dan latar belakang. Apl hasad boleh memaksa diri mereka ke hadapan tanpa kawalan anda."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"hentikan apl yang sedang dijalankan"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Membenarkan apl untuk mengalih keluar tugasan dan melupuskan aplnya. Apl hasad boleh mengganggu tingkah laku apl lain."</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"mulakan sebarang aktiviti"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Membenarkan apl untuk memulakan apa-apa aktiviti, tanpa mengira perlindungan kebenaran atau keadaan eksport."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"tetapkan keserasian skrin"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Membenarkan apl mengawal mod keserasian skrin aplikasi lain. Aplikasi hasad mungkin mematahkan kelakuan aplikasi lain."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"dayakan penyahpepijatan apl"</string>
@@ -346,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Membolehkan apl untuk menghantar siaran melekit, yang kekal selepas siaran berakhir. Apl hasad boleh membuat tablet perlahan atau tidak stabil dengan menyebabkannya menggunakan memori yang terlalu banyak."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Membolehkan apl untuk menghantar siaran melekit, yang kekal selepas siaran berakhir. Apl hasad boleh membuat telefon perlahan atau tidak stabil dengan menyebabkannya menggunakan memori yang terlalu banyak."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"baca data kenalan"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Membenarkan apl untuk membaca semua data kenalan (alamat) yang disimpan pada tablet anda. Apl hasad boleh menggunakannya untuk menghantar data anda kepada orang lain."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Membenarkan apl untuk membaca semua data kenalan (alamat) yang disimpan pada telefon anda. Apl hasad boleh menggunakannya untuk menghantar data anda kepada orang lain."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"tulis data kenalan"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Membenarkan apl untuk mengubah suai data kenalan (alamat) yang disimpan pada tablet anda. Apl hasad boleh menggunakannya untuk memadam atau mengubah suai data kenalan anda."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Membenarkan apl untuk mengubah suai data kenalan (alamat) yang disimpan pada telefon anda. Apl hasad boleh menggunakannya untuk memadam atau mengubah suai data kenalan anda."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"baca log panggilan"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Membenarkan apl membaca log panggilan tablet anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakannya untuk menghantar data anda kepada orang lain."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Membenarkan apl membaca log panggilan telefon anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakannya untuk menghantar data anda kepada orang lain."</string>

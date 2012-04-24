@@ -203,10 +203,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Umožňuje aplikaci přijmout a zpracovat zprávy MMS. Škodlivé aplikace mohou sledovat vaše zprávy nebo je smazat, aniž by se vám zobrazily."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"příjem nouzového vysílání"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Umožňuje aplikaci přijmout a zpracovat zprávy tísňového vysílání. Toto oprávnění je dostupné pouze pro systémové aplikace."</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"čtení zpráv informační služby"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Umožňuje aplikaci číst zprávy informační služby přijaté ve vašem zařízení. Upozornění informační služby jsou v některých oblastech odesílána za účelem varování před mimořádnými událostmi. Škodlivé aplikace mohou narušit výkon či provoz vašeho zařízení během přijímání zpráv informační služby."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"odesílaní zpráv SMS"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Umožňuje aplikaci odesílat zprávy SMS. Škodlivé aplikace vás mohou připravit o peníze odesíláním zpráv bez vašeho svolení."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"posílat zprávy SMS bez potvrzení"</string>
@@ -225,10 +223,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Umožňuje aplikaci přesunout úlohy na popředí nebo pozadí. Škodlivé aplikace mohou vynutit zobrazení na popředí bez vašeho svolení."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"zastavení činnosti aplikací"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Umožňuje aplikaci odstranit úlohy a ukončit jejich aplikace. Škodlivé aplikace mohou narušit chování ostatních aplikací."</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"zahájení libovolné činnosti"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Umožňuje aplikaci zahájit libovolnou aktivitu bez ohledu na ochranu pomocí oprávnění či exportovaný stav."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"nastavit kompatibilitu obrazovky"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Umožňuje aplikaci ovládat režim kompatibility obrazovky v ostatních aplikacích. Škodlivé aplikace mohou narušit chování ostatních aplikací."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"povolení ladění aplikací"</string>
@@ -346,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Umožňuje aplikaci odeslat trvalá vysílání, která přetrvávají i po skončení vysílání. Škodlivé aplikace mohou tablet zpomalit či způsobit jeho nestabilitu, protože bude používat příliš mnoho paměti."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Umožňuje aplikaci odeslat trvalá vysílání, která přetrvávají i po skončení vysílání. Škodlivé aplikace mohou telefon zpomalit či způsobit jeho nestabilitu, protože bude používat příliš mnoho paměti."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"číst data kontaktů"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Umožňuje aplikaci číst všechny kontaktní údaje uložené v tabletu (adresu). Škodlivé aplikace mohou toto oprávnění použít k odeslání údajů jiným lidem."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Umožňuje aplikaci číst všechny kontaktní údaje (adresy) uložené v telefonu. Škodlivé aplikace mohou toto oprávnění použít k odeslání údajů jiným lidem."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"zapisovat data kontaktů"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Umožňuje aplikaci upravit kontaktní údaje (adresy) uložené v tabletu. Škodlivé aplikace mohou toto oprávnění použít k vymazání nebo úpravě kontaktních údajů."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Umožňuje aplikaci upravit kontaktní údaje uložené v telefonu (adresu). Škodlivé aplikace mohou toto oprávnění použít k vymazání nebo úpravě kontaktních údajů."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"číst seznam hovorů"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Umožňuje aplikaci číst seznam hovorů vašeho tabletu, včetně dat o příchozích a odchozích hovorech. Škodlivé aplikace mohou tato data posílat jiným osobám."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Umožňuje aplikaci číst seznam hovorů vašeho telefonu, včetně dat o příchozích a odchozích hovorech. Škodlivé aplikace mohou tato data posílat jiným osobám."</string>

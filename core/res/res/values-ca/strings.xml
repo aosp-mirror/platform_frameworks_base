@@ -342,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Permet que l\'aplicació enviï emissions permanents, que es conserven després de finalitzar l\'emissió. Les aplicacions malicioses poden alentir o desestabilitzar la tauleta si li fan utilitzar massa memòria."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Permet que l\'aplicació enviï emissions permanents, que es conserven després de finalitzar l\'emissió. Les aplicacions malicioses poden alentir o desestabilitzar el telèfon si li fan utilitzar massa memòria."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"llegir dades de contacte"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Permet que l\'aplicació llegeixi totes les dades de contacte (adreces) emmagatzemades a la tauleta. Les aplicacions malicioses poden utilitzar-ho per enviar les teves dades a altres persones."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Permet que l\'aplicació llegeixi totes les dades de contacte (adreces) emmagatzemades al telèfon. Les aplicacions malicioses poden utilitzar-ho per enviar les teves dades a d\'altres persones."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"escriure dades de contacte"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Permet que l\'aplicació modifiqui les dades de contacte (adreça) emmagatzemades a la tauleta. Les aplicacions malicioses poden utilitzar-ho per esborrar o modificar les dades de contacte."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Permet que l\'aplicació modifiqui les dades de contacte (adreça) emmagatzemades al telèfon. Les aplicacions malicioses poden utilitzar-ho per esborrar o per modificar les dades de contacte."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"lectura del registre de trucades"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Permet que l\'aplicació llegeixi el registre de trucades de la teva tauleta, incloses les dades de les trucades entrants i sortints. És possible que les aplicacions malicioses ho utilitzin per enviar les teves dades a altres persones."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Permet que l\'aplicació llegeixi el registre de trucades del teu telèfon, incloses les dades de les trucades entrants i sortints. És possible que les aplicacions malicioses ho utilitzin per enviar les teves dades a altres persones."</string>

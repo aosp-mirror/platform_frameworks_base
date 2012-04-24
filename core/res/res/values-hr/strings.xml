@@ -203,10 +203,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Omogućuje aplikaciji primanje i obradu MMS poruka. Zlonamjerne aplikacije mogu nadzirati vaše poruke ili ih brisati, a da vam ih ne pokažu."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"primanje hitnih odašiljanja"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Omogućuje aplikaciji primanje i obradu poruka hitnih odašiljanja. Ta je dozvola dostupna samo aplikacijama sustava."</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"čitaj poruke koje se emitiraju unutar mobilne mreže"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Omogućuje aplikaciji čitanje poruka emitiranih unutar mobilne mreže koje prima vaš uređaj. Upozorenja koja se emitiraju na području mobilne mreže dostavljaju se na nekim lokacijama kako bi upozorila korisnike na hitne situacije. Zlonamjerne aplikacije mogu ometati izvršavanje ili rad vašeg uređaja kada stigne hitno upozorenje koje se emitira unutar mobilne mreže."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"slanje SMS poruka"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Omogućuje aplikaciji slanje SMS poruka. Zlonamjerne aplikacije mogu vam prouzročiti troškove šaljući poruke bez vašeg znanja."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"slanje SMS poruka bez potvrde"</string>
@@ -225,10 +223,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Omogućuje aplikaciji da premjesti zadatke u prednji plan ili pozadinu. Zlonamjerne aplikacije mogu na silu doći u prednji plan bez vašeg nadzora."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"zaustavljanje pokrenutih aplikacija"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Omogućuje aplikaciji uklanjanje zadataka i uklanjanje njihovih aplikacija. Zlonamjerne aplikacije mogu poremetiti rad drugih aplikacija."</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"započni bilo kakvu aktivnost"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Omogućuje aplikaciji da započne bilo koju aktivnost, bez obzira na zaštitu pomoću dozvola ili stanje izvoza."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"postavljanje kompatibilnosti sa zaslonom"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Aplikaciji omogućuje upravljanje načinom kompatibilnosti aplikacija sa zaslonom. Zlonamjerne aplikacije mogu prekinuti takvo ponašanje ostalih aplikacija."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"omogućavanje rješavanja programskih pogrešaka u aplikaciji"</string>
@@ -346,11 +342,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Omogućuje aplikaciji slanje \"ljepljivih\" emitiranja, koja se zadržavaju nakon što emitiranje završi. Zlonamjerne aplikacije mogu usporiti tabletno računalo ili ga učiniti nestabilnim uzrokujući pretjeranu upotrebu memorije."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Omogućuje aplikaciji slanje \"ljepljivih\" emitiranja, koja se zadržavaju nakon što emitiranje završi. Zlonamjerne aplikacije mogu usporiti telefon ili ga učiniti nestabilnim uzrokujući pretjeranu upotrebu memorije."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"čitanje kontaktnih podataka"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Omogućuje aplikaciji čitanje svih kontaktnih podataka (adresa) pohranjenih na tabletnom računalu. Zlonamjerne aplikacije mogu to upotrijebiti za slanje vaših podataka drugim osobama."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Omogućuje aplikaciji čitanje svih kontaktnih podataka (adresa) pohranjenih na telefonu. Zlonamjerne aplikacije mogu to upotrijebiti za slanje vaših podataka drugim osobama."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"pisanje kontaktnih podataka"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Omogućuje aplikaciji da promijeni kontaktne podatke (adrese) pohranjene na tabletnom računalu. Zlonamjerne aplikacije mogu na taj način izbrisati ili promijeniti vaše kontaktne podatke."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Omogućuje aplikaciji da promijeni kontaktne podatke (adrese) pohranjene na telefonu. Zlonamjerne aplikacije mogu na taj način izbrisati ili promijeniti vaše kontaktne podatke."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"čitanje dnevnika poziva"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Aplikaciji omogućuje čitanje dnevnika poziva vašeg tabletnog računala zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za slanje vaših podataka drugim osobama."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Aplikaciji omogućuje čitanje dnevnika poziva vašeg telefona zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za slanje vaših podataka drugim osobama."</string>

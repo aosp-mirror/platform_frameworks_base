@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"הטבלט שלך יכבה."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"הטלפון שלך יכובה."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"האם ברצונך לבצע כיבוי?"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"אתחל למצב בטוח"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"האם אתה רוצה לאתחל למצב בטוח? פעולה זו תשבית את כל יישומי צד שלישי שהתקנת. הם ישוחזרו לאחר שתאתחל שוב."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"נוצרו לאחרונה"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"אין יישומים אחרונים"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"אפשרויות טאבלט"</string>
@@ -342,11 +340,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"מאפשר ליישום לשלוח שידורים דביקים, אשר נותרים לאחר סיום השידור. יישומים זדוניים עלולים להאט את פעילות הטבלט או להפוך אותה לבלתי יציבה על ידי הגדרת המכשיר לשימוש ביותר מדי זיכרון."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"מאפשר ליישום לשלוח שידורים דביקים, אשר נותרים לאחר סיום השידור. יישומים זדוניים עלולים להאט את פעילות הטלפון או להפוך אותה לבלתי יציבה על ידי הגדרת המכשיר לשימוש ביותר מדי זיכרון."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"קרא נתונים של אנשי קשר"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"מאפשר ליישום לקרוא את כל פרטי הקשר (כתובת) המאוחסנים בטבלט. יישומים זדוניים עלולים להשתמש בכך כדי לשלוח את הנתונים שלך לאנשים אחרים."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"מאפשר ליישום לקרוא את כל פרטי הקשר (כתובת) המאוחסנים בטלפון. יישומים זדוניים עלולים להשתמש בכך כדי לשלוח את הנתונים שלך לאנשים אחרים."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"כתוב נתונים של אנשי קשר"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"מאפשר ליישום לשנות את פרטי הקשר (כתובת) המאוחסנים בטבלט. יישומים זדוניים עלולים להשתמש בכך כדי למחוק או לשנות את פרטי הקשר שלך."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"מאפשר ליישום לשנות את פרטי הקשר (כתובת) המאוחסנים בטלפון. יישומים זדוניים עלולים להשתמש בכך כדי למחוק או לשנות את פרטי הקשר שלך."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"קריאת יומן שיחות"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"מאפשר ליישום לקרוא את יומן השיחות של הטבלט, כולל נתונים על שיחות נכנסות ויוצאות. יישומים זדוניים עלולים לעשות בכך שימוש כדי לשלוח את הנתונים שלך לאנשים אחרים."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"מאפשר ליישום לקרוא את יומן השיחות של הטלפון, כולל נתונים על שיחות נכנסות ויוצאות. יישומים זדוניים עלולים לעשות בכך שימוש כדי לשלוח את הנתונים שלך לאנשים אחרים."</string>
@@ -742,14 +744,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"אבג"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"תו"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"מילה"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"קישור"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"שורה"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"בדיקת היצרן נכשלה"</string>

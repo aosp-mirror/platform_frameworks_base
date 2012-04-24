@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Il tablet verrà spento."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Il telefono verrà spento."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Spegnere?"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"Riavvia in modalità provvisoria"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"Riavviare in modalità provvisoria? Ciò comporterà la disattivazione di tutte le applicazioni di terze parti installate. Verranno ripristinate al prossimo riavvio."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Recenti"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Nessuna applicazione recente."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Opzioni tablet"</string>
@@ -342,11 +340,15 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Consente all\'applicazione di inviare broadcast permanenti, che permangono anche al termine del broadcast. Le applicazioni dannose potrebbero rendere il tablet lento o instabile tramite un uso eccessivo della memoria."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Consente all\'applicazione di inviare broadcast permanenti, che permangono anche al termine del broadcast. Le applicazioni dannose potrebbero rendere il telefono lento o instabile tramite un uso eccessivo della memoria."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"lettura dati di contatto"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"Consente all\'applicazione di leggere tutti i dati di contatto (indirizzi) memorizzati sul tablet. Le applicazioni dannose potrebbero farne uso per inviare i tuoi dati ad altre persone."</string>
-    <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"Consente all\'applicazione di leggere tutti i dati di contatto (indirizzi) memorizzati sul telefono. Le applicazioni dannose potrebbero farne uso per inviare i tuoi dati ad altre persone."</string>
+    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="644616215860933284">"scrittura dati di contatto"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Consente all\'applicazione di modificare i dati di contatto (indirizzi) memorizzati sul tablet. Le applicazioni dannose potrebbero farne uso per cancellare o modificare i tuoi dati di contatto."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Consente all\'applicazione di modificare i dati di contatto (indirizzi) memorizzati sul telefono. Le applicazioni dannose potrebbero farne uso per cancellare o modificare i tuoi dati di contatto."</string>
+    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
+    <skip />
+    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
+    <skip />
     <string name="permlab_readCallLog" msgid="3478133184624102739">"lettura del registro chiamate"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Consente all\'applicazione di leggere il registro chiamate del tablet, inclusi i dati sulle chiamate in arrivo e in uscita. Le applicazioni dannose potrebbero fare uso di questa funzione per inviare dati ad altre persone."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Consente all\'applicazione di leggere il registro chiamate del telefono, inclusi i dati sulle chiamate in arrivo e in uscita. Le applicazioni dannose potrebbero fare uso di questa funzione per inviare dati ad altre persone."</string>
@@ -742,14 +744,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"carattere"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"parola"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"link"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"linea"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Test di fabbrica non riuscito"</string>
