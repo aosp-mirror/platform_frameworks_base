@@ -166,9 +166,17 @@ public class CookieManager {
      * @return True if {@link WebView} instances send and accept cookies for
      *         file scheme URLs
      */
+    // Static for backward compatibility.
     public static boolean allowFileSchemeCookies() {
-        // TODO: indirect this via the WebViewFactoryProvider.Statics interface. http://b/6379925
-        return CookieManagerClassic.allowFileSchemeCookies();
+        return getInstance().allowFileSchemeCookiesImpl();
+    }
+
+    /**
+     * Implements {@link #allowFileSchemeCookies()}
+     * @hide Only for use by WebViewProvider implementations
+     */
+    protected boolean allowFileSchemeCookiesImpl() {
+        throw new MustOverrideException();
     }
 
     /**
@@ -181,8 +189,16 @@ public class CookieManager {
      * Note that calls to this method will have no effect if made after a
      * {@link WebView} or CookieManager instance has been created.
      */
+    // Static for backward compatibility.
     public static void setAcceptFileSchemeCookies(boolean accept) {
-        // TODO: indirect this via the WebViewFactoryProvider.Statics interface. http://b/6379925
-        CookieManagerClassic.setAcceptFileSchemeCookies(accept);
+        getInstance().setAcceptFileSchemeCookiesImpl(accept);
+    }
+
+    /**
+     * Implements {@link #setAcceptFileSchemeCookies(boolean)}
+     * @hide Only for use by WebViewProvider implementations
+     */
+    protected void setAcceptFileSchemeCookiesImpl(boolean accept) {
+        throw new MustOverrideException();
     }
 }
