@@ -1341,7 +1341,7 @@ private NetworkStateTracker makeWimaxStateTracker() {
                         mNetd.removeRoute(ifaceName, r);
                     } catch (Exception e) {
                         // never crash - catch them all
-                        if (DBG) loge("Exception trying to remove a route: " + e);
+                        if (VDBG) loge("Exception trying to remove a route: " + e);
                         return false;
                     }
                 } else {
@@ -1353,7 +1353,7 @@ private NetworkStateTracker makeWimaxStateTracker() {
                     mNetd.removeSecondaryRoute(ifaceName, r);
                 } catch (Exception e) {
                     // never crash - catch them all
-                    if (DBG) loge("Exception trying to remove a route: " + e);
+                    if (VDBG) loge("Exception trying to remove a route: " + e);
                     return false;
                 }
             }
