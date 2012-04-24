@@ -149,11 +149,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private static final boolean ENABLE_INSECURE_STATUS_BAR_EXPAND = true;
 
     /** The stream type that the lock sounds are tied to. */
-    private static final int MASTER_STREAM_TYPE = AudioManager.STREAM_RING;
-    /** Minimum volume for lock sounds, as a ratio of max MASTER_STREAM_TYPE */
-    final float MIN_LOCK_VOLUME = 0.05f;
-    /** Maximum volume for lock sounds, as a ratio of max MASTER_STREAM_TYPE */
-    final float MAX_LOCK_VOLUME = 0.4f;
+    private int mMasterStreamType;
 
     private Context mContext;
     private AlarmManager mAlarmManager;
@@ -1142,24 +1138,12 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             if (mAudioManager == null) {
                 mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
                 if (mAudioManager == null) return;
-                mMasterStreamMaxVolume = mAudioManager.getStreamMaxVolume(MASTER_STREAM_TYPE);
+                mMasterStreamType = mAudioManager.getMasterStreamType();
             }
             // If the stream is muted, don't play the sound
-            if (mAudioManager.isStreamMute(MASTER_STREAM_TYPE)) return;
+            if (mAudioManager.isStreamMute(mMasterStreamType)) return;
 
-            // Adjust the lock sound volume from a minimum of MIN_LOCK_VOLUME to a maximum
-            // of MAX_LOCK_VOLUME, relative to the maximum level of the MASTER_STREAM_TYPE volume.
-            float lockSoundVolume;
-            int masterStreamVolume = mAudioManager.getStreamVolume(MASTER_STREAM_TYPE);
-            if (masterStreamVolume == 0) {
-                return;
-            } else {
-                lockSoundVolume = MIN_LOCK_VOLUME + (MAX_LOCK_VOLUME - MIN_LOCK_VOLUME)
-                        * ((float) masterStreamVolume / mMasterStreamMaxVolume);
-            }
-
-            mLockSoundStreamId = mLockSounds.play(whichSound, lockSoundVolume, lockSoundVolume, 1,
-                    0, 1.0f);
+            mLockSoundStreamId = mLockSounds.play(whichSound, 1.0f, 1.0f, 1, 0, 1.0f);
         }
     }
 

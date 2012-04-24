@@ -241,7 +241,7 @@ public class PowerUI extends SystemUI {
                 if (soundUri != null) {
                     final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
                     if (sfx != null) {
-                        sfx.setStreamType(AudioManager.STREAM_NOTIFICATION);
+                        sfx.setStreamType(AudioManager.STREAM_SYSTEM);
                         sfx.play();
                     }
                 }
