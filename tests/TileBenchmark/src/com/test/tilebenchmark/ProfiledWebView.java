@@ -89,6 +89,11 @@ public class ProfiledWebView extends WebView implements WebViewClassic.PageSwapD
         mLoadTime = 0;
     }
 
+    public void setUseMinimalMemory(boolean minimal) {
+        WebSettingsClassic settings = getWebViewClassic().getSettings();
+        settings.setProperty("use_minimal_memory", minimal ? "true" : "false");
+    }
+
     public void onPageFinished() {
         mLoadTime = System.currentTimeMillis();
     }

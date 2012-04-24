@@ -276,6 +276,22 @@ public class PerformanceTest extends
         }
     }
 
+    public void testMetricsMinimalMemory() {
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mWeb.setUseMinimalMemory(true);
+            }
+        });
+
+        setScrollingTestingMode(true);
+        if (checkMedia() && runTestDirs(SCROLL_TEST_DIRS)) {
+            getInstrumentation().sendStatus(0, mStats.getBundle());
+        } else {
+            getInstrumentation().sendStatus(1, null);
+        }
+    }
+
     private boolean runAnimationTests() {
         for (int doubleBuffer = 0; doubleBuffer <= 1; doubleBuffer++) {
             mDoubleBuffering = doubleBuffer == 1;
