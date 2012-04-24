@@ -15,6 +15,7 @@ import java.io.PrintWriter;
  *
  */
 public class AppWindowAnimator {
+    static final String TAG = "AppWindowAnimator";
 
     final AppWindowToken mAppToken;
     final WindowManagerService mService;
@@ -43,6 +44,8 @@ public class AppWindowAnimator {
     Animation thumbnailAnimation;
     final Transformation thumbnailTransformation = new Transformation();
 
+    static final Animation sDummyAnimation = new DummyAnimation();
+
     public AppWindowAnimator(final WindowManagerService service, final AppWindowToken atoken) {
         mService = service;
         mAppToken = atoken;
@@ -51,7 +54,7 @@ public class AppWindowAnimator {
 
     public void setAnimation(Animation anim, boolean initialized) {
         if (WindowManagerService.localLOGV) Slog.v(
-            WindowManagerService.TAG, "Setting animation in " + this + ": " + anim);
+            TAG, "Setting animation in " + this + ": " + anim);
         animation = anim;
         animating = false;
         animInitialized = initialized;
@@ -78,8 +81,8 @@ public class AppWindowAnimator {
     public void setDummyAnimation() {
         if (animation == null) {
             if (WindowManagerService.localLOGV) Slog.v(
-                WindowManagerService.TAG, "Setting dummy animation in " + this);
-            animation = WindowManagerService.sDummyAnimation;
+                TAG, "Setting dummy animation in " + this);
+            animation = sDummyAnimation;
             animInitialized = false;
         }
     }
@@ -111,7 +114,7 @@ public class AppWindowAnimator {
             if (winAnimator.mAnimLayer > thumbnailLayer) {
                 thumbnailLayer = winAnimator.mAnimLayer;
             }
-            if (WindowManagerService.DEBUG_LAYERS) Slog.v(WindowManagerService.TAG, "Updating layer " + w + ": "
+            if (WindowManagerService.DEBUG_LAYERS) Slog.v(TAG, "Updating layer " + w + ": "
                     + winAnimator.mAnimLayer);
             if (w == mService.mInputMethodTarget && !mService.mInputMethodTargetWaitingAnim) {
                 mService.setInputMethodAnimLayerAdjustment(adj);
@@ -162,14 +165,12 @@ public class AppWindowAnimator {
         transformation.clear();
         final boolean more = animation.getTransformation(currentTime, transformation);
         if (WindowManagerService.DEBUG_ANIM) Slog.v(
-            WindowManagerService.TAG, "Stepped animation in " + this +
-            ": more=" + more + ", xform=" + transformation);
+            TAG, "Stepped animation in " + this + ": more=" + more + ", xform=" + transformation);
         if (!more) {
             animation = null;
             clearThumbnail();
             if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                WindowManagerService.TAG, "Finished animation in " + this +
-                " @ " + currentTime);
+                TAG, "Finished animation in " + this + " @ " + currentTime);
         }
         hasTransformation = more;
         return more;
@@ -180,7 +181,7 @@ public class AppWindowAnimator {
         if (mService.okToDisplay()) {
             // We will run animations as long as the display isn't frozen.
 
-            if (animation == WindowManagerService.sDummyAnimation) {
+            if (animation == sDummyAnimation) {
                 // This guy is going to animate, but not yet.  For now count
                 // it as not animating for purposes of scheduling transactions;
                 // when it is really time to animate, this will be set to
@@ -194,7 +195,7 @@ public class AppWindowAnimator {
                     && animation != null) {
                 if (!animating) {
                     if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                        WindowManagerService.TAG, "Starting animation in " + this +
+                        TAG, "Starting animation in " + this +
                         " @ " + currentTime + ": dw=" + dw + " dh=" + dh
                         + " scale=" + mService.mTransitionAnimationScale
                         + " allDrawn=" + mAppToken.allDrawn + " animating=" + animating);
@@ -247,7 +248,7 @@ public class AppWindowAnimator {
         }
 
         if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                WindowManagerService.TAG, "Animation done in " + this
+                TAG, "Animation done in " + this
                 + ": reportedVisible=" + mAppToken.reportedVisible);
 
         transformation.clear();
@@ -266,7 +267,7 @@ public class AppWindowAnimator {
         final int NW = mAppToken.allAppWindows.size();
         for (int i=0; i<NW; i++) {
             WindowStateAnimator winAnimator = mAppToken.allAppWindows.get(i).mWinAnimator;
-            if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG,
+            if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
                     "performing show on: " + winAnimator);
             winAnimator.performShowLocked();
             isAnimating |= winAnimator.isAnimating();
@@ -300,4 +301,15 @@ public class AppWindowAnimator {
                     pw.println(thumbnailTransformation.toShortString());
         }
     }
+
+    // This is an animation that does nothing: it just immediately finishes
+    // itself every time it is called.  It is used as a stub animation in cases
+    // where we want to synchronize multiple things that may be animating.
+    static final class DummyAnimation extends Animation {
+        @Override
+        public boolean getTransformation(long currentTime, Transformation outTransformation) {
+            return false;
+        }
+    }
+
 }

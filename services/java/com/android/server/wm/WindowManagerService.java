@@ -4111,7 +4111,7 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean runningAppAnimation = false;
 
             if (transit != WindowManagerPolicy.TRANSIT_UNSET) {
-                if (wtoken.mAppAnimator.animation == sDummyAnimation) {
+                if (wtoken.mAppAnimator.animation == AppWindowAnimator.sDummyAnimation) {
                     wtoken.mAppAnimator.animation = null;
                 }
                 if (applyAnimationLocked(wtoken, lp, transit, visible)) {
@@ -6579,16 +6579,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
     }
-
-    // This is an animation that does nothing: it just immediately finishes
-    // itself every time it is called.  It is used as a stub animation in cases
-    // where we want to synchronize multiple things that may be animating.
-    static final class DummyAnimation extends Animation {
-        public boolean getTransformation(long currentTime, Transformation outTransformation) {
-            return false;
-        }
-    }
-    static final Animation sDummyAnimation = new DummyAnimation();
 
     // -------------------------------------------------------------
     // Async Handler

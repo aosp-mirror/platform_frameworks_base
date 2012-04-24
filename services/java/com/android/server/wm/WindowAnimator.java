@@ -130,7 +130,7 @@ public class WindowAnimator {
         for (i=0; i<NAT; i++) {
             final AppWindowAnimator appAnimator = mService.mAppTokens.get(i).mAppAnimator;
             final boolean wasAnimating = appAnimator.animation != null
-                    && appAnimator.animation != WindowManagerService.sDummyAnimation;
+                    && appAnimator.animation != AppWindowAnimator.sDummyAnimation;
             if (appAnimator.stepAnimationLocked(mCurrentTime, mInnerDw, mInnerDh)) {
                 mAnimating = true;
             } else if (wasAnimating) {
@@ -147,7 +147,7 @@ public class WindowAnimator {
         for (i=0; i<NEAT; i++) {
             final AppWindowAnimator appAnimator = mService.mExitingAppTokens.get(i).mAppAnimator;
             final boolean wasAnimating = appAnimator.animation != null
-                    && appAnimator.animation != WindowManagerService.sDummyAnimation;
+                    && appAnimator.animation != AppWindowAnimator.sDummyAnimation;
             if (appAnimator.stepAnimationLocked(mCurrentTime, mInnerDw, mInnerDh)) {
                 mAnimating = true;
             } else if (wasAnimating) {
