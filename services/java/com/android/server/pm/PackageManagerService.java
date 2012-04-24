@@ -53,6 +53,7 @@ import android.content.ServiceConnection;
 import android.content.IntentSender.SendIntentException;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
@@ -116,7 +117,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -128,7 +128,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -136,9 +135,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
 
 import libcore.io.ErrnoException;
 import libcore.io.IoUtils;
@@ -5133,13 +5129,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             final Uri packageURI, final IPackageInstallObserver observer, final int flags,
             final String installerPackageName) {
         installPackageWithVerification(packageURI, observer, flags, installerPackageName, null,
-                null);
+                null, null);
     }
 
     @Override
     public void installPackageWithVerification(Uri packageURI, IPackageInstallObserver observer,
             int flags, String installerPackageName, Uri verificationURI,
-            ManifestDigest manifestDigest) {
+            ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES, null);
 
         final int uid = Binder.getCallingUid();
@@ -5157,7 +5153,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         msg.obj = new InstallParams(packageURI, observer, filteredFlags, installerPackageName,
-                verificationURI, manifestDigest);
+                verificationURI, manifestDigest, encryptionParams);
         mHandler.sendMessage(msg);
     }
 
@@ -5560,22 +5556,27 @@ public class PackageManagerService extends IPackageManager.Stub {
     class InstallParams extends HandlerParams {
         final IPackageInstallObserver observer;
         int flags;
-        final Uri packageURI;
+
+        private final Uri mPackageURI;
         final String installerPackageName;
         final Uri verificationURI;
         final ManifestDigest manifestDigest;
         private InstallArgs mArgs;
         private int mRet;
+        private File mTempPackage;
+        final ContainerEncryptionParams encryptionParams;
 
         InstallParams(Uri packageURI,
                 IPackageInstallObserver observer, int flags,
-                String installerPackageName, Uri verificationURI, ManifestDigest manifestDigest) {
-            this.packageURI = packageURI;
+                String installerPackageName, Uri verificationURI, ManifestDigest manifestDigest,
+                ContainerEncryptionParams encryptionParams) {
+            this.mPackageURI = packageURI;
             this.flags = flags;
             this.observer = observer;
             this.installerPackageName = installerPackageName;
             this.verificationURI = verificationURI;
             this.manifestDigest = manifestDigest;
+            this.encryptionParams = encryptionParams;
         }
 
         private int installLocationPolicy(PackageInfoLite pkgLite, int flags) {
@@ -5655,16 +5656,51 @@ public class PackageManagerService extends IPackageManager.Stub {
                     lowThreshold = dsm.getMemoryLowThreshold();
                 }
 
-                // Remote call to find out default install location
                 try {
-                    mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
+                    mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, mPackageURI,
                             Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    pkgLite = mContainerService.getMinimalPackageInfo(packageURI, flags,
-                            lowThreshold);
-                } finally {
-                    mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                }
 
+                    final File packageFile;
+                    if (encryptionParams != null || !"file".equals(mPackageURI.getScheme())) {
+                        ParcelFileDescriptor out = null;
+
+                        mTempPackage = createTempPackageFile(mDrmAppPrivateInstallDir);
+                        if (mTempPackage != null) {
+                            try {
+                                out = ParcelFileDescriptor.open(mTempPackage,
+                                        ParcelFileDescriptor.MODE_READ_WRITE);
+                            } catch (FileNotFoundException e) {
+                                Slog.e(TAG, "Failed to create temporary file for : " + mPackageURI);
+                            }
+
+                            // Make a temporary file for decryption.
+                            ret = mContainerService
+                                    .copyResource(mPackageURI, encryptionParams, out);
+
+                            packageFile = mTempPackage;
+
+                            FileUtils.setPermissions(packageFile.getAbsolutePath(),
+                                    FileUtils.S_IRUSR | FileUtils.S_IWUSR | FileUtils.S_IROTH,
+                                    -1, -1);
+                        } else {
+                            packageFile = null;
+                        }
+                    } else {
+                        packageFile = new File(mPackageURI.getPath());
+                    }
+
+                    if (packageFile != null) {
+                        // Remote call to find out default install location
+                        pkgLite = mContainerService.getMinimalPackageInfo(
+                                packageFile.getAbsolutePath(), flags, lowThreshold);
+                    }
+                } finally {
+                    mContext.revokeUriPermission(mPackageURI,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                }
+            }
+
+            if (ret == PackageManager.INSTALL_SUCCEEDED) {
                 int loc = pkgLite.recommendedInstallLocation;
                 if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_LOCATION) {
                     ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
@@ -5708,8 +5744,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final int requiredUid = mRequiredVerifierPackage == null ? -1
                         : getPackageUid(mRequiredVerifierPackage, 0);
                 if (requiredUid != -1 && isVerificationEnabled()) {
-                    final Intent verification = new Intent(Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
-                    verification.setDataAndType(packageURI, PACKAGE_MIME_TYPE);
+                    final Intent verification = new Intent(
+                            Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
+                    verification.setDataAndType(getPackageUri(), PACKAGE_MIME_TYPE);
                     verification.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
                     final List<ResolveInfo> receivers = queryIntentReceivers(verification, null,
@@ -5812,6 +5849,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (mArgs != null) {
                 processPendingInstall(mArgs, mRet);
             }
+
+            if (mTempPackage != null) {
+                if (!mTempPackage.delete()) {
+                    Slog.w(TAG, "Couldn't delete temporary file: "
+                            + mTempPackage.getAbsolutePath());
+                }
+            }
         }
 
         @Override
@@ -5822,6 +5866,14 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         public boolean isForwardLocked() {
             return (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
+        }
+
+        public Uri getPackageUri() {
+            if (mTempPackage != null) {
+                return Uri.fromFile(mTempPackage);
+            } else {
+                return mPackageURI;
+            }
         }
     }
 
@@ -6037,8 +6089,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         boolean created = false;
 
         FileInstallArgs(InstallParams params) {
-            super(params.packageURI, params.observer, params.flags, params.installerPackageName,
-                    params.manifestDigest);
+            super(params.getPackageUri(), params.observer, params.flags,
+                    params.installerPackageName, params.manifestDigest);
         }
 
         FileInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath) {
@@ -6128,7 +6180,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             try {
                 mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
                         Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                ret = imcs.copyResource(packageURI, out);
+                ret = imcs.copyResource(packageURI, null, out);
             } finally {
                 IoUtils.closeQuietly(out);
                 mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -6315,8 +6367,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         String libraryPath;
 
         AsecInstallArgs(InstallParams params) {
-            super(params.packageURI, params.observer, params.flags, params.installerPackageName,
-                    params.manifestDigest);
+            super(params.getPackageUri(), params.observer, params.flags,
+                    params.installerPackageName, params.manifestDigest);
         }
 
         AsecInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath,
