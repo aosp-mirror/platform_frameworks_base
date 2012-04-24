@@ -185,6 +185,8 @@ public class AppWindowAnimator {
                 // it as not animating for purposes of scheduling transactions;
                 // when it is really time to animate, this will be set to
                 // a real animation and the next call will execute normally.
+                hasTransformation = true;
+                transformation.setAlpha(mAppToken.reportedVisible ? 1 : 0);
                 return false;
             }
 
