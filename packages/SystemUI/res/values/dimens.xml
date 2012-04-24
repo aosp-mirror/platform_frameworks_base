@@ -72,7 +72,7 @@
     <dimen name="status_bar_icon_padding">0dp</dimen>
 
     <!-- thickness (height) of dividers between each notification row -->
-    <dimen name="notification_divider_height">4dp</dimen>
+    <dimen name="notification_divider_height">2dp</dimen>
 
     <!-- Notification drawer tuning parameters (phone UI) -->
     <!-- Initial velocity of the shade when expanding on its own -->

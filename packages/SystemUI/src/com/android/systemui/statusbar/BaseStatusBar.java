@@ -436,6 +436,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected  boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
+        int rowHeight =
+                mContext.getResources().getDimensionPixelSize(R.dimen.notification_height);
         int minHeight =
                 mContext.getResources().getDimensionPixelSize(R.dimen.notification_min_height);
         int maxHeight =
@@ -462,7 +464,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
             expandable = Boolean.TRUE;
         } else {
-            lp.height = minHeight;
+            lp.height = rowHeight;
         }
         row.setLayoutParams(lp);
         row.setTag(R.id.expandable_tag, expandable);
