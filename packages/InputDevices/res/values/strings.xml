@@ -11,4 +11,25 @@
 
     <!-- German keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_german_label">German</string>
+
+    <!-- French keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_french_label">French</string>
+
+    <!-- Canadian French keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_french_ca_label">French (Canada)</string>
+
+    <!-- Russian keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_russian_label">Russian</string>
+
+    <!-- Russian (Apple style) keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_russian_apple_label">Russian, Apple</string>
+
+    <!-- Spanish keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_spanish_label">Spanish</string>
+
+    <!-- Swiss French keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_swiss_french_label">Swiss French</string>
+
+    <!-- Swiss German keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_swiss_german_label">Swiss German</string>
 </resources>

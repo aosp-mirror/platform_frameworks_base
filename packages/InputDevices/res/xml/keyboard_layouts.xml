@@ -11,4 +11,32 @@
     <keyboard-layout android:name="keyboard_layout_german"
             android:label="@string/keyboard_layout_german_label"
             android:kcm="@raw/keyboard_layout_german" />
+
+    <keyboard-layout android:name="keyboard_layout_french"
+            android:label="@string/keyboard_layout_french_label"
+            android:kcm="@raw/keyboard_layout_french" />
+
+    <keyboard-layout android:name="keyboard_layout_french_ca"
+            android:label="@string/keyboard_layout_french_ca_label"
+            android:kcm="@raw/keyboard_layout_french_ca" />
+
+    <keyboard-layout android:name="keyboard_layout_russian"
+            android:label="@string/keyboard_layout_russian_label"
+            android:kcm="@raw/keyboard_layout_russian" />
+
+    <keyboard-layout android:name="keyboard_layout_russian_apple"
+            android:label="@string/keyboard_layout_russian_apple_label"
+            android:kcm="@raw/keyboard_layout_russian_apple" />
+
+    <keyboard-layout android:name="keyboard_layout_spanish"
+            android:label="@string/keyboard_layout_spanish_label"
+            android:kcm="@raw/keyboard_layout_spanish" />
+
+    <keyboard-layout android:name="keyboard_layout_swiss_french"
+            android:label="@string/keyboard_layout_swiss_french_label"
+            android:kcm="@raw/keyboard_layout_swiss_french" />
+
+    <keyboard-layout android:name="keyboard_layout_swiss_german"
+            android:label="@string/keyboard_layout_swiss_german_label"
+            android:kcm="@raw/keyboard_layout_swiss_german" />
 </keyboard-layouts>
