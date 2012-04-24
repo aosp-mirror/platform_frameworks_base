@@ -390,10 +390,10 @@ class WindowStateAnimator {
 
     // This must be called while inside a transaction.
     boolean commitFinishDrawingLocked(long currentTime) {
-        //Slog.i(TAG, "commitFinishDrawingLocked: " + mSurface);
         if (mDrawState != COMMIT_DRAW_PENDING) {
             return false;
         }
+        //Slog.i(TAG, "commitFinishDrawingLocked: Draw pending. " + mSurface);
         mDrawState = READY_TO_SHOW;
         final boolean starting = mWin.mAttrs.type == TYPE_APPLICATION_STARTING;
         final AppWindowToken atoken = mWin.mAppToken;
@@ -515,7 +515,8 @@ class WindowStateAnimator {
 
         @Override
         public String toString() {
-            return "Surface " + mName + ": shown=" + mShown + " layer=" + mLayer
+            return "Surface " + Integer.toHexString(System.identityHashCode(this)) + " "
+                    + mName + ": shown=" + mShown + " layer=" + mLayer
                     + " alpha=" + mSurfaceTraceAlpha + " " + mPosition.x + "," + mPosition.y
                     + " " + mSize.x + "x" + mSize.y;
         }
