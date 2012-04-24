@@ -24,7 +24,9 @@ import android.graphics.Insets;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.LogPrinter;
 import android.util.Pair;
+import android.util.Printer;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -219,7 +221,6 @@ public class GridLayout extends ViewGroup {
 
     // Misc constants
 
-    static final String TAG = GridLayout.class.getName();
     static final int MAX_SIZE = 100000;
     static final int DEFAULT_CONTAINER_MARGIN = 0;
     static final int UNINITIALIZED_HASH = 0;
@@ -251,6 +252,7 @@ public class GridLayout extends ViewGroup {
     int alignmentMode = DEFAULT_ALIGNMENT_MODE;
     int defaultGap;
     int lastLayoutParamsHashCode = UNINITIALIZED_HASH;
+    Printer printer = new LogPrinter(Log.DEBUG, getClass().getName());
 
     // Constructors
 
@@ -565,6 +567,29 @@ public class GridLayout extends ViewGroup {
         horizontalAxis.setOrderPreserved(columnOrderPreserved);
         invalidateStructure();
         requestLayout();
+    }
+
+    /**
+     * Return the printer that will log diagnostics from this layout.
+     *
+     * @see #setPrinter(android.util.Printer)
+     *
+     * @return the printer associated with this view
+     */
+    public Printer getPrinter() {
+        return printer;
+    }
+
+    /**
+     * Set the printer that will log diagnostics from this layout.
+     * The default value is created by {@link android.util.LogPrinter}.
+     *
+     * @param printer the printer associated with this layout
+     *
+     * @see #getPrinter()
+     */
+    public void setPrinter(Printer printer) {
+        this.printer = printer;
     }
 
     // Static utility methods
@@ -946,8 +971,8 @@ public class GridLayout extends ViewGroup {
             validateLayoutParams();
             lastLayoutParamsHashCode = computeLayoutParamsHashCode();
         } else if (lastLayoutParamsHashCode != computeLayoutParamsHashCode()) {
-            Log.w(TAG, "The fields of some layout parameters were modified in between layout " +
-                    "operations. Check the javadoc for GridLayout.LayoutParams#rowSpec.");
+            printer.println("The fields of some layout parameters were modified in between "
+                    + "layout operations. Check the javadoc for GridLayout.LayoutParams#rowSpec.");
             invalidateStructure();
             consistencyCheck();
         }
@@ -1529,8 +1554,8 @@ public class GridLayout extends ViewGroup {
                     removed.add(arc);
                 }
             }
-            Log.d(TAG, axisName + " constraints: " + arcsToString(culprits) + " are inconsistent; "
-                    + "permanently removing: " + arcsToString(removed) + ". ");
+            printer.println(axisName + " constraints: " + arcsToString(culprits) +
+                    " are inconsistent; permanently removing: " + arcsToString(removed) + ". ");
         }
 
         /*

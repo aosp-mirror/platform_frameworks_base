@@ -28631,6 +28631,7 @@ package android.widget {
     method public int getAlignmentMode();
     method public int getColumnCount();
     method public int getOrientation();
+    method public android.util.Printer getPrinter();
     method public int getRowCount();
     method public boolean getUseDefaultMargins();
     method public boolean isColumnOrderPreserved();
@@ -28640,6 +28641,7 @@ package android.widget {
     method public void setColumnCount(int);
     method public void setColumnOrderPreserved(boolean);
     method public void setOrientation(int);
+    method public void setPrinter(android.util.Printer);
     method public void setRowCount(int);
     method public void setRowOrderPreserved(boolean);
     method public void setUseDefaultMargins(boolean);
