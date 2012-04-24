@@ -54,7 +54,7 @@ public class AppWindowAnimator {
 
     public void setAnimation(Animation anim, boolean initialized) {
         if (WindowManagerService.localLOGV) Slog.v(
-            TAG, "Setting animation in " + this + ": " + anim);
+            TAG, "Setting animation in " + mAppToken + ": " + anim);
         animation = anim;
         animating = false;
         animInitialized = initialized;
@@ -81,7 +81,7 @@ public class AppWindowAnimator {
     public void setDummyAnimation() {
         if (animation == null) {
             if (WindowManagerService.localLOGV) Slog.v(
-                TAG, "Setting dummy animation in " + this);
+                TAG, "Setting dummy animation in " + mAppToken);
             animation = sDummyAnimation;
             animInitialized = false;
         }
@@ -165,12 +165,12 @@ public class AppWindowAnimator {
         transformation.clear();
         final boolean more = animation.getTransformation(currentTime, transformation);
         if (WindowManagerService.DEBUG_ANIM) Slog.v(
-            TAG, "Stepped animation in " + this + ": more=" + more + ", xform=" + transformation);
+            TAG, "Stepped animation in " + mAppToken + ": more=" + more + ", xform=" + transformation);
         if (!more) {
             animation = null;
             clearThumbnail();
             if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                TAG, "Finished animation in " + this + " @ " + currentTime);
+                TAG, "Finished animation in " + mAppToken + " @ " + currentTime);
         }
         hasTransformation = more;
         return more;
@@ -195,7 +195,7 @@ public class AppWindowAnimator {
                     && animation != null) {
                 if (!animating) {
                     if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                        TAG, "Starting animation in " + this +
+                        TAG, "Starting animation in " + mAppToken +
                         " @ " + currentTime + ": dw=" + dw + " dh=" + dh
                         + " scale=" + mService.mTransitionAnimationScale
                         + " allDrawn=" + mAppToken.allDrawn + " animating=" + animating);
@@ -248,7 +248,7 @@ public class AppWindowAnimator {
         }
 
         if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                TAG, "Animation done in " + this
+                TAG, "Animation done in " + mAppToken
                 + ": reportedVisible=" + mAppToken.reportedVisible);
 
         transformation.clear();

@@ -451,9 +451,9 @@ public class WindowAnimator {
         Surface.openTransaction();
 
         try {
-            testWallpaperAndBackgroundLocked();
             updateWindowsAppsAndRotationAnimationsLocked();
             performAnimationsLocked();
+            testWallpaperAndBackgroundLocked();
 
             // THIRD LOOP: Update the surfaces of all windows.
 
