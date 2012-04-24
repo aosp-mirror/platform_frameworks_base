@@ -595,7 +595,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             for (Integer i : mIndexRemoteViews.keySet()) {
                 final RemoteViews v = mIndexRemoteViews.get(i);
                 if (v != null) {
-                    mem += v.estimateBitmapMemoryUsage();
+                    mem += v.estimateMemoryUsage();
                 }
             }
             return mem;
@@ -942,10 +942,6 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
      * which  wouldn't otherwise be possible.
      */
     public void setVisibleRangeHint(int lowerBound, int upperBound) {
-        if (lowerBound < 0 || upperBound < 0) {
-            throw new RuntimeException("Attempted to set invalid range: lowerBound="+lowerBound +
-                    "," + "upperBound="+upperBound);
-        }
         mVisibleWindowLowerBound = lowerBound;
         mVisibleWindowUpperBound = upperBound;
     }

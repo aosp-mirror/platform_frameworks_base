@@ -27831,6 +27831,7 @@ package android.widget {
 
   public class RemoteViews implements android.view.LayoutInflater.Filter android.os.Parcelable {
     ctor public RemoteViews(java.lang.String, int);
+    ctor public RemoteViews(android.widget.RemoteViews, android.widget.RemoteViews);
     ctor public RemoteViews(android.os.Parcel);
     method public void addView(int, android.widget.RemoteViews);
     method public android.view.View apply(android.content.Context, android.view.ViewGroup);
