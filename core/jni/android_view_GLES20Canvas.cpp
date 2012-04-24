@@ -158,9 +158,19 @@ static jint android_view_GLES20Canvas_getStencilSize(JNIEnv* env, jobject clazz)
 // ----------------------------------------------------------------------------
 
 static jint android_view_GLES20Canvas_callDrawGLFunction(JNIEnv* env, jobject clazz,
-        OpenGLRenderer* renderer, Functor *functor) {
+        OpenGLRenderer* renderer, Functor* functor) {
     android::uirenderer::Rect dirty;
     return renderer->callDrawGLFunction(functor, dirty);
+}
+
+static void android_view_GLES20Canvas_detachFunctor(JNIEnv* env,
+        jobject clazz, OpenGLRenderer* renderer, Functor* functor) {
+    renderer->detachFunctor(functor);
+}
+
+static void android_view_GLES20Canvas_attachFunctor(JNIEnv* env,
+        jobject clazz, OpenGLRenderer* renderer, Functor* functor) {
+    renderer->attachFunctor(functor);
 }
 
 static jint android_view_GLES20Canvas_invokeFunctors(JNIEnv* env,
@@ -825,9 +835,9 @@ static JNINativeMethod gMethods[] = {
     { "nIsAvailable",       "()Z",             (void*) android_view_GLES20Canvas_isAvailable },
 
 #ifdef USE_OPENGL_RENDERER
-    { "nFlushCaches",           "(I)V",        (void*) android_view_GLES20Canvas_flushCaches },
-    { "nInitCaches",            "()V",         (void*) android_view_GLES20Canvas_initCaches },
-    { "nTerminateCaches",       "()V",         (void*) android_view_GLES20Canvas_terminateCaches },
+    { "nFlushCaches",       "(I)V",            (void*) android_view_GLES20Canvas_flushCaches },
+    { "nInitCaches",        "()V",             (void*) android_view_GLES20Canvas_initCaches },
+    { "nTerminateCaches",   "()V",             (void*) android_view_GLES20Canvas_terminateCaches },
 
     { "nCreateRenderer",    "()I",             (void*) android_view_GLES20Canvas_createRenderer },
     { "nDestroyRenderer",   "(I)V",            (void*) android_view_GLES20Canvas_destroyRenderer },
@@ -839,7 +849,9 @@ static JNINativeMethod gMethods[] = {
     { "nGetStencilSize",    "()I",             (void*) android_view_GLES20Canvas_getStencilSize },
 
     { "nCallDrawGLFunction", "(II)I",          (void*) android_view_GLES20Canvas_callDrawGLFunction },
-    { "nInvokeFunctors",         "(ILandroid/graphics/Rect;)I",
+    { "nDetachFunctor",      "(II)V",          (void*) android_view_GLES20Canvas_detachFunctor },
+    { "nAttachFunctor",      "(II)V",          (void*) android_view_GLES20Canvas_attachFunctor },
+    { "nInvokeFunctors",     "(ILandroid/graphics/Rect;)I",
             (void*) android_view_GLES20Canvas_invokeFunctors },
 
     { "nSave",              "(II)I",           (void*) android_view_GLES20Canvas_save },

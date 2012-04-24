@@ -59,7 +59,6 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TypedValue;
-import android.view.KeyCharacterMap.FallbackAction;
 import android.view.View.AttachInfo;
 import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
@@ -666,6 +665,18 @@ public final class ViewRootImpl implements ViewParent,
                     mAttachInfo.mHardwareRenderer.isEnabled()) {
                 mAttachInfo.mHardwareRenderer.destroyLayers(mView);
             }
+        }
+    }
+
+    public void attachFunctor(int functor) {
+        if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
+            mAttachInfo.mHardwareRenderer.attachFunctor(mAttachInfo, functor);
+        }
+    }
+
+    public void detachFunctor(int functor) {
+        if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
+            mAttachInfo.mHardwareRenderer.detachFunctor(functor);
         }
     }
 
@@ -4489,8 +4500,8 @@ public final class ViewRootImpl implements ViewParent,
             mHandler.postDelayed(mSendWindowContentChangedAccessibilityEvent,
                     ViewConfiguration.getSendRecurringAccessibilityEventsInterval());
         } else {
-            View newSource = getCommonPredecessor(oldSource, source);
-            mSendWindowContentChangedAccessibilityEvent.mSource = newSource;
+            mSendWindowContentChangedAccessibilityEvent.mSource =
+                    getCommonPredecessor(oldSource, source);
         }
     }
 

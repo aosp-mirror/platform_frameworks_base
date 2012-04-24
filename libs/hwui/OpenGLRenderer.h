@@ -29,6 +29,7 @@
 
 #include <utils/Functor.h>
 #include <utils/RefBase.h>
+#include <utils/SortedVector.h>
 #include <utils/Vector.h>
 
 #include <cutils/compiler.h>
@@ -73,6 +74,8 @@ public:
     virtual void resume();
 
     ANDROID_API status_t invokeFunctors(Rect& dirty);
+    ANDROID_API void detachFunctor(Functor* functor);
+    ANDROID_API void attachFunctor(Functor* functor);
     virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty);
 
     ANDROID_API int getSaveCount() const;
@@ -612,7 +615,7 @@ private:
     // List of rectangles to clear after saveLayer() is invoked
     Vector<Rect*> mLayers;
     // List of functors to invoke after a frame is drawn
-    Vector<Functor*> mFunctors;
+    SortedVector<Functor*> mFunctors;
 
     // Indentity matrix
     const mat4 mIdentity;

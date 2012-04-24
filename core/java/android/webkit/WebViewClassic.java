@@ -2469,7 +2469,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     /**
      * Loads the view data from the input stream. See
-     * {@link #saveViewState(OutputStream)} for more information.
+     * {@link #saveViewState(java.io.OutputStream, ValueCallback)} for more information.
      * @param stream The {@link InputStream} to load from
      */
     public void loadViewState(InputStream stream) {
@@ -5630,6 +5630,13 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
         removeAccessibilityApisFromJavaScript();
         updateHwAccelerated();
+
+        if (mWebView.isHardwareAccelerated()) {
+            int drawGLFunction = nativeGetDrawGLFunction(mNativeClass);
+            if (drawGLFunction != 0) {
+                mWebView.getViewRootImpl().detachFunctor(drawGLFunction);
+            }
+        }
     }
 
     @Override

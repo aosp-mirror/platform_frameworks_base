@@ -437,6 +437,27 @@ public abstract class HardwareRenderer {
     abstract void setSurfaceTexture(HardwareLayer layer, SurfaceTexture surfaceTexture);
 
     /**
+     * Detaches the specified functor from the current functor execution queue.
+     * 
+     * @param functor The native functor to remove from the execution queue.
+     *                
+     * @see HardwareCanvas#callDrawGLFunction(int) 
+     * @see #attachFunctor(android.view.View.AttachInfo, int) 
+     */
+    abstract void detachFunctor(int functor);
+
+    /**
+     * Schedules the specified functor in the functors execution queue.
+     *
+     * @param attachInfo AttachInfo tied to this renderer.
+     * @param functor The native functor to insert in the execution queue.
+     *
+     * @see HardwareCanvas#callDrawGLFunction(int)
+     * @see #detachFunctor(int) 
+     */
+    abstract void attachFunctor(View.AttachInfo attachInfo, int functor);
+
+    /**
      * Initializes the hardware renderer for the specified surface and setup the
      * renderer for drawing, if needed. This is invoked when the ViewAncestor has
      * potentially lost the hardware renderer. The hardware renderer should be
@@ -1202,10 +1223,30 @@ public abstract class HardwareRenderer {
             }
 
             if ((status & DisplayList.STATUS_INVOKE) != 0) {
-                attachInfo.mHandler.removeCallbacks(mFunctorsRunnable);
-                mFunctorsRunnable.attachInfo = attachInfo;
+                scheduleFunctors(attachInfo);
+            }
+        }
+
+        private void scheduleFunctors(View.AttachInfo attachInfo) {
+            mFunctorsRunnable.attachInfo = attachInfo;
+            if (!attachInfo.mHandler.hasCallbacks(mFunctorsRunnable)) {
                 // delay the functor callback by a few ms so it isn't polled constantly
                 attachInfo.mHandler.postDelayed(mFunctorsRunnable, FUNCTOR_PROCESS_DELAY);
+            }
+        }
+
+        @Override
+        void detachFunctor(int functor) {
+            if (mCanvas != null) {
+                mCanvas.detachFunctor(functor);
+            }
+        }
+
+        @Override
+        void attachFunctor(View.AttachInfo attachInfo, int functor) {
+            if (mCanvas != null) {
+                mCanvas.attachFunctor(functor);
+                scheduleFunctors(attachInfo);
             }
         }
 

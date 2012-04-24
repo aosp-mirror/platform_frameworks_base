@@ -347,6 +347,23 @@ public class MessageQueue {
         }
     }
 
+    final boolean hasMessages(Handler h, Runnable r, Object object) {
+        if (h == null) {
+            return false;
+        }
+
+        synchronized (this) {
+            Message p = mMessages;
+            while (p != null) {
+                if (p.target == h && p.callback == r && (object == null || p.obj == object)) {
+                    return true;
+                }
+                p = p.next;
+            }
+            return false;
+        }
+    }
+
     final void removeMessages(Handler h, int what, Object object) {
         if (h == null) {
             return;

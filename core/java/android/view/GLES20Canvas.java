@@ -266,6 +266,20 @@ class GLES20Canvas extends HardwareCanvas {
 
     private static native int nInvokeFunctors(int renderer, Rect dirty);
 
+    @Override
+    public void detachFunctor(int functor) {
+        nDetachFunctor(mRenderer, functor);
+    }
+
+    private static native void nDetachFunctor(int renderer, int functor);
+
+    @Override
+    public void attachFunctor(int functor) {
+        nAttachFunctor(mRenderer, functor);
+    }
+
+    private static native void nAttachFunctor(int renderer, int functor);
+
     ///////////////////////////////////////////////////////////////////////////
     // Memory
     ///////////////////////////////////////////////////////////////////////////

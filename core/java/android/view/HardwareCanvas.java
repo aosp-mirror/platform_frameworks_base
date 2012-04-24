@@ -107,4 +107,26 @@ public abstract class HardwareCanvas extends Canvas {
     public int invokeFunctors(Rect dirty) {
         return DisplayList.STATUS_DONE;
     }
+
+    /**
+     * Detaches the specified functor from the current functor execution queue.
+     *
+     * @param functor The native functor to remove from the execution queue.
+     *
+     * @see #invokeFunctors(android.graphics.Rect)
+     * @see #callDrawGLFunction(int)
+     * @see #detachFunctor(int) 
+     */
+    abstract void detachFunctor(int functor);
+
+    /**
+     * Attaches the specified functor to the current functor execution queue.
+     *
+     * @param functor The native functor to add to the execution queue.
+     *
+     * @see #invokeFunctors(android.graphics.Rect)
+     * @see #callDrawGLFunction(int)
+     * @see #detachFunctor(int) 
+     */
+    abstract void attachFunctor(int functor);
 }

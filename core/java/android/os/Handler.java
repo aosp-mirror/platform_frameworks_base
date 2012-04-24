@@ -550,6 +550,16 @@ public class Handler {
         return mQueue.hasMessages(this, what, object);
     }
 
+    /**
+     * Check if there are any pending posts of messages with callback r in
+     * the message queue.
+     * 
+     * @hide
+     */
+    public final boolean hasCallbacks(Runnable r) {
+        return mQueue.hasMessages(this, r, null);
+    }
+
     // if we can get rid of this method, the handler need not remember its loop
     // we could instead export a getMessageQueue() method... 
     public final Looper getLooper() {
@@ -588,20 +598,20 @@ public class Handler {
         }
     }
 
-    private final Message getPostMessage(Runnable r) {
+    private static Message getPostMessage(Runnable r) {
         Message m = Message.obtain();
         m.callback = r;
         return m;
     }
 
-    private final Message getPostMessage(Runnable r, Object token) {
+    private static Message getPostMessage(Runnable r, Object token) {
         Message m = Message.obtain();
         m.obj = token;
         m.callback = r;
         return m;
     }
 
-    private final void handleCallback(Message message) {
+    private static void handleCallback(Message message) {
         message.callback.run();
     }
 
