@@ -662,29 +662,31 @@ final class AccessibilityInteractionController {
                 ViewGroup parentGroup = (ViewGroup) parent;
                 ChildListForAccessibility children = ChildListForAccessibility.obtain(parentGroup,
                         false);
-                final int childCount = children.getChildCount();
-                for (int i = 0; i < childCount; i++) {
-                    if (outInfos.size() >= MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
-                        children.recycle();
-                        return;
-                    }
-                    View child = children.getChildAt(i);
-                    if (child.getAccessibilityViewId() != current.getAccessibilityViewId()
-                            &&  child.isDisplayedOnScreen()) {
-                        AccessibilityNodeInfo info = null;
-                        AccessibilityNodeProvider provider = child.getAccessibilityNodeProvider();
-                        if (provider == null) {
-                            info = child.createAccessibilityNodeInfo();
-                        } else {
-                            info = provider.createAccessibilityNodeInfo(
-                                    AccessibilityNodeInfo.UNDEFINED);
+                try {
+                    final int childCount = children.getChildCount();
+                    for (int i = 0; i < childCount; i++) {
+                        if (outInfos.size() >= MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
+                            return;
                         }
-                        if (info != null) {
-                            outInfos.add(info);
+                        View child = children.getChildAt(i);
+                        if (child.getAccessibilityViewId() != current.getAccessibilityViewId()
+                                &&  child.isDisplayedOnScreen()) {
+                            AccessibilityNodeInfo info = null;
+                            AccessibilityNodeProvider provider = child.getAccessibilityNodeProvider();
+                            if (provider == null) {
+                                info = child.createAccessibilityNodeInfo();
+                            } else {
+                                info = provider.createAccessibilityNodeInfo(
+                                        AccessibilityNodeInfo.UNDEFINED);
+                            }
+                            if (info != null) {
+                                outInfos.add(info);
+                            }
                         }
                     }
+                } finally {
+                    children.recycle();
                 }
-                children.recycle();
             }
         }
 
@@ -697,32 +699,34 @@ final class AccessibilityInteractionController {
             HashMap<View, AccessibilityNodeInfo> addedChildren =
                 new HashMap<View, AccessibilityNodeInfo>();
             ChildListForAccessibility children = ChildListForAccessibility.obtain(rootGroup, false);
-            final int childCount = children.getChildCount();
-            for (int i = 0; i < childCount; i++) {
-                if (outInfos.size() >= MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
-                    children.recycle();
-                    return;
-                }
-                View child = children.getChildAt(i);
-                if (child.isDisplayedOnScreen()) {
-                    AccessibilityNodeProvider provider = child.getAccessibilityNodeProvider();
-                    if (provider == null) {
-                        AccessibilityNodeInfo info = child.createAccessibilityNodeInfo();
-                        if (info != null) {
-                            outInfos.add(info);
-                            addedChildren.put(child, null);
-                        }
-                    } else {
-                        AccessibilityNodeInfo info = provider.createAccessibilityNodeInfo(
-                               AccessibilityNodeInfo.UNDEFINED);
-                        if (info != null) {
-                            outInfos.add(info);
-                            addedChildren.put(child, info);
+            try {
+                final int childCount = children.getChildCount();
+                for (int i = 0; i < childCount; i++) {
+                    if (outInfos.size() >= MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
+                        return;
+                    }
+                    View child = children.getChildAt(i);
+                    if (child.isDisplayedOnScreen()) {
+                        AccessibilityNodeProvider provider = child.getAccessibilityNodeProvider();
+                        if (provider == null) {
+                            AccessibilityNodeInfo info = child.createAccessibilityNodeInfo();
+                            if (info != null) {
+                                outInfos.add(info);
+                                addedChildren.put(child, null);
+                            }
+                        } else {
+                            AccessibilityNodeInfo info = provider.createAccessibilityNodeInfo(
+                                   AccessibilityNodeInfo.UNDEFINED);
+                            if (info != null) {
+                                outInfos.add(info);
+                                addedChildren.put(child, info);
+                            }
                         }
                     }
                 }
+            } finally {
+                children.recycle();
             }
-            children.recycle();
             if (outInfos.size() < MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
                 for (Map.Entry<View, AccessibilityNodeInfo> entry : addedChildren.entrySet()) {
                     View addedChild = entry.getKey();

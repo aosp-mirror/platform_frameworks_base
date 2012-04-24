@@ -391,8 +391,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      *     {@link View#FOCUS_RIGHT},
      *     {@link View#FOCUS_FORWARD},
      *     {@link View#FOCUS_BACKWARD},
-     *     {@link View#ACCESSIBILITY_FOCUS_IN},
-     *     {@link View#ACCESSIBILITY_FOCUS_OUT},
      *     {@link View#ACCESSIBILITY_FOCUS_FORWARD},
      *     {@link View#ACCESSIBILITY_FOCUS_BACKWARD},
      *     {@link View#ACCESSIBILITY_FOCUS_UP},

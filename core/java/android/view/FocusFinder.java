@@ -17,12 +17,10 @@
 package android.view;
 
 import android.graphics.Rect;
-import android.view.ViewGroup.ChildListForAccessibility;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Stack;
 
 /**
  * The algorithm used for finding the next focusable view in a given direction
@@ -30,7 +28,7 @@ import java.util.Stack;
  */
 public class FocusFinder {
 
-    private static ThreadLocal<FocusFinder> tlFocusFinder =
+    private static final ThreadLocal<FocusFinder> tlFocusFinder =
             new ThreadLocal<FocusFinder>() {
                 @Override
                 protected FocusFinder initialValue() {
@@ -45,14 +43,12 @@ public class FocusFinder {
         return tlFocusFinder.get();
     }
 
-    Rect mFocusedRect = new Rect();
-    Rect mOtherRect = new Rect();
-    Rect mBestCandidateRect = new Rect();
-    SequentialFocusComparator mSequentialFocusComparator = new SequentialFocusComparator();
+    final Rect mFocusedRect = new Rect();
+    final Rect mOtherRect = new Rect();
+    final Rect mBestCandidateRect = new Rect();
+    final SequentialFocusComparator mSequentialFocusComparator = new SequentialFocusComparator();
 
     private final ArrayList<View> mTempList = new ArrayList<View>();
-
-    private Stack<View> mTempStack;
 
     // enforce thread local access
     private FocusFinder() {}
@@ -78,147 +74,114 @@ public class FocusFinder {
      * @return The next focusable view, or null if none exists.
      */
     public View findNextFocusFromRect(ViewGroup root, Rect focusedRect, int direction) {
-        return findNextFocus(root, null, focusedRect, direction);
+        mFocusedRect.set(focusedRect);
+        return findNextFocus(root, null, mFocusedRect, direction);
     }
 
     private View findNextFocus(ViewGroup root, View focused, Rect focusedRect, int direction) {
         if ((direction & View.FOCUS_ACCESSIBILITY) != View.FOCUS_ACCESSIBILITY) {
             return findNextInputFocus(root, focused, focusedRect, direction);
         } else {
-            return findNextAccessibilityFocus(root, focused, direction);
+            return findNextAccessibilityFocus(root, focused, focusedRect, direction);
         }
     }
 
     private View findNextInputFocus(ViewGroup root, View focused, Rect focusedRect, int direction) {
+        View next = null;
         if (focused != null) {
-            // check for user specified next focus
-            View userSetNextFocus = focused.findUserSetNextFocus(root, direction);
-            if (userSetNextFocus != null &&
-                userSetNextFocus.isFocusable() &&
-                (!userSetNextFocus.isInTouchMode() ||
-                 userSetNextFocus.isFocusableInTouchMode())) {
-                return userSetNextFocus;
+            next = findNextUserSpecifiedInputFocus(root, focused, direction);
+        }
+        if (next != null) {
+            return next;
+        }
+        ArrayList<View> focusables = mTempList;
+        try {
+            focusables.clear();
+            root.addFocusables(focusables, direction);
+            if (!focusables.isEmpty()) {
+                next = findNextFocus(root, focused, focusedRect, direction, focusables);
             }
+        } finally {
+            focusables.clear();
+        }
+        return next;
+    }
 
+    private View findNextUserSpecifiedInputFocus(ViewGroup root, View focused, int direction) {
+        // check for user specified next focus
+        View userSetNextFocus = focused.findUserSetNextFocus(root, direction);
+        if (userSetNextFocus != null && userSetNextFocus.isFocusable()
+                && (!userSetNextFocus.isInTouchMode()
+                        || userSetNextFocus.isFocusableInTouchMode())) {
+            return userSetNextFocus;
+        }
+        return null;
+    }
+
+    private View findNextFocus(ViewGroup root, View focused, Rect focusedRect,
+            int direction, ArrayList<View> focusables) {
+        final int directionMasked = (direction & ~View.FOCUS_ACCESSIBILITY);
+        if (focused != null) {
             // fill in interesting rect from focused
-            focused.getFocusedRect(mFocusedRect);
-            root.offsetDescendantRectToMyCoords(focused, mFocusedRect);
+            focused.getFocusedRect(focusedRect);
+            root.offsetDescendantRectToMyCoords(focused, focusedRect);
         } else {
             // make up a rect at top left or bottom right of root
-            switch (direction) {
+            switch (directionMasked) {
                 case View.FOCUS_RIGHT:
                 case View.FOCUS_DOWN:
-                    setFocusTopLeft(root);
+                    setFocusTopLeft(root, focusedRect);
                     break;
                 case View.FOCUS_FORWARD:
                     if (root.isLayoutRtl()) {
-                        setFocusBottomRight(root);
+                        setFocusBottomRight(root, focusedRect);
                     } else {
-                        setFocusTopLeft(root);
+                        setFocusTopLeft(root, focusedRect);
                     }
                     break;
 
                 case View.FOCUS_LEFT:
                 case View.FOCUS_UP:
-                    setFocusBottomRight(root);
+                    setFocusBottomRight(root, focusedRect);
                     break;
                 case View.FOCUS_BACKWARD:
                     if (root.isLayoutRtl()) {
-                        setFocusTopLeft(root);
+                        setFocusTopLeft(root, focusedRect);
                     } else {
-                        setFocusBottomRight(root);
+                        setFocusBottomRight(root, focusedRect);
                     break;
                 }
             }
         }
 
-        ArrayList<View> focusables = mTempList;
-        focusables.clear();
-        root.addFocusables(focusables, direction);
-        if (focusables.isEmpty()) {
-            // The focus cannot change.
-            return null;
+        switch (directionMasked) {
+            case View.FOCUS_FORWARD:
+            case View.FOCUS_BACKWARD:
+                return findNextInputFocusInRelativeDirection(focusables, root, focused, focusedRect,
+                        directionMasked);
+            case View.FOCUS_UP:
+            case View.FOCUS_DOWN:
+            case View.FOCUS_LEFT:
+            case View.FOCUS_RIGHT:
+                return findNextInputFocusInAbsoluteDirection(focusables, root, focused,
+                        focusedRect, directionMasked);
+            default:
+                throw new IllegalArgumentException("Unknown direction: " + directionMasked);
         }
+    }
 
+    private View findNextAccessibilityFocus(ViewGroup root, View focused,
+            Rect focusedRect, int direction) {
+        ArrayList<View> focusables = mTempList;
         try {
-            switch (direction) {
-                case View.FOCUS_FORWARD:
-                case View.FOCUS_BACKWARD:
-                    return findNextInputFocusInRelativeDirection(focusables, root, focused,
-                            focusedRect, direction);
-                case View.FOCUS_UP:
-                case View.FOCUS_DOWN:
-                case View.FOCUS_LEFT:
-                case View.FOCUS_RIGHT:
-                    return findNextInputFocusInAbsoluteDirection(focusables, root, focused,
-                            focusedRect, direction);
-                default:
-                    throw new IllegalArgumentException("Unknown direction: " + direction);
-            }
+            focusables.clear();
+            root.addFocusables(focusables, direction, View.FOCUSABLES_ACCESSIBILITY);
+            View next = findNextFocus(root, focused, focusedRect, direction,
+                    focusables);
+            return next;
         } finally {
             focusables.clear();
         }
-    }
-
-    /**
-     * Find the next view to take accessibility focus in root's descendants,
-     * starting from the view that currently is accessibility focused.
-     *
-     * @param root The root which also contains the focused view.
-     * @param focused The current accessibility focused view.
-     * @param direction Direction to look.
-     * @return The next focusable view, or null if none exists.
-     */
-    private View findNextAccessibilityFocus(ViewGroup root, View focused, int direction) {
-        switch (direction) {
-            case View.ACCESSIBILITY_FOCUS_IN:
-            case View.ACCESSIBILITY_FOCUS_OUT:
-            case View.ACCESSIBILITY_FOCUS_FORWARD:
-            case View.ACCESSIBILITY_FOCUS_BACKWARD: {
-                return findNextHierarchicalAcessibilityFocus(root, focused, direction);
-            }
-            case View.ACCESSIBILITY_FOCUS_LEFT:
-            case View.ACCESSIBILITY_FOCUS_RIGHT:
-            case View.ACCESSIBILITY_FOCUS_UP:
-            case View.ACCESSIBILITY_FOCUS_DOWN: {
-                return findNextDirectionalAccessibilityFocus(root, focused, direction);
-            }
-            default:
-                throw new IllegalArgumentException("Unknown direction: " + direction);
-        }
-    }
-
-    private View findNextHierarchicalAcessibilityFocus(ViewGroup root, View focused,
-            int direction) {
-        View current = (focused != null) ? focused : root;
-        switch (direction) {
-            case View.ACCESSIBILITY_FOCUS_IN: {
-                return findNextAccessibilityFocusIn(current);
-            }
-            case View.ACCESSIBILITY_FOCUS_OUT: {
-                return findNextAccessibilityFocusOut(current);
-            }
-            case View.ACCESSIBILITY_FOCUS_FORWARD: {
-                return findNextAccessibilityFocusForward(current);
-            }
-            case View.ACCESSIBILITY_FOCUS_BACKWARD: {
-                return findNextAccessibilityFocusBackward(current);
-            }
-        }
-        return null;
-    }
-
-    private View findNextDirectionalAccessibilityFocus(ViewGroup root, View focused,
-            int direction) {
-        ArrayList<View> focusables = mTempList;
-        focusables.clear();
-        root.addFocusables(focusables, direction, View.FOCUSABLES_ACCESSIBILITY);
-        Rect focusedRect = getFocusedRect(root, focused, direction);
-        final int inputFocusDirection = getCorrespondingInputFocusDirection(direction);
-        View next = findNextInputFocusInAbsoluteDirection(focusables, root,
-                focused, focusedRect, inputFocusDirection);
-        focusables.clear();
-        return next;
     }
 
     private View findNextInputFocusInRelativeDirection(ArrayList<View> focusables, ViewGroup root,
@@ -241,17 +204,16 @@ public class FocusFinder {
         return focusables.get(count - 1);
     }
 
-    private void setFocusBottomRight(ViewGroup root) {
+    private void setFocusBottomRight(ViewGroup root, Rect focusedRect) {
         final int rootBottom = root.getScrollY() + root.getHeight();
         final int rootRight = root.getScrollX() + root.getWidth();
-        mFocusedRect.set(rootRight, rootBottom,
-                rootRight, rootBottom);
+        focusedRect.set(rootRight, rootBottom, rootRight, rootBottom);
     }
 
-    private void setFocusTopLeft(ViewGroup root) {
+    private void setFocusTopLeft(ViewGroup root, Rect focusedRect) {
         final int rootTop = root.getScrollY();
         final int rootLeft = root.getScrollX();
-        mFocusedRect.set(rootLeft, rootTop, rootLeft, rootTop);
+        focusedRect.set(rootLeft, rootTop, rootLeft, rootTop);
     }
 
     View findNextInputFocusInAbsoluteDirection(ArrayList<View> focusables, ViewGroup root, View focused,
@@ -294,140 +256,6 @@ public class FocusFinder {
         return closest;
     }
 
-    private View findNextAccessibilityFocusIn(View view) {
-        // We have to traverse the full view tree to make sure
-        // we consider views in the order specified by their
-        // parent layout managers since some managers could be
-        // LTR while some could be RTL.
-        if (mTempStack == null) {
-            mTempStack = new Stack<View>();
-        }
-        Stack<View> fringe = mTempStack;
-        fringe.clear();
-        fringe.add(view);
-        while (!fringe.isEmpty()) {
-            View current = fringe.pop();
-            if (current.getAccessibilityNodeProvider() != null) {
-                fringe.clear();
-                return current;
-            }
-            if (current != view && current.includeForAccessibility()) {
-                fringe.clear();
-                return current;
-            }
-            if (current instanceof ViewGroup) {
-                ViewGroup currentGroup = (ViewGroup) current;
-                ChildListForAccessibility children = ChildListForAccessibility.obtain(
-                        currentGroup, true);
-                final int childCount = children.getChildCount();
-                for (int i = childCount - 1; i >= 0; i--) {
-                    fringe.push(children.getChildAt(i));
-                }
-                children.recycle();
-            }
-        }
-        return null;
-    }
-
-    private View findNextAccessibilityFocusOut(View view) {
-        ViewParent parent = view.getParentForAccessibility();
-        if (parent instanceof View) {
-            return (View) parent;
-        }
-        return null;
-    }
-
-    private View findNextAccessibilityFocusForward(View view) {
-        // We have to traverse the full view tree to make sure
-        // we consider views in the order specified by their
-        // parent layout managers since some managers could be
-        // LTR while some could be RTL.
-        View current = view;
-        while (current != null) {
-            ViewParent parent = current.getParent();
-            if (!(parent instanceof ViewGroup)) {
-                return null;
-            }
-            ViewGroup parentGroup = (ViewGroup) parent;
-            // Ask the parent to find a sibling after the current view
-            // that can take accessibility focus.
-            ChildListForAccessibility children = ChildListForAccessibility.obtain(
-                    parentGroup, true);
-            final int fromIndex = children.getChildIndex(current) + 1;
-            final int childCount = children.getChildCount();
-            for (int i = fromIndex; i < childCount; i++) {
-                View child = children.getChildAt(i);
-                View next = null;
-                if (child.getAccessibilityNodeProvider() != null) {
-                    next = child;
-                } else if (child.includeForAccessibility()) {
-                    next = child;
-                } else {
-                    next = findNextAccessibilityFocusIn(child);
-                }
-                if (next != null) {
-                    children.recycle();
-                    return next;
-                }
-            }
-            children.recycle();
-            // Reaching a regarded for accessibility predecessor without
-            // finding a next view to take focus means that at this level
-            // there is no next accessibility focusable sibling.
-            if (parentGroup.includeForAccessibility()) {
-                return null;
-            }
-            // Try asking a predecessor to find a focusable.
-            current = parentGroup;
-        }
-        return null;
-    }
-
-    private View findNextAccessibilityFocusBackward(View view) {
-        // We have to traverse the full view tree to make sure
-        // we consider views in the order specified by their
-        // parent layout managers since some managers could be
-        // LTR while some could be RTL.
-        View current = view;
-        while (current != null) {
-            ViewParent parent = current.getParent();
-            if (!(parent instanceof ViewGroup)) {
-                return null;
-            }
-            ViewGroup parentGroup = (ViewGroup) parent;
-            // Ask the parent to find a sibling after the current view
-            // to take accessibility focus
-            ChildListForAccessibility children = ChildListForAccessibility.obtain(
-                    parentGroup, true);
-            final int fromIndex = children.getChildIndex(current) - 1;
-            for (int i = fromIndex; i >= 0; i--) {
-                View child = children.getChildAt(i);
-                View next = null;
-                if (child.getAccessibilityNodeProvider() != null) {
-                    next = child;
-                } else if (child.includeForAccessibility()) {
-                    next = child;
-                } else {
-                    next = findNextAccessibilityFocusIn(child);
-                }
-                if (next != null) {
-                    children.recycle();
-                    return next;
-                }
-            }
-            children.recycle();
-            // Reaching a regarded for accessibility predecessor without
-            // finding a previous view to take focus means that at this level
-            // there is no previous accessibility focusable sibling.
-            if (parentGroup.includeForAccessibility()) {
-                return null;
-            }
-            // Try asking a predecessor to find a focusable.
-            current = parentGroup;
-        }
-        return null;
-    }
-
     private static View getForwardFocusable(ViewGroup root, View focused,
                                             ArrayList<View> focusables, int count) {
         return (root.isLayoutRtl()) ?
@@ -460,47 +288,6 @@ public class FocusFinder {
             }
         }
         return focusables.get(count - 1);
-    }
-
-    private Rect getFocusedRect(ViewGroup root, View focused, int direction) {
-        Rect focusedRect = mFocusedRect;
-        if (focused != null) {
-            focused.getFocusedRect(focusedRect);
-            root.offsetDescendantRectToMyCoords(focused, focusedRect);
-        } else {
-            switch (direction) {
-                case View.FOCUS_RIGHT:
-                case View.FOCUS_DOWN:
-                    final int rootTop = root.getScrollY();
-                    final int rootLeft = root.getScrollX();
-                    focusedRect.set(rootLeft, rootTop, rootLeft, rootTop);
-                    break;
-
-                case View.FOCUS_LEFT:
-                case View.FOCUS_UP:
-                    final int rootBottom = root.getScrollY() + root.getHeight();
-                    final int rootRight = root.getScrollX() + root.getWidth();
-                    focusedRect.set(rootRight, rootBottom, rootRight, rootBottom);
-                    break;
-            }
-        }
-        return focusedRect;
-    }
-
-    private int getCorrespondingInputFocusDirection(int accessFocusDirection) {
-        switch (accessFocusDirection) {
-            case View.ACCESSIBILITY_FOCUS_LEFT:
-                return View.FOCUS_LEFT;
-            case View.ACCESSIBILITY_FOCUS_RIGHT:
-                return View.FOCUS_RIGHT;
-            case View.ACCESSIBILITY_FOCUS_UP:
-                return View.FOCUS_UP;
-            case View.ACCESSIBILITY_FOCUS_DOWN:
-                return View.FOCUS_DOWN;
-            default:
-                throw new IllegalArgumentException("Cannot map accessiblity focus"
-                        + " direction: " + accessFocusDirection);
-        }
     }
 
     /**

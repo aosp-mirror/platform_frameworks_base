@@ -1622,18 +1622,22 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     @Override
     public void addChildrenForAccessibility(ArrayList<View> childrenForAccessibility) {
-        View[] children = mChildren;
-        final int childrenCount = mChildrenCount;
-        for (int i = 0; i < childrenCount; i++) {
-            View child = children[i];
-            if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE
-                    && (child.mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
-                if (child.includeForAccessibility()) {
-                    childrenForAccessibility.add(child);
-                } else {
-                    child.addChildrenForAccessibility(childrenForAccessibility);
+        ChildListForAccessibility children = ChildListForAccessibility.obtain(this, true);
+        try {
+            final int childrenCount = children.getChildCount();
+            for (int i = 0; i < childrenCount; i++) {
+                View child = children.getChildAt(i);
+                if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE
+                        && (child.mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
+                    if (child.includeForAccessibility()) {
+                        childrenForAccessibility.add(child);
+                    } else {
+                        child.addChildrenForAccessibility(childrenForAccessibility);
+                    }
                 }
             }
+        } finally {
+            children.recycle();
         }
     }
 
@@ -2424,18 +2428,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
         // Let our children have a shot in populating the event.
         ChildListForAccessibility children = ChildListForAccessibility.obtain(this, true);
-        final int childCount = children.getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = children.getChildAt(i);
-            if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
-                handled = child.dispatchPopulateAccessibilityEvent(event);
-                if (handled) {
-                    children.recycle();
-                    return handled;
+        try {
+            final int childCount = children.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                View child = children.getChildAt(i);
+                if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
+                    handled = child.dispatchPopulateAccessibilityEvent(event);
+                    if (handled) {
+                        children.recycle();
+                        return handled;
+                    }
                 }
             }
+        } finally {
+            children.recycle();
         }
-        children.recycle();
         return false;
     }
 
