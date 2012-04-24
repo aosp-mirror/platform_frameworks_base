@@ -139,6 +139,5 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokasyong itinatakda ng GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"I-clear ang lahat ng notification."</string>
     <string name="dreams_dock_launcher" msgid="3541196417659166245">"I-activate ang screen saver"</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (1163547729015390250) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Impormasyon ng app"</string>
 </resources>
