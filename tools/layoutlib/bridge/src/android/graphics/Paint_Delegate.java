@@ -36,6 +36,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Delegate implementing the native methods of android.graphics.Paint
@@ -90,6 +91,8 @@ public class Paint_Delegate {
     private PathEffect_Delegate mPathEffect;
     private MaskFilter_Delegate mMaskFilter;
     private Rasterizer_Delegate mRasterizer;
+
+    private Locale mLocale = Locale.getDefault();
 
 
     // ---- Public Helper methods ----
@@ -253,6 +256,8 @@ public class Paint_Delegate {
 
         return delegate.mFlags;
     }
+
+
 
     @LayoutlibDelegate
     /*package*/ static void setFlags(Paint thisPaint, int flags) {
@@ -904,6 +909,17 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static void native_setTextLocale(int native_object, String locale) {
+        // get the delegate from the native int.
+        Paint_Delegate delegate = sManager.getDelegate(native_object);
+        if (delegate == null) {
+            return;
+        }
+
+        delegate.setTextLocale(locale);
+    }
+
+    @LayoutlibDelegate
     /*package*/ static int native_getTextWidths(int native_object, char[] text, int index,
             int count, float[] widths) {
         // get the delegate from the native int.
@@ -1243,7 +1259,9 @@ public class Paint_Delegate {
         return 0;
     }
 
-
+    private void setTextLocale(String locale) {
+        mLocale = new Locale(locale);
+    }
 
     private static void setFlag(Paint thisPaint, int flagMask, boolean flagValue) {
         // get the delegate from the native int.
@@ -1258,4 +1276,5 @@ public class Paint_Delegate {
             delegate.mFlags &= ~flagMask;
         }
     }
+
 }
