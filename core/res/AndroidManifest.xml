@@ -732,13 +732,21 @@
         android:description="@string/permdesc_expandStatusBar" />
 
     <!-- Allows an application to get information about the currently
-         or recently running tasks: a thumbnail representation of the tasks,
-         what activities are running in it, etc. -->
+         or recently running tasks. -->
     <permission android:name="android.permission.GET_TASKS"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="dangerous"
         android:label="@string/permlab_getTasks"
         android:description="@string/permdesc_getTasks" />
+
+    <!-- Allows an application to get full detailed information about
+         recently running tasks, with full fidelity to the real state.
+         @hide -->
+    <permission android:name="android.permission.GET_DETAILED_TASKS"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature"
+        android:label="@string/permlab_getDetailedTasks"
+        android:description="@string/permdesc_getDetailedTasks" />
 
     <!-- Allows an application to change the Z-order of tasks -->
     <permission android:name="android.permission.REORDER_TASKS"

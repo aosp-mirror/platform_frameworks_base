@@ -542,6 +542,13 @@
         information about currently and recently running tasks. Malicious apps may 
         discover private information about other apps.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50] -->
+    <string name="permlab_getDetailedTasks">retrieve details of running apps</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_getDetailedTasks">Allows the app to retrieve
+        detailed information about currently and recently running tasks. Malicious apps may 
+        discover private information about other apps.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_reorderTasks">reorder running apps</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
