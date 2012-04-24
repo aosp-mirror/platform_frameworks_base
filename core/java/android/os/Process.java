@@ -299,6 +299,24 @@ public class Process {
      **/
     private static final int THREAD_GROUP_FOREGROUND = 1;
 
+    /**
+     * System thread group.
+     * @hide
+     **/
+    public static final int THREAD_GROUP_SYSTEM = 2;
+
+    /**
+     * Application audio thread group.
+     * @hide
+     **/
+    public static final int THREAD_GROUP_AUDIO_APP = 3;
+
+    /**
+     * System audio thread group.
+     * @hide
+     **/
+    public static final int THREAD_GROUP_AUDIO_SYS = 4;
+
     public static final int SIGNAL_QUIT = 3;
     public static final int SIGNAL_KILL = 9;
     public static final int SIGNAL_USR1 = 10;
@@ -654,6 +672,21 @@ public class Process {
         long[] procStatusValues = new long[1];
         procStatusValues[0] = -1;
         Process.readProcLines("/proc/" + pid + "/status", procStatusLabels, procStatusValues);
+        return (int) procStatusValues[0];
+    }
+
+    /**
+     * Returns the thread group leader id for a currently running thread.
+     * @param tid the thread id
+     * @return the thread group leader id of the thread, or -1 if the thread is not running.
+     *         This is same as what getpid(2) would return if called by tid.
+     * @hide
+     */
+    public static final int getThreadGroupLeader(int tid) {
+        String[] procStatusLabels = { "Tgid:" };
+        long[] procStatusValues = new long[1];
+        procStatusValues[0] = -1;
+        Process.readProcLines("/proc/" + tid + "/status", procStatusLabels, procStatusValues);
         return (int) procStatusValues[0];
     }
 
