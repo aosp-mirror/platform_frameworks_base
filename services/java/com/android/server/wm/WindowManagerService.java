@@ -8172,7 +8172,8 @@ public class WindowManagerService extends IWindowManager.Stub
             // so we want to leave all of them as undimmed (for
             // performance reasons).
             mInnerFields.mObscured = true;
-        } else if (canBeSeen && (attrFlags & FLAG_DIM_BEHIND) != 0) {
+        } else if (canBeSeen && (attrFlags & FLAG_DIM_BEHIND) != 0
+                && !(w.mAppToken != null && w.mAppToken.hiddenRequested)) {
             if (localLOGV) Slog.v(TAG, "Win " + w + " obscured=" + mInnerFields.mObscured);
             if (!mInnerFields.mDimming) {
                 //Slog.i(TAG, "DIM BEHIND: " + w);
