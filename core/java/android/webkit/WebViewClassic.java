@@ -7825,6 +7825,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             // This provides a hook for ProfiledWebView to observe the tile page swaps.
             ((PageSwapDelegate) mWebView).onPageSwapOccurred(notifyAnimationStarted);
         }
+
+        if (mPictureListener != null) {
+            // trigger picture listener for hardware layers. Software layers are
+            // triggered in setNewPicture
+            mPictureListener.onNewPicture(getWebView(), capturePicture());
+        }
     }
 
     void setNewPicture(final WebViewCore.DrawData draw, boolean updateBaseLayer) {
@@ -7894,7 +7900,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         scrollEditWithCursor();
 
         if (mPictureListener != null) {
-            mPictureListener.onNewPicture(getWebView(), capturePicture());
+            if (!mWebView.isHardwareAccelerated()
+                    || mWebView.getLayerType() == View.LAYER_TYPE_SOFTWARE) {
+                // trigger picture listener for software layers. Hardware layers are
+                // triggered in pageSwapCallback
+                mPictureListener.onNewPicture(getWebView(), capturePicture());
+            }
         }
     }
 
