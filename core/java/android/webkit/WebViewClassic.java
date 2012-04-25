@@ -701,7 +701,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     // A final CallbackProxy shared by WebViewCore and BrowserFrame.
     private CallbackProxy mCallbackProxy;
 
-    private WebViewDatabase mDatabase;
+    private WebViewDatabaseClassic mDatabase;
 
     // SSL certificate for the main top-level page (if secure)
     private SslCertificate mCertificate;
@@ -1230,7 +1230,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         mViewManager = new ViewManager(this);
         L10nUtils.setApplicationContext(context.getApplicationContext());
         mWebViewCore = new WebViewCore(context, this, mCallbackProxy, javaScriptInterfaces);
-        mDatabase = WebViewDatabase.getInstance(context);
+        mDatabase = WebViewDatabaseClassic.getInstance(context);
         mScroller = new OverScroller(context, null, 0, 0, false); //TODO Use OverScroller's flywheel
         mZoomManager = new ZoomManager(this, mCallbackProxy);
 
@@ -1293,6 +1293,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         @Override
         public WebStorage getWebStorage() {
             return WebStorageClassic.getInstance();
+        }
+
+        @Override
+        public WebViewDatabase getWebViewDatabase(Context context) {
+            return WebViewDatabaseClassic.getInstance(context);
         }
     }
 
@@ -7191,8 +7196,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     break;
                 }
                 case NEVER_REMEMBER_PASSWORD: {
-                    mDatabase.setUsernamePassword(
-                            msg.getData().getString("host"), null, null);
+                    mDatabase.setUsernamePassword(msg.getData().getString("host"), null, null);
                     ((Message) msg.obj).sendToTarget();
                     break;
                 }

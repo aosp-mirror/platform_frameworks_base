@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import android.content.Context;
+
 /**
  * This is the main entry-point into the WebView back end implementations, which the WebView
  * proxy class uses to instantiate all the other objects as needed. The backend must provide an
@@ -63,21 +65,32 @@ public interface WebViewFactoryProvider {
     /**
      * Gets the singleton CookieManager instance for this WebView implementation. The
      * implementation must return the same instance on subsequent calls.
-     * @return the singleton CookieManager instance.
+     *
+     * @return the singleton CookieManager instance
      */
     CookieManager getCookieManager();
 
     /**
      * Gets the singleton WebIconDatabase instance for this WebView implementation. The
      * implementation must return the same instance on subsequent calls.
-     * @return the singleton WebIconDatabase instance.
+     *
+     * @return the singleton WebIconDatabase instance
      */
     WebIconDatabase getWebIconDatabase();
 
     /**
      * Gets the singleton WebStorage instance for this WebView implementation. The
      * implementation must return the same instance on subsequent calls.
-     * @return the singleton WebStorage instance.
+     *
+     * @return the singleton WebStorage instance
      */
     WebStorage getWebStorage();
+
+    /**
+     * Gets the singleton WebViewDatabase instance for this WebView implementation. The
+     * implementation must return the same instance on subsequent calls.
+     *
+     * @return the singleton WebViewDatabase instance
+     */
+    WebViewDatabase getWebViewDatabase(Context context);
 }
