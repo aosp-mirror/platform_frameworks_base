@@ -1074,6 +1074,13 @@ public interface WindowManagerPolicy {
     public void stopScreenSaver();
 
     /**
+     * Set the last used input method window state. This state is used to make IME transition
+     * smooth.
+     * @hide
+     */
+    public void setLastInputMethodWindowLw(WindowState ime, WindowState target);
+
+    /**
      * Print the WindowManagerPolicy's state into the given stream.
      *
      * @param prefix Text to print at the front of each line.
