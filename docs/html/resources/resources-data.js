@@ -529,6 +529,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'new', 'media', 'gl'],
+    path: 'samples/HelloEffects/index.html',
+    title: {
+      en: 'HelloEffects'
+    },
+    description: {
+      en: 'An application that demonstrates how to use the Media Effects APIs.'
+    }
+  },
+  {
     tags: ['sample'],
     path: 'samples/Home/index.html',
     title: {
