@@ -18,12 +18,15 @@ package com.android.systemui;
 
 import android.animation.Animator;
 import android.animation.LayoutTransition;
+import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.speech.RecognizerIntent;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,7 +52,7 @@ public class SearchPanelView extends FrameLayout implements
     private boolean mShowing;
     private View mSearchTargetsContainer;
     private MultiWaveView mMultiWaveView;
-
+    private SearchManager mSearchManager;
 
     public SearchPanelView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -58,6 +61,14 @@ public class SearchPanelView extends FrameLayout implements
     public SearchPanelView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mContext = context;
+        mSearchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
+        if (mSearchManager == null) {
+            Slog.w(TAG, "Search manager not available");
+        }
+    }
+
+    public boolean isSearchAvailable() {
+        return mSearchManager != null && mSearchManager.getGlobalSearchActivity() != null;
     }
 
     final MultiWaveView.OnTriggerListener mMultiWaveViewListener
@@ -79,18 +90,27 @@ public class SearchPanelView extends FrameLayout implements
             final int resId = mMultiWaveView.getResourceIdForTarget(target);
             switch (resId) {
                 case com.android.internal.R.drawable.ic_lockscreen_search:
-                    Intent intent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
-                    intent.setFlags(
-                            Intent.FLAG_ACTIVITY_NEW_TASK
-                            | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                            | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startGlobalSearch();
+                break;
+            }
+            mBar.hideSearchPanel();
+        }
+
+        private void startGlobalSearch() {
+            if (mSearchManager != null) {
+                ComponentName globalSearchActivity = mSearchManager.getGlobalSearchActivity();
+                if (globalSearchActivity != null) {
+                    Intent intent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.setComponent(globalSearchActivity);
                     try {
                         mContext.startActivity(intent);
                     } catch (ActivityNotFoundException e) {
-                        Log.w(TAG, "Application not found for action " + intent.getAction());
+                        Slog.w(TAG, "Application not found for action " + intent.getAction());
                     }
-                    mBar.hideSearchPanel();
-                break;
+                } else {
+                    Slog.w(TAG, "No global search activity");
+                }
             }
         }
     };
