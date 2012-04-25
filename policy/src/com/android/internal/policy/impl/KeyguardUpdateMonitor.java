@@ -82,8 +82,8 @@ public class KeyguardUpdateMonitor {
     private CharSequence mTelephonySpn;
 
     private int mFailedAttempts = 0;
-    private int mFailedFaceUnlockAttempts = 0;
-    private static final int FAILED_FACE_UNLOCK_ATTEMPTS_BEFORE_BACKUP = 15;
+    private int mFailedBiometricUnlockAttempts = 0;
+    private static final int FAILED_BIOMETRIC_UNLOCK_ATTEMPTS_BEFORE_BACKUP = 15;
 
     private boolean mClockVisible;
 
@@ -703,7 +703,7 @@ public class KeyguardUpdateMonitor {
 
     public void clearFailedAttempts() {
         mFailedAttempts = 0;
-        mFailedFaceUnlockAttempts = 0;
+        mFailedBiometricUnlockAttempts = 0;
     }
 
     public void reportFailedAttempt() {
@@ -718,12 +718,12 @@ public class KeyguardUpdateMonitor {
         return mPhoneState;
     }
 
-    public void reportFailedFaceUnlockAttempt() {
-        mFailedFaceUnlockAttempts++;
+    public void reportFailedBiometricUnlockAttempt() {
+        mFailedBiometricUnlockAttempts++;
     }
 
-    public boolean getMaxFaceUnlockAttemptsReached() {
-        return mFailedFaceUnlockAttempts >= FAILED_FACE_UNLOCK_ATTEMPTS_BEFORE_BACKUP;
+    public boolean getMaxBiometricUnlockAttemptsReached() {
+        return mFailedBiometricUnlockAttempts >= FAILED_BIOMETRIC_UNLOCK_ATTEMPTS_BEFORE_BACKUP;
     }
 
     public boolean isSimLocked() {
