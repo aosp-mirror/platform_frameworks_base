@@ -21,7 +21,6 @@ package android.widget;
  * progressing through its set of children. The interface exists to give AppWidgetHosts a way of
  * taking responsibility for automatically advancing such collections.
  *
- * @hide
  */
 public interface Advanceable {
 
