@@ -4151,7 +4151,6 @@ package android.appwidget {
   }
 
   public class AppWidgetManager {
-    method public void bindAppWidgetId(int, android.content.ComponentName);
     method public int[] getAppWidgetIds(android.content.ComponentName);
     method public android.appwidget.AppWidgetProviderInfo getAppWidgetInfo(int);
     method public java.util.List<android.appwidget.AppWidgetProviderInfo> getInstalledProviders();

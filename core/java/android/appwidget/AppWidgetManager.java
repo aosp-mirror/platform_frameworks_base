@@ -80,6 +80,46 @@ public class AppWidgetManager {
     public static final String ACTION_APPWIDGET_PICK = "android.appwidget.action.APPWIDGET_PICK";
 
     /**
+     * Send this from your {@link AppWidgetHost} activity when you want to bind an AppWidget to
+     * display and bindAppWidgetIdIfAllowed returns false.
+     * <p>
+     * You must supply the following extras:
+     * <table>
+     *   <tr>
+     *     <td>{@link #EXTRA_APPWIDGET_ID}</td>
+     *     <td>A newly allocated appWidgetId, which will be bound to the AppWidget provider
+     *         you provide.</td>
+     *  </tr>
+     *  <tr>
+     *     <td>{@link #EXTRA_APPWIDGET_PROVIDER}</td>
+     *     <td>The BroadcastReceiver that will be the AppWidget provider for this AppWidget.
+     *     </td>
+     *  </tr>
+     * </table>
+     *
+     * <p>
+     * The system will respond with an onActivityResult call with the following extras in
+     * the intent:
+     * <table>
+     *   <tr>
+     *     <td>{@link #EXTRA_APPWIDGET_ID}</td>
+     *     <td>The appWidgetId that you supplied in the original intent.</td>
+     *  </tr>
+     * </table>
+     * <p>
+     * When you receive the result from the AppWidget bind activity, if the resultCode is
+     * {@link android.app.Activity#RESULT_OK}, the AppWidget has been bound.  You should then
+     * check the AppWidgetProviderInfo for the returned AppWidget, and if it has one, launch its
+     * configuration activity.  If {@link android.app.Activity#RESULT_CANCELED} is returned, you
+     * should delete
+     * the appWidgetId.
+     *
+     * @see #ACTION_APPWIDGET_CONFIGURE
+     *
+     */
+    public static final String ACTION_APPWIDGET_BIND = "android.appwidget.action.APPWIDGET_BIND";
+
+    /**
      * Sent when it is time to configure your AppWidget while it is being added to a host.
      * This action is not sent as a broadcast to the AppWidget provider, but as a startActivity
      * to the activity specified in the {@link AppWidgetProviderInfo AppWidgetProviderInfo meta-data}.
@@ -142,6 +182,13 @@ public class AppWidgetManager {
      * {@sample frameworks/base/tests/appwidgets/AppWidgetHostTest/src/com/android/tests/appwidgethost/TestAppWidgetProvider.java getExtra_EXTRA_APPWIDGET_IDS}
      */
     public static final String EXTRA_APPWIDGET_IDS = "appWidgetIds";
+
+    /**
+     * An intent extra that contains the component name of a AppWidget provider.
+     * <p>
+     * The value will be an ComponentName.
+     */
+    public static final String EXTRA_APPWIDGET_PROVIDER = "appWidgetProvider";
 
     /**
      * An intent extra to pass to the AppWidget picker containing a {@link java.util.List} of
@@ -501,16 +548,80 @@ public class AppWidgetManager {
     /**
      * Set the component for a given appWidgetId.
      *
-     * <p class="note">You need the APPWIDGET_LIST permission.  This method is to be used by the
-     * AppWidget picker.
+     * <p class="note">You need the BIND_APPWIDGET permission or the user must have enabled binding
+     *         widgets always for your component. This method is used by the AppWidget picker and
+     *         should not be used by other apps.
      *
      * @param appWidgetId     The AppWidget instance for which to set the RemoteViews.
      * @param provider      The {@link android.content.BroadcastReceiver} that will be the AppWidget
      *                      provider for this AppWidget.
+     * @hide
      */
     public void bindAppWidgetId(int appWidgetId, ComponentName provider) {
         try {
             sService.bindAppWidgetId(appWidgetId, provider);
+        }
+        catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+    }
+
+    /**
+     * Set the component for a given appWidgetId.
+     *
+     * <p class="note">You need the BIND_APPWIDGET permission or the user must have enabled binding
+     *         widgets always for your component. Should be used by apps that host widgets; if this
+     *         method returns false, call {@link #ACTION_APPWIDGET_BIND} to request permission to
+     *         bind
+     *
+     * @param appWidgetId     The AppWidget instance for which to set the RemoteViews.
+     * @param provider      The {@link android.content.BroadcastReceiver} that will be the AppWidget
+     *                      provider for this AppWidget.
+     * @return true if this component has permission to bind the AppWidget
+     */
+    public boolean bindAppWidgetIdIfAllowed(int appWidgetId, ComponentName provider) {
+        if (mContext == null) {
+            return false;
+        }
+        try {
+            return sService.bindAppWidgetIdIfAllowed(
+                    mContext.getPackageName(), appWidgetId, provider);
+        }
+        catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+    }
+
+    /**
+     * Query if a given package was granted permission by the user to bind app widgets
+     *
+     * <p class="note">You need the MODIFY_APPWIDGET_BIND_PERMISSIONS permission
+     *
+     * @param packageName        The package for which the permission is being queried
+     * @return true if the package was granted permission by the user to bind app widgets
+     * @hide
+     */
+    public boolean hasBindAppWidgetPermission(String packageName) {
+        try {
+            return sService.hasBindAppWidgetPermission(packageName);
+        }
+        catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+    }
+
+    /**
+     * Changes any user-granted permission for the given package to bind app widgets
+     *
+     * <p class="note">You need the MODIFY_APPWIDGET_BIND_PERMISSIONS permission
+     *
+     * @param provider        The package whose permission is being changed
+     * @param permission      Whether to give the package permission to bind widgets
+     * @hide
+     */
+    public void setBindAppWidgetPermission(String packageName, boolean permission) {
+        try {
+            sService.setBindAppWidgetPermission(packageName, permission);
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);

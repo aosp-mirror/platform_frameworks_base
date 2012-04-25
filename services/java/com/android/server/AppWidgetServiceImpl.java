@@ -24,8 +24,8 @@ import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.Intent.FilterComparison;
+import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
@@ -56,7 +56,6 @@ import com.android.internal.os.AtomicFile;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.widget.IRemoteViewsAdapterConnection;
 import com.android.internal.widget.IRemoteViewsFactory;
-import com.android.server.am.ActivityManagerService;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -167,6 +166,8 @@ class AppWidgetServiceImpl {
     int mNextAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID + 1;
     final ArrayList<AppWidgetId> mAppWidgetIds = new ArrayList<AppWidgetId>();
     ArrayList<Host> mHosts = new ArrayList<Host>();
+    // set of package names
+    HashSet<String> mPackagesWithBindWidgetPermission = new HashSet<String>();
     boolean mSafeMode;
     int mUserId;
     boolean mStateLoaded;
@@ -493,10 +494,7 @@ class AppWidgetServiceImpl {
         }
     }
 
-    public void bindAppWidgetId(int appWidgetId, ComponentName provider) {
-        mContext.enforceCallingPermission(android.Manifest.permission.BIND_APPWIDGET,
-                "bindGagetId appWidgetId=" + appWidgetId + " provider=" + provider);
-
+    private void bindAppWidgetIdImpl(int appWidgetId, ComponentName provider) {
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mAppWidgetIds) {
@@ -539,6 +537,67 @@ class AppWidgetServiceImpl {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    public void bindAppWidgetId(int appWidgetId, ComponentName provider) {
+        mContext.enforceCallingPermission(android.Manifest.permission.BIND_APPWIDGET,
+            "bindAppWidgetId appWidgetId=" + appWidgetId + " provider=" + provider);
+        bindAppWidgetIdImpl(appWidgetId, provider);
+    }
+
+    public boolean bindAppWidgetIdIfAllowed(
+            String packageName, int appWidgetId, ComponentName provider) {
+        try {
+            mContext.enforceCallingPermission(android.Manifest.permission.BIND_APPWIDGET, null);
+        } catch (SecurityException se) {
+            if (!callerHasBindAppWidgetPermission(packageName)) {
+                return false;
+            }
+        }
+        bindAppWidgetIdImpl(appWidgetId, provider);
+        return true;
+    }
+
+    private boolean callerHasBindAppWidgetPermission(String packageName) {
+        int callingUid = Binder.getCallingUid();
+        try {
+            if (!UserId.isSameApp(callingUid, getUidForPackage(packageName))) {
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
+            return mPackagesWithBindWidgetPermission.contains(packageName);
+        }
+    }
+
+    public boolean hasBindAppWidgetPermission(String packageName) {
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS,
+                "hasBindAppWidgetPermission packageName=" + packageName);
+
+        synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
+            return mPackagesWithBindWidgetPermission.contains(packageName);
+        }
+    }
+
+    public void setBindAppWidgetPermission(String packageName, boolean permission) {
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS,
+                "setBindAppWidgetPermission packageName=" + packageName);
+
+        synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
+            if (permission) {
+                mPackagesWithBindWidgetPermission.add(packageName);
+            } else {
+                mPackagesWithBindWidgetPermission.remove(packageName);
+            }
+        }
+        saveStateLocked();
     }
 
     // Binds to a specific RemoteViewsService
@@ -1375,6 +1434,13 @@ class AppWidgetServiceImpl {
                 out.endTag(null, "g");
             }
 
+            Iterator<String> it = mPackagesWithBindWidgetPermission.iterator();
+            while (it.hasNext()) {
+                out.startTag(null, "b");
+                out.attribute(null, "packageName", it.next());
+                out.endTag(null, "b");
+            }
+
             out.endTag(null, "gs");
 
             out.endDocument();
@@ -1444,6 +1510,11 @@ class AppWidgetServiceImpl {
                             host.hostId = Integer
                                     .parseInt(parser.getAttributeValue(null, "id"), 16);
                             mHosts.add(host);
+                        }
+                    } else if ("b".equals(tag)) {
+                        String packageName = parser.getAttributeValue(null, "packageName");
+                        if (packageName != null) {
+                            mPackagesWithBindWidgetPermission.add(packageName);
                         }
                     } else if ("g".equals(tag)) {
                         AppWidgetId id = new AppWidgetId();
