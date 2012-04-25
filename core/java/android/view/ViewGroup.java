@@ -382,6 +382,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private static final int ARRAY_INITIAL_CAPACITY = 12;
     private static final int ARRAY_CAPACITY_INCREMENT = 12;
 
+    private static Paint DEBUG_PAINT;
+
+    private static Paint getDebugPaint() {
+         if (DEBUG_PAINT == null) {
+             DEBUG_PAINT = new Paint();
+             DEBUG_PAINT.setStyle(Paint.Style.STROKE);
+         }
+         return DEBUG_PAINT;
+    }
+
     // Used to draw cached views
     Paint mCachePaint;
 
@@ -2658,7 +2668,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return b;
     }
 
-    private static void drawRect(Canvas canvas, int x1, int y1, int x2, int y2, Paint paint) {
+    private static void drawRect(Canvas canvas, int x1, int y1, int x2, int y2, int color) {
+        Paint paint = getDebugPaint();
+        paint.setColor(color);
         canvas.drawRect(x1, y1, x2 - 1, y2 - 1, paint);
     }
 
@@ -2668,7 +2680,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     protected void onDebugDrawMargins(Canvas canvas) {
         for (int i = 0; i < getChildCount(); i++) {
             View c = getChildAt(i);
-            c.getLayoutParams().onDebugDraw(this, canvas);
+            c.getLayoutParams().onDebugDraw(c, canvas);
         }
     }
 
@@ -2676,12 +2688,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     protected void onDebugDraw(Canvas canvas) {
-        Paint paint = new Paint();
-        paint.setStyle(Paint.Style.STROKE);
-
         // Draw optical bounds
         if (getLayoutMode() == LAYOUT_BOUNDS) {
-            paint.setColor(Color.RED);
             for (int i = 0; i < getChildCount(); i++) {
                 View c = getChildAt(i);
                 Insets insets = c.getLayoutInsets();
@@ -2689,19 +2697,18 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         c.getLeft() + insets.left,
                         c.getTop() + insets.top,
                         c.getRight() - insets.right,
-                        c.getBottom() - insets.bottom, paint);
+                        c.getBottom() - insets.bottom, Color.RED);
             }
-        }
-
-        // Draw bounds
-        paint.setColor(Color.BLUE);
-        for (int i = 0; i < getChildCount(); i++) {
-            View c = getChildAt(i);
-            drawRect(canvas, c.getLeft(), c.getTop(), c.getRight(), c.getBottom(), paint);
         }
 
         // Draw margins
         onDebugDrawMargins(canvas);
+
+        // Draw bounds
+        for (int i = 0; i < getChildCount(); i++) {
+            View c = getChildAt(i);
+            drawRect(canvas, c.getLeft(), c.getTop(), c.getRight(), c.getBottom(), Color.BLUE);
+        }
     }
 
     /**
@@ -5793,15 +5800,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          */
         @Override
         public void onDebugDraw(View view, Canvas canvas) {
-            Paint paint = new Paint();
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(Color.MAGENTA);
-
             drawRect(canvas,
                     view.getLeft() - leftMargin,
                     view.getTop() - topMargin,
                     view.getRight() + rightMargin,
-                    view.getBottom() + bottomMargin, paint);
+                    view.getBottom() + bottomMargin, Color.MAGENTA);
         }
     }
 
