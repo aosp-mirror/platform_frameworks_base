@@ -316,6 +316,19 @@ static jboolean Surface_isValid(JNIEnv* env, jobject clazz)
     return Surface::isValid(surface) ? JNI_TRUE : JNI_FALSE;
 }
 
+static jboolean Surface_isConsumerRunningBehind(JNIEnv* env, jobject clazz)
+{
+    int value = 0;
+    const sp<Surface>& surface(getSurface(env, clazz));
+    if (!Surface::isValid(surface)) {
+        doThrowIAE(env);
+        return 0;
+    }
+    ANativeWindow* anw = static_cast<ANativeWindow *>(surface.get());
+    anw->query(anw, NATIVE_WINDOW_CONSUMER_RUNNING_BEHIND, &value);
+    return (jboolean)value;
+}
+
 static inline SkBitmap::Config convertPixelFormat(PixelFormat format)
 {
     /* note: if PIXEL_FORMAT_RGBX_8888 means that all alpha bytes are 0xFF, then
@@ -875,6 +888,7 @@ static JNINativeMethod gSurfaceMethods[] = {
     {"setFreezeTint",       "(I)V",  (void*)Surface_setFreezeTint },
     {"readFromParcel",      "(Landroid/os/Parcel;)V", (void*)Surface_readFromParcel },
     {"writeToParcel",       "(Landroid/os/Parcel;I)V", (void*)Surface_writeToParcel },
+    {"isConsumerRunningBehind", "()Z", (void*)Surface_isConsumerRunningBehind },
 };
 
 void nativeClassInit(JNIEnv* env, jclass clazz)

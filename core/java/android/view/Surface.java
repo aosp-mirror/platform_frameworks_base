@@ -323,6 +323,15 @@ public class Surface implements Parcelable {
         return mSurfaceGenerationId;
     }
 
+
+    /**
+     * Whether the consumer of this Surface is running behind the producer;
+     * that is, isConsumerRunningBehind() returns true if the consumer is more
+     * than one buffer ahead of the producer.
+     * @hide
+     */
+    public native boolean isConsumerRunningBehind();
+
     /**
      * A Canvas class that can handle the compatibility mode. This does two
      * things differently.
