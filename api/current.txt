@@ -24927,6 +24927,7 @@ package android.view.accessibility {
     method public static java.lang.String eventTypeToString(int);
     method public long getEventTime();
     method public int getEventType();
+    method public int getGranularity();
     method public java.lang.CharSequence getPackageName();
     method public android.view.accessibility.AccessibilityRecord getRecord(int);
     method public int getRecordCount();
@@ -24936,6 +24937,7 @@ package android.view.accessibility {
     method public static android.view.accessibility.AccessibilityEvent obtain();
     method public void setEventTime(long);
     method public void setEventType(int);
+    method public void setGranularity(int);
     method public void setPackageName(java.lang.CharSequence);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
@@ -24957,6 +24959,7 @@ package android.view.accessibility {
     field public static final int TYPE_VIEW_SELECTED = 4; // 0x4
     field public static final int TYPE_VIEW_TEXT_CHANGED = 16; // 0x10
     field public static final int TYPE_VIEW_TEXT_SELECTION_CHANGED = 8192; // 0x2000
+    field public static final int TYPE_VIEW_TEXT_TRAVERSED_AT_GRANULARITY = 131072; // 0x20000
     field public static final int TYPE_WINDOW_CONTENT_CHANGED = 2048; // 0x800
     field public static final int TYPE_WINDOW_STATE_CHANGED = 32; // 0x20
   }
@@ -24997,7 +25000,7 @@ package android.view.accessibility {
     method public int getChildCount();
     method public java.lang.CharSequence getClassName();
     method public java.lang.CharSequence getContentDescription();
-    method public java.lang.CharSequence[] getGranularities();
+    method public int getGranularities();
     method public java.lang.CharSequence getPackageName();
     method public android.view.accessibility.AccessibilityNodeInfo getParent();
     method public java.lang.CharSequence getText();
@@ -25031,7 +25034,7 @@ package android.view.accessibility {
     method public void setEnabled(boolean);
     method public void setFocusable(boolean);
     method public void setFocused(boolean);
-    method public void setGranularities(java.lang.CharSequence[]);
+    method public void setGranularities(int);
     method public void setLongClickable(boolean);
     method public void setPackageName(java.lang.CharSequence);
     method public void setParent(android.view.View);
@@ -25044,7 +25047,8 @@ package android.view.accessibility {
     method public void setText(java.lang.CharSequence);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ACTION_ACCESSIBILITY_FOCUS = 64; // 0x40
-    field public static final java.lang.String ACTION_ARGUMENT_GRANULARITY = "ACTION_ARGUMENT_GRANULARITY";
+    field public static final java.lang.String ACTION_ARGUMENT_GRANULARITY_INT = "ACTION_ARGUMENT_GRANULARITY_INT";
+    field public static final java.lang.String ACTION_ARGUMENT_HTML_ELEMENT_STRING = "ACTION_ARGUMENT_HTML_ELEMENT_STRING";
     field public static final int ACTION_CLEAR_ACCESSIBILITY_FOCUS = 128; // 0x80
     field public static final int ACTION_CLEAR_FOCUS = 2; // 0x2
     field public static final int ACTION_CLEAR_SELECTION = 8; // 0x8
@@ -25052,11 +25056,18 @@ package android.view.accessibility {
     field public static final int ACTION_FOCUS = 1; // 0x1
     field public static final int ACTION_LONG_CLICK = 32; // 0x20
     field public static final int ACTION_NEXT_AT_GRANULARITY = 256; // 0x100
+    field public static final int ACTION_NEXT_HTML_ELEMENT = 1024; // 0x400
     field public static final int ACTION_PREVIOUS_AT_GRANULARITY = 512; // 0x200
+    field public static final int ACTION_PREVIOUS_HTML_ELEMENT = 2048; // 0x800
     field public static final int ACTION_SELECT = 4; // 0x4
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int FOCUS_ACCESSIBILITY = 2; // 0x2
     field public static final int FOCUS_INPUT = 1; // 0x1
+    field public static final int GRANULARITY_CHARACTER = 1; // 0x1
+    field public static final int GRANULARITY_LINE = 4; // 0x4
+    field public static final int GRANULARITY_PAGE = 16; // 0x10
+    field public static final int GRANULARITY_PARAGRAPH = 8; // 0x8
+    field public static final int GRANULARITY_WORD = 2; // 0x2
   }
 
   public abstract class AccessibilityNodeProvider {

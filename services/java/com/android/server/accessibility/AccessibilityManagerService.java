@@ -1554,7 +1554,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
                 final boolean permissionGranted = mSecurityPolicy.canPerformActionLocked(this,
-                        resolvedWindowId, action);
+                        resolvedWindowId, action, arguments);
                 if (!permissionGranted) {
                     return false;
                 } else {
@@ -1702,7 +1702,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             | AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS
             | AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS
             | AccessibilityNodeInfo.ACTION_NEXT_AT_GRANULARITY
-            | AccessibilityNodeInfo.ACTION_PREVIOUS_AT_GRANULARITY;
+            | AccessibilityNodeInfo.ACTION_PREVIOUS_AT_GRANULARITY
+            | AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT
+            | AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT;
+
+        private static final int VALID_GRANULARITIES =
+            AccessibilityNodeInfo.GRANULARITY_CHARACTER
+            | AccessibilityNodeInfo.GRANULARITY_WORD
+            | AccessibilityNodeInfo.GRANULARITY_LINE
+            | AccessibilityNodeInfo.GRANULARITY_PARAGRAPH
+            | AccessibilityNodeInfo.GRANULARITY_PAGE;
 
         private static final int RETRIEVAL_ALLOWING_EVENT_TYPES =
             AccessibilityEvent.TYPE_VIEW_CLICKED
@@ -1752,10 +1761,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return canRetrieveWindowContent(service) && isRetrievalAllowingWindow(windowId);
         }
 
-        public boolean canPerformActionLocked(Service service, int windowId, int action) {
+        public boolean canPerformActionLocked(Service service, int windowId, int action,
+                Bundle arguments) {
             return canRetrieveWindowContent(service)
                 && isRetrievalAllowingWindow(windowId)
-                && isActionPermitted(action);
+                && isActionPermitted(action)
+                && isActionArgumentsValid(action, arguments);
         }
 
         public boolean canRetrieveWindowContent(Service service) {
@@ -1777,6 +1788,29 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         private boolean isActionPermitted(int action) {
              return (VALID_ACTIONS & action) != 0;
+        }
+
+        private boolean isActionArgumentsValid(int action, Bundle arguments) {
+            switch (action) {
+                case AccessibilityNodeInfo.ACTION_NEXT_AT_GRANULARITY:
+                case AccessibilityNodeInfo.ACTION_PREVIOUS_AT_GRANULARITY: {
+                    if (arguments.size() == 1) {
+                        final int granularity = arguments.getInt(
+                                AccessibilityNodeInfo.ACTION_ARGUMENT_GRANULARITY_INT);
+                        return (granularity & VALID_GRANULARITIES) != 0
+                                && Integer.bitCount(granularity) == 1;
+                    }
+                } break;
+                case AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT:
+                case AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT: {
+                    if (arguments.size() == 1) {
+                        String element = arguments.getString(
+                                AccessibilityNodeInfo.ACTION_ARGUMENT_HTML_ELEMENT_STRING);
+                        return !TextUtils.isEmpty(element);
+                    }
+                } break;
+            }
+            return false;
         }
 
         private void enforceCallingPermission(String permission, String function) {
