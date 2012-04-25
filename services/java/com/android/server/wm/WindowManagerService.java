@@ -2262,6 +2262,7 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean imMayMove = true;
 
             if (attrs.type == TYPE_INPUT_METHOD) {
+                win.mGivenInsetsPending = true;
                 mInputMethodWindow = win;
                 addInputMethodWindowToListLocked(win);
                 imMayMove = false;
@@ -3422,6 +3423,9 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             WindowToken wtoken = mTokenMap.remove(token);
             if (wtoken != null) {
+                if (wtoken.windowType == TYPE_INPUT_METHOD && mInputMethodWindow != null) {
+                    mPolicy.setLastInputMethodWindowLw(mInputMethodWindow, mInputMethodTarget);
+                }
                 boolean delayed = false;
                 if (!wtoken.hidden) {
                     wtoken.hidden = true;

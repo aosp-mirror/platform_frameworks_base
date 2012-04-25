@@ -323,6 +323,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mPowerKeyHandled; // accessed from input reader and handler thread
     boolean mPendingPowerKeyUpCanceled;
     Handler mHandler;
+    WindowState mLastInputMethodWindow = null;
+    WindowState mLastInputMethodTargetWindow = null;
 
     static final int RECENT_APPS_BEHAVIOR_SHOW_OR_DISMISS = 0;
     static final int RECENT_APPS_BEHAVIOR_EXIT_TOUCH_MODE_AND_SHOW = 1;
@@ -2397,6 +2399,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (win == mStatusBar || win == mNavigationBar) {
             return;
         }
+        final boolean needsToOffsetInputMethodTarget =
+                (win == mLastInputMethodTargetWindow && mLastInputMethodWindow != null);
+        if (needsToOffsetInputMethodTarget) {
+            if (DEBUG_LAYOUT) {
+                Slog.i(TAG, "Offset ime target window by the last ime window state");
+            }
+            offsetInputMethodWindowLw(mLastInputMethodWindow);
+        }
 
         final int fl = attrs.flags;
         final int sim = attrs.softInputMode;
@@ -2674,20 +2684,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.
         if (attrs.type == TYPE_INPUT_METHOD && !win.getGivenInsetsPendingLw()) {
-            int top = win.getContentFrameLw().top;
-            top += win.getGivenContentInsetsLw().top;
-            if (mContentBottom > top) {
-                mContentBottom = top;
-            }
-            top = win.getVisibleFrameLw().top;
-            top += win.getGivenVisibleInsetsLw().top;
-            if (mCurBottom > top) {
-                mCurBottom = top;
-            }
-            if (DEBUG_LAYOUT) Log.v(TAG, "Input method: mDockBottom="
-                    + mDockBottom + " mContentBottom="
-                    + mContentBottom + " mCurBottom=" + mCurBottom);
+            setLastInputMethodWindowLw(null, null);
+            offsetInputMethodWindowLw(win);
         }
+    }
+
+    private void offsetInputMethodWindowLw(WindowState win) {
+        int top = win.getContentFrameLw().top;
+        top += win.getGivenContentInsetsLw().top;
+        if (mContentBottom > top) {
+            mContentBottom = top;
+        }
+        top = win.getVisibleFrameLw().top;
+        top += win.getGivenVisibleInsetsLw().top;
+        if (mCurBottom > top) {
+            mCurBottom = top;
+        }
+        if (DEBUG_LAYOUT) Log.v(TAG, "Input method: mDockBottom="
+                + mDockBottom + " mContentBottom="
+                + mContentBottom + " mCurBottom=" + mCurBottom);
     }
 
     /** {@inheritDoc} */
@@ -4184,6 +4199,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // overridden by qemu.hw.mainkeys in the emulator.
     public boolean hasNavigationBar() {
         return mHasNavigationBar;
+    }
+
+    @Override
+    public void setLastInputMethodWindowLw(WindowState ime, WindowState target) {
+        mLastInputMethodWindow = ime;
+        mLastInputMethodTargetWindow = target;
     }
 
     public void dump(String prefix, FileDescriptor fd, PrintWriter pw, String[] args) {
