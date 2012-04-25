@@ -381,6 +381,13 @@ public class WifiP2pManager {
     /** @hide */
     public static final int RESPONSE_SERVICE                        = BASE + 50;
 
+    /** @hide */
+    public static final int SET_DEVICE_NAME                         = BASE + 51;
+    /** @hide */
+    public static final int SET_DEVICE_NAME_FAILED                  = BASE + 52;
+    /** @hide */
+    public static final int SET_DEVICE_NAME_SUCCEEDED               = BASE + 53;
+
     /**
      * Create a new WifiP2pManager instance. Applications use
      * {@link android.content.Context#getSystemService Context.getSystemService()} to retrieve
@@ -603,6 +610,7 @@ public class WifiP2pManager {
                     case WifiP2pManager.ADD_SERVICE_REQUEST_FAILED:
                     case WifiP2pManager.REMOVE_SERVICE_REQUEST_FAILED:
                     case WifiP2pManager.CLEAR_SERVICE_REQUESTS_FAILED:
+                    case WifiP2pManager.SET_DEVICE_NAME_FAILED:
                         if (listener != null) {
                             ((ActionListener) listener).onFailure(message.arg1);
                         }
@@ -621,6 +629,7 @@ public class WifiP2pManager {
                     case WifiP2pManager.ADD_SERVICE_REQUEST_SUCCEEDED:
                     case WifiP2pManager.REMOVE_SERVICE_REQUEST_SUCCEEDED:
                     case WifiP2pManager.CLEAR_SERVICE_REQUESTS_SUCCEEDED:
+                    case WifiP2pManager.SET_DEVICE_NAME_SUCCEEDED:
                         if (listener != null) {
                             ((ActionListener) listener).onSuccess();
                         }
@@ -1102,6 +1111,21 @@ public class WifiP2pManager {
         checkChannel(c);
         c.mAsyncChannel.sendMessage(REQUEST_GROUP_INFO, 0, c.putListener(listener));
     }
+
+    /**
+     * Set p2p device name.
+     * @hide
+     * @param c is the channel created at {@link #initialize}
+     * @param listener for callback when group info is available. Can be null.
+     */
+    public void setDeviceName(Channel c, String devName, ActionListener listener) {
+        checkChannel(c);
+        WifiP2pDevice d = new WifiP2pDevice();
+        d.deviceName = devName;
+        c.mAsyncChannel.sendMessage(SET_DEVICE_NAME, 0, c.putListener(listener), d);
+    }
+
+
 
     /**
      * Get a reference to WifiP2pService handler. This is used to establish
