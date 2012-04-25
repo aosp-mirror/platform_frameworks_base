@@ -1665,20 +1665,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             updateRulesForAppLocked(appId);
         }
 
-        // and catch system UIDs
-        // TODO: keep in sync with android_filesystem_config.h
-        for (int uid = 1000; uid <= 1025; uid++) {
-            updateRulesForUidLocked(uid);
-        }
-        for (int uid = 2000; uid <= 2002; uid++) {
-            updateRulesForUidLocked(uid);
-        }
-        for (int uid = 3000; uid <= 3007; uid++) {
-            updateRulesForUidLocked(uid);
-        }
-        for (int uid = 9998; uid <= 9999; uid++) {
-            updateRulesForUidLocked(uid);
-        }
+        // limit data usage for some internal system services
+        updateRulesForUidLocked(android.os.Process.MEDIA_UID);
+        updateRulesForUidLocked(android.os.Process.DRM_UID);
     }
 
     private void updateRulesForAppLocked(int appId) {
@@ -1688,7 +1677,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    private static boolean isUidValidForRules(int uid) {
+        // allow rules on specific system services, and any apps
+        if (uid == android.os.Process.MEDIA_UID || uid == android.os.Process.DRM_UID
+                || UserId.isApp(uid)) {
+            return true;
+        }
+
+        return false;
+    }
+
     private void updateRulesForUidLocked(int uid) {
+        if (!isUidValidForRules(uid)) return;
+
         final int appId = UserId.getAppId(uid);
         final int appPolicy = getAppPolicy(appId);
         final boolean uidForeground = isUidForeground(uid);

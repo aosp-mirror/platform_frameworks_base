@@ -92,6 +92,12 @@ public class Process {
     public static final int MEDIA_UID = 1013;
 
     /**
+     * Defines the UID/GID for the DRM process.
+     * @hide
+     */
+    public static final int DRM_UID = 1019;
+
+    /**
      * Defines the GID for the group that allows write access to the SD card.
      * @hide
      */
