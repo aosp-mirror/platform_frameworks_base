@@ -4116,6 +4116,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void dismissKeyguardOnNextActivity() {
         enforceNotIsolatedCaller("dismissKeyguardOnNextActivity");
         synchronized (this) {
+            if (mLockScreenShown) {
+                mLockScreenShown = false;
+                comeOutOfSleepIfNeededLocked();
+            }
             mMainStack.dismissKeyguardOnNextActivityLocked();
         }
     }
