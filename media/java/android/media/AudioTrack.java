@@ -340,6 +340,15 @@ public class AudioTrack
         }
     }
 
+    // mask of all the channels supported by this implementation
+    private static final int SUPPORTED_OUT_CHANNELS =
+            AudioFormat.CHANNEL_OUT_FRONT_LEFT |
+            AudioFormat.CHANNEL_OUT_FRONT_RIGHT |
+            AudioFormat.CHANNEL_OUT_FRONT_CENTER |
+            AudioFormat.CHANNEL_OUT_LOW_FREQUENCY |
+            AudioFormat.CHANNEL_OUT_BACK_LEFT |
+            AudioFormat.CHANNEL_OUT_BACK_RIGHT |
+            AudioFormat.CHANNEL_OUT_BACK_CENTER;
 
     // Convenience method for the constructor's parameter checks.
     // This is where constructor IllegalArgumentException-s are thrown
@@ -392,10 +401,16 @@ public class AudioTrack
             mChannels = AudioFormat.CHANNEL_OUT_STEREO;
             break;
         default:
-            mChannelCount = 0;
-            mChannels = AudioFormat.CHANNEL_INVALID;
-            mChannelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_INVALID;
-            throw(new IllegalArgumentException("Unsupported channel configuration."));
+            if ((channelConfig & SUPPORTED_OUT_CHANNELS) != channelConfig) {
+                // input channel configuration features unsupported channels
+                mChannelCount = 0;
+                mChannels = AudioFormat.CHANNEL_INVALID;
+                mChannelConfiguration = AudioFormat.CHANNEL_INVALID;
+                throw(new IllegalArgumentException("Unsupported channel configuration."));
+            } else {
+                mChannels = channelConfig;
+                mChannelCount = Integer.bitCount(channelConfig);
+            }
         }
 
         //--------------
@@ -623,8 +638,13 @@ public class AudioTrack
             channelCount = 2;
             break;
         default:
-            loge("getMinBufferSize(): Invalid channel configuration.");
-            return AudioTrack.ERROR_BAD_VALUE;
+            if ((channelConfig & SUPPORTED_OUT_CHANNELS) != channelConfig) {
+                // input channel configuration features unsupported channels
+                loge("getMinBufferSize(): Invalid channel configuration.");
+                return AudioTrack.ERROR_BAD_VALUE;
+            } else {
+                channelCount = Integer.bitCount(channelConfig);
+            }
         }
 
         if ((audioFormat != AudioFormat.ENCODING_PCM_16BIT)
