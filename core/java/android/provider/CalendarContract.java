@@ -1354,6 +1354,8 @@ public final class CalendarContract {
                         GUESTS_CAN_INVITE_OTHERS);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, GUESTS_CAN_MODIFY);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, GUESTS_CAN_SEE_GUESTS);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CUSTOM_APP_PACKAGE);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CUSTOM_APP_URI);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ORGANIZER);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_ID);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, DIRTY);
@@ -1556,6 +1558,8 @@ public final class CalendarContract {
      * <li>{@link #GUESTS_CAN_MODIFY}</li>
      * <li>{@link #GUESTS_CAN_INVITE_OTHERS}</li>
      * <li>{@link #GUESTS_CAN_SEE_GUESTS}</li>
+     * <li>{@link #CUSTOM_APP_PACKAGE}</li>
+     * <li>{@link #CUSTOM_APP_URI}</li>
      * </ul>
      * The following Events columns are writable only by a sync adapter
      * <ul>
