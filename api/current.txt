@@ -26608,7 +26608,7 @@ package android.widget {
     method public abstract void onNothingSelected(android.widget.AdapterView<?>);
   }
 
-  public abstract class AdapterViewAnimator extends android.widget.AdapterView {
+  public abstract class AdapterViewAnimator extends android.widget.AdapterView implements android.widget.Advanceable {
     ctor public AdapterViewAnimator(android.content.Context);
     ctor public AdapterViewAnimator(android.content.Context, android.util.AttributeSet);
     ctor public AdapterViewAnimator(android.content.Context, android.util.AttributeSet, int);
@@ -26648,6 +26648,11 @@ package android.widget {
     method public void setFlipInterval(int);
     method public void startFlipping();
     method public void stopFlipping();
+  }
+
+  public abstract interface Advanceable {
+    method public abstract void advance();
+    method public abstract void fyiWillBeAdvancedByHostKThx();
   }
 
   public class AlphabetIndexer extends android.database.DataSetObserver implements android.widget.SectionIndexer {
