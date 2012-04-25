@@ -67,8 +67,8 @@ public class PackageHelper {
         return null;
     }
 
-    public static String createSdDir(int sizeMb, String cid,
-            String sdEncKey, int uid) {
+    public static String createSdDir(int sizeMb, String cid, String sdEncKey, int uid,
+            boolean isExternal) {
         // Create mount point via MountService
         IMountService mountService = getMountService();
 
@@ -76,8 +76,8 @@ public class PackageHelper {
             Log.i(TAG, "Size of container " + sizeMb + " MB");
 
         try {
-            int rc = mountService.createSecureContainer(
-                    cid, sizeMb, "fat", sdEncKey, uid);
+            int rc = mountService.createSecureContainer(cid, sizeMb, "ext4", sdEncKey, uid,
+                    isExternal);
             if (rc != StorageResultCode.OperationSucceeded) {
                 Log.e(TAG, "Failed to create secure container " + cid);
                 return null;
@@ -206,10 +206,21 @@ public class PackageHelper {
        return false;
    }
 
-    public static void extractPublicFiles(String packagePath, File publicZipFile)
+    public static int extractPublicFiles(String packagePath, File publicZipFile)
             throws IOException {
-        final FileOutputStream fstr = new FileOutputStream(publicZipFile);
-        final ZipOutputStream publicZipOutStream = new ZipOutputStream(fstr);
+        final FileOutputStream fstr;
+        final ZipOutputStream publicZipOutStream;
+
+        if (publicZipFile == null) {
+            fstr = null;
+            publicZipOutStream = null;
+        } else {
+            fstr = new FileOutputStream(publicZipFile);
+            publicZipOutStream = new ZipOutputStream(fstr);
+        }
+
+        int size = 0;
+
         try {
             final ZipFile privateZip = new ZipFile(packagePath);
             try {
@@ -219,25 +230,29 @@ public class PackageHelper {
                     if ("AndroidManifest.xml".equals(zipEntryName)
                             || "resources.arsc".equals(zipEntryName)
                             || zipEntryName.startsWith("res/")) {
-                        copyZipEntry(zipEntry, privateZip, publicZipOutStream);
+                        size += zipEntry.getSize();
+                        if (publicZipFile != null) {
+                            copyZipEntry(zipEntry, privateZip, publicZipOutStream);
+                        }
                     }
                 }
             } finally {
-                try {
-                    privateZip.close();
-                } catch (IOException e) {
-                }
+                try { privateZip.close(); } catch (IOException e) {}
             }
 
-            publicZipOutStream.finish();
-            publicZipOutStream.flush();
-            FileUtils.sync(fstr);
-            publicZipOutStream.close();
-            FileUtils.setPermissions(publicZipFile.getAbsolutePath(), FileUtils.S_IRUSR
-                    | FileUtils.S_IWUSR | FileUtils.S_IRGRP | FileUtils.S_IROTH, -1, -1);
+            if (publicZipFile != null) {
+                publicZipOutStream.finish();
+                publicZipOutStream.flush();
+                FileUtils.sync(fstr);
+                publicZipOutStream.close();
+                FileUtils.setPermissions(publicZipFile.getAbsolutePath(), FileUtils.S_IRUSR
+                        | FileUtils.S_IWUSR | FileUtils.S_IRGRP | FileUtils.S_IROTH, -1, -1);
+            }
         } finally {
             IoUtils.closeQuietly(publicZipOutStream);
         }
+
+        return size;
     }
 
     private static void copyZipEntry(ZipEntry zipEntry, ZipFile inZipFile,
@@ -264,5 +279,19 @@ public class PackageHelper {
         } finally {
             IoUtils.closeQuietly(data);
         }
+    }
+
+    public static boolean fixSdPermissions(String cid, int gid, String filename) {
+        try {
+            int rc = getMountService().fixPermissionsSecureContainer(cid, gid, filename);
+            if (rc != StorageResultCode.OperationSucceeded) {
+                Log.i(TAG, "Failed to fixperms container " + cid);
+                return false;
+            }
+            return true;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to fixperms container " + cid + " with exception " + e);
+        }
+        return false;
     }
 }

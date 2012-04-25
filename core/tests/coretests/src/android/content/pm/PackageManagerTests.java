@@ -309,9 +309,7 @@ public class PackageManagerTests extends AndroidTestCase {
     private static final int INSTALL_LOC_ERR = -1;
     private int getInstallLoc(int flags, int expInstallLocation, long pkgLen) {
         // Flags explicitly over ride everything else.
-        if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0 ) {
-            return INSTALL_LOC_INT;
-        } else if ((flags & PackageManager.INSTALL_EXTERNAL) != 0 ) {
+        if ((flags & PackageManager.INSTALL_EXTERNAL) != 0 ) {
             return INSTALL_LOC_SD;
         } else if ((flags & PackageManager.INSTALL_INTERNAL) != 0) {
             return INSTALL_LOC_INT;
@@ -380,61 +378,76 @@ public class PackageManagerTests extends AndroidTestCase {
             String publicSrcPath = publicSrcDir.getParent();
             long pkgLen = new File(info.sourceDir).length();
 
-            if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
-                assertTrue((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
-                assertEquals(srcPath, drmInstallPath);
-                assertEquals(publicSrcPath, appInstallPath);
-                assertTrue(info.nativeLibraryDir.startsWith(dataDir.getPath()));
-            } else {
-                assertFalse((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
-                int rLoc = getInstallLoc(flags, expInstallLocation, pkgLen);
-                if (rLoc == INSTALL_LOC_INT) {
-                    assertEquals(srcPath, appInstallPath);
-                    assertEquals(publicSrcPath, appInstallPath);
-                    assertFalse((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
-                    assertTrue(info.nativeLibraryDir.startsWith(dataDir.getPath()));
-
-                    // Make sure the native library dir is not a symlink
-                    final File nativeLibDir = new File(info.nativeLibraryDir);
-                    assertTrue("Native library dir should exist at " + info.nativeLibraryDir,
-                            nativeLibDir.exists());
-                    try {
-                        assertEquals("Native library dir should not be a symlink",
-                                info.nativeLibraryDir,
-                                nativeLibDir.getCanonicalPath());
-                    } catch (IOException e) {
-                        fail("Can't read " + nativeLibDir.getPath());
-                    }
-                } else if (rLoc == INSTALL_LOC_SD){
-                    assertTrue("Application flags (" + info.flags
-                            + ") should contain FLAG_EXTERNAL_STORAGE",
-                            (info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
+            int rLoc = getInstallLoc(flags, expInstallLocation, pkgLen);
+            if (rLoc == INSTALL_LOC_INT) {
+                if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
+                    assertTrue("The application should be installed forward locked",
+                            (info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
                     assertTrue("The APK path (" + srcPath + ") should start with "
-                            + SECURE_CONTAINERS_PREFIX, srcPath
-                            .startsWith(SECURE_CONTAINERS_PREFIX));
+                            + SECURE_CONTAINERS_PREFIX,
+                            srcPath.startsWith(SECURE_CONTAINERS_PREFIX));
                     assertTrue("The public APK path (" + publicSrcPath + ") should start with "
-                            + SECURE_CONTAINERS_PREFIX, publicSrcPath
-                            .startsWith(SECURE_CONTAINERS_PREFIX));
+                            + SECURE_CONTAINERS_PREFIX,
+                            publicSrcPath.startsWith(SECURE_CONTAINERS_PREFIX));
                     assertTrue("The native library path (" + info.nativeLibraryDir
                             + ") should start with " + SECURE_CONTAINERS_PREFIX,
                             info.nativeLibraryDir.startsWith(SECURE_CONTAINERS_PREFIX));
-
-                    // Make sure the native library in /data/data/<app>/lib is a
-                    // symlink to the ASEC
-                    final File nativeLibSymLink = new File(info.dataDir, "lib");
-                    assertTrue("Native library symlink should exist at " + nativeLibSymLink.getPath(),
-                            nativeLibSymLink.exists());
-                    try {
-                        assertEquals(nativeLibSymLink.getPath() + " should be a symlink to "
-                                + info.nativeLibraryDir, info.nativeLibraryDir, nativeLibSymLink
-                                .getCanonicalPath());
-                    } catch (IOException e) {
-                        fail("Can't read " + nativeLibSymLink.getPath());
-                    }
                 } else {
-                    // TODO handle error. Install should have failed.
-                    fail("Install should have failed");
+                    assertFalse((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
+                    assertEquals(srcPath, appInstallPath);
+                    assertEquals(publicSrcPath, appInstallPath);
+                    assertTrue(info.nativeLibraryDir.startsWith(dataDir.getPath()));
                 }
+                assertFalse((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
+
+                // Make sure the native library dir is not a symlink
+                final File nativeLibDir = new File(info.nativeLibraryDir);
+                assertTrue("Native library dir should exist at " + info.nativeLibraryDir,
+                        nativeLibDir.exists());
+                try {
+                    assertEquals("Native library dir should not be a symlink",
+                            info.nativeLibraryDir,
+                            nativeLibDir.getCanonicalPath());
+                } catch (IOException e) {
+                    fail("Can't read " + nativeLibDir.getPath());
+                }
+            } else if (rLoc == INSTALL_LOC_SD){
+                if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
+                    assertTrue("The application should be installed forward locked",
+                            (info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
+                } else {
+                    assertFalse("The application should not be installed forward locked",
+                            (info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
+                }
+                assertTrue("Application flags (" + info.flags
+                        + ") should contain FLAG_EXTERNAL_STORAGE",
+                        (info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
+                // Might need to check:
+                // ((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0)
+                assertTrue("The APK path (" + srcPath + ") should start with "
+                        + SECURE_CONTAINERS_PREFIX, srcPath.startsWith(SECURE_CONTAINERS_PREFIX));
+                assertTrue("The public APK path (" + publicSrcPath + ") should start with "
+                        + SECURE_CONTAINERS_PREFIX,
+                        publicSrcPath.startsWith(SECURE_CONTAINERS_PREFIX));
+                assertTrue("The native library path (" + info.nativeLibraryDir
+                        + ") should start with " + SECURE_CONTAINERS_PREFIX,
+                        info.nativeLibraryDir.startsWith(SECURE_CONTAINERS_PREFIX));
+
+                // Make sure the native library in /data/data/<app>/lib is a
+                // symlink to the ASEC
+                final File nativeLibSymLink = new File(info.dataDir, "lib");
+                assertTrue("Native library symlink should exist at " + nativeLibSymLink.getPath(),
+                        nativeLibSymLink.exists());
+                try {
+                    assertEquals(nativeLibSymLink.getPath() + " should be a symlink to "
+                            + info.nativeLibraryDir, info.nativeLibraryDir, nativeLibSymLink
+                            .getCanonicalPath());
+                } catch (IOException e) {
+                    fail("Can't read " + nativeLibSymLink.getPath());
+                }
+            } else {
+                // TODO handle error. Install should have failed.
+                fail("Install should have failed");
             }
         } catch (NameNotFoundException e) {
             failStr("failed with exception : " + e);
@@ -1774,15 +1787,17 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     /*
-     * Install an app with both external and forward-lock flags set. should fail
+     * Install an app with both external and forward-lock flags set.
      */
     @LargeTest
     public void testFlagEF() {
-        installFromRawResource("install.apk", R.raw.install,
-                PackageManager.INSTALL_FORWARD_LOCK | PackageManager.INSTALL_EXTERNAL,
-                false,
-                true, PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION,
-                PackageInfo.INSTALL_LOCATION_AUTO);
+        // Do not run on devices with emulated external storage.
+        if (Environment.isExternalStorageEmulated()) {
+            return;
+        }
+
+        sampleInstallFromRawResource(PackageManager.INSTALL_FORWARD_LOCK
+                | PackageManager.INSTALL_EXTERNAL, true);
     }
 
     /*
@@ -1899,15 +1914,20 @@ public class PackageManagerTests extends AndroidTestCase {
                 PackageManager.INSTALL_FORWARD_LOCK,
                 true,
                 false, -1,
-                PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
+                PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
     }
 
     /*
      * Install an app with fwd locked flag set and install location set to
-     * preferExternal. should install internally.
+     * preferExternal. Should install externally.
      */
     @LargeTest
     public void testFlagFManifestE() {
+        // Do not run on devices with emulated external storage.
+        if (Environment.isExternalStorageEmulated()) {
+            return;
+        }
+
         installFromRawResource("install.apk", R.raw.install_loc_sdcard,
                 PackageManager.INSTALL_FORWARD_LOCK,
                 true,
@@ -1916,11 +1936,16 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     /*
-     * Install an app with fwd locked flag set and install location set to
-     * auto. should install internally.
+     * Install an app with fwd locked flag set and install location set to auto.
+     * should install externally.
      */
     @LargeTest
     public void testFlagFManifestA() {
+        // Do not run on devices with emulated external storage.
+        if (Environment.isExternalStorageEmulated()) {
+            return;
+        }
+
         installFromRawResource("install.apk", R.raw.install_loc_auto,
                 PackageManager.INSTALL_FORWARD_LOCK,
                 true,
