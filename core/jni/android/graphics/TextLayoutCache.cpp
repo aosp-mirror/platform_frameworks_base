@@ -21,6 +21,7 @@
 #include "SkFontHost.h"
 #include <unicode/unistr.h>
 #include <unicode/normlzr.h>
+#include <unicode/uchar.h>
 
 extern "C" {
   #include "harfbuzz-unicode.h"
@@ -38,8 +39,6 @@ namespace android {
 #define TYPEFACE_THAI "/system/fonts/DroidSansThai.ttf"
 
 ANDROID_SINGLETON_STATIC_INSTANCE(TextLayoutEngine);
-
-static KeyedVector<UChar, UChar> gBidiMirrored;
 
 //--------------------------------------------------------------------------------------------------
 
@@ -356,23 +355,6 @@ TextLayoutShaper::TextLayoutShaper() : mShaperItemGlyphArraySize(0) {
 
     mShaperItem.font = &mFontRec;
     mShaperItem.font->userData = &mShapingPaint;
-
-    // Fill the BiDi mirrored chars map
-    // See: http://www.unicode.org/Public/6.0.0/ucd/extracted/DerivedBinaryProperties.txt
-    gBidiMirrored.add('(', ')');
-    gBidiMirrored.add(')', '(');
-    gBidiMirrored.add('[', ']');
-    gBidiMirrored.add(']', '[');
-    gBidiMirrored.add('{', '}');
-    gBidiMirrored.add('}', '{');
-    gBidiMirrored.add('<', '>');
-    gBidiMirrored.add('>', '<');
-    gBidiMirrored.add(0x00ab, 0x00bb); // LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
-    gBidiMirrored.add(0x00bb, 0x00ab); // RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
-    gBidiMirrored.add(0x2039, 0x203a); // SINGLE LEFT-POINTING ANGLE QUOTATION MARK
-    gBidiMirrored.add(0x203a, 0x2039); // SINGLE RIGHT-POINTING ANGLE QUOTATION MARK
-    gBidiMirrored.add(0x2264, 0x2265); // LESS-THAN OR EQUAL TO
-    gBidiMirrored.add(0x2265, 0x2264); // GREATER-THAN OR EQUAL TO
 }
 
 TextLayoutShaper::~TextLayoutShaper() {
@@ -577,7 +559,7 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* chars
 #if DEBUG_GLYPHS
             ALOGD("Found main code point at index %d", int(j));
 #endif
-            // We found the main code point, so we can normalize the "chunck" and fill
+            // We found the main code point, so we can normalize the "chunk" and fill
             // the remaining with ZWSP so that the Paint.getTextWidth() APIs will still be able
             // to get one advance per char
             mBuffer.remove();
@@ -608,17 +590,13 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* chars
     // script-run splitting with Harfbuzz is splitting on parenthesis
     if (isRTL) {
         for (ssize_t i = 0; i < ssize_t(count); i++) {
-            UChar ch = chars[i];
-            ssize_t index = gBidiMirrored.indexOfKey(ch);
-            // Skip non "BiDi mirrored" chars
-            if (index < 0) {
-                continue;
-            }
+            UChar32 ch = chars[i];
+            if (!u_isMirrored(ch)) continue;
             if (!useNormalizedString) {
                 useNormalizedString = true;
                 mNormalizedString.setTo(false /* not terminated*/, chars, count);
             }
-            UChar result = gBidiMirrored.valueAt(index);
+            UChar result =  (UChar) u_charMirror(ch);
             mNormalizedString.setCharAt(i, result);
 #if DEBUG_GLYPHS
             ALOGD("Rewriting codepoint '%d' to '%d' at position %d",
