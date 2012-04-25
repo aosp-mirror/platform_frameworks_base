@@ -31,17 +31,16 @@ import android.graphics.BitmapFactory;
 import android.mtp.MtpConstants;
 import android.net.Uri;
 import android.os.Environment;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.provider.MediaStore;
-import android.provider.MediaStore.Files.FileColumns;
-import android.provider.Settings;
 import android.provider.MediaStore.Audio;
+import android.provider.MediaStore.Audio.Playlists;
 import android.provider.MediaStore.Files;
+import android.provider.MediaStore.Files.FileColumns;
 import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Video;
-import android.provider.MediaStore.Audio.Playlists;
+import android.provider.Settings;
 import android.sax.Element;
 import android.sax.ElementListener;
 import android.sax.RootElement;
@@ -56,10 +55,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Locale;
 
 import libcore.io.ErrnoException;
@@ -371,6 +368,14 @@ public class MediaScanner
             return mPath + " mRowId: " + mRowId;
         }
     }
+
+    private static class PlaylistEntry {
+        String path;
+        long bestmatchid;
+        int bestmatchlevel;
+    }
+
+    private ArrayList<PlaylistEntry> mPlaylistEntries = new ArrayList<PlaylistEntry>();
 
     private MediaInserter mMediaInserter;
 
@@ -1492,93 +1497,83 @@ public class MediaScanner
         return result;
     }
 
-    private boolean addPlayListEntry(String entry, String playListDirectory,
-            Uri uri, ContentValues values, int index, Cursor fileList) {
+    private boolean matchEntries(long rowId, String data) {
 
+        int len = mPlaylistEntries.size();
+        boolean done = true;
+        for (int i = 0; i < len; i++) {
+            PlaylistEntry entry = mPlaylistEntries.get(i);
+            if (entry.bestmatchlevel == Integer.MAX_VALUE) {
+                continue; // this entry has been matched already
+            }
+            done = false;
+            if (data.equalsIgnoreCase(entry.path)) {
+                entry.bestmatchid = rowId;
+                entry.bestmatchlevel = Integer.MAX_VALUE;
+                continue; // no need for path matching
+            }
+
+            int matchLength = matchPaths(data, entry.path);
+            if (matchLength > entry.bestmatchlevel) {
+                entry.bestmatchid = rowId;
+                entry.bestmatchlevel = matchLength;
+            }
+        }
+        return done;
+    }
+
+    private void cachePlaylistEntry(String line, String playListDirectory) {
+        PlaylistEntry entry = new PlaylistEntry();
         // watch for trailing whitespace
-        int entryLength = entry.length();
-        while (entryLength > 0 && Character.isWhitespace(entry.charAt(entryLength - 1))) entryLength--;
+        int entryLength = line.length();
+        while (entryLength > 0 && Character.isWhitespace(line.charAt(entryLength - 1))) entryLength--;
         // path should be longer than 3 characters.
         // avoid index out of bounds errors below by returning here.
-        if (entryLength < 3) return false;
-        if (entryLength < entry.length()) entry = entry.substring(0, entryLength);
+        if (entryLength < 3) return;
+        if (entryLength < line.length()) line = line.substring(0, entryLength);
 
         // does entry appear to be an absolute path?
         // look for Unix or DOS absolute paths
-        char ch1 = entry.charAt(0);
+        char ch1 = line.charAt(0);
         boolean fullPath = (ch1 == '/' ||
-                (Character.isLetter(ch1) && entry.charAt(1) == ':' && entry.charAt(2) == '\\'));
+                (Character.isLetter(ch1) && line.charAt(1) == ':' && line.charAt(2) == '\\'));
         // if we have a relative path, combine entry with playListDirectory
         if (!fullPath)
-            entry = playListDirectory + entry;
-
+            line = playListDirectory + line;
+        entry.path = line;
         //FIXME - should we look for "../" within the path?
 
-        // best matching MediaFile for the play list entry
-        FileEntry bestMatch = null;
+        mPlaylistEntries.add(entry);
+    }
 
-        // number of rightmost file/directory names for bestMatch
-        int bestMatchLength = 0;
-
-        if (fileList != null) {
-            int count = fileList.getCount();
-            // Backing up a little in the cursor helps when the files in the
-            // playlist are not in the same order as they are in the database
-            // but are still close.
-            fileList.move(-1000);
-            while(--count >= 0) {
-                if (!fileList.moveToNext()) {
-                    fileList.moveToFirst();
-                }
-                long rowId = fileList.getLong(FILES_PRESCAN_ID_COLUMN_INDEX);
-                String path = fileList.getString(FILES_PRESCAN_PATH_COLUMN_INDEX);
-                int format = fileList.getInt(FILES_PRESCAN_FORMAT_COLUMN_INDEX);
-                long lastModified = fileList.getLong(FILES_PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
-
-                if (path.equalsIgnoreCase(entry)) {
-                    bestMatch = new FileEntry(rowId, path, lastModified, format);
-                    break;    // don't bother continuing search
-                }
-
-                int matchLength = matchPaths(path, entry);
-                if (matchLength > bestMatchLength) {
-                    bestMatch = new FileEntry(rowId, path, lastModified, format);
-                    bestMatchLength = matchLength;
-                }
+    private void processCachedPlaylist(Cursor fileList, ContentValues values, Uri playlistUri) {
+        fileList.moveToPosition(-1);
+        while (fileList.moveToNext()) {
+            long rowId = fileList.getLong(FILES_PRESCAN_ID_COLUMN_INDEX);
+            String data = fileList.getString(FILES_PRESCAN_PATH_COLUMN_INDEX);
+            if (matchEntries(rowId, data)) {
+                break;
             }
         }
 
-        if (bestMatch == null) {
-            return false;
-        }
-
-        try {
-            // check rowid is set. Rowid may be missing if it is inserted by bulkInsert().
-            if (bestMatch.mRowId == 0) {
-                Cursor c = mMediaProvider.query(mAudioUri, ID_PROJECTION,
-                        MediaStore.Files.FileColumns.DATA + "=?",
-                        new String[] { bestMatch.mPath }, null, null);
-                if (c != null) {
-                    if (c.moveToNext()) {
-                        bestMatch.mRowId = c.getLong(0);
-                    }
-                    c.close();
-                }
-                if (bestMatch.mRowId == 0) {
-                    return false;
+        int len = mPlaylistEntries.size();
+        int index = 0;
+        for (int i = 0; i < len; i++) {
+            PlaylistEntry entry = mPlaylistEntries.get(i);
+            if (entry.bestmatchlevel > 0) {
+                try {
+                    values.clear();
+                    values.put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, Integer.valueOf(index));
+                    values.put(MediaStore.Audio.Playlists.Members.AUDIO_ID, Long.valueOf(entry.bestmatchid));
+                    mMediaProvider.insert(playlistUri, values);
+                    index++;
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException in MediaScanner.processCachedPlaylist()", e);
+                    return;
                 }
             }
-            // OK, now we are ready to add this to the database
-            values.clear();
-            values.put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, Integer.valueOf(index));
-            values.put(MediaStore.Audio.Playlists.Members.AUDIO_ID, Long.valueOf(bestMatch.mRowId));
-            mMediaProvider.insert(uri, values);
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in MediaScanner.addPlayListEntry()", e);
-            return false;
         }
-
-        return true;
+        mPlaylistEntries.clear();
     }
 
     private void processM3uPlayList(String path, String playListDirectory, Uri uri,
@@ -1590,16 +1585,16 @@ public class MediaScanner
                 reader = new BufferedReader(
                         new InputStreamReader(new FileInputStream(f)), 8192);
                 String line = reader.readLine();
-                int index = 0;
+                mPlaylistEntries.clear();
                 while (line != null) {
                     // ignore comment lines, which begin with '#'
                     if (line.length() > 0 && line.charAt(0) != '#') {
-                        values.clear();
-                        if (addPlayListEntry(line, playListDirectory, uri, values, index, fileList))
-                            index++;
+                        cachePlaylistEntry(line, playListDirectory);
                     }
                     line = reader.readLine();
                 }
+
+                processCachedPlaylist(fileList, values, uri);
             }
         } catch (IOException e) {
             Log.e(TAG, "IOException in MediaScanner.processM3uPlayList()", e);
@@ -1622,20 +1617,19 @@ public class MediaScanner
                 reader = new BufferedReader(
                         new InputStreamReader(new FileInputStream(f)), 8192);
                 String line = reader.readLine();
-                int index = 0;
+                mPlaylistEntries.clear();
                 while (line != null) {
                     // ignore comment lines, which begin with '#'
                     if (line.startsWith("File")) {
                         int equals = line.indexOf('=');
                         if (equals > 0) {
-                            values.clear();
-                            if (addPlayListEntry(line.substring(equals + 1), playListDirectory,
-                                    uri, values, index, fileList))
-                                index++;
+                            cachePlaylistEntry(line, playListDirectory);
                         }
                     }
                     line = reader.readLine();
                 }
+
+                processCachedPlaylist(fileList, values, uri);
             }
         } catch (IOException e) {
             Log.e(TAG, "IOException in MediaScanner.processPlsPlayList()", e);
@@ -1653,15 +1647,9 @@ public class MediaScanner
 
         final ContentHandler handler;
         String playListDirectory;
-        Uri uri;
-        Cursor fileList;
-        ContentValues values = new ContentValues();
-        int index = 0;
 
         public WplHandler(String playListDirectory, Uri uri, Cursor fileList) {
             this.playListDirectory = playListDirectory;
-            this.uri = uri;
-            this.fileList = fileList;
 
             RootElement root = new RootElement("smil");
             Element body = root.getChild("body");
@@ -1676,13 +1664,11 @@ public class MediaScanner
         public void start(Attributes attributes) {
             String path = attributes.getValue("", "src");
             if (path != null) {
-                values.clear();
-                if (addPlayListEntry(path, playListDirectory, uri, values, index, fileList)) {
-                    index++;
-                }
+                cachePlaylistEntry(path, playListDirectory);
             }
         }
 
+       @Override
        public void end() {
        }
 
@@ -1692,15 +1678,18 @@ public class MediaScanner
     }
 
     private void processWplPlayList(String path, String playListDirectory, Uri uri,
-            Cursor fileList) {
+            ContentValues values, Cursor fileList) {
         FileInputStream fis = null;
         try {
             File f = new File(path);
             if (f.exists()) {
                 fis = new FileInputStream(f);
 
+                mPlaylistEntries.clear();
                 Xml.parse(fis, Xml.findEncodingByName("UTF-8"),
                         new WplHandler(playListDirectory, uri, fileList).getContentHandler());
+
+                processCachedPlaylist(fileList, values, uri);
             }
         } catch (SAXException e) {
             e.printStackTrace();
@@ -1762,7 +1751,7 @@ public class MediaScanner
         } else if (fileType == MediaFile.FILE_TYPE_PLS) {
             processPlsPlayList(path, playListDirectory, membersUri, values, fileList);
         } else if (fileType == MediaFile.FILE_TYPE_WPL) {
-            processWplPlayList(path, playListDirectory, membersUri, fileList);
+            processWplPlayList(path, playListDirectory, membersUri, values, fileList);
         }
     }
 
@@ -1800,7 +1789,7 @@ public class MediaScanner
     private native final void native_finalize();
 
     /**
-     * Releases resouces associated with this MediaScanner object.
+     * Releases resources associated with this MediaScanner object.
      * It is considered good practice to call this method when
      * one is done using the MediaScanner object. After this method
      * is called, the MediaScanner object can no longer be used.
