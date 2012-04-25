@@ -3135,11 +3135,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         if (enter) {
             // Entering app zooms out from the center of the initial rect.
-            final float minScale = 0.1f;
-            float scaleW = minScale +
-                    ((1f - minScale) * mNextAppTransitionStartWidth / (float) mAppDisplayWidth);
-            float scaleH = minScale +
-                    ((1f - minScale) * mNextAppTransitionStartHeight / (float) mAppDisplayHeight);
+            float scaleW = mNextAppTransitionStartWidth / (float) mAppDisplayWidth;
+            float scaleH = mNextAppTransitionStartHeight / (float) mAppDisplayHeight;
             Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
                     computePivot(mNextAppTransitionStartX, scaleW),
                     computePivot(mNextAppTransitionStartY, scaleH));
