@@ -3039,14 +3039,14 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     // the scale factor is not 1)
     private void calcOurContentVisibleRectF(RectF r) {
         calcOurVisibleRect(mContentVisibleRect);
-        r.left = viewToContentXf(mContentVisibleRect.left);
+        r.left = viewToContentXf(mContentVisibleRect.left) / mWebView.getScaleX();
         // viewToContentY will remove the total height of the title bar.  Add
         // the visible height back in to account for the fact that if the title
         // bar is partially visible, the part of the visible rect which is
         // displaying our content is displaced by that amount.
-        r.top = viewToContentYf(mContentVisibleRect.top + getVisibleTitleHeightImpl());
-        r.right = viewToContentXf(mContentVisibleRect.right);
-        r.bottom = viewToContentYf(mContentVisibleRect.bottom);
+        r.top = viewToContentYf(mContentVisibleRect.top + getVisibleTitleHeightImpl()) / mWebView.getScaleY();
+        r.right = viewToContentXf(mContentVisibleRect.right) / mWebView.getScaleX();
+        r.bottom = viewToContentYf(mContentVisibleRect.bottom) / mWebView.getScaleY();
     }
 
     static class ViewSizeData {
