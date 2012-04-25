@@ -2322,27 +2322,26 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         String operator = mPhone.mIccRecords.getOperatorNumeric();
         int networkType = mPhone.getServiceState().getNetworkType();
 
-        if (requestedApnType.equals(Phone.APN_TYPE_DEFAULT)) {
-            if (canSetPreferApn && mPreferredApn != null) {
-                if (DBG) {
-                    log("buildWaitingApns: Preferred APN:" + operator + ":"
+        if (canSetPreferApn && mPreferredApn != null &&
+                mPreferredApn.canHandleType(requestedApnType)) {
+            if (DBG) {
+                log("buildWaitingApns: Preferred APN:" + operator + ":"
                         + mPreferredApn.numeric + ":" + mPreferredApn);
-                }
-                if (mPreferredApn.numeric.equals(operator)) {
-                    if (mPreferredApn.bearer == 0 || mPreferredApn.bearer == networkType) {
-                        apnList.add(mPreferredApn);
-                        if (DBG) log("buildWaitingApns: X added preferred apnList=" + apnList);
-                        return apnList;
-                    } else {
-                        if (DBG) log("buildWaitingApns: no preferred APN");
-                        setPreferredApn(-1);
-                        mPreferredApn = null;
-                    }
+            }
+            if (mPreferredApn.numeric.equals(operator)) {
+                if (mPreferredApn.bearer == 0 || mPreferredApn.bearer == networkType) {
+                    apnList.add(mPreferredApn);
+                    if (DBG) log("buildWaitingApns: X added preferred apnList=" + apnList);
+                    return apnList;
                 } else {
                     if (DBG) log("buildWaitingApns: no preferred APN");
                     setPreferredApn(-1);
                     mPreferredApn = null;
                 }
+            } else {
+                if (DBG) log("buildWaitingApns: no preferred APN");
+                setPreferredApn(-1);
+                mPreferredApn = null;
             }
         }
         if (mAllApns != null) {
