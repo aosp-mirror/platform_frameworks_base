@@ -258,7 +258,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     // ================================================================================
     // Constructing the view
     // ================================================================================
-    protected View makeStatusBarView() {
+    protected PhoneStatusBarView makeStatusBarView() {
         final Context context = mContext;
 
         Resources res = context.getResources();
@@ -294,6 +294,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                     (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
 
                 mNavigationBarView.setDisabledFlags(mDisabled);
+                mNavigationBarView.setBar(this);
             }
         } catch (RemoteException ex) {
             // no window manager? good luck with that
@@ -389,12 +390,65 @@ public class PhoneStatusBar extends BaseStatusBar {
         return lp;
     }
 
+    @Override
+    protected WindowManager.LayoutParams getSearchLayoutParams(LayoutParams layoutParams) {
+        boolean opaque = false;
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+                (opaque ? PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT));
+        if (ActivityManager.isHighEndGfx(mDisplay)) {
+            lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+        } else {
+            lp.flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+            lp.dimAmount = 0.7f;
+        }
+        lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
+        lp.setTitle("SearchPanel");
+        // TODO: Define custom animation for Search panel
+        lp.windowAnimations = com.android.internal.R.style.Animation_RecentApplications;
+        lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
+        | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
+        return lp;
+    }
+
     protected void updateRecentsPanel() {
         super.updateRecentsPanel(R.layout.status_bar_recent_panel);
         // Make .03 alpha the minimum so you always see the item a bit-- slightly below
         // .03, the item disappears entirely (as if alpha = 0) and that discontinuity looks
         // a bit jarring
         mRecentsPanel.setMinSwipeAlpha(0.03f);
+    }
+
+    @Override
+    protected void updateSearchPanel() {
+        super.updateSearchPanel();
+        mSearchPanelView.setStatusBarView(mStatusBarView);
+        mNavigationBarView.setDelegateView(mSearchPanelView);
+    }
+
+    @Override
+    public void showSearchPanel() {
+        super.showSearchPanel();
+        WindowManager.LayoutParams lp =
+            (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
+        lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        lp.flags &= ~WindowManager.LayoutParams.FLAG_SLIPPERY;
+        WindowManagerImpl.getDefault().updateViewLayout(mNavigationBarView, lp);
+    }
+
+    @Override
+    public void hideSearchPanel() {
+        super.hideSearchPanel();
+        WindowManager.LayoutParams lp =
+            (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
+        lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        lp.flags |= WindowManager.LayoutParams.FLAG_SLIPPERY;
+        WindowManagerImpl.getDefault().updateViewLayout(mNavigationBarView, lp);
     }
 
     protected int getStatusBarGravity() {
@@ -412,12 +466,30 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     };
     private StatusBarNotification mCurrentlyIntrudingNotification;
+    View.OnTouchListener mHomeSearchActionListener = new View.OnTouchListener() {
+        public boolean onTouch(View v, MotionEvent event) {
+            switch(event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    Slog.d(TAG, "showing search panel");
+                    showSearchPanel();
+                break;
+
+                case MotionEvent.ACTION_UP:
+                    Slog.d(TAG, "hiding search panel");
+                    hideSearchPanel();
+                break;
+            }
+            return false;
+        }
+    };
 
     private void prepareNavigationBarView() {
         mNavigationBarView.reorient();
 
         mNavigationBarView.getRecentsButton().setOnClickListener(mRecentsClickListener);
         mNavigationBarView.getRecentsButton().setOnTouchListener(mRecentsPanel);
+        updateSearchPanel();
+//        mNavigationBarView.getHomeButton().setOnTouchListener(mHomeSearchActionListener);
     }
 
     // For small-screen devices (read: phones) that lack hardware navigation buttons
@@ -528,7 +600,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             Slog.d(TAG, "Presenting high-priority notification");
             // special new transient ticker mode
             // 1. Populate mIntruderAlertView
-            
+
             if (notification.notification.intruderView == null) {
                 Slog.e(TAG, notification.notification.toString() + " wanted to intrude but intruderView was null");
                 return;
@@ -544,7 +616,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             mIntruderAlertView.applyIntruderContent(notification.notification.intruderView, listener);
 
             mCurrentlyIntrudingNotification = notification;
-            
+
             // 2. Animate mIntruderAlertView in
             mHandler.sendEmptyMessage(MSG_SHOW_INTRUDER);
 
@@ -698,7 +770,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
             // Recalculate the position of the sliding windows and the titles.
             updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
-            
+
             if (ENABLE_INTRUDERS && old == mCurrentlyIntrudingNotification) {
                 mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
             }
@@ -1672,7 +1744,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         addStatusBarWindow();
         addExpandedWindow();
     }
-    
+
     private void addStatusBarWindow() {
         // Put up the view
         final int height = getStatusBarHeight();
@@ -1697,9 +1769,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         lp.gravity = getStatusBarGravity();
         lp.setTitle("StatusBar");
         lp.packageName = mContext.getPackageName();
-        WindowManagerImpl.getDefault().addView(makeStatusBarView(), lp);
+        mStatusBarView = makeStatusBarView();
+        WindowManagerImpl.getDefault().addView(mStatusBarView, lp);
     }
-    
+
     void addExpandedWindow() {
         WindowManager.LayoutParams lp;
         int pixelFormat;
@@ -1780,11 +1853,11 @@ public class PhoneStatusBar extends BaseStatusBar {
                 panelh = disph;
             }
         }
-        
+
         // catch orientation changes and other peculiar cases
         if (panelh > disph || (panelh < disph && !mTracking && !mAnimating))
             panelh = disph;
-        
+
         mTrackingPosition = panelh;
         // XXX: this is all very WIP
         //mNotificationPanel.setY(panelh);
@@ -1796,9 +1869,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         final float frac = (float)panelh / disph;
         final int color = ((int)(0xB0 * frac * frac)) << 24;
         mExpandedWindowView.setBackgroundColor(color);
-        
+
 //        Slog.d(TAG, String.format("updateExpanded: pos=%d frac=%.2f col=0x%08x", pos, frac, color));
-        
+
 //        if (mExpandedParams != null) {
 //            if (mCloseView.getWindowVisibility() == View.VISIBLE) {
 //                mCloseView.getLocationInWindow(mPositionTmp);
@@ -2060,7 +2133,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             // oh well
         }
     }
-    
+
     /**
      * Reload some of our resources when the configuration changes.
      *

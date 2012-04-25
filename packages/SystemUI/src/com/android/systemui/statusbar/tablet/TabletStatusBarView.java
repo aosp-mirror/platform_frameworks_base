@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.tablet;
 
+import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.DelegateViewHelper;
+
 import android.content.Context;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -31,13 +34,24 @@ public class TabletStatusBarView extends FrameLayout {
     private final View[] mIgnoreChildren = new View[MAX_PANELS];
     private final View[] mPanels = new View[MAX_PANELS];
     private final int[] mPos = new int[2];
+    private DelegateViewHelper mDelegateHelper;
 
     public TabletStatusBarView(Context context) {
         super(context);
+        mDelegateHelper = new DelegateViewHelper(this);
     }
 
     public TabletStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mDelegateHelper = new DelegateViewHelper(this);
+    }
+
+    public void setDelegateView(View view) {
+        mDelegateHelper.setDelegateView(view);
+    }
+
+    public void setBar(BaseStatusBar phoneStatusBar) {
+        mDelegateHelper.setBar(phoneStatusBar);
     }
 
     @Override
@@ -72,6 +86,9 @@ public class TabletStatusBarView extends FrameLayout {
         if (TabletStatusBar.DEBUG) {
             Slog.d(TabletStatusBar.TAG, "TabletStatusBarView not intercepting event");
         }
+        if (mDelegateHelper != null) {
+            return mDelegateHelper.onInterceptTouchEvent(ev);
+        }
         return super.onInterceptTouchEvent(ev);
     }
 
@@ -97,7 +114,7 @@ public class TabletStatusBarView extends FrameLayout {
 
     /**
      * Let the status bar know that if you tap on ignore while panel is showing, don't do anything.
-     * 
+     *
      * Debounces taps on, say, a popup's trigger when the popup is already showing.
      */
     public void setIgnoreChildren(int index, View ignore, View panel) {

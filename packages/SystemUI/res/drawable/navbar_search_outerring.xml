@@ -13,18 +13,11 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item
-        android:state_enabled="true"
-        android:state_active="false"
-        android:state_focused="false"
-        android:drawable="@drawable/ic_lockscreen_google_normal" />
-
-    <item
-        android:state_enabled="true"
-        android:state_active="true"
-        android:state_focused="false"
-        android:drawable="@drawable/ic_lockscreen_google_activated" />
-
-</selector>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <size android:height="@dimen/navbar_search_outerring_diameter"
+        android:width="@dimen/navbar_search_outerring_diameter" />
+    <solid android:color="#00000000" />
+    <stroke android:color="#1affffff" android:width="2dp" />
+</shape>

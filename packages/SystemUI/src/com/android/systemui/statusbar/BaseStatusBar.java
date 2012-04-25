@@ -55,6 +55,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.statusbar.StatusBarNotification;
 import com.android.internal.widget.SizeAdaptiveLayout;
+import com.android.systemui.SearchPanelView;
 import com.android.systemui.SystemUI;
 import com.android.systemui.recent.RecentsPanelView;
 import com.android.systemui.recent.RecentTasksLoader;
@@ -73,6 +74,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected static final int MSG_CLOSE_RECENTS_PANEL = 1021;
     protected static final int MSG_PRELOAD_RECENT_APPS = 1022;
     protected static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 1023;
+    protected static final int MSG_OPEN_SEARCH_PANEL = 1024;
+    protected static final int MSG_CLOSE_SEARCH_PANEL = 1025;
 
     protected CommandQueue mCommandQueue;
     protected IStatusBarService mBarService;
@@ -80,6 +83,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     // used to notify status bar for suppressing notification LED
     protected boolean mPanelSlightlyVisible;
+
+    // Search panel
+    protected SearchPanelView mSearchPanelView;
 
     // Recent apps
     protected RecentsPanelView mRecentsPanel;
@@ -278,10 +284,27 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     @Override
+    public void showSearchPanel() {
+        int msg = MSG_OPEN_SEARCH_PANEL;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
+    }
+
+    @Override
+    public void hideSearchPanel() {
+        int msg = MSG_CLOSE_SEARCH_PANEL;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
+    }
+
+    @Override
     public void onRecentsPanelVisibilityChanged(boolean visible) {
     }
 
     protected abstract WindowManager.LayoutParams getRecentsLayoutParams(
+            LayoutParams layoutParams);
+
+    protected abstract WindowManager.LayoutParams getSearchLayoutParams(
             LayoutParams layoutParams);
 
     protected void updateRecentsPanel(int recentsResId) {
@@ -319,6 +342,31 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     }
 
+    protected void updateSearchPanel() {
+        // Search Panel
+        boolean visible = false;
+        if (mSearchPanelView != null) {
+            visible = mSearchPanelView.isShowing();
+            WindowManagerImpl.getDefault().removeView(mSearchPanelView);
+        }
+
+        // Provide SearchPanel with a temporary parent to allow layout params to work.
+        LinearLayout tmpRoot = new LinearLayout(mContext);
+        mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(
+                 R.layout.status_bar_search_panel, tmpRoot, false);
+        mSearchPanelView.setOnTouchListener(
+                 new TouchOutsideListener(MSG_CLOSE_SEARCH_PANEL, mSearchPanelView));
+        mSearchPanelView.setVisibility(View.GONE);
+
+        WindowManager.LayoutParams lp = getSearchLayoutParams(mSearchPanelView.getLayoutParams());
+
+        WindowManagerImpl.getDefault().addView(mSearchPanelView, lp);
+        mSearchPanelView.setBar(this);
+        if (visible) {
+            mSearchPanelView.show(true, false);
+        }
+    }
+
     protected H createHandler() {
          return new H();
     }
@@ -346,6 +394,18 @@ public abstract class BaseStatusBar extends SystemUI implements
                   if (DEBUG) Slog.d(TAG, "cancel preloading recents");
                   mRecentsPanel.clearRecentTasksList();
                   break;
+             case MSG_OPEN_SEARCH_PANEL:
+                 if (DEBUG) Slog.d(TAG, "opening search panel");
+                 if (mSearchPanelView != null) {
+                     mSearchPanelView.show(true, true);
+                 }
+                 break;
+             case MSG_CLOSE_SEARCH_PANEL:
+                 if (DEBUG) Slog.d(TAG, "closing search panel");
+                 if (mSearchPanelView != null && mSearchPanelView.isShowing()) {
+                     mSearchPanelView.show(false, true);
+                 }
+                 break;
             }
         }
     }
