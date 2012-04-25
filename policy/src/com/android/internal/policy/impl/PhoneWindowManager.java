@@ -306,7 +306,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowState mStatusBar = null;
     boolean mHasSystemNavBar;
     int mStatusBarHeight;
-    final ArrayList<WindowState> mStatusBarSubPanels = new ArrayList<WindowState>();
     WindowState mNavigationBar = null;
     boolean mHasNavigationBar = false;
     boolean mCanHideNavigationBar = false;
@@ -1586,7 +1585,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.STATUS_BAR_SERVICE,
                         "PhoneWindowManager");
-                mStatusBarSubPanels.add(win);
                 break;
             case TYPE_KEYGUARD:
                 if (mKeyguard != null) {
@@ -1606,8 +1604,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mKeyguard = null;
         } else if (mNavigationBar == win) {
             mNavigationBar = null;
-        } else {
-            mStatusBarSubPanels.remove(win);
         }
     }
 
@@ -2777,25 +2773,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // If keyguard is currently visible, no reason to animate
             // behind it.
             return false;
-        }
-        if (mStatusBar != null && mStatusBar.isVisibleLw()) {
-            RectF rect = new RectF(mStatusBar.getShownFrameLw());
-            for (int i=mStatusBarSubPanels.size()-1; i>=0; i--) {
-                WindowState w = mStatusBarSubPanels.get(i);
-                if (w.isVisibleLw()) {
-                    rect.union(w.getShownFrameLw());
-                }
-            }
-            final int insetw = mRestrictedScreenWidth/10;
-            final int inseth = mRestrictedScreenHeight/10;
-            if (rect.contains(insetw, inseth, mRestrictedScreenWidth-insetw,
-                        mRestrictedScreenHeight-inseth)) {
-                // All of the status bar windows put together cover the
-                // screen, so the app can't be seen.  (Note this test doesn't
-                // work if the rects of these windows are at odd offsets or
-                // sizes, causing gaps in the rect union we have computed.)
-                return false;
-            }
         }
         return true;
     }
