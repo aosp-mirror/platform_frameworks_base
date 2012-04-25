@@ -22,14 +22,19 @@
     <alpha android:fromAlpha="1.0" android:toAlpha="0"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
             android:interpolator="@interpolator/decelerate_cubic"
-            android:duration="200"/>
-    <scale android:fromXScale="1.0" android:toXScale="0.95"
-            android:fromYScale="1.0" android:toYScale="0.95"
+            android:duration="300"/>
+    <scale android:fromXScale="1.0" android:toXScale="0.6"
+            android:fromYScale="1.0" android:toYScale="0.6"
             android:pivotX="50%p" android:pivotY="50%p"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:interpolator="@interpolator/decelerate_quint"
-            android:duration="300" />
+            android:interpolator="@interpolator/accelerate_quad"
+            android:duration="500" />
+    <translate android:fromYDelta="0" android:toYDelta="-100%"
+            android:interpolator="@interpolator/accelerate_quad"
+            android:duration="500"/>
+
     <!-- This is needed to keep the animation running while task_open_enter completes -->
     <alpha android:fromAlpha="1.0" android:toAlpha="1.0"
-            android:duration="540" />
+            android:interpolator="@interpolator/accelerate_quad"
+            android:duration="700" />
 </set>

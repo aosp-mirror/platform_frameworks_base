@@ -22,8 +22,8 @@
     android:zAdjustment="top"
     android:shareInterpolator="false">
     <scale
-        android:fromXScale="1.0" android:toXScale="1.15"
-        android:fromYScale="1.0" android:toYScale="1.15"
+        android:fromXScale="1.0" android:toXScale="1.10"
+        android:fromYScale="1.0" android:toYScale="1.10"
         android:pivotX="50%p" android:pivotY="50%p"
         android:fillEnabled="true" android:fillAfter="true"
         android:interpolator="@interpolator/accelerate_quint"

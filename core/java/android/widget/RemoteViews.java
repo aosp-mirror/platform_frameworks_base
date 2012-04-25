@@ -16,13 +16,7 @@
 
 package android.widget;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetHostView;
 import android.content.Context;
@@ -40,12 +34,19 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.LayoutInflater.Filter;
 import android.view.RemotableViewMethod;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.LayoutInflater.Filter;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView.OnItemClickListener;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 
 /**
@@ -140,14 +141,18 @@ public class RemoteViews implements Parcelable, Filter {
             return;
         }
 
-        protected boolean startIntentSafely(Context context, PendingIntent pendingIntent,
+        protected boolean startIntentSafely(View view, PendingIntent pendingIntent,
                 Intent fillInIntent) {
             try {
                 // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
+                Context context = view.getContext();
+                ActivityOptions opts = ActivityOptions.makeScaleUpAnimation(view,
+                        0, 0,
+                        view.getMeasuredWidth(), view.getMeasuredHeight());
                 context.startIntentSender(
                         pendingIntent.getIntentSender(), fillInIntent,
                         Intent.FLAG_ACTIVITY_NEW_TASK,
-                        Intent.FLAG_ACTIVITY_NEW_TASK, 0);
+                        Intent.FLAG_ACTIVITY_NEW_TASK, 0, opts.toBundle());
             } catch (IntentSender.SendIntentException e) {
                 android.util.Log.e(LOG_TAG, "Cannot send pending intent: ", e);
                 return false;
@@ -263,7 +268,7 @@ public class RemoteViews implements Parcelable, Filter {
                         rect.bottom = (int) ((pos[1] + v.getHeight()) * appScale + 0.5f);
 
                         fillInIntent.setSourceBounds(rect);
-                        startIntentSafely(v.getContext(), pendingIntent, fillInIntent);
+                        startIntentSafely(v, pendingIntent, fillInIntent);
                     }
 
                 };
@@ -341,7 +346,7 @@ public class RemoteViews implements Parcelable, Filter {
 
                             final Intent intent = new Intent();
                             intent.setSourceBounds(rect);
-                            startIntentSafely(view.getContext(), pendingIntentTemplate, fillInIntent);
+                            startIntentSafely(view, pendingIntentTemplate, fillInIntent);
                         }
                     }
                 };
@@ -479,7 +484,7 @@ public class RemoteViews implements Parcelable, Filter {
     
                             final Intent intent = new Intent();
                             intent.setSourceBounds(rect);
-                            startIntentSafely(v.getContext(), pendingIntent, intent);
+                            startIntentSafely(v, pendingIntent, intent);
                         }
                     };
                 }

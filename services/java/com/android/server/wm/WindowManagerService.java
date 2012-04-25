@@ -130,6 +130,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.Transformation;
+import android.view.animation.TranslateAnimation;
 
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
@@ -3129,13 +3130,16 @@ public class WindowManagerService extends IWindowManager.Stub
                         com.android.internal.R.integer.config_shortAnimTime);
                 break;
             default:
-                duration = 500;
+                duration = 300;
                 break;
         }
         if (enter) {
             // Entering app zooms out from the center of the initial rect.
-            float scaleW = mNextAppTransitionStartWidth/(float)mAppDisplayWidth;
-            float scaleH = mNextAppTransitionStartHeight/(float)mAppDisplayHeight;
+            final float minScale = 0.1f;
+            float scaleW = minScale +
+                    ((1f - minScale) * mNextAppTransitionStartWidth / (float) mAppDisplayWidth);
+            float scaleH = minScale +
+                    ((1f - minScale) * mNextAppTransitionStartHeight / (float) mAppDisplayHeight);
             Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
                     computePivot(mNextAppTransitionStartX, scaleW),
                     computePivot(mNextAppTransitionStartY, scaleH));
@@ -3152,7 +3156,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         a.setFillAfter(true);
         final Interpolator interpolator = AnimationUtils.loadInterpolator(mContext,
-                com.android.internal.R.interpolator.decelerate_quad);
+                com.android.internal.R.interpolator.decelerate_cubic);
         a.setInterpolator(interpolator);
         a.initialize(mAppDisplayWidth, mAppDisplayHeight,
                 mAppDisplayWidth, mAppDisplayHeight);
@@ -3177,7 +3181,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         com.android.internal.R.integer.config_shortAnimTime);
                 break;
             default:
-                duration = 500;
+                duration = 300;
                 break;
         }
         if (thumb) {

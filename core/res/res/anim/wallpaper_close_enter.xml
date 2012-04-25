@@ -19,16 +19,14 @@
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:shareInterpolator="false" android:zAdjustment="top">
-    <scale android:fromXScale="1.2" android:toXScale="1.0"
-            android:fromYScale=".8" android:toYScale="1.0"
+    <scale android:fromXScale=".2" android:toXScale="1.0"
+            android:fromYScale=".2" android:toYScale="1.0"
             android:pivotX="50%p" android:pivotY="50%p"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:interpolator="@interpolator/decelerate_quint"
-            android:startOffset="300"
-            android:duration="240" />
+            android:interpolator="@interpolator/decelerate_cubic"
+            android:duration="300" />
     <alpha android:fromAlpha="0" android:toAlpha="1.0"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:interpolator="@interpolator/decelerate_quad"
-            android:startOffset="300"
+            android:interpolator="@interpolator/decelerate_cubic"
             android:duration="300"/>
 </set>
