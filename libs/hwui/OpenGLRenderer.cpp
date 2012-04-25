@@ -267,13 +267,13 @@ status_t OpenGLRenderer::invokeFunctors(Rect& dirty) {
             Functor* f = functors.itemAt(i);
             result |= (*f)(DrawGlInfo::kModeProcess, &info);
 
-            if (result != DrawGlInfo::kStatusDone) {
+            if (result & DrawGlInfo::kStatusDraw) {
                 Rect localDirty(info.dirtyLeft, info.dirtyTop, info.dirtyRight, info.dirtyBottom);
                 dirty.unionWith(localDirty);
+            }
 
-                if (result & DrawGlInfo::kStatusInvoke) {
-                    mFunctors.add(f);
-                }
+            if (result & DrawGlInfo::kStatusInvoke) {
+                mFunctors.add(f);
             }
         }
     }

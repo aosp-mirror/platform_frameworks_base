@@ -2668,7 +2668,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     public void clearView() {
         mContentWidth = 0;
         mContentHeight = 0;
-        setBaseLayer(0, null, false, false);
+        setBaseLayer(0, false, false);
         mWebViewCore.sendMessage(EventHub.CLEAR_CONTENT);
     }
 
@@ -4447,12 +4447,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     private SelectActionModeCallback mSelectCallback;
 
-    void setBaseLayer(int layer, Region invalRegion, boolean showVisualIndicator,
+    void setBaseLayer(int layer, boolean showVisualIndicator,
             boolean isPictureAfterFirstLayout) {
         if (mNativeClass == 0)
             return;
         boolean queueFull;
-        queueFull = nativeSetBaseLayer(mNativeClass, layer, invalRegion,
+        queueFull = nativeSetBaseLayer(mNativeClass, layer,
                                        showVisualIndicator, isPictureAfterFirstLayout);
 
         if (queueFull) {
@@ -7847,7 +7847,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         boolean isPictureAfterFirstLayout = viewState != null;
 
         if (updateBaseLayer) {
-            setBaseLayer(draw.mBaseLayer, draw.mInvalRegion,
+            setBaseLayer(draw.mBaseLayer,
                     getSettings().getShowVisualIndicator(),
                     isPictureAfterFirstLayout);
         }
@@ -7879,15 +7879,17 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
         mSendScrollEvent = true;
 
-        if (DebugFlags.WEB_VIEW) {
-            Rect b = draw.mInvalRegion.getBounds();
-            Log.v(LOGTAG, "NEW_PICTURE_MSG_ID {" +
-                    b.left+","+b.top+","+b.right+","+b.bottom+"}");
+        int functor = 0;
+        if (mWebView.isHardwareAccelerated()
+                || mWebView.getLayerType() != View.LAYER_TYPE_HARDWARE) {
+            functor = nativeGetDrawGLFunction(mNativeClass);
         }
-        Rect invalBounds = draw.mInvalRegion.getBounds();
-        if (!invalBounds.isEmpty()) {
-            invalidateContentRect(invalBounds);
+
+        if (functor != 0) {
+            mWebView.getViewRootImpl().attachFunctor(functor);
         } else {
+            // invalidate the screen so that the next repaint will show new content
+            // TODO: partial invalidate
             mWebView.invalidate();
         }
 
@@ -8575,8 +8577,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private native Rect     nativeLayerBounds(int layer);
     private native void     nativeSetHeightCanMeasure(boolean measure);
     private native boolean  nativeSetBaseLayer(int nativeInstance,
-            int layer, Region invalRegion,
-            boolean showVisualIndicator, boolean isPictureAfterFirstLayout);
+            int layer, boolean showVisualIndicator, boolean isPictureAfterFirstLayout);
     private native int      nativeGetBaseLayer();
     private native void     nativeReplaceBaseContent(int content);
     private native void     nativeCopyBaseContentToPicture(Picture pict);
