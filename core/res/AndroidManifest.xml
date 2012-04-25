@@ -1658,16 +1658,6 @@
                 android:excludeFromRecents="true"
                 android:process=":ui">
         </activity>
-        <activity android:name="com.android.internal.app.RingtonePickerActivity"
-                android:theme="@style/Theme.Holo.Dialog.Alert"
-                android:excludeFromRecents="true"
-                android:multiprocess="true"
-                android:process=":ui">
-            <intent-filter>
-                <action android:name="android.intent.action.RINGTONE_PICKER" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
 
         <activity android:name="android.accounts.ChooseAccountActivity"
                 android:excludeFromRecents="true"
