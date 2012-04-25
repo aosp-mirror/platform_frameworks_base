@@ -428,6 +428,12 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         final int origLen = end - start;
         final int newLen = tbend - tbstart;
 
+        if (origLen == 0 && newLen == 0 && !hasNonExclusiveExclusiveSpanAt(tb, tbstart)) {
+            // This is a no-op iif there are no spans in tb that would be added (with a 0-length)
+            // Early exit so that the text watchers do not get notified
+            return this;
+        }
+
         TextWatcher[] textWatchers = getSpans(start, start + origLen, TextWatcher.class);
         sendBeforeTextChanged(textWatchers, start, origLen, newLen);
 
@@ -468,6 +474,20 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         sendToSpanWatchers(start, end, newLen - origLen);
 
         return this; 
+    }
+
+    private static boolean hasNonExclusiveExclusiveSpanAt(CharSequence text, int offset) {
+        if (text instanceof Spanned) {
+            Spanned spanned = (Spanned) text;
+            Object[] spans = spanned.getSpans(offset, offset, Object.class);
+            final int length = spans.length;
+            for (int i = 0; i < length; i++) {
+                Object span = spans[i];
+                int flags = spanned.getSpanFlags(span);
+                if (flags != Spanned.SPAN_EXCLUSIVE_EXCLUSIVE) return true;
+            }
+        }
+        return false;
     }
 
     private void sendToSpanWatchers(int replaceStart, int replaceEnd, int nbNewChars) {
