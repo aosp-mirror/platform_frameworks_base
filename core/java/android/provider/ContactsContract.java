@@ -5411,8 +5411,9 @@ public final class ContactsContract {
 
             /**
              * The phone number's E164 representation. This value can be omitted in which
-             * case the provider will try to automatically infer it. If present, {@link #NUMBER}
-             * has to be set as well (it will be ignored otherwise).
+             * case the provider will try to automatically infer it.  (It'll be left null if the
+             * provider fails to infer.)
+             * If present, {@link #NUMBER} has to be set as well (it will be ignored otherwise).
              * <P>Type: TEXT</P>
              */
             public static final String NORMALIZED_NUMBER = DATA4;
