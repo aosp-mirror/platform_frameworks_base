@@ -252,7 +252,7 @@ public interface IMountService extends IInterface {
              * an int consistent with MountServiceResultCode
              */
             public int createSecureContainer(String id, int sizeMb, String fstype, String key,
-                    int ownerUid) throws RemoteException {
+                    int ownerUid, boolean external) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 int _result;
@@ -263,6 +263,7 @@ public interface IMountService extends IInterface {
                     _data.writeString(fstype);
                     _data.writeString(key);
                     _data.writeInt(ownerUid);
+                    _data.writeInt(external ? 1 : 0);
                     mRemote.transact(Stub.TRANSACTION_createSecureContainer, _data, _reply, 0);
                     _reply.readException();
                     _result = _reply.readInt();
@@ -711,6 +712,31 @@ public interface IMountService extends IInterface {
                 }
                 return _result;
             }
+
+            /**
+             * Fix permissions in a container which has just been created and
+             * populated. Returns an int consistent with MountServiceResultCode
+             */
+            public int fixPermissionsSecureContainer(String id, int gid, String filename)
+                    throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                int _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(id);
+                    _data.writeInt(gid);
+                    _data.writeString(filename);
+                    mRemote.transact(Stub.TRANSACTION_fixPermissionsSecureContainer, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readInt();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+
+            }
         }
 
         private static final String DESCRIPTOR = "IMountService";
@@ -780,6 +806,8 @@ public interface IMountService extends IInterface {
         static final int TRANSACTION_getEncryptionState = IBinder.FIRST_CALL_TRANSACTION + 31;
 
         static final int TRANSACTION_verifyEncryptionPassword = IBinder.FIRST_CALL_TRANSACTION + 32;
+
+        static final int TRANSACTION_fixPermissionsSecureContainer = IBinder.FIRST_CALL_TRANSACTION + 33;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -909,7 +937,10 @@ public interface IMountService extends IInterface {
                     key = data.readString();
                     int ownerUid;
                     ownerUid = data.readInt();
-                    int resultCode = createSecureContainer(id, sizeMb, fstype, key, ownerUid);
+                    boolean external;
+                    external = 0 != data.readInt();
+                    int resultCode = createSecureContainer(id, sizeMb, fstype, key, ownerUid,
+                            external);
                     reply.writeNoException();
                     reply.writeInt(resultCode);
                     return true;
@@ -1109,6 +1140,19 @@ public interface IMountService extends IInterface {
                     reply.writeInt(result);
                     return true;
                 }
+                case TRANSACTION_fixPermissionsSecureContainer: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String id;
+                    id = data.readString();
+                    int gid;
+                    gid = data.readInt();
+                    String filename;
+                    filename = data.readString();
+                    int resultCode = fixPermissionsSecureContainer(id, gid, filename);
+                    reply.writeNoException();
+                    reply.writeInt(resultCode);
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -1118,8 +1162,8 @@ public interface IMountService extends IInterface {
      * Creates a secure container with the specified parameters. Returns an int
      * consistent with MountServiceResultCode
      */
-    public int createSecureContainer(String id, int sizeMb, String fstype, String key, int ownerUid)
-            throws RemoteException;
+    public int createSecureContainer(String id, int sizeMb, String fstype, String key,
+            int ownerUid, boolean external) throws RemoteException;
 
     /*
      * Destroy a secure container, and free up all resources associated with it.
@@ -1317,4 +1361,11 @@ public interface IMountService extends IInterface {
     public Parcelable[] getVolumeList() throws RemoteException;
 
     public String getSecureContainerFilesystemPath(String id) throws RemoteException;
+
+    /*
+     * Fix permissions in a container which has just been created and populated.
+     * Returns an int consistent with MountServiceResultCode
+     */
+    public int fixPermissionsSecureContainer(String id, int gid, String filename)
+            throws RemoteException;
 }

@@ -22,14 +22,14 @@ import android.content.pm.PackageInfoLite;
 import android.content.res.ObbInfo;
 
 interface IMediaContainerService {
-    String copyResourceToContainer(in Uri packageURI,
-                String containerId,
-                String key, String resFileName);
+    String copyResourceToContainer(in Uri packageURI, String containerId, String key,
+            String resFileName, String publicResFileName, boolean isExternal,
+            boolean isForwardLocked);
     int copyResource(in Uri packageURI,
                 in ParcelFileDescriptor outStream);
     PackageInfoLite getMinimalPackageInfo(in Uri fileUri, in int flags, in long threshold);
-    boolean checkInternalFreeStorage(in Uri fileUri, in long threshold);
-    boolean checkExternalFreeStorage(in Uri fileUri);
+    boolean checkInternalFreeStorage(in Uri fileUri, boolean isForwardLocked, in long threshold);
+    boolean checkExternalFreeStorage(in Uri fileUri, boolean isForwardLocked);
     ObbInfo getObbInfo(in String filename);
     long calculateDirectorySize(in String directory);
     /** Return file system stats: [0] is total bytes, [1] is available bytes */

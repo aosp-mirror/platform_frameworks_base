@@ -723,7 +723,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     if (msg.obj != null) {
                         @SuppressWarnings("unchecked")
-                        Set<SdInstallArgs> args = (Set<SdInstallArgs>) msg.obj;
+                        Set<AsecInstallArgs> args = (Set<AsecInstallArgs>) msg.obj;
                         if (DEBUG_SD_INSTALL) Log.i(TAG, "Unloading all containers");
                         // Unload containers
                         unloadAllContainers(args);
@@ -828,17 +828,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (!mHandler.hasMessages(WRITE_PACKAGE_RESTRICTIONS)) {
             mHandler.sendEmptyMessageDelayed(WRITE_PACKAGE_RESTRICTIONS, WRITE_SETTINGS_DELAY);
         }
-    }
-
-    static boolean installOnSd(int flags) {
-        if (((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) ||
-                ((flags & PackageManager.INSTALL_INTERNAL) != 0)) {
-            return false;
-        }
-        if ((flags & PackageManager.INSTALL_EXTERNAL) != 0) {
-            return true;
-        }
-        return false;
     }
 
     public static final IPackageManager main(Context context, boolean factoryTest,
@@ -5396,7 +5385,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     synchronized (mInstallLock) {
                         installPackageLI(args, true, res);
                     }
-                    args.doPostInstall(res.returnCode);
+                    args.doPostInstall(res.returnCode, res.uid);
                 }
 
                 // A restore should be performed at this point if (a) the install
@@ -5646,7 +5635,6 @@ public class PackageManagerService extends IPackageManager.Stub {
          */
         public void handleStartCopy() throws RemoteException {
             int ret = PackageManager.INSTALL_SUCCEEDED;
-            final boolean fwdLocked = (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
             final boolean onSd = (flags & PackageManager.INSTALL_EXTERNAL) != 0;
             final boolean onInt = (flags & PackageManager.INSTALL_INTERNAL) != 0;
             PackageInfoLite pkgLite = null;
@@ -5654,10 +5642,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (onInt && onSd) {
                 // Check if both bits are set.
                 Slog.w(TAG, "Conflicting flags specified for installing on both internal and external");
-                ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
-            } else if (fwdLocked && onSd) {
-                // Check for forward locked apps
-                Slog.w(TAG, "Cannot install fwd locked apps on sdcard");
                 ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
             } else {
                 final long lowThreshold;
@@ -5835,6 +5819,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             mArgs = createInstallArgs(this);
             mRet = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
         }
+
+        public boolean isForwardLocked() {
+            return (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
+        }
     }
 
     /*
@@ -5850,14 +5838,16 @@ public class PackageManagerService extends IPackageManager.Stub {
         final String packageName;
         final InstallArgs srcArgs;
         final InstallArgs targetArgs;
+        int uid;
         int mRet;
 
         MoveParams(InstallArgs srcArgs, IPackageMoveObserver observer, int flags,
-                String packageName, String dataDir) {
+                String packageName, String dataDir, int uid) {
             this.srcArgs = srcArgs;
             this.observer = observer;
             this.flags = flags;
             this.packageName = packageName;
+            this.uid = uid;
             if (srcArgs != null) {
                 Uri packageUri = Uri.fromFile(new File(srcArgs.getCodePath()));
                 targetArgs = createInstallArgs(packageUri, flags, packageName, dataDir);
@@ -5892,7 +5882,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         @Override
         void handleReturnCode() {
-            targetArgs.doPostInstall(mRet);
+            targetArgs.doPostInstall(mRet, uid);
             int currentStatus = PackageManager.MOVE_FAILED_INTERNAL_ERROR;
             if (mRet == PackageManager.INSTALL_SUCCEEDED) {
                 currentStatus = PackageManager.MOVE_SUCCEEDED;
@@ -5908,9 +5898,35 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    /**
+     * Used during creation of InstallArgs
+     *
+     * @param flags package installation flags
+     * @return true if should be installed on external storage
+     */
+    private static boolean installOnSd(int flags) {
+        if ((flags & PackageManager.INSTALL_INTERNAL) != 0) {
+            return false;
+        }
+        if ((flags & PackageManager.INSTALL_EXTERNAL) != 0) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Used during creation of InstallArgs
+     *
+     * @param flags package installation flags
+     * @return true if should be installed as forward locked
+     */
+    private static boolean installForwardLocked(int flags) {
+        return (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
+    }
+
     private InstallArgs createInstallArgs(InstallParams params) {
-        if (installOnSd(params.flags)) {
-            return new SdInstallArgs(params);
+        if (installOnSd(params.flags) || params.isForwardLocked()) {
+            return new AsecInstallArgs(params);
         } else {
             return new FileInstallArgs(params);
         }
@@ -5918,8 +5934,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private InstallArgs createInstallArgs(int flags, String fullCodePath, String fullResourcePath,
             String nativeLibraryPath) {
-        if (installOnSd(flags)) {
-            return new SdInstallArgs(fullCodePath, fullResourcePath, nativeLibraryPath);
+        if (installOnSd(flags) || installForwardLocked(flags)) {
+            return new AsecInstallArgs(fullCodePath, fullResourcePath, nativeLibraryPath,
+                    (flags & PackageManager.INSTALL_EXTERNAL) != 0);
         } else {
             return new FileInstallArgs(fullCodePath, fullResourcePath, nativeLibraryPath);
         }
@@ -5927,9 +5944,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     // Used by package mover
     private InstallArgs createInstallArgs(Uri packageURI, int flags, String pkgName, String dataDir) {
-        if (installOnSd(flags)) {
-            String cid = getNextCodePath(null, pkgName, "/" + SdInstallArgs.RES_FILE_NAME);
-            return new SdInstallArgs(packageURI, cid);
+        if (installOnSd(flags) || installForwardLocked(flags)) {
+            String cid = getNextCodePath(null, pkgName, "/" + AsecInstallArgs.RES_FILE_NAME);
+            return new AsecInstallArgs(packageURI, cid,
+                    (flags & PackageManager.INSTALL_EXTERNAL) != 0);
         } else {
             return new FileInstallArgs(packageURI, pkgName, dataDir);
         }
@@ -5956,7 +5974,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         abstract int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException;
         abstract int doPreInstall(int status);
         abstract boolean doRename(int status, String pkgName, String oldCodePath);
-        abstract int doPostInstall(int status);
+
+        abstract int doPostInstall(int status, int uid);
         abstract String getCodePath();
         abstract String getResourcePath();
         abstract String getNativeLibraryPath();
@@ -5964,6 +5983,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         abstract void cleanUpResourcesLI();
         abstract boolean doPostDeleteLI(boolean delete);
         abstract boolean checkFreeStorage(IMediaContainerService imcs) throws RemoteException;
+
+        protected boolean isFwdLocked() {
+            return (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
+        }
     }
 
     class FileInstallArgs extends InstallArgs {
@@ -6016,7 +6039,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             try {
                 mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
                         Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                return imcs.checkInternalFreeStorage(packageURI, lowThreshold);
+                return imcs.checkInternalFreeStorage(packageURI, isFwdLocked(), lowThreshold);
             } finally {
                 mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
@@ -6126,7 +6149,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        int doPostInstall(int status) {
+        int doPostInstall(int status, int uid) {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 cleanUp();
             }
@@ -6229,10 +6252,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             cleanUpResourcesLI();
             return true;
         }
-
-        private boolean isFwdLocked() {
-            return (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
-        }
     }
 
     /**
@@ -6246,20 +6265,23 @@ public class PackageManagerService extends IPackageManager.Stub {
         return subStr1.substring(sidx+1, eidx);
     }
 
-    class SdInstallArgs extends InstallArgs {
+    class AsecInstallArgs extends InstallArgs {
         static final String RES_FILE_NAME = "pkg.apk";
+        static final String PUBLIC_RES_FILE_NAME = "res.zip";
 
         String cid;
         String packagePath;
+        String resourcePath;
         String libraryPath;
 
-        SdInstallArgs(InstallParams params) {
+        AsecInstallArgs(InstallParams params) {
             super(params.packageURI, params.observer, params.flags, params.installerPackageName,
                     params.manifestDigest);
         }
 
-        SdInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath) {
-            super(null, null, PackageManager.INSTALL_EXTERNAL, null, null);
+        AsecInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath,
+                boolean isExternal) {
+            super(null, null, isExternal ? PackageManager.INSTALL_EXTERNAL : 0, null, null);
             // Extract cid from fullCodePath
             int eidx = fullCodePath.lastIndexOf("/");
             String subStr1 = fullCodePath.substring(0, eidx);
@@ -6268,14 +6290,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             setCachePath(subStr1);
         }
 
-        SdInstallArgs(String cid) {
-            super(null, null, PackageManager.INSTALL_EXTERNAL, null, null);
+        AsecInstallArgs(String cid) {
+            super(null, null, 0, null, null);
             this.cid = cid;
             setCachePath(PackageHelper.getSdDir(cid));
         }
 
-        SdInstallArgs(Uri packageURI, String cid) {
-            super(packageURI, null, PackageManager.INSTALL_EXTERNAL, null, null);
+        AsecInstallArgs(Uri packageURI, String cid, boolean isExternal) {
+            super(packageURI, null, isExternal ? PackageManager.INSTALL_EXTERNAL : 0, null, null);
             this.cid = cid;
         }
 
@@ -6287,10 +6309,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             try {
                 mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
                         Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                return imcs.checkExternalFreeStorage(packageURI);
+                return imcs.checkExternalFreeStorage(packageURI, isFwdLocked());
             } finally {
                 mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
+        }
+
+        private final boolean isExternal() {
+            return (flags & PackageManager.INSTALL_EXTERNAL) != 0;
         }
 
         int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
@@ -6308,8 +6334,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             try {
                 mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
                         Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                newCachePath = imcs.copyResourceToContainer(packageURI, cid,
-                        getEncryptKey(), RES_FILE_NAME);
+                newCachePath = imcs.copyResourceToContainer(packageURI, cid, getEncryptKey(),
+                        RES_FILE_NAME, PUBLIC_RES_FILE_NAME, isExternal(), isFwdLocked());
             } finally {
                 mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
@@ -6329,7 +6355,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         @Override
         String getResourcePath() {
-            return packagePath;
+            return resourcePath;
         }
 
         @Override
@@ -6405,22 +6431,36 @@ public class PackageManagerService extends IPackageManager.Stub {
             File cachePath = new File(newCachePath);
             libraryPath = new File(cachePath, LIB_DIR_NAME).getPath();
             packagePath = new File(cachePath, RES_FILE_NAME).getPath();
+
+            if (isFwdLocked()) {
+                resourcePath = new File(cachePath, PUBLIC_RES_FILE_NAME).getPath();
+            } else {
+                resourcePath = packagePath;
+            }
         }
 
-        int doPostInstall(int status) {
+        int doPostInstall(int status, int uid) {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 cleanUp();
             } else {
+                if (uid < Process.FIRST_APPLICATION_UID
+                        || !PackageHelper.fixSdPermissions(cid, uid, RES_FILE_NAME)) {
+                    Slog.e(TAG, "Failed to finalize " + cid);
+                    PackageHelper.destroySdDir(cid);
+                    return PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
+                }
+
                 boolean mounted = PackageHelper.isContainerMounted(cid);
                 if (!mounted) {
-                    PackageHelper.mountSdDir(cid,
-                            getEncryptKey(), Process.myUid());
+                    PackageHelper.mountSdDir(cid, getEncryptKey(), Process.myUid());
                 }
             }
             return status;
         }
 
         private void cleanUp() {
+            if (DEBUG_SD_INSTALL) Slog.i(TAG, "cleanUp");
+
             // Destroy secure container
             PackageHelper.destroySdDir(cid);
         }
@@ -6749,8 +6789,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // We didn't need to disable the .apk as a current system package,
                 // which means we are replacing another update that is already
                 // installed.  We need to make sure to delete the older one's .apk.
-                res.removedInfo.args = createInstallArgs(isExternal(pkg)
-                        ? PackageManager.INSTALL_EXTERNAL : PackageManager.INSTALL_INTERNAL,
+                res.removedInfo.args = createInstallArgs(0,
                         deletedPackage.applicationInfo.sourceDir,
                         deletedPackage.applicationInfo.publicSourceDir,
                         deletedPackage.applicationInfo.nativeLibraryDir);
@@ -6836,13 +6875,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Discontinue if moving dex files failed.
             return;
         }
-        if((res.returnCode = setPermissionsLI(newPackage))
-                != PackageManager.INSTALL_SUCCEEDED) {
-            mInstaller.rmdex(newPackage.mScanPath);
-            return;
-        } else {
-            Log.d(TAG, "New package installed in " + newPackage.mPath);
-        }
+
+        Log.d(TAG, "New package installed in " + newPackage.mPath);
+
         synchronized (mPackages) {
             updatePermissionsLPw(newPackage.packageName, newPackage,
                     UPDATE_PERMISSIONS_REPLACE_PKG | (newPackage.permissions.size() > 0
@@ -6872,10 +6907,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         res.returnCode = PackageManager.INSTALL_SUCCEEDED;
 
         // Retrieve PackageSettings and parse package
-        int parseFlags = PackageParser.PARSE_CHATTY |
-        (forwardLocked ? PackageParser.PARSE_FORWARD_LOCK : 0) |
-        (onSd ? PackageParser.PARSE_ON_SDCARD : 0);
-        parseFlags |= mDefParseFlags;
+        int parseFlags = mDefParseFlags | PackageParser.PARSE_CHATTY
+                | (forwardLocked ? PackageParser.PARSE_FORWARD_LOCK : 0)
+                | (onSd ? PackageParser.PARSE_ON_SDCARD : 0);
         PackageParser pp = new PackageParser(tmpPackageFile.getPath());
         pp.setSeparateProcesses(mSeparateProcesses);
         final PackageParser.Package pkg = pp.parsePackage(tmpPackageFile,
@@ -6972,33 +7006,16 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private int setPermissionsLI(PackageParser.Package newPackage) {
-        int retCode = 0;
-        // TODO Gross hack but fix later. Ideally move this to be a post installation
-        // check after alloting uid.
-        if (isForwardLocked(newPackage)) {
-            retCode = mInstaller.setForwardLockPerm(getApkName(newPackage.mPath),
-                    newPackage.applicationInfo.uid);
-        } else {
-            // The permissions on the resource file was set when it was copied for
-            // non forward locked apps and apps on sdcard
-        }
-
-        if (retCode != 0) {
-            Slog.e(TAG, "Couldn't set new package file permissions for " + newPackage.mPath
-                    + ". The return code was: " + retCode);
-            // TODO Define new internal error
-            return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-        }
-        return PackageManager.INSTALL_SUCCEEDED;
-    }
-
     private static boolean isForwardLocked(PackageParser.Package pkg) {
         return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0;
     }
 
     private static boolean isExternal(PackageParser.Package pkg) {
         return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
+    }
+
+    private static boolean isExternal(PackageSetting ps) {
+        return (ps.pkgFlags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
     }
 
     private static boolean isSystemApp(PackageParser.Package pkg) {
@@ -8359,8 +8376,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         // little while.
         mHandler.post(new Runnable() {
             public void run() {
-                // TODO fix this; this does nothing.
-                mHandler.removeCallbacks(this);
                 updateExternalMediaStatusInner(mediaStatus, reportStatus);
             }
         });
@@ -8372,13 +8387,13 @@ public class PackageManagerService extends IPackageManager.Stub {
      * Please note that we always have to report status if reportStatus has been
      * set to true especially when unloading packages.
      */
-    private void updateExternalMediaStatusInner(boolean mediaStatus, boolean reportStatus) {
+    private void updateExternalMediaStatusInner(boolean isMounted, boolean reportStatus) {
         // Collection of uids
         int uidArr[] = null;
         // Collection of stale containers
         HashSet<String> removeCids = new HashSet<String>();
         // Collection of packages on external media with valid containers.
-        HashMap<SdInstallArgs, String> processCids = new HashMap<SdInstallArgs, String>();
+        HashMap<AsecInstallArgs, String> processCids = new HashMap<AsecInstallArgs, String>();
         // Get list of secure containers.
         final String list[] = PackageHelper.getSecureContainerList();
         if (list == null || list.length == 0) {
@@ -8391,7 +8406,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // reader
             synchronized (mPackages) {
                 for (String cid : list) {
-                    SdInstallArgs args = new SdInstallArgs(cid);
+                    AsecInstallArgs args = new AsecInstallArgs(cid);
                     if (DEBUG_SD_INSTALL)
                         Log.i(TAG, "Processing container " + cid);
                     String pkgName = args.getPackageName();
@@ -8441,7 +8456,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         // Process packages with valid entries.
-        if (mediaStatus) {
+        if (isMounted) {
             if (DEBUG_SD_INSTALL)
                 Log.i(TAG, "Loading packages");
             loadMediaPackages(processCids, uidArr, removeCids);
@@ -8476,12 +8491,12 @@ public class PackageManagerService extends IPackageManager.Stub {
      * the cid is added to list of removeCids. We currently don't delete stale
      * containers.
      */
-   private void loadMediaPackages(HashMap<SdInstallArgs, String> processCids, int uidArr[],
+   private void loadMediaPackages(HashMap<AsecInstallArgs, String> processCids, int uidArr[],
             HashSet<String> removeCids) {
         ArrayList<String> pkgList = new ArrayList<String>();
-        Set<SdInstallArgs> keys = processCids.keySet();
+        Set<AsecInstallArgs> keys = processCids.keySet();
         boolean doGc = false;
-        for (SdInstallArgs args : keys) {
+        for (AsecInstallArgs args : keys) {
             String codePath = processCids.get(args);
             if (DEBUG_SD_INSTALL)
                 Log.i(TAG, "Loading container : " + args.cid);
@@ -8517,7 +8532,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             retCode = PackageManager.INSTALL_SUCCEEDED;
                             pkgList.add(pkg.packageName);
                             // Post process args
-                            args.doPostInstall(PackageManager.INSTALL_SUCCEEDED);
+                            args.doPostInstall(PackageManager.INSTALL_SUCCEEDED,
+                                    pkg.applicationInfo.uid);
                         }
                     } else {
                         Slog.i(TAG, "Failed to install pkg from  " + codePath + " from sdcard");
@@ -8580,9 +8596,9 @@ public class PackageManagerService extends IPackageManager.Stub {
    /*
      * Utility method to unload a list of specified containers
      */
-    private void unloadAllContainers(Set<SdInstallArgs> cidArgs) {
+    private void unloadAllContainers(Set<AsecInstallArgs> cidArgs) {
         // Just unmount all valid containers.
-        for (SdInstallArgs arg : cidArgs) {
+        for (AsecInstallArgs arg : cidArgs) {
             synchronized (mInstallLock) {
                 arg.doPostDeleteLI(false);
            }
@@ -8598,14 +8614,14 @@ public class PackageManagerService extends IPackageManager.Stub {
      * that we always have to post this message if status has been requested no
      * matter what.
      */
-    private void unloadMediaPackages(HashMap<SdInstallArgs, String> processCids, int uidArr[],
+    private void unloadMediaPackages(HashMap<AsecInstallArgs, String> processCids, int uidArr[],
             final boolean reportStatus) {
         if (DEBUG_SD_INSTALL)
             Log.i(TAG, "unloading media packages");
         ArrayList<String> pkgList = new ArrayList<String>();
-        ArrayList<SdInstallArgs> failedList = new ArrayList<SdInstallArgs>();
-        final Set<SdInstallArgs> keys = processCids.keySet();
-        for (SdInstallArgs args : keys) {
+        ArrayList<AsecInstallArgs> failedList = new ArrayList<AsecInstallArgs>();
+        final Set<AsecInstallArgs> keys = processCids.keySet();
+        for (AsecInstallArgs args : keys) {
             String pkgName = args.getPackageName();
             if (DEBUG_SD_INSTALL)
                 Log.i(TAG, "Trying to unload pkg : " + pkgName);
@@ -8666,9 +8682,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (pkg.applicationInfo != null && isSystemApp(pkg)) {
                     Slog.w(TAG, "Cannot move system application");
                     returnCode = PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
-                } else if (pkg.applicationInfo != null && isForwardLocked(pkg)) {
-                    Slog.w(TAG, "Cannot move forward locked app.");
-                    returnCode = PackageManager.MOVE_FAILED_FORWARD_LOCKED;
                 } else if (pkg.mOperationPending) {
                     Slog.w(TAG, "Attempt to move package which has pending operations");
                     returnCode = PackageManager.MOVE_FAILED_OPERATION_PENDING;
@@ -8700,13 +8713,14 @@ public class PackageManagerService extends IPackageManager.Stub {
              * anyway.
              */
             if (returnCode != PackageManager.MOVE_SUCCEEDED) {
-                processPendingMove(new MoveParams(null, observer, 0, packageName, null), returnCode);
+                processPendingMove(new MoveParams(null, observer, 0, packageName, null, -1),
+                        returnCode);
             } else {
                 Message msg = mHandler.obtainMessage(INIT_COPY);
                 InstallArgs srcArgs = createInstallArgs(currFlags, pkg.applicationInfo.sourceDir,
                         pkg.applicationInfo.publicSourceDir, pkg.applicationInfo.nativeLibraryDir);
                 MoveParams mp = new MoveParams(srcArgs, observer, newFlags, packageName,
-                        pkg.applicationInfo.dataDir);
+                        pkg.applicationInfo.dataDir, pkg.applicationInfo.uid);
                 msg.obj = mp;
                 mHandler.sendMessage(msg);
             }
@@ -8831,7 +8845,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (returnCode != PackageManager.MOVE_SUCCEEDED) {
                     // Clean up failed installation
                     if (mp.targetArgs != null) {
-                        mp.targetArgs.doPostInstall(PackageManager.INSTALL_FAILED_INTERNAL_ERROR);
+                        mp.targetArgs.doPostInstall(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
+                                -1);
                     }
                 } else {
                     // Force a gc to clear things up.
