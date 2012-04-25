@@ -226,6 +226,23 @@ import java.util.List;
  *   <li>{@link #getContentDescription()} - The content description of the source.</li>
  * </ul>
  * </p>
+ * <b>View text traversed at granularity</b> - represents the event of traversing the
+ * text of a view at a given granularity. For example, moving to the next word.</br>
+ * <em>Type:</em> {@link #TYPE_VIEW_TEXT_TRAVERSED_AT_GRANULARITY} </br>
+ * <em>Properties:</em></br>
+ * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li>
+ *   <li>{@link #getClassName()} - The class name of the source.</li>
+ *   <li>{@link #getPackageName()} - The package name of the source.</li>
+ *   <li>{@link #getEventTime()}  - The event time.</li>
+ *   <li>{@link #getText()} - The text of the current text at the granularity.</li>
+ *   <li>{@link #isPassword()} - Whether the source is password.</li>
+ *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
+ *   <li>{@link #getContentDescription()} - The content description of the source.</li>
+ *   <li>{@link #getGranularity()} - Sets the granularity at which a view's text was traversed.</li>
+ * </ul>
+ * </p>
  * <p>
  * <b>View scrolled</b> - represents the event of scrolling a view. If
  * the source is a descendant of {@link android.widget.AdapterView} the
@@ -580,6 +597,11 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED = 0x00010000;
 
     /**
+     * Represents the event of traversing the text of a view at a given granularity.
+     */
+    public static final int TYPE_VIEW_TEXT_TRAVERSED_AT_GRANULARITY = 0x00020000;
+
+    /**
      * Mask for {@link AccessibilityEvent} all types.
      *
      * @see #TYPE_VIEW_CLICKED
@@ -597,6 +619,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @see #TYPE_VIEW_SCROLLED
      * @see #TYPE_VIEW_TEXT_SELECTION_CHANGED
      * @see #TYPE_ANNOUNCEMENT
+     * @see #TYPE_VIEW_TEXT_TRAVERSED_AT_GRANULARITY
      */
     public static final int TYPES_ALL_MASK = 0xFFFFFFFF;
 
@@ -610,6 +633,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     private int mEventType;
     private CharSequence mPackageName;
     private long mEventTime;
+    int mGranularity;
 
     private final ArrayList<AccessibilityRecord> mRecords = new ArrayList<AccessibilityRecord>();
 
@@ -627,6 +651,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     void init(AccessibilityEvent event) {
         super.init(event);
         mEventType = event.mEventType;
+        mGranularity = event.mGranularity;
         mEventTime = event.mEventTime;
         mPackageName = event.mPackageName;
     }
@@ -744,6 +769,27 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     }
 
     /**
+     * Sets the text granularity that was traversed.
+     *
+     * @param granularity The granularity.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setGranularity(int granularity) {
+        enforceNotSealed();
+        mGranularity = granularity;
+    }
+
+    /**
+     * Gets the text granularity that was traversed.
+     *
+     * @return The granularity.
+     */
+    public int getGranularity() {
+        return mGranularity;
+    }
+
+    /**
      * Returns a cached instance if such is available or a new one is
      * instantiated with its type property set.
      *
@@ -831,6 +877,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     protected void clear() {
         super.clear();
         mEventType = 0;
+        mGranularity = 0;
         mPackageName = null;
         mEventTime = 0;
         while (!mRecords.isEmpty()) {
@@ -847,6 +894,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public void initFromParcel(Parcel parcel) {
         mSealed = (parcel.readInt() == 1);
         mEventType = parcel.readInt();
+        mGranularity = parcel.readInt();
         mPackageName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
         mEventTime = parcel.readLong();
         mConnectionId = parcel.readInt();
@@ -897,6 +945,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(isSealed() ? 1 : 0);
         parcel.writeInt(mEventType);
+        parcel.writeInt(mGranularity);
         TextUtils.writeToParcel(mPackageName, parcel, 0);
         parcel.writeLong(mEventTime);
         parcel.writeInt(mConnectionId);
@@ -953,6 +1002,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         builder.append("EventType: ").append(eventTypeToString(mEventType));
         builder.append("; EventTime: ").append(mEventTime);
         builder.append("; PackageName: ").append(mPackageName);
+        builder.append("; Granularity: ").append(mGranularity);
         builder.append(super.toString());
         if (DEBUG) {
             builder.append("\n");
@@ -1033,6 +1083,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 return "TYPE_VIEW_ACCESSIBILITY_FOCUSED";
             case TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED:
                 return "TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED";
+            case TYPE_VIEW_TEXT_TRAVERSED_AT_GRANULARITY:
+                return "TYPE_CURRENT_AT_GRANULARITY_CHANGED";
             default:
                 return null;
         }

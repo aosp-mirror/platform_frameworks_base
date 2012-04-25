@@ -102,7 +102,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final int ACTION_CLEAR_SELECTION = 0x00000008;
 
     /**
-     * Action that clicks on the node info.
+     * Action that long clicks on the node info.
      */
     public static final int ACTION_CLICK = 0x00000010;
 
@@ -122,78 +122,105 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final int ACTION_CLEAR_ACCESSIBILITY_FOCUS = 0x00000080;
 
     /**
-     * Action that requests from the node to go to the next entity in its content
-     * at a given granularity. For example, move to the next word, link, etc.
+     * Action that requests to go to the next entity in this node's text
+     * at a given granularity. For example, move to the next character, word, etc.
      * <p>
-     * <strong>Arguments:</strong>
-     * <ul>
-     * <li>
-     * {@link #ACTION_ARGUMENT_GRANULARITY}
-     * </li>
-     * <li>
-     * </p>
-     * <p>
+     * <strong>Arguments:</strong> {@link #ACTION_ARGUMENT_GRANULARITY_INT}<br>
      * <strong>Example:</strong>
      * <code><pre><p>
-     *   // Assume the first granularity was presented to the user and she is
-     *   // making an explicit action to traverse the node at that granularity.
-     *   CharSequence granularity = info.getGranularity(0);
      *   Bundle arguments = new Bundle();
-     *   arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_GRANULARITY, granularity);
+     *   arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_GRANULARITY_INT,
+     *           AccessibilityNodeInfo.GRANULARITY_CHARACTER);
      *   info.performAction(AccessibilityNodeInfo.ACTION_NEXT_AT_GRANULARITY, arguments);
      * </code></pre></p>
-     * </li>
-     * </ul>
      * </p>
-     * @see #setGranularities(CharSequence[])
+     *
+     * @see #setGranularities(int)
      * @see #getGranularities()
+     *
+     * @see #GRANULARITY_CHARACTER
+     * @see #GRANULARITY_WORD
+     * @see #GRANULARITY_LINE
+     * @see #GRANULARITY_PARAGRAPH
+     * @see #GRANULARITY_PAGE
      */
     public static final int ACTION_NEXT_AT_GRANULARITY = 0x00000100;
 
     /**
-     * Action that requests from the node to go to the previous entity in its content
-     * at a given granularity. For example, move to the next word, link, etc.
+     * Action that requests to go to the previous entity in this node's text
+     * at a given granularity. For example, move to the next character, word, etc.
      * <p>
-     * <strong>Arguments:</strong>
-     * <ul>
-     * <li>
-     *  {@link #ACTION_ARGUMENT_GRANULARITY}
-     * </li>
-     * <li>
-     * </p>
-     * <p>
+     * <strong>Arguments:</strong> {@link #ACTION_ARGUMENT_GRANULARITY_INT}<br>
      * <strong>Example:</strong>
      * <code><pre><p>
-     *   // Assume the first granularity was presented to the user and she is
-     *   // making an explicit action to traverse the node at that granularity.
-     *   CharSequence granularity = info.getGranularity(0);
      *   Bundle arguments = new Bundle();
-     *   arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_GRANULARITY, granularity);
-     *   info.performAction(AccessibilityNodeInfo.ACTION_NEXT_AT_GRANULARITY, arguments);
+     *   arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_GRANULARITY_INT,
+     *           AccessibilityNodeInfo.GRANULARITY_CHARACTER);
+     *   info.performAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_GRANULARITY, arguments);
      * </code></pre></p>
-     * </li>
-     * </ul>
      * </p>
-     * @see #setGranularities(CharSequence[])
+     *
+     * @see #setGranularities(int)
      * @see #getGranularities()
+     *
+     * @see #GRANULARITY_CHARACTER
+     * @see #GRANULARITY_WORD
+     * @see #GRANULARITY_LINE
+     * @see #GRANULARITY_PARAGRAPH
+     * @see #GRANULARITY_PAGE
      */
     public static final int ACTION_PREVIOUS_AT_GRANULARITY = 0x00000200;
 
     /**
-     * Argument for which content granularity to be used when traversing the node content.
+     * Action to move to the next HTML element of a given type. For example, move
+     * to the BUTTON, INPUT, TABLE, etc.
      * <p>
-     * <strong>Actions:</strong>
-     * <ul>
-     * <li>
-     * {@link #ACTION_PREVIOUS_AT_GRANULARITY}
-     * </li>
-     * <li>
-     * {@link #ACTION_PREVIOUS_AT_GRANULARITY}
-     * </li>
-     * </ul>
+     * <strong>Arguments:</strong> {@link #ACTION_ARGUMENT_HTML_ELEMENT_STRING}<br>
+     * <strong>Example:</strong>
+     * <code><pre><p>
+     *   Bundle arguments = new Bundle();
+     *   arguments.putString(AccessibilityNodeInfo.ACTION_ARGUMENT_HTML_ELEMENT_STRING, "BUTTON");
+     *   info.performAction(AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT, arguments);
+     * </code></pre></p>
      * </p>
      */
-    public static final String ACTION_ARGUMENT_GRANULARITY = "ACTION_ARGUMENT_GRANULARITY";
+    public static final int ACTION_NEXT_HTML_ELEMENT = 0x00000400;
+
+    /**
+     * Action to move to the previous HTML element of a given type. For example, move
+     * to the BUTTON, INPUT, TABLE, etc.
+     * <p>
+     * <strong>Arguments:</strong> {@link #ACTION_ARGUMENT_HTML_ELEMENT_STRING}<br>
+     * <strong>Example:</strong>
+     * <code><pre><p>
+     *   Bundle arguments = new Bundle();
+     *   arguments.putString(AccessibilityNodeInfo.ACTION_ARGUMENT_HTML_ELEMENT_STRING, "BUTTON");
+     *   info.performAction(AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT, arguments);
+     * </code></pre></p>
+     * </p>
+     */
+    public static final int ACTION_PREVIOUS_HTML_ELEMENT = 0x00000800;
+
+    /**
+     * Argument for which text granularity to be used when traversing the node text.
+     * <p>
+     * <strong>Type:</strong> int<br>
+     * <strong>Actions:</strong> {@link #ACTION_NEXT_AT_GRANULARITY},
+     * {@link #ACTION_PREVIOUS_AT_GRANULARITY}
+     * </p>
+     */
+    public static final String ACTION_ARGUMENT_GRANULARITY_INT = "ACTION_ARGUMENT_GRANULARITY_INT";
+
+    /**
+     * Argument for which HTML element to get moving to the next/previous HTML element.
+     * <p>
+     * <strong>Type:</strong> String<br>
+     * <strong>Actions:</strong> {@link #ACTION_NEXT_HTML_ELEMENT},
+     *         {@link #ACTION_PREVIOUS_HTML_ELEMENT}
+     * </p>
+     */
+    public static final String ACTION_ARGUMENT_HTML_ELEMENT_STRING =
+        "ACTION_ARGUMENT_HTML_ELEMENT_STRING";
 
     /**
      * The input focus.
@@ -204,6 +231,33 @@ public class AccessibilityNodeInfo implements Parcelable {
      * The accessibility focus.
      */
     public static final int FOCUS_ACCESSIBILITY = 2;
+
+    // Granularities
+
+    /**
+     * Granularity bit for traversing the text of a node by character.
+     */
+    public static final int GRANULARITY_CHARACTER = 0x00000001;
+
+    /**
+     * Granularity bit for traversing the text of a node by word.
+     */
+    public static final int GRANULARITY_WORD = 0x00000002;
+
+    /**
+     * Granularity bit for traversing the text of a node by line.
+     */
+    public static final int GRANULARITY_LINE = 0x00000004;
+
+    /**
+     * Granularity bit for traversing the text of a node by paragraph.
+     */
+    public static final int GRANULARITY_PARAGRAPH = 0x00000008;
+
+    /**
+     * Granularity bit for traversing the text of a node by page.
+     */
+    public static final int GRANULARITY_PAGE = 0x00000010;
 
     // Boolean attributes.
 
@@ -308,7 +362,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private final SparseLongArray mChildNodeIds = new SparseLongArray();
     private int mActions;
 
-    private CharSequence[] mGranularities;
+    private int mGranularities;
 
     private int mConnectionId = UNDEFINED;
 
@@ -532,28 +586,28 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Sets the granularities for traversing the content of this node.
+     * Sets the text granularities for traversing the text of this node.
      * <p>
      *   <strong>Note:</strong> Cannot be called from an
      *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
      *
-     * @param granularities The granularity names.
+     * @param granularities The bit mask with granularities.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
      */
-    public void setGranularities(CharSequence[] granularities) {
+    public void setGranularities(int granularities) {
         enforceNotSealed();
         mGranularities = granularities;
     }
 
     /**
-     * Gets the granularities for traversing the content of this node.
+     * Gets the granularities for traversing the text of this node.
      *
-     * @return The count.
+     * @return The bit mask with granularities.
      */
-    public CharSequence[] getGranularities() {
+    public int getGranularities() {
         return mGranularities;
     }
 
@@ -1339,8 +1393,6 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeLong(mParentNodeId);
         parcel.writeInt(mConnectionId);
 
-        parcel.writeCharSequenceArray(mGranularities);
-
         SparseLongArray childIds = mChildNodeIds;
         final int childIdsSize = childIds.size();
         parcel.writeInt(childIdsSize);
@@ -1359,6 +1411,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeInt(mBoundsInScreen.right);
 
         parcel.writeInt(mActions);
+
+        parcel.writeInt(mGranularities);
 
         parcel.writeInt(mBooleanProperties);
 
@@ -1392,7 +1446,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mContentDescription = other.mContentDescription;
         mActions= other.mActions;
         mBooleanProperties = other.mBooleanProperties;
-        mGranularities = (other.mGranularities) != null ? other.mGranularities.clone() : null;
+        mGranularities = other.mGranularities;
         final int otherChildIdCount = other.mChildNodeIds.size();
         for (int i = 0; i < otherChildIdCount; i++) {
             mChildNodeIds.put(i, other.mChildNodeIds.valueAt(i));    
@@ -1410,8 +1464,6 @@ public class AccessibilityNodeInfo implements Parcelable {
         mWindowId = parcel.readInt();
         mParentNodeId = parcel.readLong();
         mConnectionId = parcel.readInt();
-
-        mGranularities = parcel.readCharSequenceArray();
 
         SparseLongArray childIds = mChildNodeIds;
         final int childrenSize = parcel.readInt();
@@ -1432,6 +1484,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         mActions = parcel.readInt();
 
+        mGranularities = parcel.readInt();
+
         mBooleanProperties = parcel.readInt();
 
         mPackageName = parcel.readCharSequence();
@@ -1449,7 +1503,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mParentNodeId = ROOT_NODE_ID;
         mWindowId = UNDEFINED;
         mConnectionId = UNDEFINED;
-        mGranularities = null;
+        mGranularities = 0;
         mChildNodeIds.clear();
         mBoundsInParent.set(0, 0, 0, 0);
         mBoundsInScreen.set(0, 0, 0, 0);
@@ -1479,6 +1533,29 @@ public class AccessibilityNodeInfo implements Parcelable {
                 return "ACTION_CLEAR_SELECTION";
             default:
                 throw new IllegalArgumentException("Unknown action: " + action);
+        }
+    }
+
+    /**
+     * Gets the human readable granularity symbolic name.
+     *
+     * @param granularity The action.
+     * @return The symbolic name.
+     */
+    private static String getGranularitySymbolicName(int granularity) {
+        switch (granularity) {
+            case GRANULARITY_CHARACTER:
+                return "GRANULARITY_CHARACTER";
+            case GRANULARITY_WORD:
+                return "GRANULARITY_WORD";
+            case GRANULARITY_LINE:
+                return "GRANULARITY_LINE";
+            case GRANULARITY_PARAGRAPH:
+                return "GRANULARITY_PARAGRAPH";
+            case GRANULARITY_PAGE:
+                return "GRANULARITY_PAGE";
+            default:
+                throw new IllegalArgumentException("Unknown granularity: " + granularity);
         }
     }
 
@@ -1529,11 +1606,13 @@ public class AccessibilityNodeInfo implements Parcelable {
             builder.append("; virtualDescendantId: " + getVirtualDescendantId(mSourceNodeId));
             builder.append("; mParentNodeId: " + mParentNodeId);
 
-            CharSequence[] granularities = mGranularities;
+            int granularities = mGranularities;
             builder.append("; granularities: [");
-            for (int i = 0, count = granularities.length; i < count; i++) {
-                builder.append(granularities[i]);
-                if (i < count - 1) {
+            while (granularities != 0) {
+                final int granularity = 1 << Integer.numberOfTrailingZeros(granularities);
+                granularities &= ~granularity;
+                builder.append(getGranularitySymbolicName(granularity));
+                if (granularities != 0) {
                     builder.append(", ");
                 }
             }
@@ -1570,7 +1649,6 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; scrollable: " + isScrollable());
 
         builder.append("; [");
-
         for (int actionBits = mActions; actionBits != 0;) {
             final int action = 1 << Integer.numberOfTrailingZeros(actionBits);
             actionBits &= ~action;
@@ -1579,7 +1657,6 @@ public class AccessibilityNodeInfo implements Parcelable {
                 builder.append(", ");
             }
         }
-
         builder.append("]");
 
         return builder.toString();
