@@ -173,10 +173,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     protected int mGroupFlags;
 
     /*
-     * THe layout mode: either {@link #UNDEFINED_LAYOUT_MODE}, {@link #COMPONENT_BOUNDS} or
-     * {@link #LAYOUT_BOUNDS}
+     * The layout mode: either {@link #CLIP_BOUNDS} or {@link #OPTICAL_BOUNDS}
      */
-    private int mLayoutMode = UNDEFINED_LAYOUT_MODE;
+    private int mLayoutMode = CLIP_BOUNDS;
 
     /**
      * NOTE: If you change the flags below make sure to reflect the changes
@@ -345,19 +344,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     // Layout Modes
 
-    private static final int UNDEFINED_LAYOUT_MODE = -1;
-
     /**
      * This constant is a {@link #setLayoutMode(int) layoutMode}.
-     * Component bounds are the raw values of {@link #getLeft() left}, {@link #getTop() top},
+     * Clip bounds are the raw values of {@link #getLeft() left}, {@link #getTop() top},
      * {@link #getRight() right} and {@link #getBottom() bottom}.
      */
-    public static final int COMPONENT_BOUNDS = 0;
+    public static final int CLIP_BOUNDS = 0;
 
     /**
      * This constant is a {@link #setLayoutMode(int) layoutMode}.
+     * Optical bounds describe where a widget appears to be. They sit inside the clip
+     * bounds which need to cover a larger area to allow other effects,
+     * such as shadows and glows, to be drawn.
      */
-    public static final int LAYOUT_BOUNDS = 1;
+    public static final int OPTICAL_BOUNDS = 1;
 
     /**
      * We clip to padding when FLAG_CLIP_TO_PADDING and FLAG_PADDING_NOT_NULL
@@ -2696,10 +2696,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     protected void onDebugDraw(Canvas canvas) {
         // Draw optical bounds
-        if (getLayoutMode() == LAYOUT_BOUNDS) {
+        if (getLayoutMode() == OPTICAL_BOUNDS) {
             for (int i = 0; i < getChildCount(); i++) {
                 View c = getChildAt(i);
-                Insets insets = c.getLayoutInsets();
+                Insets insets = c.getOpticalInsets();
                 drawRect(canvas,
                         c.getLeft() + insets.left,
                         c.getTop() + insets.top,
@@ -4597,37 +4597,22 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Returns the basis of alignment during the layout of this view group:
-     * either {@link #COMPONENT_BOUNDS} or {@link #LAYOUT_BOUNDS}.
+     * Returns the basis of alignment during layout operations on this view group:
+     * either {@link #CLIP_BOUNDS} or {@link #OPTICAL_BOUNDS}.
      *
      * @return the layout mode to use during layout operations
      *
      * @see #setLayoutMode(int)
      */
     public int getLayoutMode() {
-        if (mLayoutMode == UNDEFINED_LAYOUT_MODE) {
-            ViewParent parent = getParent();
-            if (parent instanceof ViewGroup) {
-                ViewGroup viewGroup = (ViewGroup) parent;
-                return viewGroup.getLayoutMode();
-            } else {
-                int targetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
-                boolean preJellyBean = targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN;
-                return preJellyBean ? COMPONENT_BOUNDS : LAYOUT_BOUNDS;
-            }
-
-        }
         return mLayoutMode;
     }
 
     /**
-     * Sets the basis of alignment during alignment of this view group.
-     * Valid values are either {@link #COMPONENT_BOUNDS} or {@link #LAYOUT_BOUNDS}.
+     * Sets the basis of alignment during the layout of this view group.
+     * Valid values are either {@link #CLIP_BOUNDS} or {@link #OPTICAL_BOUNDS}.
      * <p>
-     * The default is to query the property of the parent if this view group has a parent.
-     * If this ViewGroup is the root of the view hierarchy the default
-     * value is {@link #LAYOUT_BOUNDS} for target SDK's greater than JellyBean,
-     * {@link #LAYOUT_BOUNDS} otherwise.
+     * The default is {@link #CLIP_BOUNDS}.
      *
      * @param layoutMode the layout mode to use during layout operations
      *

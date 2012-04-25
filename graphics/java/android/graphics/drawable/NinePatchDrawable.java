@@ -56,6 +56,7 @@ public class NinePatchDrawable extends Drawable {
     private NinePatchState mNinePatchState;
     private NinePatch mNinePatch;
     private Rect mPadding;
+    private Insets mLayoutInsets = Insets.NONE;
     private Paint mPaint;
     private boolean mMutated;
 
@@ -180,12 +181,21 @@ public class NinePatchDrawable extends Drawable {
         }
     }
 
+    private Insets scaleFromDensity(Insets insets, int sdensity, int tdensity) {
+        int left = Bitmap.scaleFromDensity(insets.left, sdensity, tdensity);
+        int top = Bitmap.scaleFromDensity(insets.top, sdensity, tdensity);
+        int right = Bitmap.scaleFromDensity(insets.right, sdensity, tdensity);
+        int bottom = Bitmap.scaleFromDensity(insets.bottom, sdensity, tdensity);
+        return Insets.of(left, top, right, bottom);
+    }
+
     private void computeBitmapSize() {
         final int sdensity = mNinePatch.getDensity();
         final int tdensity = mTargetDensity;
         if (sdensity == tdensity) {
             mBitmapWidth = mNinePatch.getWidth();
             mBitmapHeight = mNinePatch.getHeight();
+            mLayoutInsets = mNinePatchState.mLayoutInsets;
         } else {
             mBitmapWidth = Bitmap.scaleFromDensity(mNinePatch.getWidth(),
                     sdensity, tdensity);
@@ -202,6 +212,7 @@ public class NinePatchDrawable extends Drawable {
                 dest.right = Bitmap.scaleFromDensity(src.right, sdensity, tdensity);
                 dest.bottom = Bitmap.scaleFromDensity(src.bottom, sdensity, tdensity);
             }
+            mLayoutInsets = scaleFromDensity(mNinePatchState.mLayoutInsets, sdensity, tdensity);
         }
     }
 
@@ -226,7 +237,7 @@ public class NinePatchDrawable extends Drawable {
      */
     @Override
     public Insets getLayoutInsets() {
-        return mNinePatchState.mLayoutInsets;
+        return mLayoutInsets;
     }
 
     @Override

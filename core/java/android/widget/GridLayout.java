@@ -581,10 +581,10 @@ public class GridLayout extends ViewGroup {
     }
 
     private int getDefaultMargin(View c, boolean isAtEdge, boolean horizontal, boolean leading) {
-        return isAtEdge ? DEFAULT_CONTAINER_MARGIN : getDefaultMargin(c, horizontal, leading);
+        return /*isAtEdge ? DEFAULT_CONTAINER_MARGIN :*/ getDefaultMargin(c, horizontal, leading);
     }
 
-    private int getDefaultMarginValue(View c, LayoutParams p, boolean horizontal, boolean leading) {
+    private int getDefaultMargin(View c, LayoutParams p, boolean horizontal, boolean leading) {
         if (!useDefaultMargins) {
             return 0;
         }
@@ -602,7 +602,7 @@ public class GridLayout extends ViewGroup {
         int margin = horizontal ?
                 (leading ? lp.leftMargin : lp.rightMargin) :
                 (leading ? lp.topMargin : lp.bottomMargin);
-        return margin == UNDEFINED ? getDefaultMarginValue(view, lp, horizontal, leading) : margin;
+        return margin == UNDEFINED ? getDefaultMargin(view, lp, horizontal, leading) : margin;
     }
 
     private int getMargin(View view, boolean horizontal, boolean leading) {
@@ -777,11 +777,12 @@ public class GridLayout extends ViewGroup {
         LayoutParams lp = new LayoutParams();
         for (int i = 0; i < getChildCount(); i++) {
             View c = getChildAt(i);
+            Insets insets = getLayoutMode() == OPTICAL_BOUNDS ? c.getOpticalInsets() : Insets.NONE;
             lp.setMargins(
-                    getMargin1(c, true, true),
-                    getMargin1(c, false, true),
-                    getMargin1(c, true, false),
-                    getMargin1(c, false, false));
+                    getMargin1(c, true, true) - insets.left,
+                    getMargin1(c, false, true) - insets.top,
+                    getMargin1(c, true, false) - insets.right,
+                    getMargin1(c, false, false) - insets.bottom);
             lp.onDebugDraw(c, canvas);
         }
     }
@@ -946,7 +947,12 @@ public class GridLayout extends ViewGroup {
     }
 
     private int getMeasurement(View c, boolean horizontal) {
-        return horizontal ? c.getMeasuredWidth() : c.getMeasuredHeight();
+        int result = horizontal ? c.getMeasuredWidth() : c.getMeasuredHeight();
+        if (getLayoutMode() == OPTICAL_BOUNDS) {
+            Insets insets = c.getOpticalInsets();
+            return result - (horizontal ? insets.left + insets.right : insets.top + insets.bottom);
+        }
+        return result;
     }
 
     final int getMeasurementIncludingMargin(View c, boolean horizontal) {
@@ -1052,6 +1058,14 @@ public class GridLayout extends ViewGroup {
                     targetWidth - width - paddingRight - rightMargin - dx;
             int cy = paddingTop + y1 + gravityOffsetY + alignmentOffsetY + topMargin;
 
+            boolean useLayoutBounds = getLayoutMode() == OPTICAL_BOUNDS;
+            if (useLayoutBounds) {
+                Insets insets = c.getOpticalInsets();
+                cx -= insets.left;
+                cy -= insets.top;
+                width += (insets.left + insets.right);
+                height += (insets.top + insets.bottom);
+            }
             if (width != c.getMeasuredWidth() || height != c.getMeasuredHeight()) {
                 c.measure(makeMeasureSpec(width, EXACTLY), makeMeasureSpec(height, EXACTLY));
             }
@@ -2135,21 +2149,8 @@ public class GridLayout extends ViewGroup {
             return before + after;
         }
 
-        private int getAlignmentValue(GridLayout gl, View c, int size, Alignment a, boolean horiz) {
-            boolean useLayoutBounds = gl.getLayoutMode() == LAYOUT_BOUNDS;
-            if (!useLayoutBounds) {
-                return a.getAlignmentValue(c, size);
-            } else {
-                Insets insets = c.getLayoutInsets();
-                int leadingInset = horiz ? insets.left : insets.top; // RTL?
-                int trailingInset = horiz ? insets.right : insets.bottom; // RTL?
-                int totalInset = leadingInset + trailingInset;
-                return leadingInset + a.getAlignmentValue(c, size - totalInset);
-            }
-        }
-
         protected int getOffset(GridLayout gl, View c, Alignment a, int size, boolean horizontal) {
-            return before - getAlignmentValue(gl, c, size, a, horizontal);
+            return before - a.getAlignmentValue(c, size, gl.getLayoutMode());
         }
 
         protected final void include(GridLayout gl, View c, Spec spec, Axis axis) {
@@ -2158,7 +2159,7 @@ public class GridLayout extends ViewGroup {
             int size = gl.getMeasurementIncludingMargin(c, horizontal);
             Alignment alignment = gl.getAlignment(spec.alignment, horizontal);
             // todo test this works correctly when the returned value is UNDEFINED
-            int before = getAlignmentValue(gl, c, size, alignment, horizontal);
+            int before = alignment.getAlignmentValue(c, size, gl.getLayoutMode());
             include(before, size - before);
         }
 
@@ -2441,9 +2442,10 @@ public class GridLayout extends ViewGroup {
          *
          * @param view              the view to which this alignment should be applied
          * @param viewSize          the measured size of the view
+         * @param mode              the basis of alignment: CLIP or OPTICAL
          * @return the alignment value
          */
-        abstract int getAlignmentValue(View view, int viewSize);
+        abstract int getAlignmentValue(View view, int viewSize, int mode);
 
         /**
          * Returns the size of the view specified by this alignment.
@@ -2473,7 +2475,7 @@ public class GridLayout extends ViewGroup {
         }
 
         @Override
-        public int getAlignmentValue(View view, int viewSize) {
+        public int getAlignmentValue(View view, int viewSize, int mode) {
             return UNDEFINED;
         }
     };
@@ -2489,7 +2491,7 @@ public class GridLayout extends ViewGroup {
         }
 
         @Override
-        public int getAlignmentValue(View view, int viewSize) {
+        public int getAlignmentValue(View view, int viewSize, int mode) {
             return 0;
         }
     };
@@ -2505,7 +2507,7 @@ public class GridLayout extends ViewGroup {
         }
 
         @Override
-        public int getAlignmentValue(View view, int viewSize) {
+        public int getAlignmentValue(View view, int viewSize, int mode) {
             return viewSize;
         }
     };
@@ -2542,8 +2544,8 @@ public class GridLayout extends ViewGroup {
             }
 
             @Override
-            public int getAlignmentValue(View view, int viewSize) {
-                return (!view.isLayoutRtl() ? ltr : rtl).getAlignmentValue(view, viewSize);
+            public int getAlignmentValue(View view, int viewSize, int mode) {
+                return (!view.isLayoutRtl() ? ltr : rtl).getAlignmentValue(view, viewSize, mode);
             }
         };
     }
@@ -2572,7 +2574,7 @@ public class GridLayout extends ViewGroup {
         }
 
         @Override
-        public int getAlignmentValue(View view, int viewSize) {
+        public int getAlignmentValue(View view, int viewSize, int mode) {
             return viewSize >> 1;
         }
     };
@@ -2591,9 +2593,16 @@ public class GridLayout extends ViewGroup {
         }
 
         @Override
-        public int getAlignmentValue(View view, int viewSize) {
+        public int getAlignmentValue(View view, int viewSize, int mode) {
             int baseline = view.getBaseline();
-            return (baseline == -1) ? UNDEFINED : baseline;
+            if (baseline == -1) {
+                return UNDEFINED;
+            } else {
+                if (mode == OPTICAL_BOUNDS) {
+                    return baseline - view.getOpticalInsets().top;
+                }
+                return baseline;
+            }
         }
 
         @Override
@@ -2644,7 +2653,7 @@ public class GridLayout extends ViewGroup {
         }
 
         @Override
-        public int getAlignmentValue(View view, int viewSize) {
+        public int getAlignmentValue(View view, int viewSize, int mode) {
             return UNDEFINED;
         }
 
