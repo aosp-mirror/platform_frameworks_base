@@ -39,4 +39,12 @@
     <keyboard-layout android:name="keyboard_layout_swiss_german"
             android:label="@string/keyboard_layout_swiss_german_label"
             android:kcm="@raw/keyboard_layout_swiss_german" />
+
+    <keyboard-layout android:name="keyboard_layout_belgian"
+            android:label="@string/keyboard_layout_belgian"
+            android:kcm="@raw/keyboard_layout_belgian" />
+
+    <keyboard-layout android:name="keyboard_layout_bulgarian"
+            android:label="@string/keyboard_layout_bulgarian"
+            android:kcm="@raw/keyboard_layout_bulgarian" />
 </keyboard-layouts>

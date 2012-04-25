@@ -32,4 +32,10 @@
 
     <!-- Swiss German keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_swiss_german_label">Swiss German</string>
+
+    <!-- Belgian keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_belgian">Belgian</string>
+
+    <!-- Bulgarian keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_bulgarian">Bulgarian</string>
 </resources>
