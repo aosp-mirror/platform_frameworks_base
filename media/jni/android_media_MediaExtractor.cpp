@@ -96,8 +96,13 @@ status_t JMediaExtractor::selectTrack(size_t index) {
     return mImpl->selectTrack(index);
 }
 
-status_t JMediaExtractor::seekTo(int64_t timeUs) {
-    return mImpl->seekTo(timeUs);
+status_t JMediaExtractor::unselectTrack(size_t index) {
+    return mImpl->unselectTrack(index);
+}
+
+status_t JMediaExtractor::seekTo(
+        int64_t timeUs, MediaSource::ReadOptions::SeekMode mode) {
+    return mImpl->seekTo(timeUs, mode);
 }
 
 status_t JMediaExtractor::advance() {
@@ -281,8 +286,8 @@ static void android_media_MediaExtractor_selectTrack(
     }
 }
 
-static void android_media_MediaExtractor_seekTo(
-        JNIEnv *env, jobject thiz, jlong timeUs) {
+static void android_media_MediaExtractor_unselectTrack(
+        JNIEnv *env, jobject thiz, jint index) {
     sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
 
     if (extractor == NULL) {
@@ -290,7 +295,30 @@ static void android_media_MediaExtractor_seekTo(
         return;
     }
 
-    extractor->seekTo(timeUs);
+    status_t err = extractor->unselectTrack(index);
+
+    if (err != OK) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
+}
+
+static void android_media_MediaExtractor_seekTo(
+        JNIEnv *env, jobject thiz, jlong timeUs, jint mode) {
+    sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
+
+    if (extractor == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    if (mode < MediaSource::ReadOptions::SEEK_PREVIOUS_SYNC
+            || mode > MediaSource::ReadOptions::SEEK_CLOSEST) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
+
+    extractor->seekTo(timeUs, (MediaSource::ReadOptions::SeekMode)mode);
 }
 
 static jboolean android_media_MediaExtractor_advance(
@@ -648,7 +676,10 @@ static JNINativeMethod gMethods[] = {
 
     { "selectTrack", "(I)V", (void *)android_media_MediaExtractor_selectTrack },
 
-    { "seekTo", "(J)V", (void *)android_media_MediaExtractor_seekTo },
+    { "unselectTrack", "(I)V",
+        (void *)android_media_MediaExtractor_unselectTrack },
+
+    { "seekTo", "(JI)V", (void *)android_media_MediaExtractor_seekTo },
 
     { "advance", "()Z", (void *)android_media_MediaExtractor_advance },
 
