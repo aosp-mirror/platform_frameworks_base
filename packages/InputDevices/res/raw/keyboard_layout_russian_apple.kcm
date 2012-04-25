@@ -17,7 +17,7 @@
 # This is a variant of the typical Russian PC keyboard layout that is presented
 # on Apple keyboards.  In contrast with the standard layout, some of the symbols and
 # punctuation characters have been rearranged.
-# English characters are accessible using ralt (Alt Gr).
+# As an added convenience, English characters are accessible using ralt (Alt Gr).
 #
 
 type OVERLAY
