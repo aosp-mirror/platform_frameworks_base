@@ -115,4 +115,6 @@ interface IAudioService {
     void startBluetoothSco(IBinder cb);
 
     void stopBluetoothSco(IBinder cb);
+
+    void forceVolumeControlStream(int streamType, IBinder cb);
 }
