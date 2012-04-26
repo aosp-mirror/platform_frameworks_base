@@ -1740,26 +1740,29 @@ int doPackage(Bundle* bundle)
             // Write the R.java file into the appropriate class directory
             // e.g. gen/com/foo/app/R.java
             err = writeResourceSymbols(bundle, assets, assets->getPackage(), true);
-            // If we have library files, we're going to write our R.java file into
-            // the appropriate class directory for those libraries as well.
-            // e.g. gen/com/foo/app/lib/R.java
-            if (bundle->getExtraPackages() != NULL) {
-                // Split on colon
-                String8 libs(bundle->getExtraPackages());
-                char* packageString = strtok(libs.lockBuffer(libs.length()), ":");
-                while (packageString != NULL) {
-                    // Write the R.java file out with the correct package name
-                    err = writeResourceSymbols(bundle, assets, String8(packageString), true);
-                    packageString = strtok(NULL, ":");
-                }
-                libs.unlockBuffer();
-            }
         } else {
             const String8 customPkg(bundle->getCustomPackage());
             err = writeResourceSymbols(bundle, assets, customPkg, true);
         }
         if (err < 0) {
             goto bail;
+        }
+        // If we have library files, we're going to write our R.java file into
+        // the appropriate class directory for those libraries as well.
+        // e.g. gen/com/foo/app/lib/R.java
+        if (bundle->getExtraPackages() != NULL) {
+            // Split on colon
+            String8 libs(bundle->getExtraPackages());
+            char* packageString = strtok(libs.lockBuffer(libs.length()), ":");
+            while (packageString != NULL) {
+                // Write the R.java file out with the correct package name
+                err = writeResourceSymbols(bundle, assets, String8(packageString), true);
+                if (err < 0) {
+                    goto bail;
+                }
+                packageString = strtok(NULL, ":");
+            }
+            libs.unlockBuffer();
         }
     } else {
         err = writeResourceSymbols(bundle, assets, assets->getPackage(), false);
