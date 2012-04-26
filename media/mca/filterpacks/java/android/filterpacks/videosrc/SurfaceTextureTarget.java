@@ -160,8 +160,21 @@ public class SurfaceTextureTarget extends Filter {
     @Override
     public void open(FilterContext context) {
         // Set up SurfaceTexture internals
-        mSurfaceId = context.getGLEnvironment().registerSurfaceTexture(mSurfaceTexture, mScreenWidth, mScreenHeight);
+        mSurfaceId = context.getGLEnvironment().registerSurfaceTexture(
+            mSurfaceTexture, mScreenWidth, mScreenHeight);
+        if (mSurfaceId <= 0) {
+            throw new RuntimeException("Could not register SurfaceTexture: " + mSurfaceTexture);
+        }
     }
+
+
+    @Override
+    public void close(FilterContext context) {
+        if (mSurfaceId > 0) {
+            context.getGLEnvironment().unregisterSurfaceId(mSurfaceId);
+        }
+    }
+
 
     @Override
     public void process(FilterContext context) {
@@ -173,9 +186,11 @@ public class SurfaceTextureTarget extends Filter {
         Frame input = pullInput("frame");
         boolean createdFrame = false;
 
-        float currentAspectRatio = (float)input.getFormat().getWidth() / input.getFormat().getHeight();
+        float currentAspectRatio =
+          (float)input.getFormat().getWidth() / input.getFormat().getHeight();
         if (currentAspectRatio != mAspectRatio) {
-            if (mLogVerbose) Log.v(TAG, "New aspect ratio: " + currentAspectRatio +", previously: " + mAspectRatio);
+            if (mLogVerbose) Log.v(TAG, "New aspect ratio: " + currentAspectRatio +
+                ", previously: " + mAspectRatio);
             mAspectRatio = currentAspectRatio;
             updateTargetRect();
         }
