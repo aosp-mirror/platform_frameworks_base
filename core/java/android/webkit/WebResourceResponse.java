@@ -36,9 +36,10 @@ public class WebResourceResponse {
      * input stream. Callers must implement
      * {@link InputStream#read(byte[]) InputStream.read(byte[])} for the input
      * stream.
-     * @param mimeType The resource response's MIME type, for example text/html
-     * @param encoding The resource response's encoding
-     * @param data The input stream that provides the resource response's data
+     *
+     * @param mimeType the resource response's MIME type, for example text/html
+     * @param encoding the resource response's encoding
+     * @param data the input stream that provides the resource response's data
      */
     public WebResourceResponse(String mimeType, String encoding,
             InputStream data) {
@@ -49,7 +50,8 @@ public class WebResourceResponse {
 
     /**
      * Sets the resource response's MIME type, for example text/html.
-     * @param mimeType The resource response's MIME type
+     *
+     * @param mimeType the resource response's MIME type
      */
     public void setMimeType(String mimeType) {
         mMimeType = mimeType;
@@ -57,7 +59,8 @@ public class WebResourceResponse {
 
     /**
      * Gets the resource response's MIME type.
-     * @return The resource response's MIME type
+     *
+     * @return the resource response's MIME type
      */
     public String getMimeType() {
         return mMimeType;
@@ -66,7 +69,8 @@ public class WebResourceResponse {
     /**
      * Sets the resource response's encoding, for example UTF-8. This is used
      * to decode the data from the input stream.
-     * @param encoding The resource response's encoding
+     *
+     * @param encoding the resource response's encoding
      */
     public void setEncoding(String encoding) {
         mEncoding = encoding;
@@ -74,7 +78,8 @@ public class WebResourceResponse {
 
     /**
      * Gets the resource response's encoding.
-     * @return The resource response's encoding
+     *
+     * @return the resource response's encoding
      */
     public String getEncoding() {
         return mEncoding;
@@ -83,7 +88,8 @@ public class WebResourceResponse {
     /**
      * Sets the input stream that provides the resource respone's data. Callers
      * must implement {@link InputStream#read(byte[]) InputStream.read(byte[])}.
-     * @param data The input stream that provides the resource response's data
+     *
+     * @param data the input stream that provides the resource response's data
      */
     public void setData(InputStream data) {
         mInputStream = data;
@@ -91,7 +97,8 @@ public class WebResourceResponse {
 
     /**
      * Gets the input stream that provides the resource respone's data.
-     * @return The input stream that provides the resource response's data
+     *
+     * @return the input stream that provides the resource response's data
      */
     public InputStream getData() {
         return mInputStream;
