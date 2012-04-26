@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"您的平板电脑会关闭。"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"您的手机会关机。"</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"您要关机吗？"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"重新启动并进入安全模式"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"您要重新启动并进入安全模式吗？这样会停用您已安装的所有第三方应用。再次重新启动将恢复这些应用。"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"近期任务"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"最近没有运行任何应用"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"平板电脑选项"</string>
@@ -219,6 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"允许应用接收和处理 WAP 短信。恶意应用可能会监视您的短信，或删除短信而不向您显示。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"检索正在运行的应用"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"允许应用针对近期运行的和当前正在运行的任务检索相关信息。恶意应用可能会发现有关其他应用的私密信息。"</string>
+    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
+    <skip />
+    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"对正在运行的应用重新排序"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"允许应用将任务移动到前台和后台。恶意应用可能会不受您的控制，强行让自己处于前台。"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"停止正在运行的应用"</string>
@@ -746,14 +748,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"字符"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"字"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"链接"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"行"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="AMPM">%P</xliff:g> <xliff:g id="HOUR">%-l</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="AMPM">%p</xliff:g> <xliff:g id="HOUR">%-l</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"出厂测试失败"</string>

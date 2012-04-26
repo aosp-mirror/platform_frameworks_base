@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Din pekdator stängs av."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Din telefon stängs av."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Vill du stänga av?"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"Starta om i felsäkert läge"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"Vill du starta om datorn i felsäkert läge? Då inaktiveras alla appar från tredje part som du har installerat. Apparna återställs när du startar om datorn igen."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Senaste"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Inga nya appar."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Alternativ för pekdatorn"</string>
@@ -219,6 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Tillåter att appen tar emot och bearbetar WAP-meddelanden. Skadliga appar kan övervaka dina meddelanden eller ta bort dem innan du har sett dem."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hämta appar som körs"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Tillåter att appen hämtar information om uppgifter som körs och har körts. Skadliga appar kan upptäcka privat information om andra appar."</string>
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"hämta information om aktiva appar"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Tillåter att appen hämtar detaljerad information om uppgifter som körs och har körts. Skadliga appar kan upptäcka personliga uppgifter om andra appar."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"byt ordning på appar som körs"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Tillåter att appen flyttar uppgifter till förgrunden eller bakgrunden. Skadliga appar kan tvinga sig till förgrunden utan att du kan styra det."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"avsluta appar som körs"</string>
@@ -342,15 +342,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Tillåter att appen skickar sticky broadcasts, som finns kvar när sändningen är slut. Skadliga appar kan göra pekdatorn seg eller instabil genom att se till att den använder för mycket minne."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Tillåter att appen skickar sticky broadcasts, som finns kvar när sändningen är slut. Skadliga appar kan göra mobilen seg eller instabil genom att använda för mycket minne."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"läsa kontaktinformation"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Appen tillåts läsa alla data om dina kontakter som finns lagrade på pekdatorn, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med specifika personer. På så sätt kan autoslutförda e-postadresser och andra användbara funktioner förbättras. Behörigheten kan utnyttjas av skadliga appar för att skicka dina kontaktuppgifter till andra personer."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Appen tillåts läsa alla data om dina kontakter som finns lagrade i mobilen, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med specifika personer. På så sätt kan autoslutförda e-postadresser och andra användbara funktioner förbättras. Behörigheten kan utnyttjas av skadliga appar för att skicka dina kontaktuppgifter till andra personer."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"skriva kontaktuppgifter"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Appen tillåts läsa alla data om dina kontakter som finns lagrade i mobilen, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med specifika personer. På så sätt kan autoslutförda e-postadresser och andra användbara funktioner förbättras. Detta kan utnyttjas av skadliga appar för att skicka dina kontaktuppgifter till andra personer."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Appen tillåts läsa alla data om dina kontakter som finns lagrade i mobilen, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med specifika personer. På så sätt kan autoslutförda e-postadresser och andra användbara funktioner förbättras. Detta kan utnyttjas av skadliga appar för att skicka dina kontaktuppgifter till andra personer."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"läs samtalslogg"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Tillåter att appen läser pekdatorns samtalslista, inklusive uppgifter om inkommande och utgående samtal. Skadliga appar kan använda informationen för att skicka dina data till andra personer."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Tillåter att appen läser mobilens samtalslista, inklusive uppgifter om inkommande och utgående samtal. Skadliga appar kan använda informationen för att skicka dina data till andra personer."</string>
@@ -746,14 +742,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"tecken"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"ord"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"länk"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"rad"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Det gick fel vid fabrikstestet"</string>

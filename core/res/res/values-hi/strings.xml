@@ -217,6 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"एप्लिकेशन को WAP संदेशों को प्राप्त करने और संसाधित करने देता है. दुर्भावनापूर्ण एप्लिकेशन आपके संदेशों की निगरानी कर सकते हैं या आपको दिखाए बिना उन्हें हटा सकते हैं."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"चल रहे एप्‍लिकेशन पुनर्प्राप्त करें"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"एप्लिकेशन को वर्तमान में और हाल ही में चल रहे कार्यों की जानकारी पुर्नप्राप्त करने देता है. दुर्भावनापूर्ण एप्लिकेशन अन्य एप्लिकेशन के बारे में निजी जानकारी खोज सकते हैं."</string>
+    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
+    <skip />
+    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"चल रहे एप्‍लिकेशन पुन: क्रमित करें"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"एप्लिकेशन को अग्रभूमि और पृष्ठभूमि में कार्यों को ले जाने देता है. दुर्भावनापूर्ण एप्लिकेशन आपके नियंत्रण के बिना स्वयं को बलपूर्वक आगे कर सकते हैं."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"चलने वाले एप्लिकेशन रोकें"</string>

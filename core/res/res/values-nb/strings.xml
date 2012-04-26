@@ -217,6 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Lar appen motta og behandle WAP-meldinger. Ondsinnede apper kan overvåke meldingene dine eller slette dem uten å vise dem til deg."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hente apper som kjører"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Lar appen hente ut informasjon om oppgaver som kjører eller nylig har kjørt. Ondsinnede apper kan bruke dette til å oppdage privat informasjon om andre apper."</string>
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"hente informasjon om apper som kjører"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Tillat at appen henter ut informasjon om oppgaver som kjører eller nylig har kjørt. Skadelige apper kan bruke dette til å oppdage privat informasjon om andre apper."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"Endre rekkefølge på apper som kjører"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Lar appen flytte oppgaver til forgrunnen eller bakgrunnen. Ondsinnede apper kan tvinge seg frem til forgrunnen utenfor din kontroll."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"avslutte apper som kjører"</string>
@@ -340,15 +342,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Lar appen sende hengende kringkastinger («sticky broadcasts») som blir værende etter at kringkastingen er over. Ondsinnede apper kan gjøre nettbrettet tregt eller ustabilt ved å bruke for mye minne."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Lar appen sende hengende kringkastinger («sticky broadcasts») som blir værende etter at kringkastingen er over. Ondsinnede apper kan gjøre telefonen treg eller ustabil ved å bruke for mye minne."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"lese kontaktinformasjon"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Tillat at appen kan lese alle opplysningene om kontaktene lagret på nettbrettet ditt – inkludert hvor ofte du har ringt, sendt e-post til eller på andre måter kommunisert med spesifikke individer. Dette muliggjør autofullføring av e-postadresser og andre praktiske funksjoner. Skadelige apper kan bruke denne tillatelsen til å sende kontaktopplysningene dine til andre."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Tillat at appen kan lese alle opplysningene om kontaktene lagret på telefonen din – inkludert hvor ofte du har ringt, sendt e-post til eller på andre måter kommunisert med spesifikke individer. Dette muliggjør autofullføring av e-postadresser og andre praktiske funksjoner. Skadelige apper kan bruke denne tillatelsen til å sende kontaktopplysningene dine til andre."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"skrive kontaktinformasjon"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Tillat at appen kan endre opplysningene om kontaktene lagret på nettbrettet – inkludert hvor ofte du har ringt, sendt e-post til eller på andre måter kommunisert med spesifikke individer. Dette muliggjør autofullføring av e-postadresser og andre praktiske funksjoner. Skadelige apper kan bruke denne tillatelsen til å slette eller endre kontaktopplysningene dine."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Tillat at appen kan endre opplysningene om kontaktene lagret på telefonen din – inkludert hvor ofte du har ringt, sendt e-post til eller på andre måter kommunisert med spesifikke individer. Dette muliggjør autofullføring av e-postadresser og andre praktiske funksjoner. Skadelige apper kan bruke denne tillatelsen til å slette eller endre kontaktopplysningene dine."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"lar appen lese anropsloggen"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Lar appen lese nettbrettets samtalelogg, inkludert data om innkommende og utgående anrop. Skadelige apper kan utnytte denne tillatelsen til å sende dataene dine til andre personer."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Lar appen lese telefonens samtalelogg, inkludert data om innkommende og utgående anrop. Skadelige apper kan utnytte denne tillatelsen til å sende dataene dine til andre personer."</string>

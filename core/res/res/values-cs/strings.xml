@@ -48,8 +48,8 @@
     <string name="mismatchPin" msgid="609379054496863419">"Zadané kódy PIN se neshodují."</string>
     <string name="invalidPin" msgid="3850018445187475377">"Zadejte kód PIN o délce 4-8 číslic."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"Zadejte osmimístný nebo delší kód PUK."</string>
-    <string name="needPuk" msgid="919668385956251611">"Karta SIM je blokována pomocí kódu PUK. Odblokujete ji zadáním kódu PUK."</string>
-    <string name="needPuk2" msgid="4526033371987193070">"Chcete-li odblokovat kartu SIM, zadejte kód PUK2."</string>
+    <string name="needPuk" msgid="919668385956251611">"SIM karta je blokována pomocí kódu PUK. Odblokujete ji zadáním kódu PUK."</string>
+    <string name="needPuk2" msgid="4526033371987193070">"Chcete-li odblokovat SIM kartu, zadejte kód PUK2."</string>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Příchozí identifikace volajícího"</string>
@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet se vypne."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Váš telefon bude vypnut."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Chcete vypnout telefon?"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"Restart v nouzovém režimu"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"Chcete zařízení restartovat v nouzovém režimu? Deaktivujete tak veškeré nainstalované aplikace třetích stran. Po dalším restartu budou obnoveny."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Nejnovější"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Žádné nové aplikace"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Možnosti tabletu"</string>
@@ -210,15 +208,19 @@
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"posílat zprávy SMS bez potvrzení"</string>
     <string name="permdesc_sendSmsNoConfirmation" msgid="3437759207020400204">"Umožňuje aplikaci odesílat zprávy SMS. Škodlivé aplikace vás mohou připravit o peníze odesíláním zpráv bez vašeho svolení."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"čtení zpráv SMS a MMS"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2341692916884515613">"Umožňuje aplikaci číst zprávy SMS uložené v tabletu nebo na kartě SIM. Škodlivé aplikace mohou číst důvěrné zprávy."</string>
-    <string name="permdesc_readSms" product="default" msgid="5653850482025875493">"Umožňuje aplikaci číst zprávy SMS uložené v telefonu nebo na kartě SIM. Škodlivé aplikace mohou číst důvěrné zprávy."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="2341692916884515613">"Umožňuje aplikaci číst zprávy SMS uložené v tabletu nebo na SIM kartě. Škodlivé aplikace mohou číst důvěrné zprávy."</string>
+    <string name="permdesc_readSms" product="default" msgid="5653850482025875493">"Umožňuje aplikaci číst zprávy SMS uložené v telefonu nebo na SIM kartě. Škodlivé aplikace mohou číst důvěrné zprávy."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"úprava zpráv SMS a MMS"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Umožňuje aplikaci zapisování do zpráv SMS uložených v tabletu nebo na kartě SIM. Škodlivé aplikace mohou vaše zprávy smazat."</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Umožňuje aplikaci zapisování do zpráv SMS uložených v telefonu nebo na kartě SIM. Škodlivé aplikace mohou vaše zprávy smazat."</string>
+    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Umožňuje aplikaci zapisování do zpráv SMS uložených v tabletu nebo na SIM kartě. Škodlivé aplikace mohou vaše zprávy smazat."</string>
+    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Umožňuje aplikaci zapisování do zpráv SMS uložených v telefonu nebo na SIM kartě. Škodlivé aplikace mohou vaše zprávy smazat."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"příjem WAP"</string>
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Umožňuje aplikaci přijmout a zpracovat zprávy WAP. Škodlivé aplikace mohou sledovat vaše zprávy nebo je smazat, aniž by vám byly zobrazeny."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"načtení spuštěných aplikací"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Umožňuje aplikaci získat informace o aktuálně a naposledy spuštěných úlohách. Škodlivé aplikace mohou odhalit soukromé informace o ostatních aplikacích."</string>
+    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
+    <skip />
+    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"změna uspořádání spuštěných aplikací"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Umožňuje aplikaci přesunout úlohy na popředí nebo pozadí. Škodlivé aplikace mohou vynutit zobrazení na popředí bez vašeho svolení."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"zastavení činnosti aplikací"</string>
@@ -696,15 +698,15 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Zkusit znovu"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Překročili jste maximální povolený počet pokusů o odemknutí obličejem."</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Nabíjení, <xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Nabito."</string>
+    <string name="lockscreen_charged" msgid="4938930459620989972">"nabito"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Připojte dobíjecí zařízení."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Není vložena SIM karta."</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"V tabletu není karta SIM."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"V telefonu není žádná karta SIM."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Vložte kartu SIM."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Karta SIM chybí nebo je nečitelná. Vložte kartu SIM."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Vaše karta SIM byla natrvalo zablokována."\n" Požádejte svého poskytovatele bezdrátových služeb o další kartu SIM."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Není vložena SIM karta"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"V tabletu není SIM karta."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"V telefonu není žádná SIM karta."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Vložte SIM kartu."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM karta chybí nebo je nečitelná. Vložte SIM kartu."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Vaše SIM karta byla natrvalo zablokována."\n" Požádejte svého poskytovatele bezdrátových služeb o další SIM kartu."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Tlačítko Předchozí stopa"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Tlačítko Další stopa"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Tlačítko Pozastavit"</string>
@@ -712,10 +714,10 @@
     <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Tlačítko Zastavit"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Pouze tísňová volání"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Síť je blokována"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"Karta SIM je zablokována pomocí kódu PUK."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM karta je zablokována pomocí kódu PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Další informace naleznete v uživatelské příručce; nebo kontaktujte zákaznickou podporu."</string>
-    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Karta SIM je zablokována."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Odblokování karty SIM..."</string>
+    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM karta je zablokována."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Odblokování SIM karty..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Již <xliff:g id="NUMBER_0">%d</xliff:g>krát jste použili nesprávné bezpečnostní gesto. "\n\n"Zkuste to znovu za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Již <xliff:g id="NUMBER_0">%d</xliff:g>krát jste nesprávně zadali heslo. "\n\n"Zkuste to znovu za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Již <xliff:g id="NUMBER_0">%d</xliff:g>krát jste nesprávně zadali kód PIN. "\n\n"Zkuste to znovu za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
@@ -746,14 +748,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"Alt"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"znak"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"slovo"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"odkaz"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"řádek"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Test továrního nastavení se nezdařil"</string>
@@ -1038,10 +1036,10 @@
     <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Odeslat zprávu"</string>
     <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Neodesílat"</string>
     <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Nahlásit škodlivou aplikaci"</string>
-    <string name="sim_removed_title" msgid="6227712319223226185">"Karta SIM odebrána"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"Mobilní síť bude dostupná až poté, co vložíte platnou kartu SIM a restartujete zařízení."</string>
+    <string name="sim_removed_title" msgid="6227712319223226185">"SIM karta odebrána"</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"Mobilní síť bude dostupná až poté, co vložíte platnou SIM kartu a restartujete zařízení."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Hotovo"</string>
-    <string name="sim_added_title" msgid="3719670512889674693">"Karta SIM přidána."</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"SIM karta přidána."</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Mobilní síť bude přístupná po restartu zařízení."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Restartovat"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Nastavení času"</string>
