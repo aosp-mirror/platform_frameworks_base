@@ -71,6 +71,7 @@ private:
             int pause;
             String8 path;
             SortedVector<Frame> frames;
+            bool playUntilComplete;
         };
         int fps;
         int width;
@@ -82,6 +83,8 @@ private:
     status_t initTexture(void* buffer, size_t len);
     bool android();
     bool movie();
+
+    void checkExit();
 
     sp<SurfaceComposerClient>       mSession;
     AssetManager mAssets;

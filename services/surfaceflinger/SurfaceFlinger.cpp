@@ -183,7 +183,9 @@ void SurfaceFlinger::bootFinished()
     }
 
     // stop boot animation
-    property_set("ctl.stop", "bootanim");
+    // formerly we would just kill the process, but we now ask it to exit so it
+    // can choose where to stop the animation.
+    property_set("service.bootanim.exit", "1");
 }
 
 void SurfaceFlinger::binderDied(const wp<IBinder>& who)
@@ -194,7 +196,7 @@ void SurfaceFlinger::binderDied(const wp<IBinder>& who)
     setOrientation(0, eOrientationDefault, 0);
 
     // restart the boot-animation
-    property_set("ctl.start", "bootanim");
+    startBootAnim();
 }
 
 void SurfaceFlinger::onFirstRef()
@@ -300,11 +302,16 @@ status_t SurfaceFlinger::readyToRun()
     /*
      *  We're now ready to accept clients...
      */
-
-    // start boot animation
-    property_set("ctl.start", "bootanim");
+    startBootAnim();
 
     return NO_ERROR;
+}
+
+void SurfaceFlinger::startBootAnim()
+{
+    // start boot animation
+    property_set("service.bootanim.exit", "0");
+    property_set("ctl.start", "bootanim");
 }
 
 // ----------------------------------------------------------------------------

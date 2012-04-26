@@ -334,7 +334,8 @@ private:
             void        debugFlashRegions();
             void        debugShowFPS() const;
             void        drawWormhole() const;
-           
+
+            void        startBootAnim();
 
     mutable     MessageQueue    mEventQueue;
 
