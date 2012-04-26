@@ -278,6 +278,13 @@ status_t OpenGLRenderer::invokeFunctors(Rect& dirty) {
         }
     }
 
+    // Restore state possibly changed by the functors in process mode
+    GLboolean value;
+    glGetBooleanv(GL_BLEND, &value);
+    mCaches.blend = value;
+
+    mCaches.activeTexture(0);
+
     return result;
 }
 
@@ -2787,6 +2794,7 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
 void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,
         ProgramDescription& description, bool swapSrcDst) {
     blend = blend || mode != SkXfermode::kSrcOver_Mode;
+
     if (blend) {
         // These blend modes are not supported by OpenGL directly and have
         // to be implemented using shaders. Since the shader will perform
