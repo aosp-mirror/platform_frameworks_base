@@ -11076,15 +11076,20 @@ package android.media {
     method public boolean hasCacheReachedEndOfStream();
     method public int readSampleData(java.nio.ByteBuffer, int);
     method public final void release();
-    method public void seekTo(long);
+    method public void seekTo(long, int);
     method public void selectTrack(int);
     method public final void setDataSource(android.content.Context, android.net.Uri, java.util.Map<java.lang.String, java.lang.String>) throws java.io.IOException;
     method public final void setDataSource(java.lang.String, java.util.Map<java.lang.String, java.lang.String>);
     method public final void setDataSource(java.lang.String);
     method public final void setDataSource(java.io.FileDescriptor);
     method public final void setDataSource(java.io.FileDescriptor, long, long);
+    method public void unselectTrack(int);
     field public static final int SAMPLE_FLAG_ENCRYPTED = 2; // 0x2
     field public static final int SAMPLE_FLAG_SYNC = 1; // 0x1
+    field public static final int SEEK_TO_CLOSEST = 3; // 0x3
+    field public static final int SEEK_TO_CLOSEST_SYNC = 2; // 0x2
+    field public static final int SEEK_TO_NEXT_SYNC = 1; // 0x1
+    field public static final int SEEK_TO_PREVIOUS_SYNC = 0; // 0x0
   }
 
   public class MediaMetadataRetriever {
