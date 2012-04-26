@@ -191,17 +191,33 @@ final public class MediaExtractor {
 
     /** Subsequent calls to {@link #readSampleData}, {@link #getSampleTrackIndex} and
      *  {@link #getSampleTime} only retrieve information for the subset of tracks
-     *  selected by the call below.
-     *  Selecting the same track multiple times has no effect, the track
+     *  selected.
+     *  Selecting the same track multiple times has no effect, the track is
      *  only selected once.
-     *  Media data will be returned in the order of their timestamps.
     */
     public native void selectTrack(int index);
 
-    /** All selected tracks seek near the requested time. The next sample
-     *  returned for each selected track will be a sync sample.
+    /** Subsequent calls to {@link #readSampleData}, {@link #getSampleTrackIndex} and
+     *  {@link #getSampleTime} only retrieve information for the subset of tracks
+     *  selected.
     */
-    public native void seekTo(long timeUs);
+    public native void unselectTrack(int index);
+
+    /** If possible, seek to a sync sample at or before the specified time */
+    public static final int SEEK_TO_PREVIOUS_SYNC       = 0;
+    /** If possible, seek to a sync sample at or after the specified time */
+    public static final int SEEK_TO_NEXT_SYNC           = 1;
+    /** If possible, seek to the sync sample closest to the specified time */
+    public static final int SEEK_TO_CLOSEST_SYNC        = 2;
+    /** If possible, seek to a sample closest to the specified time, which may
+      * NOT be a sync sample!
+      */
+    public static final int SEEK_TO_CLOSEST             = 3;
+
+    /** All selected tracks seek near the requested time according to the
+      * specified mode.
+      */
+    public native void seekTo(long timeUs, int mode);
 
     /** Advance to the next sample. Returns false if no more sample data
      *  is available (end of stream).
