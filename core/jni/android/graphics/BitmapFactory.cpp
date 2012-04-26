@@ -322,6 +322,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         const float sy = scaledHeight / float(decoded->height());
 
         bitmap->setConfig(decoded->getConfig(), scaledWidth, scaledHeight);
+        bitmap->setIsOpaque(decoded->isOpaque());
         bitmap->allocPixels(&javaAllocator, NULL);
         bitmap->eraseColor(0);
 
