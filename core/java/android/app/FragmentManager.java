@@ -1890,7 +1890,7 @@ final class FragmentManagerImpl extends FragmentManager {
         if (mActive != null) {
             for (int i=0; i<mAdded.size(); i++) {
                 Fragment f = mAdded.get(i);
-                if (f != null && !f.mHidden) {
+                if (f != null && !f.mHidden && f.mUserVisibleHint) {
                     if (f.onContextItemSelected(item)) {
                         return true;
                     }
