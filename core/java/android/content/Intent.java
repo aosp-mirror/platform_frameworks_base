@@ -1624,8 +1624,20 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast Action:  The current system wallpaper has changed.  See
      * {@link android.app.WallpaperManager} for retrieving the new wallpaper.
+     * This should <em>only</em> be used to determine when the wallpaper
+     * has changed to show the new wallpaper to the user.  You should certainly
+     * never, in response to this, change the wallpaper or other attributes of
+     * it such as the suggested size.  That would be crazy, right?  You'd cause
+     * all kinds of loops, especially if other apps are doing similar things,
+     * right?  Of course.  So please don't do this.
+     *
+     * @deprecated Modern applications should use
+     * {@link android.view.WindowManager.LayoutParams#FLAG_SHOW_WALLPAPER
+     * WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER} to have the wallpaper
+     * shown behind their UI, rather than watching for this broadcast and
+     * rendering the wallpaper on their own.
      */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @Deprecated @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_WALLPAPER_CHANGED = "android.intent.action.WALLPAPER_CHANGED";
     /**
      * Broadcast Action: The current device {@link android.content.res.Configuration}
