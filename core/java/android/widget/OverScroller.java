@@ -35,7 +35,7 @@ public class OverScroller {
     private final SplineOverScroller mScrollerX;
     private final SplineOverScroller mScrollerY;
 
-    private final Interpolator mInterpolator;
+    private Interpolator mInterpolator;
 
     private final boolean mFlywheel;
 
@@ -111,6 +111,10 @@ public class OverScroller {
     public OverScroller(Context context, Interpolator interpolator,
             float bounceCoefficientX, float bounceCoefficientY, boolean flywheel) {
         this(context, interpolator, flywheel);
+    }
+
+    void setInterpolator(Interpolator interpolator) {
+        mInterpolator = interpolator;
     }
 
     /**
