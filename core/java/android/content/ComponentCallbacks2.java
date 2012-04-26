@@ -88,7 +88,11 @@ public interface ComponentCallbacks2 extends ComponentCallbacks {
      * should never compare to exact values of the level, since new intermediate
      * values may be added -- you will typically want to compare if the value
      * is greater or equal to a level you are interested in.
-     * 
+     *
+     * <p>To retrieve the processes current trim level at any point, you can
+     * use {@link android.app.ActivityManager#getMyMemoryState
+     * ActivityManager.getMyMemoryState(RunningAppProcessInfo)}.
+     *
      * @param level The context of the trim, giving a hint of the amount of
      * trimming the application may like to perform.  May be
      * {@link #TRIM_MEMORY_COMPLETE}, {@link #TRIM_MEMORY_MODERATE},
