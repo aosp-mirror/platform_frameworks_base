@@ -132,6 +132,14 @@
             android:excludeFromRecents="true">
         </activity>
 
+        <!-- started from UsbDebuggingManager -->
+        <activity android:name=".usb.UsbDebuggingActivity"
+            android:permission="android.permission.MANAGE_USB"
+            android:theme="@*android:style/Theme.Holo.Dialog.Alert"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true">
+        </activity>
+
         <!-- started from NetworkPolicyManagerService -->
         <activity
             android:name=".net.NetworkOverLimitActivity"
