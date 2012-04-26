@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"La tauleta s\'apagarà."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"El telèfon s\'apagarà."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Vols apagar-lo?"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"Reinicia en mode segur"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"Vols reiniciar en mode segur? Es desactivaran les aplicacions de tercers que hagis instal·lat. Es restabliran quan tornis a reiniciar."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Recents"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"No hi ha aplicacions recents"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Opcions de la tauleta"</string>
@@ -219,6 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Permet que l\'aplicació rebi i processi missatges WAP. Les aplicacions malicioses poden supervisar els missatges o suprimir-los sense mostrar-te\'ls."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recupera les aplicacions en execució"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Permet que l\'aplicació recuperi informació sobre les tasques que s\'estan executant actualment i que s\'han executat recentment. Les aplicacions malicioses poden descobrir informació privada sobre altres aplicacions."</string>
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"recupera els detalls d\'aplicacions en execució"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Permet que l\'aplicació recuperi informació detallada sobre les tasques que s\'estan executant actualment i que s\'han executat recentment. Les aplicacions malicioses poden descobrir informació privada sobre altres aplicacions."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"canvia l\'ordre de les aplicacions en execució"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permet que l\'aplicació desplaci tasques en primer o segon pla. Les aplicacions malicioses poden aparèixer en primer pla sense el teu consentiment."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"atura les aplicacions que s\'estan executant"</string>
@@ -342,15 +342,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Permet que l\'aplicació enviï emissions permanents, que es conserven després de finalitzar l\'emissió. Les aplicacions malicioses poden alentir o desestabilitzar la tauleta si li fan utilitzar massa memòria."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Permet que l\'aplicació enviï emissions permanents, que es conserven després de finalitzar l\'emissió. Les aplicacions malicioses poden alentir o desestabilitzar el telèfon si li fan utilitzar massa memòria."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"llegir dades de contacte"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Permet que l\'aplicació llegeixi totes les dades sobre els contactes emmagatzemades a la tauleta, inclosa la freqüència amb la qual has trucat a determinades persones, els has enviat correus electrònics o t\'hi has comunicat. Això ajuda a completar automàticament les adreces electròniques, i també és útil per a altres funcions. Les aplicacions malicioses poden fer servir aquest permís per enviar les teves dades de contacte a altres persones."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Permet que l\'aplicació llegeixi totes les dades sobre els contactes emmagatzemades al telèfon, inclosa la freqüència amb la qual has trucat a determinades persones, els has enviat correus electrònics o t\'hi has comunicat. Això ajuda a completar automàticament les adreces electròniques, i també és útil per a altres funcions. Les aplicacions malicioses poden fer servir aquest permís per enviar les teves dades de contacte a altres persones."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"escriure dades de contacte"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Permet que l\'aplicació modifiqui les dades sobre els contactes emmagatzemades a la tauleta, inclosa la freqüència amb la qual has trucat a determinades persones, els has enviat correus electrònics o t\'hi has comunicat. Això ajuda a completar automàticament les adreces electròniques, i també és útil per a altres funcions. Les aplicacions malicioses poden fer servir aquest permís per esborrar o per modificar les teves dades de contacte."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Permet que l\'aplicació modifiqui les dades sobre els contactes emmagatzemades al telèfon, inclosa la freqüència amb la qual has trucat a determinades persones, els has enviat correus electrònics o t\'hi has comunicat. Això ajuda a completar automàticament les adreces electròniques, i també és útil per a altres funcions. Les aplicacions malicioses poden fer servir aquest permís per esborrar o per modificar les teves dades de contacte."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"lectura del registre de trucades"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Permet que l\'aplicació llegeixi el registre de trucades de la teva tauleta, incloses les dades de les trucades entrants i sortints. És possible que les aplicacions malicioses ho utilitzin per enviar les teves dades a altres persones."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Permet que l\'aplicació llegeixi el registre de trucades del teu telèfon, incloses les dades de les trucades entrants i sortints. És possible que les aplicacions malicioses ho utilitzin per enviar les teves dades a altres persones."</string>
@@ -746,14 +742,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"caràcter"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"paraula"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"enllaç"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"línia"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Error a la prova de fàbrica"</string>

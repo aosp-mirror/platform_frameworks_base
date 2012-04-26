@@ -217,6 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Võimaldab rakendusel vastu võtta ja töödelda WAP-sõnumeid. Pahatahtlikud rakendused võivad teie sõnumeid jälgida või neid kustutada teile näitamata."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"Käitatud rakenduste toomine"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Võimaldab rakendusel hankida teavet praegu töötavate ja hiljuti töötanud ülesannete kohta. Pahatahtlikud rakendused võivad avastada privaatset teavet teiste rakenduste kohta."</string>
+    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
+    <skip />
+    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"käitatud rakenduste ümberjärjestamine"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Võimaldab rakendusel teisaldada ülesanded esiplaanile ja taustale. Pahatahtlikud rakendused võivad sundida end esiplaanile tulema teie loata."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"käitatud rakenduste peatamine"</string>
@@ -340,15 +344,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Võimaldab rakendusel saata püsivaid edastusi, mis jäävad pärast saate lõppemist alles. Pahatahtlikud rakendused võivad muuta tahvelarvuti aeglaseks või ebastabiilseks, põhjustades selle liiga suurt mälukasutust."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Võimaldab rakendusel saata püsivaid edastusi, mis jäävad pärast saate lõppemist alles. Pahatahtlikud rakendused võivad muuta telefoni aeglaseks või ebastabiilseks, põhjustades selle liiga suurt mälukasutust."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"loe kontaktandmeid"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Lubab rakendusel lugeda kõikide tahvelarvutisse salvestatud kontaktide andmeid, sh seda, kui sageli olete nendele inimestele helistanud, meilinud või nendega muul viisil suhelnud. See on kasulik e-posti aadresside automaatsel täitmisel ja muude mugavusfunktsioonide puhul. Pahatahtlikud rakendused võivad selle loa abil saata teie kontaktandmed teistele inimestele."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Lubab rakendusel lugeda kõikide telefoni salvestatud kontaktide andmeid, sh seda, kui sageli olete nendele inimestele helistanud, meilinud või nendega muul viisil suhelnud. See on kasulik e-posti aadresside automaatsel täitmisel ja muude mugavusfunktsioonide puhul. Pahatahtlikud rakendused võivad selle loa abil saata teie kontaktandmed teistele inimestele."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"kirjuta kontaktandmeid"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Lubab rakendusel muuta kõikide tahvelarvutisse salvestatud kontaktide andmeid, sh seda, kui sageli olete nendele inimestele helistanud, meilinud või nendega muul viisil suhelnud. See on kasulik e-posti aadresside automaatsel täitmisel ja muude mugavusfunktsioonide puhul. Pahatahtlikud rakendused võivad kasutada seda luba kontaktandmete muutmiseks või kustutamiseks."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Lubab rakendusel muuta kõikide telefoni salvestatud kontaktide andmeid, sh seda, kui sageli olete nendele inimestele helistanud, meilinud või nendega muul viisil suhelnud. See on kasulik e-posti aadresside automaatsel täitmisel ja muude mugavusfunktsioonide puhul. Pahatahtlikud rakendused võivad kasutada seda luba kontaktandmete muutmiseks või kustutamiseks."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"kõnelogi lugemine"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Lubab rakendusel lugeda tahvelarvuti kõnelogi, sh teavet sissetulevate ja väljaminevate kõnede kohta. Pahatahtlikud rakendused võivad saata selle abil teie teavet teistele inimestele."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Lubab rakendusel lugeda telefoni kõnelogi, sh teavet sissetulevate ja väljaminevate kõnede kohta. Pahatahtlikud rakendused võivad saata selle abil teie teavet teistele inimestele."</string>

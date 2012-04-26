@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Ihr Tablet wird heruntergefahren."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefon wird heruntergefahren."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Möchten Sie das Gerät herunterfahren?"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"Im abgesicherten Modus starten"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"Möchten Sie im abgesicherten Modus neu starten? Dadurch werden alle Apps von Drittanbietern deaktiviert, die Sie installiert haben. Sie werden jedoch nach einem weiteren Neustart wiederhergestellt."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Kürzlich geöffnet"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Keine kürzlich geöffneten Apps"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Tablet-Optionen"</string>
@@ -204,7 +202,7 @@
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"Notfall-Broadcasts empfangen"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Ermöglicht der App, Notfall-Broadcasts zu empfangen und zu verarbeiten. Diese Berechtigung steht nur System-Apps zur Verfügung."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"Cell Broadcast-Nachrichten lesen"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Ermöglicht es der App, von Ihrem Gerät empfangene Cell Broadcast-Nachrichten zu lesen. Cell Broadcast-Benachrichtigungen werden an einigen Standorten gesendet, um Sie über Notfallsituationen zu informieren. Schädliche Apps können die Leistung oder den Betrieb Ihres Geräts beeinträchtigen, wenn eine Cell Broadcast-Notfallbenachrichtigung eingeht."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Ermöglicht der App, von Ihrem Gerät empfangene Cell Broadcast-Nachrichten zu lesen. Cell Broadcast-Benachrichtigungen werden an einigen Standorten gesendet, um Sie über Notfallsituationen zu informieren. Schädliche Apps können die Leistung oder den Betrieb Ihres Geräts beeinträchtigen, wenn eine Cell Broadcast-Notfallbenachrichtigung eingeht."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"Kurznachrichten senden"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Ermöglicht der App das Senden von SMS. Bei schädlichen Apps können Kosten entstehen, wenn diese Nachrichten ohne Ihre Zustimmung versenden."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"SMS-Nachrichten ohne Bestätigung senden"</string>
@@ -219,12 +217,16 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Ermöglicht der App, WAP-Mitteilungen zu empfangen und zu verarbeiten. Schädliche Apps können so Ihre Nachrichten überwachen oder löschen, bevor sie angezeigt werden."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"aktive Apps abrufen"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Ermöglicht der App, Informationen zu aktuellen und kürzlich ausgeführten Aufgaben abzurufen. Schädliche Apps können so geheime Informationen zu anderen Apps erhalten."</string>
+    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
+    <skip />
+    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"Aktive Apps neu ordnen"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Ermöglicht der App, Aufgaben in den Vorder- und Hintergrund zu verschieben. Schädliche Apps können so ohne Ihr Zutun eine Anzeige im Vordergrund erzwingen."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"Aktive Apps beenden"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Ermöglicht der App, Aufgaben zu entfernen und die entsprechenden Apps zu beenden. Schädliche Apps können das Verhalten anderer Apps stören."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"Beliebige Aktivität starten"</string>
-    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Ermöglicht es der App, ungeachtet der Berechtigungen oder des Exportstatus beliebige Aktivitäten zu starten"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Ermöglicht der App, ungeachtet der Berechtigungen oder des Exportstatus beliebige Aktivitäten zu starten"</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"Bildschirmkompatibilität festlegen"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Ermöglicht der App, den Bildschirmkompatibilitätsmodus anderer Apps zu steuern. Schädliche Apps können das Verhalten anderer Apps stören."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"Fehlerbeseitigung für App aktivieren"</string>
@@ -342,15 +344,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Ermöglicht der App, dauerhafte Broadcasts zu senden, die auch nach Ende des Broadcasts bestehen bleiben. Schädliche Apps können das Tablet langsam oder unstabil machen, indem zuviel Speicherplatz belegt wird."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Ermöglicht der App, dauerhafte Broadcasts zu senden, die auch nach Ende des Broadcasts bestehen bleiben. Schädliche Apps können das Telefon langsam oder unstabil machen, indem zuviel Speicherplatz belegt wird."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"Kontaktdaten lesen"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Ermöglicht der App, alle Daten Ihrer auf dem Tablet gespeicherten Kontakte zu lesen, einschließlich der Häufigkeit, mit der Sie angerufen, E-Mails gesendet oder auf andere Weise mit bestimmten Personen kommuniziert haben. Dadurch werden die automatische Vervollständigung von E-Mail-Adressen und andere praktische Funktionen verbessert. Schädliche Apps können mit dieser Berechtigung Ihre Kontaktdaten an andere Personen senden."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Ermöglicht der App, alle Daten Ihrer auf dem Telefon gespeicherten Kontakte zu lesen, einschließlich der Häufigkeit, mit der Sie angerufen, E-Mails gesendet oder auf andere Weise mit bestimmten Personen kommuniziert haben. Dadurch werden die automatische Vervollständigung von E-Mail-Adressen und andere praktische Funktionen verbessert. Schädliche Apps können mit dieser Berechtigung Ihre Kontaktdaten an andere Personen senden."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"Kontaktdaten schreiben"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Ermöglicht der App, die Daten Ihrer auf dem Tablet gespeicherten Kontakte zu ändern, einschließlich der Häufigkeit, mit der Sie angerufen, E-Mails gesendet oder auf andere Weise mit bestimmten Personen kommuniziert haben. Dadurch werden die automatische Vervollständigung von E-Mail-Adressen und andere praktische Funktionen verbessert. Schädliche Apps können mit dieser Berechtigung Ihre Kontaktdaten ändern oder löschen."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Ermöglicht der App, die Daten Ihrer auf dem Telefon gespeicherten Kontakte zu ändern, einschließlich der Häufigkeit, mit der Sie angerufen, E-Mails gesendet oder auf andere Weise mit bestimmten Personen kommuniziert haben. Dadurch werden die automatische Vervollständigung von E-Mail-Adressen und andere praktische Funktionen verbessert. Schädliche Apps können mit dieser Berechtigung Ihre Kontaktdaten ändern oder löschen."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"Anrufprotokoll lesen"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Ermöglicht der App, das Anrufprotokoll Ihres Tablets zu lesen, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so Ihre Daten an Dritte senden."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Ermöglicht der App, das Anrufprotokoll Ihres Telefons zu lesen, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so Ihre Daten an Dritte senden."</string>
@@ -746,14 +744,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"Zeichen"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"Wort"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"Link"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"Zeile"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Werkstest fehlgeschlagen"</string>

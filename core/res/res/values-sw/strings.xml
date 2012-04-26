@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Kompyuta yako ndogo itazima."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Simu yako itazima."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Unataka kuzima?"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"Washa upya kwa hali salama"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"Je, unataka kuwasha upya kwa hali salama? Hii italemaza programu zote za wahusika wengine ambazo umesakinisha. Zitarejeshwa wakati utawasha upya tena."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Za hivi karibuni"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Hakuna programu za hivi karibuni."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Chaguo za kompyuta ndogo"</string>
@@ -219,6 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Inaruhusu programu kupokea na kuchakata jumbe za WAP. Programu hasidi zinaweza kufuatilia jumbe zako au kuzifuta bila kukuonyesha."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"rudisha programu zinazoendeshwa"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Inaruhusu programu kupata taarifa kuhusu kazi zinazoendelea sasa na hivi karibuni. Programu hasidi zinaweza kugundua taarifa ya kibinafsi kuhusu programu zingine."</string>
+    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
+    <skip />
+    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"Agiza tena programu za kuendeshwa"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Inaruhusu programu kusongesha kazi kwenye mandhari-mbele na mandhari-nyuma. Programu hasidi zinaweza kujilazimisha mbele bila udhibiti wako."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"Komesha programu zinazoendeshwa"</string>
@@ -342,15 +344,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Inaruhusu programu kutuma matangazo nata, ambayo hubakia baada ya matangazo kuisha. Programu hasidi zinaweza fanya kompyuta kibao kufanya kazi polepole au kuifanya isiwe thabiti kwa kuifanya itumie kumbukumbu kubwa zaidi."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Inaruhusu programu kutuma matangazo nata, ambayo hubakia baada ya matangazo kuisha. Programu hasidi zinaweza fanya simu kufanya kazi polepole au kuifanya isiwe thabiti kwa kuifanya itumie kumbukumbu kubwa zaidi."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"soma data ya anwani"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Huruhusu programu kusoma data yote kuhusu anwani zako zilizohifadhiwa kwenye  simu yako, ikiwa ni pamoja na marudio ya wale uliowapigia simu, kuwatumia barua pepe, au kuwasiliana kwa njia zingine na watu maalum. Hii husaidia na ukamilishaji otomatiki wa anwani za barua pepe na vipengele vingine vinavyofaa. Programu hasidi zinaweza kutumia idhini hii ili kutuma data yako ya anwani kwa watu wengine."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Huruhusu programu kusoma data yote kuhusu anwani zako zilizohifadhiwa kwenye  simu yako, ikiwa ni pamoja na marudio ya wale uliowapigia simu, kuwatumia barua pepe, au kuwasiliana kwa njia zingine na watu maalum. Hii husaidia na ukamilishaji otomatiki wa anwani za barua pepe na vipengele vingine vinavyofaa. Programu hasidi zinaweza kutumia idhini hii ili kutuma data yako ya anwani kwa watu wengine."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"andika data ya anwani"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Huruhusu programu kurekebisha data kuhusu anwani zako zilizohifadhiwa kwenye  simu yako, ikiwa ni pamoja na marudio ya wale uliowapigia simu, kuwatumia barua pepe, au kuwasiliana kwa njia zingine na watu maalum. Hii husaidia na ukamilishaji otomatiki wa anwani za barua pepe na vipengele vingine vinavyofaa. Programu hasidi zinaweza kutumia hii kufuta au kurekebisha data yako ya anwani."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Huruhusu programu kurekebisha data kuhusu anwani zako zilizohifadhiwa kwenye  simu yako, ikiwa ni pamoja na marudio ya wale uliowapigia simu, kuwatumia barua pepe, au kuwasiliana kwa njia zingine na watu maalum. Hii husaidia na ukamilishaji otomatiki wa anwani za barua pepe na vipengele vingine vinavyofaa. Programu hasidi zinaweza kutumia hii kufuta au kurekebisha data yako ya anwani."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"soma rajisi ya simu"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Huruhusu programu kusoma rajisi ya simu ya kompyuta kibao yako, ikiwa ni pamoja na simu zinazoingia na kutoka. Huenda programu hasidi zikatumia hii ili kutuma data yako kwa watu wengine."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Huruhusu programu kusoma rajisi ya simu yako, ikiwa ni pamoja na data kuhusu simu zinazoingia na kutoka. Huenda programu hasidi zikatumia hii ili kutuma data yako kwa watu wengine."</string>
@@ -746,14 +744,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"kibambo"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"neno"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"kiungo"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"mstari"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Jaribio la kiwanda limeshindikana"</string>
