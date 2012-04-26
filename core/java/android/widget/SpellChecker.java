@@ -457,7 +457,16 @@ public class SpellChecker implements SpellCheckerSessionListener {
         public void parse() {
             Editable editable = (Editable) mTextView.getText();
             // Iterate over the newly added text and schedule new SpellCheckSpans
-            final int start = editable.getSpanStart(mRange);
+            final int start;
+            if (mIsSentenceSpellCheckSupported) {
+                // TODO: Find the start position of the sentence.
+                // Set span with the context
+                start =  Math.max(
+                        0, editable.getSpanStart(mRange) - MIN_SENTENCE_LENGTH);
+            } else {
+                start = editable.getSpanStart(mRange);
+            }
+
             final int end = editable.getSpanEnd(mRange);
 
             int wordIteratorWindowEnd = Math.min(end, start + WORD_ITERATOR_INTERVAL);
@@ -512,9 +521,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
                     return;
                 }
                 // TODO: Find the start position of the sentence.
-                // Set span with the context
-                final int spellCheckStart =  Math.max(
-                        0, Math.min(wordStart, regionEnd - MIN_SENTENCE_LENGTH));
+                final int spellCheckStart =  wordStart;
                 if (regionEnd <= spellCheckStart) {
                     return;
                 }
