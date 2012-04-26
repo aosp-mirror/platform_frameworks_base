@@ -114,7 +114,7 @@
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"Žádná karta SIM."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"Žádná SIM karta."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Tethering přes Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Režim V letadle."</string>
     <!-- String.format failed for translation -->
