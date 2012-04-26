@@ -1184,6 +1184,7 @@
   <java-symbol type="bool" name="config_showNavigationBar" />
   <java-symbol type="bool" name="target_honeycomb_needs_options_menu" />
   <java-symbol type="dimen" name="navigation_bar_height" />
+  <java-symbol type="dimen" name="navigation_bar_height_landscape" />
   <java-symbol type="dimen" name="navigation_bar_width" />
   <java-symbol type="dimen" name="status_bar_height" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_off" />
