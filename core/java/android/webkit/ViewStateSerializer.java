@@ -64,7 +64,6 @@ class ViewStateSerializer {
         draw.mViewState = new WebViewCore.ViewState();
         draw.mContentSize = new Point(contentWidth, contentHeight);
         draw.mBaseLayer = baseLayer;
-        draw.mInvalRegion = new Region(0, 0, contentWidth, contentHeight);
         stream.close();
         return draw;
     }

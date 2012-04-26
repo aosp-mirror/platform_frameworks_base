@@ -601,8 +601,7 @@ public final class WebViewCore {
      * Redraw a portion of the picture set. The Point wh returns the
      * width and height of the overall picture.
      */
-    private native int nativeRecordContent(int nativeClass, Region invalRegion,
-            Point wh);
+    private native int nativeRecordContent(int nativeClass, Point wh);
 
     /**
      * Notify webkit that animations have begun (on the hardware accelerated content)
@@ -2180,11 +2179,9 @@ public final class WebViewCore {
     static class DrawData {
         DrawData() {
             mBaseLayer = 0;
-            mInvalRegion = new Region();
             mContentSize = new Point();
         }
         int mBaseLayer;
-        Region mInvalRegion;
         // view size that was used by webkit during the most recent layout
         Point mViewSize;
         Point mContentSize;
@@ -2230,8 +2227,7 @@ public final class WebViewCore {
         mDrawIsScheduled = false;
         DrawData draw = new DrawData();
         if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw start");
-        draw.mBaseLayer = nativeRecordContent(mNativeClass, draw.mInvalRegion,
-                draw.mContentSize);
+        draw.mBaseLayer = nativeRecordContent(mNativeClass, draw.mContentSize);
         if (draw.mBaseLayer == 0) {
             if (mWebViewClassic != null && !mWebViewClassic.isPaused()) {
                 if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw abort, resending draw message");
@@ -2277,8 +2273,7 @@ public final class WebViewCore {
         // the draw path (and fix saving <canvas>)
         DrawData draw = new DrawData();
         if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "saveViewState start");
-        draw.mBaseLayer = nativeRecordContent(mNativeClass, draw.mInvalRegion,
-                draw.mContentSize);
+        draw.mBaseLayer = nativeRecordContent(mNativeClass, draw.mContentSize);
         boolean result = false;
         try {
             result = ViewStateSerializer.serializeViewState(stream, draw);
