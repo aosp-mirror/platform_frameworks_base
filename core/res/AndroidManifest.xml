@@ -112,6 +112,13 @@
     <protected-broadcast android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
     <protected-broadcast android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
 
+    <protected-broadcast android:name="android.intent.action.HEADSET_PLUG" />
+    <protected-broadcast android:name="android.intent.action.ANALOG_AUDIO_DOCK_PLUG" />
+    <protected-broadcast android:name="android.intent.action.DIGITAL_AUDIO_DOCK_PLUG" />
+    <protected-broadcast android:name="android.intent.action.HDMI_AUDIO_PLUG" />
+    <protected-broadcast android:name="android.intent.action.USB_AUDIO_ACCESSORY_PLUG" />
+    <protected-broadcast android:name="android.intent.action.USB_AUDIO_DEVICE_PLUG" />
+
     <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE" />
     <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE_IMMEDIATE" />
 
