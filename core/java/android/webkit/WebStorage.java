@@ -44,8 +44,9 @@ public class WebStorage {
     // otherwise the WebCore thread will remain asleep.
     public interface QuotaUpdater {
         /**
-         * Provide a new quota, specified in bytes.
-         * @param newQuota The new quota, in bytes
+         * Provides a new quota, specified in bytes.
+         *
+         * @param newQuota the new quota, in bytes
          */
         public void updateQuota(long newQuota);
     };
@@ -79,8 +80,9 @@ public class WebStorage {
         }
 
         /**
-         * Get the string representation of this origin.
-         * @return The string representation of this origin
+         * Gets the string representation of this origin.
+         *
+         * @return the string representation of this origin
          */
         // An origin string is created using WebCore::SecurityOrigin::toString().
         // Note that WebCore::SecurityOrigin uses 0 (which is not printed) for
@@ -92,19 +94,21 @@ public class WebStorage {
         }
 
         /**
-         * Get the quota for this origin, for the Web SQL Database API, in
+         * Gets the quota for this origin, for the Web SQL Database API, in
          * bytes. If this origin does not use the Web SQL Database API, this
          * quota will be set to zero.
-         * @return The quota, in bytes.
+         *
+         * @return the quota, in bytes
          */
         public long getQuota() {
             return mQuota;
         }
 
         /**
-         * Get the total amount of storage currently being used by this origin,
+         * Gets the total amount of storage currently being used by this origin,
          * for all JavaScript storage APIs, in bytes.
-         * @return The total amount of storage, in bytes.
+         *
+         * @return the total amount of storage, in bytes
          */
         public long getUsage() {
             return mUsage;
@@ -124,7 +128,7 @@ public class WebStorage {
      */
 
     /**
-     * Get the origins currently using either the Application Cache or Web SQL
+     * Gets the origins currently using either the Application Cache or Web SQL
      * Database APIs. This method operates asynchronously, with the result
      * being provided via a {@link ValueCallback}. The origins are provided as
      * a map, of type {@code Map<String, WebStorage.Origin>}, from the string
@@ -135,7 +139,7 @@ public class WebStorage {
     }
 
     /**
-     * Get the amount of storage currently being used by both the Application
+     * Gets the amount of storage currently being used by both the Application
      * Cache and Web SQL Database APIs by the given origin. The amount is given
      * in bytes and the origin is specified using its string representation.
      * This method operates asynchronously, with the result being provided via
@@ -146,7 +150,7 @@ public class WebStorage {
     }
 
     /**
-     * Get the storage quota for the Web SQL Database API for the given origin.
+     * Gets the storage quota for the Web SQL Database API for the given origin.
      * The quota is given in bytes and the origin is specified using its string
      * representation. This method operates asynchronously, with the result
      * being provided via a {@link ValueCallback}. Note that a quota is not
@@ -157,7 +161,7 @@ public class WebStorage {
     }
 
     /**
-     * Set the storage quota for the Web SQL Database API for the given origin.
+     * Sets the storage quota for the Web SQL Database API for the given origin.
      * The quota is specified in bytes and the origin is specified using its string
      * representation. Note that a quota is not enforced on a per-origin basis
      * for the Application Cache API.
@@ -167,7 +171,7 @@ public class WebStorage {
     }
 
     /**
-     * Clear the storage currently being used by both the Application Cache and
+     * Clears the storage currently being used by both the Application Cache and
      * Web SQL Database APIs by the given origin. The origin is specified using
      * its string representation.
      */
@@ -176,7 +180,7 @@ public class WebStorage {
     }
 
     /**
-     * Clear all storage currently being used by the JavaScript storage APIs.
+     * Clears all storage currently being used by the JavaScript storage APIs.
      * This includes the Application Cache, Web SQL Database and the HTML5 Web
      * Storage APIs.
      */
@@ -185,8 +189,9 @@ public class WebStorage {
     }
 
     /**
-     * Get the singleton instance of this class.
-     * @return The singleton {@link WebStorage} instance.
+     * Gets the singleton instance of this class.
+     *
+     * @return the singleton {@link WebStorage} instance
      */
     public static WebStorage getInstance() {
       return WebViewFactory.getProvider().getWebStorage();
