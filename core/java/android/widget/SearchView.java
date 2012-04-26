@@ -381,6 +381,17 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     }
 
     /**
+     * Returns the IME options set on the query text field.
+     * @return the ime options
+     * @see TextView#setImeOptions(int)
+     *
+     * @attr ref android.R.styleable#SearchView_imeOptions
+     */
+    public int getImeOptions() {
+        return mQueryTextView.getImeOptions();
+    }
+
+    /**
      * Sets the input type on the query text field.
      *
      * @see TextView#setInputType(int)
@@ -390,6 +401,16 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
      */
     public void setInputType(int inputType) {
         mQueryTextView.setInputType(inputType);
+    }
+
+    /**
+     * Returns the input type set on the query text field.
+     * @return the input type
+     *
+     * @attr ref android.R.styleable#SearchView_inputType
+     */
+    public int getInputType() {
+        return mQueryTextView.getInputType();
     }
 
     /** @hide */
@@ -511,6 +532,26 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     public void setQueryHint(CharSequence hint) {
         mQueryHint = hint;
         updateQueryHint();
+    }
+
+    /**
+     * Gets the hint text to display in the query text field.
+     * @return the query hint text, if specified, null otherwise.
+     *
+     * @attr ref android.R.styleable#SearchView_queryHint
+     */
+    public CharSequence getQueryHint() {
+        if (mQueryHint != null) {
+            return mQueryHint;
+        } else if (mSearchable != null) {
+            CharSequence hint = null;
+            int hintId = mSearchable.getHintId();
+            if (hintId != 0) {
+                hint = getContext().getString(hintId);
+            }
+            return hint;
+        }
+        return null;
     }
 
     /**
@@ -649,6 +690,15 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         mMaxWidth = maxpixels;
 
         requestLayout();
+    }
+
+    /**
+     * Gets the specified maximum width in pixels, if set. Returns zero if
+     * no maximum width was specified.
+     * @return the maximum width of the view
+     */
+    public int getMaxWidth() {
+        return mMaxWidth;
     }
 
     @Override
