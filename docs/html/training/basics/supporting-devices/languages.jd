@@ -97,6 +97,10 @@ locale currently set for the user's device.</p>
 &lt;/resources>
 </pre>
 
+<p class="note"><strong>Note:</strong> You can use the locale qualifier (or any
+configuration qualifer) on any resource type, such as if you want to provide
+localized versions of your bitmap drawable. For more information, see <a
+href="{@docRoot}guide/topics/resources/localization.html">Localization</a>.
 
 <h2 id="UseString">Use the String Resources</h2>
 
