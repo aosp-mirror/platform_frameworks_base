@@ -186,6 +186,13 @@ public class JavaBridgeBasicsTest extends JavaBridgeTestBase {
         assertRaisesException("testController.foo()");
     }
 
+    public void testUncaughtJavaExceptionRaisesJavaException() throws Throwable {
+        injectObjectAndReload(new Object() {
+            public void method() { throw new RuntimeException("foo"); }
+        }, "testObject");
+        assertRaisesException("testObject.method()");
+    }
+
     // Note that this requires that we can pass a JavaScript string to Java.
     public void testTypeOfStaticMethod() throws Throwable {
         injectObjectAndReload(new ObjectWithStaticMethod(), "testObject");
@@ -394,7 +401,6 @@ public class JavaBridgeBasicsTest extends JavaBridgeTestBase {
         assertEquals("", mTestController.waitForStringValue());
     }
 
-    // java.lang.reflect only allows access to public methods and fields. See b/6386557.
     public void testReflectPublicMethod() throws Throwable {
         injectObjectAndReload(new Object() {
             public String method() { return "foo"; }
@@ -404,12 +410,33 @@ public class JavaBridgeBasicsTest extends JavaBridgeTestBase {
                 ".toString()"));
     }
 
-    // java.lang.reflect only allows access to public methods and fields. See b/6386557.
     public void testReflectPublicField() throws Throwable {
         injectObjectAndReload(new Object() {
             public String field = "foo";
         }, "testObject");
         assertEquals("foo", executeJavaScriptAndGetStringResult(
                 "testObject.getClass().getField('field').get(testObject).toString()"));
+    }
+
+    public void testReflectPrivateMethodRaisesException() throws Throwable {
+        injectObjectAndReload(new Object() {
+            private void method() {};
+        }, "testObject");
+        assertRaisesException("testObject.getClass().getMethod('method', null)");
+        // getDeclaredMethod() is able to access a private method, but invoke()
+        // throws a Java exception.
+        assertRaisesException(
+                "testObject.getClass().getDeclaredMethod('method', null).invoke(testObject, null)");
+    }
+
+    public void testReflectPrivateFieldRaisesException() throws Throwable {
+        injectObjectAndReload(new Object() {
+            private int field;
+        }, "testObject");
+        assertRaisesException("testObject.getClass().getField('field')");
+        // getDeclaredField() is able to access a private field, but getInt()
+        // throws a Java exception.
+        assertRaisesException(
+                "testObject.getClass().getDeclaredField('field').getInt(testObject)");
     }
 }
