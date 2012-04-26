@@ -24979,7 +24979,7 @@ package android.webkit {
     method public void setMimeType(java.lang.String);
   }
 
-  public class WebSettings {
+  public abstract class WebSettings {
     method public boolean enableSmoothTransition();
     method public boolean getAllowContentAccess();
     method public boolean getAllowFileAccess();
