@@ -1210,7 +1210,11 @@ public final class BluetoothAdapter {
                     mService = bluetoothService;
                     for (IBluetoothManagerCallback cb : mBluetoothManagerCallbackList ){
                         try {
-                            cb.onBluetoothServiceUp(bluetoothService);
+                            if (cb != null) {
+                                cb.onBluetoothServiceUp(bluetoothService);
+                            } else {
+                                Log.d(TAG, "onBluetoothServiceUp: cb is null!!!");
+                            }
                         } catch (Exception e)  { Log.e(TAG,"",e);}
                     }
                 }
@@ -1222,7 +1226,11 @@ public final class BluetoothAdapter {
                     mService = null;
                     for (IBluetoothManagerCallback cb : mBluetoothManagerCallbackList ){
                         try {
-                            cb.onBluetoothServiceDown();
+                            if (cb != null) {
+                                cb.onBluetoothServiceDown();
+                            } else {
+                                Log.d(TAG, "onBluetoothServiceDown: cb is null!!!");
+                            }
                         } catch (Exception e)  { Log.e(TAG,"",e);}
                     }
                 }
@@ -1361,10 +1369,12 @@ public final class BluetoothAdapter {
     }
 
     private ArrayList<IBluetoothManagerCallback> mBluetoothManagerCallbackList = new ArrayList<IBluetoothManagerCallback>();
-    //private IBluetoothStateChangeCallback mBluetoothStateChangeCallback;
+
     /*package*/ IBluetooth getBluetoothService(IBluetoothManagerCallback cb) {
         synchronized (mManagerCallback) {
-            if (!mBluetoothManagerCallbackList.contains(cb)) {
+            if (cb == null) {
+                Log.w(TAG, "Unable to register null state change callback", new Exception());
+            } else if (!mBluetoothManagerCallbackList.contains(cb)) {
                 mBluetoothManagerCallbackList.add(cb);
             }
         }

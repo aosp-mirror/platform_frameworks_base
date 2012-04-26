@@ -468,7 +468,7 @@ public final class BluetoothSocket implements Closeable {
         int left = b.length;
         while(left > 0) {
             int ret = is.read(b, b.length - left, left);
-            if(ret < 0)
+            if(ret <= 0)
                  throw new IOException("read failed, socket might closed, read ret: " + ret);
             left -= ret;
             if(left != 0)
