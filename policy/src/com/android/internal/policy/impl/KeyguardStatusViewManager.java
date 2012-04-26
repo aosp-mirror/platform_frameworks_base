@@ -303,8 +303,10 @@ class KeyguardStatusViewManager implements OnClickListener {
         mUpdateMonitor.registerInfoCallback(mInfoCallback);
         mUpdateMonitor.registerSimStateCallback(mSimStateCallback);
         resetStatusInfo();
-        //Issue the faceunlock failure message in a centralized place
-        if (mUpdateMonitor.getMaxFaceUnlockAttemptsReached()) {
+        // Issue the biometric unlock failure message in a centralized place
+        // TODO: we either need to make the Face Unlock multiple failures string a more general
+        // 'biometric unlock' or have each biometric unlock handle this on their own.
+        if (mUpdateMonitor.getMaxBiometricUnlockAttemptsReached()) {
             setInstructionText(getContext().getString(R.string.faceunlock_multiple_failures));
         }
     }

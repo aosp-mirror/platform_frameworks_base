@@ -580,7 +580,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         restoreWidgetState();
 
         if (mBiometricUnlock != null && startBiometricUnlock) {
-            mBiometricUnlock.start(mSuppressBiometricUnlock);
+            maybeStartBiometricUnlock();
         }
     }
 
@@ -623,7 +623,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         } else {
             mHasDialog = false;
             if (mBiometricUnlock != null && startBiometricUnlock) {
-                mBiometricUnlock.start(mSuppressBiometricUnlock);
+                maybeStartBiometricUnlock();
             }
         }
     }
@@ -855,7 +855,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                 }
                 recreateUnlockScreen(unlockMode);
                 if (mBiometricUnlock != null && restartBiometricUnlock) {
-                    mBiometricUnlock.start(mSuppressBiometricUnlock);
+                    maybeStartBiometricUnlock();
                 }
             }
         }
@@ -971,7 +971,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         initializeTransportControlView(unlockView);
 
         if (mBiometricUnlock != null) {
-            mBiometricUnlock.initializeAreaView(unlockView);
+            // TODO: make faceLockAreaView a more general biometricUnlockView
+            // We will need to add our Face Unlock specific child views programmatically in
+            // initializeView rather than having them in the XML files.
+            mBiometricUnlock.initializeView(unlockView.findViewById(R.id.faceLockAreaView));
         }
 
         mUnlockScreenMode = unlockMode;
@@ -1152,6 +1155,26 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         @Override
         public int getMinimumHeight() {
             return mBitmap.getHeight();
+        }
+    }
+
+    /**
+     * Starts the biometric unlock if it should be started based on a number of factors including
+     * the mSuppressBiometricUnlock flag.  If it should not be started, it hides the biometric
+     * unlock area.
+     */
+    private void maybeStartBiometricUnlock() {
+        if (mBiometricUnlock != null) {
+            final boolean backupIsTimedOut = (mUpdateMonitor.getFailedAttempts() >=
+                    LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT);
+            if (!mSuppressBiometricUnlock
+                    && mUpdateMonitor.getPhoneState() == TelephonyManager.CALL_STATE_IDLE
+                    && !mUpdateMonitor.getMaxBiometricUnlockAttemptsReached()
+                    && !backupIsTimedOut) {
+                mBiometricUnlock.start();
+            } else {
+                mBiometricUnlock.hide();
+            }
         }
     }
 }

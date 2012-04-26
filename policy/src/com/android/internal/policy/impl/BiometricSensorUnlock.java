@@ -19,33 +19,63 @@ package com.android.internal.policy.impl;
 import android.view.View;
 
 interface BiometricSensorUnlock {
-    // Returns 'true' if the biometric sensor has started its unlock procedure but has not yet
-    // accepted or rejected the user.
+    /**
+     * Initializes the view provided for the biometric unlock UI to work within.  The provided area
+     * completely covers the backup unlock mechanism.  The view is then displayed in the same manner
+     * as if {@link BiometricSensorUnlock#show(long)} was called with a timeout of 0.
+     * @param biometricUnlockView View provided for the biometric unlock UI.
+     */
+    public void initializeView(View biometricUnlockView);
+
+    /**
+     * Indicates whether the biometric unlock is running.  Before
+     * {@link BiometricSensorUnlock#start} is called, isRunning() returns false.  After a successful
+     * call to {@link BiometricSensorUnlock#start}, isRunning() returns true until the biometric
+     * unlock completes, {@link BiometricSensorUnlock#stop} has been called, or an error has
+     * forced the biometric unlock to stop.
+     * @return whether the biometric unlock is currently running.
+     */
     public boolean isRunning();
 
-    // Show the interface, but don't start the unlock procedure.  The interface should disappear
-    // after the specified timeout.  If the timeout is 0, the interface shows until another event,
-    // such as calling hide(), causes it to disappear.
-    // Called on the UI Thread
+    /**
+     * Covers the backup unlock mechanism by showing the contents of the view initialized in
+     * {@link BiometricSensorUnlock#initializeView(View)}.  The view should disappear after the
+     * specified timeout.  If the timeout is 0, the interface shows until another event, such as
+     * calling {@link BiometricSensorUnlock#hide()}, causes it to disappear.  Called on the UI
+     * thread.
+     * @param timeoutMilliseconds Amount of time in milliseconds to display the view before
+     * disappearing.  A value of 0 means the view should remain visible.
+     */
     public void show(long timeoutMilliseconds);
 
-    // Hide the interface, if any, exposing the lockscreen.
+    /**
+     * Uncovers the backup unlock mechanism by hiding the contents of the view initialized in
+     * {@link BiometricSensorUnlock#initializeView(View)}.
+     */
     public void hide();
 
-    // Stop the unlock procedure if running.  Returns 'true' if it was in fact running.
+    /**
+     * Binds to the biometric unlock service and starts the unlock procedure.  Called on the UI
+     * thread.
+     * @return false if it can't be started or the backup should be used.
+     */
+    public boolean start();
+
+    /**
+     * Stops the biometric unlock procedure and unbinds from the service.
+     * @return whether the biometric unlock was running when called.
+     */
     public boolean stop();
 
-    // Start the unlock procedure.  Returns ‘false’ if it can’t be started or if the backup should
-    // be used.
-    // Called on the UI thread.
-    public boolean start(boolean suppressBiometricUnlock);
-
-    // Provide a view to work within.
-    public void initializeAreaView(View topView);
-
-    // Clean up any resources used by the biometric unlock.
+    /**
+     * Cleans up any resources used by the biometric unlock.
+     */
     public void cleanUp();
 
-    // Returns the Device Policy Manager quality (e.g. PASSWORD_QUALITY_BIOMETRIC_WEAK).
+    /**
+     * Gets the Device Policy Manager quality of the biometric unlock sensor
+     * (e.g., PASSWORD_QUALITY_BIOMETRIC_WEAK).
+     * @return biometric unlock sensor quality, as defined by Device Policy Manager.
+     */
     public int getQuality();
 }
