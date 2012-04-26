@@ -69,18 +69,9 @@ public final class Choreographer {
     private static final boolean USE_VSYNC = SystemProperties.getBoolean(
             "debug.choreographer.vsync", true);
 
-    // Enable/disable allowing traversals to proceed immediately if no drawing occurred
-    // during the previous frame.  When true, the Choreographer can degrade more gracefully
-    // if drawing takes longer than a frame, but it may potentially block in eglSwapBuffers()
-    // if there are two dirty buffers enqueued.
-    // When false, we always schedule traversals on strict vsync boundaries.
-    private static final boolean USE_PIPELINING = SystemProperties.getBoolean(
-            "debug.choreographer.pipeline", false);
-
     private static final int MSG_DO_FRAME = 0;
     private static final int MSG_DO_SCHEDULE_VSYNC = 1;
     private static final int MSG_DO_SCHEDULE_CALLBACK = 2;
-    private static final int MSG_DO_TRAVERSAL = 3;
 
     private final Object mLock = new Object();
 
@@ -94,8 +85,6 @@ public final class Choreographer {
 
     private boolean mFrameScheduled;
     private long mLastFrameTime;
-    private boolean mDrewLastFrame;
-    private boolean mTraversalScheduled;
 
     /**
      * Callback type: Input callback.  Runs first.
@@ -236,35 +225,11 @@ public final class Choreographer {
         }
 
         synchronized (mLock) {
-            if (USE_PIPELINING && callbackType == CALLBACK_INPUT) {
-                Message msg = Message.obtain(mHandler, action);
-                msg.setAsynchronous(true);
-                mHandler.sendMessage(msg);
-                return;
-            }
-
             final long now = SystemClock.uptimeMillis();
             final long dueTime = now + delayMillis;
             mCallbackQueues[callbackType].addCallbackLocked(dueTime, action, token);
 
             if (dueTime <= now) {
-                if (USE_PIPELINING && callbackType == CALLBACK_TRAVERSAL) {
-                    if (!mDrewLastFrame) {
-                        if (DEBUG) {
-                            Log.d(TAG, "Scheduling traversal immediately.");
-                        }
-                        if (!mTraversalScheduled) {
-                            mTraversalScheduled = true;
-                            Message msg = mHandler.obtainMessage(MSG_DO_TRAVERSAL);
-                            msg.setAsynchronous(true);
-                            mHandler.sendMessageAtTime(msg, dueTime);
-                        }
-                        return;
-                    }
-                    if (DEBUG) {
-                        Log.d(TAG, "Scheduling traversal on next frame.");
-                    }
-                }
                 scheduleFrameLocked(now);
             } else {
                 Message msg = mHandler.obtainMessage(MSG_DO_SCHEDULE_CALLBACK, action);
@@ -301,27 +266,6 @@ public final class Choreographer {
             mCallbackQueues[callbackType].removeCallbacksLocked(action, token);
             if (action != null && token == null) {
                 mHandler.removeMessages(MSG_DO_SCHEDULE_CALLBACK, action);
-            }
-        }
-    }
-
-    /**
-     * Tells the choreographer that the application has actually drawn to a surface.
-     *
-     * It uses this information to determine whether to draw immediately or to
-     * post a draw to the next vsync because it might otherwise block.
-     */
-    public void notifyDrawOccurred() {
-        if (DEBUG) {
-            Log.d(TAG, "Draw occurred.");
-        }
-
-        if (USE_PIPELINING) {
-            synchronized (mLock) {
-                if (!mDrewLastFrame) {
-                    mDrewLastFrame = true;
-                    scheduleFrameLocked(SystemClock.uptimeMillis());
-                }
             }
         }
     }
@@ -363,7 +307,6 @@ public final class Choreographer {
             }
             mFrameScheduled = false;
             mLastFrameTime = SystemClock.uptimeMillis();
-            mDrewLastFrame = false;
         }
 
         doCallbacks(Choreographer.CALLBACK_INPUT);
@@ -382,11 +325,6 @@ public final class Choreographer {
         synchronized (mLock) {
             start = SystemClock.uptimeMillis();
             callbacks = mCallbackQueues[callbackType].extractDueCallbacksLocked(start);
-
-            if (USE_PIPELINING && callbackType == CALLBACK_TRAVERSAL && mTraversalScheduled) {
-                mTraversalScheduled = false;
-                mHandler.removeMessages(MSG_DO_TRAVERSAL);
-            }
         }
 
         if (callbacks != null) {
@@ -424,15 +362,6 @@ public final class Choreographer {
                 if (mCallbackQueues[callbackType].hasDueCallbacksLocked(now)) {
                     scheduleFrameLocked(now);
                 }
-            }
-        }
-    }
-
-    void doTraversal() {
-        synchronized (mLock) {
-            if (mTraversalScheduled) {
-                mTraversalScheduled = false;
-                doCallbacks(CALLBACK_TRAVERSAL);
             }
         }
     }
@@ -482,9 +411,6 @@ public final class Choreographer {
                     break;
                 case MSG_DO_SCHEDULE_CALLBACK:
                     doScheduleCallback(msg.arg1);
-                    break;
-                case MSG_DO_TRAVERSAL:
-                    doTraversal();
                     break;
             }
         }

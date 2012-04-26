@@ -1994,7 +1994,6 @@ public final class ViewRootImpl implements ViewParent,
 
         final boolean fullRedrawNeeded = mFullRedrawNeeded;
         mFullRedrawNeeded = false;
-        mChoreographer.notifyDrawOccurred();
 
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
         try {
