@@ -2598,7 +2598,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public boolean isPrivateBrowsingEnabled() {
-        return getSettings().isPrivateBrowsingEnabled();
+        WebSettingsClassic settings = getSettings();
+        return (settings != null) ? settings.isPrivateBrowsingEnabled() : false;
     }
 
     private void startPrivateBrowsing() {
