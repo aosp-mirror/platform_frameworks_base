@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Planšetdators tiks beidzēts."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Tālrunis tiks izslēgts."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Vai vēlaties izslēgt?"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"Atsāknēšana drošajā režīmā"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"Vai vēlaties veikt atsāknēšanu drošajā režīmā? Tādējādi tiks atspējotas visas instalētās trešo pušu lietojumprogrammas. To darbība tiks atjaunota, kad vēlreiz veiksiet atsāknēšanu."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Nesens"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Nav nesen izmantotu lietotņu."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Planšetdatora opcijas"</string>
@@ -219,6 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Ļauj lietotnei saņemt un apstrādāt WAP ziņojumus. Ļaunprātīgas lietotnes var pārraudzīt vai dzēst šos ziņojumus, neparādot tos jums."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"izgūt izmantotās lietotnes"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Ļauj lietotnei izgūt informāciju par šobrīd un nesen veiktajiem uzdevumiem. Ļaunprātīgas lietotnes var atklāt privātu informāciju par citām lietotnēm."</string>
+    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
+    <skip />
+    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"pārkārtot izmantotās lietotnes"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Ļauj lietotnei pārvietot uzdevumus priekšplānā un fonā. Ļaunprātīgas lietotnes var tikt izvirzītas priekšplānā bez jūsu vadības."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"apturēt izmantoto lietotņu darbību"</string>
@@ -342,15 +344,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Ļauj lietotnei sūtīt piesaistošas apraides, kas tiek saglabātas pēc apraides pabeigšanas. Ļaunprātīgas lietotnes var palēnināt planšetdatora darbību vai padarīt tā darbību nestabilu, liekot izmantot pārāk daudz atmiņas."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Ļauj lietotnei sūtīt piesaistošas apraides, kas tiek saglabātas pēc apraides pabeigšanas. Ļaunprātīgas lietotnes var palēnināt tālruņa darbību vai padarīt tā darbību nestabilu, liekot izmantot pārāk daudz atmiņas."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"lasīt kontaktpersonu datus"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Ļauj lietotnei lasīt visus planšetdatorā saglabāto kontaktpersonu datus, tostarp datus par to, cik bieži esat zvanījis vai sūtījis e-pasta ziņojumus noteiktām personām vai citādi sazinājies ar šīm personām. Šī atļauja tiek izmantota e-pasta adrešu automātiskajai pabeigšanai un citām ērtām funkcijām. Ļaunprātīgas lietotnes var izmantot šo atļauju, lai sūtītu jūsu kontaktpersonu datus citām personām."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Ļauj lietotnei lasīt visus tālrunī saglabāto kontaktpersonu datus, tostarp datus par to, cik bieži esat zvanījis vai sūtījis e-pasta ziņojumus noteiktām personām vai citādi sazinājies ar šīm personām. Šī atļauja tiek izmantota e-pasta adrešu automātiskajai pabeigšanai un citām ērtām funkcijām. Ļaunprātīgas lietotnes var izmantot šo atļauju, lai sūtītu jūsu kontaktpersonu datus citām personām."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"rakstīt kontaktpersonu datus"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Ļauj lietotnei pārveidot planšetdatorā saglabāto kontaktpersonu datus, tostarp datus par to, cik bieži esat zvanījis vai sūtījis e-pasta ziņojumus noteiktām personām vai citādi sazinājies ar šīm personām. Šī atļauja tiek izmantota e-pasta adrešu automātiskajai pabeigšanai un citām ērtām funkcijām. Ļaunprātīgas lietotnes var izmantot šo atļauju, lai dzēstu vai pārveidotu jūsu kontaktpersonu datus."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Ļauj lietotnei pārveidot tālrunī saglabāto kontaktpersonu datus, tostarp datus par to, cik bieži esat zvanījis vai sūtījis e-pasta ziņojumus noteiktām personām vai citādi sazinājies ar šīm personām. Šī atļauja tiek izmantota e-pasta adrešu automātiskajai pabeigšanai un citām ērtām funkcijām. Ļaunprātīgas lietotnes var izmantot šo atļauju, lai dzēstu vai pārveidotu jūsu kontaktpersonu datus."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"nolasīt zvanu žurnālu"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Ļauj lietotnei nolasīt planšetdatora zvanu žurnālu, tostarp ienākošo un izejošo zvanu datus. Ļaunprātīgas lietotnes var to izmantot, lai sūtītu jūsu datus citām personām."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Ļauj lietotnei nolasīt tālruņa zvanu žurnālu, tostarp ienākošo un izejošo zvanu datus. Ļaunprātīgas lietotnes var to izmantot, lai sūtītu jūsu datus citām personām."</string>
@@ -746,14 +744,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"rakstzīme"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"vārds"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"saite"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"rindiņa"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g> (<xliff:g id="AMPM">%P</xliff:g>)"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g> (<xliff:g id="AMPM">%p</xliff:g>)"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Rūpnīcas pārbaude neizdevās"</string>

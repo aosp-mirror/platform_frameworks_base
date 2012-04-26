@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Ithebhulethi yakho izocima."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Ifoni yakho izocima."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Ingabe ufuna ukucisha?"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"Qala kabusha emodini ephephile"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"Ingabe ufuna ukuqala kabusha kumodi ephephile? Lokhu kuzokhubaza zonke izinhlelo zokusebenza ezivela eceleni ozifakile. Zizobuyiswa uma uqala kabusha futhi."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Okwakamuva"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Azikho izinhlelo zokusebenza zakamuva"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Okukhethwa konke kwethebhulethi"</string>
@@ -219,6 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Ivumela ukuthi insiza yamukele iphinde isebenze imiyalezo ye-WAP. Izinsiza ezinobungozi zingabheka imiyalezo yakho noma ziyisuse ngaphandle kokuthi zikukhombise."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"thola izinsiza ezisebenzayo"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Ivumela insiza uuthi ithole kabusha ulwazi mayelana nezinto ezenzeka manje nezisanda kwenzeka. Izinsiza ezinobungozi zingathola imininingwane eyimfihlo mayelana nezinye izinsiza."</string>
+    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
+    <skip />
+    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"misa kabusha izinsiza ezisebenzayo"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Ivumela insiza ukuthi ihambise izenzo ziye ngaphambili kanye nasemumva. Izinsiza ezinobungozi zingaziphoqelela ukuth iziye phambili ngaphandle kokulawula kwakho."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"misa izinsiza ezisebenzayo"</string>
@@ -342,15 +344,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Ivumela ukuthi insiza ithumele ukusakaza okunamathelayo, okusalayo emva kokuba ukusakazwa sekuphelile. Izinsiza ezinobungozi zingenzaa amakhompyutha epeni ukuthi ahambe kancane noma angasebenzi kahle ngokuthi asebenzise imemori enkulu kakhulu."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Ivumela ukuthi insiza ithumele ukusakaza okunamathelayo, okusalayo emva kokuba ukusakazwa sekuphelile. Izinsiza ezinobungozi zingenzaa amakhompyutha epeni ukuthi ahambe kancane noma angasebenzi kahle ngokuthi asebenzise imemori enkulu kakhulu."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"funda idatha yothintana naye"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Ivumela uhlelo lokusebenza ukufunda othintana nabo abagcinwe kwithebhulethi yakho, kuhlanganise ukuvama ukushaya ucingo, uku-imeyla, noma ukuxhumana okuthize kwanoma iziphi ezinye izindlela nabantu abathize. Lokhu kusiza ngokuqedela okuzenzakalelayo kwamakheli e-imeyli kanye nezinye izici eziwusizo. Izinhlelo zokusebenza ezinonya zingase zisebenzise le mvume ukuthumela idatha yakho yothintana nabo kwabanye abantu."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Ivumela uhlelo lokusebenza ukufunda yonke idatha emayelana nabathintwayo bakho abagcinwe efonini yakho, kuhlanganise ukuvama ukushaya ucingo, uku-imeyla, noma ukuxhumana okuthize kwanoma iziphi ezinye izindlela nabantu abathize. Lokhu kusiza ngokuqedela okuzenzakalelayo kwamakheli e-imeyli kanye nezinye izici eziwusizo. Izinhlelo zokusebenza ezinonya zingase zisebenzise le mvume ukuthumela idatha yakho yothintana nabo kwabanye abantu."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"bhala idatha yothintana naye"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Ivumela uhlelo lokusebenza ukugugula idatha emayelana nabathintwayo bakho abagcinwe kwithebhulethi yakho, kuhlanganise ukuvama ukushaya ucingo, uku-imeyla, noma ukuxhumana okuthize kwanoma iziphi ezinye izindlela nabantu abathize. Lokhu kusiza ngokuqedela okuzenzakalelayo kwamakheli e-imeyli kanye nezinye izici eziwusizo. Izinhlelo zokusebenza ezinonya zingase zisebenzise le mvume ukusula noma ukuguqula idatha yakho yothintana nabo."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Ivumela uhlelo lokusebenza ukugugula idatha emayelana nabathintwayo bakho abagcinwe efonini yakho, kuhlanganise ukuvama ukushaya ucingo, uku-imeyla, noma ukuxhumana okuthize kwanoma iziphi ezinye izindlela nabantu abathize. Lokhu kusiza ngokuqedela okuzenzakalelayo kwamakheli e-imeyli kanye nezinye izici eziwusizo. Izinhlelo zokusebenza ezinonya zingase zisebenzise le mvume ukusula noma ukuguqula idatha yakho yothintana nabo."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"funda irekhodi lamakholi"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Ivumela uhlelo lokusebenza ukufunda irekhodi lamakholi lethubhulethi yakho, kufaka phakathi idatha mayelana namakholi angenayo naphumayo. Izinhlelo zikusebenza ezingalungile zingasebenzisa lokhu ukuthumela idatha kwabanye abantu."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Ivumela uhlelo lokusebenza ukufunda irekhodi lamakholi akho, kufaka phakathi idatha mayelana namakholi aphumayo nangenayo. Izinhlelo zokusebenza ezingalungile zingasebenzisa lokhu ukuthumela idatha kwabanye abantu."</string>
@@ -746,14 +744,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"uhlamvu"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"igama"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"isixhumanisi"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"ulayini"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Ukuhlola kwemboni kwehlulekile"</string>

@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Планшэт будзе адключаны."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Ваш тэлефон будзе выключаны."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Закрыць?"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"Перазагрузка ў бяспечным рэжыме"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"Хочаце перазагрузіцца ў бяспечным рэжыме? Гэта дазволіць адключыць усе іншыя ўсталяваныя прыкладанні. Пасля перазагрузкi iх праца будзе адноўлена."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Апошнія"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Няма апошніх прыкладанняў."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Параметры планшэта"</string>
@@ -219,12 +217,16 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Дазваляе прыкладанням атрымліваць і апрацоўваць WAP-паведамленні. Шкоднасныя прыкладанні могуць адсочваць вашы паведамленні або выдаляць іх, не паказваючы вам."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"атрымаць запушчаныя прыкладанні"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Дазваляе прыкладанням атрымліваць інфармацыю пра бягучыя і нядаўна запушчаныя заданнi. Шкоднасныя прыкладанні могуць атрымліваць асабістую інфармацыю пра іншыя прыкладаннi."</string>
+    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
+    <skip />
+    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"змяніць парадак запушчаных прыкладанняў"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Дазваляе прыкладанням перамяшчаць заданні на ​​пярэдні план і фон. Шкоднасныя прыкладанні могуць прымусова рабіць сябе асноўнымі без вашага ведама."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"спыніць запушчаныя прыкладанні"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Дазваляе прыкладанням выдаляць заданні і спыняць прыкладанні, якія іх выкарыстоўваюць. Шкоднасныя прыкладаннi могуць перашкодзiць працы іншых прыкладанняў."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"пачынаць любы працэс"</string>
-    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Дазваляе прыкладанню пачынаць любы працэс, незалежна ад абароны дазволам ці стану экспартавання."</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Дазваляе прыкладанню пачынаць любы працэс, незалежна ад абароны дазволам ці стану экспарту."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"усталяваць сумяшчальнасць экранаў"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Дазваляе прыкладанню кіраваць рэжымам сумяшчальнасці экранаў іншых прыкладанняў. Шкоднаснае ПЗ можа перашкодзiць працы іншых прыкладанняў."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"уключыць адладку прыкладання"</string>
@@ -342,15 +344,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Дазваляе прыкладанням дасылаць далейшыя звязаныя перадачы, якія застаюцца пасля заканчэння асноўнай перадачы. Шкоднасныя прыкладанні могуць зрабіць працу планшэта павольнай або няўстойлівай, прымушаючы яго выкарыстоўваць занадта шмат памяці."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Дазваляе прыкладанню дасылаць далейшыя звязаныя перадачы, якія застаюцца пасля заканчэння асноўнай перадачы. Шкоднасныя прыкладанні могуць зрабіць працу тэлефона павольнай або няўстойлівай, прымушаючы яго выкарыстоўваць занадта шмат памяці."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"чытаць кантактныя дадзеныя"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Дазваляе прыкладанням чытаць усе дадзеныя пра кантактах, якія захоўваюцца на планшэце, у тым ліку найбольш частыя, якiм вы тэлефанавалi, пiсалi па электроннай пошце ці ці з якiмi звязвалiся іншым спосабам. Гэта дазваляе аўтаматычна завяршаць адрасы электроннай пошты і іншыя зручныя функцыі. Шкоднасныя праграмы могуць выкарыстоўваць гэты дазвол, каб адпраўляць свае кантактныя дадзеныя іншым людзям."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Дазваляе прыкладанням чытаць усе дадзеныя пра кантактах, якія захоўваюцца ў тэлефоне, у тым ліку найбольш частыя, якiм вы тэлефанавалi, пiсалi па электроннай пошце ці звязвалiся з iмi іншым спосабам. Гэта дазваляе аўтаматычна завяршаць адрасы электроннай пошты і іншыя зручныя функцыі. Шкоднасныя праграмы могуць выкарыстоўваць гэты дазвол, каб адпраўляць свае кантактныя дадзеныя іншым людзям."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"запісваць кантактныя дадзеныя"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Дазваляе прыкладанням чытаць усе дадзеныя пра кантактах, якія захоўваюцца ў тэлефоне, у тым ліку найбольш частыя, якiм вы тэлефанавалi, пiсалi па электроннай пошце ці з якiмi звязвалiся іншым спосабам. Гэта дазваляе аўтаматычна завяршаць адрасы электроннай пошты і іншыя зручныя функцыі. Шкоднасныя праграмы могуць выкарыстоўваць гэты дазвол, каб адпраўляць свае кантактныя дадзеныя іншым людзям."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Дазваляе прыкладанням чытаць усе дадзеныя пра кантактах, якія захоўваюцца ў тэлефоне, у тым ліку найбольш частыя, якiм вы тэлефанавалi, пiсалi па электроннай пошце ці з якiмi звязвалiся іншым спосабам. Гэта дазваляе аўтаматычна завяршаць адрасы электроннай пошты і іншыя зручныя функцыі. Шкоднасныя праграмы могуць выкарыстоўваць гэты дазвол, каб адпраўляць свае кантактныя дадзеныя іншым людзям."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"чытанне гiсторыi выклікаў"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Дазваляе прыкладанню чытаць гiсторыю выклiкаў планшэту, у тым лiку дадзеныя пра ўваходныя і зыходныя выклiкi. Шкоднасныя прыкладаннi могуць выкарыстоўваць гэта, каб адпраўляць вашы дадзеныя іншым людзям."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Дазваляе прыкладанню чытаць гiсторыю выклiкаў, у тым лiку ўваходныя і зыходныя выклiкi. Шкоднасныя праграмы могуць выкарыстоўваць гэта, каб адпраўляць вашы дадзеныя іншым людзям."</string>
@@ -746,14 +744,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"Alt"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"Знак"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"слова"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"спасылка"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"радок"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Не атрымалася выканаць заводскую праверку"</string>

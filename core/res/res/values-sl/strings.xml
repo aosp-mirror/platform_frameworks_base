@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablični računalnik se bo zaustavil."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefon bo zaustavljen."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Ali želite izklopiti telefon?"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"Vnovičen zagon v varnem načinu"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"Ali želite znova zagnati v varnem načinu? S tem onemogočite vse nameščene aplikacije drugih ponudnikov. Obnovljene bodo pri naslednjem vnovičnem zagonu."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Nedavno"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Ni nedavnih programov"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Možnosti tabličnega računalnika"</string>
@@ -203,10 +201,8 @@
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Programu omogoča prejemanje in obdelavo sporočil MMS. Zlonamerni programi lahko nadzirajo sporočila ali jih brišejo, ne da bi vam jih pokazali."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"prejemanje oddaj v sili"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Programu omogoča prejemanje in obdelavo sporočil za oddajanje v sili. To dovoljenje je na voljo samo sistemskim programom."</string>
-    <!-- no translation found for permlab_readCellBroadcasts (1598328843619646166) -->
-    <skip />
-    <!-- no translation found for permdesc_readCellBroadcasts (6361972776080458979) -->
-    <skip />
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"branje sporočil oddaje v celici"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Omogoča aplikaciji branje sporočil oddaje v celici, ki jih prejme naprava. Opozorila oddaje v celici so dostavljena na nekaterih lokacijah, da vas opozorijo na izredne razmere. Zlonamerne aplikacije lahko vplivajo na delovanje naprave, ko dobi sporočilo oddaje v celici."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"pošiljanje sporočil SMS"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Programu omogoča pošiljanje SMS-ov. Zlonamerni programi lahko pošiljajo sporočila brez vaše potrditve, kar vas lahko drago stane."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"pošiljanje SMS-ov brez potrditve"</string>
@@ -221,14 +217,16 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Programu omogoča prejemanje in obdelavo sporočil WAP. Zlonamerni programi lahko nadzirajo sporočila ali jih brišejo, ne da bi vam jih pokazali."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"dobivanje programov, ki se izvajajo"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Programu omogoča dobivanje informacij o trenutnih in nedavno izvajajočih se opravilih. Zlonamerni programi lahko odkrijejo zasebne podatke o drugih programih."</string>
+    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
+    <skip />
+    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"preurejanje programov, ki se izvajajo"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Programu omogoča premikanje opravil v ospredje in ozadje. Zlonamerni programi se lahko brez vašega nadzora vsilijo v ospredje."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"ustavitev programov, ki se izvajajo"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Programu omogoča odstranjevanje opravil in zapiranje njihovih programov. Zlonamerni programi lahko motijo delovanje drugih programov."</string>
-    <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
-    <skip />
-    <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
-    <skip />
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"zagon poljubne dejavnosti"</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Omogoča aplikaciji zagon poljubne dejavnosti, ne glede na zaščito dovoljenj ali izvoženo stanje."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"nastavitev združljivosti zaslona"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Programu omogoča nadzor združljivostnega načina zaslona drugih programov. Zlonamerni programi lahko prekinejo delovanje drugih programov."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"omogočanje iskanja in odpravljanja napak v programu"</string>
@@ -346,15 +344,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Programu omogoča hitro pošiljanje fiksnih oddaj, ki ostanejo po koncu oddajanja. Zaradi zlonamernih programov je lahko delovanje tabličnega računalnika počasno ali nestabilno ali tablični računalnik zaradi njih porabi preveč pomnilnika."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Programu omogoča hitro pošiljanje fiksnih oddaj, ki ostanejo po koncu oddajanja. Zaradi zlonamernih programov je delovanje telefona lahko počasno ali nestabilno ali tablični računalnik zaradi njih porabi preveč pomnilnika."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"branje podatkov stika"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Aplikaciji omogoča branje vseh podatkov o stikih, shranjenih v tabličnem računalniku, vključno s podatki o pogostosti klicev, e-poštnih sporočil ali drugih komunikacij s posameznimi osebami. To izboljša samodokončanje e-poštnih naslovov in druge priročne funkcije. Zlonamerne aplikacije lahko izrabijo to dovoljenje za pošiljanje podatkov o stikih drugim ljudem."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Aplikaciji omogoča branje vseh podatkov o stikih, shranjenih v telefonu, vključno s podatki o pogostosti klicev, e-poštnih sporočil ali drugih komunikacij s posameznimi osebami. To izboljša samodokončanje e-poštnih naslovov in druge priročne funkcije. Zlonamerne aplikacije lahko izrabijo to dovoljenje za pošiljanje podatkov o stikih drugim ljudem."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"pisanje podatkov stika"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Aplikaciji omogoča spreminjanje podatkov o stikih, shranjenih v tabličnem računalniku, vključno s podatki o pogostosti klicev, e-poštnih sporočil ali drugih komunikacij s posameznimi osebami. To izboljša samodokončanje e-poštnih naslovov in druge priročne funkcije. Zlonamerne aplikacije lahko izrabijo to dovoljenje za brisanje ali spreminjanje podatkov o stikih."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Aplikaciji omogoča spreminjanje podatkov o stikih, shranjenih v telefonu, vključno s podatki o pogostosti klicev, e-poštnih sporočil ali drugih komunikacij s posameznimi osebami. To izboljša samodokončanje e-poštnih naslovov in druge priročne funkcije. Zlonamerne aplikacije lahko izrabijo to dovoljenje za brisanje ali spreminjanje podatkov o stikih."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"branje dnevnika klicev"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Aplikaciji dovoli branje dnevnika klicev v tabličnem računalniku, vključno s podatki o dohodnih in odhodnih klicih. Zlonamerne aplikacije lahko tako pošiljajo vaše podatke drugim."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Aplikaciji dovoli branje dnevnika klicev v telefonu, vključno s podatki o dohodnih in odhodnih klicih. Zlonamerne aplikacije lahko tako pošiljajo vaše podatke drugim."</string>
@@ -750,14 +744,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"znak"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"beseda"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"povezava"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"vrstica"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Tovarniški preskus ni uspel"</string>
