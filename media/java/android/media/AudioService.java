@@ -149,6 +149,7 @@ public class AudioService extends IAudioService.Stub {
     private int mMode;
     // protects mRingerMode
     private final Object mSettingsLock = new Object();
+
     private boolean mMediaServerOk;
 
     private SoundPool mSoundPool;
@@ -343,6 +344,14 @@ public class AudioService extends IAudioService.Stub {
     // Keyguard manager proxy
     private KeyguardManager mKeyguardManager;
 
+    // mVolumeControlStream is set by VolumePanel to temporarily force the stream type which volume
+    // is controlled by Vol keys.
+    private int  mVolumeControlStream = -1;
+    private final Object mForceControlStreamLock = new Object();
+    // VolumePanel is currently the only client of forceVolumeControlStream() and runs in system
+    // server process so in theory it is not necessary to monitor the client death.
+    // However it is good to be ready for future evolutions.
+    private ForceControlStreamClient mForceControlStreamClient = null;
 
     ///////////////////////////////////////////////////////////////////////////
     // Construction
@@ -538,8 +547,8 @@ public class AudioService extends IAudioService.Stub {
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags) {
 
         int streamType;
-        if ((flags & AudioManager.FLAG_FORCE_STREAM) != 0) {
-            streamType = suggestedStreamType;
+        if (mVolumeControlStream != -1) {
+            streamType = mVolumeControlStream;
         } else {
             streamType = getActiveStreamType(suggestedStreamType);
         }
@@ -680,6 +689,57 @@ public class AudioService extends IAudioService.Stub {
                                      (streamState.muteCount() != 0) /* lastAudible */);
 
         sendVolumeUpdate(streamType, oldIndex, index, flags);
+    }
+
+    /** @see AudioManager#forceVolumeControlStream(int) */
+    public void forceVolumeControlStream(int streamType, IBinder cb) {
+        synchronized(mForceControlStreamLock) {
+            mVolumeControlStream = streamType;
+            if (mVolumeControlStream == -1) {
+                if (mForceControlStreamClient != null) {
+                    mForceControlStreamClient.release();
+                    mForceControlStreamClient = null;
+                }
+            } else {
+                mForceControlStreamClient = new ForceControlStreamClient(cb);
+            }
+        }
+    }
+
+    private class ForceControlStreamClient implements IBinder.DeathRecipient {
+        private IBinder mCb; // To be notified of client's death
+
+        ForceControlStreamClient(IBinder cb) {
+            if (cb != null) {
+                try {
+                    cb.linkToDeath(this, 0);
+                } catch (RemoteException e) {
+                    // Client has died!
+                    Log.w(TAG, "ForceControlStreamClient() could not link to "+cb+" binder death");
+                    cb = null;
+                }
+            }
+            mCb = cb;
+        }
+
+        public void binderDied() {
+            synchronized(mForceControlStreamLock) {
+                Log.w(TAG, "SCO client died");
+                if (mForceControlStreamClient != this) {
+                    Log.w(TAG, "unregistered control stream client died");
+                } else {
+                    mForceControlStreamClient = null;
+                    mVolumeControlStream = -1;
+                }
+            }
+        }
+
+        public void release() {
+            if (mCb != null) {
+                mCb.unlinkToDeath(this, 0);
+                mCb = null;
+            }
+        }
     }
 
     private int findVolumeDelta(int direction, int volume) {

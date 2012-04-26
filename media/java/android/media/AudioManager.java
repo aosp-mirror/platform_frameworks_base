@@ -47,7 +47,6 @@ public class AudioManager {
 
     private final Context mContext;
     private long mVolumeKeyUpTime;
-    private int  mVolumeControlStream = -1;
     private final boolean mUseMasterVolume;
     private static String TAG = "AudioManager";
 
@@ -304,13 +303,6 @@ public class AudioManager {
     public static final int FLAG_VIBRATE = 1 << 4;
 
     /**
-     * forces use of specified stream
-     * @hide
-     */
-    public static final int FLAG_FORCE_STREAM = 1 << 5;
-
-
-    /**
      * Ringer mode that will be silent and will not vibrate. (This overrides the
      * vibrate setting.)
      *
@@ -458,10 +450,6 @@ public class AudioManager {
                                     : ADJUST_LOWER,
                             flags);
                 } else {
-                    if (mVolumeControlStream != -1) {
-                        stream = mVolumeControlStream;
-                        flags |= FLAG_FORCE_STREAM;
-                    }
                     adjustSuggestedStreamVolume(
                             keyCode == KeyEvent.KEYCODE_VOLUME_UP
                                     ? ADJUST_RAISE
@@ -500,10 +488,6 @@ public class AudioManager {
                     }
                 } else {
                     int flags = FLAG_PLAY_SOUND;
-                    if (mVolumeControlStream != -1) {
-                        stream = mVolumeControlStream;
-                        flags |= FLAG_FORCE_STREAM;
-                    }
                     adjustSuggestedStreamVolume(
                             ADJUST_SAME,
                             stream,
@@ -943,7 +927,12 @@ public class AudioManager {
      * @hide
      */
     public void forceVolumeControlStream(int streamType) {
-        mVolumeControlStream = streamType;
+        IAudioService service = getService();
+        try {
+            service.forceVolumeControlStream(streamType, mICallBack);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in forceVolumeControlStream", e);
+        }
     }
 
     /**
