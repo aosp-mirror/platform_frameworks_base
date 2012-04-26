@@ -38,7 +38,7 @@
     <View android:layout_height="3dip"
           android:layout_width="match_parent"
           android:background="#323232"/>
-    
+
     <TextView android:id="@+id/description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -56,7 +56,12 @@
         android:layout_weight="1"
         android:scrollbarAlwaysDrawVerticalTrack="true" />
 
+    <View android:layout_height="1dip"
+        android:layout_width="match_parent"
+        android:background="?android:attr/dividerHorizontal" />
+
     <Button android:id="@+id/addAccount"
+        style="?android:attr/buttonBarButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="2dip"
