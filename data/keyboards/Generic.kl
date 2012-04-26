@@ -300,7 +300,7 @@ key 318   BUTTON_THUMBR
 
 
 # key 352 "KEY_OK"
-# key 353 "KEY_SELECT"
+key 353   DPAD_CENTER
 # key 354 "KEY_GOTO"
 # key 355 "KEY_CLEAR"
 # key 356 "KEY_POWER2"
