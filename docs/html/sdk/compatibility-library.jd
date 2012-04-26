@@ -48,8 +48,32 @@ the Support Package, as denoted by revision number.</p>
 
 <div class="toggle-content open">
 
+
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" />
+    Support Package, revision 8 (April 2012)
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Fixed intent flags for {@link android.app.PendingIntent} objects generated
+            by {@link android.support.v4.app.TaskStackBuilder}.</li>
+          <li>Removed unused attributes from the gridlayout library projects to make sure
+            the library can be built with API Level 7 and higher.</li>
+          <li>Added {@code .classpath} and {@code .project} files for the gridlayout
+            library project.</li>
+        </ul>
+      </dd>
+    </dl>
+</div>
+
+<div class="toggle-content closed">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" />
     Support Package, revision 7 (March 2012)
   </a></p>
 
