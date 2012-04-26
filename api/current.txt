@@ -27977,7 +27977,11 @@ package android.widget {
   public class SearchView extends android.widget.LinearLayout implements android.view.CollapsibleActionView {
     ctor public SearchView(android.content.Context);
     ctor public SearchView(android.content.Context, android.util.AttributeSet);
+    method public int getImeOptions();
+    method public int getInputType();
+    method public int getMaxWidth();
     method public java.lang.CharSequence getQuery();
+    method public java.lang.CharSequence getQueryHint();
     method public android.widget.CursorAdapter getSuggestionsAdapter();
     method public boolean isIconfiedByDefault();
     method public boolean isIconified();
