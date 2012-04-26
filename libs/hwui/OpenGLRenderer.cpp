@@ -190,8 +190,17 @@ void OpenGLRenderer::finish() {
     while ((status = glGetError()) != GL_NO_ERROR) {
         ALOGD("GL error from OpenGLRenderer: 0x%x", status);
         switch (status) {
+            case GL_INVALID_ENUM:
+                ALOGE("  GL_INVALID_ENUM");
+                break;
+            case GL_INVALID_VALUE:
+                ALOGE("  GL_INVALID_VALUE");
+                break;
+            case GL_INVALID_OPERATION:
+                ALOGE("  GL_INVALID_OPERATION");
+                break;
             case GL_OUT_OF_MEMORY:
-                ALOGE("  OpenGLRenderer is out of memory!");
+                ALOGE("  Out of memory!");
                 break;
         }
     }
