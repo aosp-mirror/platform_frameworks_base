@@ -257,6 +257,8 @@ public class MediaRecorder
         public static final int AAC_PLUS = 4;
         /** @hide enhanced AAC plus audio codec */
         public static final int EAAC_PLUS = 5;
+        /** AAC-ELD audio codec */
+        public static final int AAC_ELD = 6;
     }
 
     /**
