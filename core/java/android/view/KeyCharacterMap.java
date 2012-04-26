@@ -153,20 +153,26 @@ public class KeyCharacterMap implements Parcelable {
     private static final int ACCENT_BREVE = '\u02D8';
     private static final int ACCENT_CARON = '\u02C7';
     private static final int ACCENT_CEDILLA = '\u00B8';
+    private static final int ACCENT_CIRCUMFLEX = '\u02C6';
     private static final int ACCENT_COMMA_ABOVE = '\u1FBD';
     private static final int ACCENT_COMMA_ABOVE_RIGHT = '\u02BC';
     private static final int ACCENT_DOT_ABOVE = '\u02D9';
+    private static final int ACCENT_DOT_BELOW = '.'; // approximate
     private static final int ACCENT_DOUBLE_ACUTE = '\u02DD';
     private static final int ACCENT_GRAVE = '\u02CB';
-    private static final int ACCENT_CIRCUMFLEX = '\u02C6';
+    private static final int ACCENT_HOOK_ABOVE = '\u02C0';
+    private static final int ACCENT_HORN = '\''; // approximate
     private static final int ACCENT_MACRON = '\u00AF';
     private static final int ACCENT_MACRON_BELOW = '\u02CD';
     private static final int ACCENT_OGONEK = '\u02DB';
     private static final int ACCENT_REVERSED_COMMA_ABOVE = '\u02BD';
     private static final int ACCENT_RING_ABOVE = '\u02DA';
+    private static final int ACCENT_STROKE = '-'; // approximate
     private static final int ACCENT_TILDE = '\u02DC';
     private static final int ACCENT_TURNED_COMMA_ABOVE = '\u02BB';
     private static final int ACCENT_UMLAUT = '\u00A8';
+    private static final int ACCENT_VERTICAL_LINE_ABOVE = '\u02C8';
+    private static final int ACCENT_VERTICAL_LINE_BELOW = '\u02CC';
 
     /* Legacy dead key display characters used in previous versions of the API.
      * We still support these characters by mapping them to their non-legacy version. */
@@ -188,11 +194,11 @@ public class KeyCharacterMap implements Parcelable {
         addCombining('\u0306', ACCENT_BREVE);
         addCombining('\u0307', ACCENT_DOT_ABOVE);
         addCombining('\u0308', ACCENT_UMLAUT);
-        //addCombining('\u0309', ACCENT_HOOK_ABOVE);
+        addCombining('\u0309', ACCENT_HOOK_ABOVE);
         addCombining('\u030A', ACCENT_RING_ABOVE);
         addCombining('\u030B', ACCENT_DOUBLE_ACUTE);
         addCombining('\u030C', ACCENT_CARON);
-        //addCombining('\u030D', ACCENT_VERTICAL_LINE_ABOVE);
+        addCombining('\u030D', ACCENT_VERTICAL_LINE_ABOVE);
         //addCombining('\u030E', ACCENT_DOUBLE_VERTICAL_LINE_ABOVE);
         //addCombining('\u030F', ACCENT_DOUBLE_GRAVE);
         //addCombining('\u0310', ACCENT_CANDRABINDU);
@@ -201,13 +207,14 @@ public class KeyCharacterMap implements Parcelable {
         addCombining('\u0313', ACCENT_COMMA_ABOVE);
         addCombining('\u0314', ACCENT_REVERSED_COMMA_ABOVE);
         addCombining('\u0315', ACCENT_COMMA_ABOVE_RIGHT);
-        //addCombining('\u031B', ACCENT_HORN);
-        //addCombining('\u0323', ACCENT_DOT_BELOW);
+        addCombining('\u031B', ACCENT_HORN);
+        addCombining('\u0323', ACCENT_DOT_BELOW);
         //addCombining('\u0326', ACCENT_COMMA_BELOW);
         addCombining('\u0327', ACCENT_CEDILLA);
         addCombining('\u0328', ACCENT_OGONEK);
-        //addCombining('\u0329', ACCENT_VERTICAL_LINE_BELOW);
+        addCombining('\u0329', ACCENT_VERTICAL_LINE_BELOW);
         addCombining('\u0331', ACCENT_MACRON_BELOW);
+        addCombining('\u0335', ACCENT_STROKE);
         //addCombining('\u0342', ACCENT_PERISPOMENI);
         //addCombining('\u0344', ACCENT_DIALYTIKA_TONOS);
         //addCombining('\u0345', ACCENT_YPOGEGRAMMENI);
@@ -235,6 +242,33 @@ public class KeyCharacterMap implements Parcelable {
      */
     private static final SparseIntArray sDeadKeyCache = new SparseIntArray();
     private static final StringBuilder sDeadKeyBuilder = new StringBuilder();
+    static {
+        // Non-standard decompositions.
+        // Stroke modifier for Finnish multilingual keyboard and others.
+        addDeadKey(ACCENT_STROKE, 'D', '\u0110');
+        addDeadKey(ACCENT_STROKE, 'G', '\u01e4');
+        addDeadKey(ACCENT_STROKE, 'H', '\u0126');
+        addDeadKey(ACCENT_STROKE, 'I', '\u0197');
+        addDeadKey(ACCENT_STROKE, 'L', '\u0141');
+        addDeadKey(ACCENT_STROKE, 'O', '\u00d8');
+        addDeadKey(ACCENT_STROKE, 'T', '\u0166');
+        addDeadKey(ACCENT_STROKE, 'd', '\u0111');
+        addDeadKey(ACCENT_STROKE, 'g', '\u01e5');
+        addDeadKey(ACCENT_STROKE, 'h', '\u0127');
+        addDeadKey(ACCENT_STROKE, 'i', '\u0268');
+        addDeadKey(ACCENT_STROKE, 'l', '\u0142');
+        addDeadKey(ACCENT_STROKE, 'o', '\u00f8');
+        addDeadKey(ACCENT_STROKE, 't', '\u0167');
+    }
+
+    private static void addDeadKey(int accent, int c, int result) {
+        final int combining = sAccentToCombining.get(accent);
+        if (combining == 0) {
+            throw new IllegalStateException("Invalid dead key declaration.");
+        }
+        final int combination = (combining << 16) | c;
+        sDeadKeyCache.put(combination, result);
+    }
 
     public static final Parcelable.Creator<KeyCharacterMap> CREATOR =
             new Parcelable.Creator<KeyCharacterMap>() {
