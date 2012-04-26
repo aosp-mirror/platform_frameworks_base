@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"您的平板電腦將會關機。"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"手機即將關機。"</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"您要關機嗎？"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"重新啟動進入安全模式"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"您要重新啟動進入安全模式嗎？這會停用您所安裝的所有第三方應用程式。如要還原這些應用程式，只要再次重新啟動即可。"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"最新的"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"沒有最近用過的應用程式。"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"平板電腦選項"</string>
@@ -219,6 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"允許應用程式接收及處理 WAP 訊息。請注意，惡意應用程式可能利用此功能監視訊息，或在您讀取訊息前擅自將其刪除。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"擷取執行中的應用程式"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"允許應用程式取得最近執行任務的資訊。請注意，惡意應用程式可能利用此功能找出其他應用程式的隱私資訊。"</string>
+    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
+    <skip />
+    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"重新排序正在執行的應用程式"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"允許應用程式將工作移至前景或背景。請注意，惡意應用程式可能利用此功能自行移動至前景。"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"停止執行中的應用程式"</string>
@@ -746,14 +748,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"字元"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"字詞"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"連結"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"行"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"出廠測試失敗"</string>
@@ -1033,8 +1031,8 @@
     <string name="sms_control_no" msgid="625438561395534982">"拒絕"</string>
     <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"傳送簡訊給短碼？"</string>
     <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"傳送付費簡訊？"</string>
-    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;&lt;/b&gt;「<xliff:g id="APP_NAME">%1$s</xliff:g>」想要傳送簡訊給簡訊短碼 &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;。&lt;p&gt;傳送簡訊給簡訊短碼之後，系統即會從您的行動帳戶扣除付費服務的費用。&lt;p&gt;您要允許這個應用程式傳送簡訊嗎？"</string>
-    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;&lt;/b&gt;「<xliff:g id="APP_NAME">%1$s</xliff:g>」想要傳送簡訊給付費簡訊短碼 &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;。&lt;p&gt;&lt;b&gt;傳送簡訊給這個對象之後，系統即會從您的行動帳戶扣除付費服務的費用。&lt;/b&gt;&lt;p&gt;您要允許這個應用程式傳送簡訊嗎？"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;&lt;/b&gt;「<xliff:g id="APP_NAME">%1$s</xliff:g>」想要傳送簡訊給簡訊短碼 &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;。&lt;p&gt;將簡訊傳送給對方之後，系統即會從您的行動帳戶收取付費服務的費用。&lt;p&gt;您要允許這個應用程式傳送簡訊嗎？"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;&lt;/b&gt;「<xliff:g id="APP_NAME">%1$s</xliff:g>」想要傳送簡訊給付費簡訊短碼 &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;。&lt;p&gt;&lt;b&gt;將簡訊傳送給對方之後，系統即會從您的行動帳戶收取付費服務的費用。&lt;/b&gt;&lt;p&gt;您要允許這個應用程式傳送簡訊嗎？"</string>
     <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"傳送簡訊"</string>
     <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"不要傳送"</string>
     <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"檢舉惡意應用程式"</string>

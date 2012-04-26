@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"El tablet se apagará."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"El teléfono se apagará."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"¿Seguro que quieres apagar el teléfono?"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"Reiniciar en modo seguro"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"¿Quieres reiniciar el sistema en modo seguro? Se inhabilitarán todas las aplicaciones externas que hayas instalado. Esas aplicaciones se restaurarán la próxima vez que reinicies del sistema."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Reciente"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"No hay aplicaciones recientes."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Opciones del tablet"</string>
@@ -219,6 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Permite que la aplicación reciba y procese mensajes WAP. Las aplicaciones malintencionadas pueden controlar los mensajes o eliminarlos sin mostrarlos al usuario."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recuperar aplicaciones en ejecución"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Permite que la aplicación recupere información sobre tareas que se están ejecutando en este momento o que se han ejecutado recientemente. Las aplicaciones malintencionadas pueden usar este permiso para acceder a información privada sobre otras aplicaciones."</string>
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"recuperar información de aplicaciones en ejecución"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Permite que la aplicación recupere información sobre tareas que se están ejecutando en este momento o que se han ejecutado recientemente. Las aplicaciones malintencionadas pueden usar este servicio para acceder a información privada sobre otras aplicaciones."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"reorganizar aplicaciones en ejecución"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permite que la aplicación mueva tareas a segundo o a primer plano. Algunas aplicaciones malintencionadas pueden aparecer en primer plano sin el control del usuario."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"detener aplicaciones en ejecución"</string>
@@ -342,15 +342,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Permite que la aplicación envíe emisiones que permanecen en el dispositivo una vez que la emisión ha finalizado. Las aplicaciones malintencionadas pueden ralentizar el tablet o volverlo inestable al hacer que use demasiada memoria."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Permite que la aplicación envíe emisiones persistentes, que permanecen en el dispositivo una vez que la emisión haya finalizado. Las aplicaciones malintencionadas pueden ralentizar el teléfono o volverlo inestable al hacer que use demasiada memoria."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"leer los datos de contacto"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Permite que la aplicación lea los datos de los contactos almacenados en el tablet, incluida la frecuencia con la que los hayas llamado, les hayas enviado un correo electrónico o te hayas puesto en contacto con ellos de otro modo. Esta información permite rellenar automáticamente direcciones de correo electrónico y otras funciones prácticas. Las aplicaciones malintencionadas pueden utilizar este permiso para enviar los datos de tus contactos a otros usuarios."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Permite que la aplicación lea los datos de los contactos almacenados en el teléfono, incluida la frecuencia con la que los hayas llamado, les hayas enviado un correo electrónico o te hayas puesto en contacto con ellos de otro modo. Esta información permite rellenar automáticamente direcciones de correo electrónico y otras funciones prácticas. Las aplicaciones malintencionadas pueden utilizar este permiso para enviar los datos de tus contactos a otros usuarios."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"escribir datos de contacto"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Permite que la aplicación modifique los datos de los contactos almacenados en el tablet, incluida la frecuencia con la que los hayas llamado, les hayas enviado un correo electrónico o te hayas puesto en contacto con ellos de otro modo. Esta información permite rellenar automáticamente direcciones de correo electrónico y otras funciones prácticas. Las aplicaciones malintencionadas pueden utilizar este permiso para borrar o modificar los datos de tus contactos."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Permite que la aplicación modifique los datos de los contactos almacenados en el teléfono, incluida la frecuencia con la que los hayas llamado, les hayas enviado un correo electrónico o te hayas puesto en contacto con ellos de otro modo. Esta información permite rellenar automáticamente direcciones de correo electrónico y otras funciones prácticas. Las aplicaciones malintencionadas pueden utilizar este permiso para borrar o modificar los datos de tus contactos."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"leer el registro de llamadas"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Permite que la aplicación lea el registro de llamadas del tablet, incluidos datos sobre llamadas entrantes y salientes. Las aplicaciones malintencionadas pueden usar este permiso para enviar tus datos a otros usuarios."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Permite que la aplicación lea el registro de llamadas del teléfono, incluidos datos sobre llamadas entrantes y salientes. Las aplicaciones malintencionadas pueden usar este permiso para enviar tus datos a otros usuarios."</string>
@@ -746,14 +742,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"carácter"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"palabra"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"enlace"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"línea"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Fallo en la prueba de fábrica"</string>

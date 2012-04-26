@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet anda akan dimatikan."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefon anda akan dimatikan."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Adakah anda mahu menutup?"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"But semula ke mod selamat"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"Adakah anda mahu membut semula ke dalam mod selamat? Ini akan melumpuhkan semua aplikasi pihak ketiga yang telah anda pasang. Semua aplikasi itu akan dipulihkan semula apabila anda membut semula."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Baru-baru ini"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Tiada apl terbaharu"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Pilihan tablet"</string>
@@ -219,6 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Membenarkan apl untuk menerima dan memproses mesej WAP. Apl hasad boleh memantau mesej anda atau memadamnya tanpa menunjukkannya kepada anda."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"dapatkan semula apl yang sedang dijalankan"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Membenarkan apl untuk mendapatkan maklumat tugasan yang sedang dan baru berjalan. Apl hasad boleh mendapat maklumat peribadi tentang apl lain."</string>
+    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
+    <skip />
+    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"susun semula tertib apl yang dijalankan"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Membenarkan apl untuk memindahkan tugasan ke latar depan dan latar belakang. Apl hasad boleh memaksa diri mereka ke hadapan tanpa kawalan anda."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"hentikan apl yang sedang dijalankan"</string>
@@ -746,14 +748,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"watak"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"perkataan"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"pautan"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"baris"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Ujian kilang gagal"</string>

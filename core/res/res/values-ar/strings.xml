@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"سيتم إيقاف تشغيل الجهاز اللوحي."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"سيتم إيقاف تشغيل هاتفك."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"هل تريد إيقاف التشغيل؟"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"إعادة تشغيل في الوضع الآمن"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"هل تريد إعادة تشغيل الكمبيوتر في الوضع الآمن؟ سيؤدي ذلك إلى تعطيل جميع تطبيقات الجهات الخارجية التي تم تثبيتها. ستتم استعادتها عند إعادة التشغيل مرة أخرى."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"حديثة"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"ليست هناك تطبيقات حديثة."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"خيارات الجهاز اللوحي"</string>
@@ -219,6 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"للسماح للتطبيق بتلقي رسائل WAP ومعالجتها. قد تراقب بعض التطبيقات الضارة رسائلك أو تحذفها بدون عرضها لك."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"استرداد التطبيقات التي قيد التشغيل"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"للسماح للتطبيق باسترداد معلومات حول المهام المُشغلة الحالية والحديثة. قد تكتشف التطبيقات الضارة معلومات خاصة حول التطبيقات الأخرى."</string>
+    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
+    <skip />
+    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"إعادة ترتيب التطبيقات قيد التشغيل"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"للسماح لتطبيق ما بنقل المهام إلى المقدمة والخلفية. قد تفرض التطبيقات الضارة نفسها إلى المقدمة بدون تحكم منك."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"إيقاف التطبيقات التي قيد التشغيل"</string>
@@ -342,15 +344,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"للسماح للتطبيق بإرسال بث طويل الزيارة، والذي يظل بعد انتهاء البث. قد تجعل التطبيقات الضارة الجهاز اللوحي بطيئًا أو غير مستقر من خلال التسبب في استخدامه لمساحة كبيرة للغاية من الذاكرة."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"للسماح للتطبيق بإرسال بث طويل الزيارة، والذي يظل بعد انتهاء البث. قد تجعل التطبيقات الضارة الهاتف بطيئًا أو غير مستقر من خلال التسبب في استخدامه لمساحة كبيرة للغاية من الذاكرة."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"قراءة بيانات جهة الاتصال"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"للسماح للتطبيق بقراءة جميع البيانات عن جهات الاتصال المخزنة على جهازك اللوحي، بما في ذلك معدل الاتصال بأفراد معينين أو إرسال رسائل إلكترونية إليهم أو التواصل معهم بطرق أخرى. يفيد هذا ميزة الإكمال التلقائي لعناوين البريد الإلكتروني والميزات المناسبة الأخرى. ويمكن للتطبيقات الضارة استخدام هذا الإذن لإرسال بيانات الاتصال إلى أشخاص آخرين."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"للسماح للتطبيق بقراءة جميع البيانات عن جهات الاتصال المخزنة على هاتفك، بما في ذلك معدل الاتصال بأفراد معينين أو إرسال رسائل إلكترونية إليهم أو التواصل معهم بطرق أخرى. يفيد هذا ميزة الإكمال التلقائي لعناوين البريد الإلكتروني والميزات المناسبة الأخرى. ويمكن للتطبيقات الضارة استخدام هذا الإذن لإرسال بيانات الاتصال إلى أشخاص آخرين."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"كتابة بيانات جهة الاتصال"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"للسماح للتطبيق بتعديل البيانات عن جهات الاتصال المخزنة على جهازك اللوحي، بما في ذلك معدل الاتصال بأفراد معينين أو إرسال رسائل إلكترونية إليهم أو التواصل معهم بطرق أخرى. يفيد هذا ميزة الإكمال التلقائي لعناوين البريد الإلكتروني والميزات المناسبة الأخرى. ويمكن للتطبيقات الضارة استخدام هذا لمسح أو تعديل بيانات الاتصال."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"للسماح للتطبيق بتعديل البيانات عن جهات الاتصال المخزنة على هاتفك، بما في ذلك معدل الاتصال بأفراد معينين أو إرسال رسائل إلكترونية إليهم أو التواصل معهم بطرق أخرى. يفيد هذا ميزة الإكمال التلقائي لعناوين البريد الإلكتروني والميزات المناسبة الأخرى. ويمكن للتطبيقات الضارة استخدام هذا لمسح أو تعديل بيانات الاتصال."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"قراءة سجل المكالمات"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"للسماح للتطبيق بقراءة سجل المكالمات، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وربما تستخدم التطبيقات الضارة هذا لإرسال بياناتك إلى أشخاص آخرين."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"للسماح للتطبيق بقراءة سجل مكالمات الهاتف، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وربما تستخدم التطبيقات الضارة هذا لإرسال بياناتك إلى أشخاص آخرين."</string>
@@ -746,14 +744,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ب ت ث"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"حرف"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"كلمة"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"رابط"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"سطر"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"أخفق اختبار المصنع"</string>

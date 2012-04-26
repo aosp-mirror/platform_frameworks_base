@@ -217,12 +217,14 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Tillader, at appen kan modtage og behandle WAP-beskeder. Ondsindede apps kan overvåge dine beskeder eller slette dem uden at vise dem til dig."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hente kørende apps"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Tillader, at appen kan hente oplysninger om aktuelle og seneste opgaver. Ondsindede apps kan registrere private oplysninger om andre apps."</string>
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"hente oplysninger om apps, der kører"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Tillader, at appen kan hente oplysninger om aktuelle og seneste opgaver. Ondsindede apps kan muligvis finde personlige oplysninger om andre apps."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"omorganisere kørende apps"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Tillader, at appen kan flytte opgaver til forgrunden og baggrunden. Ondsindede apps kan tvinge sig selv i forgrunden uden din kontrol."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"stoppe kørsel af apps"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Tillader, at en app kan fjerne opgaver og lukke deres apps. Ondsindede apps kan forstyrre adfærden for andre apps."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"starte en aktivitet"</string>
-    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Tillader, at appen starter en hvilken som helst aktivitet, uanset tilladelsesbeskyttelse eller eksportstatus."</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Tillader, at appen starter en hvilken som helst aktivitet, uanset tilladelsesbeskyttelse eller eksporteret tilstand."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"indstil skærmens kompatibilitet"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Tillader, at appen kontrollerer kompatibilitetstilstanden for skærme i andre applikationer. Ondsindede applikationer kan forstyrre andre applikationers adfærd."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"aktivere fejlretning af appen"</string>
@@ -340,15 +342,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Tillader, at appen kan sende klæbende udsendelser, der efterlades, selvom udsendelsen er slut. Ondsindede apps kan gøre din tablet langsom eller ustabil ved at tvinge den til at bruge for meget hukommelse."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Tillader, at appen kan sende klæbende udsendelser, der efterlades, når udsendelsen er slut. Ondsindede apps kan gøre din telefon langsom eller ustabil ved at tvinge den til at bruge for meget hukommelse."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"læs kontaktdata"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Tillader, at appen læser alle de data om dine kontaktpersoner, der er gemt på din tablet, herunder hvor ofte du har ringet til, sendt e-mail til eller på anden måde kommunikeret med bestemte individer. Dette hjælper i forbindelse med automatisk fuldførelse af e-mailadresser og andre nyttige funktioner. Ondsindede apps kan bruge denne tilladelse til at sende dine kontaktoplysninger til andre."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Tillader, at appen læser alle de data om dine kontaktpersoner, der er gemt på din telefon, herunder hvor ofte du har ringet til, sendt e-mail til eller på anden måde kommunikeret med bestemte individer. Dette hjælper i forbindelse med automatisk fuldførelse af e-mailadresser og andre nyttige funktioner. Ondsindede apps kan bruge denne tilladelse til at sende dine kontaktoplysninger til andre."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"skriv kontaktdata"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Tillader, at appen ændrer data om dine kontaktpersoner, der er gemt på tabletten, herunder hvor ofte du har ringet til, sendt e-mail til eller på anden måde kommunikeret med bestemte individer. Dette hjælper i forbindelse med automatisk fuldførelse af e-mailadresser og andre nyttige funktioner. Ondsindede apps kan bruge denne tilladelse til at sende dine kontaktoplysninger til andre."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Tillader, at appen ændrer data om dine kontaktpersoner, der er gemt på telefonen, herunder hvor ofte du har ringet til, sendt e-mail til eller på anden måde kommunikeret med bestemte individer. Dette hjælper i forbindelse med automatisk fuldførelse af e-mailadresser og andre nyttige funktioner. Ondsindede apps kan bruge denne tilladelse til at sende dine kontaktoplysninger til andre."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"læs opkaldsliste"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Tillader, at appen læser din tablets opkaldsliste, herunder data om indgående og udgående opkald. Ondsindede apps kan bruge dette til at sende dine data til andre personer."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Tillader, at appen læser telefonens opkaldsliste, herunder data om indgående og udgående opkald. Ondsindede apps kan bruge dette til at sende dine data til andre personer."</string>
