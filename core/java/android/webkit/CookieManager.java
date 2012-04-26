@@ -40,7 +40,7 @@ public class CookieManager {
      * {@link CookieSyncManager#createInstance(Context)} must be called
      * first.
      *
-     * @return The singleton CookieManager instance
+     * @return the singleton CookieManager instance
      */
     public static synchronized CookieManager getInstance() {
         return WebViewFactory.getProvider().getCookieManager();
@@ -49,7 +49,8 @@ public class CookieManager {
     /**
      * Sets whether the application's {@link WebView} instances should send and
      * accept cookies.
-     * @param accept Whether {@link WebView} instances should send and accept
+     *
+     * @param accept whether {@link WebView} instances should send and accept
      *               cookies
      */
     public synchronized void setAcceptCookie(boolean accept) {
@@ -59,7 +60,8 @@ public class CookieManager {
     /**
      * Gets whether the application's {@link WebView} instances send and accept
      * cookies.
-     * @return True if {@link WebView} instances send and accept cookies
+     *
+     * @return true if {@link WebView} instances send and accept cookies
      */
     public synchronized boolean acceptCookie() {
         throw new MustOverrideException();
@@ -70,8 +72,9 @@ public class CookieManager {
      * path and name will be replaced with the new cookie. The cookie being set
      * must not have expired and must not be a session cookie, otherwise it
      * will be ignored.
-     * @param url The URL for which the cookie is set
-     * @param value The cookie as a string, using the format of the 'Set-Cookie'
+     *
+     * @param url the URL for which the cookie is set
+     * @param value the cookie as a string, using the format of the 'Set-Cookie'
      *              HTTP response header
      */
     public void setCookie(String url, String value) {
@@ -80,8 +83,9 @@ public class CookieManager {
 
     /**
      * Gets the cookies for the given URL.
-     * @param url The URL for which the cookies are requested
-     * @return value The cookies as a string, using the format of the 'Cookie'
+     *
+     * @param url the URL for which the cookies are requested
+     * @return value the cookies as a string, using the format of the 'Cookie'
      *               HTTP request header
      */
     public String getCookie(String url) {
@@ -89,10 +93,11 @@ public class CookieManager {
     }
 
     /**
-     * See {@link #getCookie(String)}
-     * @param url The URL for which the cookies are requested
-     * @param privateBrowsing Whether to use the private browsing cookie jar
-     * @return value The cookies as a string, using the format of the 'Cookie'
+     * See {@link #getCookie(String)}.
+     *
+     * @param url the URL for which the cookies are requested
+     * @param privateBrowsing whether to use the private browsing cookie jar
+     * @return value the cookies as a string, using the format of the 'Cookie'
      *               HTTP request header
      * @hide Used by Browser, no intention to publish.
      */
@@ -101,10 +106,11 @@ public class CookieManager {
     }
 
     /**
-     * Get cookie(s) for a given uri so that it can be set to "cookie:" in http
+     * Gets cookie(s) for a given uri so that it can be set to "cookie:" in http
      * request header.
-     * @param uri The WebAddress for which the cookies are requested
-     * @return value The cookies as a string, using the format of the 'Cookie'
+     *
+     * @param uri the WebAddress for which the cookies are requested
+     * @return value the cookies as a string, using the format of the 'Cookie'
      *               HTTP request header
      * @hide Used by RequestHandle, no intention to publish.
      */
@@ -129,7 +135,8 @@ public class CookieManager {
 
     /**
      * Gets whether there are stored cookies.
-     * @return True if there are stored cookies.
+     *
+     * @return true if there are stored cookies
      */
     public synchronized boolean hasCookies() {
         throw new MustOverrideException();
@@ -137,7 +144,8 @@ public class CookieManager {
 
     /**
      * See {@link #hasCookies()}.
-     * @param privateBrowsing Whether to use the private browsing cookie jar
+     *
+     * @param privateBrowsing whether to use the private browsing cookie jar
      * @hide Used by Browser, no intention to publish.
      */
     public synchronized boolean hasCookies(boolean privateBrowsing) {
@@ -152,7 +160,7 @@ public class CookieManager {
     }
 
     /**
-     * Flush all cookies managed by the Chrome HTTP stack to flash.
+     * Flushes all cookies managed by the Chrome HTTP stack to flash.
      *
      * @hide Package level api, called from CookieSyncManager
      */
@@ -163,7 +171,8 @@ public class CookieManager {
     /**
      * Gets whether the application's {@link WebView} instances send and accept
      * cookies for file scheme URLs.
-     * @return True if {@link WebView} instances send and accept cookies for
+     *
+     * @return true if {@link WebView} instances send and accept cookies for
      *         file scheme URLs
      */
     // Static for backward compatibility.
@@ -172,7 +181,8 @@ public class CookieManager {
     }
 
     /**
-     * Implements {@link #allowFileSchemeCookies()}
+     * Implements {@link #allowFileSchemeCookies()}.
+     *
      * @hide Only for use by WebViewProvider implementations
      */
     protected boolean allowFileSchemeCookiesImpl() {
@@ -195,7 +205,8 @@ public class CookieManager {
     }
 
     /**
-     * Implements {@link #setAcceptFileSchemeCookies(boolean)}
+     * Implements {@link #setAcceptFileSchemeCookies(boolean)}.
+     *
      * @hide Only for use by WebViewProvider implementations
      */
     protected void setAcceptFileSchemeCookiesImpl(boolean accept) {

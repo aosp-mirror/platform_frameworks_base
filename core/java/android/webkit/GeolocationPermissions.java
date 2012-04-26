@@ -48,28 +48,31 @@ public class GeolocationPermissions {
      */
     public interface Callback {
         /**
-         * Set the Geolocation permission state for the supplied origin.
-         * @param origin The origin for which permissions are set.
-         * @param allow Whether or not the origin should be allowed to use the
-         *              Geolocation API.
-         * @param retain Whether the permission should be retained beyond the
+         * Sets the Geolocation permission state for the supplied origin.
+         *
+         * @param origin the origin for which permissions are set
+         * @param allow whether or not the origin should be allowed to use the
+         *              Geolocation API
+         * @param retain whether the permission should be retained beyond the
          *               lifetime of a page currently being displayed by a
-         *               WebView.
+         *               WebView
          */
         public void invoke(String origin, boolean allow, boolean retain);
     };
 
     /**
-     * Get the singleton instance of this class.
-     * @return The singleton {@link GeolocationPermissions} instance.
+     * Gets the singleton instance of this class.
+     *
+     * @return the singleton {@link GeolocationPermissions} instance
      */
     public static GeolocationPermissions getInstance() {
       return WebViewFactory.getProvider().getGeolocationPermissions();
     }
 
     /**
-     * Get the set of origins for which Geolocation permissions are stored.
-     * @param callback A {@link ValueCallback} to receive the result of this
+     * Gets the set of origins for which Geolocation permissions are stored.
+     *
+     * @param callback a {@link ValueCallback} to receive the result of this
      *                 request. This object's
      *                 {@link ValueCallback#onReceiveValue(T) onReceiveValue()}
      *                 method will be invoked asynchronously with a set of
@@ -85,9 +88,10 @@ public class GeolocationPermissions {
     }
 
     /**
-     * Get the Geolocation permission state for the specified origin.
-     * @param origin The origin for which Geolocation permission is requested.
-     * @param callback A {@link ValueCallback} to receive the result of this
+     * Gets the Geolocation permission state for the specified origin.
+     *
+     * @param origin the origin for which Geolocation permission is requested
+     * @param callback a {@link ValueCallback} to receive the result of this
      *                 request. This object's
      *                 {@link ValueCallback#onReceiveValue(T) onReceiveValue()}
      *                 method will be invoked asynchronously with a boolean
@@ -99,23 +103,25 @@ public class GeolocationPermissions {
     }
 
     /**
-     * Clear the Geolocation permission state for the specified origin.
-     * @param origin The origin for which Geolocation permissions are cleared.
+     * Clears the Geolocation permission state for the specified origin.
+     *
+     * @param origin the origin for which Geolocation permissions are cleared
      */
     public void clear(String origin) {
         // Must be a no-op for backward compatibility: see the hidden constructor for reason.
     }
 
     /**
-     * Allow the specified origin to use the Geolocation API.
-     * @param origin The origin for which Geolocation API use is allowed.
+     * Allows the specified origin to use the Geolocation API.
+     *
+     * @param origin the origin for which Geolocation API use is allowed
      */
     public void allow(String origin) {
         // Must be a no-op for backward compatibility: see the hidden constructor for reason.
     }
 
     /**
-     * Clear the Geolocation permission state for all origins.
+     * Clears the Geolocation permission state for all origins.
      */
     public void clearAll() {
         // Must be a no-op for backward compatibility: see the hidden constructor for reason.
