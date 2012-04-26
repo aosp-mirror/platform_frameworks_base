@@ -217,6 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Consente all\'applicazione di ricevere ed elaborare messaggi WAP. Le applicazioni dannose potrebbero monitorare i tuoi messaggi o eliminarli senza mostrarteli."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recupero applicazioni in esecuzione"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Consente all\'applicazione di recuperare informazioni sulle attività attualmente e recentemente in esecuzione. Le applicazioni dannose potrebbero scoprire informazioni riservate su altre applicazioni."</string>
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"recupero dettagli applicazioni in esecuzione"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Consente all\'applicazione di recuperare informazioni dettagliate sulle attività attualmente e recentemente in esecuzione. Le applicazioni dannose potrebbero scoprire informazioni riservate su altre applicazioni."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"riordinamento applicazioni in esecuzione"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Consente all\'applicazione di spostare attività in primo piano e in background. Le applicazioni dannose potrebbero forzare la loro impostazione in primo piano senza il tuo controllo."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"interruzione applicazioni in esecuzione"</string>
@@ -340,15 +342,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Consente all\'applicazione di inviare broadcast permanenti, che permangono anche al termine del broadcast. Le applicazioni dannose potrebbero rendere il tablet lento o instabile tramite un uso eccessivo della memoria."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Consente all\'applicazione di inviare broadcast permanenti, che permangono anche al termine del broadcast. Le applicazioni dannose potrebbero rendere il telefono lento o instabile tramite un uso eccessivo della memoria."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"lettura dati di contatto"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Consente all\'applicazione di leggere tutti i dati relativi ai contatti memorizzati sul tablet, inclusa la frequenza con cui hai chiamato individui specifici, hai inviato loro delle email o hai comunicato con loro in altri modi. Ciò favorisce il completamento automatico degli indirizzi email e altre comode funzioni. Le applicazioni dannose potrebbero utilizzare questa autorizzazione per inviare i tuoi dati di contatto ad altre persone."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Consente all\'applicazione di leggere tutti i dati relativi ai contatti memorizzati sul telefono, inclusa la frequenza con cui hai chiamato individui specifici, hai inviato loro delle email o hai comunicato con loro in altri modi. Ciò favorisce il completamento automatico degli indirizzi email e altre comode funzioni. Le applicazioni dannose potrebbero utilizzare questa autorizzazione per inviare i tuoi dati di contatto ad altre persone."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"scrittura dati di contatto"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Consente all\'applicazione di modificare i dati relativi ai contatti memorizzati sul tablet, inclusa la frequenza con cui hai chiamato individui specifici, hai inviato loro delle email o hai comunicato con loro in altri modi. Ciò favorisce il completamento automatico degli indirizzi email e altre comode funzioni. Le applicazioni dannose potrebbero farne uso per cancellare o modificare i tuoi dati di contatto."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Consente all\'applicazione di modificare i dati relativi ai contatti memorizzati sul telefono, inclusa la frequenza con cui hai chiamato individui specifici, hai inviato loro delle email o hai comunicato con loro in altri modi. Ciò favorisce il completamento automatico degli indirizzi email e altre comode funzioni. Le applicazioni dannose potrebbero farne uso per cancellare o modificare i tuoi dati di contatto."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"lettura del registro chiamate"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Consente all\'applicazione di leggere il registro chiamate del tablet, inclusi i dati sulle chiamate in arrivo e in uscita. Le applicazioni dannose potrebbero fare uso di questa funzione per inviare dati ad altre persone."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Consente all\'applicazione di leggere il registro chiamate del telefono, inclusi i dati sulle chiamate in arrivo e in uscita. Le applicazioni dannose potrebbero fare uso di questa funzione per inviare dati ad altre persone."</string>

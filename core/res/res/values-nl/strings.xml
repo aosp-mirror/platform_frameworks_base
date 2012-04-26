@@ -202,7 +202,7 @@
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"noodberichten ontvangen"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Hiermee kan de app berichten over noodsituaties ontvangen en verwerken. Deze rechten zijn alleen beschikbaar voor systeemapps."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"infodienstberichten lezen"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Toestaan dat de app infodienstberichten leest die worden ontvangen op uw apparaat. Infodienstmeldingen worden verzonden naar bepaalde locaties om u te waarschuwen voor noodsituaties. Schadelijke apps kunnen de prestaties of verwerking van uw apparaat verstoren wanneer een infodienstbericht wordt ontvangen."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Toestaan dat de app infodienstberichten leest die worden ontvangen op uw apparaat. Infodienstberichten worden verzonden naar bepaalde locaties om u te waarschuwen voor noodsituaties. Schadelijke apps kunnen de prestaties of verwerking van uw apparaat verstoren wanneer een infodienstbericht wordt ontvangen."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS-berichten verzenden"</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Hiermee kan de app sms\'jes verzenden. Schadelijke apps kunnen u geld kosten door zonder uw toestemming berichten te verzenden."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"zonder toestemming sms\'jes verzenden"</string>
@@ -217,6 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Hiermee kan de app WAP-berichten ontvangen en verwerken. Schadelijke apps kunnen uw berichten bijhouden of deze verwijderen zonder dat u ze te zien krijgt."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"actieve apps ophalen"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Hiermee kan de app informatie over huidige en recent uitgevoerde taken ophalen. Schadelijke apps kunnen op deze manier mogelijk privé-informatie over andere apps achterhalen."</string>
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"details van actieve apps ophalen"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Hiermee kan de app gedetailleerde informatie over huidige en recent uitgevoerde taken ophalen. Schadelijke apps kunnen op deze manier mogelijk privé-informatie over andere apps achterhalen."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"actieve apps opnieuw rangschikken"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Hiermee kan de app taken naar de voor- en achtergrond verplaatsen. Schadelijke apps kunnen zichzelf op de voorgrond plaatsen zonder dat u hier iets aan kunt doen."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"actieve apps stoppen"</string>
@@ -340,15 +342,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Hiermee kan de app sticky broadcasts verzenden die behouden blijven nadat de broadcast is beëindigd. Schadelijke apps kunnen hiermee de tablet traag of instabiel maken door ervoor te zorgen dat er te veel geheugenruimte wordt gebruikt."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Hiermee kan de app sticky broadcasts verzenden die behouden blijven nadat de broadcast is beëindigd. Schadelijke apps kunnen hiermee de telefoon traag of instabiel maken door ervoor te zorgen dat er te veel geheugenruimte wordt gebruikt."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"contactgegevens lezen"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Hiermee kan de app alle gegevens lezen over contacten die zijn opgeslagen op uw tablet, met inbegrip van de frequentie waarmee u heeft gebeld, e-mails heeft verzonden, of op andere wijze heeft gecommuniceerd met bepaalde personen. Dit helpt bij het automatisch aanvullen van e-mailadressen en andere handige functies. Schadelijke apps kunnen deze toestemming gebruiken om uw contactgegevens naar andere mensen te verzenden."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Hiermee kan de app alle gegevens lezen over contacten die zijn opgeslagen op uw telefoon, met inbegrip van de frequentie waarmee u heeft gebeld, e-mails heeft verzonden, of op andere wijze heeft gecommuniceerd met bepaalde personen. Dit helpt bij het automatisch aanvullen van e-mailadressen en andere handige functies. Schadelijke apps kunnen deze toestemming gebruiken om uw contactgegevens naar andere mensen te verzenden."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"contactgegevens schrijven"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Hiermee kan de app gegevens wijzigen van contacten die zijn opgeslagen op uw tablet, met inbegrip van de frequentie waarmee u heeft gebeld, e-mails heeft verzonden, of op andere wijze heeft gecommuniceerd met bepaalde personen. Dit helpt bij het automatisch aanvullen van e-mailadressen en andere handige functies. Schadelijke apps kunnen deze toestemming gebruiken om uw contactgegevens naar andere mensen te verzenden."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Hiermee kan de app gegevens wijzigen van contacten die zijn opgeslagen op uw telefoon, met inbegrip van de frequentie waarmee u heeft gebeld, e-mails heeft verzonden, of op andere wijze heeft gecommuniceerd met bepaalde personen. Dit helpt bij het automatisch aanvullen van e-mailadressen en andere handige functies. Schadelijke apps kunnen deze toestemming gebruiken om uw contactgegevens naar andere mensen te verzenden."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"oproeplogboek lezen"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Toestaan dat de app het oproeplogboek van uw tablet leest, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee uw gegevens naar andere personen verzenden."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Toestaan dat de app het oproeplogboek van uw telefoon leest, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee uw gegevens naar andere personen verzenden."</string>

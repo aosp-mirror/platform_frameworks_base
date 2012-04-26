@@ -146,10 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"タブレットの電源をOFFにします。"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"携帯電話の電源を切ります。"</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"シャットダウンしますか？"</string>
-    <!-- no translation found for reboot_safemode_title (7054509914500140361) -->
-    <skip />
-    <!-- no translation found for reboot_safemode_confirm (55293944502784668) -->
-    <skip />
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"再起動してセーフモードに変更"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"再起動してセーフモードにしますか？セーフモードでは、インストールしたすべてのサードパーティ製アプリが無効になります。これらのアプリはもう一度再起動すると復元されます。"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"新着"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"最近使ったアプリはありません。"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"タブレットオプション"</string>
@@ -219,6 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"WAPメッセージの受信と処理をアプリに許可します。この許可を悪意のあるアプリに利用されると、メッセージが監視されたり、表示されずに削除されたりする恐れがあります。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"実行中のアプリの取得"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"現在実行中または最近実行したタスクに関する情報の取得をアプリに許可します。この許可を悪意のあるアプリに利用されると、他のアプリに関する非公開情報が発見される恐れがあります。"</string>
+    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
+    <skip />
+    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"実行中のアプリの順序変更"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"タスクをフォアグラウンドやバックグラウンドに移動することをアプリに許可します。この許可を悪意のあるアプリに利用されると、悪意のあるアプリが強制的に優先される恐れがあります。"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"実行中のアプリの停止"</string>
@@ -746,14 +748,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for granularity_label_character (7336470535385009523) -->
-    <skip />
-    <!-- no translation found for granularity_label_word (7075570328374918660) -->
-    <skip />
-    <!-- no translation found for granularity_label_link (5815508880782488267) -->
-    <skip />
-    <!-- no translation found for granularity_label_line (5764267235026120888) -->
-    <skip />
+    <string name="granularity_label_character" msgid="7336470535385009523">"文字"</string>
+    <string name="granularity_label_word" msgid="7075570328374918660">"単語"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"リンク"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"行"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"出荷時試験が失敗"</string>
