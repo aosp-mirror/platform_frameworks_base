@@ -91,6 +91,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.TokenWatcher;
+import android.os.Trace;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -631,6 +632,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Update animations of all applications, including those
                 // associated with exiting/removed apps
                 synchronized (mAnimator) {
+                    Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "wmAnimate");
                     final ArrayList<WindowStateAnimator> winAnimators = mAnimator.mWinAnimators;
                     winAnimators.clear();
                     final int N = mWindows.size();
@@ -641,6 +643,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                     }
                     mAnimator.animate();
+                    Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
                 }
             }
         }
@@ -7518,6 +7521,7 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "wmLayout");
         mInLayout = true;
         boolean recoveringMemory = false;
         
@@ -7562,7 +7566,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 mInLayout = false;
                 assignLayersLocked();
                 mLayoutNeeded = true;
+                // XXX this recursion seems broken!
+                Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
                 performLayoutAndPlaceSurfacesLocked();
+                Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "wmLayout");
 
             } else {
                 mInLayout = false;
@@ -7587,6 +7594,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mInLayout = false;
             Log.wtf(TAG, "Unhandled exception while laying out windows", e);
         }
+
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     private final void performLayoutLockedInner(boolean initial, boolean updateInputWindows) {
@@ -8814,6 +8823,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {
         WindowState newFocus = computeFocusedWindowLocked();
         if (mCurrentFocus != newFocus) {
+            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "wmUpdateFocus");
             // This check makes sure that we don't already have the focus
             // change message pending.
             mH.removeMessages(H.REPORT_FOCUS_CHANGE);
@@ -8856,6 +8866,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 // doing this part.
                 finishUpdateFocusedWindowAfterAssignLayersLocked(updateInputWindows);
             }
+
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             return true;
         }
         return false;

@@ -36,6 +36,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.StrictMode;
+import android.os.Trace;
 import android.os.UserId;
 import android.util.AndroidRuntimeException;
 import android.util.Slog;
@@ -745,6 +746,7 @@ public final class LoadedApk {
                     return;
                 }
 
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "broadcastReceiveReg");
                 try {
                     ClassLoader cl =  mReceiver.getClass().getClassLoader();
                     intent.setExtrasClassLoader(cl);
@@ -759,6 +761,7 @@ public final class LoadedApk {
                     }
                     if (mInstrumentation == null ||
                             !mInstrumentation.onException(mReceiver, e)) {
+                        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                         throw new RuntimeException(
                             "Error receiving broadcast " + intent
                             + " in " + mReceiver, e);
@@ -768,6 +771,7 @@ public final class LoadedApk {
                 if (receiver.getPendingResult() != null) {
                     finish();
                 }
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
 
