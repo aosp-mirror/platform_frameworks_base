@@ -3049,6 +3049,13 @@ public final class ContactsContract {
      * requires android.permission.READ_SOCIAL_STREAM permission, and inserting or updating social
      * stream items requires android.permission.WRITE_SOCIAL_STREAM permission.
      * </p>
+     * <h3>Account check</h3>
+     * <p>
+     * The content URIs to the insert, update and delete operations are required to have the account
+     * information matching that of the owning raw contact as query parameters, namely
+     * {@link RawContacts#ACCOUNT_TYPE} and {@link RawContacts#ACCOUNT_NAME}.
+     * {@link RawContacts#DATA_SET} isn't required.
+     * </p>
      * <h3>Operations</h3>
      * <dl>
      * <dt><b>Insert</b></dt>
@@ -3063,9 +3070,12 @@ public final class ContactsContract {
      * values.put(StreamItems.TEXT, "Breakfasted at Tiffanys");
      * values.put(StreamItems.TIMESTAMP, timestamp);
      * values.put(StreamItems.COMMENTS, "3 people reshared this");
-     * Uri streamItemUri = getContentResolver().insert(
-     *     Uri.withAppendedPath(ContentUris.withAppendedId(RawContacts.CONTENT_URI, rawContactId),
-     *         RawContacts.StreamItems.CONTENT_DIRECTORY), values);
+     * Uri.Builder builder = RawContacts.CONTENT_URI.buildUpon();
+     * ContentUris.appendId(builder, rawContactId);
+     * builder.appendEncodedPath(RawContacts.StreamItems.CONTENT_DIRECTORY);
+     * builder.appendQueryParameter(RawContacts.ACCOUNT_NAME, accountName);
+     * builder.appendQueryParameter(RawContacts.ACCOUNT_TYPE, accountType);
+     * Uri streamItemUri = getContentResolver().insert(builder.build(), values);
      * long streamItemId = ContentUris.parseId(streamItemUri);
      * </pre>
      * </dd>
@@ -3077,7 +3087,10 @@ public final class ContactsContract {
      * values.put(StreamItems.TEXT, "Breakfasted at Tiffanys");
      * values.put(StreamItems.TIMESTAMP, timestamp);
      * values.put(StreamItems.COMMENTS, "3 people reshared this");
-     * Uri streamItemUri = getContentResolver().insert(StreamItems.CONTENT_URI, values);
+     * Uri.Builder builder = StreamItems.CONTENT_URI.buildUpon();
+     * builder.appendQueryParameter(RawContacts.ACCOUNT_NAME, accountName);
+     * builder.appendQueryParameter(RawContacts.ACCOUNT_TYPE, accountType);
+     * Uri streamItemUri = getContentResolver().insert(builder.build(), values);
      * long streamItemId = ContentUris.parseId(streamItemUri);
      *</pre>
      * </dd>
@@ -3410,6 +3423,13 @@ public final class ContactsContract {
      * requires android.permission.READ_SOCIAL_STREAM permission, and inserting or updating
      * social stream photos requires android.permission.WRITE_SOCIAL_STREAM permission.
      * </p>
+     * <h3>Account check</h3>
+     * <p>
+     * The content URIs to the insert, update and delete operations are required to have the account
+     * information matching that of the owning raw contact as query parameters, namely
+     * {@link RawContacts#ACCOUNT_TYPE} and {@link RawContacts#ACCOUNT_NAME}.
+     * {@link RawContacts#DATA_SET} isn't required.
+     * </p>
      * <h3>Operations</h3>
      * <dl>
      * <dt><b>Insert</b></dt>
@@ -3426,9 +3446,12 @@ public final class ContactsContract {
      * ContentValues values = new ContentValues();
      * values.put(StreamItemPhotos.SORT_INDEX, 1);
      * values.put(StreamItemPhotos.PHOTO, photoData);
-     * Uri photoUri = getContentResolver().insert(Uri.withAppendedPath(
-     *     ContentUris.withAppendedId(StreamItems.CONTENT_URI, streamItemId)
-     *     StreamItems.StreamItemPhotos#CONTENT_DIRECTORY), values);
+     * Uri.Builder builder = StreamItems.CONTENT_URI.buildUpon();
+     * ContentUris.appendId(builder, streamItemId);
+     * builder.appendEncodedPath(StreamItems.StreamItemPhotos.CONTENT_DIRECTORY);
+     * builder.appendQueryParameter(RawContacts.ACCOUNT_NAME, accountName);
+     * builder.appendQueryParameter(RawContacts.ACCOUNT_TYPE, accountType);
+     * Uri photoUri = getContentResolver().insert(builder.build(), values);
      * long photoId = ContentUris.parseId(photoUri);
      * </pre>
      * </dd>
@@ -3439,7 +3462,10 @@ public final class ContactsContract {
      * values.put(StreamItemPhotos.STREAM_ITEM_ID, streamItemId);
      * values.put(StreamItemPhotos.SORT_INDEX, 1);
      * values.put(StreamItemPhotos.PHOTO, photoData);
-     * Uri photoUri = getContentResolver().insert(StreamItems.CONTENT_PHOTO_URI, values);
+     * Uri.Builder builder = StreamItems.CONTENT_PHOTO_URI.buildUpon();
+     * builder.appendQueryParameter(RawContacts.ACCOUNT_NAME, accountName);
+     * builder.appendQueryParameter(RawContacts.ACCOUNT_TYPE, accountType);
+     * Uri photoUri = getContentResolver().insert(builder.build(), values);
      * long photoId = ContentUris.parseId(photoUri);
      * </pre>
      * </dd>
@@ -3459,12 +3485,13 @@ public final class ContactsContract {
      * <pre>
      * ContentValues values = new ContentValues();
      * values.put(StreamItemPhotos.PHOTO, newPhotoData);
-     * getContentResolver().update(
-     *     ContentUris.withAppendedId(
-     *         Uri.withAppendedPath(
-     *             ContentUris.withAppendedId(StreamItems.CONTENT_URI, streamItemId)
-     *             StreamItems.StreamItemPhotos#CONTENT_DIRECTORY),
-     *         streamItemPhotoId), values, null, null);
+     * Uri.Builder builder = StreamItems.CONTENT_URI.buildUpon();
+     * ContentUris.appendId(builder, streamItemId);
+     * builder.appendEncodedPath(StreamItems.StreamItemPhotos.CONTENT_DIRECTORY);
+     * ContentUris.appendId(builder, streamItemPhotoId);
+     * builder.appendQueryParameter(RawContacts.ACCOUNT_NAME, accountName);
+     * builder.appendQueryParameter(RawContacts.ACCOUNT_TYPE, accountType);
+     * getContentResolver().update(builder.build(), values, null, null);
      * </pre>
      * </dd>
      * <dt>Via the {@link ContactsContract.StreamItems#CONTENT_PHOTO_URI} URI:</dt>
@@ -3473,7 +3500,10 @@ public final class ContactsContract {
      * ContentValues values = new ContentValues();
      * values.put(StreamItemPhotos.STREAM_ITEM_ID, streamItemId);
      * values.put(StreamItemPhotos.PHOTO, newPhotoData);
-     * getContentResolver().update(StreamItems.CONTENT_PHOTO_URI, values);
+     * Uri.Builder builder = StreamItems.CONTENT_PHOTO_URI.buildUpon();
+     * builder.appendQueryParameter(RawContacts.ACCOUNT_NAME, accountName);
+     * builder.appendQueryParameter(RawContacts.ACCOUNT_TYPE, accountType);
+     * getContentResolver().update(builder.build(), values);
      * </pre>
      * </dd>
      * </dl>
@@ -3489,21 +3519,24 @@ public final class ContactsContract {
      * </dt>
      * <dd>
      * <pre>
-     * getContentResolver().delete(
-     *     ContentUris.withAppendedId(
-     *         Uri.withAppendedPath(
-     *             ContentUris.withAppendedId(StreamItems.CONTENT_URI, streamItemId)
-     *             StreamItems.StreamItemPhotos#CONTENT_DIRECTORY),
-     *         streamItemPhotoId), null, null);
+     * Uri.Builder builder = StreamItems.CONTENT_URI.buildUpon();
+     * ContentUris.appendId(builder, streamItemId);
+     * builder.appendEncodedPath(StreamItems.StreamItemPhotos.CONTENT_DIRECTORY);
+     * ContentUris.appendId(builder, streamItemPhotoId);
+     * builder.appendQueryParameter(RawContacts.ACCOUNT_NAME, accountName);
+     * builder.appendQueryParameter(RawContacts.ACCOUNT_TYPE, accountType);
+     * getContentResolver().delete(builder.build(), null, null);
      * </pre>
      * </dd>
      * <dt>Deleting all photos under a stream item</dt>
      * <dd>
      * <pre>
-     * getContentResolver().delete(
-     *     Uri.withAppendedPath(
-     *         ContentUris.withAppendedId(StreamItems.CONTENT_URI, streamItemId)
-     *         StreamItems.StreamItemPhotos#CONTENT_DIRECTORY), null, null);
+     * Uri.Builder builder = StreamItems.CONTENT_URI.buildUpon();
+     * ContentUris.appendId(builder, streamItemId);
+     * builder.appendEncodedPath(StreamItems.StreamItemPhotos.CONTENT_DIRECTORY);
+     * builder.appendQueryParameter(RawContacts.ACCOUNT_NAME, accountName);
+     * builder.appendQueryParameter(RawContacts.ACCOUNT_TYPE, accountType);
+     * getContentResolver().delete(builder.build(), null, null);
      * </pre>
      * </dd>
      * </dl>
