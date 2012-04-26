@@ -502,7 +502,16 @@ public class ActivityManager {
     /**
      * Return a list of the tasks that the user has recently launched, with
      * the most recent being first and older ones after in order.
-     * 
+     *
+     * <p><b>Note: this method is only intended for debugging and presenting
+     * task management user interfaces</b>.  This should never be used for
+     * core logic in an application, such as deciding between different
+     * behaviors based on the information found here.  Such uses are
+     * <em>not</em> supported, and will likely break in the future.  For
+     * example, if multiple applications can be actively running at the
+     * same time, assumptions made about the meaning of the data here for
+     * purposes of control flow will be incorrect.</p>
+     *
      * @param maxNum The maximum number of entries to return in the list.  The
      * actual number returned may be smaller, depending on how many tasks the
      * user has started and the maximum number the system can remember.
@@ -668,6 +677,15 @@ public class ActivityManager {
      * activity -- the task may have been frozen by the system, so that it
      * can be restarted in its previous state when next brought to the
      * foreground.
+     *
+     * <p><b>Note: this method is only intended for debugging and presenting
+     * task management user interfaces</b>.  This should never be used for
+     * core logic in an application, such as deciding between different
+     * behaviors based on the information found here.  Such uses are
+     * <em>not</em> supported, and will likely break in the future.  For
+     * example, if multiple applications can be actively running at the
+     * same time, assumptions made about the meaning of the data here for
+     * purposes of control flow will be incorrect.</p>
      *
      * @param maxNum The maximum number of entries to return in the list.  The
      * actual number returned may be smaller, depending on how many tasks the
@@ -1016,7 +1034,10 @@ public class ActivityManager {
 
     /**
      * Return a list of the services that are currently running.
-     * 
+     *
+     * <p><b>Note: this method is only intended for debugging or implementing
+     * service management type user interfaces.</b></p>
+     *
      * @param maxNum The maximum number of entries to return in the list.  The
      * actual number returned may be smaller, depending on how many services
      * are running.
@@ -1128,6 +1149,16 @@ public class ActivityManager {
         }
     }
 
+    /**
+     * Return general information about the memory state of the system.  This
+     * can be used to help decide how to manage your own memory, though note
+     * that polling is not recommended and
+     * {@link android.content.ComponentCallbacks2#onTrimMemory(int)
+     * ComponentCallbacks2.onTrimMemory(int)} is the preferred way to do this.
+     * Also see {@link #getMyMemoryState} for how to retrieve the current trim
+     * level of your process as needed, which gives a better hint for how to
+     * manage its memory.
+     */
     public void getMemoryInfo(MemoryInfo outInfo) {
         try {
             ActivityManagerNative.getDefault().getMemoryInfo(outInfo);
@@ -1497,6 +1528,9 @@ public class ActivityManager {
      * Returns a list of application processes installed on external media
      * that are running on the device.
      *
+     * <p><b>Note: this method is only intended for debugging or building
+     * a user-facing process management UI.</b></p>
+     *
      * @return Returns a list of ApplicationInfo records, or null if none
      * This list ordering is not specified.
      * @hide
@@ -1511,7 +1545,10 @@ public class ActivityManager {
 
     /**
      * Returns a list of application processes that are running on the device.
-     * 
+     *
+     * <p><b>Note: this method is only intended for debugging or building
+     * a user-facing process management UI.</b></p>
+     *
      * @return Returns a list of RunningAppProcessInfo records, or null if there are no
      * running processes (it will not return an empty list).  This list ordering is not
      * specified.
@@ -1544,7 +1581,10 @@ public class ActivityManager {
 
     /**
      * Return information about the memory usage of one or more processes.
-     * 
+     *
+     * <p><b>Note: this method is only intended for debugging or building
+     * a user-facing process management UI.</b></p>
+     *
      * @param pids The pids of the processes whose memory usage is to be
      * retrieved.
      * @return Returns an array of memory information, one for each

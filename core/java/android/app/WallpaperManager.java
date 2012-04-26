@@ -637,6 +637,14 @@ public class WallpaperManager {
      * wallpaper it would like to use.  This allows such applications to have
      * a virtual wallpaper that is larger than the physical screen, matching
      * the size of their workspace.
+     *
+     * <p>Note developers, who don't seem to be reading this.  This is
+     * for <em>home screens</em> to tell what size wallpaper they would like.
+     * Nobody else should be calling this!  Certainly not other non-home-screen
+     * apps that change the wallpaper.  Those apps are supposed to
+     * <b>retrieve</b> the suggested size so they can construct a wallpaper
+     * that matches it.
+     *
      * @param minimumWidth Desired minimum width
      * @param minimumHeight Desired minimum height
      */
