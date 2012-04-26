@@ -114,14 +114,21 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mDeviceProvisioned = isDeviceProvisioned;
         if (mDialog != null) {
             mDialog.dismiss();
+            mDialog = null;
+            // Show delayed, so that the dismiss of the previous dialog completes
+            mHandler.sendEmptyMessage(MESSAGE_SHOW);
+        } else {
+            handleShow();
         }
+    }
+
+    private void handleShow() {
         mDialog = createDialog();
         prepareDialog();
 
         mDialog.show();
         mDialog.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_DISABLE_EXPAND);
     }
-
     /**
      * Create the global actions dialog.
      * @return A new dialog.
@@ -279,7 +286,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mContext.registerReceiver(mRingerModeReceiver, filter);
         }
     }
-
 
     /** {@inheritDoc} */
     public void onDismiss(DialogInterface dialog) {
@@ -694,16 +700,23 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private static final int MESSAGE_DISMISS = 0;
     private static final int MESSAGE_REFRESH = 1;
+    private static final int MESSAGE_SHOW = 2;
     private static final int DIALOG_DISMISS_DELAY = 300; // ms
 
     private Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
-            if (msg.what == MESSAGE_DISMISS) {
+            switch (msg.what) {
+            case MESSAGE_DISMISS:
                 if (mDialog != null) {
                     mDialog.dismiss();
                 }
-            } else if (msg.what == MESSAGE_REFRESH) {
+                break;
+            case MESSAGE_REFRESH:
                 mAdapter.notifyDataSetChanged();
+                break;
+            case MESSAGE_SHOW:
+                handleShow();
+                break;
             }
         }
     };
