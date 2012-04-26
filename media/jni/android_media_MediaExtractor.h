@@ -18,6 +18,7 @@
 #define _ANDROID_MEDIA_MEDIAEXTRACTOR_H_
 
 #include <media/stagefright/foundation/ABase.h>
+#include <media/stagefright/MediaSource.h>
 #include <utils/Errors.h>
 #include <utils/KeyedVector.h>
 #include <utils/RefBase.h>
@@ -43,8 +44,9 @@ struct JMediaExtractor : public RefBase {
     status_t getTrackFormat(size_t index, jobject *format) const;
 
     status_t selectTrack(size_t index);
+    status_t unselectTrack(size_t index);
 
-    status_t seekTo(int64_t timeUs);
+    status_t seekTo(int64_t timeUs, MediaSource::ReadOptions::SeekMode mode);
 
     status_t advance();
     status_t readSampleData(jobject byteBuf, size_t offset, size_t *sampleSize);
