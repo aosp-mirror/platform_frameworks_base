@@ -1534,8 +1534,7 @@ public class WifiStateMachine extends StateMachine {
 
     private void sendNetworkStateChangeBroadcast(String bssid) {
         Intent intent = new Intent(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
-                | Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         intent.putExtra(WifiManager.EXTRA_NETWORK_INFO, new NetworkInfo(mNetworkInfo));
         intent.putExtra(WifiManager.EXTRA_LINK_PROPERTIES, new LinkProperties (mLinkProperties));
         if (bssid != null)
