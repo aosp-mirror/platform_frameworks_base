@@ -45,8 +45,7 @@ public abstract class Layout {
     private static final ParagraphStyle[] NO_PARA_SPANS =
         ArrayUtils.emptyArray(ParagraphStyle.class);
 
-    /* package */ static final EmojiFactory EMOJI_FACTORY =
-        EmojiFactory.newAvailableInstance();
+    /* package */ static final EmojiFactory EMOJI_FACTORY = EmojiFactory.newAvailableInstance();
     /* package */ static final int MIN_EMOJI, MAX_EMOJI;
 
     static {
@@ -363,15 +362,15 @@ public abstract class Layout {
         // direction of the layout or line.  XXX: Should they?
         // They are evaluated at each line.
         if (mSpannedText) {
-            if (lineBackgroundSpans == null) {
-                lineBackgroundSpans = new SpanSet<LineBackgroundSpan>(LineBackgroundSpan.class);
+            if (mLineBackgroundSpans == null) {
+                mLineBackgroundSpans = new SpanSet<LineBackgroundSpan>(LineBackgroundSpan.class);
             }
 
             Spanned buffer = (Spanned) mText;
             int textLength = buffer.length();
-            lineBackgroundSpans.init(buffer, 0, textLength);
+            mLineBackgroundSpans.init(buffer, 0, textLength);
 
-            if (lineBackgroundSpans.numberOfSpans > 0) {
+            if (mLineBackgroundSpans.numberOfSpans > 0) {
                 int previousLineBottom = getLineTop(firstLine);
                 int previousLineEnd = getLineStart(firstLine);
                 ParagraphStyle[] spans = NO_PARA_SPANS;
@@ -392,17 +391,18 @@ public abstract class Layout {
                     if (start >= spanEnd) {
                         // These should be infrequent, so we'll use this so that
                         // we don't have to check as often.
-                        spanEnd = lineBackgroundSpans.getNextTransition(start, textLength);
+                        spanEnd = mLineBackgroundSpans.getNextTransition(start, textLength);
                         // All LineBackgroundSpans on a line contribute to its background.
                         spansLength = 0;
                         // Duplication of the logic of getParagraphSpans
                         if (start != end || start == 0) {
                             // Equivalent to a getSpans(start, end), but filling the 'spans' local
                             // array instead to reduce memory allocation
-                            for (int j = 0; j < lineBackgroundSpans.numberOfSpans; j++) {
-                                // equal test is valid since both intervals are not empty by construction
-                                if (lineBackgroundSpans.spanStarts[j] >= end ||
-                                        lineBackgroundSpans.spanEnds[j] <= start) continue;
+                            for (int j = 0; j < mLineBackgroundSpans.numberOfSpans; j++) {
+                                // equal test is valid since both intervals are not empty by
+                                // construction
+                                if (mLineBackgroundSpans.spanStarts[j] >= end ||
+                                        mLineBackgroundSpans.spanEnds[j] <= start) continue;
                                 if (spansLength == spans.length) {
                                     // The spans array needs to be expanded
                                     int newSize = ArrayUtils.idealObjectArraySize(2 * spansLength);
@@ -410,7 +410,7 @@ public abstract class Layout {
                                     System.arraycopy(spans, 0, newSpans, 0, spansLength);
                                     spans = newSpans;
                                 }
-                                spans[spansLength++] = lineBackgroundSpans.spans[j];
+                                spans[spansLength++] = mLineBackgroundSpans.spans[j];
                             }
                         }
                     }
@@ -423,7 +423,7 @@ public abstract class Layout {
                     }
                 }
             }
-            lineBackgroundSpans.recycle();
+            mLineBackgroundSpans.recycle();
         }
 
         // There can be a highlight even without spans if we are drawing
@@ -1687,7 +1687,7 @@ public abstract class Layout {
      * styles that are already applied to the buffer will apply to text that
      * is inserted into it.
      */
-    /* package */ static <T> T[] getParagraphSpans(Spanned text, int start, int end, Class<T> type) {
+    /* package */static <T> T[] getParagraphSpans(Spanned text, int start, int end, Class<T> type) {
         if (start == end && start > 0) {
             return ArrayUtils.emptyArray(type);
         }
@@ -1857,7 +1857,7 @@ public abstract class Layout {
     private static final Rect sTempRect = new Rect();
     private boolean mSpannedText;
     private TextDirectionHeuristic mTextDir;
-    private SpanSet<LineBackgroundSpan> lineBackgroundSpans;
+    private SpanSet<LineBackgroundSpan> mLineBackgroundSpans;
 
     public static final int DIR_LEFT_TO_RIGHT = 1;
     public static final int DIR_RIGHT_TO_LEFT = -1;
