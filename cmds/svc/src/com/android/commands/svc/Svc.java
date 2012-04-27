@@ -94,6 +94,7 @@ public class Svc {
             COMMAND_HELP,
             new PowerCommand(),
             new DataCommand(),
-            new WifiCommand()
+            new WifiCommand(),
+            new UsbCommand()
     };
 }
