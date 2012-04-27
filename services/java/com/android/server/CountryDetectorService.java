@@ -212,6 +212,8 @@ public class CountryDetectorService extends ICountryDetector.Stub implements Run
     @SuppressWarnings("unused")
     @Override
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+
         if (!DEBUG) return;
         try {
             final Printer p = new PrintWriterPrinter(fout);

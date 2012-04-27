@@ -4085,6 +4085,8 @@ public class AudioService extends IAudioService.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+
         // TODO probably a lot more to do here than just the audio focus and remote control stacks
         dumpFocusStack(pw);
         dumpRCStack(pw);

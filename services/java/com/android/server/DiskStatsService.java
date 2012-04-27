@@ -34,6 +34,8 @@ import java.io.PrintWriter;
  * statistics about the status of the disk.
  */
 public class DiskStatsService extends Binder {
+    private static final String TAG = "DiskStatsService";
+
     private final Context mContext;
 
     public DiskStatsService(Context context) {
@@ -42,7 +44,7 @@ public class DiskStatsService extends Binder {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        // This data is accessible to any app -- no permission check needed.
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
 
         // Run a quick-and-dirty performance test: write 512 bytes
         byte[] junk = new byte[512];
