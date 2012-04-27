@@ -1687,6 +1687,8 @@ public class ActivityManager {
                 return DisplayMetrics.DENSITY_MEDIUM;
             case DisplayMetrics.DENSITY_MEDIUM:
                 return DisplayMetrics.DENSITY_HIGH;
+            case DisplayMetrics.DENSITY_TV:
+                return DisplayMetrics.DENSITY_XHIGH;
             case DisplayMetrics.DENSITY_HIGH:
                 return DisplayMetrics.DENSITY_XHIGH;
             case DisplayMetrics.DENSITY_XHIGH:
@@ -1696,7 +1698,7 @@ public class ActivityManager {
             default:
                 // The density is some abnormal value.  Return some other
                 // abnormal value that is a reasonable scaling of it.
-                return (int)(density*1.5f);
+                return (int)((density*1.5f)+.5f);
         }
     }
 
@@ -1723,6 +1725,8 @@ public class ActivityManager {
                 return (size * DisplayMetrics.DENSITY_MEDIUM) / DisplayMetrics.DENSITY_LOW;
             case DisplayMetrics.DENSITY_MEDIUM:
                 return (size * DisplayMetrics.DENSITY_HIGH) / DisplayMetrics.DENSITY_MEDIUM;
+            case DisplayMetrics.DENSITY_TV:
+                return (size * DisplayMetrics.DENSITY_XHIGH) / DisplayMetrics.DENSITY_HIGH;
             case DisplayMetrics.DENSITY_HIGH:
                 return (size * DisplayMetrics.DENSITY_XHIGH) / DisplayMetrics.DENSITY_HIGH;
             case DisplayMetrics.DENSITY_XHIGH:
@@ -1732,7 +1736,7 @@ public class ActivityManager {
             default:
                 // The density is some abnormal value.  Return some other
                 // abnormal value that is a reasonable scaling of it.
-                return (int)(size*1.5f);
+                return (int)((size*1.5f) + .5f);
         }
     }
 
