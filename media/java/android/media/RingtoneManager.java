@@ -606,16 +606,15 @@ public class RingtoneManager {
      * @see #getRingtone(Context, Uri)
      */
     private static Ringtone getRingtone(final Context context, Uri ringtoneUri, int streamType) {
-
         try {
-            Ringtone r = new Ringtone(context);
+            final Ringtone r = new Ringtone(context, true);
             if (streamType >= 0) {
                 r.setStreamType(streamType);
             }
-            r.open(ringtoneUri);
+            r.setUri(ringtoneUri);
             return r;
         } catch (Exception ex) {
-            Log.e(TAG, "Failed to open ringtone " + ringtoneUri);
+            Log.e(TAG, "Failed to open ringtone " + ringtoneUri + ": " + ex);
         }
 
         return null;

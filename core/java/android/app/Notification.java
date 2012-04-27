@@ -21,6 +21,7 @@ import com.android.internal.R;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -213,7 +214,7 @@ public class Notification implements Parcelable
     /**
      * Use this constant as the value for audioStreamType to request that
      * the default stream type for notifications be used.  Currently the
-     * default stream type is STREAM_RING.
+     * default stream type is {@link AudioManager#STREAM_NOTIFICATION}.
      */
     public static final int STREAM_DEFAULT = -1;
 

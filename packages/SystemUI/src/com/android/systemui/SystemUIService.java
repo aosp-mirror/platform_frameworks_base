@@ -41,6 +41,7 @@ public class SystemUIService extends Service {
     final Object[] SERVICES = new Object[] {
             0, // system bar or status bar, filled in below.
             com.android.systemui.power.PowerUI.class,
+            com.android.systemui.media.RingtonePlayer.class,
         };
 
     /**

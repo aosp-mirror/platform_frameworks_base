@@ -21,6 +21,8 @@ import android.content.ComponentName;
 import android.media.IAudioFocusDispatcher;
 import android.media.IRemoteControlClient;
 import android.media.IRemoteControlDisplay;
+import android.media.IRingtonePlayer;
+import android.net.Uri;
 
 /**
  * {@hide}
@@ -113,10 +115,11 @@ interface IAudioService {
     oneway void remoteControlDisplayUsesBitmapSize(in IRemoteControlDisplay rcd, int w, int h);
 
     void startBluetoothSco(IBinder cb);
-
     void stopBluetoothSco(IBinder cb);
 
     void forceVolumeControlStream(int streamType, IBinder cb);
 
+    void setRingtonePlayer(IRingtonePlayer player);
+    IRingtonePlayer getRingtonePlayer();
     int getMasterStreamType();
 }
