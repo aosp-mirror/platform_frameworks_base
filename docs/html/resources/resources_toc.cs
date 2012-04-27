@@ -141,6 +141,25 @@
           </li>
         </ul>
       </li>
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>training/basics/network-ops/index.html">
+            <span class="en">Performing Network Operations<span class="new">&nbsp;new!</span></span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/basics/network-ops/connecting.html">
+            <span class="en">Connecting to the Network</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/network-ops/managing.html">
+            <span class="en">Managing Network Usage</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/network-ops/xml.html">
+            <span class="en">Parsing XML Data</span>
+          </a>
+          </li>
+        </ul>
+      </li>
       
     </ul>
   </li>
