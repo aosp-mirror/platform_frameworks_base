@@ -340,6 +340,14 @@ public class WindowManagerImpl implements WindowManager {
             View curView = root.getView();
             
             root.mAddNesting = 0;
+
+            if (view != null) {
+                InputMethodManager imm = InputMethodManager.getInstance(view.getContext());
+                if (imm != null) {
+                    imm.windowDismissed(mViews[index].getWindowToken());
+                }
+            }
+
             root.die(true);
             finishRemoveViewLocked(curView, index);
             if (curView == view) {
