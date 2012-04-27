@@ -30,6 +30,7 @@ import android.net.wifi.p2p.nsd.WifiP2pServiceResponse;
 import android.net.wifi.p2p.nsd.WifiP2pUpnpServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pUpnpServiceResponse;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Handler;
 import android.os.Looper;
@@ -265,6 +266,41 @@ public class WifiP2pManager {
      */
     public static final String EXTRA_WIFI_P2P_DEVICE = "wifiP2pDevice";
 
+    /**
+     * The lookup key for a {@link #String} object.
+     * Retrieve with {@link android.os.Bundle#getString(String)}.
+     * @hide
+     */
+    public static final String APP_PKG_BUNDLE_KEY = "appPkgName";
+
+    /**
+     * The lookup key for a {@link #Boolean} object.
+     * Retrieve with {@link android.os.Bundle#getBoolean(String)}.
+     * @hide
+     */
+    public static final String RESET_DIALOG_LISTENER_BUNDLE_KEY = "dialogResetFlag";
+
+    /**
+     * The lookup key for a {@link #String} object.
+     * Retrieve with {@link android.os.Bundle#getString(String)}.
+     * @hide
+     */
+    public static final String WPS_PIN_BUNDLE_KEY = "wpsPin";
+
+    /**
+     * The lookup key for a {@link android.net.wifi.p2p.WifiP2pDevice} object
+     * Retrieve with {@link android.os.Bundle#getParcelable(String)}.
+     * @hide
+     */
+    public static final String P2P_DEV_BUNDLE_KEY = "wifiP2pDevice";
+
+    /**
+     * The lookup key for a {@link android.net.wifi.p2p.WifiP2pConfig} object
+     * Retrieve with {@link android.os.Bundle#getParcelable(String)}.
+     * @hide
+     */
+    public static final String P2P_CONFIG_BUNDLE_KEY = "wifiP2pConfig";
+
     IWifiP2pManager mService;
 
     private static final int BASE = Protocol.BASE_WIFI_P2P_MANAGER;
@@ -388,6 +424,18 @@ public class WifiP2pManager {
     /** @hide */
     public static final int SET_DEVICE_NAME_SUCCEEDED               = BASE + 53;
 
+    /** @hide */
+    public static final int SET_DIALOG_LISTENER                     = BASE + 54;
+    /** @hide */
+    public static final int DIALOG_LISTENER_DETACHED                = BASE + 55;
+    /** @hide */
+    public static final int DIALOG_LISTENER_ATTACHED                = BASE + 56;
+
+    /** @hide */
+    public static final int CONNECTION_REQUESTED                    = BASE + 57;
+    /** @hide */
+    public static final int SHOW_PIN_REQUESTED                      = BASE + 58;
+
     /**
      * Create a new WifiP2pManager instance. Applications use
      * {@link android.content.Context#getSystemService Context.getSystemService()} to retrieve
@@ -426,6 +474,14 @@ public class WifiP2pManager {
      * request.
      */
     public static final int NO_SERVICE_REQUESTS = 3;
+
+    /**
+     * Passed with {@link DialogListener#onDetached}.
+     * Indicates that the registered listener was detached from the system because
+     * the application went into background.
+     * @hide
+     */
+    public static final int NOT_IN_FOREGROUND   = 4;
 
     /** Interface for callback invocation when framework channel is lost */
     public interface ChannelListener {
@@ -475,7 +531,7 @@ public class WifiP2pManager {
         public void onGroupInfoAvailable(WifiP2pGroup group);
     }
 
-    /**
+   /**
     * Interface for callback invocation when service discovery response other than
     * Upnp or Bonjour is received
     */
@@ -559,15 +615,59 @@ public class WifiP2pManager {
 
 
     /**
+     * Interface for callback invocation when dialog events are received.
+     * see {@link #setDialogListener}.
+     * @hide
+     */
+    public interface DialogListener {
+
+        /**
+         * Called by the system when a request to show WPS pin is received.
+         *
+         * @param pin WPS pin.
+         */
+        public void onShowPinRequested(String pin);
+
+        /**
+         * Called by the system when a request to establish the connection is received.
+         *
+         * Application can then call {@link #connect} with the given config if the request
+         * is acceptable.
+         *
+         * @param device the source device.
+         * @param config p2p configuration.
+         */
+        public void onConnectionRequested(WifiP2pDevice device, WifiP2pConfig config);
+
+        /**
+         * Called by the system when this listener was attached to the system.
+         */
+        public void onAttached();
+
+        /**
+         * Called by the system when this listener was detached from the system or
+         * failed to attach.
+         *
+         * Application can request again using {@link #setDialogListener} when it is
+         * in the foreground.
+         *
+         * @param reason The reason for failure could be one of {@link #ERROR},
+         * {@link #BUSY}, {@link #P2P_UNSUPPORTED} or {@link #NOT_IN_FOREGROUND}
+         */
+        public void onDetached(int reason);
+    }
+
+    /**
      * A channel that connects the application to the Wifi p2p framework.
      * Most p2p operations require a Channel as an argument. An instance of Channel is obtained
      * by doing a call on {@link #initialize}
      */
     public static class Channel {
-        Channel(Looper looper, ChannelListener l) {
+        Channel(Context context, Looper looper, ChannelListener l) {
             mAsyncChannel = new AsyncChannel();
             mHandler = new P2pHandler(looper);
             mChannelListener = l;
+            mContext = context;
         }
         private final static int INVALID_LISTENER_KEY = 0;
         private ChannelListener mChannelListener;
@@ -578,9 +678,11 @@ public class WifiP2pManager {
         private HashMap<Integer, Object> mListenerMap = new HashMap<Integer, Object>();
         private Object mListenerMapLock = new Object();
         private int mListenerKey = 0;
+        private DialogListener mDialogListener;
 
-        AsyncChannel mAsyncChannel;
-        P2pHandler mHandler;
+        private AsyncChannel mAsyncChannel;
+        private P2pHandler mHandler;
+        Context mContext;
         class P2pHandler extends Handler {
             P2pHandler(Looper looper) {
                 super(looper);
@@ -656,6 +758,34 @@ public class WifiP2pManager {
                         WifiP2pServiceResponse resp = (WifiP2pServiceResponse) message.obj;
                         handleServiceResponse(resp);
                         break;
+                    case WifiP2pManager.CONNECTION_REQUESTED:
+                        if (mDialogListener != null) {
+                            Bundle bundle = message.getData();
+                            mDialogListener.onConnectionRequested(
+                                    (WifiP2pDevice)bundle.getParcelable(
+                                            P2P_DEV_BUNDLE_KEY),
+                                    (WifiP2pConfig)bundle.getParcelable(
+                                            P2P_CONFIG_BUNDLE_KEY));
+                        }
+                        break;
+                    case WifiP2pManager.SHOW_PIN_REQUESTED:
+                        if (mDialogListener != null) {
+                            Bundle bundle = message.getData();
+                            mDialogListener.onShowPinRequested(
+                                    bundle.getString(WPS_PIN_BUNDLE_KEY));
+                        }
+                        break;
+                    case WifiP2pManager.DIALOG_LISTENER_ATTACHED:
+                        if (mDialogListener != null) {
+                            mDialogListener.onAttached();
+                        }
+                        break;
+                    case WifiP2pManager.DIALOG_LISTENER_DETACHED:
+                        if (mDialogListener != null) {
+                            mDialogListener.onDetached(message.arg1);
+                            mDialogListener = null;
+                        }
+                        break;
                    default:
                         Log.d(TAG, "Ignored " + message);
                         break;
@@ -721,6 +851,10 @@ public class WifiP2pManager {
                 return mListenerMap.remove(key);
             }
         }
+
+        private void setDialogListener(DialogListener listener) {
+            mDialogListener = listener;
+        }
     }
 
     private static void checkChannel(Channel c) {
@@ -748,7 +882,7 @@ public class WifiP2pManager {
         Messenger messenger = getMessenger();
         if (messenger == null) return null;
 
-        Channel c = new Channel(srcLooper, listener);
+        Channel c = new Channel(srcContext, srcLooper, listener);
         if (c.mAsyncChannel.connectSync(srcContext, c.mHandler, messenger)
                 == AsyncChannel.STATUS_SUCCESSFUL) {
             return c;
@@ -1126,6 +1260,41 @@ public class WifiP2pManager {
     }
 
 
+    /**
+     * Set dialog listener to over-ride system dialogs on p2p events. This function
+     * allows an application to receive notifications on connection requests from
+     * peers so that it can customize the user experience for connection with
+     * peers.
+     *
+     * <p> The function call immediately returns after sending a request
+     * to the framework. The application is notified of a success or failure to attach
+     * to the system through listener callbacks {@link DialogListener#onAttached} or
+     * {@link DialogListener#onDetached}.
+     *
+     * <p> Note that only foreground application will be successful in overriding the
+     * system dialogs.
+     * @hide
+     *
+     * @param c is the channel created at {@link #initialize}
+     * @param listener for callback on a dialog event.
+     */
+    public void setDialogListener(Channel c, DialogListener listener) {
+        checkChannel(c);
+        c.setDialogListener(listener);
+
+        /**
+         * mAsyncChannel should always stay private and inaccessible from the app
+         * to prevent an app from sending a message with a fake app name to gain
+         * control over the dialogs
+         */
+        Message msg = Message.obtain();
+        Bundle bundle = new Bundle();
+        bundle.putString(APP_PKG_BUNDLE_KEY, c.mContext.getPackageName());
+        bundle.putBoolean(RESET_DIALOG_LISTENER_BUNDLE_KEY, listener == null);
+        msg.what = SET_DIALOG_LISTENER;
+        msg.setData(bundle);
+        c.mAsyncChannel.sendMessage(msg);
+    }
 
     /**
      * Get a reference to WifiP2pService handler. This is used to establish
