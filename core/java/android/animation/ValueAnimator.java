@@ -56,11 +56,6 @@ public class ValueAnimator extends Animator {
     private static float sDurationScale = 1.0f;
 
     /**
-     * Messages sent to timing handler: START is sent when an animation first begins.
-     */
-    static final int ANIMATION_START = 0;
-
-    /**
      * Values used with internal variable mPlayingState to indicate the current state of an
      * animation.
      */
@@ -504,7 +499,7 @@ public class ValueAnimator extends Animator {
             mPlayingState = SEEKED;
         }
         mStartTime = currentTime - playTime;
-        animationFrame(currentTime);
+        doAnimationFrame(currentTime);
     }
 
     /**
@@ -528,8 +523,9 @@ public class ValueAnimator extends Animator {
      * the same times for calculating their values, which makes synchronizing
      * animations possible.
      *
+     * The handler uses the Choreographer for executing periodic callbacks.
      */
-    private static class AnimationHandler extends Handler implements Runnable {
+    private static class AnimationHandler implements Runnable {
         // The per-thread list of all active animations
         private final ArrayList<ValueAnimator> mAnimations = new ArrayList<ValueAnimator>();
 
@@ -552,34 +548,13 @@ public class ValueAnimator extends Animator {
         }
 
         /**
-         * The START message is sent when an animation's start()  method is called.
-         * It cannot start synchronously when start() is called
-         * because the call may be on the wrong thread, and it would also not be
-         * synchronized with other animations because it would not start on a common
-         * timing pulse. So each animation sends a START message to the handler, which
-         * causes the handler to place the animation on the active animations queue and
-         * start processing frames for that animation.
+         * Start animating on the next frame.
          */
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case ANIMATION_START:
-                    // If there are already active animations, or if another ANIMATION_START
-                    // message was processed during this frame, then the pending list may already
-                    // have been cleared. If that's the case, we've already processed the
-                    // active animations for this frame - don't do it again.
-                    if (mPendingAnimations.size() > 0) {
-                        doAnimationFrame();
-                    }
-                    break;
-            }
+        public void start() {
+            scheduleAnimation();
         }
 
-        private void doAnimationFrame() {
-            // currentTime holds the common time for all animations processed
-            // during this frame
-            long currentTime = AnimationUtils.currentAnimationTimeMillis();
-
+        private void doAnimationFrame(long frameTime) {
             // mPendingAnimations holds any animations that have requested to be started
             // We're going to clear mPendingAnimations, but starting animation may
             // cause more to be added to the pending list (for example, if one animation
@@ -605,7 +580,7 @@ public class ValueAnimator extends Animator {
             int numDelayedAnims = mDelayedAnims.size();
             for (int i = 0; i < numDelayedAnims; ++i) {
                 ValueAnimator anim = mDelayedAnims.get(i);
-                if (anim.delayedAnimationFrame(currentTime)) {
+                if (anim.delayedAnimationFrame(frameTime)) {
                     mReadyAnims.add(anim);
                 }
             }
@@ -626,7 +601,7 @@ public class ValueAnimator extends Animator {
             int i = 0;
             while (i < numAnims) {
                 ValueAnimator anim = mAnimations.get(i);
-                if (anim.animationFrame(currentTime)) {
+                if (anim.doAnimationFrame(frameTime)) {
                     mEndingAnims.add(anim);
                 }
                 if (mAnimations.size() == numAnims) {
@@ -652,10 +627,8 @@ public class ValueAnimator extends Animator {
 
             // If there are still active or delayed animations, schedule a future call to
             // onAnimate to process the next frame of the animations.
-            if (!mAnimationScheduled
-                    && (!mAnimations.isEmpty() || !mDelayedAnims.isEmpty())) {
-                mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION, this, null);
-                mAnimationScheduled = true;
+            if (!mAnimations.isEmpty() || !mDelayedAnims.isEmpty()) {
+                scheduleAnimation();
             }
         }
 
@@ -663,7 +636,14 @@ public class ValueAnimator extends Animator {
         @Override
         public void run() {
             mAnimationScheduled = false;
-            doAnimationFrame();
+            doAnimationFrame(mChoreographer.getFrameTime());
+        }
+
+        private void scheduleAnimation() {
+            if (!mAnimationScheduled) {
+                mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION, this, null);
+                mAnimationScheduled = true;
+            }
         }
     }
 
@@ -935,7 +915,7 @@ public class ValueAnimator extends Animator {
             mRunning = true;
             notifyStartListeners();
         }
-        animationHandler.sendEmptyMessage(ANIMATION_START);
+        animationHandler.start();
     }
 
     @Override
@@ -1098,17 +1078,6 @@ public class ValueAnimator extends Animator {
      */
     boolean animationFrame(long currentTime) {
         boolean done = false;
-
-        if (mPlayingState == STOPPED) {
-            mPlayingState = RUNNING;
-            if (mSeekTime < 0) {
-                mStartTime = currentTime;
-            } else {
-                mStartTime = currentTime - mSeekTime;
-                // Now that we're playing, reset the seek time
-                mSeekTime = -1;
-            }
-        }
         switch (mPlayingState) {
         case RUNNING:
         case SEEKED:
@@ -1141,6 +1110,31 @@ public class ValueAnimator extends Animator {
         }
 
         return done;
+    }
+
+    /**
+     * Processes a frame of the animation, adjusting the start time if needed.
+     *
+     * @param frameTime The frame time.
+     * @return true if the animation has ended.
+     */
+    final boolean doAnimationFrame(long frameTime) {
+        if (mPlayingState == STOPPED) {
+            mPlayingState = RUNNING;
+            if (mSeekTime < 0) {
+                mStartTime = frameTime;
+            } else {
+                mStartTime = frameTime - mSeekTime;
+                // Now that we're playing, reset the seek time
+                mSeekTime = -1;
+            }
+        }
+        // The frame time might be before the start time during the first frame of
+        // an animation.  The "current time" must always be on or after the start
+        // time to avoid animating frames at negative time intervals.  In practice, this
+        // is very rare and only happens when seeking backwards.
+        final long currentTime = Math.max(frameTime, mStartTime);
+        return animationFrame(currentTime);
     }
 
     /**
