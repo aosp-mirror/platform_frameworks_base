@@ -672,6 +672,7 @@ public final class InputMethodManager {
      * Disconnect any existing input connection, clearing the served view.
      */
     void finishInputLocked() {
+        mCurRootView = null;
         mNextServedView = null;
         if (mServedView != null) {
             if (DEBUG) Log.v(TAG, "FINISH INPUT: " + mServedView);
