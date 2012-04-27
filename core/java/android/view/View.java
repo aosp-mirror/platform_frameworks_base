@@ -13853,7 +13853,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * @hide
      */
-    public Insets getLayoutInsets() {
+    public Insets getOpticalInsets() {
         if (mLayoutInsets == null) {
             mLayoutInsets = (mBackground == null) ? Insets.NONE : mBackground.getLayoutInsets();
         }
