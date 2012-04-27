@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.systemui.media;
 
 import android.content.Context;
 import android.media.AudioManager;
@@ -36,7 +36,7 @@ import java.util.LinkedList;
 /**
  * @hide
  * This class is provides the same interface and functionality as android.media.AsyncPlayer
- * with the following differences: 
+ * with the following differences:
  * - whenever audio is played, audio focus is requested,
  * - whenever audio playback is stopped or the playback completed, audio focus is abandoned.
  */
@@ -338,4 +338,3 @@ public class NotificationPlayer implements OnCompletionListener {
         }
     }
 }
-

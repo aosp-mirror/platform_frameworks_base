@@ -16,6 +16,7 @@
 
 package android.media;
 
+import static android.Manifest.permission.REMOTE_AUDIO_PLAYBACK;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
@@ -360,7 +361,6 @@ public class AudioService extends IAudioService.Stub {
     private int mPrevVolDirection = AudioManager.ADJUST_SAME;
     // Keyguard manager proxy
     private KeyguardManager mKeyguardManager;
-
     // mVolumeControlStream is set by VolumePanel to temporarily force the stream type which volume
     // is controlled by Vol keys.
     private int  mVolumeControlStream = -1;
@@ -369,6 +369,8 @@ public class AudioService extends IAudioService.Stub {
     // server process so in theory it is not necessary to monitor the client death.
     // However it is good to be ready for future evolutions.
     private ForceControlStreamClient mForceControlStreamClient = null;
+    // Used to play ringtones outside system_server
+    private volatile IRingtonePlayer mRingtonePlayer;
 
     ///////////////////////////////////////////////////////////////////////////
     // Construction
@@ -4231,6 +4233,17 @@ public class AudioService extends IAudioService.Stub {
     }
 
     @Override
+    public void setRingtonePlayer(IRingtonePlayer player) {
+        mContext.enforceCallingOrSelfPermission(REMOTE_AUDIO_PLAYBACK, null);
+        mRingtonePlayer = player;
+    }
+
+    @Override
+    public IRingtonePlayer getRingtonePlayer() {
+        return mRingtonePlayer;
+    }
+
+    @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
 
@@ -4238,6 +4251,4 @@ public class AudioService extends IAudioService.Stub {
         dumpFocusStack(pw);
         dumpRCStack(pw);
     }
-
-
 }
