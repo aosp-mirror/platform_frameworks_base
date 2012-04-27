@@ -117,6 +117,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     private boolean mHasDialog = false;
     //True if this device is currently plugged in
     private boolean mPluggedIn;
+    // True the first time lockscreen is showing after boot
+    private static boolean sIsFirstAppearanceAfterBoot = true;
 
     // The music control widget
     private TransportControlView mTransportControlView;
@@ -437,7 +439,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         mUpdateMonitor = updateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mWindowController = controller;
-        mSuppressBiometricUnlock = false;
+        mSuppressBiometricUnlock = sIsFirstAppearanceAfterBoot;
+        sIsFirstAppearanceAfterBoot = false;
         mPluggedIn = mUpdateMonitor.isDevicePluggedIn();
         mScreenOn = ((PowerManager)context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
 
