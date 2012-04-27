@@ -977,16 +977,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mStatusBarHeight = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
 
-        mNavigationBarHeightForRotation[Surface.ROTATION_0] =
-        mNavigationBarHeightForRotation[Surface.ROTATION_90] =
-        mNavigationBarHeightForRotation[Surface.ROTATION_180] =
-        mNavigationBarHeightForRotation[Surface.ROTATION_270] =
+        // Height of the navigation bar when presented horizontally at bottom
+        mNavigationBarHeightForRotation[mPortraitRotation] =
+        mNavigationBarHeightForRotation[mUpsideDownRotation] =
                 mContext.getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.navigation_bar_height);
-        mNavigationBarWidthForRotation[Surface.ROTATION_0] =
-        mNavigationBarWidthForRotation[Surface.ROTATION_90] =
-        mNavigationBarWidthForRotation[Surface.ROTATION_180] =
-        mNavigationBarWidthForRotation[Surface.ROTATION_270] =
+        mNavigationBarHeightForRotation[mLandscapeRotation] =
+        mNavigationBarHeightForRotation[mSeascapeRotation] =
+                mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.navigation_bar_height_landscape);
+
+        // Width of the navigation bar when presented vertically along one side
+        mNavigationBarWidthForRotation[mPortraitRotation] =
+        mNavigationBarWidthForRotation[mUpsideDownRotation] =
+        mNavigationBarWidthForRotation[mLandscapeRotation] =
+        mNavigationBarWidthForRotation[mSeascapeRotation] =
                 mContext.getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.navigation_bar_width);
 
