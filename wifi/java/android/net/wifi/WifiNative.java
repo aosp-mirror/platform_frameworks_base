@@ -270,25 +270,6 @@ public class WifiNative {
             && doBooleanCommand("DRIVER RXFILTER-START");
     }
 
-    public int getPowerMode() {
-        String ret = doStringCommand("DRIVER GETPOWER");
-        if (!TextUtils.isEmpty(ret)) {
-            // reply comes back in the form "powermode = XX" where XX is the
-            // number we're interested in.
-            String[] tokens = ret.split(" = ");
-            try {
-                if (tokens.length == 2) return Integer.parseInt(tokens[1]);
-            } catch (NumberFormatException e) {
-                return -1;
-            }
-        }
-        return -1;
-    }
-
-    public boolean setPowerMode(int mode) {
-        return doBooleanCommand("DRIVER POWERMODE " + mode);
-    }
-
     public int getBand() {
        String ret = doStringCommand("DRIVER GETBAND");
         if (!TextUtils.isEmpty(ret)) {
@@ -366,12 +347,10 @@ public class WifiNative {
     }
 
     public void enableBackgroundScan(boolean enable) {
-        //Note: BGSCAN-START and BGSCAN-STOP are documented in core/res/res/values/config.xml
-        //and will need an update if the names are changed
         if (enable) {
-            doBooleanCommand("DRIVER BGSCAN-START");
+            doBooleanCommand("SET pno 1");
         } else {
-            doBooleanCommand("DRIVER BGSCAN-STOP");
+            doBooleanCommand("SET pno 0");
         }
     }
 
@@ -465,6 +444,14 @@ public class WifiNative {
 
     public boolean setP2pGroupIdle(String iface, int time) {
         return doBooleanCommand("SET interface=" + iface + " p2p_group_idle " + time);
+    }
+
+    public void setPowerSave(boolean enabled) {
+        if (enabled) {
+            doBooleanCommand("SET ps 1");
+        } else {
+            doBooleanCommand("SET ps 0");
+        }
     }
 
     public boolean setP2pPowerSave(String iface, boolean enabled) {
