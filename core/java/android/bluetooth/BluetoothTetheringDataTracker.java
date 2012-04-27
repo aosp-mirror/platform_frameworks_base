@@ -63,7 +63,7 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
 
     private BluetoothPan mBluetoothPan;
     private static String mIface;
-
+    private Thread mDhcpThread;
     /* For sending events to connectivity service handler */
     private Handler mCsHandler;
     private Context mContext;
@@ -306,7 +306,7 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
     public synchronized void startReverseTether(String iface) {
         mIface = iface;
         Log.d(TAG, "startReverseTether mCsHandler: " + mCsHandler);
-        Thread dhcpThread = new Thread(new Runnable() {
+         mDhcpThread = new Thread(new Runnable() {
             public void run() {
                 //TODO(): Add callbacks for failure and success case.
                 //Currently this thread runs independently.
@@ -315,7 +315,7 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
                 String result = "";
                 Log.d(TAG, "waiting for change of sys prop dhcp result: " + DhcpResultName);
                 for(int i = 0; i < 30*5; i++) {
-                    try { Thread.sleep(200); } catch (InterruptedException ie) { }
+                    try { Thread.sleep(200); } catch (InterruptedException ie) { return;}
                     result = SystemProperties.get(DhcpResultName);
                     Log.d(TAG, "read " + DhcpResultName + ": " + result);
                     if(result.equals("failed")) {
@@ -344,11 +344,15 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
                 Log.d(TAG, "startReverseTether, dhcp failed, resut: " + result);
             }
         });
-        dhcpThread.start();
+        mDhcpThread.start();
     }
 
     public synchronized void stopReverseTether() {
         //NetworkUtils.stopDhcp(iface);
+        if(mDhcpThread != null && mDhcpThread.isAlive()) {
+            mDhcpThread.interrupt();
+            try { mDhcpThread.join(); } catch (InterruptedException ie) { return; }
+        }
         mLinkProperties.clear();
         mNetworkInfo.setIsAvailable(false);
         mNetworkInfo.setDetailedState(DetailedState.DISCONNECTED, null, null);
