@@ -25,6 +25,7 @@ public final class CancellationSignal {
     private boolean mIsCanceled;
     private OnCancelListener mOnCancelListener;
     private ICancellationSignal mRemote;
+    private boolean mCancelInProgress;
 
     /**
      * Creates a cancellation signal, initially not canceled.
@@ -59,18 +60,32 @@ public final class CancellationSignal {
      * If the operation has not yet started, then it will be canceled as soon as it does.
      */
     public void cancel() {
+        final OnCancelListener listener;
+        final ICancellationSignal remote;
         synchronized (this) {
-            if (!mIsCanceled) {
-                mIsCanceled = true;
-                if (mOnCancelListener != null) {
-                    mOnCancelListener.onCancel();
+            if (mIsCanceled) {
+                return;
+            }
+            mIsCanceled = true;
+            mCancelInProgress = true;
+            listener = mOnCancelListener;
+            remote = mRemote;
+        }
+
+        try {
+            if (listener != null) {
+                listener.onCancel();
+            }
+            if (remote != null) {
+                try {
+                    remote.cancel();
+                } catch (RemoteException ex) {
                 }
-                if (mRemote != null) {
-                    try {
-                        mRemote.cancel();
-                    } catch (RemoteException ex) {
-                    }
-                }
+            }
+        } finally {
+            synchronized (this) {
+                mCancelInProgress = false;
+                notifyAll();
             }
         }
     }
@@ -86,25 +101,34 @@ public final class CancellationSignal {
      * If {@link CancellationSignal#cancel} has already been called, then the provided
      * listener is invoked immediately.
      *
-     * The listener is called while holding the cancellation signal's lock which is
-     * also held while registering or unregistering the listener.  Because of the lock,
-     * it is not possible for the listener to run after it has been unregistered.
-     * This design choice makes it easier for clients of {@link CancellationSignal} to
-     * prevent race conditions related to listener registration and unregistration.
+     * This method is guaranteed that the listener will not be called after it
+     * has been removed.
      *
      * @param listener The cancellation listener, or null to remove the current listener.
      */
     public void setOnCancelListener(OnCancelListener listener) {
         synchronized (this) {
+            waitForCancelFinishedLocked();
+
+            if (mOnCancelListener == listener) {
+                return;
+            }
             mOnCancelListener = listener;
-            if (mIsCanceled && listener != null) {
-                listener.onCancel();
+            if (!mIsCanceled || listener == null) {
+                return;
             }
         }
+        listener.onCancel();
     }
 
     /**
      * Sets the remote transport.
+     *
+     * If {@link CancellationSignal#cancel} has already been called, then the provided
+     * remote transport is canceled immediately.
+     *
+     * This method is guaranteed that the remote transport will not be called after it
+     * has been removed.
      *
      * @param remote The remote transport, or null to remove.
      *
@@ -112,12 +136,27 @@ public final class CancellationSignal {
      */
     public void setRemote(ICancellationSignal remote) {
         synchronized (this) {
+            waitForCancelFinishedLocked();
+
+            if (mRemote == remote) {
+                return;
+            }
             mRemote = remote;
-            if (mIsCanceled && remote != null) {
-                try {
-                    remote.cancel();
-                } catch (RemoteException ex) {
-                }
+            if (!mIsCanceled || remote == null) {
+                return;
+            }
+        }
+        try {
+            remote.cancel();
+        } catch (RemoteException ex) {
+        }
+    }
+
+    private void waitForCancelFinishedLocked() {
+        while (mCancelInProgress) {
+            try {
+                wait();
+            } catch (InterruptedException ex) {
             }
         }
     }

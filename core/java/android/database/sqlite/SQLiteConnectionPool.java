@@ -594,6 +594,7 @@ public final class SQLiteConnectionPool implements Closeable {
                 (connectionFlags & CONNECTION_FLAG_PRIMARY_CONNECTION_AFFINITY) != 0;
 
         final ConnectionWaiter waiter;
+        final int nonce;
         synchronized (mLock) {
             throwIfClosedLocked();
 
@@ -636,73 +637,75 @@ public final class SQLiteConnectionPool implements Closeable {
                 mConnectionWaiterQueue = waiter;
             }
 
-            if (cancellationSignal != null) {
-                final int nonce = waiter.mNonce;
-                cancellationSignal.setOnCancelListener(new CancellationSignal.OnCancelListener() {
-                    @Override
-                    public void onCancel() {
-                        synchronized (mLock) {
-                            cancelConnectionWaiterLocked(waiter, nonce);
-                        }
-                    }
-                });
-            }
+            nonce = waiter.mNonce;
         }
 
-        // Park the thread until a connection is assigned or the pool is closed.
-        // Rethrow an exception from the wait, if we got one.
-        long busyTimeoutMillis = CONNECTION_POOL_BUSY_MILLIS;
-        long nextBusyTimeoutTime = waiter.mStartTime + busyTimeoutMillis;
-        for (;;) {
-            // Detect and recover from connection leaks.
-            if (mConnectionLeaked.compareAndSet(true, false)) {
+        // Set up the cancellation listener.
+        if (cancellationSignal != null) {
+            cancellationSignal.setOnCancelListener(new CancellationSignal.OnCancelListener() {
+                @Override
+                public void onCancel() {
+                    synchronized (mLock) {
+                        if (waiter.mNonce == nonce) {
+                            cancelConnectionWaiterLocked(waiter);
+                        }
+                    }
+                }
+            });
+        }
+        try {
+            // Park the thread until a connection is assigned or the pool is closed.
+            // Rethrow an exception from the wait, if we got one.
+            long busyTimeoutMillis = CONNECTION_POOL_BUSY_MILLIS;
+            long nextBusyTimeoutTime = waiter.mStartTime + busyTimeoutMillis;
+            for (;;) {
+                // Detect and recover from connection leaks.
+                if (mConnectionLeaked.compareAndSet(true, false)) {
+                    synchronized (mLock) {
+                        wakeConnectionWaitersLocked();
+                    }
+                }
+
+                // Wait to be unparked (may already have happened), a timeout, or interruption.
+                LockSupport.parkNanos(this, busyTimeoutMillis * 1000000L);
+
+                // Clear the interrupted flag, just in case.
+                Thread.interrupted();
+
+                // Check whether we are done waiting yet.
                 synchronized (mLock) {
-                    wakeConnectionWaitersLocked();
+                    throwIfClosedLocked();
+
+                    final SQLiteConnection connection = waiter.mAssignedConnection;
+                    final RuntimeException ex = waiter.mException;
+                    if (connection != null || ex != null) {
+                        recycleConnectionWaiterLocked(waiter);
+                        if (connection != null) {
+                            return connection;
+                        }
+                        throw ex; // rethrow!
+                    }
+
+                    final long now = SystemClock.uptimeMillis();
+                    if (now < nextBusyTimeoutTime) {
+                        busyTimeoutMillis = now - nextBusyTimeoutTime;
+                    } else {
+                        logConnectionPoolBusyLocked(now - waiter.mStartTime, connectionFlags);
+                        busyTimeoutMillis = CONNECTION_POOL_BUSY_MILLIS;
+                        nextBusyTimeoutTime = now + busyTimeoutMillis;
+                    }
                 }
             }
-
-            // Wait to be unparked (may already have happened), a timeout, or interruption.
-            LockSupport.parkNanos(this, busyTimeoutMillis * 1000000L);
-
-            // Clear the interrupted flag, just in case.
-            Thread.interrupted();
-
-            // Check whether we are done waiting yet.
-            synchronized (mLock) {
-                throwIfClosedLocked();
-
-                final SQLiteConnection connection = waiter.mAssignedConnection;
-                final RuntimeException ex = waiter.mException;
-                if (connection != null || ex != null) {
-                    if (cancellationSignal != null) {
-                        cancellationSignal.setOnCancelListener(null);
-                    }
-                    recycleConnectionWaiterLocked(waiter);
-                    if (connection != null) {
-                        return connection;
-                    }
-                    throw ex; // rethrow!
-                }
-
-                final long now = SystemClock.uptimeMillis();
-                if (now < nextBusyTimeoutTime) {
-                    busyTimeoutMillis = now - nextBusyTimeoutTime;
-                } else {
-                    logConnectionPoolBusyLocked(now - waiter.mStartTime, connectionFlags);
-                    busyTimeoutMillis = CONNECTION_POOL_BUSY_MILLIS;
-                    nextBusyTimeoutTime = now + busyTimeoutMillis;
-                }
+        } finally {
+            // Remove the cancellation listener.
+            if (cancellationSignal != null) {
+                cancellationSignal.setOnCancelListener(null);
             }
         }
     }
 
     // Can't throw.
-    private void cancelConnectionWaiterLocked(ConnectionWaiter waiter, int nonce) {
-        if (waiter.mNonce != nonce) {
-            // Waiter already removed and recycled.
-            return;
-        }
-
+    private void cancelConnectionWaiterLocked(ConnectionWaiter waiter) {
         if (waiter.mAssignedConnection != null || waiter.mException != null) {
             // Waiter is done waiting but has not woken up yet.
             return;
