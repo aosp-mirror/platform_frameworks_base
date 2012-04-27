@@ -60,6 +60,8 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
     private static final String OUTPUT_FILE_EXT = ".3gp";
     private static final String MEDIA_STRESS_OUTPUT =
         "/sdcard/mediaStressOutput.txt";
+    private static final int CAMERA_ID = 0;
+
     private final CameraErrorCallback mCameraErrorCallback = new CameraErrorCallback();
     private final RecorderErrorCallback mRecorderErrorCallback = new RecorderErrorCallback();
 
@@ -162,7 +164,7 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
                 runOnLooper(new Runnable() {
                     @Override
                     public void run() {
-                        mCamera = Camera.open();
+                        mCamera = Camera.open(CAMERA_ID);
                     }
                 });
                 mCamera.setErrorCallback(mCameraErrorCallback);
@@ -250,7 +252,7 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
                 runOnLooper(new Runnable() {
                     @Override
                     public void run() {
-                        mCamera = Camera.open();
+                        mCamera = Camera.open(CAMERA_ID);
                     }
                 });
                 mCamera.setErrorCallback(mCameraErrorCallback);
