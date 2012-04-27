@@ -337,7 +337,8 @@ public final class BluetoothA2dp implements BluetoothProfile {
         if (mService != null && isEnabled()
             && isValidDevice(device)) {
             if (priority != BluetoothProfile.PRIORITY_OFF &&
-                priority != BluetoothProfile.PRIORITY_ON) {
+                priority != BluetoothProfile.PRIORITY_ON &&
+                priority != BluetoothProfile.PRIORITY_AUTO_CONNECT) {
               return false;
             }
             try {
