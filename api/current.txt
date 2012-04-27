@@ -2601,6 +2601,7 @@ package android.app {
     method public void finish();
     method public void finishActivity(int);
     method public void finishActivityFromChild(android.app.Activity, int);
+    method public void finishAffinity();
     method public void finishFromChild(android.app.Activity);
     method public android.app.ActionBar getActionBar();
     method public final android.app.Application getApplication();
