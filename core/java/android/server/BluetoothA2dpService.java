@@ -588,6 +588,8 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
 
     @Override
     protected synchronized void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+
         if (mAudioDevices.isEmpty()) return;
         pw.println("Cached audio devices:");
         for (BluetoothDevice device : mAudioDevices.keySet()) {

@@ -39,9 +39,11 @@ public class SamplingProfilerService extends Binder {
     private static final boolean LOCAL_LOGV = false;
     public static final String SNAPSHOT_DIR = SamplingProfilerIntegration.SNAPSHOT_DIR;
 
+    private final Context mContext;
     private FileObserver snapshotObserver;
 
     public SamplingProfilerService(Context context) {
+        mContext = context;
         registerSettingObserver(context);
         startWorking(context);
     }
@@ -94,6 +96,8 @@ public class SamplingProfilerService extends Binder {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+
         pw.println("SamplingProfilerService:");
         pw.println("Watching directory: " + SNAPSHOT_DIR);
     }
