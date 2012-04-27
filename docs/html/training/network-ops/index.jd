@@ -1,0 +1,73 @@
+page.title=Performing Network Operations
+
+trainingnavtop=true
+startpage=true
+next.title=Connecting to the Network
+next.link=connecting.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li>Android 1.6 (API level 4) or higher</li>
+  <li>A device that is able to connect to mobile and Wi-Fi networks</li>
+</ul>
+
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}training/monitoring-device-state/index.html">Optimizing Battery Life</a></li>
+  <li><a href="{@docRoot}training/efficient-downloads/index.html">Transferring Data Without Draining the Battery</a></li>
+  <li><a href="{@docRoot}guide/webapps/index.html">Web Apps Overview</a></li>
+</ul>
+
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}shareables/training/NetworkUsage.zip"
+class="button">Download the sample</a>
+ <p class="filename">NetworkUsage.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>This class explains the basic tasks involved in connecting to the network,
+monitoring the network connection (including connection changes), and giving
+users control over an app's network usage. It also describes how to parse and
+consume XML data.</p> 
+
+<p>This class includes a sample application that illustrates how to perform
+common network operations. You can download the sample (to the right) and use it
+as a source of reusable code for your own application.</p>
+
+<p>By going through these lessons, you'll have the
+fundamental building blocks for creating Android applications that download
+content and parse data efficiently, while minimizing network traffic.</p>
+
+
+
+<h2>Lessons</h2>
+
+<dl>
+ <dt><b><a href="connecting.html">Connecting to the Network</a></b></dt>
+ 
+   <dd>Learn how to connect to the network, choose an HTTP client, and perform
+network operations outside of the UI thread.</dd>
+
+ <dt><b><a href="managing.html">Managing Network Usage</a></b></dt>
+ 
+   <dd>Learn how to check a
+device's network connection, create a preferences UI for controlling network
+usage, and respond to connection changes.</dd>
+   
+   <dt><b><a href="xml.html">Parsing XML Data</a></b></dt>
+   <dd>Learn how to parse and consume XML data.</dd>
+
+</dl> 
+
