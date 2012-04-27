@@ -36,6 +36,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Surface;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.widget.ImageView;
@@ -73,7 +74,7 @@ public class NavigationBarView extends LinearLayout {
     int mNavigationIconHints = 0;
 
     private Drawable mBackIcon, mBackLandIcon, mBackAltIcon, mBackAltLandIcon;
-
+    
     private DelegateViewHelper mDelegateHelper;
 
     // workaround for LayoutTransitions leaving the nav buttons in a weird state (bug 5549288)
@@ -311,7 +312,6 @@ public class NavigationBarView extends LinearLayout {
         }
         mCurrentView = mRotatedViews[rot];
         mCurrentView.setVisibility(View.VISIBLE);
-        mVertical = (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270);
 
         // force the low profile & disabled states into compliance
         setLowProfile(mLowProfile, false, true /* force */);
@@ -333,6 +333,14 @@ public class NavigationBarView extends LinearLayout {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         if (DEBUG) Slog.d(TAG, String.format(
                     "onSizeChanged: (%dx%d) old: (%dx%d)", w, h, oldw, oldh));
+
+        final boolean newVertical = w > 0 && h > w;
+        if (newVertical != mVertical) {
+            mVertical = newVertical;
+            //Slog.v(TAG, String.format("onSizeChanged: h=%d, w=%d, vert=%s", h, w, mVertical?"y":"n"));
+            reorient();
+        }
+
         postCheckForInvalidLayout("sizeChanged");
         super.onSizeChanged(w, h, oldw, oldh);
     }
