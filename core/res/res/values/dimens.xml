@@ -34,8 +34,8 @@
     <dimen name="status_bar_height">25dip</dimen>
     <!-- Height of the bottom navigation / system bar. -->
     <dimen name="navigation_bar_height">48dp</dimen>
-    <!-- Height of the bottom navigation bar in portrait -->
-    <dimen name="navigation_bar_height_portrait">@dimen/navigation_bar_height</dimen>
+    <!-- Height of the bottom navigation bar in portrait; often the same as @dimen/navigation_bar_height -->
+    <dimen name="navigation_bar_height_landscape">48dp</dimen>
     <!-- Width of the navigation bar when it is placed vertically on the screen -->
     <dimen name="navigation_bar_width">42dp</dimen>
     <!-- Height of notification icons in the status bar -->
