@@ -648,6 +648,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     protected static final String VIEW_LOG_TAG = "View";
 
     /**
+     * When set to true, apps will draw debugging information about their layouts. 
+     *
+     * @hide
+     */
+    public static final String DEBUG_LAYOUT_PROPERTY = "debug.layout";
+
+    /**
      * Used to mark a View that has no ID.
      */
     public static final int NO_ID = -1;
@@ -16903,7 +16910,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         /**
          * Show where the margins, bounds and layout bounds are for each view.
          */
-        final boolean mDebugLayout = SystemProperties.getBoolean("debug.layout", false);
+        final boolean mDebugLayout = SystemProperties.getBoolean(DEBUG_LAYOUT_PROPERTY, false);
 
         /**
          * Creates a new set of attachment information with the specified

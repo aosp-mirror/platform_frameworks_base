@@ -72,7 +72,7 @@ public abstract class HardwareRenderer {
      * "true", to enable partial invalidates
      * "false", to disable partial invalidates
      */
-    static final String RENDER_DIRTY_REGIONS_PROPERTY = "hwui.render_dirty_regions";
+    static final String RENDER_DIRTY_REGIONS_PROPERTY = "debug.hwui.render_dirty_regions";
     
     /**
      * System property used to enable or disable vsync.
@@ -82,7 +82,7 @@ public abstract class HardwareRenderer {
      * "true", to disable vsync
      * "false", to enable vsync
      */
-    static final String DISABLE_VSYNC_PROPERTY = "hwui.disable_vsync";
+    static final String DISABLE_VSYNC_PROPERTY = "debug.hwui.disable_vsync";
 
     /**
      * System property used to enable or disable hardware rendering profiling.
@@ -95,8 +95,10 @@ public abstract class HardwareRenderer {
      * Possible values:
      * "true", to enable profiling
      * "false", to disable profiling
+     * 
+     * @hide
      */
-    static final String PROFILE_PROPERTY = "hwui.profile";
+    public static final String PROFILE_PROPERTY = "debug.hwui.profile";
 
     /**
      * System property used to specify the number of frames to be used
@@ -110,7 +112,7 @@ public abstract class HardwareRenderer {
      * Possible values:
      * "60", to set the limit of frames to 60
      */
-    static final String PROFILE_MAXFRAMES_PROPERTY = "hwui.profile.maxframes";
+    static final String PROFILE_MAXFRAMES_PROPERTY = "debug.hwui.profile.maxframes";
 
     /**
      * System property used to debug EGL configuration choice.
@@ -119,7 +121,7 @@ public abstract class HardwareRenderer {
      * "choice", print the chosen configuration only
      * "all", print all possible configurations
      */
-    static final String PRINT_CONFIG_PROPERTY = "hwui.print_config";
+    static final String PRINT_CONFIG_PROPERTY = "debug.hwui.print_config";
 
     /**
      * Turn on to draw dirty regions every other frame.
@@ -127,8 +129,10 @@ public abstract class HardwareRenderer {
      * Possible values:
      * "true", to enable dirty regions debugging
      * "false", to disable dirty regions debugging
+     * 
+     * @hide
      */
-    static final String DEBUG_DIRTY_REGIONS_PROPERTY = "hwui.debug_dirty_regions";
+    public static final String DEBUG_DIRTY_REGIONS_PROPERTY = "debug.hwui.show_dirty_regions";
     
     /**
      * A process can set this flag to false to prevent the use of hardware
