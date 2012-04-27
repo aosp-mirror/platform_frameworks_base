@@ -47,9 +47,6 @@ public class SmokeTestRunner extends InstrumentationTestRunner {
         final PackageManager pm = getTargetContext().getPackageManager();
         final List<ResolveInfo> apps = ProcessErrorsTest.getLauncherActivities(pm);
 
-        // FIXME: figure out some way to control the reported class names for these anonymous
-        // FIXME: class instances.
-
         final TestCase setupTest = new ProcessErrorsTest() {
             @Override
             public void runTest() throws Exception {
@@ -87,6 +84,15 @@ public class SmokeTestRunner extends InstrumentationTestRunner {
             appTest.setName(app.activityInfo.name);
             suite.addTest(appTest);
         }
+
+        final TestCase asyncErrorTest = new ProcessErrorsTest() {
+            @Override
+            public void runTest() throws Exception {
+                testZZReportAsyncErrors();
+            }
+        };
+        asyncErrorTest.setName("testAsynchronousErrors");
+        suite.addTest(asyncErrorTest);
 
         return suite;
     }
