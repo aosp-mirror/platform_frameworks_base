@@ -250,7 +250,7 @@ public class NavigationBarView extends LinearLayout {
         } else {
             navButtons.animate()
                 .alpha(lightsOut ? 0f : 1f)
-                .setDuration(lightsOut ? 600 : 200)
+                .setDuration(lightsOut ? 750 : 250)
                 .start();
 
             lowLights.setOnTouchListener(mLightsOutListener);
@@ -260,8 +260,7 @@ public class NavigationBarView extends LinearLayout {
             }
             lowLights.animate()
                 .alpha(lightsOut ? 1f : 0f)
-                .setStartDelay(lightsOut ? 500 : 0)
-                .setDuration(lightsOut ? 1000 : 300)
+                .setDuration(lightsOut ? 750 : 250)
                 .setInterpolator(new AccelerateInterpolator(2.0f))
                 .setListener(lightsOut ? null : new AnimatorListenerAdapter() {
                     @Override

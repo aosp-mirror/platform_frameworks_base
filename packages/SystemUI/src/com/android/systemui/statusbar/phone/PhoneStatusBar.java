@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -55,6 +58,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
@@ -207,6 +211,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     int[] mAbsPos = new int[2];
     Runnable mPostCollapseCleanup = null;
 
+    private AnimatorSet mLightsOutAnimation;
+    private AnimatorSet mLightsOnAnimation;
 
     // for disabling the status bar
     int mDisabled = 0;
@@ -935,7 +941,26 @@ public class PhoneStatusBar extends BaseStatusBar {
             mClearButton.setAlpha(clearable ? 1.0f : 0.0f);
         }
         mClearButton.setEnabled(clearable);
-
+        
+        final View nlo = mStatusBarView.findViewById(R.id.notification_lights_out);
+        final boolean showDot = (any&&!areLightsOn());
+        if (showDot != (nlo.getAlpha() == 1.0f)) {
+            if (showDot) {
+                nlo.setAlpha(0f);
+                nlo.setVisibility(View.VISIBLE);
+            }
+            nlo.animate()
+                .alpha(showDot?1:0)
+                .setDuration(showDot?750:250)
+                .setInterpolator(new AccelerateInterpolator(2.0f))
+                .setListener(showDot ? null : new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator _a) {
+                        nlo.setVisibility(View.GONE);
+                    }
+                })
+                .start();
+        }
     }
 
     public void showClock(boolean show) {
@@ -1372,6 +1397,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         final int hitSize = statusBarSize*2;
         final int y = (int)event.getRawY();
         if (action == MotionEvent.ACTION_DOWN) {
+            if (!areLightsOn()) {
+                setLightsOn(true);
+            }
+
             if (!mExpanded) {
                 mViewDelta = statusBarSize - y;
             } else {
@@ -1470,16 +1499,64 @@ public class PhoneStatusBar extends BaseStatusBar {
                 final boolean lightsOut = (0 != (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE));
                 if (lightsOut) {
                     animateCollapse();
+                    if (mTicking) {
+                        mTicker.halt();
+                    }
                 }
+                
                 if (mNavigationBarView != null) {
                     mNavigationBarView.setLowProfile(lightsOut);
                 }
+                
+                setStatusBarLowProfile(lightsOut);
             }
 
             notifyUiVisibilityChanged();
         }
     }
 
+    private void setStatusBarLowProfile(boolean lightsOut) {
+        if (mLightsOutAnimation == null) {
+            final View notifications = mStatusBarView.findViewById(R.id.notification_icon_area);
+            final View systemIcons = mStatusBarView.findViewById(R.id.statusIcons);
+            final View signal = mStatusBarView.findViewById(R.id.signal_cluster);
+            final View battery = mStatusBarView.findViewById(R.id.battery);
+            final View clock = mStatusBarView.findViewById(R.id.clock);
+
+            mLightsOutAnimation = new AnimatorSet();
+            mLightsOutAnimation.playTogether(
+                    ObjectAnimator.ofFloat(notifications, View.ALPHA, 0),
+                    ObjectAnimator.ofFloat(systemIcons, View.ALPHA, 0),
+                    ObjectAnimator.ofFloat(signal, View.ALPHA, 0),
+                    ObjectAnimator.ofFloat(battery, View.ALPHA, 0.5f),
+                    ObjectAnimator.ofFloat(clock, View.ALPHA, 0.5f)
+                );
+            mLightsOutAnimation.setDuration(750);
+            
+            mLightsOnAnimation = new AnimatorSet();
+            mLightsOnAnimation.playTogether(
+                    ObjectAnimator.ofFloat(notifications, View.ALPHA, 1),
+                    ObjectAnimator.ofFloat(systemIcons, View.ALPHA, 1),
+                    ObjectAnimator.ofFloat(signal, View.ALPHA, 1),
+                    ObjectAnimator.ofFloat(battery, View.ALPHA, 1),
+                    ObjectAnimator.ofFloat(clock, View.ALPHA, 1)
+                );
+            mLightsOnAnimation.setDuration(250);
+        }
+        
+        mLightsOutAnimation.cancel();
+        mLightsOnAnimation.cancel();
+
+        final Animator a = lightsOut ? mLightsOutAnimation : mLightsOnAnimation;
+        a.start();
+
+        setAreThereNotifications();
+    }
+
+    private boolean areLightsOn() {
+        return 0 == (mSystemUiVisibility & View.SYSTEM_UI_FLAG_LOW_PROFILE);
+    }
+    
     public void setLightsOn(boolean on) {
         Log.v(TAG, "setLightsOn(" + on + ")");
         if (on) {
@@ -1580,6 +1657,9 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     private void tick(StatusBarNotification n) {
+        // no ticking in lights-out mode
+        if (!areLightsOn()) return;
+        
         // Show the ticker if one is requested. Also don't do this
         // until status bar window is attached to the window manager,
         // because...  well, what's the point otherwise?  And trying to
