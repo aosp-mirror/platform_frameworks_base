@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Ivumela ukuthi insiza yamukele iphinde isebenze imiyalezo ye-WAP. Izinsiza ezinobungozi zingabheka imiyalezo yakho noma ziyisuse ngaphandle kokuthi zikukhombise."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"thola izinsiza ezisebenzayo"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Ivumela insiza uuthi ithole kabusha ulwazi mayelana nezinto ezenzeka manje nezisanda kwenzeka. Izinsiza ezinobungozi zingathola imininingwane eyimfihlo mayelana nezinye izinsiza."</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"thola kabusha imininingwane yezinhlelo zokusebenza ezisebenzayo"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Ivumela uhlelo lokusebenza ukuthola kabusha ulwazi mayelana nezinto ezenzeka manje nezisanda kwenzeka. Izinhlelo zokusebenza ezingalungile zingathola imininingwane eyimfihlo mayelana nezinye izinhlelo zokusebenza."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"misa kabusha izinsiza ezisebenzayo"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Ivumela insiza ukuthi ihambise izenzo ziye ngaphambili kanye nasemumva. Izinsiza ezinobungozi zingaziphoqelela ukuth iziye phambili ngaphandle kokulawula kwakho."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"misa izinsiza ezisebenzayo"</string>

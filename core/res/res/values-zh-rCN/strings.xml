@@ -344,15 +344,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"允许应用发送持久广播，此类广播在结束后仍会保留。恶意应用可能会导致平板电脑使用过多内存，从而使速度变慢或变得不稳定。"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"允许应用发送持久广播，此类广播在结束后仍会保留。恶意应用可能会导致手机使用过多内存，从而使速度变慢或变得不稳定。"</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"读取联系人数据"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"允许该应用读取与您平板电脑上存储的联系人相关的所有数据，包括您呼叫特定联系人、向其发送电子邮件或以其他方式通信的频率。这有助于自动填充电子邮件地址，以及实现其他某些便利功能。恶意应用可能会借此将您的联系人数据发送给他人。"</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"允许该应用读取与您手机上存储的联系人相关的所有数据，包括您呼叫特定联系人、向其发送电子邮件或以其他方式通信的频率。这有助于自动填充电子邮件地址，以及实现其他某些便利功能。恶意应用可能会借此将您的联系人数据发送给他人。"</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"写入联系数据"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"允许该应用修改与您平板电脑上存储的联系人相关的数据，包括您呼叫特定联系人、向其发送电子邮件或以其他方式通信的频率。这有助于自动填充电子邮件地址，以及实现其他某些便利功能。恶意应用可能会借此删除或修改您的联系人数据。"</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"允许该应用修改与您手机上存储的联系人相关的数据，包括您呼叫特定联系人、向其发送电子邮件或以其他方式通信的频率。这有助于自动填充电子邮件地址，以及实现其他某些便利功能。恶意应用可能会借此删除或修改您的联系人数据。"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"读取通话记录"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"允许该应用读取平板电脑的通话记录，包括有关来电和外拨电话的数据。恶意应用可能会借此将您的数据发送给他人。"</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"允许该应用读取手机的通话记录，包括有关来电和外拨电话的数据。恶意应用可能会借此将您的数据发送给他人。"</string>

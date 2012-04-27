@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Cho phép ứng dụng nhận và xử lý tin nhắn WAP. Ứng dụng độc hại có thể giám sát tin nhắn của bạn hoặc xóa tin nhắn mà không hiển thị chúng cho bạn."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"truy xuất các ứng dụng đang chạy"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Cho phép ứng dụng truy xuất thông tin về các công việc đã và đang chạy gần đây. Ứng dụng độc hại có thể phát hiện thông tin riêng tư về các ứng dụng khác."</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"truy xuất chi tiết về các ứng dụng đang chạy"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Cho phép ứng dụng truy xuất thông tin chi tiết về các tác vụ đã và đang chạy gần đây. Ứng dụng độc hại có thể phát hiện thông tin riêng tư về các ứng dụng khác."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"sắp xếp lại những ứng dụng đang chạy"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Cho phép ứng dụng di chuyển công việc sang nền trước và nền sau. Ứng dụng độc hại có thể tự hiển thị ở nền trước mà không chịu sự kiểm soát của bạn."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"dừng các ứng dụng đang chạy"</string>
@@ -344,15 +342,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Cho phép ứng dụng gửi nội dung truyền phát hấp dẫn người xem. Nội dung này sẽ vẫn còn sau khi quá trình truyền phát kết thúc. Ứng dụng độc hại có thể làm cho máy tính bảng bị chậm hoặc không ổn định bằng cách khiến máy tính bảng sử dụng quá nhiều bộ nhớ."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Cho phép ứng dụng gửi nội dung truyền phát hấp dẫn người xem. Nội dung này sẽ vẫn còn sau khi quá trình truyền phát kết thúc. Ứng dụng độc hại có thể làm cho điện thoại bị chậm hoặc không ổn định bằng cách khiến điện thoại sử dụng quá nhiều bộ nhớ."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"đọc dữ liệu liên hệ"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Cho phép ứng dụng đọc tất cả dữ liệu về các liên hệ được lưu trữ trên máy tính bảng của bạn, bao gồm cả các liên hệ mà bạn thường xuyên gọi, gửi email hoặc liên lạc theo các cách khác với các cá nhân cụ thể. Việc này giúp ích cho tính năng tự động hoàn tất địa chỉ email và các tính năng tiện lợi khác. Các ứng dụng độc hại có thể sử dụng quyền này để gửi dữ liệu liên hệ của bạn cho những người khác."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Cho phép ứng dụng đọc tất cả dữ liệu về các liên hệ được lưu trữ trên điện thoại của bạn, bao gồm cả các liên hệ mà bạn thường xuyên gọi, gửi email hoặc liên lạc theo các cách khác với các cá nhân cụ thể. Việc này giúp ích cho tính năng tự động hoàn tất địa chỉ email và các tính năng tiện lợi khác. Các ứng dụng độc hại có thể sử dụng quyền này để gửi dữ liệu liên hệ của bạn cho những người khác."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"ghi dữ liệu liên hệ"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Cho phép ứng dụng sửa đổi dữ liệu về các liên hệ được lưu trữ trên máy tính bảng của bạn, bao gồm cả các liên hệ mà bạn thường xuyên gọi, gửi email hoặc liên lạc theo các cách khác với các cá nhân cụ thể. Việc này giúp ích cho tính năng tự động hoàn tất địa chỉ email và các tính năng tiện lợi khác. Các ứng dụng độc hại có thể sử dụng quyền này để xóa hoặc sửa đổi dữ liệu liên hệ của bạn."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Cho phép ứng dụng sửa đổi dữ liệu về các liên hệ được lưu trữ trên điện thoại của bạn, bao gồm cả các liên hệ mà bạn thường xuyên gọi, gửi email hoặc liên lạc theo các cách khác với các cá nhân cụ thể. Việc này giúp ích cho tính năng tự động hoàn tất địa chỉ email và các tính năng tiện lợi khác. Các ứng dụng độc hại có thể sử dụng quyền này để xóa hoặc sửa đổi dữ liệu liên hệ của bạn."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"đọc nhật ký cuộc gọi"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Cho phép ứng dụng đọc nhật ký cuộc gọi trên máy tính bảng của bạn, bao gồm dữ liệu về các cuộc gọi đến và gọi đi. Các ứng dụng độc hại có thể sử dụng quyền này để gửi dữ liệu của bạn cho những người khác."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Cho phép ứng dụng đọc nhật ký cuộc gọi trên điện thoại của bạn, bao gồm dữ liệu về các cuộc gọi đến và gọi đi. Các ứng dụng độc hại có thể sử dụng quyền này để gửi dữ liệu của bạn cho những người khác."</string>

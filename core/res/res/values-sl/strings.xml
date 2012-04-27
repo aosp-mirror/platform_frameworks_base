@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Programu omogoča prejemanje in obdelavo sporočil WAP. Zlonamerni programi lahko nadzirajo sporočila ali jih brišejo, ne da bi vam jih pokazali."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"dobivanje programov, ki se izvajajo"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Programu omogoča dobivanje informacij o trenutnih in nedavno izvajajočih se opravilih. Zlonamerni programi lahko odkrijejo zasebne podatke o drugih programih."</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"prejemanje podrobnosti o aplikacijah, ki se izvajajo"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Aplikaciji omogoča, da dobi podatke o trenutnih in nedavno izvajajočih se opravilih. Zlonamerne aplikacije lahko odkrijejo zasebne podatke o drugih aplikacijah."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"preurejanje programov, ki se izvajajo"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Programu omogoča premikanje opravil v ospredje in ozadje. Zlonamerni programi se lahko brez vašega nadzora vsilijo v ospredje."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"ustavitev programov, ki se izvajajo"</string>

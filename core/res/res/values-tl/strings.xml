@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Pinapayagan ang app na tumanggap at magproseso ng mga mensaheng WAP. Maaaring subaybayan ng nakakahamak na apps ang iyong mga mensahe o tanggalin ang mga ito nang hindi ipinapakita ang mga ito sa iyo."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"bawiin ang tumatakbong apps"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Pinapayagan ang app na bawiin ang impormasyon tungkol sa kasalukuyan at kamakailang tumatakbong mga gawain. Maaaring makatuklas ang nakakahamak na apps ng pribadong impormasyon tungkol sa iba pang apps."</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"bawiin ang mga detalye ng gumaganang apps"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Binibigyang-daan ang app na bawiin ang detalyadong impormasyon tungkol sa mga kasalukuyan at kamakailang gumaganang gawain. Maaaring makatuklas ang nakakahamak na apps ng pribadong impormasyon tungkol sa iba pang apps."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"muling isaayos ang tumatakbong apps"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Pinapayagan ang app na ilipat ang mga gawain sa foreground at background. Maaaring puwersahin ng nakakahamak na apps ang mga sarili nito sa harapan nang wala ang iyong pagkontrol."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"ihinto ang pagpapatakbo ng apps"</string>
