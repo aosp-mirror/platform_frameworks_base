@@ -69,6 +69,12 @@ public final class Choreographer {
     private static final boolean USE_VSYNC = SystemProperties.getBoolean(
             "debug.choreographer.vsync", true);
 
+    // Enable/disable using the frame time instead of returning now.
+    private static final boolean USE_FRAME_TIME = SystemProperties.getBoolean(
+            "debug.choreographer.frametime", true);
+
+    private static final long NANOS_PER_MS = 1000000;
+
     private static final int MSG_DO_FRAME = 0;
     private static final int MSG_DO_SCHEDULE_VSYNC = 1;
     private static final int MSG_DO_SCHEDULE_CALLBACK = 2;
@@ -84,7 +90,8 @@ public final class Choreographer {
     private final CallbackQueue[] mCallbackQueues;
 
     private boolean mFrameScheduled;
-    private long mLastFrameTime;
+    private boolean mCallbacksRunning;
+    private long mLastFrameTimeNanos;
 
     /**
      * Callback type: Input callback.  Runs first.
@@ -108,7 +115,7 @@ public final class Choreographer {
         mLooper = looper;
         mHandler = new FrameHandler(looper);
         mDisplayEventReceiver = USE_VSYNC ? new FrameDisplayEventReceiver(looper) : null;
-        mLastFrameTime = Long.MIN_VALUE;
+        mLastFrameTimeNanos = Long.MIN_VALUE;
 
         mCallbackQueues = new CallbackQueue[CALLBACK_LAST + 1];
         for (int i = 0; i <= CALLBACK_LAST; i++) {
@@ -270,6 +277,40 @@ public final class Choreographer {
         }
     }
 
+    /**
+     * Gets the time when the current frame started.  The frame time should be used
+     * instead of {@link SystemClock#uptimeMillis()} to synchronize animations.
+     * This helps to reduce inter-frame jitter because the frame time is fixed at the
+     * time the frame was scheduled to start, regardless of when the animations or
+     * drawing code actually ran.
+     *
+     * This method should only be called from within a callback.
+     *
+     * @return The frame start time, in the {@link SystemClock#uptimeMillis()} time base.
+     *
+     * @throws IllegalStateException if no frame is in progress.
+     */
+    public long getFrameTime() {
+        return getFrameTimeNanos() / NANOS_PER_MS;
+    }
+
+    /**
+     * Same as {@link #getFrameTime()} but with nanosecond precision.
+     *
+     * @return The frame start time, in the {@link System#nanoTime()} time base.
+     *
+     * @throws IllegalStateException if no frame is in progress.
+     */
+    public long getFrameTimeNanos() {
+        synchronized (mLock) {
+            if (!mCallbacksRunning) {
+                throw new IllegalStateException("This method must only be called as "
+                        + "part of a callback while a frame is in progress.");
+            }
+            return USE_FRAME_TIME ? mLastFrameTimeNanos : System.nanoTime();
+        }
+    }
+
     private void scheduleFrameLocked(long now) {
         if (!mFrameScheduled) {
             mFrameScheduled = true;
@@ -289,7 +330,8 @@ public final class Choreographer {
                     mHandler.sendMessageAtFrontOfQueue(msg);
                 }
             } else {
-                final long nextFrameTime = Math.max(mLastFrameTime + sFrameDelay, now);
+                final long nextFrameTime = Math.max(
+                        mLastFrameTimeNanos / NANOS_PER_MS + sFrameDelay, now);
                 if (DEBUG) {
                     Log.d(TAG, "Scheduling next frame in " + (nextFrameTime - now) + " ms.");
                 }
@@ -300,13 +342,18 @@ public final class Choreographer {
         }
     }
 
-    void doFrame(int frame) {
+    void doFrame(long timestampNanos, int frame) {
         synchronized (mLock) {
             if (!mFrameScheduled) {
                 return; // no work to do
             }
             mFrameScheduled = false;
-            mLastFrameTime = SystemClock.uptimeMillis();
+            mLastFrameTimeNanos = timestampNanos;
+        }
+
+        final long startNanos;
+        if (DEBUG) {
+            startNanos = System.nanoTime();
         }
 
         doCallbacks(Choreographer.CALLBACK_INPUT);
@@ -314,20 +361,24 @@ public final class Choreographer {
         doCallbacks(Choreographer.CALLBACK_TRAVERSAL);
 
         if (DEBUG) {
+            final long endNanos = System.nanoTime();
             Log.d(TAG, "Frame " + frame + ": Finished, took "
-                    + (SystemClock.uptimeMillis() - mLastFrameTime) + " ms.");
+                    + (endNanos - startNanos) * 0.000001f + " ms, latency "
+                    + (startNanos - timestampNanos) * 0.000001f + " ms.");
         }
     }
 
     void doCallbacks(int callbackType) {
-        final long start;
         Callback callbacks;
         synchronized (mLock) {
-            start = SystemClock.uptimeMillis();
-            callbacks = mCallbackQueues[callbackType].extractDueCallbacksLocked(start);
+            final long now = SystemClock.uptimeMillis();
+            callbacks = mCallbackQueues[callbackType].extractDueCallbacksLocked(now);
+            if (callbacks == null) {
+                return;
+            }
+            mCallbacksRunning = true;
         }
-
-        if (callbacks != null) {
+        try {
             for (Callback c = callbacks; c != null; c = c.next) {
                 if (DEBUG) {
                     Log.d(TAG, "RunCallback: type=" + callbackType
@@ -336,8 +387,9 @@ public final class Choreographer {
                 }
                 c.action.run();
             }
-
+        } finally {
             synchronized (mLock) {
+                mCallbacksRunning = false;
                 do {
                     final Callback next = callbacks.next;
                     recycleCallbackLocked(callbacks);
@@ -404,7 +456,7 @@ public final class Choreographer {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_DO_FRAME:
-                    doFrame(0);
+                    doFrame(System.nanoTime(), 0);
                     break;
                 case MSG_DO_SCHEDULE_VSYNC:
                     doScheduleVsync();
@@ -423,7 +475,7 @@ public final class Choreographer {
 
         @Override
         public void onVsync(long timestampNanos, int frame) {
-            doFrame(frame);
+            doFrame(timestampNanos, frame);
         }
     }
 
