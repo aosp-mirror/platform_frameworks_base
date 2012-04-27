@@ -2148,6 +2148,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * @return the size (in pixels) of the default text size in this TextView.
      */
+    @ViewDebug.ExportedProperty(category = "text")
     public float getTextSize() {
         return mTextPaint.getTextSize();
     }
