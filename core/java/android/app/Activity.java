@@ -2714,7 +2714,7 @@ public class Activity extends ContextThemeWrapper
                 onCreateNavigateUpTaskStack(b);
                 onPrepareNavigateUpTaskStack(b);
                 b.startActivities();
-                finish();
+                finishAffinity();
             } else {
                 navigateUpTo(upIntent);
             }
