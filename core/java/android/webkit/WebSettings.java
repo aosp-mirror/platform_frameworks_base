@@ -848,25 +848,37 @@ public abstract class WebSettings {
     }
 
     /**
-     * Configures scripting (such as XmlHttpRequest) access from file scheme URLs
-     * to any origin. Note, calling this method with a true argument value also
-     * implies calling setAllowFileAccessFromFileURLs with a true. The default
-     * value is false for API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
-     * and higher and true otherwise.
+     * Sets whether JavaScript running in the context of a file scheme URL
+     * should be allowed to access content from any origin. This includes
+     * access to content from other file scheme URLs. See
+     * {@link #setAllowFileAccessFromFileURLs}. To enable the most restrictive,
+     * and therefore secure policy, this setting should be disabled.
+     * <p>
+     * The default value is true for API level
+     * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below,
+     * and false for API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
+     * and above.
      *
-     * @param flag true if the WebView should allow scripting access from file
-     *             scheme URLs to any origin
+     * @param flag whether JavaScript running in the context of a file scheme
+     *             URL should be allowed to access content from any origin
      */
     public abstract void setAllowUniversalAccessFromFileURLs(boolean flag);
 
     /**
-     * Configures scripting (such as XmlHttpRequest) access from file scheme URLs
-     * to file origin. The default value is false for API level
-     * {@link android.os.Build.VERSION_CODES#JELLY_BEAN} and higher and true
-     * otherwise.
+     * Sets whether JavaScript running in the context of a file scheme URL
+     * should be allowed to access content from other file scheme URLs. To
+     * enable the most restrictive, and therefore secure policy, this setting
+     * should be disabled. Note that the value of this setting is ignored if
+     * the value of {@link #getAllowUniversalAccessFromFileURLs} is true.
+     * <p>
+     * The default value is true for API level
+     * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below,
+     * and false for API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
+     * and above.
      *
-     * @param flag true if the WebView should allow scripting access from file
-     *             scheme URLs to file origin
+     * @param flag whether JavaScript running in the context of a file scheme
+     *             URL should be allowed to access content from other file
+     *             scheme URLs
      */
     public abstract void setAllowFileAccessFromFileURLs(boolean flag);
 
@@ -1028,21 +1040,22 @@ public abstract class WebSettings {
     }
 
     /**
-     * Gets whether scripting access {see @setAllowUniversalAccessFromFileURLs} from
-     * file URLs to any origin is enabled.
+     * Gets whether JavaScript running in the context of a file scheme URL can
+     * access content from any origin. This includes access to content from
+     * other file scheme URLs.
      *
-     * @return true if the WebView allows scripting access from file scheme requests
-     *         to any origin
+     * @return whether JavaScript running in the context of a file scheme URL
+     *         can access content from any origin
      * @see #setAllowUniversalAccessFromFileURLs
      */
     public abstract boolean getAllowUniversalAccessFromFileURLs();
 
     /**
-     * Gets whether scripting access {see @setAllowFileAccessFromFileURLs} from file
-     * URLs to file origin is enabled.
+     * Gets whether JavaScript running in the context of a file scheme URL can
+     * access content from other file scheme URLs.
      *
-     * @return true if the WebView allows scripting access from file scheme requests
-     *         to file origin
+     * @return whether JavaScript running in the context of a file scheme URL
+     *         can access content from other file scheme URLs
      * @see #setAllowFileAccessFromFileURLs
      */
     public abstract boolean getAllowFileAccessFromFileURLs();
