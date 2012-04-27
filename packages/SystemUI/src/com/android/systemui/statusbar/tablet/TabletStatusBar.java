@@ -589,9 +589,9 @@ public class TabletStatusBar extends BaseStatusBar implements
             });
 
         // tuning parameters
-        final int LIGHTS_GOING_OUT_SYSBAR_DURATION = 600;
-        final int LIGHTS_GOING_OUT_SHADOW_DURATION = 1000;
-        final int LIGHTS_GOING_OUT_SHADOW_DELAY    = 500;
+        final int LIGHTS_GOING_OUT_SYSBAR_DURATION = 750;
+        final int LIGHTS_GOING_OUT_SHADOW_DURATION = 750;
+        final int LIGHTS_GOING_OUT_SHADOW_DELAY    = 0;
 
         final int LIGHTS_COMING_UP_SYSBAR_DURATION = 200;
 //        final int LIGHTS_COMING_UP_SYSBAR_DELAY    = 50;
