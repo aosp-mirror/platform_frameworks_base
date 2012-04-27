@@ -146,8 +146,8 @@
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"ጡባዊዎ ይዘጋል።"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"ስልክዎ ይዘጋል።"</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"ዘግተህ መውጣት  ትፈልጋለህ?"</string>
-    <string name="reboot_safemode_title" msgid="7054509914500140361">"ወደ ጥንቁቅ ሁናቴ ውስጥ ዳግም አስጀምር"</string>
-    <string name="reboot_safemode_confirm" msgid="55293944502784668">"ወደ ጥንቁቅ ሁናቴ ውስጥ ዳግም ማስጀመር ትፈልጋለህ? ይሄ ሁሉንም የጫንካቸው የሶስተኛ ወገን መተግበሪያዎችን ያሰናክላል።  እንደገና ዳግም ስታስጀምር ይመለስሉሃል።"</string>
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"በአስተማማኝ ኹነታ ውስጥ ዳግም አስጀምር"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"በአስተማማኝ ኹነታ ውስጥ ዳግም ማስጀመር ትፈልጋለህ? ይሄ ሁሉንም የጫንካቸው የሶስተኛ ወገን መተግበሪያዎችን ያሰናክላል።  እንደገና ዳግም ስታስጀምር ይመለስሉሃል።"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"የቅርብ ጊዜ"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"ምንም የቅርብ ጊዜ ትግበራዎች የሉም"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"የጡባዊ አማራጮች"</string>

@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Mengizinkan apl menerima dan memproses pesan WAP. Apl berbahaya dapat memantau pesan atau menghapusnya tanpa menunjukkannya kepada Anda."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"mengambil apl yang berjalan"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Mengizinkan apl mengambil informasi tentang tugas yang sedang dijalankan dan yang baru-baru ini dijalankan. Apl berbahaya dapat menemukan informasi pribadi tentang apl lain."</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"mengambil detail aplikasi yang sedang berjalan"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Izinkan aplikasi mengambil informasi mendetail tentang tugas yang saat ini dan baru-baru ini dijalankan. Aplikasi berbahaya dapat menemukan informasi pribadi tentang aplikasi lain."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"menyusun ulang apl yang berjalan"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Mengizinkan apl memindah tugas ke latar depan dan latar belakang. Apl berbahaya dapat memaksa berpindah ke depan tanpa kontrol Anda."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"menghentikan apl yang berjalan"</string>
@@ -323,7 +321,7 @@
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"menggunakan media pengawasandi apa pun untuk pemutaran"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Mengizinkan apl menggunakan pengawasandi media apa pun yang terpasang guna mengawasandikan media untuk diputar."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"baca/tulis ke sumber daya yang dimiliki oleh diag"</string>
-    <string name="permdesc_diagnostic" msgid="6608295692002452283">"Mengizinkan apl membaca dan menulis ke sumber daya apa pun yang dimiliki oleh grup diag; misalnya, file dalam /dev. Izin ini berpotensi mempengaruhi kestabilan dan keamanan sistem. Sebaiknya ini HANYA digunakan untuk diagnostik khusus perangkat keras oleh pabrikan atau operator."</string>
+    <string name="permdesc_diagnostic" msgid="6608295692002452283">"Mengizinkan apl membaca dan menulis ke sumber daya apa pun yang dimiliki oleh grup diag; misalnya, file dalam /dev. Izin ini berpotensi memengaruhi kestabilan dan keamanan sistem. Sebaiknya ini HANYA digunakan untuk diagnostik khusus perangkat keras oleh pabrikan atau operator."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"mengaktifkan atau menonaktifkan komponen apl"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Mengizinkan apl mengubah apakah komponen apl lain diaktifkan atau tidak. Apl berbahaya dapat menggunakan ini untuk menonaktifkan kemampuan tablet yang penting. Izin ini harus digunakan dengan hati-hati karena dapat menjadikan komponen apl tidak dapat digunakan, tidak konsisten, atau tidak stabil."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Mengizinkan apl mengubah apakah komponen apl lain diaktifkan atau tidak. Apl berbahaya dapat menggunakan izin ini untuk menonaktifkan kemampuan ponsel yang penting. Izin ini harus digunakan dengan hati-hati, karena mungkin saja menjadikan komponen apl tidak dapat digunakan, tidak konsisten, atau tidak stabil."</string>
@@ -344,15 +342,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Mengizinkan apl mengirim siaran permanen, yang tetap ada setelah siaran berakhir. Apl berbahaya dapat membuat tablet menjadi lambat atau tidak stabil dengan memicu penggunaan memori yang terlalu banyak."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Mengizinkan apl mengirim siaran permanen, yang tetap ada setelah siaran berakhir. Apl berbahaya dapat membuat ponsel menjadi lambat atau tidak stabil dengan memicu penggunaan memori yang terlalu banyak."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"baca data kenalan"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Memungkinkan aplikasi membaca semua data tentang kenalan yang disimpan pada tablet Anda, termasuk frekuensi saat Anda menghubungi, mengirim email, atau berkomunikasi dengan cara lain dengan individu tertentu. Aplikasi ini membantu pelengkapan otomatis alamat email dan fitur nyaman lainnya. Aplikasi berbahaya dapat menggunakan izin ini untuk mengirim data kenalan Anda kepada orang lain."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Memungkinkan aplikasi membaca semua data tentang kenalan yang disimpan pada ponsel Anda, termasuk frekuensi saat Anda menghubungi, mengirim email, atau berkomunikasi dengan cara lain dengan individu tertentu. Aplikasi ini membantu pelengkapan otomatis alamat email dan fitur nyaman lainnya. Aplikasi berbahaya dapat menggunakan izin ini untuk mengirim data kenalan Anda kepada orang lain."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"tuliskan data kenalan"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Memungkinkan aplikasi mengubah semua data tentang kenalan yang disimpan pada tablet Anda, termasuk frekuensi saat Anda menghubungi, mengirim email, atau berkomunikasi dengan cara lain dengan individu tertentu. Aplikasi ini membantu pelengkapan otomatis alamat email dan fitur nyaman lainnya. Aplikasi berbahaya dapat menggunakan izin ini untuk mengirim data kenalan Anda kepada orang lain."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Memungkinkan aplikasi mengubah semua data tentang kenalan yang disimpan pada ponsel Anda, termasuk frekuensi saat Anda menghubungi, mengirim email, atau berkomunikasi dengan cara lain dengan individu tertentu. Aplikasi ini membantu pelengkapan otomatis alamat email dan fitur nyaman lainnya. Aplikasi berbahaya dapat menggunakan izin ini untuk mengirim data kenalan Anda kepada orang lain."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"membaca log panggilan"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Memungkinkan apl membaca log panggilan tablet Anda, termasuk data tentang panggilan masuk dan keluar. Apl berbahaya dapat menggunakan ini untuk mengirim data ke orang lain."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Memungkinkan apl membaca log panggilan ponsel Anda, termasuk data tentang panggilan masuk dan keluar. Apl berbahaya dapat menggunakan ini untuk mengirim data ke orang lain."</string>

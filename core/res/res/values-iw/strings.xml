@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"מאפשר ליישום לקבל ולעבד הודעות WAP. יישומים זדוניים עלולים לעקוב אחר ההודעות שלך או למחוק אותן מבלי להציגן בפניך."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"אחזור יישומים פעילים"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"מאפשר ליישום לאחזר מידע על המשימות הנוכחיות שפועלות, ואלו שפעלו לאחרונה. יישומים זדוניים עלולים לגלות מידע אישי על יישומים אחרים."</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"אחזור פרטי יישומים פועלים"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"מאפשר ליישום לאחזר מידע מפורט על המשימות הנוכחיות הפועלות ועל משימות שפעלו לאחרונה. יישומים זדוניים עלולים לגלות מידע אישי על יישומים אחרים."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"סידור מחדש של יישומים פעילים"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"מאפשר ליישום להעביר משימות לחזית ולרקע. יישומים זדוניים עלולים לאלץ את עצמם לעבור לחזית ללא שליטה מצדך."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"עצירת יישומים פעילים"</string>

@@ -224,7 +224,7 @@
     <string name="permlab_removeTasks" msgid="6821513401870377403">"stop lopende programme"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Laat die program toe om take te verwyder en hul programme te dood. Kwaadwillige programme kan die gedrag van ander programme ontwrig."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"begin enige aktiwiteit"</string>
-    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Laat die program toe om \'n aktiwiteit te begin, ongeag van toestemming-beskerming of uitgevoerde status."</string>
+    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Laat die program toe om \'n aktiwiteit te begin, ongeag toestemming-beskerming of uitgevoerde status."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"stel skermversoenbaarheid"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Laat die program toe om om die skermversoenbaarheid-modus van ander programme te beheer. Kwaadwillige programme kan die gedrag van ander programme breek."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"aktiveer programontfouting"</string>

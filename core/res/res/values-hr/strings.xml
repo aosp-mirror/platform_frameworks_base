@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Omogućuje aplikaciji primanje i obradu WAP poruka. Zlonamjerne aplikacije mogu nadzirati vaše poruke ili ih brisati, a da vam ih ne pokažu."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"dohvaćanje pokrenutih aplikacija"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Omogućuje aplikaciji dohvaćanje informacija o trenutačno i nedavno pokrenutim zadacima. Zlonamjerne aplikacije mogu otkriti privatne informacije o drugim aplikacijama."</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"dohvaćanje pojedinosti o pokrenutim aplikacijama"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Aplikaciji omogućuje dohvaćanje detaljnih informacija o trenutačno i nedavno pokrenutim zadacima. Zlonamjerne aplikacije mogu otkriti privatne informacije o drugim aplikacijama."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"promjena redoslijeda pokrenutih aplikacija"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Omogućuje aplikaciji da premjesti zadatke u prednji plan ili pozadinu. Zlonamjerne aplikacije mogu na silu doći u prednji plan bez vašeg nadzora."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"zaustavljanje pokrenutih aplikacija"</string>
@@ -344,15 +342,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Omogućuje aplikaciji slanje \"ljepljivih\" emitiranja, koja se zadržavaju nakon što emitiranje završi. Zlonamjerne aplikacije mogu usporiti tabletno računalo ili ga učiniti nestabilnim uzrokujući pretjeranu upotrebu memorije."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Omogućuje aplikaciji slanje \"ljepljivih\" emitiranja, koja se zadržavaju nakon što emitiranje završi. Zlonamjerne aplikacije mogu usporiti telefon ili ga učiniti nestabilnim uzrokujući pretjeranu upotrebu memorije."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"čitanje kontaktnih podataka"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Omogućuje aplikaciji čitanje svih podataka o vašim kontaktima pohranjenim na vašem tabletnom računalu, uključujući i učestalost kojom određene pojedince nazivate, šaljete im e-poruke ili komunicirate s njima na druge načine. To pomaže pri automatskom dovršavanju e-adresa i s ostalim prigodnim značajkama. Zlonamjerne aplikacije mogu upotrijebiti to dopuštenje kako bi vaše podatke za kontakt slale drugim osobama."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Omogućuje aplikaciji čitanje svih podataka o vašim kontaktima pohranjenim na vašem telefonu, uključujući i učestalost kojom određene pojedince nazivate, šaljete im e-poruke ili komunicirate s njima na druge načine. To pomaže pri automatskom dovršavanju e-adresa i s ostalim prigodnim značajkama. Zlonamjerne aplikacije mogu upotrijebiti to dopuštenje kako bi vaše podatke za kontakt slale drugim osobama."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"pisanje kontaktnih podataka"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Omogućuje aplikaciji izmjenu podataka o vašim kontaktima pohranjenim na vašem tabletnom računalu, uključujući i učestalost kojom određene pojedince nazivate, šaljete im e-poruke ili komunicirate s njima na druge načine. To pomaže pri automatskom dovršavanju e-adresa i s ostalim prigodnim značajkama. Zlonamjerne aplikacije mogu upotrijebiti to dopuštenje kako bi vaše podatke za kontakt izbrisale ili izmijenile."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Omogućuje aplikaciji izmjenu podataka o vašim kontaktima pohranjenim na vašem telefonu, uključujući i učestalost kojom određene pojedince nazivate, šaljete im e-poruke ili komunicirate s njima na druge načine. To pomaže pri automatskom dovršavanju adresa e-pošte i s ostalim prigodnim značajkama. Zlonamjerne aplikacije mogu upotrijebiti to dopuštenje kako bi vaše podatke za kontakt izbrisale ili izmijenile."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"čitanje dnevnika poziva"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Aplikaciji omogućuje čitanje dnevnika poziva vašeg tabletnog računala zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za slanje vaših podataka drugim osobama."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Aplikaciji omogućuje čitanje dnevnika poziva vašeg telefona zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za slanje vaših podataka drugim osobama."</string>
