@@ -16,16 +16,15 @@
 
 package com.android.server;
 
-import com.android.internal.os.AtomicFile;
-import com.android.internal.statusbar.StatusBarNotification;
-import com.android.internal.util.FastXmlSerializer;
+import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
+import static org.xmlpull.v1.XmlPullParser.END_TAG;
+import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
@@ -39,8 +38,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.media.AudioManager;
-import android.net.NetworkPolicy;
-import android.net.NetworkTemplate;
+import android.media.IAudioService;
+import android.media.IRingtonePlayer;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
@@ -48,6 +47,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserId;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -61,6 +61,14 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
+import com.android.internal.os.AtomicFile;
+import com.android.internal.statusbar.StatusBarNotification;
+import com.android.internal.util.FastXmlSerializer;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -73,18 +81,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import libcore.io.IoUtils;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
-import static android.net.NetworkPolicyManager.POLICY_NONE;
-import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.writeBooleanAttribute;
-import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.writeIntAttribute;
-import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.writeLongAttribute;
-import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
-import static org.xmlpull.v1.XmlPullParser.END_TAG;
-import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 
 /** {@hide} */
@@ -126,12 +122,13 @@ public class NotificationManagerService extends INotificationManager.Stub
     private int mDefaultNotificationLedOn;
     private int mDefaultNotificationLedOff;
 
-    private NotificationRecord mSoundNotification;
-    private NotificationPlayer mSound;
     private boolean mSystemReady;
     private int mDisabledNotifications;
 
+    private NotificationRecord mSoundNotification;
     private NotificationRecord mVibrateNotification;
+
+    private IAudioService mAudioService;
     private Vibrator mVibrator;
 
     // for enabling and disabling notification pulse behavior
@@ -409,17 +406,19 @@ public class NotificationManagerService extends INotificationManager.Stub
                     // cancel whatever's going on
                     long identity = Binder.clearCallingIdentity();
                     try {
-                        mSound.stop();
-                    }
-                    finally {
+                        final IRingtonePlayer player = mAudioService.getRingtonePlayer();
+                        if (player != null) {
+                            player.stopAsync();
+                        }
+                    } catch (RemoteException e) {
+                    } finally {
                         Binder.restoreCallingIdentity(identity);
                     }
 
                     identity = Binder.clearCallingIdentity();
                     try {
                         mVibrator.cancel();
-                    }
-                    finally {
+                    } finally {
                         Binder.restoreCallingIdentity(identity);
                     }
                 }
@@ -445,11 +444,15 @@ public class NotificationManagerService extends INotificationManager.Stub
             synchronized (mNotificationList) {
                 // sound
                 mSoundNotification = null;
+
                 long identity = Binder.clearCallingIdentity();
                 try {
-                    mSound.stop();
-                }
-                finally {
+                    final IRingtonePlayer player = mAudioService.getRingtonePlayer();
+                    if (player != null) {
+                        player.stopAsync();
+                    }
+                } catch (RemoteException e) {
+                } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
 
@@ -458,8 +461,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 identity = Binder.clearCallingIdentity();
                 try {
                     mVibrator.cancel();
-                }
-                finally {
+                } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
 
@@ -570,8 +572,6 @@ public class NotificationManagerService extends INotificationManager.Stub
         mContext = context;
         mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
         mAm = ActivityManagerNative.getDefault();
-        mSound = new NotificationPlayer(TAG);
-        mSound.setUsesWakeLock(context);
         mToastQueue = new ArrayList<ToastRecord>();
         mHandler = new WorkerHandler();
 
@@ -622,6 +622,9 @@ public class NotificationManagerService extends INotificationManager.Stub
     }
 
     void systemReady() {
+        mAudioService = IAudioService.Stub.asInterface(
+                ServiceManager.getService(Context.AUDIO_SERVICE));
+
         // no beeping until we're basically done booting
         mSystemReady = true;
     }
@@ -1026,11 +1029,14 @@ public class NotificationManagerService extends INotificationManager.Stub
                     // do not play notifications if stream volume is 0
                     // (typically because ringer mode is silent).
                     if (audioManager.getStreamVolume(audioStreamType) != 0) {
-                        long identity = Binder.clearCallingIdentity();
+                        final long identity = Binder.clearCallingIdentity();
                         try {
-                            mSound.play(mContext, uri, looping, audioStreamType);
-                        }
-                        finally {
+                            final IRingtonePlayer player = mAudioService.getRingtonePlayer();
+                            if (player != null) {
+                                player.playAsync(uri, looping, audioStreamType);
+                            }
+                        } catch (RemoteException e) {
+                        } finally {
                             Binder.restoreCallingIdentity(identity);
                         }
                     }
@@ -1121,11 +1127,14 @@ public class NotificationManagerService extends INotificationManager.Stub
         // sound
         if (mSoundNotification == r) {
             mSoundNotification = null;
-            long identity = Binder.clearCallingIdentity();
+            final long identity = Binder.clearCallingIdentity();
             try {
-                mSound.stop();
-            }
-            finally {
+                final IRingtonePlayer player = mAudioService.getRingtonePlayer();
+                if (player != null) {
+                    player.stopAsync();
+                }
+            } catch (RemoteException e) {
+            } finally {
                 Binder.restoreCallingIdentity(identity);
             }
         }
@@ -1386,7 +1395,6 @@ public class NotificationManagerService extends INotificationManager.Stub
             }
 
             pw.println("  mSoundNotification=" + mSoundNotification);
-            pw.println("  mSound=" + mSound);
             pw.println("  mVibrateNotification=" + mVibrateNotification);
             pw.println("  mDisabledNotifications=0x" + Integer.toHexString(mDisabledNotifications));
             pw.println("  mSystemReady=" + mSystemReady);

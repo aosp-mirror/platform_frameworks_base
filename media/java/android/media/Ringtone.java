@@ -18,17 +18,15 @@ package android.media;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Binder;
+import android.os.RemoteException;
 import android.provider.DrmStore;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
 
 /**
@@ -41,7 +39,8 @@ import java.io.IOException;
  * @see RingtoneManager
  */
 public class Ringtone {
-    private static String TAG = "Ringtone";
+    private static final String TAG = "Ringtone";
+    private static final boolean LOGD = true;
 
     private static final String[] MEDIA_COLUMNS = new String[] {
         MediaStore.Audio.Media._ID,
@@ -55,21 +54,26 @@ public class Ringtone {
         DrmStore.Audio.TITLE
     };
 
-    private MediaPlayer mAudio;
+    private final Context mContext;
+    private final AudioManager mAudioManager;
+    private final boolean mAllowRemote;
+    private final IRingtonePlayer mRemotePlayer;
+    private final Binder mRemoteToken;
+
+    private MediaPlayer mLocalPlayer;
 
     private Uri mUri;
     private String mTitle;
-    private FileDescriptor mFileDescriptor;
-    private AssetFileDescriptor mAssetFileDescriptor;
 
     private int mStreamType = AudioManager.STREAM_RING;
-    private AudioManager mAudioManager;
 
-    private Context mContext;
-
-    Ringtone(Context context) {
+    /** {@hide} */
+    public Ringtone(Context context, boolean allowRemote) {
         mContext = context;
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        mAllowRemote = allowRemote;
+        mRemotePlayer = allowRemote ? mAudioManager.getRingtonePlayer() : null;
+        mRemoteToken = allowRemote ? new Binder() : null;
     }
 
     /**
@@ -79,18 +83,10 @@ public class Ringtone {
      */
     public void setStreamType(int streamType) {
         mStreamType = streamType;
-        
-        if (mAudio != null) {
-            /*
-             * The stream type has to be set before the media player is
-             * prepared. Re-initialize it.
-             */
-            try {
-                openMediaPlayer();
-            } catch (IOException e) {
-                Log.w(TAG, "Couldn't set the stream type", e);
-            }
-        }
+
+        // The stream type has to be set before the media player is prepared.
+        // Re-initialize it.
+        setUri(mUri);
     }
 
     /**
@@ -164,67 +160,75 @@ public class Ringtone {
         
         return title;
     }
-    
-    private void openMediaPlayer() throws IOException {
-        if (mAudio != null) {
-            mAudio.release();
-        }
-        mAudio = new MediaPlayer();
-        if (mUri != null) {
-            mAudio.setDataSource(mContext, mUri);
-        } else if (mFileDescriptor != null) {
-            mAudio.setDataSource(mFileDescriptor);
-        } else if (mAssetFileDescriptor != null) {
-            // Note: using getDeclaredLength so that our behavior is the same
-            // as previous versions when the content provider is returning
-            // a full file.
-            if (mAssetFileDescriptor.getDeclaredLength() < 0) {
-                mAudio.setDataSource(mAssetFileDescriptor.getFileDescriptor());
-            } else {
-                mAudio.setDataSource(mAssetFileDescriptor.getFileDescriptor(),
-                        mAssetFileDescriptor.getStartOffset(),
-                        mAssetFileDescriptor.getDeclaredLength());
-            }
-        } else {
-            throw new IOException("No data source set.");
-        }
-        mAudio.setAudioStreamType(mStreamType);
-        mAudio.prepare();
-    }
 
-    void open(FileDescriptor fd) throws IOException {
-        mFileDescriptor = fd;
-        openMediaPlayer();
-    }
+    /**
+     * Set {@link Uri} to be used for ringtone playback. Attempts to open
+     * locally, otherwise will delegate playback to remote
+     * {@link IRingtonePlayer}.
+     *
+     * @hide
+     */
+    public void setUri(Uri uri) {
+        destroyLocalPlayer();
 
-    void open(AssetFileDescriptor fd) throws IOException {
-        mAssetFileDescriptor = fd;
-        openMediaPlayer();
-    }
-
-    void open(Uri uri) throws IOException {
         mUri = uri;
-        openMediaPlayer();
+        if (mUri == null) {
+            return;
+        }
+
+        // TODO: detect READ_EXTERNAL and specific content provider case, instead of relying on throwing
+
+        // try opening uri locally before delegating to remote player
+        mLocalPlayer = new MediaPlayer();
+        try {
+            mLocalPlayer.setDataSource(mContext, mUri);
+            mLocalPlayer.setAudioStreamType(mStreamType);
+            mLocalPlayer.prepare();
+
+        } catch (SecurityException e) {
+            destroyLocalPlayer();
+            if (!mAllowRemote) {
+                throw new IllegalStateException("Remote playback not allowed", e);
+            }
+        } catch (IOException e) {
+            destroyLocalPlayer();
+            if (!mAllowRemote) {
+                throw new IllegalStateException("Remote playback not allowed", e);
+            }
+        }
+
+        if (LOGD) {
+            if (mLocalPlayer != null) {
+                Log.d(TAG, "Successfully created local player");
+            } else {
+                Log.d(TAG, "Problem opening; delegating to remote player");
+            }
+        }
+    }
+
+    /** {@hide} */
+    public Uri getUri() {
+        return mUri;
     }
 
     /**
      * Plays the ringtone.
      */
     public void play() {
-        if (mAudio == null) {
-            try {
-                openMediaPlayer();
-            } catch (Exception ex) {
-                Log.e(TAG, "play() caught ", ex);
-                mAudio = null;
-            }
-        }
-        if (mAudio != null) {
-            // do not ringtones if stream volume is 0
+        if (mLocalPlayer != null) {
+            // do not play ringtones if stream volume is 0
             // (typically because ringer mode is silent).
             if (mAudioManager.getStreamVolume(mStreamType) != 0) {
-                mAudio.start();
+                mLocalPlayer.start();
             }
+        } else if (mAllowRemote) {
+            try {
+                mRemotePlayer.play(mRemoteToken, mUri, mStreamType);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Problem playing ringtone: " + e);
+            }
+        } else {
+            throw new IllegalStateException("Neither local nor remote playback available");
         }
     }
 
@@ -232,10 +236,22 @@ public class Ringtone {
      * Stops a playing ringtone.
      */
     public void stop() {
-        if (mAudio != null) {
-            mAudio.reset();
-            mAudio.release();
-            mAudio = null;
+        if (mLocalPlayer != null) {
+            destroyLocalPlayer();
+        } else if (mAllowRemote) {
+            try {
+                mRemotePlayer.stop(mRemoteToken);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Problem stopping ringtone: " + e);
+            }
+        }
+    }
+
+    private void destroyLocalPlayer() {
+        if (mLocalPlayer != null) {
+            mLocalPlayer.reset();
+            mLocalPlayer.release();
+            mLocalPlayer = null;
         }
     }
 
@@ -245,7 +261,18 @@ public class Ringtone {
      * @return True if playing, false otherwise.
      */
     public boolean isPlaying() {
-        return mAudio != null && mAudio.isPlaying();
+        if (mLocalPlayer != null) {
+            return mLocalPlayer.isPlaying();
+        } else if (mAllowRemote) {
+            try {
+                return mRemotePlayer.isPlaying(mRemoteToken);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Problem checking ringtone: " + e);
+                return false;
+            }
+        } else {
+            throw new IllegalStateException("Neither local nor remote playback available");
+        }
     }
 
     void setTitle(String title) {
