@@ -1058,7 +1058,9 @@ public class RemoteViews implements Parcelable, Filter {
         public ViewGroupAction(int viewId, RemoteViews nestedViews) {
             this.viewId = viewId;
             this.nestedViews = nestedViews;
-            configureRemoteViewsAsChild(nestedViews);
+            if (nestedViews != null) {
+                configureRemoteViewsAsChild(nestedViews);
+            }
         }
 
         public ViewGroupAction(Parcel parcel, BitmapCache bitmapCache) {
