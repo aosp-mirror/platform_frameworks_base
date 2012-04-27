@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Inaruhusu programu kupokea na kuchakata jumbe za WAP. Programu hasidi zinaweza kufuatilia jumbe zako au kuzifuta bila kukuonyesha."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"rudisha programu zinazoendeshwa"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Inaruhusu programu kupata taarifa kuhusu kazi zinazoendelea sasa na hivi karibuni. Programu hasidi zinaweza kugundua taarifa ya kibinafsi kuhusu programu zingine."</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"epua maelezo ya programu zinazoendeshwa."</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Huruhusu programu kuepua maelezo tondoti kuhusu kazi za sasa na zinazoendelea hivi karibuni. Programu hasidi huenda zikagundua maelezo ya kibinafsi kuhusu programu zingine."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"Agiza tena programu za kuendeshwa"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Inaruhusu programu kusongesha kazi kwenye mandhari-mbele na mandhari-nyuma. Programu hasidi zinaweza kujilazimisha mbele bila udhibiti wako."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"Komesha programu zinazoendeshwa"</string>

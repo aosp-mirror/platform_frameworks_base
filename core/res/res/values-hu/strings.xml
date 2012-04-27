@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Lehetővé teszi az alkalmazás számára, hogy WAP üzeneteket fogadjon és dolgozzon fel. A rosszindulatú alkalmazások megfigyelhetik vagy törölhetik az üzeneteket anélkül, hogy Ön látná azokat."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"futó alkalmazások lekérése"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Lehetővé teszi az alkalmazás számára a jelenleg és a nemrég futó feladatok adatainak lekérését. A rosszindulatú alkalmazások privát adatokhoz juthatnak más alkalmazásokról."</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"futó alkalmazások részleteinek lekérése"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Lehetővé teszi az alkalmazás számára a jelenleg és a nemrég futó feladatok részletes adatainak lekérését. A rosszindulatú alkalmazások más alkalmazásokkal kapcsolatos privát adatokhoz férhetnek hozzá."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"futó alkalmazások átrendezése"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Lehetővé teszi az alkalmazás számára, hogy feladatokat helyezzen át az előtérből a háttérbe és fordítva. A rosszindulatú alkalmazások az előtérbe helyezhetik magukat az Ön engedélye nélkül."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"futó alkalmazások leállítása"</string>
@@ -344,15 +342,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Lehetővé teszi az alkalmazás számára a ragadós üzenetek küldését, amelyek a sugárzás után is megmaradnak. A rosszindulatú alkalmazások lelassíthatják vagy instabillá tehetik a táblagépet a túlzott memóriahasználattal."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Lehetővé teszi az alkalmazás számára ragadós üzenetek küldését, amelyek a sugárzás után is megmaradnak. A rosszindulatú alkalmazások lelassíthatják vagy instabillá tehetik a táblagépet a túlzott memóriahasználattal."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"névjegyadatok olvasása"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Lehetővé teszi az alkalmazás számára a táblagépen tárolt névjegyekre vonatkozó összes adat -- például az egyes személyekkel telefonon, e-mailben vagy más módon folytatott kommunikáció gyakoriságára vonatkozó adatok -- olvasását. Ez segítséget nyújt az e-mail címek automatikus kiegészítéséhez és az egyéb kényelmi funkciók működéséhez. A rosszindulatú alkalmazások ezt az engedélyt arra használhatják, hogy névjegyeit elküldjék más személyeknek."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Lehetővé teszi az alkalmazás számára a telefonon tárolt névjegyekre vonatkozó összes adat -- például az egyes személyekkel telefonon, e-mailben vagy más módon folytatott kommunikáció gyakoriságára vonatkozó adatok -- olvasását. Ez segítséget nyújt az e-mail címek automatikus kiegészítéséhez és az egyéb kényelmi funkciók működéséhez. A rosszindulatú alkalmazások ezt az engedélyt arra használhatják, hogy névjegyeit elküldjék más személyeknek."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"névjegyadatok írása"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Lehetővé teszi az alkalmazás számára a táblagépen tárolt névjegyekre vonatkozó adatok -- például az egyes személyekkel telefonon, e-mailben vagy más módon folytatott kommunikáció gyakoriságára vonatkozó adatok -- módosítását. Ez segítséget nyújt az e-mail címek automatikus kiegészítéséhez és az egyéb kényelmi funkciók működéséhez. A rosszindulatú alkalmazások ezt az engedélyt arra használhatják, hogy módosítsák vagy töröljék névjegyeinek adatait."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Lehetővé teszi az alkalmazás számára a telefonon tárolt névjegyekre vonatkozó adatok -- például az egyes személyekkel telefonon, e-mailben vagy más módon folytatott kommunikáció gyakoriságára vonatkozó adatok -- módosítását. Ez segítséget nyújt az e-mail címek automatikus kiegészítéséhez és az egyéb kényelmi funkciók működéséhez. A rosszindulatú alkalmazások ezt az engedélyt arra használhatják, hogy módosítsák vagy töröljék névjegyeinek adatait."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"Híváslista beolvasása"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Lehetővé teszi, hogy az alkalmazás hozzáférjen a táblagép híváslistájához, beleértve a bejövő és kimenő hívások adatait. A rosszindulatú alkalmazások ezt arra használhatják, hogy az adatait elküldjék másoknak."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Lehetővé teszi, hogy az alkalmazás hozzáférjen híváslistájához, beleértve a bejövő és kimenő hívások adatait. A rosszindulatú alkalmazások ezt arra használhatják, hogy az adatait elküldjék másoknak."</string>
