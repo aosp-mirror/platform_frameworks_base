@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Permite que la aplicación reciba y procese mensajes WAP. Las aplicaciones maliciosas pueden controlar tus mensajes o eliminarlos sin mostrártelos."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recuperar aplicaciones en ejecución"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Permite que la aplicación recupere información sobre tareas en ejecución y recientemente ejecutadas. Las aplicaciones maliciosas pueden descubrir información privada sobre otras aplicaciones."</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"recuperar información sobre las aplicaciones en ejecución"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Permite que la aplicación recupere información detallada sobre tareas en ejecución y recientemente ejecutadas. Las aplicaciones malintencionadas pueden hallar información privada sobre otras aplicaciones."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"reorganizar aplicaciones en ejecución"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permite que la aplicación mueva tareas al primero o segundo plano. Las aplicaciones maliciosas pueden forzar su paso al primer plano sin que tú las controles."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"detener las aplicaciones en ejecución"</string>
@@ -344,15 +342,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Permite que la aplicación envíe transmisiones persistentes que permanecen luego de que finaliza la transmisión. Las aplicaciones maliciosas pueden hacer que la tableta funcione más lentamente o de manera inestable al forzarla a utilizar mucha memoria."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Permite que la aplicación envíe transmisiones persistentes que permanecen luego de que finaliza la transmisión. Las aplicaciones maliciosas pueden hacer que el dispositivo funcione más lento o de manera inestable al forzarlo a utilizar mucha memoria."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"leer datos de contacto"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Permite a la aplicación leer todos los datos sobre los contactos almacenados en tu tableta, incluida la frecuencia con la que realizaste llamadas, enviaste correos o te comunicaste de otras maneras con personas específicas. Esto ayuda a la escritura automática de direcciones de correo y a otras funciones convenientes. Las aplicaciones malintencionadas pueden utilizar este permiso para enviar tus datos de contacto a otras personas."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Permite a la aplicación leer todos los datos sobre los contactos almacenados en tu teléfono, incluida la frecuencia con la que realizaste llamadas, enviaste correos o te comunicaste de otras maneras con personas específicas. Esto ayuda a la escritura automática de direcciones de correo y a otras funciones convenientes. Las aplicaciones malintencionadas pueden utilizar este permiso para enviar tus datos de contacto a otras personas."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"escribir datos de contacto"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Permite a la aplicación modificar los datos sobre los contactos almacenados en tu tableta, incluida la frecuencia con la que realizaste llamadas, enviaste correos o te comunicaste de otras maneras con personas específicas. Esto ayuda a la escritura automática de direcciones de correo y a otras funciones convenientes. Las aplicaciones malintencionadas pueden utilizarlo para borrar o modificar tus datos de contacto."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Permite a la aplicación modificar los datos sobre los contactos almacenados en tu teléfono, incluida la frecuencia con la que realizaste llamadas, enviaste correos o te comunicaste de otras maneras con personas específicas. Esto ayuda a la escritura automática de direcciones de correo y a otras funciones convenientes. Las aplicaciones malintencionadas pueden utilizarlo para borrar o modificar tus datos de contacto."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"leer el registro de llamadas"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Permite que la aplicación lea el registro de llamadas de la tableta, incluidos los datos sobre llamadas entrantes y salientes. Las aplicaciones malintencionadas pueden usar este permiso para enviar tus datos a otros usuarios."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Permite que la aplicación lea el registro de llamadas del dispositivo, incluidos los datos sobre llamadas entrantes y salientes. Las aplicaciones malintencionadas pueden usar este permiso para enviar tus datos a otros usuarios."</string>

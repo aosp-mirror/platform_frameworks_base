@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Leidžiama programai gauti ir apdoroti WAP pranešimus. Kenkėjiškos programos gali stebėti jūsų pranešimus ar ištrinti juos neparodydamos jų jums."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"nuskaityti vykdomas programas"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Leidžiama programai nuskaityti informaciją apie šiuo ir paskutiniu metu vykdomas užduotis. Kenkėjiškos programos gali atrasti privačios informacijos apie kitas programas."</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"nuskaityti veikiančių programų išsamią informaciją"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Leidžiama programai nuskaityti išsamią informaciją apie šiuo ir pastaruoju metu vykdomas užduotis. Kenkėjiškos programos gali atrasti privačios informacijos apie kitas programas."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"pertvarkyti vykdomas programas"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Leidžiama programai užduotis perkelti į priekinį planą ir į foną. Kenkėjiškos programos gali priverstinai persikelti į priekį be jūsų įsikišimo."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"sustabdyti vykdomas programas"</string>
@@ -344,15 +342,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Leidžiama programai siųsti užsifiksuojančias transliacijas, kurios išlieka pasibaigus transliacijai. Kenkėjiškos programos gali sulėtinti planšetinį kompiuterį ar padaryti jį nestabilų versdamos naudoti per daug atminties."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Leidžiama programai siųsti užsifiksuojančias transliacijas, kurios išlieka pasibaigus transliacijai. Kenkėjiškos programos gali sulėtinti telefoną ar padaryti jį nestabilų versdamos jį naudoti per daug atminties."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"skaityti adresato duomenis"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Leidžiama programai perskaityti visus planšetiniame kompiuteryje saugomus duomenis apie kontaktus, įskaitant informaciją apie tai, kaip dažnai skambinote, rašėte el. laiškus ar kitais būdais bendravote su konkrečiais asmenimis. Tai naudinga naudojant automatinio el. pašto adresų užbaigimo ir kitas patogias funkcijas. Kenkėjiškos programos gali panaudoti šį leidimą, kad siųstų jūsų kontaktinius duomenis kitiems asmenims."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Leidžiama programai perskaityti visus telefone saugomus duomenis apie kontaktus, įskaitant informaciją apie tai, kaip dažnai skambinote, rašėte el. laiškus ar kitais būdais bendravote su konkrečiais asmenimis. Tai naudinga naudojant automatinio el. pašto adresų užbaigimo ir kitas patogias funkcijas. Kenkėjiškos programos gali panaudoti šį leidimą, kad siųstų jūsų kontaktinius duomenis kitiems asmenims."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"rašyti adresatų duomenis"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Leidžiama programai keisti planšetiniame kompiuteryje saugomus duomenis apie kontaktus, įskaitant informaciją apie tai, kaip dažnai skambinote, rašėte el. laiškus ar kitais būdais bendravote su konkrečiais asmenimis. Tai naudinga naudojant automatinio el. pašto adresų užbaigimo ir kitas patogias funkcijas. Kenkėjiškos programos gali tuo pasinaudoti, kad ištrintų arba pakeistų jūsų kontaktinius duomenis."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Leidžiama programai keisti telefone saugomus duomenis apie kontaktus, įskaitant informaciją apie tai, kaip dažnai skambinote, rašėte el. laiškus ar kitais būdais bendravote su konkrečiais asmenimis. Tai naudinga naudojant automatinio el. pašto adresų užbaigimo ir kitas patogias funkcijas. Kenkėjiškos programos gali tuo pasinaudoti, kad ištrintų arba pakeistų jūsų kontaktinius duomenis."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"skaityti skambučių žurnalą"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Programai leidžiama skaityti planšetinio kompiuterio skambučių žurnalą, įskaitant duomenis apie gaunamus ir siunčiamus skambučius. Kenkėjiškos programos tai gali naudoti, kad išsiųstų jūsų duomenis kitiems žmonėms."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Programai leidžiama skaityti telefono skambučių žurnalą, įskaitant duomenis apie gaunamus ir siunčiamus skambučius. Kenkėjiškos programos tai gali naudoti, kad išsiųstų jūsų duomenis kitiems žmonėms."</string>

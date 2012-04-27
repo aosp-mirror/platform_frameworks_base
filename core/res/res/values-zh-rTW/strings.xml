@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"允許應用程式接收及處理 WAP 訊息。請注意，惡意應用程式可能利用此功能監視訊息，或在您讀取訊息前擅自將其刪除。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"擷取執行中的應用程式"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"允許應用程式取得最近執行任務的資訊。請注意，惡意應用程式可能利用此功能找出其他應用程式的隱私資訊。"</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"擷取執行中應用程式的詳細資料"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"允許應用程式擷取目前及最近執行任務的詳細資訊。惡意應用程式可能會找出其他應用程式的私人資訊。"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"重新排序正在執行的應用程式"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"允許應用程式將工作移至前景或背景。請注意，惡意應用程式可能利用此功能自行移動至前景。"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"停止執行中的應用程式"</string>
@@ -344,15 +342,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"允許應用程式傳送記憶廣播，這類廣播在廣播動作結束後仍繼續存在。請注意，惡意應用程式可能利用此功能讓平板電腦使用過多的記憶體，導致平板電腦的執行速度變慢或不穩定。"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"允許應用程式傳送記憶廣播，這類廣播在廣播動作結束後仍繼續存在。請注意，惡意應用程式可能利用此功能讓手機使用過多的記憶體，導致手機的執行速度變慢或不穩定。"</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"讀取聯絡人資料"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"允許應用程式讀取儲存在平板電腦中的所有聯絡人資料，包括您與特定聯絡人通話、傳送電子郵件或使用其他通訊方式的互動頻率，這樣您就可以在輸入電子郵件地址時使用自動完成功能和其他便利功能。不過，惡意應用程式也可藉此將您的聯絡人資料傳送給其他人。"</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"允許應用程式讀取儲存在手機中的所有聯絡人資料，包括您與特定聯絡人通話、傳送電子郵件或使用其他通訊方式的互動頻率，這樣您就可以在輸入電子郵件地址時使用自動完成功能和其他便利功能。不過，惡意應用程式也可藉此將您的聯絡人資料傳送給其他人。"</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"輸入聯絡人資料"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"允許應用程式修改儲存在平板電腦中的資料，包括您與特定聯絡人通話、傳送電子郵件或使用其他通訊方式的互動頻率，這樣您就可以在輸入電子郵件地址時使用自動完成功能和其他便利功能。不過，惡意應用程式也可藉此清除或修改您的聯絡人資料。"</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"允許應用程式修改儲存在手機中的資料，包括您與特定聯絡人通話、傳送電子郵件或使用其他通訊方式的互動頻率，這樣您就可以在輸入電子郵件地址時使用自動完成功能和其他便利功能。不過，惡意應用程式也可藉此清除或修改您的聯絡人資料。"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"讀取通話紀錄"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"允許應用程式讀取平板電腦的通話紀錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能將您的資料傳送給他人。"</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"允許應用程式讀取手機的通話紀錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能將您的資料傳送給他人。"</string>

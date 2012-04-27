@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Uygulamaya, WAP mesajlarını alma ve işleme izni verir. Kötü amaçlı uygulamalar mesajlarınızı izleyebilir veya onları size göstermeden silebilir."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"çalışan uygulamaları al"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Uygulamaya, şu anda çalışmakta olan ve son çalışan işlemler hakkında bilgi alma izni verir. Kötü amaçlı uygulamalar diğer uygulamalar hakkında özel bilgileri ele geçirebilir."</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"çalışan uygulamaların ayrıntılarını al"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Uygulamaya, şu anda çalışmakta olan ve son çalışan işlemler hakkında ayrıntılı bilgi alma izni verir. Kötü amaçlı uygulamalar diğer uygulamalar hakkında özel bilgileri ele geçirebilir."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"çalışan uygulamaları yeniden sırala"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Uygulamaya, görevleri ön plana ve arka plana taşıma izni verir. Kötü amaçlı uygulamalar kendilerini sizin denetiminiz dışında ön plana taşıyabilir."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"çalışan uygulamaları durdur"</string>
@@ -344,15 +342,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Uygulamaya, yayın bittikten sonra da kalan sabit yayınlar gönderme izni verir. Kötü amaçlı uygulamalar tabletin çok fazla bellek kullanmasına neden olarak onu yavaşlatabilir veya kararsız hale getirebilirler."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Uygulamaya, yayın bittikten sonra da kalan sabit yayınlar gönderme izni verir. Kötü amaçlı uygulamalar telefonun çok fazla bellek kullanmasına neden olarak onu yavaşlatabilir veya dengesiz hale getirebilir."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"kişi verilerini oku"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Uygulamaya, belirli kişilerle ne sıklıkta sesli çağrı, e-posta ve diğer şekillerde iletişim kurduğunuz da dahil olmak üzere tabletinizde kayıtlı kişilerle ilgili tüm verileri okuma izni verir. Bu seçenek, e-posta adreslerinin otomatik tamamlanmasına ve diğer kullanışlı özelliklerin sağlanmasına yardımcı olur. Kötü amaçlı uygulamalar bu izni kullanarak kişi bilgilerinizi başkalarına gönderebilir."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Uygulamaya, belirli kişilerle ne sıklıkta sesli çağrı, e-posta ve diğer şekillerde iletişim kurduğunuz da dahil olmak üzere telefonunuzda kayıtlı kişilerle ilgili tüm verileri okuma izni verir. Bu seçenek, e-posta adreslerinin otomatik tamamlanmasına ve diğer kullanışlı özelliklerin sağlanmasına yardımcı olur. Kötü amaçlı uygulamalar bu izni kullanarak kişi bilgilerinizi başkalarına gönderebilir."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"kişi verileri yaz"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Uygulamaya, belirli kişilerle ne sıklıkta sesli çağrı, e-posta ve diğer şekillerde iletişim kurduğunuz da dahil olmak üzere tabletinizde kayıtlı kişilerle ilgili tüm verileri değiştirme izni verir. Bu seçenek, e-posta adreslerinin otomatik tamamlanmasına ve diğer kullanışlı özelliklerin sağlanmasına yardımcı olur. Kötü amaçlı uygulamalar bu izni kullanarak kişi bilgilerinizi silebilir veya değiştirebilir."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Uygulamaya, belirli kişilerle ne sıklıkta sesli çağrı, e-posta ve diğer şekillerde iletişim kurduğunuz da dahil olmak üzere telefonunuzda kayıtlı kişilerle ilgili tüm verileri değiştirme izni verir. Bu seçenek, e-posta adreslerinin otomatik tamamlanmasına ve diğer kullanışlı özelliklerin sağlanmasına yardımcı olur. Kötü amaçlı uygulamalar bu izni kullanarak kişi bilgilerinizi silebilir veya değiştirebilir."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"çağrı günlüğünü oku"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Uygulamaya tabletinizin çağrı günlüğünü (gelen ve giden çağrılarla ilgili veriler dahil olmak üzere) okuma izni verir. Kötü amaçlı uygulamalar bu izni kullanarak verilerinizi başka kişilere gönderebilir."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Uygulamaya telefonunuzun çağrı günlüğünü (gelen ve giden çağrılarla ilgili veriler dahil olmak üzere) okuma izni verir. Kötü amaçlı uygulamalar bu izni kullanarak verilerinizi başka kişilere gönderebilir."</string>

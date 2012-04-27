@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Ļauj lietotnei saņemt un apstrādāt WAP ziņojumus. Ļaunprātīgas lietotnes var pārraudzīt vai dzēst šos ziņojumus, neparādot tos jums."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"izgūt izmantotās lietotnes"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Ļauj lietotnei izgūt informāciju par šobrīd un nesen veiktajiem uzdevumiem. Ļaunprātīgas lietotnes var atklāt privātu informāciju par citām lietotnēm."</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"Informācijas izguve par izmantotajām lietotnēm"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Ļauj lietotnei izgūt informāciju par šobrīd un nesen veiktajiem uzdevumiem. Ļaunprātīgas lietotnes var atklāt privātu informāciju par citām lietotnēm."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"pārkārtot izmantotās lietotnes"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Ļauj lietotnei pārvietot uzdevumus priekšplānā un fonā. Ļaunprātīgas lietotnes var tikt izvirzītas priekšplānā bez jūsu vadības."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"apturēt izmantoto lietotņu darbību"</string>

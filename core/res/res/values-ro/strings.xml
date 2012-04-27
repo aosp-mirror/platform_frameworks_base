@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Permite aplicaţiei să primească şi să proceseze mesaje WAP. Aplicaţiile rău intenţionate pot să monitorizeze mesajele sau să le şteargă fără să vi le arate."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"preluare aplicaţii care rulează"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Permite aplicaţiei să preia informaţii despre activităţile rulate curent şi recent. Aplicaţiile rău intenţionate pot să descopere informaţii private despre alte aplicaţii."</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"preia detalii despre aplicaţiile care rulează"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Permite aplicaţiei să preia informaţii detaliate despre activităţile rulate curent şi recent. Aplicaţiile rău intenţionate pot să descopere informaţii private despre alte aplicaţii."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"reordonare aplicaţii care rulează"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permite aplicaţiei să mute activităţile în prim-plan şi în fundal. Aplicaţiile rău intenţionate pot să apară forţat în prim-plan, fără ca dvs. să puteţi controla acest lucru."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"oprire aplicaţii care rulează"</string>
@@ -344,15 +342,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Permite aplicaţiei să trimită mesaje difuzate persistente, care rămân după terminarea mesajului difuzat. Aplicaţiile rău intenţionate pot să încetinească sau să destabilizeze tableta, determinând-o să utilizeze prea multă memorie."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Permite aplicaţiei să trimită mesaje difuzate persistente, care rămân după terminarea mesajului difuzat. Aplicaţiile rău intenţionate pot să încetinească sau să destabilizeze telefonul, determinându-l să utilizeze prea multă memorie."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"citire date de contact"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Permite aplicaţiei să citească toate datele despre persoanele de contact stocate pe tabletă, inclusiv frecvenţa cu care aţi apelat, aţi trimis mesaje de e-mail către sau aţi comunicat în alte moduri cu anumite persoane. Acest lucru permite completarea automată a adreselor de e-mail, precum şi alte funcţii care vă uşurează utilizarea. Aplicaţiile rău intenţionate pot folosi această permisiune pentru a trimite datele dvs. de contact altor persoane."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Permite aplicaţiei să citească toate datele despre persoanele de contact stocate pe telefon, inclusiv frecvenţa cu care aţi apelat, aţi trimis mesaje de e-mail către sau aţi comunicat în alte moduri cu anumite persoane. Acest lucru permite completarea automată a adreselor de e-mail, precum şi alte funcţii care vă uşurează utilizarea. Aplicaţiile rău intenţionate pot folosi această permisiune pentru a trimite datele dvs. de contact altor persoane."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"scriere date de contact"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Permite aplicaţiei să modifice datele despre persoanele de contact stocate pe tabletă, inclusiv frecvenţa cu care aţi apelat, aţi trimis mesaje de e-mail către sau aţi comunicat în alte moduri cu anumite persoane. Acest lucru permite completarea automată a adreselor de e-mail, precum şi alte funcţii care vă uşurează utilizarea. Aplicaţiile rău intenţionate pot folosi această permisiune pentru a şterge sau pentru a modifica datele dvs. de contact."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Permite aplicaţiei să modifice datele despre persoanele de contact stocate pe telefon, inclusiv frecvenţa cu care aţi apelat, aţi trimis mesaje de e-mail către sau aţi comunicat în alte moduri cu anumite persoane. Acest lucru permite completarea automată a adreselor de e-mail, precum şi alte funcţii care vă uşurează utilizarea. Aplicaţiile rău intenţionate pot folosi această permisiune pentru a şterge sau pentru a modifica datele dvs. de contact."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"citeşte jurnalul de apeluri"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Permite aplicaţiei să citească jurnalul de apeluri al tabletei dvs., inclusiv datele despre apelurile primite sau efectuate. Aplicaţiile rău intenţionate pot utiliza această permisiune pentru a trimite datele dvs. altor persoane."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Permite aplicaţiei să citească jurnalul de apeluri al telefonului dvs., inclusiv datele despre apelurile primite sau efectuate. Aplicaţiile rău intenţionate pot utiliza această permisiune pentru a trimite datele dvs. altor persoane."</string>
