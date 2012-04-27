@@ -681,10 +681,15 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     }
 
     private int enableWifi(boolean enable) {
+        if (mWfm == null) {
+            mWfm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        }
         if (mWfm != null) {
             int state = mWfm.getWifiState();
             mWfm.setWifiEnabled(enable);
             return state;
+        } else {
+            Log.e(TAG, "Failed to fetch WifiManager instance");
         }
         return WifiManager.WIFI_STATE_UNKNOWN;
     }
