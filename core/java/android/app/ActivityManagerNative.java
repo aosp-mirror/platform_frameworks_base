@@ -218,7 +218,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeInt(result ? 1 : 0);
             return true;
         }
-        
+
         case FINISH_ACTIVITY_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
@@ -240,6 +240,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int requestCode = data.readInt();
             finishSubActivity(token, resultWho, requestCode);
             reply.writeNoException();
+            return true;
+        }
+
+        case FINISH_ACTIVITY_AFFINITY_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            boolean res = finishActivityAffinity(token);
+            reply.writeNoException();
+            reply.writeInt(res ? 1 : 0);
             return true;
         }
 
@@ -1865,6 +1874,18 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+    public boolean finishActivityAffinity(IBinder token) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        mRemote.transact(FINISH_ACTIVITY_AFFINITY_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean res = reply.readInt() != 0;
+        data.recycle();
+        reply.recycle();
+        return res;
     }
     public boolean willActivityBeVisible(IBinder token) throws RemoteException {
         Parcel data = Parcel.obtain();

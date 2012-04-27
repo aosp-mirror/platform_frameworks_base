@@ -4093,6 +4093,36 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Finish this activity as well as all activities immediately below it
+     * in the current task that have the same affinity.  This is typically
+     * used when an application can be launched on to another task (such as
+     * from an ACTION_VIEW of a content type it understands) and the user
+     * has used the up navigation to switch out of the current task and in
+     * to its own task.  In this case, if the user has navigated down into
+     * any other activities of the second application, all of those should
+     * be removed from the original task as part of the task switch.
+     *
+     * <p>Note that this finish does <em>not</em> allow you to deliver results
+     * to the previous activity, and an exception will be thrown if you are trying
+     * to do so.</p>
+     */
+    public void finishAffinity() {
+        if (mParent != null) {
+            throw new IllegalStateException("Can not be called from an embedded activity");
+        }
+        if (mResultCode != RESULT_CANCELED || mResultData != null) {
+            throw new IllegalStateException("Can not be called to deliver a result");
+        }
+        try {
+            if (ActivityManagerNative.getDefault().finishActivityAffinity(mToken)) {
+                mFinished = true;
+            }
+        } catch (RemoteException e) {
+            // Empty
+        }
+    }
+
+    /**
      * This is called when a child activity of this one calls its 
      * {@link #finish} method.  The default implementation simply calls
      * finish() on this activity (the parent), finishing the entire group.

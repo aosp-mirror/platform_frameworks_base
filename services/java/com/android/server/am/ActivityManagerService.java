@@ -2697,26 +2697,18 @@ public final class ActivityManagerService extends ActivityManagerNative
     public final void finishSubActivity(IBinder token, String resultWho,
             int requestCode) {
         synchronized(this) {
-            ActivityRecord self = mMainStack.isInStackLocked(token);
-            if (self == null) {
-                return;
-            }
-
             final long origId = Binder.clearCallingIdentity();
-
-            int i;
-            for (i=mMainStack.mHistory.size()-1; i>=0; i--) {
-                ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
-                if (r.resultTo == self && r.requestCode == requestCode) {
-                    if ((r.resultWho == null && resultWho == null) ||
-                        (r.resultWho != null && r.resultWho.equals(resultWho))) {
-                        mMainStack.finishActivityLocked(r, i,
-                                Activity.RESULT_CANCELED, null, "request-sub");
-                    }
-                }
-            }
-
+            mMainStack.finishSubActivityLocked(token, resultWho, requestCode);
             Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    public boolean finishActivityAffinity(IBinder token) {
+        synchronized(this) {
+            final long origId = Binder.clearCallingIdentity();
+            boolean res = mMainStack.finishActivityAffinityLocked(token);
+            Binder.restoreCallingIdentity(origId);
+            return res;
         }
     }
 
