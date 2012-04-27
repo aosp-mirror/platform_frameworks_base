@@ -8324,10 +8324,6 @@ public class WindowManagerService extends IWindowManager.Stub
             for (i=N-1; i>=0; i--) {
                 WindowState w = mWindows.get(i);
 
-                if (someoneLosingFocus && w == mCurrentFocus && w.isDisplayedLw()) {
-                    focusDisplayed = true;
-                }
-
                 final boolean obscuredChanged = w.mObscured != mInnerFields.mObscured;
 
                 // Update effect.
@@ -8383,6 +8379,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
 
                     winAnimator.setSurfaceBoundaries(recoveringMemory);
+                }
+
+                if (someoneLosingFocus && w == mCurrentFocus && w.isDisplayedLw()) {
+                    focusDisplayed = true;
                 }
 
                 updateResizingWindows(w);
