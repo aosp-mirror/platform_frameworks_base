@@ -24493,12 +24493,12 @@ package android.view {
     method public void startLayoutAnimation();
     method public void startViewTransition(android.view.View);
     method public void updateViewLayout(android.view.View, android.view.ViewGroup.LayoutParams);
+    field public static final int CLIP_BOUNDS = 0; // 0x0
     field protected static final int CLIP_TO_PADDING_MASK = 34; // 0x22
-    field public static final int COMPONENT_BOUNDS = 0; // 0x0
     field public static final int FOCUS_AFTER_DESCENDANTS = 262144; // 0x40000
     field public static final int FOCUS_BEFORE_DESCENDANTS = 131072; // 0x20000
     field public static final int FOCUS_BLOCK_DESCENDANTS = 393216; // 0x60000
-    field public static final int LAYOUT_BOUNDS = 1; // 0x1
+    field public static final int OPTICAL_BOUNDS = 1; // 0x1
     field public static final int PERSISTENT_ALL_CACHES = 3; // 0x3
     field public static final int PERSISTENT_ANIMATION_CACHE = 1; // 0x1
     field public static final int PERSISTENT_NO_CACHE = 0; // 0x0

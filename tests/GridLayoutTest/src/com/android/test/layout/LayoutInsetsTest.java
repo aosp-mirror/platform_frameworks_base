@@ -4,46 +4,49 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
 
-import static android.widget.GridLayout.*;
+import static android.widget.GridLayout.ALIGN_BOUNDS;
+import static android.widget.GridLayout.LayoutParams;
+import static android.widget.GridLayout.OPTICAL_BOUNDS;
 
 public class LayoutInsetsTest extends Activity {
+    static int[] GRAVITIES = {Gravity.LEFT, Gravity.LEFT, Gravity.CENTER_HORIZONTAL, Gravity.RIGHT, Gravity.RIGHT};
+
     public static View create(Context context) {
+        final int N = GRAVITIES.length;
+
         GridLayout p = new GridLayout(context);
         p.setUseDefaultMargins(true);
-        p.setAlignmentMode(ALIGN_BOUNDS);
-        p.setOrientation(VERTICAL);
+        //p.setAlignmentMode(ALIGN_BOUNDS);
+        p.setLayoutMode(OPTICAL_BOUNDS);
 
-        {
-            TextView c = new TextView(context);
-            c.setTextSize(32);
-            c.setText("Email setup");
-            p.addView(c);
-        }
-        {
-            Button c = new Button(context);
-            c.setBackgroundResource(R.drawable.btn_default);
-            c.setText("Test");
-            p.addView(c);
+        p.setColumnCount(N);
+
+        for (int i = 0; i < 2*N; i++) {
+            View c;
+            if (i % 2 == 0) {
+                TextView tv = new TextView(context);
+                tv.setTextSize(32);
+                tv.setText("A");
+                c = tv;
+            } else {
+                Button b = new Button(context);
+                b.setBackgroundResource(R.drawable.btn_default_normal);
+                b.setText("B");
+                c = b;
+            }
+
+            LayoutParams lp = new LayoutParams();
+            lp.setGravity(GRAVITIES[(i % N)]);
+            p.addView(c, lp);
+
         }
 
-        {
-            Button c = new Button(context);
-            c.setBackgroundResource(R.drawable.btn_default);
-            c.setText("Manual setup");
-            p.addView(c);
-            c.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Button b = (Button) v;
-                    b.setEnabled(false);
-                }
-            });
-        }
 
         return p;
     }
