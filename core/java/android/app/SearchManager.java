@@ -395,11 +395,7 @@ public class SearchManager
 
     /**
      * Intent action to be broadcast to inform that the global search provider
-     * has changed. Normal components will have no need to handle this intent since
-     * they should be using API methods from this class to access the global search
-     * activity
-     *
-     * @hide
+     * has changed.
      */
     public final static String INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED
             = "android.search.action.GLOBAL_SEARCH_ACTIVITY_CHANGED";
@@ -590,8 +586,6 @@ public class SearchManager
 
     /**
      * Gets the name of the global search activity.
-     *
-     * @hide
      */
     public ComponentName getGlobalSearchActivity() {
         try {

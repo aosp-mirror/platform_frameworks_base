@@ -3870,6 +3870,7 @@ package android.app {
   }
 
   public class SearchManager implements android.content.DialogInterface.OnCancelListener android.content.DialogInterface.OnDismissListener {
+    method public android.content.ComponentName getGlobalSearchActivity();
     method public android.app.SearchableInfo getSearchableInfo(android.content.ComponentName);
     method public java.util.List<android.app.SearchableInfo> getSearchablesInGlobalSearch();
     method public deprecated void onCancel(android.content.DialogInterface);
@@ -3893,6 +3894,7 @@ package android.app {
     field public static final java.lang.String INTENT_ACTION_SEARCH_SETTINGS = "android.search.action.SEARCH_SETTINGS";
     field public static final java.lang.String INTENT_ACTION_SEARCH_SETTINGS_CHANGED = "android.search.action.SETTINGS_CHANGED";
     field public static final java.lang.String INTENT_ACTION_WEB_SEARCH_SETTINGS = "android.search.action.WEB_SEARCH_SETTINGS";
+    field public static final java.lang.String INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED = "android.search.action.GLOBAL_SEARCH_ACTIVITY_CHANGED";
     field public static final char MENU_KEY = 115; // 0x0073 's'
     field public static final int MENU_KEYCODE = 47; // 0x2f
     field public static final java.lang.String QUERY = "query";
