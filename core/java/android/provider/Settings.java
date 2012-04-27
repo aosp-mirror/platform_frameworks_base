@@ -3270,6 +3270,12 @@ public final class Settings {
         public static final String WIFI_FREQUENCY_BAND = "wifi_frequency_band";
 
         /**
+         * The Wi-Fi peer-to-peer device name
+         * @hide
+         */
+        public static final String WIFI_P2P_DEVICE_NAME = "wifi_p2p_device_name";
+
+        /**
          * Maximum amount of time in milliseconds to hold a wakelock while waiting for mobile
          * data connectivity to be established after a disconnect from Wi-Fi.
          */

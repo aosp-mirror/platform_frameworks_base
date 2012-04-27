@@ -184,7 +184,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
         mThisDevice.primaryDeviceType = mContext.getResources().getString(
                 com.android.internal.R.string.config_wifi_p2p_device_type);
-        mThisDevice.deviceName = getDefaultDeviceName();
 
         mP2pStateMachine = new P2pStateMachine(TAG, mP2pSupported);
         mP2pStateMachine.start();
@@ -203,14 +202,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     private void enforceChangePermission() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CHANGE_WIFI_STATE,
                 "WifiP2pService");
-    }
-
-    /* We use the 4 digits of the ANDROID_ID to have a friendly
-     * default that has low likelihood of collision with a peer */
-    private String getDefaultDeviceName() {
-        String id = Settings.Secure.getString(mContext.getContentResolver(),
-                    Settings.Secure.ANDROID_ID);
-        return "Android_" + id.substring(0,4);
     }
 
     /**
@@ -376,6 +367,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                             WifiP2pManager.CLEAR_SERVICE_REQUESTS_FAILED,
                             WifiP2pManager.BUSY);
                     break;
+                case WifiP2pManager.SET_DEVICE_NAME:
+                    replyToMessage(message, WifiP2pManager.SET_DEVICE_NAME_FAILED,
+                            WifiP2pManager.BUSY);
+                    break;
                 case WifiP2pManager.REQUEST_PEERS:
                     replyToMessage(message, WifiP2pManager.RESPONSE_PEERS, mPeers);
                     break;
@@ -472,6 +467,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiP2pManager.CLEAR_SERVICE_REQUESTS:
                     replyToMessage(message,
                             WifiP2pManager.CLEAR_SERVICE_REQUESTS_FAILED,
+                            WifiP2pManager.P2P_UNSUPPORTED);
+                    break;
+                case WifiP2pManager.SET_DEVICE_NAME:
+                    replyToMessage(message, WifiP2pManager.SET_DEVICE_NAME_FAILED,
                             WifiP2pManager.P2P_UNSUPPORTED);
                     break;
                default:
@@ -582,6 +581,16 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     if (mPeers.clear()) sendP2pPeersChangedBroadcast();
                     mWifiNative.closeSupplicantConnection();
                     transitionTo(mP2pDisablingState);
+                    break;
+                case WifiP2pManager.SET_DEVICE_NAME:
+                    WifiP2pDevice d = (WifiP2pDevice) message.obj;
+                    if (d != null && setAndPersistDeviceName(d.deviceName)) {
+                        if (DBG) logd("set device name " + d.deviceName);
+                        replyToMessage(message, WifiP2pManager.SET_DEVICE_NAME_SUCCEEDED);
+                    } else {
+                        replyToMessage(message, WifiP2pManager.SET_DEVICE_NAME_FAILED,
+                                WifiP2pManager.ERROR);
+                    }
                     break;
                 case WifiP2pManager.DISCOVER_PEERS:
                     // do not send service discovery request while normal find operation.
@@ -1412,8 +1421,39 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         }
     }
 
+    private String getPersistedDeviceName() {
+        String deviceName = Settings.Secure.getString(mContext.getContentResolver(),
+                Settings.Secure.WIFI_P2P_DEVICE_NAME);
+        if (deviceName == null) {
+            /* We use the 4 digits of the ANDROID_ID to have a friendly
+             * default that has low likelihood of collision with a peer */
+            String id = Settings.Secure.getString(mContext.getContentResolver(),
+                    Settings.Secure.ANDROID_ID);
+            return "Android_" + id.substring(0,4);
+        }
+        return deviceName;
+    }
+
+    private boolean setAndPersistDeviceName(String devName) {
+        if (devName == null) return false;
+
+        if (!mWifiNative.setDeviceName(devName)) {
+            loge("Failed to set device name " + devName);
+            return false;
+        }
+
+        mThisDevice.deviceName = devName;
+        mWifiNative.setP2pSsidPostfix("-" + mThisDevice.deviceName);
+
+        Settings.Secure.putString(mContext.getContentResolver(),
+                Settings.Secure.WIFI_P2P_DEVICE_NAME, devName);
+        sendThisDeviceChangedBroadcast();
+        return true;
+    }
+
     private void initializeP2pSettings() {
         mWifiNative.setPersistentReconnect(true);
+        mThisDevice.deviceName = getPersistedDeviceName();
         mWifiNative.setDeviceName(mThisDevice.deviceName);
         //DIRECT-XY-DEVICENAME (XY is randomly generated)
         mWifiNative.setP2pSsidPostfix("-" + mThisDevice.deviceName);
