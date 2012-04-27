@@ -3497,6 +3497,51 @@ final class ActivityStack {
         return true;
     }
 
+    final void finishSubActivityLocked(IBinder token, String resultWho, int requestCode) {
+        ActivityRecord self = isInStackLocked(token);
+        if (self == null) {
+            return;
+        }
+
+        int i;
+        for (i=mHistory.size()-1; i>=0; i--) {
+            ActivityRecord r = (ActivityRecord)mHistory.get(i);
+            if (r.resultTo == self && r.requestCode == requestCode) {
+                if ((r.resultWho == null && resultWho == null) ||
+                    (r.resultWho != null && r.resultWho.equals(resultWho))) {
+                    finishActivityLocked(r, i,
+                            Activity.RESULT_CANCELED, null, "request-sub");
+                }
+            }
+        }
+    }
+
+    final boolean finishActivityAffinityLocked(IBinder token) {
+        int index = indexOfTokenLocked(token);
+        if (DEBUG_RESULTS) Slog.v(
+                TAG, "Finishing activity affinity @" + index + ": token=" + token);
+        if (index < 0) {
+            return false;
+        }
+        ActivityRecord r = mHistory.get(index);
+
+        while (index > 0) {
+            ActivityRecord cur = mHistory.get(index);
+            if (cur.task != r.task) {
+                break;
+            }
+            if (cur.taskAffinity == null && r.taskAffinity != null) {
+                break;
+            }
+            if (cur.taskAffinity != null && !cur.taskAffinity.equals(r.taskAffinity)) {
+                break;
+            }
+            finishActivityLocked(cur, index, Activity.RESULT_CANCELED, null, "request-affinity");
+            index--;
+        }
+        return true;
+    }
+
     final void finishActivityResultsLocked(ActivityRecord r, int resultCode, Intent resultData) {
         // send the result
         ActivityRecord resultTo = r.resultTo;
