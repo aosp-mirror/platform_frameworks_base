@@ -72,7 +72,7 @@ class BrowserFrame extends Handler {
     private final CallbackProxy mCallbackProxy;
     private final WebSettingsClassic mSettings;
     private final Context mContext;
-    private final WebViewDatabase mDatabase;
+    private final WebViewDatabaseClassic mDatabase;
     private final WebViewCore mWebViewCore;
     /* package */ boolean mLoadInitFromJava;
     private int mLoadType;
@@ -241,7 +241,7 @@ class BrowserFrame extends Handler {
         mSettings = settings;
         mContext = context;
         mCallbackProxy = proxy;
-        mDatabase = WebViewDatabase.getInstance(appContext);
+        mDatabase = WebViewDatabaseClassic.getInstance(appContext);
         mWebViewCore = w;
 
         mSearchBox = new SearchBoxImpl(mWebViewCore, mCallbackProxy);
@@ -496,8 +496,8 @@ class BrowserFrame extends Handler {
                     if (item != null) {
                         WebAddress uri = new WebAddress(item.getUrl());
                         String schemePlusHost = uri.getScheme() + uri.getHost();
-                        String[] up =
-                                mDatabase.getUsernamePassword(schemePlusHost);
+                        String[] up = mDatabase.getUsernamePassword(
+                                schemePlusHost);
                         if (up != null && up[0] != null) {
                             setUsernamePassword(up[0], up[1]);
                         }
@@ -809,8 +809,7 @@ class BrowserFrame extends Handler {
                         // non-null username implies that user has
                         // chosen to save password, so update the
                         // recorded password
-                        mDatabase.setUsernamePassword(
-                                schemePlusHost, username, password);
+                        mDatabase.setUsernamePassword(schemePlusHost, username, password);
                     }
                 } else {
                     // CallbackProxy will handle creating the resume
