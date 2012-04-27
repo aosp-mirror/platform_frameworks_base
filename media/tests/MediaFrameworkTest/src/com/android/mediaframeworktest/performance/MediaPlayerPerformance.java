@@ -72,6 +72,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
         "/sdcard/mediaMemOutput.txt";
     private static final String MEDIA_PROCMEM_OUTPUT =
         "/sdcard/mediaProcmemOutput.txt";
+    private static final int CAMERA_ID = 0;
 
     private static int mStartMemory = 0;
     private static int mEndMemory = 0;
@@ -132,7 +133,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
                 Looper.prepare();
                 Log.v(TAG, "start loopRun");
                 mLooper = Looper.myLooper();
-                mCamera = Camera.open();
+                mCamera = Camera.open(CAMERA_ID);
                 startDone.open();
                 Looper.loop();
                 Log.v(TAG, "initializeMessageLooper: quit.");

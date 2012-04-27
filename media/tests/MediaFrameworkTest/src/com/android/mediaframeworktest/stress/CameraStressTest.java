@@ -60,6 +60,7 @@ public class CameraStressTest extends ActivityInstrumentationTestCase2<MediaFram
     private static final long WAIT_ZOOM_ANIMATION = 5 * 1000; // 5 seconds
     private static final String CAMERA_STRESS_OUTPUT =
             "/sdcard/cameraStressOutput.txt";
+    private static final int CAMERA_ID = 0;
     private final CameraErrorCallback mCameraErrorCallback = new CameraErrorCallback();
 
     private Thread mLooperThread;
@@ -213,7 +214,7 @@ public class CameraStressTest extends ActivityInstrumentationTestCase2<MediaFram
             Log.v(TAG, "Start preview");
             output.write("No of loop: ");
 
-            mCamera = Camera.open();
+            mCamera = Camera.open(CAMERA_ID);
             Camera.Parameters params = mCamera.getParameters();
             mCamera.release();
 
@@ -230,7 +231,7 @@ public class CameraStressTest extends ActivityInstrumentationTestCase2<MediaFram
                     runOnLooper(new Runnable() {
                         @Override
                         public void run() {
-                            mCamera = Camera.open();
+                            mCamera = Camera.open(CAMERA_ID);
                         }
                     });
 
