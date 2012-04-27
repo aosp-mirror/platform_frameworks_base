@@ -105,10 +105,29 @@ PathTexture* RectShapeCache::getRect(float width, float height, SkPaint* paint) 
     PathTexture* texture = get(entry);
 
     if (!texture) {
-        SkPath path;
-        path.addRect(0.0f, 0.0f, width, height, SkPath::kCW_Direction);
+        SkRect bounds;
+        bounds.set(0.0f, 0.0f, width, height);
 
-        texture = addTexture(entry, &path, paint);
+        float left, top, offset;
+        uint32_t rectWidth, rectHeight;
+        computeBounds(bounds, paint, left, top, offset, rectWidth, rectHeight);
+
+        if (!checkTextureSize(rectWidth, rectHeight)) return NULL;
+
+        purgeCache(rectWidth, rectHeight);
+
+        SkBitmap bitmap;
+        initBitmap(bitmap, rectWidth, rectHeight);
+
+        SkPaint pathPaint(*paint);
+        initPaint(pathPaint);
+
+        SkCanvas canvas(bitmap);
+        canvas.translate(-left + offset, -top + offset);
+        canvas.drawRect(bounds, pathPaint);
+
+        texture = createTexture(0, 0, offset, rectWidth, rectHeight, 0);
+        addTexture(entry, &bitmap, texture);
     }
 
     return texture;
