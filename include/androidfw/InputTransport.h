@@ -33,6 +33,7 @@
 #include <utils/RefBase.h>
 #include <utils/String8.h>
 #include <utils/Vector.h>
+#include <utils/BitSet.h>
 
 namespace android {
 
@@ -271,6 +272,9 @@ public:
      * If consumeBatches is true, then events are still batched but they are consumed
      * immediately as soon as the input channel is exhausted.
      *
+     * The frameTime parameter specifies the time when the current display frame started
+     * rendering in the CLOCK_MONOTONIC time base, or -1 if unknown.
+     *
      * The returned sequence number is never 0 unless the operation failed.
      *
      * Returns OK on success.
@@ -280,7 +284,7 @@ public:
      * Other errors probably indicate that the channel is broken.
      */
     status_t consume(InputEventFactoryInterface* factory, bool consumeBatches,
-            uint32_t* outSeq, InputEvent** outEvent);
+            nsecs_t frameTime, uint32_t* outSeq, InputEvent** outEvent);
 
     /* Sends a finished signal to the publisher to inform it that the message
      * with the specified sequence number has finished being process and whether
@@ -298,7 +302,7 @@ public:
      * has a deferred event to be processed.  Deferred events are somewhat special in
      * that they have already been removed from the input channel.  If the input channel
      * becomes empty, the client may need to do extra work to ensure that it processes
-     * the deferred event despite the fact that the inptu channel's file descriptor
+     * the deferred event despite the fact that the input channel's file descriptor
      * is not readable.
      *
      * One option is simply to call consume() in a loop until it returns WOULD_BLOCK.
@@ -329,10 +333,54 @@ private:
 
     // Batched motion events per device and source.
     struct Batch {
-        uint32_t seq; // sequence number of last input message batched in the event
-        MotionEvent event;
+        Vector<InputMessage> samples;
     };
     Vector<Batch> mBatches;
+
+    // Touch state per device and source, only for sources of class pointer.
+    struct History {
+        nsecs_t eventTime;
+        BitSet32 idBits;
+        PointerCoords pointers[MAX_POINTERS];
+
+        void initializeFrom(const InputMessage* msg) {
+            eventTime = msg->body.motion.eventTime;
+            idBits.clear();
+            for (size_t i = 0; i < msg->body.motion.pointerCount; i++) {
+                uint32_t id = msg->body.motion.pointers[i].properties.id;
+                idBits.markBit(id);
+                size_t index = idBits.getIndexOfBit(id);
+                pointers[index].copyFrom(msg->body.motion.pointers[i].coords);
+            }
+        }
+    };
+    struct TouchState {
+        int32_t deviceId;
+        int32_t source;
+        size_t historyCurrent;
+        size_t historySize;
+        History history[2];
+
+        void initialize(int32_t deviceId, int32_t source) {
+            this->deviceId = deviceId;
+            this->source = source;
+            historyCurrent = 0;
+            historySize = 0;
+        }
+
+        void addHistory(const InputMessage* msg) {
+            historyCurrent ^= 1;
+            if (historySize < 2) {
+                historySize += 1;
+            }
+            history[historyCurrent].initializeFrom(msg);
+        }
+
+        const History* getHistory(size_t index) const {
+            return &history[(historyCurrent + index) & 1];
+        }
+    };
+    Vector<TouchState> mTouchStates;
 
     // Chain of batched sequence numbers.  When multiple input messages are combined into
     // a batch, we append a record here that associates the last sequence number in the
@@ -344,13 +392,26 @@ private:
     };
     Vector<SeqChain> mSeqChains;
 
+    status_t consumeBatch(InputEventFactoryInterface* factory,
+            nsecs_t frameTime, uint32_t* outSeq, InputEvent** outEvent);
+    status_t consumeSamples(InputEventFactoryInterface* factory,
+            Batch& batch, size_t count, uint32_t* outSeq, InputEvent** outEvent);
+
+    void updateTouchState(InputMessage* msg);
+    void resampleTouchState(nsecs_t frameTime, MotionEvent* event,
+            const InputMessage *next);
+
     ssize_t findBatch(int32_t deviceId, int32_t source) const;
+    ssize_t findTouchState(int32_t deviceId, int32_t source) const;
+
     status_t sendUnchainedFinishedSignal(uint32_t seq, bool handled);
 
     static void initializeKeyEvent(KeyEvent* event, const InputMessage* msg);
     static void initializeMotionEvent(MotionEvent* event, const InputMessage* msg);
-    static bool canAppendSamples(const MotionEvent* event, const InputMessage* msg);
-    static void appendSamples(MotionEvent* event, const InputMessage* msg);
+    static void addSample(MotionEvent* event, const InputMessage* msg);
+    static bool canAddSample(const Batch& batch, const InputMessage* msg);
+    static ssize_t findSampleNoLaterThan(const Batch& batch, nsecs_t time);
+    static bool shouldResampleTool(int32_t toolType);
 };
 
 } // namespace android

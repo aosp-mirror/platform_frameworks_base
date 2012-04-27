@@ -207,7 +207,7 @@ int32_t AInputQueue::getEvent(AInputEvent** outEvent) {
 
     uint32_t consumerSeq;
     InputEvent* myEvent = NULL;
-    status_t res = mConsumer.consume(&mPooledInputEventFactory, true /*consumeBatches*/,
+    status_t res = mConsumer.consume(&mPooledInputEventFactory, true /*consumeBatches*/, -1,
             &consumerSeq, &myEvent);
     if (res != android::OK) {
         if (res != android::WOULD_BLOCK) {
