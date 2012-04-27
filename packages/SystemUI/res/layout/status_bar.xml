@@ -29,6 +29,17 @@
     android:fitsSystemWindows="true"
     >
 
+    <ImageView
+        android:id="@+id/notification_lights_out"
+        android:layout_width="@dimen/status_bar_icon_size"
+        android:layout_height="match_parent"
+        android:paddingLeft="6dip"
+		android:paddingBottom="2dip"
+        android:src="@drawable/ic_sysbar_lights_out_dot_small"
+        android:scaleType="center"
+        android:visibility="gone"
+        />
+
     <LinearLayout android:id="@+id/icons"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -38,6 +49,7 @@
         >
 
         <LinearLayout
+			android:id="@+id/notification_icon_area"
             android:layout_width="0dip"
             android:layout_height="match_parent"
             android:layout_weight="1"
