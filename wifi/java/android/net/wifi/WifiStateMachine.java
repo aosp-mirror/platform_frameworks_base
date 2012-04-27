@@ -2814,15 +2814,15 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                     SupplicantState state = handleSupplicantStateChange(message);
-                    // Due to a WEXT bug, during the time of driver start/stop
-                    // we can go into a driver stopped state in an unexpected way.
-                    // The sequence eventually puts interface
-                    // up and we should be back to a connected state
+                    // A driver/firmware hang can now put the interface in a down state.
+                    // We detect the interface going down and recover from it
                     if (!SupplicantState.isDriverActive(state)) {
                         if (mNetworkInfo.getState() != NetworkInfo.State.DISCONNECTED) {
                             handleNetworkDisconnect();
                         }
+                        log("Detected an interface down, restart driver");
                         transitionTo(mDriverStoppedState);
+                        sendMessage(CMD_START_DRIVER);
                         break;
                     }
 
