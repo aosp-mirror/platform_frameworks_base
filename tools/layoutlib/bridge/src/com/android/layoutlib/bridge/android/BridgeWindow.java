@@ -91,6 +91,10 @@ public final class BridgeWindow implements IWindow {
     }
 
     @Override
+    public void doneAnimating() {
+    }
+
+    @Override
     public IBinder asBinder() {
         // pass for now.
         return null;
