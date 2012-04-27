@@ -169,6 +169,8 @@ public class DreamManagerService
     
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+
         pw.println("Dreamland:");
         pw.print("  component="); pw.println(mCurrentDreamComponent);
         pw.print("  token="); pw.println(mCurrentDreamToken);
