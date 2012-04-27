@@ -344,15 +344,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Membolehkan apl untuk menghantar siaran melekit, yang kekal selepas siaran berakhir. Apl hasad boleh membuat tablet perlahan atau tidak stabil dengan menyebabkannya menggunakan memori yang terlalu banyak."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Membolehkan apl untuk menghantar siaran melekit, yang kekal selepas siaran berakhir. Apl hasad boleh membuat telefon perlahan atau tidak stabil dengan menyebabkannya menggunakan memori yang terlalu banyak."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"baca data kenalan"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Membenarkan apl membaca semua data tentang kenalan anda yang disimpan pada tablet anda, termasuk kekerapan anda memanggil, menghantar e-mel atau berkomunikasi dengan cara yang lain dengan individu tertentu. Ini membantu auto-pelengkapan alamat e-mel dan ciri mudah lain. Apl hasad boleh menggunakan kebenaran ini untuk menghantar data kenalan anda kepada orang lain."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Membenarkan apl membaca semua data tentang kenalan anda yang disimpan pada telefon anda, termasuk kekerapan anda memanggil, menghantar e-mel atau berkomunikasi dengan cara yang lain dengan individu tertentu. Ini membantu auto-pelengkapan alamat e-mel dan ciri mudah lain. Apl hasad boleh menggunakan kebenaran ini untuk menghantar data kenalan anda kepada orang lain."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"tulis data kenalan"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Membolehkan aplikasi untuk mengubah suai data mengenai kenalan anda yang disimpan pada tablet anda, termasuk kekerapan yang anda telah dipanggil, mel, atau disampaikan dengan cara yang lain dengan individu-individu tertentu. Ini membantu dengan auto siap-alamat e-mel dan lain-lain ciri-ciri mudah. Aplikasi berniat jahat boleh menggunakan ini untuk memadam atau mengubah suai data kenalan anda."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Membenarkan apl mengubah suai data tentang kenalan anda yang disimpan pada telefon anda, termasuk kekerapan anda memanggil, menghantar e-mel atau berkomunikasi dengan cara yang lain dengan individu tertentu. Ini membantu auto-pelengkapan alamat e-mel dan ciri mudah lain. Apl hasad boleh menggunakan kebenaran ini untuk memadam atau mengubah suai data kenalan anda."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"baca log panggilan"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Membenarkan apl membaca log panggilan tablet anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakannya untuk menghantar data anda kepada orang lain."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Membenarkan apl membaca log panggilan telefon anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakannya untuk menghantar data anda kepada orang lain."</string>

@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"للسماح للتطبيق بتلقي رسائل WAP ومعالجتها. قد تراقب بعض التطبيقات الضارة رسائلك أو تحذفها بدون عرضها لك."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"استرداد التطبيقات التي قيد التشغيل"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"للسماح للتطبيق باسترداد معلومات حول المهام المُشغلة الحالية والحديثة. قد تكتشف التطبيقات الضارة معلومات خاصة حول التطبيقات الأخرى."</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"استرداد تفاصيل التطبيقات قيد التشغيل"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"للسماح للتطبيق باسترداد معلومات تفصيلية حول المهام قيد التشغيل حاليًا ومؤخرًا. قد تكتشف التطبيقات الضارة معلومات خاصة حول التطبيقات الأخرى."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"إعادة ترتيب التطبيقات قيد التشغيل"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"للسماح لتطبيق ما بنقل المهام إلى المقدمة والخلفية. قد تفرض التطبيقات الضارة نفسها إلى المقدمة بدون تحكم منك."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"إيقاف التطبيقات التي قيد التشغيل"</string>

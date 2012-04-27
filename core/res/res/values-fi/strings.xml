@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Antaa sovelluksen vastaanottaa ja käsitellä WAP-viestejä. Haitalliset sovellukset voivat valvoa viestejä tai poistaa niitä näyttämättä niitä sinulle."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"käynnissä olevien sovellusten noutaminen"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Antaa sovelluksen noutaa käynnissä oleviin ja käynnissä olleisiin tehtäviin liittyviä tietoja. Haitalliset sovellukset saattavat saada näin muihin sovelluksiin liittyviä yksityisiä tietoja."</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"hae tiedot suoritettavista sovelluksista"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Antaa sovellukselle oikeuden noutaa käynnissä oleviin ja käynnissä olleisiin tehtäviin liittyviä tietoja. Haitalliset sovellukset saattavat saada näin muihin sovelluksiin liittyviä yksityisiä tietoja."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"käynnissä olevien sovellusten järjesteleminen"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Antaa sovelluksen siirtää tehtäviä etualalle ja taustalle. Haitalliset sovellukset voivat pakottaa itsensä etualalle ilman käyttäjän hallintaa."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"käynnissä olevien sovellusten pysäyttäminen"</string>

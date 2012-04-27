@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"앱이 WAP 메시지를 받고 처리할 수 있도록 허용합니다. 이 경우 악성 앱이 메시지를 모니터링하거나 사용자가 보기 전에 삭제할 수 있습니다."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"실행 중인 앱 검색"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"앱이 현재 실행 중이거나 최근에 실행된 작업에 대한 정보를 검색할 수 있도록 허용합니다. 이 경우 악성 앱이 다른 앱에 대한 개인 정보를 검색할 수 있습니다."</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"실행 중인 앱 세부정보 검색"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"앱이 현재 실행 중이거나 최근에 실행된 작업에 대한 상세한 정보를 검색할 수 있도록 허용합니다. 이 경우 악성 앱이 다른 앱에 대한 개인 정보를 검색할 수 있습니다."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"실행 중인 앱 순서 재지정"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"앱이 작업을 포그라운드나 백그라운드로 이동할 수 있도록 허용합니다. 이 경우 악성 앱이 사용자의 조작 없이 앞으로 이동할 수 있습니다."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"실행 중인 앱 중지"</string>
@@ -344,15 +342,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"앱이 브로드캐스트가 끝난 후에 남은 브로드캐스트를 보낼 수 있도록 허용합니다. 이 경우 악성 앱이 태블릿에서 메모리를 너무 많이 사용하도록 하여 속도를 저하시키거나 불안정하게 만들 수 있습니다."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"앱이 브로드캐스트가 끝난 후에 남은 브로드캐스트를 보낼 수 있도록 허용합니다. 이 경우 악성 앱이 휴대전화에서 메모리를 너무 많이 사용하도록 하여 속도를 저하시키거나 불안정하게 만들 수 있습니다."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"연락처 데이터 읽기"</string>
-    <!-- no translation found for permdesc_readContacts (6370069055638209432) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4093353182535351501) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 내 태블릿에 저장된 연락처에 대한 모든 데이터를 앱이 읽도록 허용합니다. 이렇게 하면 이메일 주소 자동완성과 기타 편리한 기능을 사용할 수 있습니다. 한편 악성 앱이 이를 악용하여 내 연락처 데이터를 다른 사람에게 전송할 수 있습니다."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 내 휴대전화에 저장된 연락처에 대한 모든 데이터를 앱이 읽도록 허용합니다. 이렇게 하면 이메일 주소 자동완성과 기타 편리한 기능을 사용할 수 있습니다. 한편 악성 앱이 이를 악용하여 내 연락처 데이터를 다른 사람에게 전송할 수 있습니다."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"연락처 데이터 작성"</string>
-    <!-- no translation found for permdesc_writeContacts (5495863352173533286) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (6108469962248865715) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 내 휴대전화에 저장된 연락처에 대한 모든 데이터를 앱이 수정하도록 허용합니다. 이렇게 하면 이메일 주소 자동완성과 기타 편리한 기능을 사용할 수 있습니다. 한편 악성 앱이 이를 악용하여 내 연락처 데이터를 삭제 또는 수정할 수 있습니다."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 내 휴대전화에 저장된 연락처에 대한 모든 데이터를 앱이 수정하도록 허용합니다. 이렇게 하면 이메일 주소 자동완성과 기타 편리한 기능을 사용할 수 있습니다. 한편 악성 앱이 이를 악용하여 내 연락처 데이터를 삭제 또는 수정할 수 있습니다."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"통화 기록 읽기"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"앱에서 수신 및 발신 통화 데이터를 포함하여 태블릿의 통화 기록을 읽을 수 있도록 허용합니다. 이 경우 악성 앱이 데이터를 다른 사용자에게 보낼 수 있습니다."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"앱에서 수신 및 발신 통화 데이터를 포함하여 휴대전화의 통화 기록을 읽을 수 있도록 허용합니다. 이 경우 악성 앱이 데이터를 다른 사용자에게 보낼 수 있습니다."</string>

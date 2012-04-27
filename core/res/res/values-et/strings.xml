@@ -217,10 +217,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Võimaldab rakendusel vastu võtta ja töödelda WAP-sõnumeid. Pahatahtlikud rakendused võivad teie sõnumeid jälgida või neid kustutada teile näitamata."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"Käitatud rakenduste toomine"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Võimaldab rakendusel hankida teavet praegu töötavate ja hiljuti töötanud ülesannete kohta. Pahatahtlikud rakendused võivad avastada privaatset teavet teiste rakenduste kohta."</string>
-    <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
-    <skip />
-    <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
-    <skip />
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"töötavate rakenduste üksikasjade toomine"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Võimaldab rakendusel tuua üksikasjalikku teavet praegu töötavate ja hiljuti käitatud ülesannete kohta. Pahatahtlikud rakendused võivad tuvastada privaatset teavet muude rakenduste kohta."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"käitatud rakenduste ümberjärjestamine"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Võimaldab rakendusel teisaldada ülesanded esiplaanile ja taustale. Pahatahtlikud rakendused võivad sundida end esiplaanile tulema teie loata."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"käitatud rakenduste peatamine"</string>
