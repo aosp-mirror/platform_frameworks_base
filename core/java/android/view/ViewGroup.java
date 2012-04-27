@@ -382,15 +382,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private static final int ARRAY_INITIAL_CAPACITY = 12;
     private static final int ARRAY_CAPACITY_INCREMENT = 12;
 
-    private static Paint DEBUG_PAINT;
-
-    private static Paint getDebugPaint() {
-         if (DEBUG_PAINT == null) {
-             DEBUG_PAINT = new Paint();
-             DEBUG_PAINT.setStyle(Paint.Style.STROKE);
-         }
-         return DEBUG_PAINT;
-    }
+    private static Paint sDebugPaint;
+    private static float[] sDebugLines;
 
     // Used to draw cached views
     Paint mCachePaint;
@@ -2678,7 +2671,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private static void drawRect(Canvas canvas, int x1, int y1, int x2, int y2, int color) {
         Paint paint = getDebugPaint();
         paint.setColor(color);
-        canvas.drawRect(x1, y1, x2 - 1, y2 - 1, paint);
+
+        canvas.drawLines(getDebugLines(x1, y1, x2, y2), paint);
     }
 
     /**
@@ -6135,5 +6129,44 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             mView = null;
             mLocation.set(0, 0, 0, 0);
         }
+    }
+
+    private static Paint getDebugPaint() {
+        if (sDebugPaint == null) {
+            sDebugPaint = new Paint();
+            sDebugPaint.setAntiAlias(false);
+        }
+        return sDebugPaint;
+    }
+
+    private static float[] getDebugLines(int x1, int y1, int x2, int y2) {
+        if (sDebugLines== null) {
+            sDebugLines = new float[16];
+        }
+
+        x2--;
+        y2--;
+
+        sDebugLines[0] = x1;
+        sDebugLines[1] = y1;
+        sDebugLines[2] = x2;
+        sDebugLines[3] = y1;
+
+        sDebugLines[4] = x2;
+        sDebugLines[5] = y1;
+        sDebugLines[6] = x2;
+        sDebugLines[7] = y2 + 1;
+
+        sDebugLines[8] = x2 + 1;
+        sDebugLines[9] = y2;
+        sDebugLines[10] = x1;
+        sDebugLines[11] = y2;
+
+        sDebugLines[12]  = x1;
+        sDebugLines[13]  = y2;
+        sDebugLines[14] = x1;
+        sDebugLines[15] = y1;
+
+        return sDebugLines;
     }
 }
