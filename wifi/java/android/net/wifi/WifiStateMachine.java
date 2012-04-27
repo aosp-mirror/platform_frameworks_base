@@ -305,13 +305,11 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_RECONNECT                        = BASE + 75;
     /* Reassociate to a network */
     static final int CMD_REASSOCIATE                      = BASE + 76;
-    /* Controls power mode and suspend mode optimizations
+    /* Controls suspend mode optimizations
      *
-     * When high perf mode is enabled, power mode is set to
-     * POWER_MODE_ACTIVE and suspend mode optimizations are disabled
+     * When high perf mode is enabled, suspend mode optimizations are disabled
      *
-     * When high perf mode is disabled, power mode is set to
-     * POWER_MODE_AUTO and suspend mode optimizations are enabled
+     * When high perf mode is disabled, suspend mode optimizations are enabled
      *
      * Suspend mode optimizations include:
      * - packet filtering
@@ -374,11 +372,8 @@ public class WifiStateMachine extends StateMachine {
      */
     private static final int DEFAULT_MAX_DHCP_RETRIES = 9;
 
-    static final int POWER_MODE_ACTIVE = 1;
-    static final int POWER_MODE_AUTO = 0;
-
-    /* Tracks the power mode for restoration after a DHCP request/renewal goes through */
-    private int mPowerMode = POWER_MODE_AUTO;
+    /* Tracks if power save is enabled in driver */
+    private boolean mPowerSaveEnabled = true;;
 
     /**
      * Default framework scan interval in milliseconds. This is used in the scenario in which
@@ -1683,21 +1678,18 @@ public class WifiStateMachine extends StateMachine {
                     mWifiNative.BLUETOOTH_COEXISTENCE_MODE_DISABLED);
         }
 
-        mPowerMode =  mWifiNative.getPowerMode();
-        if (mPowerMode < 0) {
-            // Handle the case where supplicant driver does not support
-            // getPowerModeCommand.
-            mPowerMode = WifiStateMachine.POWER_MODE_AUTO;
-        }
-        if (mPowerMode != WifiStateMachine.POWER_MODE_ACTIVE) {
-            mWifiNative.setPowerMode(WifiStateMachine.POWER_MODE_ACTIVE);
+        /* Disable power save during DHCP */
+        if (mPowerSaveEnabled) {
+            mPowerSaveEnabled = false;
+            mWifiNative.setPowerSave(mPowerSaveEnabled);
         }
     }
 
 
     void handlePostDhcpSetup() {
-        /* restore power mode */
-        mWifiNative.setPowerMode(mPowerMode);
+        /* Restore power save */
+        mPowerSaveEnabled = true;
+        mWifiNative.setPowerSave(mPowerSaveEnabled);
 
         // Set the coexistence mode back to its default value
         mWifiNative.setBluetoothCoexistenceMode(
@@ -2548,6 +2540,8 @@ public class WifiStateMachine extends StateMachine {
             } else {
                 mWifiNative.stopFilteringMulticastV4Packets();
             }
+
+            mWifiNative.setPowerSave(mPowerSaveEnabled);
 
             if (mIsScanMode) {
                 mWifiNative.setScanResultHandling(SCAN_ONLY_MODE);
