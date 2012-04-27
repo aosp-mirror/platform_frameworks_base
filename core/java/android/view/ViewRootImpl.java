@@ -947,6 +947,7 @@ public final class ViewRootImpl implements ViewParent,
             mTraversalBarrier = mHandler.getLooper().postSyncBarrier();
             mChoreographer.postCallback(
                     Choreographer.CALLBACK_TRAVERSAL, mTraversalRunnable, null);
+            scheduleConsumeBatchedInput();
         }
     }
 
@@ -963,9 +964,6 @@ public final class ViewRootImpl implements ViewParent,
         if (mTraversalScheduled) {
             mTraversalScheduled = false;
             mHandler.getLooper().removeSyncBarrier(mTraversalBarrier);
-
-            doConsumeBatchedInput(false);
-            doProcessInputEvents();
 
             if (mProfile) {
                 Debug.startMethodTracing("ViewAncestor");
@@ -4206,20 +4204,13 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    void doConsumeBatchedInput(boolean callback) {
+    void doConsumeBatchedInput() {
         if (mConsumeBatchedInputScheduled) {
             mConsumeBatchedInputScheduled = false;
-            if (!callback) {
-                mChoreographer.removeCallbacks(Choreographer.CALLBACK_INPUT,
-                        mConsumedBatchedInputRunnable, null);
+            if (mInputEventReceiver != null) {
+                mInputEventReceiver.consumeBatchedInputEvents();
             }
-        }
-
-        // Always consume batched input events even if not scheduled, because there
-        // might be new input there waiting for us that we have no noticed yet because
-        // the Looper has not had a chance to run again.
-        if (mInputEventReceiver != null) {
-            mInputEventReceiver.consumeBatchedInputEvents();
+            doProcessInputEvents();
         }
     }
 
@@ -4257,8 +4248,7 @@ public final class ViewRootImpl implements ViewParent,
     final class ConsumeBatchedInputRunnable implements Runnable {
         @Override
         public void run() {
-            doConsumeBatchedInput(true);
-            doProcessInputEvents();
+            doConsumeBatchedInput();
         }
     }
     final ConsumeBatchedInputRunnable mConsumedBatchedInputRunnable =
