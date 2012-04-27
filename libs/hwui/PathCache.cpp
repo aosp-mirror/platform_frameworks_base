@@ -25,10 +25,15 @@ namespace android {
 namespace uirenderer {
 
 // Defined in ShapeCache.h
-void computePathBounds(const SkPath *path, const SkPaint* paint,
+
+void computePathBounds(const SkPath* path, const SkPaint* paint,
         float& left, float& top, float& offset, uint32_t& width, uint32_t& height) {
     const SkRect& bounds = path->getBounds();
+    computeBounds(bounds, paint, left, top, offset, width, height);
+}
 
+void computeBounds(const SkRect& bounds, const SkPaint* paint,
+        float& left, float& top, float& offset, uint32_t& width, uint32_t& height) {
     const float pathWidth = fmax(bounds.width(), 1.0f);
     const float pathHeight = fmax(bounds.height(), 1.0f);
 

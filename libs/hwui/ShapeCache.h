@@ -336,6 +336,19 @@ public:
 
 protected:
     PathTexture* addTexture(const Entry& entry, const SkPath *path, const SkPaint* paint);
+    PathTexture* addTexture(const Entry& entry, SkBitmap* bitmap);
+    void addTexture(const Entry& entry, SkBitmap* bitmap, PathTexture* texture);
+
+    /**
+     * Ensures there is enough space in the cache for a texture of the specified
+     * dimensions.
+     */
+    void purgeCache(uint32_t width, uint32_t height);
+
+    void initBitmap(SkBitmap& bitmap, uint32_t width, uint32_t height);
+    void initPaint(SkPaint& paint);
+
+    bool checkTextureSize(uint32_t width, uint32_t height);
 
     PathTexture* get(Entry entry) {
         return mCache.get(entry);
@@ -489,8 +502,63 @@ void ShapeCache<Entry>::removeTexture(PathTexture* texture) {
     }
 }
 
-void computePathBounds(const SkPath *path, const SkPaint* paint,
+void computePathBounds(const SkPath* path, const SkPaint* paint,
         float& left, float& top, float& offset, uint32_t& width, uint32_t& height);
+void computeBounds(const SkRect& bounds, const SkPaint* paint,
+        float& left, float& top, float& offset, uint32_t& width, uint32_t& height);
+
+static PathTexture* createTexture(float left, float top, float offset,
+        uint32_t width, uint32_t height, uint32_t id) {
+    PathTexture* texture = new PathTexture;
+    texture->left = left;
+    texture->top = top;
+    texture->offset = offset;
+    texture->width = width;
+    texture->height = height;
+    texture->generation = id;
+    return texture;
+}
+
+template<class Entry>
+void ShapeCache<Entry>::purgeCache(uint32_t width, uint32_t height) {
+    const uint32_t size = width * height;
+    // Don't even try to cache a bitmap that's bigger than the cache
+    if (size < mMaxSize) {
+        while (mSize + size > mMaxSize) {
+            mCache.removeOldest();
+        }
+    }
+}
+
+template<class Entry>
+void ShapeCache<Entry>::initBitmap(SkBitmap& bitmap, uint32_t width, uint32_t height) {
+    bitmap.setConfig(SkBitmap::kA8_Config, width, height);
+    bitmap.allocPixels();
+    bitmap.eraseColor(0);
+}
+
+template<class Entry>
+void ShapeCache<Entry>::initPaint(SkPaint& paint) {
+    // Make sure the paint is opaque, color, alpha, filter, etc.
+    // will be applied later when compositing the alpha8 texture
+    paint.setColor(0xff000000);
+    paint.setAlpha(255);
+    paint.setColorFilter(NULL);
+    paint.setMaskFilter(NULL);
+    paint.setShader(NULL);
+    SkXfermode* mode = SkXfermode::Create(SkXfermode::kSrc_Mode);
+    SkSafeUnref(paint.setXfermode(mode));
+}
+
+template<class Entry>
+bool ShapeCache<Entry>::checkTextureSize(uint32_t width, uint32_t height) {
+    if (width > mMaxTextureSize || height > mMaxTextureSize) {
+        ALOGW("Shape %s too large to be rendered into a texture (%dx%d, max=%dx%d)",
+                mName, width, height, mMaxTextureSize, mMaxTextureSize);
+        return false;
+    }
+    return true;
+}
 
 template<class Entry>
 PathTexture* ShapeCache<Entry>::addTexture(const Entry& entry, const SkPath *path,
@@ -500,51 +568,31 @@ PathTexture* ShapeCache<Entry>::addTexture(const Entry& entry, const SkPath *pat
     uint32_t width, height;
     computePathBounds(path, paint, left, top, offset, width, height);
 
-    if (width > mMaxTextureSize || height > mMaxTextureSize) {
-        ALOGW("Shape %s too large to be rendered into a texture (%dx%d, max=%dx%d)",
-                mName, width, height, mMaxTextureSize, mMaxTextureSize);
-        return NULL;
-    }
+    if (!checkTextureSize(width, height)) return NULL;
 
-    const uint32_t size = width * height;
-    // Don't even try to cache a bitmap that's bigger than the cache
-    if (size < mMaxSize) {
-        while (mSize + size > mMaxSize) {
-            mCache.removeOldest();
-        }
-    }
-
-    PathTexture* texture = new PathTexture;
-    texture->left = left;
-    texture->top = top;
-    texture->offset = offset;
-    texture->width = width;
-    texture->height = height;
-    texture->generation = path->getGenerationID();
+    purgeCache(width, height);
 
     SkBitmap bitmap;
-    bitmap.setConfig(SkBitmap::kA8_Config, width, height);
-    bitmap.allocPixels();
-    bitmap.eraseColor(0);
+    initBitmap(bitmap, width, height);
 
     SkPaint pathPaint(*paint);
-
-    // Make sure the paint is opaque, color, alpha, filter, etc.
-    // will be applied later when compositing the alpha8 texture
-    pathPaint.setColor(0xff000000);
-    pathPaint.setAlpha(255);
-    pathPaint.setColorFilter(NULL);
-    pathPaint.setMaskFilter(NULL);
-    pathPaint.setShader(NULL);
-    SkXfermode* mode = SkXfermode::Create(SkXfermode::kSrc_Mode);
-    SkSafeUnref(pathPaint.setXfermode(mode));
+    initPaint(pathPaint);
 
     SkCanvas canvas(bitmap);
     canvas.translate(-left + offset, -top + offset);
     canvas.drawPath(*path, pathPaint);
 
-    generateTexture(bitmap, texture);
+    PathTexture* texture = createTexture(left, top, offset, width, height, path->getGenerationID());
+    addTexture(entry, &bitmap, texture);
 
+    return texture;
+}
+
+template<class Entry>
+void ShapeCache<Entry>::addTexture(const Entry& entry, SkBitmap* bitmap, PathTexture* texture) {
+    generateTexture(*bitmap, texture);
+
+    uint32_t size = texture->width * texture->height;
     if (size < mMaxSize) {
         mSize += size;
         SHAPE_LOGD("ShapeCache::get: create %s: name, size, mSize = %d, %d, %d",
@@ -556,8 +604,6 @@ PathTexture* ShapeCache<Entry>::addTexture(const Entry& entry, const SkPath *pat
     } else {
         texture->cleanup = true;
     }
-
-    return texture;
 }
 
 template<class Entry>
