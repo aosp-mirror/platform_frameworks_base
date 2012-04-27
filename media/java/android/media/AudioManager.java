@@ -701,6 +701,21 @@ public class AudioManager {
     }
 
     /**
+     * Get the stream type whose volume is driving the UI sounds volume.
+     * UI sounds are screen lock/unlock, camera shutter, key clicks...
+     * @hide
+     */
+    public int getMasterStreamType() {
+        IAudioService service = getService();
+        try {
+            return service.getMasterStreamType();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in getMasterStreamType", e);
+            return STREAM_RING;
+        }
+    }
+
+    /**
      * Sets the ringer mode.
      * <p>
      * Silent mode will mute the volume and will not vibrate. Vibrate mode will
