@@ -1775,6 +1775,8 @@ public class BluetoothService extends IBluetooth.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+
         if (getBluetoothStateInternal() != BluetoothAdapter.STATE_ON) {
             return;
         }
