@@ -87,9 +87,12 @@ public class UsbDeviceManager {
 
     private static final int MSG_UPDATE_STATE = 0;
     private static final int MSG_ENABLE_ADB = 1;
-    private static final int MSG_SET_CURRENT_FUNCTION = 2;
+    private static final int MSG_SET_CURRENT_FUNCTIONS = 2;
     private static final int MSG_SYSTEM_READY = 3;
     private static final int MSG_BOOT_COMPLETED = 4;
+
+    private static final int AUDIO_MODE_NONE = 0;
+    private static final int AUDIO_MODE_SOURCE = 1;
 
     // Delay for debouncing USB disconnects.
     // We often get rapid connect/disconnect events when enabling USB functions,
@@ -110,6 +113,7 @@ public class UsbDeviceManager {
     private boolean mAdbEnabled;
     private boolean mAudioSourceEnabled;
     private Map<String, List<Pair<String, String>>> mOemModeMap;
+    private String[] mAccessoryStrings;
 
     private class AdbSettingsObserver extends ContentObserver {
         public AdbSettingsObserver() {
@@ -137,7 +141,7 @@ public class UsbDeviceManager {
                 mHandler.updateState(state);
             } else if ("START".equals(accessory)) {
                 if (DEBUG) Slog.d(TAG, "got accessory start");
-                setCurrentFunction(UsbManager.USB_FUNCTION_ACCESSORY, false);
+                startAccessoryMode();
             }
         }
     };
@@ -160,7 +164,7 @@ public class UsbDeviceManager {
 
         if (nativeIsStartRequested()) {
             if (DEBUG) Slog.d(TAG, "accessory attached at boot");
-            setCurrentFunction(UsbManager.USB_FUNCTION_ACCESSORY, false);
+            startAccessoryMode();
         }
     }
 
@@ -185,6 +189,29 @@ public class UsbDeviceManager {
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ADB_ENABLED, mAdbEnabled ? 1 : 0);
 
         mHandler.sendEmptyMessage(MSG_SYSTEM_READY);
+    }
+
+    private void startAccessoryMode() {
+        mAccessoryStrings = nativeGetAccessoryStrings();
+        boolean enableAudio = (nativeGetAudioMode() == AUDIO_MODE_SOURCE);
+        // don't start accessory mode if our mandatory strings have not been set
+        boolean enableAccessory = (mAccessoryStrings != null &&
+                        mAccessoryStrings[UsbAccessory.MANUFACTURER_STRING] != null &&
+                        mAccessoryStrings[UsbAccessory.MODEL_STRING] != null);
+        String functions = null;
+
+        if (enableAccessory && enableAudio) {
+            functions = UsbManager.USB_FUNCTION_ACCESSORY + ","
+                    + UsbManager.USB_FUNCTION_AUDIO_SOURCE;
+        } else if (enableAccessory) {
+            functions = UsbManager.USB_FUNCTION_ACCESSORY;
+        } else if (enableAudio) {
+            functions = UsbManager.USB_FUNCTION_AUDIO_SOURCE;
+        }
+
+        if (functions != null) {
+            setCurrentFunctions(functions, false);
+        }
     }
 
     private static void initRndisAddress() {
@@ -467,9 +494,8 @@ public class UsbDeviceManager {
             if (!mHasUsbAccessory) return;
 
             if (mConfigured) {
-                String[] strings = nativeGetAccessoryStrings();
-                if (strings != null) {
-                    mCurrentAccessory = new UsbAccessory(strings);
+                if (mAccessoryStrings != null) {
+                    mCurrentAccessory = new UsbAccessory(mAccessoryStrings);
                     Slog.d(TAG, "entering USB accessory mode: " + mCurrentAccessory);
                     // defer accessoryAttached if system is not ready
                     if (mBootCompleted) {
@@ -489,6 +515,7 @@ public class UsbDeviceManager {
                         mSettingsManager.accessoryDetached(mCurrentAccessory);
                     }
                     mCurrentAccessory = null;
+                    mAccessoryStrings = null;
                 }
             }
         }
@@ -561,10 +588,10 @@ public class UsbDeviceManager {
                 case MSG_ENABLE_ADB:
                     setAdbEnabled(msg.arg1 == 1);
                     break;
-                case MSG_SET_CURRENT_FUNCTION:
-                    String function = (String)msg.obj;
+                case MSG_SET_CURRENT_FUNCTIONS:
+                    String functions = (String)msg.obj;
                     boolean makeDefault = (msg.arg1 == 1);
-                    setEnabledFunctions(function, makeDefault);
+                    setEnabledFunctions(functions, makeDefault);
                     break;
                 case MSG_SYSTEM_READY:
                     updateUsbNotification();
@@ -717,9 +744,9 @@ public class UsbDeviceManager {
         return nativeOpenAccessory();
     }
 
-    public void setCurrentFunction(String function, boolean makeDefault) {
-        if (DEBUG) Slog.d(TAG, "setCurrentFunction(" + function + ") default: " + makeDefault);
-        mHandler.sendMessage(MSG_SET_CURRENT_FUNCTION, function, makeDefault);
+    public void setCurrentFunctions(String functions, boolean makeDefault) {
+        if (DEBUG) Slog.d(TAG, "setCurrentFunctions(" + functions + ") default: " + makeDefault);
+        mHandler.sendMessage(MSG_SET_CURRENT_FUNCTIONS, functions, makeDefault);
     }
 
     public void setMassStorageBackingFile(String path) {
@@ -787,4 +814,5 @@ public class UsbDeviceManager {
     private native String[] nativeGetAccessoryStrings();
     private native ParcelFileDescriptor nativeOpenAccessory();
     private native boolean nativeIsStartRequested();
+    private native int nativeGetAudioMode();
 }
