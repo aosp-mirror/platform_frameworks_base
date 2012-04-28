@@ -462,7 +462,7 @@ import java.lang.ref.WeakReference;
  *     <td>{Prepared, Started, Stopped, Paused, PlaybackCompleted}</p></td>
  *     <td>{Idle, Initialized, Error}</p></td>
  *     <td>Successful invoke of this method does not change the state.</p></td></tr>
- * <tr><td>addExternalSource </p></td>
+ * <tr><td>addTimedTextSource </p></td>
  *     <td>{Prepared, Started, Stopped, Paused, PlaybackCompleted}</p></td>
  *     <td>{Idle, Initialized, Error}</p></td>
  *     <td>Successful invoke of this method does not change the state.</p></td></tr>
@@ -470,7 +470,7 @@ import java.lang.ref.WeakReference;
  *     <td>{Prepared, Started, Stopped, Paused, PlaybackCompleted}</p></td>
  *     <td>{Idle, Initialized, Error}</p></td>
  *     <td>Successful invoke of this method does not change the state.</p></td></tr>
- * <tr><td>disableTrack </p></td>
+ * <tr><td>deselectTrack </p></td>
  *     <td>{Prepared, Started, Stopped, Paused, PlaybackCompleted}</p></td>
  *     <td>{Idle, Initialized, Error}</p></td>
  *     <td>Successful invoke of this method does not change the state.</p></td></tr>
@@ -598,7 +598,7 @@ public class MediaPlayer
     private static final int INVOKE_ID_ADD_EXTERNAL_SOURCE = 2;
     private static final int INVOKE_ID_ADD_EXTERNAL_SOURCE_FD = 3;
     private static final int INVOKE_ID_SELECT_TRACK = 4;
-    private static final int INVOKE_ID_UNSELECT_TRACK = 5;
+    private static final int INVOKE_ID_DESELECT_TRACK = 5;
 
     /**
      * Create a request parcel which can be routed to the native media
@@ -622,7 +622,7 @@ public class MediaPlayer
      * parcels for the request and reply. Both payloads' format is a
      * convention between the java caller and the native player.
      * Must be called after setDataSource to make sure a native player
-     * exists.
+     * exists. On failure, a RuntimeException is thrown.
      *
      * @param request Parcel with the data for the extension. The
      * caller must use {@link #newRequest()} to get one.
@@ -630,13 +630,14 @@ public class MediaPlayer
      * @param reply Output parcel with the data returned by the
      * native player.
      *
-     * @return The status code see utils/Errors.h
      * {@hide}
      */
-    public int invoke(Parcel request, Parcel reply) {
+    public void invoke(Parcel request, Parcel reply) {
         int retcode = native_invoke(request, reply);
         reply.setDataPosition(0);
-        return retcode;
+        if (retcode != 0) {
+            throw new RuntimeException("failure code: " + retcode);
+        }
     }
 
     /**
@@ -1504,8 +1505,7 @@ public class MediaPlayer
     /**
      * Class for MediaPlayer to return each audio/video/subtitle track's metadata.
      *
-     * {@see #getTrackInfo()}.
-     * {@hide}
+     * @see android.media.MediaPlayer#getTrackInfo
      */
     static public class TrackInfo implements Parcelable {
         /**
@@ -1539,17 +1539,16 @@ public class MediaPlayer
             mLanguage = in.readString();
         }
 
-        /*
-         * No special parcel contents. Keep it as hide.
-         * {@hide}
+        /**
+         * {@inheritDoc}
          */
         @Override
         public int describeContents() {
             return 0;
         }
 
-        /*
-         * {@hide}
+        /**
+         * {@inheritDoc}
          */
         @Override
         public void writeToParcel(Parcel dest, int flags) {
@@ -1577,22 +1576,18 @@ public class MediaPlayer
 
     /**
      * Returns an array of track information.
-     * If it is called in an invalid state, IllegalStateException will be thrown.
      *
      * @return Array of track info. The total number of tracks is the array length.
-     * Must be called again if an external source has been added after any of the
-     * addExternalSource methods are called.
-     * {@hide}
+     * Must be called again if an external timed text source has been added after any of the
+     * addTimedTextSource methods are called.
+     * @throws IllegalStateException if it is called in an invalid state.
      */
-    public TrackInfo[] getTrackInfo() {
+    public TrackInfo[] getTrackInfo() throws IllegalStateException {
         Parcel request = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         request.writeInterfaceToken(IMEDIA_PLAYER);
         request.writeInt(INVOKE_ID_GET_TRACK_INFO);
-        int status = invoke(request, reply);
-        if (status != 0) {
-            throw new IllegalStateException();
-        }
+        invoke(request, reply);
         TrackInfo trackInfo[] = reply.createTypedArray(TrackInfo.CREATOR);
         return trackInfo;
     }
@@ -1601,8 +1596,7 @@ public class MediaPlayer
      * in include/media/stagefright/MediaDefs.h and media/libstagefright/MediaDefs.cpp!
      */
     /**
-     * MIME type for SubRip (SRT) container. Used in addExternalSource APIs.
-     * {@hide}
+     * MIME type for SubRip (SRT) container. Used in addTimedTextSource APIs.
      */
     public static final String MEDIA_MIMETYPE_TEXT_SUBRIP = "application/x-subrip";
 
@@ -1619,23 +1613,23 @@ public class MediaPlayer
     /* TODO: Limit the total number of external timed text source to a reasonable number.
      */
     /**
-     * Adds an external source file.
+     * Adds an external timed text source file.
      *
      * Currently supported format is SubRip with the file extension .srt, case insensitive.
-     * Note that a single external source may contain multiple tracks in it.
+     * Note that a single external timed text source may contain multiple tracks in it.
      * One can find the total number of available tracks using {@link #getTrackInfo()} to see what
      * additional tracks become available after this method call.
      *
-     * @param path The file path of external source file.
+     * @param path The file path of external timed text source file.
      * @param mimeType The mime type of the file. Must be one of the mime types listed above.
      * @throws IOException if the file cannot be accessed or is corrupted.
      * @throws IllegalArgumentException if the mimeType is not supported.
-     * {@hide}
+     * @throws IllegalStateException if called in an invalid state.
      */
-    public void addExternalSource(String path, String mimeType)
-            throws IOException, IllegalArgumentException {
+    public void addTimedTextSource(String path, String mimeType)
+            throws IOException, IllegalArgumentException, IllegalStateException {
         if (!availableMimeTypeForExternalSource(mimeType)) {
-            final String msg = "Illegal mimeType for external source: " + mimeType;
+            final String msg = "Illegal mimeType for timed text source: " + mimeType;
             throw new IllegalArgumentException(msg);
         }
 
@@ -1643,7 +1637,7 @@ public class MediaPlayer
         if (file.exists()) {
             FileInputStream is = new FileInputStream(file);
             FileDescriptor fd = is.getFD();
-            addExternalSource(fd, mimeType);
+            addTimedTextSource(fd, mimeType);
             is.close();
         } else {
             // We do not support the case where the path is not a file.
@@ -1652,10 +1646,10 @@ public class MediaPlayer
     }
 
     /**
-     * Adds an external source file (Uri).
+     * Adds an external timed text source file (Uri).
      *
      * Currently supported format is SubRip with the file extension .srt, case insensitive.
-     * Note that a single external source may contain multiple tracks in it.
+     * Note that a single external timed text source may contain multiple tracks in it.
      * One can find the total number of available tracks using {@link #getTrackInfo()} to see what
      * additional tracks become available after this method call.
      *
@@ -1664,13 +1658,13 @@ public class MediaPlayer
      * @param mimeType The mime type of the file. Must be one of the mime types listed above.
      * @throws IOException if the file cannot be accessed or is corrupted.
      * @throws IllegalArgumentException if the mimeType is not supported.
-     * {@hide}
+     * @throws IllegalStateException if called in an invalid state.
      */
-    public void addExternalSource(Context context, Uri uri, String mimeType)
-            throws IOException, IllegalArgumentException {
+    public void addTimedTextSource(Context context, Uri uri, String mimeType)
+            throws IOException, IllegalArgumentException, IllegalStateException {
         String scheme = uri.getScheme();
         if(scheme == null || scheme.equals("file")) {
-            addExternalSource(uri.getPath(), mimeType);
+            addTimedTextSource(uri.getPath(), mimeType);
             return;
         }
 
@@ -1681,7 +1675,7 @@ public class MediaPlayer
             if (fd == null) {
                 return;
             }
-            addExternalSource(fd.getFileDescriptor(), mimeType);
+            addTimedTextSource(fd.getFileDescriptor(), mimeType);
             return;
         } catch (SecurityException ex) {
         } catch (IOException ex) {
@@ -1693,47 +1687,49 @@ public class MediaPlayer
     }
 
     /**
-     * Adds an external source file (FileDescriptor).
+     * Adds an external timed text source file (FileDescriptor).
+     *
      * It is the caller's responsibility to close the file descriptor.
      * It is safe to do so as soon as this call returns.
      *
-     * Currently supported format is SubRip with the file extension .srt, case insensitive.
-     * Note that a single external source may contain multiple tracks in it.
-     * One can find the total number of available tracks using {@link #getTrackInfo()} to see what
-     * additional tracks become available after this method call.
+     * Currently supported format is SubRip. Note that a single external timed text source may
+     * contain multiple tracks in it. One can find the total number of available tracks
+     * using {@link #getTrackInfo()} to see what additional tracks become available
+     * after this method call.
      *
      * @param fd the FileDescriptor for the file you want to play
      * @param mimeType The mime type of the file. Must be one of the mime types listed above.
      * @throws IllegalArgumentException if the mimeType is not supported.
-     * {@hide}
+     * @throws IllegalStateException if called in an invalid state.
      */
-    public void addExternalSource(FileDescriptor fd, String mimeType)
-            throws IllegalArgumentException {
+    public void addTimedTextSource(FileDescriptor fd, String mimeType)
+            throws IllegalArgumentException, IllegalStateException {
         // intentionally less than LONG_MAX
-        addExternalSource(fd, 0, 0x7ffffffffffffffL, mimeType);
+        addTimedTextSource(fd, 0, 0x7ffffffffffffffL, mimeType);
     }
 
     /**
      * Adds an external timed text file (FileDescriptor).
+     *
      * It is the caller's responsibility to close the file descriptor.
      * It is safe to do so as soon as this call returns.
      *
-     * Currently supported format is SubRip with the file extension .srt, case insensitive.
-     * Note that a single external source may contain multiple tracks in it.
-     * One can find the total number of available tracks using {@link #getTrackInfo()} to see what
-     * additional tracks become available after this method call.
+     * Currently supported format is SubRip. Note that a single external timed text source may
+     * contain multiple tracks in it. One can find the total number of available tracks
+     * using {@link #getTrackInfo()} to see what additional tracks become available
+     * after this method call.
      *
      * @param fd the FileDescriptor for the file you want to play
      * @param offset the offset into the file where the data to be played starts, in bytes
      * @param length the length in bytes of the data to be played
      * @param mimeType The mime type of the file. Must be one of the mime types listed above.
      * @throws IllegalArgumentException if the mimeType is not supported.
-     * {@hide}
+     * @throws IllegalStateException if called in an invalid state.
      */
-    public void addExternalSource(FileDescriptor fd, long offset, long length, String mimeType)
-            throws IllegalArgumentException {
+    public void addTimedTextSource(FileDescriptor fd, long offset, long length, String mimeType)
+            throws IllegalArgumentException, IllegalStateException {
         if (!availableMimeTypeForExternalSource(mimeType)) {
-            throw new IllegalArgumentException("Illegal mimeType for external source: " + mimeType);
+            throw new IllegalArgumentException("Illegal mimeType for timed text source: " + mimeType);
         }
 
         Parcel request = Parcel.obtain();
@@ -1771,43 +1767,40 @@ public class MediaPlayer
      * @param index the index of the track to be selected. The valid range of the index
      * is 0..total number of track - 1. The total number of tracks as well as the type of
      * each individual track can be found by calling {@link #getTrackInfo()} method.
-     * @see android.media.MediaPlayer.getTrackInfo
-     * {@hide}
+     * @throws IllegalStateException if called in an invalid state.
+     *
+     * @see android.media.MediaPlayer#getTrackInfo
      */
-    public void selectTrack(int index) {
-        selectOrUnselectTrack(index, true /* select */);
+    public void selectTrack(int index) throws IllegalStateException {
+        selectOrDeselectTrack(index, true /* select */);
     }
 
     /**
-     * Unselect a track.
+     * Deselect a track.
      * <p>
      * Currently, the track must be a timed text track and no audio or video tracks can be
-     * unselected. If the timed text track identified by index has not been
+     * deselected. If the timed text track identified by index has not been
      * selected before, it throws an exception.
      * </p>
-     * @param index the index of the track to be unselected. The valid range of the index
+     * @param index the index of the track to be deselected. The valid range of the index
      * is 0..total number of tracks - 1. The total number of tracks as well as the type of
      * each individual track can be found by calling {@link #getTrackInfo()} method.
+     * @throws IllegalStateException if called in an invalid state.
      *
-     * @see android.media.MediaPlayer.getTrackInfo
-     * {@hide}
+     * @see android.media.MediaPlayer#getTrackInfo
      */
-    public void unselectTrack(int index) {
-        selectOrUnselectTrack(index, false /* select */);
+    public void deselectTrack(int index) throws IllegalStateException {
+        selectOrDeselectTrack(index, false /* select */);
     }
 
-    private void selectOrUnselectTrack(int index, boolean select) {
+    private void selectOrDeselectTrack(int index, boolean select)
+            throws IllegalStateException {
         Parcel request = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         request.writeInterfaceToken(IMEDIA_PLAYER);
-        request.writeInt(select? INVOKE_ID_SELECT_TRACK: INVOKE_ID_UNSELECT_TRACK);
+        request.writeInt(select? INVOKE_ID_SELECT_TRACK: INVOKE_ID_DESELECT_TRACK);
         request.writeInt(index);
-        int status = invoke(request, reply);
-        if (status != 0) {
-            String msg = select? "selectTrack ": "unselectTrack ";
-            msg += "failed for track index: " + index;
-            throw new RuntimeException(msg);
-        }
+        invoke(request, reply);
     }
 
 
@@ -2142,7 +2135,6 @@ public class MediaPlayer
     /**
      * Interface definition of a callback to be invoked when a
      * timed text is available for display.
-     * {@hide}
      */
     public interface OnTimedTextListener
     {
@@ -2152,7 +2144,6 @@ public class MediaPlayer
          * @param mp             the MediaPlayer associated with this callback
          * @param text           the timed text sample which contains the text
          *                       needed to be displayed and the display format.
-         * {@hide}
          */
         public void onTimedText(MediaPlayer mp, TimedText text);
     }
@@ -2162,7 +2153,6 @@ public class MediaPlayer
      * for display.
      *
      * @param listener the callback that will be run
-     * {@hide}
      */
     public void setOnTimedTextListener(OnTimedTextListener listener)
     {
