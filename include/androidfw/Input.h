@@ -208,6 +208,7 @@ struct PointerCoords {
     status_t setAxisValue(int32_t axis, float value);
 
     void scale(float scale);
+    void lerp(const PointerCoords& a, const PointerCoords& b, float alpha);
 
     inline float getX() const {
         return getAxisValue(AMOTION_EVENT_AXIS_X);

@@ -88,7 +88,7 @@ void InputPublisherAndConsumerTest::PublishAndConsumeKeyEvent() {
 
     uint32_t consumeSeq;
     InputEvent* event;
-    status = mConsumer->consume(&mEventFactory, true /*consumeBatches*/, &consumeSeq, &event);
+    status = mConsumer->consume(&mEventFactory, true /*consumeBatches*/, -1, &consumeSeq, &event);
     ASSERT_EQ(OK, status)
             << "consumer consume should return OK";
 
@@ -171,7 +171,7 @@ void InputPublisherAndConsumerTest::PublishAndConsumeMotionEvent() {
 
     uint32_t consumeSeq;
     InputEvent* event;
-    status = mConsumer->consume(&mEventFactory, true /*consumeBatches*/, &consumeSeq, &event);
+    status = mConsumer->consume(&mEventFactory, true /*consumeBatches*/, -1, &consumeSeq, &event);
     ASSERT_EQ(OK, status)
             << "consumer consume should return OK";
 

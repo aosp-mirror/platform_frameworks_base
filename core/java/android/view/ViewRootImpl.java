@@ -4204,11 +4204,11 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    void doConsumeBatchedInput() {
+    void doConsumeBatchedInput(long frameTimeNanos) {
         if (mConsumeBatchedInputScheduled) {
             mConsumeBatchedInputScheduled = false;
             if (mInputEventReceiver != null) {
-                mInputEventReceiver.consumeBatchedInputEvents();
+                mInputEventReceiver.consumeBatchedInputEvents(frameTimeNanos);
             }
             doProcessInputEvents();
         }
@@ -4248,7 +4248,7 @@ public final class ViewRootImpl implements ViewParent,
     final class ConsumeBatchedInputRunnable implements Runnable {
         @Override
         public void run() {
-            doConsumeBatchedInput();
+            doConsumeBatchedInput(mChoreographer.getFrameTimeNanos());
         }
     }
     final ConsumeBatchedInputRunnable mConsumedBatchedInputRunnable =
