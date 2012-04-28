@@ -52,7 +52,7 @@ public:
 
     status_t initialize();
     status_t finishInputEvent(uint32_t seq, bool handled);
-    status_t consumeEvents(JNIEnv* env, bool consumeBatches);
+    status_t consumeEvents(JNIEnv* env, bool consumeBatches, nsecs_t frameTime);
 
 protected:
     virtual ~NativeInputEventReceiver();
@@ -130,15 +130,16 @@ int NativeInputEventReceiver::handleReceiveCallback(int receiveFd, int events, v
     }
 
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    status_t status = r->consumeEvents(env, false /*consumeBatches*/);
+    status_t status = r->consumeEvents(env, false /*consumeBatches*/, -1);
     r->mMessageQueue->raiseAndClearException(env, "handleReceiveCallback");
     return status == OK || status == NO_MEMORY ? 1 : 0;
 }
 
-status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env, bool consumeBatches) {
+status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
+        bool consumeBatches, nsecs_t frameTime) {
 #if DEBUG_DISPATCH_CYCLE
-    ALOGD("channel '%s' ~ Consuming input events, consumeBatches=%s.", getInputChannelName(),
-            consumeBatches ? "true" : "false");
+    ALOGD("channel '%s' ~ Consuming input events, consumeBatches=%s, frameTime=%lld.",
+            getInputChannelName(), consumeBatches ? "true" : "false", frameTime);
 #endif
 
     if (consumeBatches) {
@@ -150,7 +151,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env, bool consumeBatche
         uint32_t seq;
         InputEvent* inputEvent;
         status_t status = mInputConsumer.consume(&mInputEventFactory,
-                consumeBatches, &seq, &inputEvent);
+                consumeBatches, frameTime, &seq, &inputEvent);
         if (status) {
             if (status == WOULD_BLOCK) {
                 if (!skipCallbacks && !mBatchedInputEventPending
@@ -270,10 +271,11 @@ static void nativeFinishInputEvent(JNIEnv* env, jclass clazz, jint receiverPtr,
     }
 }
 
-static void nativeConsumeBatchedInputEvents(JNIEnv* env, jclass clazz, jint receiverPtr) {
+static void nativeConsumeBatchedInputEvents(JNIEnv* env, jclass clazz, jint receiverPtr,
+        jlong frameTimeNanos) {
     sp<NativeInputEventReceiver> receiver =
             reinterpret_cast<NativeInputEventReceiver*>(receiverPtr);
-    status_t status = receiver->consumeEvents(env, true /*consumeBatches*/);
+    status_t status = receiver->consumeEvents(env, true /*consumeBatches*/, frameTimeNanos);
     if (status && status != DEAD_OBJECT && !env->ExceptionCheck()) {
         String8 message;
         message.appendFormat("Failed to consume batched input event.  status=%d", status);
@@ -291,7 +293,7 @@ static JNINativeMethod gMethods[] = {
             (void*)nativeDispose },
     { "nativeFinishInputEvent", "(IIZ)V",
             (void*)nativeFinishInputEvent },
-    { "nativeConsumeBatchedInputEvents", "(I)V",
+    { "nativeConsumeBatchedInputEvents", "(IJ)V",
             (void*)nativeConsumeBatchedInputEvents },
 };
 
