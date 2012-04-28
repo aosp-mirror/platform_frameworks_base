@@ -87,4 +87,7 @@ public class BaseIWindow extends IWindow.Stub {
             }
         }
     }
+
+    public void doneAnimating() {
+    }
 }

@@ -229,6 +229,7 @@ public final class ViewRootImpl implements ViewParent,
     boolean mNewSurfaceNeeded;
     boolean mHasHadWindowFocus;
     boolean mLastWasImTarget;
+    boolean mWindowsAnimating;
     int mLastSystemUiVisibility;
 
     // Pool of queued input events.
@@ -1766,6 +1767,8 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        boolean skipDraw = false;
+
         if (mFirst) {
             // handle first focus request
             if (DEBUG_INPUT_RESIZE) Log.v(TAG, "First: mView.hasFocus()="
@@ -1782,6 +1785,14 @@ public final class ViewRootImpl implements ViewParent,
                             + mRealFocusedView);
                 }
             }
+            if ((relayoutResult&WindowManagerImpl.RELAYOUT_RES_ANIMATING) != 0) {
+                // The first time we relayout the window, if the system is
+                // doing window animations, we want to hold of on any future
+                // draws until the animation is done.
+                mWindowsAnimating = true;
+            }
+        } else if (mWindowsAnimating) {
+            skipDraw = true;
         }
 
         mFirst = false;
@@ -1813,14 +1824,16 @@ public final class ViewRootImpl implements ViewParent,
                 viewVisibility != View.VISIBLE;
 
         if (!cancelDraw && !newSurface) {
-            if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
-                for (int i = 0; i < mPendingTransitions.size(); ++i) {
-                    mPendingTransitions.get(i).startChangingAnimations();
+            if (!skipDraw || mReportNextDraw) {
+                if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
+                    for (int i = 0; i < mPendingTransitions.size(); ++i) {
+                        mPendingTransitions.get(i).startChangingAnimations();
+                    }
+                    mPendingTransitions.clear();
                 }
-                mPendingTransitions.clear();
+    
+                performDraw();
             }
-
-            performDraw();
         } else {
             // End any pending transitions on this non-visible window
             if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
@@ -2677,6 +2690,7 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_DISPATCH_SCREEN_STATE = 20;
     private final static int MSG_INVALIDATE_DISPLAY_LIST = 21;
     private final static int MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST = 22;
+    private final static int MSG_DISPATCH_DONE_ANIMATING = 23;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -2726,6 +2740,8 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_INVALIDATE_DISPLAY_LIST";
                 case MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST:
                     return "MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST";
+                case MSG_DISPATCH_DONE_ANIMATING:
+                    return "MSG_DISPATCH_DONE_ANIMATING";
             }
             return super.getMessageName(message);
         }
@@ -2937,6 +2953,9 @@ public final class ViewRootImpl implements ViewParent,
             } break;
             case MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST: {
                 setAccessibilityFocusedHost(null);
+            } break;
+            case MSG_DISPATCH_DONE_ANIMATING: {
+                handleDispatchDoneAnimating();
             } break;
             }
         }
@@ -3753,6 +3772,15 @@ public final class ViewRootImpl implements ViewParent,
         mView.dispatchSystemUiVisibilityChanged(args.globalVisibility);
     }
 
+    public void handleDispatchDoneAnimating() {
+        if (mWindowsAnimating) {
+            mWindowsAnimating = false;
+            if (!mDirty.isEmpty() || mIsAnimating)  {
+                scheduleTraversals();
+            }
+        }
+    }
+
     public void getLastTouchPoint(Point outLocation) {
         outLocation.x = (int) mLastTouchPoint.x;
         outLocation.y = (int) mLastTouchPoint.y;
@@ -4465,6 +4493,10 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessage(mHandler.obtainMessage(MSG_DISPATCH_SYSTEM_UI_VISIBILITY, args));
     }
 
+    public void dispatchDoneAnimating() {
+        mHandler.sendEmptyMessage(MSG_DISPATCH_DONE_ANIMATING);
+    }
+
     public void dispatchCheckFocus() {
         if (!mHandler.hasMessages(MSG_CHECK_FOCUS)) {
             // This will result in a call to checkFocus() below.
@@ -4770,6 +4802,13 @@ public final class ViewRootImpl implements ViewParent,
             if (viewAncestor != null) {
                 viewAncestor.dispatchSystemUiVisibilityChanged(seq, globalVisibility,
                         localValue, localChanges);
+            }
+        }
+
+        public void doneAnimating() {
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
+            if (viewAncestor != null) {
+                viewAncestor.dispatchDoneAnimating();
             }
         }
     }
