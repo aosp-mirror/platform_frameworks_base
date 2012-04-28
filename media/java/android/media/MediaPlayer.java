@@ -394,6 +394,10 @@ import java.lang.ref.WeakReference;
  *     <td>{} </p></td>
  *     <td>This method can be called in any state and calling it does not change
  *         the object state. </p></td></tr>
+ * <tr><td>setVideoScalingMode </p></td>
+ *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted} </p></td>
+ *     <td>{Idle, Error}</p></td>
+ *     <td>Successful invoke of this method does not change the state.</p></td></tr>
  * <tr><td>setLooping </p></td>
  *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused,
  *         PlaybackCompleted}</p></td>
@@ -599,6 +603,7 @@ public class MediaPlayer
     private static final int INVOKE_ID_ADD_EXTERNAL_SOURCE_FD = 3;
     private static final int INVOKE_ID_SELECT_TRACK = 4;
     private static final int INVOKE_ID_DESELECT_TRACK = 5;
+    private static final int INVOKE_ID_SET_VIDEO_SCALE_MODE = 6;
 
     /**
      * Create a request parcel which can be routed to the native media
@@ -689,6 +694,58 @@ public class MediaPlayer
         mSurfaceHolder = null;
         _setVideoSurface(surface);
         updateSurfaceScreenOn();
+    }
+
+    /* Do not change these video scaling mode values below without updating
+     * their counterparts in system/window.h! Please do not forget to update
+     * {@link #isVideoScalingModeSupported} when new video scaling modes
+     * are added.
+     */
+    /**
+     * Specifies a video scaling mode. The content is stretched to the
+     * surface rendering area. When the surface has the same aspect ratio
+     * as the content, the aspect ratio of the content is maintained;
+     * otherwise, the aspect ratio of the content is not maintained when video
+     * is being rendered. Unlike {@ #VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING},
+     * there is no content cropping with this video scaling mode.
+     */
+    public static final int VIDEO_SCALING_MODE_SCALE_TO_FIT = 1;
+
+    /**
+     * Specifies a video scaling mode. The content is scaled, maintaining
+     * its aspect ratio. The whole surface area is always used. When the
+     * aspect ratio of the content is the same as the surface, no content
+     * is cropped; otherwise, content is cropped to fit the surface.
+     */
+    public static final int VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING = 2;
+    /**
+     * Sets video scaling mode. To make the target video scaling mode
+     * effective during playback, this method must be called after
+     * data source is set. If not called, the default video
+     * scaling mode is {@link #VIDEO_SCALING_MODE_SCALE_TO_FIT}.
+     *
+     * <p> The supported video scaling modes are:
+     * <ul>
+     * <li> {@link #VIDEO_SCALING_MODE_SCALE_TO_FIT}
+     * <li> {@link #VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING}
+     * </ul>
+     *
+     * @param mode target video scaling mode. Most be one of the supported
+     * video scaling modes; otherwise, IllegalArgumentException will be thrown.
+     *
+     * @see MediaPlayer#VIDEO_SCALING_MODE_SCALE_TO_FIT
+     * @see MediaPlayer#VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
+     */
+    public void setVideoScalingMode(int mode) {
+        if (isVideoScalingModeSupported(mode)) {
+            final String msg = "Scaling mode " + mode + " is not supported";
+            throw new IllegalArgumentException(msg);
+        }
+        Parcel request = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        request.writeInterfaceToken(IMEDIA_PLAYER);
+        request.writeInt(INVOKE_ID_SET_VIDEO_SCALE_MODE);
+        invoke(request, reply);
     }
 
     /**
@@ -2319,4 +2376,11 @@ public class MediaPlayer
 
     private OnInfoListener mOnInfoListener;
 
+    /*
+     * Test whether a given video scaling mode is supported.
+     */
+    private boolean isVideoScalingModeSupported(int mode) {
+        return (mode == VIDEO_SCALING_MODE_SCALE_TO_FIT ||
+                mode == VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
+    }
 }
