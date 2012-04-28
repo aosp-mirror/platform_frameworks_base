@@ -500,12 +500,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if (reason == CHANGE_REASON_REMOVED) {
                 final WifiConfiguration config = intent.getParcelableExtra(
                         EXTRA_WIFI_CONFIGURATION);
-                final NetworkTemplate template = NetworkTemplate.buildTemplateWifi(
-                        removeDoubleQuotes(config.SSID));
-                synchronized (mRulesLock) {
-                    if (mNetworkPolicy.containsKey(template)) {
-                        mNetworkPolicy.remove(template);
-                        writePolicyLocked();
+                if (config.SSID != null) {
+                    final NetworkTemplate template = NetworkTemplate.buildTemplateWifi(
+                            removeDoubleQuotes(config.SSID));
+                    synchronized (mRulesLock) {
+                        if (mNetworkPolicy.containsKey(template)) {
+                            mNetworkPolicy.remove(template);
+                            writePolicyLocked();
+                        }
                     }
                 }
             }
