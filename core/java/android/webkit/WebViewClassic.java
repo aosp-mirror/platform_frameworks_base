@@ -7890,7 +7890,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             functor = nativeGetDrawGLFunction(mNativeClass);
         }
 
-        if (functor != 0 && mWebView.getViewRootImpl()) {
+        if (functor != 0) {
             mWebView.getViewRootImpl().attachFunctor(functor);
         } else {
             // invalidate the screen so that the next repaint will show new content
