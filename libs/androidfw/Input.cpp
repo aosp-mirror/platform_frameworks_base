@@ -229,6 +229,26 @@ void PointerCoords::scale(float scaleFactor) {
     scaleAxisValue(*this, AMOTION_EVENT_AXIS_TOOL_MINOR, scaleFactor);
 }
 
+void PointerCoords::lerp(const PointerCoords& a, const PointerCoords& b, float alpha) {
+    bits = 0;
+    for (uint64_t bitsRemaining = a.bits | b.bits; bitsRemaining; ) {
+        int32_t axis = __builtin_ctz(bitsRemaining);
+        uint64_t axisBit = 1LL << axis;
+        bitsRemaining &= ~axisBit;
+        if (a.bits & axisBit) {
+            if (b.bits & axisBit) {
+                float aval = a.getAxisValue(axis);
+                float bval = b.getAxisValue(axis);
+                setAxisValue(axis, aval + alpha * (bval - aval));
+            } else {
+                setAxisValue(axis, a.getAxisValue(axis));
+            }
+        } else {
+            setAxisValue(axis, b.getAxisValue(axis));
+        }
+    }
+}
+
 #ifdef HAVE_ANDROID_OS
 status_t PointerCoords::readFromParcel(Parcel* parcel) {
     bits = parcel->readInt64();
