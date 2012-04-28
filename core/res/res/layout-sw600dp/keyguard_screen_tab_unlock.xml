@@ -85,10 +85,10 @@
         <com.android.internal.widget.multiwaveview.MultiWaveView
             android:id="@+id/unlock_widget"
             android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentBottom="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:gravity="center"
 
             android:targetDrawables="@array/lockscreen_targets_with_camera"
             android:targetDescriptions="@array/lockscreen_target_descriptions_with_camera"
@@ -99,8 +99,6 @@
             android:snapMargin="@dimen/multiwaveview_snap_margin"
             android:hitRadius="@dimen/multiwaveview_hit_radius"
             android:rightChevronDrawable="@drawable/ic_lockscreen_chevron_right"
-            android:horizontalOffset="0dip"
-            android:verticalOffset="60dip"
             android:feedbackCount="3"
             android:vibrationDuration="20"
             />
