@@ -984,7 +984,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     static final int REQUEST_KEYBOARD                   = 118;
     static final int SHOW_FULLSCREEN                    = 120;
     static final int HIDE_FULLSCREEN                    = 121;
-    static final int REPLACE_BASE_CONTENT               = 123;
     static final int UPDATE_MATCH_COUNT                 = 126;
     static final int CENTER_FIT_RECT                    = 127;
     static final int SET_SCROLLBAR_MODES                = 129;
@@ -4232,14 +4231,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 df = mScrollFilter;
             }
             canvas.setDrawFilter(df);
-            // XXX: Revisit splitting content.  Right now it causes a
-            // synchronization problem with layers.
-            int content = nativeDraw(canvas, mVisibleContentRect, mBackgroundColor,
-                    extras, false);
+            nativeDraw(canvas, mVisibleContentRect, mBackgroundColor, extras);
             canvas.setDrawFilter(null);
-            if (!mBlockWebkitViewMessages && content != 0) {
-                mWebViewCore.sendMessage(EventHub.SPLIT_PICTURE_SET, content, 0);
-            }
         }
 
         canvas.restoreToCount(saveCount);
@@ -7245,10 +7238,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     mZoomManager.updateDefaultZoomDensity(density);
                     break;
                 }
-                case REPLACE_BASE_CONTENT: {
-                    nativeReplaceBaseContent(msg.arg1);
-                    break;
-                }
                 case NEW_PICTURE_MSG_ID: {
                     // called for new content
                     final WebViewCore.DrawData draw = (WebViewCore.DrawData) msg.obj;
@@ -8423,18 +8412,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Draw the HTML page into the specified canvas. This call ignores any
-     * view-specific zoom, scroll offset, or other changes. It does not draw
-     * any view-specific chrome, such as progress or URL bars.
-     *
-     * only needs to be accessible to Browser and testing
-     */
-    public void drawPage(Canvas canvas) {
-        calcOurContentVisibleRectF(mVisibleContentRect);
-        nativeDraw(canvas, mVisibleContentRect, 0, 0, false);
-    }
-
-    /**
      * Enable the communication b/t the webView and VideoViewProxy
      *
      * only used by the Browser
@@ -8567,14 +8544,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private native void     nativeDebugDump();
     private native void     nativeDestroy();
 
-    /**
-     * Draw the picture set with a background color and extra. If
-     * "splitIfNeeded" is true and the return value is not 0, the return value
-     * MUST be passed to WebViewCore with SPLIT_PICTURE_SET message so that the
-     * native allocation can be freed.
-     */
-    private native int nativeDraw(Canvas canvas, RectF visibleRect,
-            int color, int extra, boolean splitIfNeeded);
+    private native void nativeDraw(Canvas canvas, RectF visibleRect,
+            int color, int extra);
     private native void     nativeDumpDisplayTree(String urlOrNull);
     private native boolean  nativeEvaluateLayersAnimations(int nativeInstance);
     private native int      nativeCreateDrawGLFunction(int nativeInstance, Rect rect,
@@ -8588,7 +8559,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private native boolean  nativeSetBaseLayer(int nativeInstance,
             int layer, boolean showVisualIndicator, boolean isPictureAfterFirstLayout);
     private native int      nativeGetBaseLayer();
-    private native void     nativeReplaceBaseContent(int content);
     private native void     nativeCopyBaseContentToPicture(Picture pict);
     private native boolean  nativeHasContent();
     private native void     nativeStopGL();
