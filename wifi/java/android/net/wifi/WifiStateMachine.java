@@ -2855,35 +2855,33 @@ public class WifiStateMachine extends StateMachine {
                     mWifiNative.reassociate();
                     break;
                 case WifiManager.CONNECT_NETWORK:
+                    /* The connect message can contain a network id passed as arg1 on message or
+                     * or a config passed as obj on message.
+                     * For a new network, a config is passed to create and connect.
+                     * For an existing network, a network id is passed
+                     */
                     int netId = message.arg1;
                     WifiConfiguration config = (WifiConfiguration) message.obj;
 
-                    /* We connect to a specific network by issuing a select
-                     * to the WifiConfigStore. This enables the network,
-                     * while disabling all other networks in the supplicant.
-                     * Disabling a connected network will cause a disconnection
-                     * from the network. A reconnectCommand() will then initiate
-                     * a connection to the enabled network.
-                     */
+                    /* Save the network config */
                     if (config != null) {
-                        netId = mWifiConfigStore.selectNetwork(config);
-                    } else {
-                        mWifiConfigStore.selectNetwork(netId);
+                        NetworkUpdateResult result = mWifiConfigStore.saveNetwork(config);
+                        netId = result.getNetworkId();
                     }
 
-                    /* The state tracker handles enabling networks upon completion/failure */
-                    mSupplicantStateTracker.sendMessage(WifiManager.CONNECT_NETWORK);
-
-                    if (mWifiNative.reconnect()) {
+                    if (mWifiConfigStore.selectNetwork(netId) &&
+                            mWifiNative.reconnect()) {
+                        /* The state tracker handles enabling networks upon completion/failure */
+                        mSupplicantStateTracker.sendMessage(WifiManager.CONNECT_NETWORK);
                         replyToMessage(message, WifiManager.CONNECT_NETWORK_SUCCEEDED);
+                        /* Expect a disconnection from the old connection */
+                        transitionTo(mDisconnectingState);
                     } else {
-                        loge("Failed to initiate connection");
+                        loge("Failed to connect config: " + config + " netId: " + netId);
                         replyToMessage(message, WifiManager.CONNECT_NETWORK_FAILED,
                                 WifiManager.ERROR);
+                        break;
                     }
-
-                    /* Expect a disconnection from the old connection */
-                    transitionTo(mDisconnectingState);
                     break;
                 case WifiManager.START_WPS:
                     WpsInfo wpsInfo = (WpsInfo) message.obj;
