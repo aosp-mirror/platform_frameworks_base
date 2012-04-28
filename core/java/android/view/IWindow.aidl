@@ -70,11 +70,18 @@ oneway interface IWindow {
     /**
      * Drag/drop events
      */
-     void dispatchDragEvent(in DragEvent event);
+    void dispatchDragEvent(in DragEvent event);
 
     /**
      * System chrome visibility changes
      */
-     void dispatchSystemUiVisibilityChanged(int seq, int globalVisibility,
+    void dispatchSystemUiVisibilityChanged(int seq, int globalVisibility,
             int localValue, int localChanges);
+
+    /**
+     * If the window manager returned RELAYOUT_RES_ANIMATING
+     * from relayout(), this method will be called when the animation
+     * is done.
+     */
+    void doneAnimating();
 }

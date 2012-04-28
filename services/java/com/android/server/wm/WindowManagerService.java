@@ -424,6 +424,12 @@ public class WindowManagerService extends IWindowManager.Stub
             = new ArrayList<Pair<WindowState, IRemoteCallback>>();
 
     /**
+     * Windows that have called relayout() while we were running animations,
+     * so we need to tell when the animation is done.
+     */
+    final ArrayList<WindowState> mRelayoutWhileAnimating = new ArrayList<WindowState>();
+
+    /**
      * Used when rebuilding window list to keep track of windows that have
      * been removed.
      */
@@ -2647,6 +2653,7 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean inTouchMode;
         boolean configChanged;
         boolean surfaceChanged = false;
+        boolean animating;
 
         // if they don't have this permission, mask out the status bar bits
         int systemUiVisibility = 0;
@@ -2946,7 +2953,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 TAG, "Relayout of " + win + ": focusMayChange=" + focusMayChange);
 
             inTouchMode = mInTouchMode;
-            
+            animating = mAnimator.mAnimating;
+            if (animating && !mRelayoutWhileAnimating.contains(win)) {
+                mRelayoutWhileAnimating.add(win);
+            }
+
             mInputMonitor.updateInputWindowsLw(true /*force*/);
         }
 
@@ -2958,7 +2969,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         return (inTouchMode ? WindowManagerImpl.RELAYOUT_RES_IN_TOUCH_MODE : 0)
                 | (displayed ? WindowManagerImpl.RELAYOUT_RES_FIRST_TIME : 0)
-                | (surfaceChanged ? WindowManagerImpl.RELAYOUT_RES_SURFACE_CHANGED : 0);
+                | (surfaceChanged ? WindowManagerImpl.RELAYOUT_RES_SURFACE_CHANGED : 0)
+                | (animating ? WindowManagerImpl.RELAYOUT_RES_ANIMATING : 0);
     }
 
     public void performDeferredDestroyWindow(Session session, IWindow client) {
@@ -8577,6 +8589,16 @@ public class WindowManagerService extends IWindowManager.Stub
             assignLayersLocked();
             // Clear information about apps that were moving.
             mToBottomApps.clear();
+        }
+
+        if (!mAnimator.mAnimating && mRelayoutWhileAnimating.size() > 0) {
+            for (int j=mRelayoutWhileAnimating.size()-1; j>=0; j--) {
+                try {
+                    mRelayoutWhileAnimating.get(j).mClient.doneAnimating();
+                } catch (RemoteException e) {
+                }
+            }
+            mRelayoutWhileAnimating.clear();
         }
 
         if (wallpaperDestroyed) {
