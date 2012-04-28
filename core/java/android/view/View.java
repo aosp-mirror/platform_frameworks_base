@@ -4668,6 +4668,24 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 info.addAction(AccessibilityNodeInfo.ACTION_FOCUS);
             }
         }
+
+        info.addAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+        info.addAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
+
+        if (isClickable()) {
+            info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
+        }
+
+        if (isLongClickable()) {
+            info.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
+        }
+
+        if (getContentDescription() != null) {
+            info.addAction(AccessibilityNodeInfo.ACTION_NEXT_AT_GRANULARITY);
+            info.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_GRANULARITY);
+            info.setGranularities(AccessibilityNodeInfo.GRANULARITY_CHARACTER
+                    | AccessibilityNodeInfo.GRANULARITY_WORD);
+        }
     }
 
     /**
