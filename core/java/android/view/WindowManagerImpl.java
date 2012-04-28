@@ -73,6 +73,11 @@ public class WindowManagerImpl implements WindowManager {
      * The window manager has changed the surface from the last call.
      */
     public static final int RELAYOUT_RES_SURFACE_CHANGED = 0x4;
+    /**
+     * The window manager is currently animating.  It will call
+     * IWindow.doneAnimating() when done.
+     */
+    public static final int RELAYOUT_RES_ANIMATING = 0x8;
 
     /**
      * Flag for relayout: the client will be later giving
