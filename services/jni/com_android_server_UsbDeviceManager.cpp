@@ -111,6 +111,17 @@ static jboolean android_server_UsbDeviceManager_isStartRequested(JNIEnv *env, jo
     return (result == 1);
 }
 
+static jint android_server_UsbDeviceManager_getAudioMode(JNIEnv *env, jobject thiz)
+{
+    int fd = open(DRIVER_NAME, O_RDWR);
+    if (fd < 0) {
+        ALOGE("could not open %s", DRIVER_NAME);
+        return false;
+    }
+    int result = ioctl(fd, ACCESSORY_GET_AUDIO_MODE);
+    close(fd);
+    return result;
+}
 
 static JNINativeMethod method_table[] = {
     { "nativeGetAccessoryStrings",  "()[Ljava/lang/String;",
@@ -119,6 +130,8 @@ static JNINativeMethod method_table[] = {
                                     (void*)android_server_UsbDeviceManager_openAccessory },
     { "nativeIsStartRequested",     "()Z",
                                     (void*)android_server_UsbDeviceManager_isStartRequested },
+    { "nativeGetAudioMode",         "()I",
+                                    (void*)android_server_UsbDeviceManager_getAudioMode },
 };
 
 int register_android_server_UsbDeviceManager(JNIEnv *env)
