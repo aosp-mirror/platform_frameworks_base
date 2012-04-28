@@ -194,7 +194,7 @@
     <dimen name="activity_chooser_popup_min_width">200dip</dimen>
 
     <!-- The default gap between components in a layout. -->
-    <dimen name="default_gap">16dip</dimen>
+    <dimen name="default_gap">8dip</dimen>
 
     <!-- Text padding for dropdown items -->
     <dimen name="dropdownitem_text_padding_left">8dip</dimen>
