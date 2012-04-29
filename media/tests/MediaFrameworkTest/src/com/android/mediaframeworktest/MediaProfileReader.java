@@ -88,8 +88,7 @@ public class MediaProfileReader
         if (audioEncoder != MediaRecorder.AudioEncoder.AMR_NB &&
             audioEncoder != MediaRecorder.AudioEncoder.AMR_WB &&
             audioEncoder != MediaRecorder.AudioEncoder.AAC &&
-            audioEncoder != MediaRecorder.AudioEncoder.AAC_PLUS &&
-            audioEncoder != MediaRecorder.AudioEncoder.EAAC_PLUS) {
+            audioEncoder != MediaRecorder.AudioEncoder.HE_AAC) {
             throw new IllegalArgumentException("Unsupported audio encodeer " + audioEncoder);
         }
         return audioEncoderMap.get(audioEncoder);
@@ -128,7 +127,6 @@ public class MediaProfileReader
         audioEncoderMap.put(MediaRecorder.AudioEncoder.AMR_NB, "amrnb");
         audioEncoderMap.put(MediaRecorder.AudioEncoder.AMR_WB, "amrwb");
         audioEncoderMap.put(MediaRecorder.AudioEncoder.AAC, "aac");
-        audioEncoderMap.put(MediaRecorder.AudioEncoder.AAC_PLUS, "aacplus");
-        audioEncoderMap.put(MediaRecorder.AudioEncoder.EAAC_PLUS, "eaacplus");
+        audioEncoderMap.put(MediaRecorder.AudioEncoder.HE_AAC, "heaac");
     }
 }
