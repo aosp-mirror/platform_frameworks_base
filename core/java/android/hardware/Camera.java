@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The Camera class is used to set image capture settings, start/stop preview,
@@ -154,6 +155,7 @@ public class Camera {
     private boolean mOneShot;
     private boolean mWithBuffer;
     private boolean mFaceDetectionRunning = false;
+    private ReentrantLock mFocusLock = new ReentrantLock();
 
     /**
      * Broadcast Action:  A new picture is taken by the camera, and the entry of
@@ -746,8 +748,14 @@ public class Camera {
                 return;
 
             case CAMERA_MSG_FOCUS:
-                if (mAutoFocusCallback != null) {
-                    mAutoFocusCallback.onAutoFocus(msg.arg1 == 0 ? false : true, mCamera);
+                mFocusLock.lock();
+                try {
+                    if (mAutoFocusCallback != null) {
+                        boolean success = msg.arg1 == 0 ? false : true;
+                        mAutoFocusCallback.onAutoFocus(success, mCamera);
+                    }
+                } finally {
+                    mFocusLock.unlock();
                 }
                 return;
 
@@ -872,8 +880,13 @@ public class Camera {
      */
     public final void autoFocus(AutoFocusCallback cb)
     {
-        mAutoFocusCallback = cb;
-        native_autoFocus();
+        mFocusLock.lock();
+        try {
+            mAutoFocusCallback = cb;
+            native_autoFocus();
+        } finally {
+            mFocusLock.unlock();
+        }
     }
     private native final void native_autoFocus();
 
@@ -887,8 +900,14 @@ public class Camera {
      */
     public final void cancelAutoFocus()
     {
-        mAutoFocusCallback = null;
-        native_cancelAutoFocus();
+        mFocusLock.lock();
+        try {
+            mAutoFocusCallback = null;
+            native_cancelAutoFocus();
+            removePendingAFCompletionMessages();
+        } finally {
+            mFocusLock.unlock();
+        }
     }
     private native final void native_cancelAutoFocus();
 
@@ -3577,4 +3596,13 @@ public class Camera {
             return false;
         }
     };
+
+    /*
+     * At any time, there should be at most one pending auto focus completion
+     * message, but we simply remove all pending AF completion messages in
+     * the looper's queue.
+     */
+    private void removePendingAFCompletionMessages() {
+        mEventHandler.removeMessages(CAMERA_MSG_FOCUS);
+    }
 }
