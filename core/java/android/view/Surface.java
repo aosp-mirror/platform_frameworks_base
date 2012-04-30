@@ -510,6 +510,8 @@ public class Surface implements Parcelable {
     public native   void setFreezeTint(int tint);
     /** @hide */
     public native   void setFlags(int flags, int mask);
+    /** @hide */
+    public native   void setActiveRect(Rect activeRect);
 
 
    
