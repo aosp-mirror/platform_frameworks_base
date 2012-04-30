@@ -194,31 +194,6 @@ class WifiConfigStore {
         }
     }
 
-    /**
-     * Selects the specified network config for connection. This involves
-     * addition/update of the specified config, updating the priority of
-     * all the networks and enabling the given network while disabling others.
-     *
-     * Selecting a network will leave the other networks disabled and
-     * a call to enableAllNetworks() needs to be issued upon a connection
-     * or a failure event from supplicant
-     *
-     * @param config The configuration details in WifiConfiguration
-     * @return the networkId now associated with the specified configuration
-     */
-    int selectNetwork(WifiConfiguration config) {
-        if (config != null) {
-            NetworkUpdateResult result = addOrUpdateNetworkNative(config);
-            int netId = result.getNetworkId();
-            if (netId != INVALID_NETWORK_ID) {
-                selectNetwork(netId);
-            } else {
-                loge("Failed to update network " + config);
-            }
-            return netId;
-        }
-        return INVALID_NETWORK_ID;
-    }
 
     /**
      * Selects the specified network for connection. This involves
@@ -230,8 +205,11 @@ class WifiConfigStore {
      * or a failure event from supplicant
      *
      * @param netId network to select for connection
+     * @return false if the network id is invalid
      */
-    void selectNetwork(int netId) {
+    boolean selectNetwork(int netId) {
+        if (netId == INVALID_NETWORK_ID) return false;
+
         // Reset the priority of each network at start or if it goes too high.
         if (mLastPriority == -1 || mLastPriority > 1000000) {
             for(WifiConfiguration config : mConfiguredNetworks.values()) {
@@ -256,6 +234,7 @@ class WifiConfigStore {
 
        /* Avoid saving the config & sending a broadcast to prevent settings
         * from displaying a disabled list of networks */
+        return true;
     }
 
     /**
@@ -265,6 +244,12 @@ class WifiConfigStore {
      * @return network update result
      */
     NetworkUpdateResult saveNetwork(WifiConfiguration config) {
+        // A new network cannot have null SSID
+        if (config == null || (config.networkId == INVALID_NETWORK_ID &&
+                config.SSID == null)) {
+            return new NetworkUpdateResult(INVALID_NETWORK_ID);
+        }
+
         boolean newNetwork = (config.networkId == INVALID_NETWORK_ID);
         NetworkUpdateResult result = addOrUpdateNetworkNative(config);
         int netId = result.getNetworkId();
