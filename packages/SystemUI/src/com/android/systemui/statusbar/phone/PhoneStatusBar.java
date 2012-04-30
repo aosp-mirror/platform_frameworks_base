@@ -1817,7 +1817,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     public void createAndAddWindows() {
         addStatusBarWindow();
-        addExpandedWindow();
     }
 
     private void addStatusBarWindow() {
