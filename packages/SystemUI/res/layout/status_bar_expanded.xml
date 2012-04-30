@@ -121,7 +121,7 @@
    
         <com.android.systemui.statusbar.phone.CloseDragHandle android:id="@+id/close"
             android:layout_width="match_parent"
-            android:layout_height="34dp"
+            android:layout_height="@dimen/close_handle_height"
             android:layout_gravity="bottom"
             android:orientation="vertical"
             >

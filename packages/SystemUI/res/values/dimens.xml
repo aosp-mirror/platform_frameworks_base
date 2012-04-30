@@ -118,4 +118,6 @@
     <!-- Diameter of outer shape drawable shown in navbar search-->
     <dimen name="navbar_search_outerring_diameter">300dip</dimen>
 
+    <!-- Height of the draggable handle at the bottom of the phone notification panel -->
+    <dimen name="close_handle_height">34dp</dimen>
 </resources>
