@@ -140,6 +140,10 @@ public interface WindowManagerPolicy {
          * @param displayFrame The frame of the overall display in which this
          * window can appear, used for constraining the overall dimensions
          * of the window.
+         * @param systemFrame The frame within the display that any system
+         * elements are currently covering.  These indicate which parts of
+         * the window should be considered completely obscured by the screen
+         * decorations.
          * @param contentFrame The frame within the display in which we would
          * like active content to appear.  This will cause windows behind to
          * be resized to match the given content frame.
@@ -151,7 +155,7 @@ public interface WindowManagerPolicy {
          * are visible.
          */
         public void computeFrameLw(Rect parentFrame, Rect displayFrame,
-                Rect contentFrame, Rect visibleFrame);
+                Rect systemFrame, Rect contentFrame, Rect visibleFrame);
 
         /**
          * Retrieve the current frame of the window that has been assigned by
@@ -173,10 +177,18 @@ public interface WindowManagerPolicy {
          * Retrieve the frame of the display that this window was last
          * laid out in.  Must be called with the
          * window manager lock held.
-         * 
+         *
          * @return Rect The rectangle holding the display frame.
          */
         public Rect getDisplayFrameLw();
+
+        /**
+         * Retrieve the frame of the system elements that last covered the window.
+         * Must be called with the window manager lock held.
+         *
+         * @return Rect The rectangle holding the system frame.
+         */
+        public Rect getSystemFrameLw();
 
         /**
          * Retrieve the frame of the content area that this window was last
@@ -298,6 +310,12 @@ public interface WindowManagerPolicy {
         boolean isDisplayedLw();
 
         /**
+         * Return true if this window (or a window it is attached to, but not
+         * considering its app token) is currently animating.
+         */
+        public boolean isAnimatingLw();
+
+        /**
          * Is this window considered to be gone for purposes of layout?
          */
         boolean isGoneForLayoutLw();
@@ -305,8 +323,6 @@ public interface WindowManagerPolicy {
         /**
          * Returns true if this window has been shown on screen at some time in 
          * the past.  Must be called with the window manager lock held.
-         * 
-         * @return boolean
          */
         public boolean hasDrawnLw();
 
