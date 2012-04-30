@@ -339,8 +339,7 @@ public class TextureView extends View {
 
             mLayer = mAttachInfo.mHardwareRenderer.createHardwareLayer(mOpaque);
             if (!mUpdateSurface) {
-                // We already have a SurfaceTexture to use, and we will pass it
-                // to mLayer below.
+                // Create a new SurfaceTexture for the layer.
                 mSurface = mAttachInfo.mHardwareRenderer.createSurfaceTexture(mLayer);
             }
             nSetDefaultBufferSize(mSurface, getWidth(), getHeight());
@@ -359,7 +358,7 @@ public class TextureView extends View {
             };
             mSurface.setOnFrameAvailableListener(mUpdateListener);
 
-            if (mListener != null) {
+            if (mListener != null && !mUpdateSurface) {
                 mListener.onSurfaceTextureAvailable(mSurface, getWidth(), getHeight());
             }
         }
@@ -669,7 +668,9 @@ public class TextureView extends View {
      * SurfaceTexture} is already being used by this view, it is immediately
      * released and not be usable any more.  The {@link
      * SurfaceTextureListener#onSurfaceTextureDestroyed} callback is <b>not</b>
-     * called.
+     * called for the previous {@link SurfaceTexture}.  Similarly, the {@link
+     * SurfaceTextureListener#onSurfaceTextureAvailable} callback is <b>not</b>
+     * called for the {@link SurfaceTexture} passed to setSurfaceTexture.
      *
      * The {@link SurfaceTexture} object must be detached from all OpenGL ES
      * contexts prior to calling this method.
