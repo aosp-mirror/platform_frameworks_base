@@ -32,6 +32,7 @@ struct AString;
 struct ICrypto;
 struct ISurfaceTexture;
 struct MediaCodec;
+struct SurfaceTextureClient;
 
 struct JMediaCodec : public RefBase {
     JMediaCodec(
@@ -80,12 +81,15 @@ struct JMediaCodec : public RefBase {
     status_t getBuffers(
             JNIEnv *env, bool input, jobjectArray *bufArray) const;
 
+    void setVideoScalingMode(int mode);
+
 protected:
     virtual ~JMediaCodec();
 
 private:
     jclass mClass;
     jweak mObject;
+    sp<SurfaceTextureClient> mSurfaceTextureClient;
 
     sp<ALooper> mLooper;
     sp<MediaCodec> mCodec;
