@@ -24,6 +24,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.widget.AbsListView;
@@ -153,7 +154,12 @@ public final class PreferenceScreen extends PreferenceGroup implements AdapterVi
         if (mListView != null) {
             mListView.setAdapter(null);
         }
-        mListView = new ListView(context);
+
+        LayoutInflater inflater = (LayoutInflater)
+                context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View childPrefScreen = inflater.inflate(
+                com.android.internal.R.layout.preference_list_fragment, null);
+        mListView = (ListView) childPrefScreen.findViewById(android.R.id.list);
         bind(mListView);
 
         // Set the title bar if title is available, else no title bar
@@ -164,7 +170,7 @@ public final class PreferenceScreen extends PreferenceGroup implements AdapterVi
         } else {
             dialog.setTitle(title);
         }
-        dialog.setContentView(mListView);
+        dialog.setContentView(childPrefScreen);
         dialog.setOnDismissListener(this);
         if (state != null) {
             dialog.onRestoreInstanceState(state);
