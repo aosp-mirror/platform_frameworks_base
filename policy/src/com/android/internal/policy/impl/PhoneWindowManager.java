@@ -353,6 +353,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mDeskDockEnablesAccelerometer;
     int mLidKeyboardAccessibility;
     int mLidNavigationAccessibility;
+    boolean mLidControlsSleep;
     int mLongPressOnPowerBehavior = -1;
     boolean mScreenOnEarly = false;
     boolean mScreenOnFully = false;
@@ -891,6 +892,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_lidKeyboardAccessibility);
         mLidNavigationAccessibility = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lidNavigationAccessibility);
+        mLidControlsSleep = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_lidControlsSleep);
         // register for dock events
         IntentFilter filter = new IntentFilter();
         filter.addAction(UiModeManager.ACTION_ENTER_CAR_MODE);
@@ -1268,10 +1271,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return visibleValue;
     }
 
+    private boolean isKeyboardVisible() {
+        return determineHiddenState(mLidKeyboardAccessibility, 0, 1) == 1
+                || determineHiddenState(mLidNavigationAccessibility, 0, 1) == 1;
+    }
+
     /** {@inheritDoc} */
     public void adjustConfigurationLw(Configuration config) {
         readLidState();
-        updateKeyboardVisibility();
+        applyLidSwitchState();
 
         if (config.keyboard == Configuration.KEYBOARD_NOKEYS) {
             config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_YES;
@@ -2809,33 +2817,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mHeadless) return;
 
         // lid changed state
-        mLidState = lidOpen ? LID_OPEN : LID_CLOSED;
-        updateKeyboardVisibility();
+        final int newLidState = lidOpen ? LID_OPEN : LID_CLOSED;
+        if (newLidState == mLidState) {
+            return;
+        }
 
-        boolean awakeNow = mKeyguardMediator.doLidChangeTq(lidOpen);
+        mLidState = newLidState;
+        applyLidSwitchState();
         updateRotation(true);
-        if (awakeNow) {
-            // If the lid is opening and we don't have to keep the
-            // keyguard up, then we can turn on the screen
-            // immediately.
-            mKeyguardMediator.pokeWakelock();
-        } else if (keyguardIsShowingTq()) {
-            if (lidOpen) {
-                // If we are opening the lid and not hiding the
-                // keyguard, then we need to have it turn on the
-                // screen once it is shown.
+
+        if (lidOpen) {
+            if (keyguardIsShowingTq()) {
                 mKeyguardMediator.onWakeKeyWhenKeyguardShowingTq(
                         KeyEvent.KEYCODE_POWER, mDockMode != Intent.EXTRA_DOCK_STATE_UNDOCKED);
-            }
-        } else {
-            // Light up the keyboard if we are sliding up.
-            if (lidOpen) {
-                mPowerManager.userActivity(SystemClock.uptimeMillis(), false,
-                        LocalPowerManager.BUTTON_EVENT);
             } else {
                 mPowerManager.userActivity(SystemClock.uptimeMillis(), false,
-                        LocalPowerManager.OTHER_EVENT);
+                        LocalPowerManager.BUTTON_EVENT);
             }
+        } else if (!mLidControlsSleep) {
+            mPowerManager.userActivity(SystemClock.uptimeMillis(), false,
+                    LocalPowerManager.OTHER_EVENT);
         }
     }
 
@@ -3884,13 +3885,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public void enableScreenAfterBoot() {
         readLidState();
-        updateKeyboardVisibility();
-
+        applyLidSwitchState();
         updateRotation(true);
     }
 
-    private void updateKeyboardVisibility() {
-        mPowerManager.setKeyboardVisibility(mLidState == LID_OPEN);
+    private void applyLidSwitchState() {
+        mPowerManager.setKeyboardVisibility(isKeyboardVisible());
+        if (mLidState == LID_CLOSED && mLidControlsSleep) {
+            mPowerManager.goToSleep(SystemClock.uptimeMillis());
+        }
     }
 
     void updateRotation(boolean alwaysSendConfiguration) {
@@ -4176,6 +4179,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pw.print(prefix); pw.print("mLidKeyboardAccessibility=");
                 pw.print(mLidKeyboardAccessibility);
                 pw.print(" mLidNavigationAccessibility="); pw.print(mLidNavigationAccessibility);
+                pw.print(" mLidControlsSleep="); pw.print(mLidControlsSleep);
                 pw.print(" mLongPressOnPowerBehavior="); pw.println(mLongPressOnPowerBehavior);
         pw.print(prefix); pw.print("mScreenOnEarly="); pw.print(mScreenOnEarly);
                 pw.print(" mScreenOnFully="); pw.print(mScreenOnFully);

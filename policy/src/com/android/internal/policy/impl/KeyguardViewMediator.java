@@ -121,13 +121,6 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      */
     protected static final int AWAKE_INTERVAL_DEFAULT_MS = 10000;
 
-
-    /**
-     * The default amount of time we stay awake (used for all key input) when
-     * the keyboard is open
-     */
-    protected static final int AWAKE_INTERVAL_DEFAULT_KEYBOARD_OPEN_MS = 10000;
-
     /**
      * How long to wait after the screen turns off due to timeout before
      * turning on the keyguard (i.e, the user has this much time to turn
@@ -236,8 +229,6 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private KeyguardViewProperties mKeyguardViewProperties;
 
     private KeyguardUpdateMonitor mUpdateMonitor;
-
-    private boolean mKeyboardOpen = false;
 
     private boolean mScreenOn = false;
 
@@ -590,22 +581,6 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     }
 
     /**
-     * Returns true if the change is resulting in the keyguard beign dismissed,
-     * meaning the screen can turn on immediately.  Otherwise returns false.
-     */
-    public boolean doLidChangeTq(boolean isLidOpen) {
-        mKeyboardOpen = isLidOpen;
-
-        if (mUpdateMonitor.isKeyguardBypassEnabled() && mKeyboardOpen
-                && !mKeyguardViewProperties.isSecure() && mKeyguardViewManager.isShowing()) {
-            if (DEBUG) Log.d(TAG, "bypassing keyguard on sliding open of keyboard with non-secure keyguard");
-            mHandler.sendEmptyMessage(KEYGUARD_DONE_AUTHENTICATING);
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * Enable the keyguard if the settings are appropriate.  Return true if all
      * work that will happen is done; returns false if the caller can wait for
      * the keyguard to be shown.
@@ -955,8 +930,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
     /** {@inheritDoc} */
     public void pokeWakelock() {
-        pokeWakelock(mKeyboardOpen ?
-                AWAKE_INTERVAL_DEFAULT_KEYBOARD_OPEN_MS : AWAKE_INTERVAL_DEFAULT_MS);
+        pokeWakelock(AWAKE_INTERVAL_DEFAULT_MS);
     }
 
     /** {@inheritDoc} */

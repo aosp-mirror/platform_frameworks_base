@@ -4963,8 +4963,8 @@ public class WindowManagerService extends IWindowManager.Stub
     // Called by window manager policy. Not exposed externally.
     @Override
     public int getLidState() {
-        final int SW_LID = 0x00;
-        int sw = mInputManager.getSwitchState(-1, InputDevice.SOURCE_ANY, SW_LID);
+        int sw = mInputManager.getSwitchState(-1, InputDevice.SOURCE_ANY,
+                InputManagerService.SW_LID);
         if (sw > 0) {
             // Switch state: AKEY_STATE_DOWN or AKEY_STATE_VIRTUAL.
             return LID_CLOSED;
@@ -6510,14 +6510,13 @@ public class WindowManagerService extends IWindowManager.Stub
                    + " milliseconds before attempting to detect safe mode.");
         }
 
-        final int BTN_MOUSE = 0x110;
         int menuState = mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_ANY,
                 KeyEvent.KEYCODE_MENU);
         int sState = mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_ANY, KeyEvent.KEYCODE_S);
         int dpadState = mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_DPAD,
                 KeyEvent.KEYCODE_DPAD_CENTER);
         int trackballState = mInputManager.getScanCodeState(-1, InputDevice.SOURCE_TRACKBALL,
-                BTN_MOUSE);
+                InputManagerService.BTN_MOUSE);
         int volumeDownState = mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_ANY,
                 KeyEvent.KEYCODE_VOLUME_DOWN);
         mSafeMode = menuState > 0 || sState > 0 || dpadState > 0 || trackballState > 0
