@@ -713,6 +713,9 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
     public void handleSwipe(View view) {
         TaskDescription ad = ((ViewHolder) view.getTag()).taskDescription;
+        if (ad == null) {
+            Log.v(TAG, "Not able to find activity description for swiped task");
+        }
         if (DEBUG) Log.v(TAG, "Jettison " + ad.getLabel());
         mRecentTaskDescriptions.remove(ad);
 
@@ -727,13 +730,15 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         // the task.
         final ActivityManager am = (ActivityManager)
                 mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        am.removeTask(ad.persistentTaskId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
+        if (am != null) {
+            am.removeTask(ad.persistentTaskId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
 
-        // Accessibility feedback
-        setContentDescription(
-                mContext.getString(R.string.accessibility_recents_item_dismissed, ad.getLabel()));
-        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
-        setContentDescription(null);
+            // Accessibility feedback
+            setContentDescription(
+                    mContext.getString(R.string.accessibility_recents_item_dismissed, ad.getLabel()));
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
+            setContentDescription(null);
+        }
     }
 
     private void startApplicationDetailsActivity(String packageName) {
