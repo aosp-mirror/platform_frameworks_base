@@ -230,6 +230,7 @@ public class CheckedTextView extends TextView implements Checkable {
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(CheckedTextView.class.getName());
+        info.setCheckable(true);
         info.setChecked(mChecked);
     }
 }
