@@ -1139,6 +1139,14 @@ public abstract class DataConnectionTracker extends Handler {
                 mUserDataEnabled = enabled;
                 Settings.Secure.putInt(mPhone.getContext().getContentResolver(),
                         Settings.Secure.MOBILE_DATA, enabled ? 1 : 0);
+                if (getDataOnRoamingEnabled() == false &&
+                        mPhone.getServiceState().getRoaming() == true) {
+                    if (enabled) {
+                        notifyOffApnsOfAvailability(Phone.REASON_ROAMING_ON);
+                    } else {
+                        notifyOffApnsOfAvailability(Phone.REASON_DATA_DISABLED);
+                    }
+                }
                 if (prevEnabled != getAnyDataEnabled()) {
                     if (!prevEnabled) {
                         resetAllRetryCounts();

@@ -629,6 +629,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
      */
     @Override
     protected void onRoamingOff() {
+        if (mUserDataEnabled == false) return;
+
         if (getDataOnRoamingEnabled() == false) {
             notifyOffApnsOfAvailability(Phone.REASON_ROAMING_OFF);
             trySetupData(Phone.REASON_ROAMING_OFF);
@@ -642,6 +644,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
      */
     @Override
     protected void onRoamingOn() {
+        if (mUserDataEnabled == false) return;
+
         if (getDataOnRoamingEnabled()) {
             trySetupData(Phone.REASON_ROAMING_ON);
             notifyDataConnection(Phone.REASON_ROAMING_ON);
