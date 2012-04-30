@@ -8050,8 +8050,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         };
 
-        if (process == null || process.pid == MY_PID) {
-            worker.run();  // We may be about to die -- need to run this synchronously
+        if (process == null) {
+            // If process is null, we are being called from some internal code
+            // and may be about to die -- run this synchronously.
+            worker.run();
         } else {
             worker.start();
         }
