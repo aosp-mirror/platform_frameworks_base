@@ -11283,10 +11283,11 @@ package android.media {
 
   public final class MediaRecorder.AudioEncoder {
     field public static final int AAC = 3; // 0x3
-    field public static final int AAC_ELD = 6; // 0x6
+    field public static final int AAC_ELD = 5; // 0x5
     field public static final int AMR_NB = 1; // 0x1
     field public static final int AMR_WB = 2; // 0x2
     field public static final int DEFAULT = 0; // 0x0
+    field public static final int HE_AAC = 4; // 0x4
   }
 
   public final class MediaRecorder.AudioSource {
