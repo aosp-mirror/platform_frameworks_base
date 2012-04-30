@@ -304,7 +304,15 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
             return nullObjectReturn("layoutBounds == null");
         }
 
-        env->SetIntArrayRegion(layoutBounds, 0, 4, (jint*) peeker.fLayoutBounds);
+        jint scaledBounds[4];
+        if (willScale) {
+            for (int i=0; i<4; i++) {
+                scaledBounds[i] = (jint)((((jint*)peeker.fLayoutBounds)[i]*scale) + .5f);
+            }
+        } else {
+            memcpy(scaledBounds, (jint*)peeker.fLayoutBounds, sizeof(scaledBounds));
+        }
+        env->SetIntArrayRegion(layoutBounds, 0, 4, scaledBounds);
         if (javaBitmap != NULL) {
             env->SetObjectField(javaBitmap, gBitmap_layoutBoundsFieldID, layoutBounds);
         }
