@@ -193,11 +193,14 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Дозволяє програмі бути рядком стану."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"розгорнути/згорн. рядок стану"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Дозволяє програмі розгортати чи згортати рядок стану."</string>
-    <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"перехопл. вихідні дзвінки"</string>
+    <!-- no translation found for permlab_processOutgoingCalls (3906007831192990946) -->
+    <skip />
     <string name="permdesc_processOutgoingCalls" msgid="1152111671618301044">"Дозволяє програмі обробляти вихідні дзвінки та змінювати номер для виклику. Шкідливі програми можуть відстежувати, переадресовувати чи блокувати вихідні дзвінки."</string>
-    <string name="permlab_receiveSms" msgid="2697628268086208535">"отримувати SMS"</string>
+    <!-- no translation found for permlab_receiveSms (8673471768947895082) -->
+    <skip />
     <string name="permdesc_receiveSms" msgid="8107887121893611793">"Дозволяє програмі отримувати й обробляти SMS повідомлення. Шкідливі програми можуть відстежувати ваші повідомлення чи видаляти їх, навіть не показуючи вам."</string>
-    <string name="permlab_receiveMms" msgid="8894700916188083287">"отримув. MMS"</string>
+    <!-- no translation found for permlab_receiveMms (1821317344668257098) -->
+    <skip />
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Дозволяє програмі отримувати й обробляти MMS повідомлення. Шкідливі програми можуть відстежувати ваші повідомлення чи видаляти їх, навіть не показуючи вам."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"отримувати повідомлення екстрених служб"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Дозволяє програмі отримувати й обробляти повідомлення екстрених служб. Цей дозвіл доступний лише для системних програм."</string>
@@ -207,13 +210,16 @@
     <string name="permdesc_sendSms" msgid="906546667507626156">"Дозволяє програмі надсилати SMS повідомлення. Шкідливі програми можуть надсилати повідомлення без вашого підтвердження, заставляючи вас платити."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"надсилати SMS-повідомлення без підтвердження"</string>
     <string name="permdesc_sendSmsNoConfirmation" msgid="3437759207020400204">"Дозволяє програмі надсилати SMS повідомлення. Шкідливі програми можуть надсилати повідомлення без вашого підтвердження, змушуючи вас платити."</string>
-    <string name="permlab_readSms" msgid="4085333708122372256">"читати SMS або MMS"</string>
+    <!-- no translation found for permlab_readSms (8745086572213270480) -->
+    <skip />
     <string name="permdesc_readSms" product="tablet" msgid="2341692916884515613">"Дозволяє програмі читати SMS повідомлення, збережені в планшетному ПК чи на SIM-карті. Шкідливі програми можуть читати ваші конфіденційні повідомлення."</string>
     <string name="permdesc_readSms" product="default" msgid="5653850482025875493">"Дозволяє програмі читати SMS повідомлення, збережені в телефоні чи на SIM-карті. Шкідливі програми можуть читати ваші конфіденційні повідомлення."</string>
-    <string name="permlab_writeSms" msgid="6881122575154940744">"редаг. SMS або MMS"</string>
+    <!-- no translation found for permlab_writeSms (3216950472636214774) -->
+    <skip />
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Дозволяє програмі писати в SMS повідомлення, збережені в планшетному ПК чи на SIM-карті. Шкідливі програми можуть видаляти ваші повідомлення."</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Дозволяє програмі писати в SMS повідомлення, збережені в телефоні чи на SIM-карті. Шкідливі програми можуть видаляти ваші повідомлення."</string>
-    <string name="permlab_receiveWapPush" msgid="8258226427716551388">"отримувати WAP"</string>
+    <!-- no translation found for permlab_receiveWapPush (5991398711936590410) -->
+    <skip />
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Дозволяє програмі отримувати й обробляти WAP повідомлення. Шкідливі програми можуть відстежувати ваші повідомлення чи видаляти їх, навіть не показуючи вам."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"отримувати запущені програми"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Дозволяє програмі отримувати інформацію про поточні й останні запущені завдання. Шкідливі програми можуть виявляти особисту інформацію про інші програми."</string>
@@ -229,11 +235,13 @@
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Дозволяє програмі контролювати режим сумісності екрана інших програм. Шкідливі програми можуть переривати роботу інших програм."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"вмикати налагодження програми"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Дозволяє програмі вмикати налагодження для іншої програми. Шкідливі програми можуть використовувати це для примусового припинення роботи інших програм."</string>
-    <string name="permlab_changeConfiguration" msgid="8214475779521218295">"змін. налашт. інтерф. кор."</string>
+    <!-- no translation found for permlab_changeConfiguration (4162092185124234480) -->
+    <skip />
     <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Дозволяє програмі змінювати поточну конфігурацію, як-от мовний код чи розмір шрифту загалом."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"увімк. режим авто"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Дозволяє програмі вмикати режим автомобіля."</string>
-    <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"заверш. роботу фон. процесів"</string>
+    <!-- no translation found for permlab_killBackgroundProcesses (3914026687420177202) -->
+    <skip />
     <string name="permdesc_killBackgroundProcesses" msgid="931129103262126617">"Дозволяє програмі примусово припиняти фонові процеси інших програм, навіть якщо пам’яті достатньо."</string>
     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"примусово припиняти роботу інших програм"</string>
     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Дозволяє програмі примусово припиняти роботу інших програм."</string>
@@ -257,7 +265,8 @@
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Дозволяє програмі передавати сповіщення про отримання повідомлення WAP PUSH. Шкідливі програми можуть використовувати це для підробки отримання MMS повідомлень або для непомітної заміни вмісту будь-якої веб-сторінки шкідливими варіантами."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"обмежувати кількість запущ. процесів"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Дозволяє програмі контролювати максимальну кількість процесів, які буде запущено. Ніколи не вимагається для звичайних програм."</string>
-    <string name="permlab_setAlwaysFinish" msgid="238828158465736054">"примушувати всі фонові програми закриватися"</string>
+    <!-- no translation found for permlab_setAlwaysFinish (550958507798796965) -->
+    <skip />
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Дозволяє програмі контролювати обов’язкове завершення всіх дій, які переходять у фоновий режим. Ніколи не вимагається для звичайних програм."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"змінювати статистику батареї"</string>
     <string name="permdesc_batteryStats" msgid="6835186932305744068">"Дозволяє програмі змінювати зібрану статистику акумулятора. Не для використання звичайними програмами."</string>
@@ -267,7 +276,8 @@
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Дозволяє програмі запускати користувацький інтерфейс підтвердження повного резервного копіювання. Не для використання жодною програмою."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"відображати несанкціон. вікна"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Дозволяє програмі створювати вікна, які мають використовуватися інтерфейсом користувача внутрішньої системи. Не для використання звичайними програмами."</string>
-    <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"відобр. сповіщ. на рівні сист."</string>
+    <!-- no translation found for permlab_systemAlertWindow (3543347980839518613) -->
+    <skip />
     <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"Дозволяє програмі відображати вікна сповіщень системи. Шкідливі програми можуть контролювати весь екран."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"змінюв. заг. швидкість анімації"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Дозволяє програмі будь-коли змінювати загальну швидкість анімації (пришвидшувати чи сповільнювати анімації)."</string>
@@ -329,33 +339,39 @@
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Дозволяє програмі надавати або скасовувати певні дозволи для себе чи інших програм. Шкідливі програми можуть використовувати це для доступу до функцій, якого ви їм не надавали."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"установлювати потрібні програми"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Дозволяє програмі змінювати ваші вибрані програми. Шкідливі програми можуть непомітно змінювати запущені програми, примушуючи існуючі програми оманливим шляхом збирати ваші особисті дані."</string>
-    <string name="permlab_writeSettings" msgid="1365523497395143704">"змін. загальні налашт-ня сист."</string>
+    <!-- no translation found for permlab_writeSettings (2226195290955224730) -->
+    <skip />
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Дозволяє програмі змінювати дані налаштувань системи. Шкідливі програми можуть пошкодити конфігурацію вашої системи."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"змін. налашт-ня безпеки системи"</string>
     <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Дозволяє програмі змінювати дані налаштувань безпеки системи. Не для використання звичайними програмами."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"змінювати карту служб Google"</string>
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Дозволяє програмі змінювати карту служб Google. Не для використання звичайними програмами."</string>
-    <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"автоматично запускати при завантаження"</string>
+    <!-- no translation found for permlab_receiveBootCompleted (5312965565987800025) -->
+    <skip />
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Дозволяє програмі запускатися, щойно завантаження системи закінчиться. Це може затримувати запуск планшетного ПК та дозволяє програмі сповільнювати загальну роботу планшетного ПК своїм постійним функціонуванням."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Дозволяє програмі запускатися, щойно завантаження системи закінчиться. Це може затримувати запуск телефону та дозволяє програмі сповільнювати загальну роботу телефону своїм постійним функціонуванням."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"надсилати закріпл. запис"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Дозволяє програмі надсилати закріплені широкомовні повідомлення, які залишаються після відтворення широкомовного повідомлення. Шкідливі програми можуть сповільнювати роботу планшетного ПК або порушувати її стабільність, спричиняючи завелике використання пам’яті."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Дозволяє програмі надсилати закріплені широкомовні повідомлення, які залишаються після відтворення широкомовного повідомлення. Шкідливі програми можуть сповільнювати роботу телефону або порушувати її стабільність, спричиняючи завелике використання пам’яті."</string>
-    <string name="permlab_readContacts" msgid="6219652189510218240">"читати контакт. дані"</string>
+    <!-- no translation found for permlab_readContacts (8348481131899886131) -->
+    <skip />
     <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Дозволяє програмі читати всі дані про контакти, які зберігаються на вашому планшетному ПК, зокрема частоту здійснення дзвінків, надсилання електронних листів або інших способів спілкування з окремими особами. Це допомагає автоматично завершувати написання електронних адрес і користуватися іншими зручними функціями. Шкідливі програми можуть використовувати цей дозвіл для надсилання ваших контактних даних іншим людям."</string>
     <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Дозволяє програмі читати всі дані про контакти, які зберігаються на вашому телефоні, зокрема частоту здійснення дзвінків, надсилання електронних листів або інших способів спілкування з окремими особами. Це допомагає автоматично завершувати написання електронних адрес і користуватися іншими зручними функціями. Шкідливі програми можуть використовувати цей дозвіл для надсилання ваших контактних даних іншим людям."</string>
-    <string name="permlab_writeContacts" msgid="644616215860933284">"запис. контактні дані"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Дозволяє програмі змінювати  всі дані про контакти, які зберігаються на вашому планшетному ПК, зокрема частоту здійснення дзвінків, надсилання електронних листів або інших способів спілкування з окремими особами. Це допомагає автоматично завершувати написання електронних адрес і користуватися іншими зручними функціями. Шкідливі програми можуть використовувати це для стирання чи зміни ваших контактних даних."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Дозволяє програмі змінювати  всі дані про контакти, які зберігаються на вашому телефоні, зокрема частоту здійснення дзвінків, надсилання електронних листів або інших способів спілкування з окремими особами. Це допомагає автоматично завершувати написання електронних адрес і користуватися іншими зручними функціями. Шкідливі програми можуть використовувати це для стирання чи зміни ваших контактних даних."</string>
+    <!-- no translation found for permlab_writeContacts (5107492086416793544) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Дозволяє програмі змінювати всі дані про контакти, які зберігаються на вашому планшетному ПК, зокрема частоту здійснення дзвінків, надсилання електронних листів або інших способів спілкування з окремими особами. Це допомагає автоматично завершувати написання електронних адрес і користуватися іншими зручними функціями. Шкідливі програми можуть використовувати це для стирання чи зміни ваших контактних даних."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Дозволяє програмі змінювати всі дані про контакти, які зберігаються на вашому телефоні, зокрема частоту здійснення дзвінків, надсилання електронних листів або інших способів спілкування з окремими особами. Це допомагає автоматично завершувати написання електронних адрес і користуватися іншими зручними функціями. Шкідливі програми можуть використовувати це для стирання чи зміни ваших контактних даних."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"читати журнал викликів"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Дозволяє програмі читати журнал викликів вашого планшетного ПК, включно з даними про вхідні та вихідні дзвінки. Шкідливі програми можуть використовувати це для надсилання ваших даних іншим людям."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Дозволяє програмі читати журнал викликів вашого телефону, включно з даними про вхідні та вихідні дзвінки. Шкідливі програми можуть використовувати це для надсилання ваших даних іншим людям."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"записувати в журнал викликів"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Дозволяє програмі змінювати журнал викликів вашого планшетного ПК, включно з даними про вхідні та вихідні дзвінки. Шкідливі програми можуть використовувати це для стирання або зміни вашого журналу викликів."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Дозволяє програмі змінювати журнал викликів вашого телефону, включно з даними про вхідні та вихідні дзвінки. Шкідливі програми можуть використовувати це для стирання або зміни вашого журналу викликів."</string>
-    <string name="permlab_readProfile" msgid="6824681438529842282">"читати дані вашого профілю"</string>
+    <!-- no translation found for permlab_readProfile (4701889852612716678) -->
+    <skip />
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Дозволяє програмі читати особисту інформацію профілю, збережену на вашому пристрої, як-от ваше ім’я та контактну інформацію. Це означає, що інші програми можуть ідентифікувати вашу особу та надсилати дані вашого профілю іншим."</string>
-    <string name="permlab_writeProfile" msgid="4679878325177177400">"записувати в дані профілю"</string>
+    <!-- no translation found for permlab_writeProfile (907793628777397643) -->
+    <skip />
     <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"Дозволяє програмі змінювати чи додавати особисту інформацію профілю, збережену на вашому пристрої, як-от ваше ім’я та контактну інформацію. Це означає, що інші програми можуть ідентифікувати вашу особу та надсилати дані вашого профілю іншим."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"читати ваш соціальний потік"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="3419050808547335320">"Дозволяє програмі отримувати доступ до оновлень із соціальних мереж від вас і ваших друзів та синхронізувати їх. Шкідливі програми можуть використовувати це для читання приватної кореспонденції між вами та вашими друзями в соціальних мережах."</string>
@@ -396,9 +412,15 @@
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"примус. перезав. тел."</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Дозволяє програмі примусово перезавантажувати планшетний ПК."</string>
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Дозволяє програмі примусово перезавантажувати телефон."</string>
-    <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"підкл. і відкл. файлові сист."</string>
+    <!-- no translation found for permlab_mount_unmount_filesystems (2927361537942591841) -->
+    <skip />
+    <!-- no translation found for permlab_mount_unmount_filesystems (4402305049890953810) -->
+    <skip />
     <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Дозволяє програмі підключати та відключати файлові системи для пам’яті на знімних носіях."</string>
-    <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"форматувати зовн. пам\'ять"</string>
+    <!-- no translation found for permlab_mount_format_filesystems (6227819582624904972) -->
+    <skip />
+    <!-- no translation found for permlab_mount_format_filesystems (262582698639274056) -->
+    <skip />
     <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Дозволяє програмі форматувати пам’ять на знімних носіях."</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"переносити інф-ю у внутрішню пам\'ять"</string>
     <string name="permdesc_asec_access" msgid="3094563844593878548">"Дозволяє програмі отримувати інформацію про внутрішню пам’ять."</string>
@@ -410,7 +432,8 @@
     <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Дозволяє програмі підключати чи відключати внутрішню пам’ять."</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"переймен. внутр. пам\'ять"</string>
     <string name="permdesc_asec_rename" msgid="1794757588472127675">"Дозволяє програмі перейменовувати внутрішню пам’ять."</string>
-    <string name="permlab_vibrate" msgid="7768356019980849603">"контрол. вібросигн."</string>
+    <!-- no translation found for permlab_vibrate (7696427026057705834) -->
+    <skip />
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Дозволяє програмі контролювати вібросигнал."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"контр. блим. світло"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Дозволяє програмі контролювати світловий сигнал."</string>
@@ -435,7 +458,8 @@
     <string name="permdesc_bindGadget" msgid="8261326938599049290">"Дозволяє програмі повідомляти системі, які віджети можуть використовуватися певною програмою. Програма з цим дозволом може надавати іншим програмам доступ до особистих даних. Не для використання звичайними програмами."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"змінювати стан тел."</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Дозволяє програмі контролювати телефонні функції пристрою. Програма з цим дозволом може переключати мережі, вмикати та вимикати радіо в телефоні тощо без вашого відома."</string>
-    <string name="permlab_readPhoneState" msgid="2326172951448691631">"читати стан телефону та ідентиф."</string>
+    <!-- no translation found for permlab_readPhoneState (9178228524507610486) -->
+    <skip />
     <string name="permdesc_readPhoneState" msgid="5127767618743602782">"Дозволяє програмі отримувати доступ до телефонних функцій пристрою. Програма з цим дозволом може визначати номер телефону та серійний номер цього телефону, активність виклику, номер, на який робиться виклик, тощо."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"не доп.перехід пристр.в реж.сну"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"недоп. перехід тел. в реж. сну"</string>
@@ -450,7 +474,8 @@
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Запускає тест виробника на низькому рівні, дозволяючи повний доступ до апарат. забезп. тел. Доступно лише коли тел. запущено в режимі тестув. виробником."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"установити фоновий малюнок"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Дозволяє програмі встановлювати фоновий малюнок системи."</string>
-    <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"установити підказки щодо розміру фонового малюнка"</string>
+    <!-- no translation found for permlab_setWallpaperHints (3278608165977736538) -->
+    <skip />
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Дозволяє програмі встановлювати підказки щодо розміру фонового малюнка системи."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"віднов. завод. парам. за умовч."</string>
     <string name="permdesc_masterClear" msgid="3665380492633910226">"Дозволяє програмі повністю відновлювати заводські налаштування системи, видаляючи всі дані, конфігурацію та встановлені програми."</string>
@@ -462,16 +487,21 @@
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Дозволяє програмі змінювати часовий пояс телефону."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"діяти як AccountManagerService"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Дозволяє програмі здійснювати виклики AccountAuthenticators."</string>
-    <string name="permlab_getAccounts" msgid="4549918644233460103">"виявляти невідомі облікові записи"</string>
+    <!-- no translation found for permlab_getAccounts (1086795467760122114) -->
+    <skip />
     <string name="permdesc_getAccounts" product="tablet" msgid="3238360555257773358">"Дозволяє програмі отримувати список облікових записів, відомих планшетному ПК."</string>
     <string name="permdesc_getAccounts" product="default" msgid="2735689364629830348">"Дозволяє програмі отримувати список облікових записів, відомих телефону."</string>
-    <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"діяти як автентиф-тор обл. запису"</string>
+    <!-- no translation found for permlab_authenticateAccounts (5265908481172736933) -->
+    <skip />
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Дозволяє програмі використовувати можливості автентифікатора облікового запису AccountManager, зокрема створювати облікові записи, а також отримувати та встановлювати паролі до них."</string>
-    <string name="permlab_manageAccounts" msgid="4440380488312204365">"керувати списком облікових записів"</string>
+    <!-- no translation found for permlab_manageAccounts (4983126304757177305) -->
+    <skip />
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Дозволяє програмі виконувати такі операції, як додавання та видалення облікових записів і видалення паролів до них."</string>
-    <string name="permlab_useCredentials" msgid="6401886092818819856">"використ. автентифікаційні облік. дані обл. запису"</string>
+    <!-- no translation found for permlab_useCredentials (235481396163877642) -->
+    <skip />
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Дозволяє програмі подавати запити на маркери автентифікації."</string>
-    <string name="permlab_accessNetworkState" msgid="6865575199464405769">"перегляд. стан мережі"</string>
+    <!-- no translation found for permlab_accessNetworkState (4951027964348974773) -->
+    <skip />
     <string name="permdesc_accessNetworkState" msgid="479772796952547198">"Дозволяє програмі переглядати стани всіх мереж."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"повний доступ до Інтернету"</string>
     <string name="permdesc_createNetworkSockets" msgid="5963922297444265950">"Дозволяє програмі створювати сокети мережі."</string>
@@ -483,29 +513,36 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Дозволяє програмі змінювати стан під’єднання до мережі в режимі модема."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"змінювати параметр викор. фонових даних"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Дозволяє програмі змінювати параметр використання фонових даних."</string>
-    <string name="permlab_accessWifiState" msgid="8100926650211034400">"перегл. стан Wi-Fi"</string>
+    <!-- no translation found for permlab_accessWifiState (5202012949247040011) -->
+    <skip />
     <string name="permdesc_accessWifiState" msgid="7770452658226256831">"Дозволяє програмі переглядати інформацію про стан Wi-Fi."</string>
-    <string name="permlab_changeWifiState" msgid="7280632711057112137">"змінити стан Wi-Fi"</string>
+    <!-- no translation found for permlab_changeWifiState (6550641188749128035) -->
+    <skip />
     <string name="permdesc_changeWifiState" msgid="7399961004537946240">"Дозволяє програмі підключатися та відключатися від точок доступу Wi-Fi, а також вносити зміни в налаштовані мережі Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"дозвол. отримання багатоадр. Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="7633598524564320817">"Дозволяє програмі отримувати пакети, не адресовані безпосередньо вашому пристрою. Це може буди корисним для виявлення служб, які надаються поблизу. Використовує більше заряду, ніж режим не-багатоадресних пакетів."</string>
-    <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"адміністрування Bluetooth"</string>
+    <!-- no translation found for permlab_bluetoothAdmin (6006967373935926659) -->
+    <skip />
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Дозволяє програмі налаштовувати планшетний ПК із локальним Bluetooth, а також знаходити віддалені пристрої та створювати з ними пару."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Дозволяє програмі налаштовувати телефон із локальним Bluetooth, а також знаходити віддалені пристрої та створювати з ними пару."</string>
-    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Переглянути стан WiMAX"</string>
+    <!-- no translation found for permlab_accessWimaxState (7436749103151096452) -->
+    <skip />
     <string name="permdesc_accessWimaxState" msgid="5914958077555177749">"Дозволяє програмі переглядати інформацію про стан WiMAX."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Змінити стан WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="3328853825006455912">"Дозволяє програмі підключатися та відключатися від мережі WiMAX."</string>
-    <string name="permlab_bluetooth" msgid="8361038707857018732">"створюв. підключення Bluetooth"</string>
+    <!-- no translation found for permlab_bluetooth (6127769336339276828) -->
+    <skip />
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Дозволяє програмі переглядати конфігурацію планшетного ПК із локальним Bluetooth, а також створювати та приймати з’єднання зі спареними пристроями."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Дозволяє програмі переглядати конфігурацію локального телефону з Bluetooth, а також створювати та приймати з’єднання зі спареними пристроями."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"контрол. Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Дозволяє програмі обмінюватися даними з тегами, картками та читачами екрана Near Field Communication (NFC)."</string>
-    <string name="permlab_disableKeyguard" msgid="4977406164311535092">"вимик. блок. клав."</string>
+    <!-- no translation found for permlab_disableKeyguard (3598496301486439258) -->
+    <skip />
     <string name="permdesc_disableKeyguard" msgid="6231611286892232626">"Дозволяє програмі вимикати блокування клавіатури та будь-який пов’язаний паролем захист. Допустимий приклад: телефон вимикає блокування клавіатури під час отримання вхідного дзвінка, після закінчення якого блокування клавіатури відновлюється."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"читати налаштування синхронізації"</string>
     <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"Дозволяє програмі читати налаштування синхронізації, наприклад, чи ввімкнено синхронізацію для програми \"Люди\"."</string>
-    <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"записувати налаштування синхронізації"</string>
+    <!-- no translation found for permlab_writeSyncSettings (5408694875793945314) -->
+    <skip />
     <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"Дозволяє програмі змінювати налаштування синхронізації, наприклад, чи ввімкнено синхронізацію для програми \"Люди\"."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"читати стат-ку синхрон."</string>
     <string name="permdesc_readSyncStats" msgid="3801971839939951678">"Дозволяє програмі читати статистику синхронізації, напр., історію здійснених синхронізацій."</string>
@@ -513,16 +550,23 @@
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Дозволяє програмі отримувати відомості про поточно синхронізовані канали."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"запис. підписані канали"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Дозволяє програмі змінювати поточно синхронізовані канали. Шкідливі програми можуть змінювати ваші синхронізовані канали."</string>
-    <string name="permlab_readDictionary" msgid="8410247960433376352">"читати вказаний користувачем словник"</string>
+    <!-- no translation found for permlab_readDictionary (4107101525746035718) -->
+    <skip />
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Дозволяє програмі читати будь-які особисті вислови, назви та фрази, які користувач міг зберегти у своєму словнику."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"писати у вказаний користувачем словник"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Дозволяє програмі писати нові слова в словник користувача."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="4086221374639183281">"читати вміст носія USB"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8537875151845139539">"читати вміст карти SD"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"Дозволяє програмі читати вміст носія USB."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"Дозволяє програмі читати вміст карти SD."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"змінювати/видаляти вміст носія USB"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"змінювати/видал. вміст карти SD"</string>
+    <!-- no translation found for permlab_sdcardRead (367275095159405468) -->
+    <skip />
+    <!-- no translation found for permlab_sdcardRead (2188156462934977940) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (3530894470637667917) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (2555811422562526606) -->
+    <skip />
+    <!-- no translation found for permlab_sdcardWrite (8485979062254666748) -->
+    <skip />
+    <!-- no translation found for permlab_sdcardWrite (9084476432661578751) -->
+    <skip />
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Дозволяє програмі писати на носій USB"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Дозволяє програмі записувати на карту SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"змінювати/видаляти вміст внутр. сховища даних"</string>
@@ -775,12 +819,15 @@
     <string name="autofill_parish" msgid="8202206105468820057">"Община"</string>
     <string name="autofill_area" msgid="3547409050889952423">"Область"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Емірат"</string>
-    <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"читати історію й закладки переглядача"</string>
+    <!-- no translation found for permlab_readHistoryBookmarks (3775265775405106983) -->
+    <skip />
     <string name="permdesc_readHistoryBookmarks" msgid="4577476392604595921">"Дозволяє програмі читати всі URL-адреси, які відкривалися в цьому веб-переглядачі, і всі закладки веб-переглядача."</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"записувати історію й закладки переглядача"</string>
+    <!-- no translation found for permlab_writeHistoryBookmarks (3714785165273314490) -->
+    <skip />
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="1757103804824209530">"Дозволяє програмі змінювати історію чи закладки веб-переглядача, збережені у вашому планшетному ПК. Шкідливі програми можуть використовувати це для видалення чи зміни даних веб-переглядача."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="6693764355720719197">"Дозволяє програмі змінювати історію чи закладки веб-переглядача, збережені у вашому телефоні. Шкідливі програми можуть використовувати це для видалення чи зміни даних веб-переглядача."</string>
-    <string name="permlab_setAlarm" msgid="5924401328803615165">"налашт. сигнал у будильн."</string>
+    <!-- no translation found for permlab_setAlarm (1379294556362091814) -->
+    <skip />
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Дозволяє програмі налаштовувати сигнал у встановленій програмі будильника. У деяких програмах будильника ця функція може не застосовуватися."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"додавати голосову пошту"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Дозволяє програмі додавати повідомлення в папку \"Вхідні\" голосової пошти."</string>
