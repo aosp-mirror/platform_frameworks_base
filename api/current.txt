@@ -26746,6 +26746,7 @@ package android.widget {
     method public void dismissDropDown();
     method public boolean enoughToFilter();
     method public android.widget.ListAdapter getAdapter();
+    method public java.lang.CharSequence getCompletionHint();
     method public int getDropDownAnchor();
     method public android.graphics.drawable.Drawable getDropDownBackground();
     method public int getDropDownHeight();
