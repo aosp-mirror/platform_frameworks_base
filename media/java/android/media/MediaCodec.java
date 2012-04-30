@@ -442,6 +442,19 @@ final public class MediaCodec {
         return getBuffers(false /* input */);
     }
 
+    /** The content is scaled to the surface dimensions */
+    public static final int VIDEO_SCALING_MODE_STRETCH_TO_FIT             = 1;
+
+    /** The content is scaled, maintaining its aspect ratio, the whole
+        surface area is used, content may be cropped
+    */
+    public static final int VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING = 2;
+
+    /** If a surface has been specified in a previous call to {@link #configure}
+        specifies the scaling mode to use. The default is "stretch to fit".
+    */
+    public native final void setVideoScalingMode(int mode);
+
     private native final ByteBuffer[] getBuffers(boolean input);
 
     private static native final void native_init();
