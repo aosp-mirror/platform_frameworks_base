@@ -2438,7 +2438,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
                     handled = child.dispatchPopulateAccessibilityEvent(event);
                     if (handled) {
-                        children.recycle();
                         return handled;
                     }
                 }
