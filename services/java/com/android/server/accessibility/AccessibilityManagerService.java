@@ -1765,8 +1765,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 Bundle arguments) {
             return canRetrieveWindowContent(service)
                 && isRetrievalAllowingWindow(windowId)
-                && isActionPermitted(action)
-                && isActionArgumentsValid(action, arguments);
+                && isActionPermitted(action);
         }
 
         public boolean canRetrieveWindowContent(Service service) {
@@ -1788,29 +1787,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         private boolean isActionPermitted(int action) {
              return (VALID_ACTIONS & action) != 0;
-        }
-
-        private boolean isActionArgumentsValid(int action, Bundle arguments) {
-            switch (action) {
-                case AccessibilityNodeInfo.ACTION_NEXT_AT_GRANULARITY:
-                case AccessibilityNodeInfo.ACTION_PREVIOUS_AT_GRANULARITY: {
-                    if (arguments.size() == 1) {
-                        final int granularity = arguments.getInt(
-                                AccessibilityNodeInfo.ACTION_ARGUMENT_GRANULARITY_INT);
-                        return (granularity & VALID_GRANULARITIES) != 0
-                                && Integer.bitCount(granularity) == 1;
-                    }
-                } break;
-                case AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT:
-                case AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT: {
-                    if (arguments.size() == 1) {
-                        String element = arguments.getString(
-                                AccessibilityNodeInfo.ACTION_ARGUMENT_HTML_ELEMENT_STRING);
-                        return !TextUtils.isEmpty(element);
-                    }
-                } break;
-            }
-            return false;
         }
 
         private void enforceCallingPermission(String permission, String function) {
