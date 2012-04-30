@@ -806,6 +806,10 @@ public class Notification implements Parcelable
             contentView.setViewVisibility(R.id.time, View.VISIBLE);
             contentView.setLong(R.id.time, "setTime", when);
         }
+        if (this.number != 0) {
+            NumberFormat f = NumberFormat.getIntegerInstance();
+            contentView.setTextViewText(R.id.info, f.format(this.number));
+        }
 
         this.contentView = contentView;
         this.contentIntent = contentIntent;
