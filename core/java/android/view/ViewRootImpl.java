@@ -635,6 +635,8 @@ public final class ViewRootImpl implements ViewParent,
                 if (view.getImportantForAccessibility() == View.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
                     view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
                 }
+
+                setAccessibilityFocusedHost(null);
             }
         }
     }
@@ -2339,6 +2341,9 @@ public final class ViewRootImpl implements ViewParent,
             if (mAccessibilityFocusedVirtualView == null) {
                 mAccessibilityFocusedVirtualView = provider.findAccessibilitiyFocus(View.NO_ID);
             }
+            if (mAccessibilityFocusedVirtualView == null) {
+                return;
+            }
             mAccessibilityFocusedVirtualView.getBoundsInScreen(bounds);
             bounds.offset(-mAttachInfo.mWindowLeft, -mAttachInfo.mWindowTop);
         }
@@ -2865,6 +2870,8 @@ public final class ViewRootImpl implements ViewParent,
                         mHasHadWindowFocus = true;
                     }
 
+                    setAccessibilityFocusedHost(null);
+
                     if (mView != null && mAccessibilityManager.isEnabled()) {
                         if (hasWindowFocus) {
                             mView.sendAccessibilityEvent(
@@ -2883,9 +2890,6 @@ public final class ViewRootImpl implements ViewParent,
                             if (mAccessibilityFocusedHost == null) {
                                 mView.requestAccessibilityFocus();
                             }
-                        } else {
-                            // Clear accessibility focus when the window loses input focus.
-                            setAccessibilityFocusedHost(null);
                         }
                     }
                 }
