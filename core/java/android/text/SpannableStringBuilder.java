@@ -260,7 +260,9 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
     private void change(int start, int end, CharSequence cs, int csStart, int csEnd) {
         // Can be negative
-        final int nbNewChars = (csEnd - csStart) - (end - start);
+        final int replacedLength = end - start;
+        final int replacementLength = csEnd - csStart;
+        final int nbNewChars = replacementLength - replacedLength;
 
         for (int i = mSpanCount - 1; i >= 0; i--) {
             int spanStart = mSpanStarts[i];
@@ -308,7 +310,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
         // The removal pass needs to be done before the gap is updated in order to broadcast the
         // correct previous positions to the correct intersecting SpanWatchers
-        if (end > start) { // no need for span fixup on pure insertion
+        if (replacedLength > 0) { // no need for span fixup on pure insertion
             // A for loop will not work because the array is being modified
             // Do not iterate in reverse to keep the SpanWatchers notified in ordering
             // Also, a removed SpanWatcher should not get notified of removed spans located
@@ -334,29 +336,18 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
         TextUtils.getChars(cs, csStart, csEnd, mText, start);
 
-        if (end > start) { // no need for span fixup on pure insertion
+        if (replacedLength > 0) { // no need for span fixup on pure insertion
             final boolean atEnd = (mGapStart + mGapLength == mText.length);
+            final boolean textIsRemoved = replacementLength == 0;
 
             for (int i = 0; i < mSpanCount; i++) {
-                if (mSpanStarts[i] >= start && mSpanStarts[i] < mGapStart + mGapLength) {
-                    int flag = (mSpanFlags[i] & START_MASK) >> START_SHIFT;
+                final int startFlag = (mSpanFlags[i] & START_MASK) >> START_SHIFT;
+                mSpanStarts[i] = updatedIntervalBound(mSpanStarts[i], start, nbNewChars, startFlag,
+                        atEnd, textIsRemoved);
 
-                    if (flag == POINT || (flag == PARAGRAPH && atEnd)) {
-                        mSpanStarts[i] = mGapStart + mGapLength;
-                    } else {
-                        mSpanStarts[i] = start;
-                    }
-                }
-
-                if (mSpanEnds[i] >= start && mSpanEnds[i] < mGapStart + mGapLength) {
-                    int flag = (mSpanFlags[i] & END_MASK);
-
-                    if (flag == POINT || (flag == PARAGRAPH && atEnd)) {
-                        mSpanEnds[i] = mGapStart + mGapLength;
-                    } else {
-                        mSpanEnds[i] = start;
-                    }
-                }
+                final int endFlag = (mSpanFlags[i] & END_MASK);
+                mSpanEnds[i] = updatedIntervalBound(mSpanEnds[i], start, nbNewChars, endFlag,
+                        atEnd, textIsRemoved);
             }
         }
 
@@ -380,6 +371,38 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                 }
             }
         }
+    }
+
+    private int updatedIntervalBound(int offset, int start, int nbNewChars, int flag, boolean atEnd,
+            boolean textIsRemoved) {
+        if (offset >= start && offset < mGapStart + mGapLength) {
+            if (flag == POINT) {
+                // A POINT located inside the replaced range should be moved to the end of the
+                // replaced text.
+                // The exception is when the point is at the start of the range and we are doing a
+                // text replacement (as opposed to a deletion): the point stays there.
+                if (textIsRemoved || offset > start) {
+                    return mGapStart + mGapLength;
+                }
+            } else {
+                if (flag == PARAGRAPH) {
+                    if (atEnd) {
+                        return mGapStart + mGapLength;
+                    }
+                } else { // MARK
+                    // MARKs should be moved to the start, with the exception of a mark located at the
+                    // end of the range (which will be < mGapStart + mGapLength since mGapLength > 0)
+                    // which should stay 'unchanged' at the end of the replaced text.
+                    if (textIsRemoved || offset < mGapStart - nbNewChars) {
+                        return start;
+                    } else {
+                        // Move to the end of replaced text (needed if nbNewChars != 0)
+                        return mGapStart;
+                    }
+                }
+            }
+        }
+        return offset;
     }
 
     private void removeSpan(int i) {
@@ -1076,7 +1099,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
         System.out.print("\n");
     }
-     */
+    */
 
     /**
      * Don't call this yourself -- exists for Canvas to use internally.
