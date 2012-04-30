@@ -207,31 +207,20 @@ public class AppWidgetHostView extends FrameLayout {
         super.dispatchRestoreInstanceState(jail);
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int oldWidth = getMeasuredWidth();
-        int oldHeight = getMeasuredHeight();
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int newWidth = getMeasuredWidth();
-        int newHeight = getMeasuredHeight();
-
-        // TODO: this is just a hack for now -- we actually have the AppWidgetHost
-        // be responsible for updating the size of the widget.
-        if (oldWidth != newWidth || oldHeight != newHeight) {
-            final float density = mContext.getResources().getDisplayMetrics().density;
-            final int newWidthDips = (int) (newWidth / density);
-            final int newHeightDips = (int) (newHeight / density);
-            updateAppWidgetSize(null, newWidthDips, newHeightDips, newWidthDips, newHeightDips);
-        }
-    }
-
     /**
      * Provide guidance about the size of this widget to the AppWidgetManager. This information
      * gets embedded into the AppWidgetExtras and causes a callback to the AppWidgetProvider.
+     * @see AppWidgetProvider#onAppWidgetExtrasChanged(Context, AppWidgetManager, int, Bundle)
      *
-     *  @see AppWidgetProvider#onAppWidgetExtrasChanged(Context, AppWidgetManager, int, Bundle)
+     * @param extras The bundle of extra information, in addition to the size information
+     *          can be null.
+     * @param minWidth The minimum width that the widget will be displayed at.
+     * @param minHeight The maximum height that the widget will be displayed at.
+     * @param maxWidth The maximum height that the widget will be displayed at.
+     *
      */
-    public void updateAppWidgetSize(Bundle extras, int minWidth, int minHeight, int maxWidth, int maxHeight) {
+    public void updateAppWidgetSize(Bundle extras, int minWidth, int minHeight, int maxWidth,
+            int maxHeight) {
         if (extras == null) {
             extras = new Bundle();
         }
@@ -242,6 +231,13 @@ public class AppWidgetHostView extends FrameLayout {
         updateAppWidgetExtras(extras);
     }
 
+    /**
+     * Specify some extra information for the widget provider. Causes a callback to the
+     * AppWidgetProvider.
+     * @see AppWidgetProvider#onAppWidgetExtrasChanged(Context, AppWidgetManager, int, Bundle)
+     *
+     * @param extras The bundle of extra information.
+     */
     public void updateAppWidgetExtras(Bundle extras) {
         AppWidgetManager.getInstance(mContext).updateAppWidgetExtras(mAppWidgetId, extras);
     }
