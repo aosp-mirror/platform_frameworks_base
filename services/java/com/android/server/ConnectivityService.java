@@ -884,20 +884,23 @@ private NetworkStateTracker makeWimaxStateTracker() {
     @Override
     public boolean isActiveNetworkMetered() {
         enforceAccessPermission();
-
         final long token = Binder.clearCallingIdentity();
         try {
-            final NetworkState state = getNetworkStateUnchecked(mActiveDefaultNetwork);
-            if (state != null) {
-                try {
-                    return mPolicyManager.isNetworkMetered(state);
-                } catch (RemoteException e) {
-                }
-            }
-            return false;
+            return isNetworkMeteredUnchecked(mActiveDefaultNetwork);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+    }
+
+    private boolean isNetworkMeteredUnchecked(int networkType) {
+        final NetworkState state = getNetworkStateUnchecked(networkType);
+        if (state != null) {
+            try {
+                return mPolicyManager.isNetworkMetered(state);
+            } catch (RemoteException e) {
+            }
+        }
+        return false;
     }
 
     public boolean setRadios(boolean turnOn) {
@@ -993,7 +996,8 @@ private NetworkStateTracker makeWimaxStateTracker() {
     public int startUsingNetworkFeature(int networkType, String feature,
             IBinder binder) {
         if (VDBG) {
-            log("startUsingNetworkFeature for net " + networkType + ": " + feature);
+            log("startUsingNetworkFeature for net " + networkType + ": " + feature + ", uid="
+                    + Binder.getCallingUid());
         }
         enforceChangePermission();
         if (!ConnectivityManager.isNetworkTypeValid(networkType) ||
@@ -1008,6 +1012,16 @@ private NetworkStateTracker makeWimaxStateTracker() {
 
         if (mProtectedNetworks.contains(usedNetworkType)) {
             enforceConnectivityInternalPermission();
+        }
+
+        // if UID is restricted, don't allow them to bring up metered APNs
+        final boolean networkMetered = isNetworkMeteredUnchecked(usedNetworkType);
+        final int uidRules;
+        synchronized (mRulesLock) {
+            uidRules = mUidRules.get(Binder.getCallingUid(), RULE_ALLOW_ALL);
+        }
+        if (networkMetered && (uidRules & RULE_REJECT_METERED) != 0) {
+            return Phone.APN_REQUEST_FAILED;
         }
 
         NetworkStateTracker network = mNetTrackers[usedNetworkType];
@@ -1432,7 +1446,6 @@ private NetworkStateTracker makeWimaxStateTracker() {
                 mUidRules.put(uid, uidRules);
             }
 
-            // TODO: dispatch into NMS to push rules towards kernel module
             // TODO: notify UID when it has requested targeted updates
         }
 
