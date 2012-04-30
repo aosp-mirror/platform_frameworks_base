@@ -62,7 +62,7 @@ public class FocusFinder {
      * @return The next focusable view, or null if none exists.
      */
     public final View findNextFocus(ViewGroup root, View focused, int direction) {
-        return findNextFocus(root, focused, mFocusedRect, direction);
+        return findNextFocus(root, focused, null, direction);
     }
 
     /**
@@ -122,34 +122,40 @@ public class FocusFinder {
             int direction, ArrayList<View> focusables) {
         final int directionMasked = (direction & ~View.FOCUS_ACCESSIBILITY);
         if (focused != null) {
+            if (focusedRect == null) {
+                focusedRect = mFocusedRect;
+            }
             // fill in interesting rect from focused
             focused.getFocusedRect(focusedRect);
             root.offsetDescendantRectToMyCoords(focused, focusedRect);
         } else {
-            // make up a rect at top left or bottom right of root
-            switch (directionMasked) {
-                case View.FOCUS_RIGHT:
-                case View.FOCUS_DOWN:
-                    setFocusTopLeft(root, focusedRect);
-                    break;
-                case View.FOCUS_FORWARD:
-                    if (root.isLayoutRtl()) {
-                        setFocusBottomRight(root, focusedRect);
-                    } else {
+            if (focusedRect == null) {
+                focusedRect = mFocusedRect;
+                // make up a rect at top left or bottom right of root
+                switch (directionMasked) {
+                    case View.FOCUS_RIGHT:
+                    case View.FOCUS_DOWN:
                         setFocusTopLeft(root, focusedRect);
-                    }
-                    break;
+                        break;
+                    case View.FOCUS_FORWARD:
+                        if (root.isLayoutRtl()) {
+                            setFocusBottomRight(root, focusedRect);
+                        } else {
+                            setFocusTopLeft(root, focusedRect);
+                        }
+                        break;
 
-                case View.FOCUS_LEFT:
-                case View.FOCUS_UP:
-                    setFocusBottomRight(root, focusedRect);
-                    break;
-                case View.FOCUS_BACKWARD:
-                    if (root.isLayoutRtl()) {
-                        setFocusTopLeft(root, focusedRect);
-                    } else {
+                    case View.FOCUS_LEFT:
+                    case View.FOCUS_UP:
                         setFocusBottomRight(root, focusedRect);
-                    break;
+                        break;
+                    case View.FOCUS_BACKWARD:
+                        if (root.isLayoutRtl()) {
+                            setFocusTopLeft(root, focusedRect);
+                        } else {
+                            setFocusBottomRight(root, focusedRect);
+                        break;
+                    }
                 }
             }
         }
