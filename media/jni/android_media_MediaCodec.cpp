@@ -39,6 +39,8 @@
 #include <media/stagefright/foundation/AString.h>
 #include <media/stagefright/MediaErrors.h>
 
+#include <system/window.h>
+
 namespace android {
 
 // Keep these in sync with their equivalents in MediaCodec.java !!!
@@ -111,9 +113,12 @@ status_t JMediaCodec::configure(
         int flags) {
     sp<SurfaceTextureClient> client;
     if (surfaceTexture != NULL) {
-        client = new SurfaceTextureClient(surfaceTexture);
+        mSurfaceTextureClient = new SurfaceTextureClient(surfaceTexture);
+    } else {
+        mSurfaceTextureClient.clear();
     }
-    return mCodec->configure(format, client, crypto, flags);
+
+    return mCodec->configure(format, mSurfaceTextureClient, crypto, flags);
 }
 
 status_t JMediaCodec::start() {
@@ -121,6 +126,8 @@ status_t JMediaCodec::start() {
 }
 
 status_t JMediaCodec::stop() {
+    mSurfaceTextureClient.clear();
+
     return mCodec->stop();
 }
 
@@ -225,6 +232,12 @@ status_t JMediaCodec::getBuffers(
     }
 
     return OK;
+}
+
+void JMediaCodec::setVideoScalingMode(int mode) {
+    if (mSurfaceTextureClient != NULL) {
+        native_window_set_scaling_mode(mSurfaceTextureClient.get(), mode);
+    }
 }
 
 }  // namespace android
@@ -663,6 +676,24 @@ static jobjectArray android_media_MediaCodec_getBuffers(
     return NULL;
 }
 
+static void android_media_MediaCodec_setVideoScalingMode(
+        JNIEnv *env, jobject thiz, jint mode) {
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    if (mode != NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW
+            && mode != NATIVE_WINDOW_SCALING_MODE_SCALE_CROP) {
+        jniThrowException(env, "java/lang/InvalidArgumentException", NULL);
+        return;
+    }
+
+    codec->setVideoScalingMode(mode);
+}
+
 static void android_media_MediaCodec_native_init(JNIEnv *env) {
     jclass clazz = env->FindClass("android/media/MediaCodec");
     CHECK(clazz != NULL);
@@ -764,6 +795,9 @@ static JNINativeMethod gMethods[] = {
 
     { "getBuffers", "(Z)[Ljava/nio/ByteBuffer;",
       (void *)android_media_MediaCodec_getBuffers },
+
+    { "setVideoScalingMode", "(I)V",
+      (void *)android_media_MediaCodec_setVideoScalingMode },
 
     { "native_init", "()V", (void *)android_media_MediaCodec_native_init },
 
