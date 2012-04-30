@@ -1531,6 +1531,22 @@ public class AccessibilityNodeInfo implements Parcelable {
                 return "ACTION_SELECT";
             case ACTION_CLEAR_SELECTION:
                 return "ACTION_CLEAR_SELECTION";
+            case ACTION_CLICK:
+                return "ACTION_CLICK";
+            case ACTION_LONG_CLICK:
+                return "ACTION_LONG_CLICK";
+            case ACTION_ACCESSIBILITY_FOCUS:
+                return "ACTION_ACCESSIBILITY_FOCUS";
+            case ACTION_CLEAR_ACCESSIBILITY_FOCUS:
+                return "ACTION_CLEAR_ACCESSIBILITY_FOCUS";
+            case ACTION_NEXT_AT_GRANULARITY:
+                return "ACTION_NEXT_AT_GRANULARITY";
+            case ACTION_PREVIOUS_AT_GRANULARITY:
+                return "ACTION_PREVIOUS_AT_GRANULARITY";
+            case ACTION_NEXT_HTML_ELEMENT:
+                return "ACTION_NEXT_HTML_ELEMENT";
+            case ACTION_PREVIOUS_HTML_ELEMENT:
+                return "ACTION_PREVIOUS_HTML_ELEMENT";
             default:
                 throw new IllegalArgumentException("Unknown action: " + action);
         }
