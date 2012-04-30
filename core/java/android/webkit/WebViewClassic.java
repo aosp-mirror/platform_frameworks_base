@@ -7887,14 +7887,14 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         mSendScrollEvent = true;
 
         int functor = 0;
-        if (mWebView.isHardwareAccelerated()
-                || mWebView.getLayerType() != View.LAYER_TYPE_HARDWARE) {
+        ViewRootImpl viewRoot = mWebView.getViewRootImpl();
+        if (mWebView.isHardwareAccelerated() && viewRoot != null) {
             functor = nativeGetDrawGLFunction(mNativeClass);
+            viewRoot.attachFunctor(functor);
         }
 
-        if (functor != 0) {
-            mWebView.getViewRootImpl().attachFunctor(functor);
-        } else {
+        if (functor == 0
+                || mWebView.getLayerType() != View.LAYER_TYPE_NONE) {
             // invalidate the screen so that the next repaint will show new content
             // TODO: partial invalidate
             mWebView.invalidate();
