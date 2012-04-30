@@ -2647,8 +2647,8 @@ public class WindowManagerService extends IWindowManager.Stub
     public int relayoutWindow(Session session, IWindow client, int seq,
             WindowManager.LayoutParams attrs, int requestedWidth,
             int requestedHeight, int viewVisibility, int flags,
-            Rect outFrame, Rect outContentInsets, Rect outVisibleInsets,
-            Configuration outConfig, Surface outSurface) {
+            Rect outFrame, Rect outSystemInsets, Rect outContentInsets,
+            Rect outVisibleInsets, Configuration outConfig, Surface outSurface) {
         boolean displayed = false;
         boolean inTouchMode;
         boolean configChanged;
@@ -2939,6 +2939,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mAppToken.updateReportedVisibilityLocked();
             }
             outFrame.set(win.mCompatFrame);
+            outSystemInsets.set(win.mSystemInsets);
             outContentInsets.set(win.mContentInsets);
             outVisibleInsets.set(win.mVisibleInsets);
             if (localLOGV) Slog.v(
@@ -8092,10 +8093,12 @@ public class WindowManagerService extends IWindowManager.Stub
     private void updateResizingWindows(final WindowState w) {
         final WindowStateAnimator winAnimator = w.mWinAnimator;
         if (w.mHasSurface && !w.mAppFreezing && w.mLayoutSeq == mLayoutSeq) {
+            w.mSystemInsetsChanged |=
+                    !w.mLastSystemInsets.equals(w.mSystemInsets);
             w.mContentInsetsChanged |=
-                !w.mLastContentInsets.equals(w.mContentInsets);
+                    !w.mLastContentInsets.equals(w.mContentInsets);
             w.mVisibleInsetsChanged |=
-                !w.mLastVisibleInsets.equals(w.mVisibleInsets);
+                    !w.mLastVisibleInsets.equals(w.mVisibleInsets);
             boolean configChanged =
                 w.mConfiguration != mCurConfiguration
                 && (w.mConfiguration == null
@@ -8108,7 +8111,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     + ": configChanged=" + configChanged
                     + " last=" + w.mLastFrame + " frame=" + w.mFrame);
             w.mLastFrame.set(w.mFrame);
-            if (w.mContentInsetsChanged
+            if (w.mSystemInsetsChanged
+                    || w.mContentInsetsChanged
                     || w.mVisibleInsetsChanged
                     || winAnimator.mSurfaceResized
                     || configChanged) {
@@ -8120,6 +8124,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             + " configChanged=" + configChanged);
                 }
 
+                w.mLastSystemInsets.set(w.mSystemInsets);
                 w.mLastContentInsets.set(w.mContentInsets);
                 w.mLastVisibleInsets.set(w.mVisibleInsets);
                 makeWindowFreezingScreenIfNeededLocked(w);
@@ -8505,10 +8510,11 @@ public class WindowManagerService extends IWindowManager.Stub
                             winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING) Slog.i(
                             TAG, "Resizing " + win + " WITH DRAW PENDING");
                     win.mClient.resized((int)winAnimator.mSurfaceW,
-                            (int)winAnimator.mSurfaceH,
+                            (int)winAnimator.mSurfaceH, win.mLastSystemInsets,
                             win.mLastContentInsets, win.mLastVisibleInsets,
                             winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING,
                             configChanged ? win.mConfiguration : null);
+                    win.mSystemInsetsChanged = false;
                     win.mContentInsetsChanged = false;
                     win.mVisibleInsetsChanged = false;
                     winAnimator.mSurfaceResized = false;

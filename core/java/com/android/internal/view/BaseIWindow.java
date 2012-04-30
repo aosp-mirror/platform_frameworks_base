@@ -33,7 +33,7 @@ public class BaseIWindow extends IWindow.Stub {
         mSession = session;
     }
     
-    public void resized(int w, int h, Rect coveredInsets,
+    public void resized(int w, int h, Rect systemInsets, Rect contentInsets,
             Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
         if (reportDraw) {
             try {

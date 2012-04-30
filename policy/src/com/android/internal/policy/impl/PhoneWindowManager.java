@@ -407,6 +407,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // that area of the display from all other windows.
     int mRestrictedScreenLeft, mRestrictedScreenTop;
     int mRestrictedScreenWidth, mRestrictedScreenHeight;
+    // During layout, the current screen borders accounting for any currently
+    // visible system UI elements.
+    int mSystemLeft, mSystemTop, mSystemRight, mSystemBottom;
     // For applications requesting stable content insets, these are them.
     int mStableLeft, mStableTop, mStableRight, mStableBottom;
     // During layout, the current screen borders with all outer decoration
@@ -423,6 +426,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mDockLeft, mDockTop, mDockRight, mDockBottom;
     // During layout, the layer at which the doc window is placed.
     int mDockLayer;
+    // During layout, this is the layer of the status bar.
+    int mStatusBarLayer;
     int mLastSystemUiFlags;
     // Bits that we are in the process of clearing, so we want to prevent
     // them from being set by applications until everything has been updated
@@ -438,6 +443,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     static final Rect mTmpParentFrame = new Rect();
     static final Rect mTmpDisplayFrame = new Rect();
+    static final Rect mTmpSystemFrame = new Rect();
     static final Rect mTmpContentFrame = new Rect();
     static final Rect mTmpVisibleFrame = new Rect();
     static final Rect mTmpNavigationFrame = new Rect();
@@ -2168,11 +2174,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mRestrictedScreenLeft = mRestrictedScreenTop = 0;
         mRestrictedScreenWidth = displayWidth;
         mRestrictedScreenHeight = displayHeight;
-        mDockLeft = mContentLeft = mStableLeft = mCurLeft = 0;
-        mDockTop = mContentTop = mStableTop = mCurTop = 0;
-        mDockRight = mContentRight = mStableRight = mCurRight = displayWidth;
-        mDockBottom = mContentBottom = mStableBottom = mCurBottom = displayHeight;
+        mDockLeft = mContentLeft = mStableLeft = mSystemLeft = mCurLeft = 0;
+        mDockTop = mContentTop = mStableTop = mSystemTop = mCurTop = 0;
+        mDockRight = mContentRight = mStableRight = mSystemRight = mCurRight = displayWidth;
+        mDockBottom = mContentBottom = mStableBottom = mSystemBottom = mCurBottom = displayHeight;
         mDockLayer = 0x10000000;
+        mStatusBarLayer = -1;
 
         // start with the current dock rect, which will be (0,0,displayWidth,displayHeight)
         final Rect pf = mTmpParentFrame;
@@ -2232,6 +2239,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // We currently want to hide the navigation UI.
                     mNavigationBar.hideLw(true);
                 }
+                if (navVisible && !mNavigationBar.isAnimatingLw()) {
+                    // If the nav bar is currently requested to be visible,
+                    // and not in the process of animating on or off, then
+                    // we can tell the app that it is covered by it.
+                    mSystemBottom = mTmpNavigationFrame.top;
+                }
             } else {
                 // Landscape screen; nav bar goes to the right.
                 int left = displayWidth - mNavigationBarWidthForRotation[displayRotation];
@@ -2250,6 +2263,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // We currently want to hide the navigation UI.
                     mNavigationBar.hideLw(true);
                 }
+                if (navVisible && !mNavigationBar.isAnimatingLw()) {
+                    // If the nav bar is currently requested to be visible,
+                    // and not in the process of animating on or off, then
+                    // we can tell the app that it is covered by it.
+                    mSystemRight = mTmpNavigationFrame.left;
+                }
             }
             // Make sure the content and current rectangles are updated to
             // account for the restrictions from the navigation bar.
@@ -2257,9 +2276,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mContentBottom = mCurBottom = mDockBottom;
             mContentLeft = mCurLeft = mDockLeft;
             mContentRight = mCurRight = mDockRight;
+            mStatusBarLayer = mNavigationBar.getSurfaceLayer();
             // And compute the final frame.
             mNavigationBar.computeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame,
-                    mTmpNavigationFrame, mTmpNavigationFrame);
+                    mTmpNavigationFrame, mTmpNavigationFrame, mTmpNavigationFrame);
             if (DEBUG_LAYOUT) Log.i(TAG, "mNavigationBar frame: " + mTmpNavigationFrame);
         }
         if (DEBUG_LAYOUT) Log.i(TAG, String.format("mDock rect: (%d,%d - %d,%d)",
@@ -2277,8 +2297,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             vf.right = mStableRight;
             vf.bottom = mStableBottom;
 
+            mStatusBarLayer = mStatusBar.getSurfaceLayer();
+
             // Let the status bar determine its size.
-            mStatusBar.computeFrameLw(pf, df, vf, vf);
+            mStatusBar.computeFrameLw(pf, df, df, vf, vf);
 
             // For layout, the status bar is always at the top with our fixed height.
             mStableTop = mUnrestrictedScreenTop + mStatusBarHeight;
@@ -2302,6 +2324,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         mDockLeft, mDockTop, mDockRight, mDockBottom,
                         mContentLeft, mContentTop, mContentRight, mContentBottom,
                         mCurLeft, mCurTop, mCurRight, mCurBottom));
+            }
+            if (mStatusBar.isVisibleLw() && !mStatusBar.isAnimatingLw()) {
+                // If the status bar is currently requested to be visible,
+                // and not in the process of animating on or off, then
+                // we can tell the app that it is covered by it.
+                mSystemTop = mUnrestrictedScreenTop + mStatusBarHeight;
             }
         }
     }
@@ -2368,6 +2396,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         final Rect pf = mTmpParentFrame;
         final Rect df = mTmpDisplayFrame;
+        final Rect sf = mTmpSystemFrame;
         final Rect cf = mTmpContentFrame;
         final Rect vf = mTmpVisibleFrame;
         
@@ -2611,6 +2640,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             df.right = df.bottom = cf.right = cf.bottom = vf.right = vf.bottom = 10000;
         }
 
+        // Compute the system frame.  This is easy: for things behind the
+        // status bar, it is any application windows; otherwise it is not set.
+        int parentType = attached != null ? attached.getAttrs().type : attrs.type;
+        if (win.getSurfaceLayer() < mStatusBarLayer
+                && parentType < WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW) {
+            sf.left = mSystemLeft;
+            sf.top = mSystemTop;
+            sf.right = mSystemRight;
+            sf.bottom = mSystemBottom;
+        } else {
+            sf.left = sf.top = -10000;
+            sf.right = sf.bottom = 10000;
+        }
+
         if (DEBUG_LAYOUT) Log.v(TAG, "Compute frame " + attrs.getTitle()
                 + ": sim=#" + Integer.toHexString(sim)
                 + " attach=" + attached + " type=" + attrs.type 
@@ -2618,7 +2661,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + " pf=" + pf.toShortString() + " df=" + df.toShortString()
                 + " cf=" + cf.toShortString() + " vf=" + vf.toShortString());
         
-        win.computeFrameLw(pf, df, cf, vf);
+        win.computeFrameLw(pf, df, sf, cf, vf);
         
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.
@@ -4193,6 +4236,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(","); pw.print(mStableTop);
                 pw.print(")-("); pw.print(mStableRight);
                 pw.print(","); pw.print(mStableBottom); pw.println(")");
+        pw.print(prefix); pw.print("mSystem=("); pw.print(mSystemLeft);
+                pw.print(","); pw.print(mSystemTop);
+                pw.print(")-("); pw.print(mSystemRight);
+                pw.print(","); pw.print(mSystemBottom); pw.println(")");
         pw.print(prefix); pw.print("mCur=("); pw.print(mCurLeft);
                 pw.print(","); pw.print(mCurTop);
                 pw.print(")-("); pw.print(mCurRight);
@@ -4205,7 +4252,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(","); pw.print(mDockTop);
                 pw.print(")-("); pw.print(mDockRight);
                 pw.print(","); pw.print(mDockBottom); pw.println(")");
-        pw.print(prefix); pw.print("mDockLayer="); pw.println(mDockLayer);
+        pw.print(prefix); pw.print("mDockLayer="); pw.print(mDockLayer);
+                pw.print(" mStatusBarLayer="); pw.println(mStatusBarLayer);
         pw.print(prefix); pw.print("mTopFullscreenOpaqueWindowState=");
                 pw.println(mTopFullscreenOpaqueWindowState);
         pw.print(prefix); pw.print("mTopIsFullscreen="); pw.print(mTopIsFullscreen);

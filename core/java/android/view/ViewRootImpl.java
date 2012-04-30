@@ -261,6 +261,7 @@ public final class ViewRootImpl implements ViewParent,
 
     final Rect mPendingVisibleInsets = new Rect();
     final Rect mPendingContentInsets = new Rect();
+    final Rect mPendingSystemInsets = new Rect();
     final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
             = new ViewTreeObserver.InternalInsetsInfo();
 
@@ -3846,7 +3847,7 @@ public final class ViewRootImpl implements ViewParent,
                 (int) (mView.getMeasuredWidth() * appScale + 0.5f),
                 (int) (mView.getMeasuredHeight() * appScale + 0.5f),
                 viewVisibility, insetsPending ? WindowManagerImpl.RELAYOUT_INSETS_PENDING : 0,
-                mWinFrame, mPendingContentInsets, mPendingVisibleInsets,
+                mWinFrame, mPendingSystemInsets, mPendingContentInsets, mPendingVisibleInsets,
                 mPendingConfiguration, mSurface);
         //Log.d(TAG, "<<<<<< BACK FROM relayout");
         if (restore) {
@@ -4689,11 +4690,11 @@ public final class ViewRootImpl implements ViewParent,
             mViewAncestor = new WeakReference<ViewRootImpl>(viewAncestor);
         }
 
-        public void resized(int w, int h, Rect coveredInsets, Rect visibleInsets,
-                boolean reportDraw, Configuration newConfig) {
+        public void resized(int w, int h, Rect systemInsets, Rect contentInsets,
+                Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
-                viewAncestor.dispatchResized(w, h, coveredInsets, visibleInsets, reportDraw,
+                viewAncestor.dispatchResized(w, h, contentInsets, visibleInsets, reportDraw,
                         newConfig);
             }
         }
