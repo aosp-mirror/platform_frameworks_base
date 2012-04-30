@@ -556,6 +556,7 @@ public class BitmapFactory {
             return bm;
         }
         byte[] np = bm.getNinePatchChunk();
+        int[] lb = bm.getLayoutBounds();
         final boolean isNinePatch = np != null && NinePatch.isNinePatchChunk(np);
         if (opts.inScaled || isNinePatch) {
             float scale = targetDensity / (float) density;
@@ -568,6 +569,13 @@ public class BitmapFactory {
                 if (isNinePatch) {
                     np = nativeScaleNinePatch(np, scale, outPadding);
                     bm.setNinePatchChunk(np);
+                }
+                if (lb != null) {
+                    int[] newLb = new int[lb.length];
+                    for (int i=0; i<lb.length; i++) {
+                        newLb[i] = (int)((lb[i]*scale)+.5f);
+                    }
+                    bm.setLayoutBounds(newLb);
                 }
             }
 
