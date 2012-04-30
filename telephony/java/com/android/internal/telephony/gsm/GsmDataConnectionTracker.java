@@ -1863,6 +1863,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     protected void onRoamingOff() {
         if (DBG) log("onRoamingOff");
 
+        if (mUserDataEnabled == false) return;
+
         if (getDataOnRoamingEnabled() == false) {
             notifyOffApnsOfAvailability(Phone.REASON_ROAMING_OFF);
             setupDataOnReadyApns(Phone.REASON_ROAMING_OFF);
@@ -1873,6 +1875,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     protected void onRoamingOn() {
+        if (mUserDataEnabled == false) return;
+
         if (getDataOnRoamingEnabled()) {
             if (DBG) log("onRoamingOn: setup data on roaming");
             setupDataOnReadyApns(Phone.REASON_ROAMING_ON);
