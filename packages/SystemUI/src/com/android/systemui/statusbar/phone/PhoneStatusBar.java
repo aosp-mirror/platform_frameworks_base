@@ -164,6 +164,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     // drag bar
     CloseDragHandle mCloseView;
+    private int mCloseViewHeight;
 
     // all notifications
     NotificationData mNotificationData = new NotificationData();
@@ -333,6 +334,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mCloseView = (CloseDragHandle)mStatusBarWindow.findViewById(R.id.close);
         mCloseView.mService = this;
+        mCloseViewHeight = res.getDimensionPixelSize(R.dimen.close_handle_height);
 
         mEdgeBorder = res.getDimensionPixelSize(R.dimen.status_bar_edge_ignore);
 
@@ -464,6 +466,10 @@ public class PhoneStatusBar extends BaseStatusBar {
                     res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
         }
         return mNaturalBarHeight;
+    }
+
+    private int getCloseViewHeight() {
+        return mCloseViewHeight;
     }
 
     private View.OnClickListener mRecentsClickListener = new View.OnClickListener() {
@@ -1259,7 +1265,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
     
     void doRevealAnimation() {
-        final int h = mCloseView.getHeight() + getStatusBarHeight();
+        final int h = getCloseViewHeight() + getStatusBarHeight();
         if (mAnimatingReveal && mAnimating && mAnimY < h) {
             incrementAnim();
             if (mAnimY >= h) {
@@ -1420,9 +1426,9 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         } else if (mTracking) {
             trackMovement(event);
-            final int minY = statusBarSize + mCloseView.getHeight();
+            final int minY = statusBarSize + getCloseViewHeight();
             if (action == MotionEvent.ACTION_MOVE) {
-                if (mAnimatingReveal && y < minY) {
+                if (mAnimatingReveal && (y + mViewDelta) < minY) {
                     // nothing
                 } else  {
                     mAnimatingReveal = false;
@@ -1855,6 +1861,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         mTrackingPosition = -mDisplayMetrics.heightPixels;
     }
 
+    static final float saturate(float a) {
+        return a < 0f ? 0f : (a > 1f ? 1f : a);
+    }
+
     void updateExpandedViewPos(int expandedPosition) {
         if (SPEW) {
             Slog.d(TAG, "updateExpandedViewPos before expandedPosition=" + expandedPosition
@@ -1905,8 +1915,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
         cropView.setLayoutParams(lp);
         // woo, special effects
-        final float frac = (float)panelh / disph;
-        final int color = ((int)(0xB0 * Math.pow(frac, 0.5))) << 24;
+        final int barh = getCloseViewHeight() + getStatusBarHeight();
+        final float frac = saturate((float)(panelh - barh) / (disph - barh));
+        final int color = ((int)(0xB0 * Math.sin(frac * 1.57f))) << 24;
         mStatusBarWindow.setBackgroundColor(color);
 
 //        Slog.d(TAG, String.format("updateExpanded: pos=%d frac=%.2f col=0x%08x", pos, frac, color));
