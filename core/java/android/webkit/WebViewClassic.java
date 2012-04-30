@@ -7890,7 +7890,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         ViewRootImpl viewRoot = mWebView.getViewRootImpl();
         if (mWebView.isHardwareAccelerated() && viewRoot != null) {
             functor = nativeGetDrawGLFunction(mNativeClass);
-            viewRoot.attachFunctor(functor);
+            if (functor != 0) {
+                viewRoot.attachFunctor(functor);
+            }
         }
 
         if (functor == 0
