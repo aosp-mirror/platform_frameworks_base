@@ -237,6 +237,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             public boolean onLongClick(View v) {
                 final String packageNameF = (String) v.getTag();
                 if (packageNameF == null) return false;
+                if (v.getWindowToken() == null) return false;
                 PopupMenu popup = new PopupMenu(mContext, v);
                 popup.getMenuInflater().inflate(R.menu.notification_popup_menu, popup.getMenu());
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
