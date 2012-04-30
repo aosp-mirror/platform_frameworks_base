@@ -28,13 +28,17 @@ extends CharSequence
     /**
      * Bitmask of bits that are relevent for controlling point/mark behavior
      * of spans.
+     *
+     * MARK and POINT are conceptually located <i>between</i> two adjacent characters.
+     * A MARK is "attached" to the character on the left hand side, while a POINT
+     * tends to stick to the character on the right hand side.
      */
     public static final int SPAN_POINT_MARK_MASK = 0x33;
     
     /**
      * 0-length spans with type SPAN_MARK_MARK behave like text marks:
      * they remain at their original offset when text is inserted
-     * at that offset.
+     * at that offset. Conceptually, the text is added after the mark.
      */
     public static final int SPAN_MARK_MARK =   0x11;
     /**
@@ -50,6 +54,7 @@ extends CharSequence
      * 0-length spans with type SPAN_POINT_POINT behave like cursors:
      * they are pushed forward by the length of the insertion when text
      * is inserted at their offset.
+     * The text is conceptually inserted before the point.
      */
     public static final int SPAN_POINT_POINT = 0x22;
 
