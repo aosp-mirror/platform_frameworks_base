@@ -87,6 +87,7 @@ import android.view.View.MeasureSpec;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
@@ -5435,8 +5436,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
         if (mWebView.isHardwareAccelerated()) {
             int drawGLFunction = nativeGetDrawGLFunction(mNativeClass);
-            if (drawGLFunction != 0) {
-                mWebView.getViewRootImpl().detachFunctor(drawGLFunction);
+            ViewRootImpl viewRoot = mWebView.getViewRootImpl();
+            if (drawGLFunction != 0 && viewRoot != null) {
+                viewRoot.detachFunctor(drawGLFunction);
             }
         }
     }
