@@ -147,7 +147,11 @@ public class DhcpInfoInternal {
      * metered, and sensitive to heavy data transfers.
      */
     public boolean hasMeteredHint() {
-        return "ANDROID_METERED".equals(vendorInfo);
+        if (vendorInfo != null) {
+            return vendorInfo.contains("ANDROID_METERED");
+        } else {
+            return false;
+        }
     }
 
     public String toString() {
