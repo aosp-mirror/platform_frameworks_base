@@ -4376,7 +4376,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (!cancelCurrent) {
                 if (updateCurrent) {
                     if (rec.key.requestIntent != null) {
-                        rec.key.requestIntent.replaceExtras(intents != null ? intents[0] : null);
+                        rec.key.requestIntent.replaceExtras(intents != null ?
+                                intents[intents.length - 1] : null);
                     }
                     if (intents != null) {
                         intents[intents.length-1] = rec.key.requestIntent;
