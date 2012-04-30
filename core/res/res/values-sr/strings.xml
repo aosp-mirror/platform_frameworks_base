@@ -193,11 +193,14 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Дозвољава апликацији да функционише као статусна трака."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"проширење/скупљање статусне траке"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Дозвољава апликацији да проширује или скупља статусну траку."</string>
-    <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"пресретање одлазних позива"</string>
+    <!-- no translation found for permlab_processOutgoingCalls (3906007831192990946) -->
+    <skip />
     <string name="permdesc_processOutgoingCalls" msgid="1152111671618301044">"Дозвољава апликацији да пресретне одлазне позиве и промени број који се бира. Злонамерне апликације могу да надгледају, преусмеравају или блокирају одлазне позиве."</string>
-    <string name="permlab_receiveSms" msgid="2697628268086208535">"пријем SMS порука"</string>
+    <!-- no translation found for permlab_receiveSms (8673471768947895082) -->
+    <skip />
     <string name="permdesc_receiveSms" msgid="8107887121893611793">"Дозвољава апликацији да прима и обрађује SMS поруке. Злонамерне апликације могу да надгледају поруке или да их бришу, а да вам их не прикажу."</string>
-    <string name="permlab_receiveMms" msgid="8894700916188083287">"пријем MMS порука"</string>
+    <!-- no translation found for permlab_receiveMms (1821317344668257098) -->
+    <skip />
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Дозвољава апликацији да прима и обрађује MMS поруке. Злонамерне апликације могу да надгледају поруке или да их бришу, а да вам их не прикажу."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"пријем хитних преноса"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Дозвољава апликацији да прима и обрађује поруке хитног преноса. Ова дозвола је доступна само за системске апликације."</string>
@@ -207,13 +210,16 @@
     <string name="permdesc_sendSms" msgid="906546667507626156">"Дозвољава апликацији да шаље SMS поруке. Злонамерне апликације могу да шаљу поруке без ваше потврде, што вам  може изазвати трошкове."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"слање SMS порука без потврде"</string>
     <string name="permdesc_sendSmsNoConfirmation" msgid="3437759207020400204">"Дозвољава апликацији да шаље SMS поруке. Злонамерне апликације могу да шаљу поруке без ваше потврде, што вам може изазвати трошкове."</string>
-    <string name="permlab_readSms" msgid="4085333708122372256">"читање SMS или MMS порука"</string>
+    <!-- no translation found for permlab_readSms (8745086572213270480) -->
+    <skip />
     <string name="permdesc_readSms" product="tablet" msgid="2341692916884515613">"Дозвољава апликацији да чита SMS поруке сачуване на таблету или SIM картици. Злонамерне апликације могу да читају поверљиве поруке."</string>
     <string name="permdesc_readSms" product="default" msgid="5653850482025875493">"Дозвољава апликацији да чита SMS поруке сачуване на телефону или SIM картици. Злонамерне апликације могу да читају поверљиве поруке."</string>
-    <string name="permlab_writeSms" msgid="6881122575154940744">"измена SMS или MMS порука"</string>
+    <!-- no translation found for permlab_writeSms (3216950472636214774) -->
+    <skip />
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Дозвољава апликацији да уписује податке у SMS поруке сачуване на таблету или SIM картици. Злонамерне апликације могу да избришу поруке."</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Дозвољава апликацији да уписује податке у SMS поруке сачуване на телефону или SIM картици. Злонамерне апликације могу да избришу поруке."</string>
-    <string name="permlab_receiveWapPush" msgid="8258226427716551388">"пријем преко WAP-а"</string>
+    <!-- no translation found for permlab_receiveWapPush (5991398711936590410) -->
+    <skip />
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Дозвољава апликацији да прима и обрађује WAP поруке. Злонамерне апликације могу да надгледају поруке или да их бришу, а да вам их не прикажу."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"преузимање покренутих апликација"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Дозвољава апликацији да преузима информације о актуелним и недавно покренутим задацима. Злонамерне апликације могу да открију приватне информације о другим апликацијама."</string>
@@ -229,11 +235,13 @@
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Дозвољава апликацији да контролише режим компатибилности екрана других апликација. Злонамерне апликације могу да угрозе понашање других апликација."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"омогућавање отклањања грешака у апликацији"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Дозвољава апликацији да укључи уклањање грешака за другу апликацију. Злонамерне апликације могу то да искористе за онемогућавање других апликација."</string>
-    <string name="permlab_changeConfiguration" msgid="8214475779521218295">"промена подешавања корисничког интерфејса"</string>
+    <!-- no translation found for permlab_changeConfiguration (4162092185124234480) -->
+    <skip />
     <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Дозвољава апликацији да промени тренутну конфигурацију, као што је локалитет или општа величина фонта."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"омогућавање режима рада у аутомобилу"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Дозвољава апликацији да омогући режим рада у аутомобилу."</string>
-    <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"заустављање позадинских процеса"</string>
+    <!-- no translation found for permlab_killBackgroundProcesses (3914026687420177202) -->
+    <skip />
     <string name="permdesc_killBackgroundProcesses" msgid="931129103262126617">"Дозвољава апликацији да заустави позадинске процесе других апликација, чак и када постоји довољно слободне меморије."</string>
     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"принудно заустављање других апликација"</string>
     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Дозвољава апликацији да принудно заустави друге апликације."</string>
@@ -257,7 +265,8 @@
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Дозвољава апликацији да емитује обавештење да је примљена PUSH порука преко WAP-а. Злонамерне апликације то могу да искористе да фалсификују пријем MMS порука или да кришом замене садржај било које веб странице уносом злонамерног садржаја."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"ограничење броја покренутих процеса"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Дозвољава апликацији да управља максималним бројем процеса који ће моћи да се покрену. Никада није потребна уобичајеним апликацијама."</string>
-    <string name="permlab_setAlwaysFinish" msgid="238828158465736054">"затварање свих позадинских апликација"</string>
+    <!-- no translation found for permlab_setAlwaysFinish (550958507798796965) -->
+    <skip />
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Дозвољава апликацији да управља тиме да ли ће се активности увек окончати чим пређу у позадину. Уобичајене апликације је никада не користе."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"измена статистике о батерији"</string>
     <string name="permdesc_batteryStats" msgid="6835186932305744068">"Дозвољава апликацији да измени прикупљену статистику о батерији. Не користе је уобичајене апликације."</string>
@@ -267,7 +276,8 @@
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Дозвољава апликацији да покреће кориснички интерфејс за потврду прављења комплетне резервне копије. Ово не треба да користи ниједна апликација."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"приказ неовлашћених прозора"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Дозвољава апликацији да прави прозоре које ће користити кориснички интерфејс интерног система. Не користе је уобичајене апликације."</string>
-    <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"приказ упозорења на нивоу система"</string>
+    <!-- no translation found for permlab_systemAlertWindow (3543347980839518613) -->
+    <skip />
     <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"Дозвољава апликацији да прикаже прозоре са системским упозорењима. Злонамерне апликације на тај начин могу да преузму цео екран."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"измена глобалне брзине анимација"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Дозвољава апликацији да у сваком тренутку промени глобалну брзину анимација (брже или спорије анимације)."</string>
@@ -329,22 +339,26 @@
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Омогућава апликацији да додели или опозове посебне дозволе за њу или друге апликације. Злонамерне апликације могу то да користе да би приступале функцијама које им нисте одобрили."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"подешавање жељених апликација"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Дозвољава апликацији да мења омиљене апликације. Злонамерне апликације могу без обавештења да промене апликације које су покренуте и да преко њих прикупљају ваше приватне податке."</string>
-    <string name="permlab_writeSettings" msgid="1365523497395143704">"измена глобалних подешавања система"</string>
+    <!-- no translation found for permlab_writeSettings (2226195290955224730) -->
+    <skip />
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Дозвољава апликацији да мења податке о подешавању система. Злонамерне апликације могу да оштете конфигурацију система."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"измена безбедносних подешавања система"</string>
     <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Дозвољава апликацији да измени системске податке за безбедносна подешавања. Уобичајене апликације је не користе."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"измена мапе Google услуга"</string>
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Дозвољава апликацији да измени мапу Google услуга. Не користе је уобичајене апликације."</string>
-    <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"аутоматско покретање при покретању система"</string>
+    <!-- no translation found for permlab_receiveBootCompleted (5312965565987800025) -->
+    <skip />
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Омогућава да се апликација покрене одмах након покретања система. То може да успори покретање таблета, при чему ова апликација може да успори функционисање целог таблета тиме што ће увек бити активна."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Омогућава да се апликација покрене чим се систем покрене. То може да успори покретање телефона, при чему ова апликација може да успори функционисање целог телефона тиме што ће увек бити активна."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"слање пријемчивих емитовања"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Дозвољава апликацији да шаље пријемчива емитовања, која остају по завршетку емитовања. Злонамерне апликације могу да успоре или дестабилизују таблет тиме што ће га приморати да троши превише меморије."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Дозвољава апликацији да шаље пријемчива емитовања, која остају по завршетку емитовања. Злонамерне апликације могу да успоре или дестабилизују телефон тиме што ће га приморати да троши превише меморије."</string>
-    <string name="permlab_readContacts" msgid="6219652189510218240">"читање података о контактима"</string>
+    <!-- no translation found for permlab_readContacts (8348481131899886131) -->
+    <skip />
     <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Дозвољава апликацији да чита све податке о контактима ускладиштене на таблету, укључујући податке о томе колико често зовете одређене особе, шаљете им поруке е-поште или на други начин комуницирате са њима. Ово помаже функцији аутоматског довршавања адреса е-поште и другим корисним функцијама. Злонамерне апликације могу да искористе ову дозволу за слање ваших података о контакту другим људима."</string>
     <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Дозвољава апликацији да чита све податке о контактима ускладиштене на телефону, укључујући податке о томе колико често зовете одређене особе, шаљете им поруке е-поште или на други начин комуницирате са њима. Ово помаже функцији аутоматског довршавања адреса е-поште и другим корисним функцијама. Злонамерне апликације могу да искористе ову дозволу за слање ваших података о контакту другим људима."</string>
-    <string name="permlab_writeContacts" msgid="644616215860933284">"уписивање података о контактима"</string>
+    <!-- no translation found for permlab_writeContacts (5107492086416793544) -->
+    <skip />
     <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Дозвољава апликацији да мења податке о контактима ускладиштене на таблету, укључујући податке о томе колико често зовете одређене особе, шаљете им поруке е-поште или на други начин комуницирате са њима. Ово помаже функцији аутоматског довршавања адреса е-поште и другим корисним функцијама. Злонамерне апликације могу то да искористе да би избрисале или измениле ваше податке о контакту."</string>
     <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Дозвољава апликацији да мења податке о контактима ускладиштене на телефону, укључујући податке о томе колико често зовете одређене особе, шаљете им поруке е-поште или на други начин комуницирате са њима. Ово помаже функцији аутоматског довршавања адреса е-поште и другим корисним функцијама. Злонамерне апликације могу то да искористе да би избрисале или измениле ваше податке о контакту."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"читање евиденције позива"</string>
@@ -353,9 +367,11 @@
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"писање евиденције позива"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Дозвољава апликацији да мења евиденцију позива на таблету, укључујући податке о долазним и одлазним позивима. Злонамерне апликације могу ово да користе да би брисале или мењале евиденцију позива."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Дозвољава апликацији да мења евиденцију позива на телефону, укључујући податке о долазним и одлазним позивима. Злонамерне апликације могу ово да користе да би брисале или мењале евиденцију позива."</string>
-    <string name="permlab_readProfile" msgid="6824681438529842282">"читање података о профилу"</string>
+    <!-- no translation found for permlab_readProfile (4701889852612716678) -->
+    <skip />
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Дозвољава апликацији да чита личне информације са профила сачуване на уређају, као што су име и контакт информације. То значи да друге апликације могу да вас идентификују и да информације о вашем профилу шаљу другима."</string>
-    <string name="permlab_writeProfile" msgid="4679878325177177400">"уписивање у податке профила"</string>
+    <!-- no translation found for permlab_writeProfile (907793628777397643) -->
+    <skip />
     <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"Дозвољава апликацији да мења или да додаје нове личне информације са профила сачуване на уређају, као што су име и информације за контакт. То значи да друге апликације могу да вас идентификују и да информације о профилу шаљу другима."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"читање друштвеног стрима"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="3419050808547335320">"Дозвољава апликацији да приступа вашим друштвеним ажурирањима и друштвеним ажурирањима пријатеља и да их синхронизује. Злонамерне апликације могу помоћу тога да читају приватне преписке између вас и пријатеља на друштвеним мрежама."</string>
@@ -396,9 +412,15 @@
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"принудно поновно покретање телефона"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Дозвољава апликацији да принудно поново покрене таблет."</string>
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Дозвољава апликацији да принудно поново покрене телефон."</string>
-    <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"прикључивање и искључивање система датотека"</string>
+    <!-- no translation found for permlab_mount_unmount_filesystems (2927361537942591841) -->
+    <skip />
+    <!-- no translation found for permlab_mount_unmount_filesystems (4402305049890953810) -->
+    <skip />
     <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Дозвољава апликацији да прикључи и искључи системе датотека преносне меморије."</string>
-    <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"форматирање екстерног складишта"</string>
+    <!-- no translation found for permlab_mount_format_filesystems (6227819582624904972) -->
+    <skip />
+    <!-- no translation found for permlab_mount_format_filesystems (262582698639274056) -->
+    <skip />
     <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Дозвољава апликацији да форматира преносну меморију."</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"увид у информације о интерној меморији"</string>
     <string name="permdesc_asec_access" msgid="3094563844593878548">"Дозвољава апликацији да преузме информације о интерној меморији."</string>
@@ -410,7 +432,8 @@
     <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Дозвољава апликацији да прикључи/искључи интерну меморију."</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"преименовање интерне меморије"</string>
     <string name="permdesc_asec_rename" msgid="1794757588472127675">"Дозвољава апликацији да преименује интерну меморију."</string>
-    <string name="permlab_vibrate" msgid="7768356019980849603">"контрола вибрације"</string>
+    <!-- no translation found for permlab_vibrate (7696427026057705834) -->
+    <skip />
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Дозвољава апликацији да контролише вибрацију."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"контрола осветљења"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Дозвољава апликацији да контролише блиц."</string>
@@ -435,7 +458,8 @@
     <string name="permdesc_bindGadget" msgid="8261326938599049290">"Дозвољава апликацији да изда наредбу систему о томе које апликације ће моћи да користе које виџете. Ова дозвола омогућава апликацијама да другим апликацијама одобре приступ личним подацима. Не користе је уобичајене апликације."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"измена статуса телефона"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Дозвољава апликацији да управља функцијама телефона на уређају. Апликација са овом дозволом може да прелази са једне мреже на другу и да без обавештења укључује и искључује радио телефона и сличне функције."</string>
-    <string name="permlab_readPhoneState" msgid="2326172951448691631">"читање статуса и идентитета телефона"</string>
+    <!-- no translation found for permlab_readPhoneState (9178228524507610486) -->
+    <skip />
     <string name="permdesc_readPhoneState" msgid="5127767618743602782">"Дозвољава апликацији да приступа функцијама телефона уређаја. Ова дозвола омогућава да апликација утврди број телефона и серијски број телефона, затим да ли је позив активан, са којим бројем је успостављена веза и слично."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"спречавање преласка таблета у стање спавања"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"спречавање преласка телефона у стање спавања"</string>
@@ -450,7 +474,8 @@
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Покретање теста ниског нивоа који спроводи произвођач, које омогућава потпуни приступ хардверу телефона. Доступно је само када телефон покренут у режиму тестирања које спроводи произвођач."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"подешавање позадине"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Дозвољава апликацији да поставља позадину система."</string>
-    <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"савети за подешавање величине позадине"</string>
+    <!-- no translation found for permlab_setWallpaperHints (3278608165977736538) -->
+    <skip />
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Дозвољава апликацији да подеси савете за системску величину позадине."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"поновно постављање фабричких подразумеваних подешавања"</string>
     <string name="permdesc_masterClear" msgid="3665380492633910226">"Дозвољава апликацији да поново постави комплетна фабричка подешавања система и тиме избрише све податке, конфигурацију и инсталиране апликације."</string>
@@ -462,16 +487,21 @@
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Дозвољава апликацији да промени временску зону телефона."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"улога услуге управљања налогом"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Дозвољава апликацији да упућује позиве издаваоцима потврде аутентичности налога."</string>
-    <string name="permlab_getAccounts" msgid="4549918644233460103">"откривање познатих налога"</string>
+    <!-- no translation found for permlab_getAccounts (1086795467760122114) -->
+    <skip />
     <string name="permdesc_getAccounts" product="tablet" msgid="3238360555257773358">"Дозвољава апликацији да преузме листу налога познатих таблету."</string>
     <string name="permdesc_getAccounts" product="default" msgid="2735689364629830348">"Дозвољава апликацији да преузме листу налога за које постоје подаци на телефону."</string>
-    <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"улога потврде идентитета налога"</string>
+    <!-- no translation found for permlab_authenticateAccounts (5265908481172736933) -->
+    <skip />
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Дозвољава апликацији да користи могућности менаџера налога за потврду аутентичности налога, укључујући отварање налога, као и преузимање и подешавање лозинки за њих."</string>
-    <string name="permlab_manageAccounts" msgid="4440380488312204365">"управљање листом налога"</string>
+    <!-- no translation found for permlab_manageAccounts (4983126304757177305) -->
+    <skip />
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Дозвољава апликацији да изврши радње попут додавања и уклањања налога, као и брисања одговарајућих лозинки."</string>
-    <string name="permlab_useCredentials" msgid="6401886092818819856">"коришћење акредитива налога за потврду идентитета"</string>
+    <!-- no translation found for permlab_useCredentials (235481396163877642) -->
+    <skip />
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Дозвољава апликацији да захтева токене за потврду аутентичности."</string>
-    <string name="permlab_accessNetworkState" msgid="6865575199464405769">"приказ статуса мреже"</string>
+    <!-- no translation found for permlab_accessNetworkState (4951027964348974773) -->
+    <skip />
     <string name="permdesc_accessNetworkState" msgid="479772796952547198">"Дозвољава апликацији да прегледа статус свих мрежа."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"потпуни приступ Интернету"</string>
     <string name="permdesc_createNetworkSockets" msgid="5963922297444265950">"Дозвољава апликацији да прави мрежне прикључке."</string>
@@ -483,29 +513,36 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Дозвољава апликацији да мења статус везе са привезаном мрежом."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"промена подешавања за коришћење података у позадини"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Дозвољава апликацији да мења подешавање коришћења позадинских података."</string>
-    <string name="permlab_accessWifiState" msgid="8100926650211034400">"приказ Wi-Fi статуса"</string>
+    <!-- no translation found for permlab_accessWifiState (5202012949247040011) -->
+    <skip />
     <string name="permdesc_accessWifiState" msgid="7770452658226256831">"Дозвољава апликацији да прегледа информације о статусу Wi-Fi мреже."</string>
-    <string name="permlab_changeWifiState" msgid="7280632711057112137">"промена Wi-Fi статуса"</string>
+    <!-- no translation found for permlab_changeWifiState (6550641188749128035) -->
+    <skip />
     <string name="permdesc_changeWifiState" msgid="7399961004537946240">"Омогућава да се апликација повезује са Wi-Fi приступним тачкама и да прекине везу са њима, као и да уноси промене у конфигурисане Wi-Fi мреже."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"омогућавање пријема вишесмерног Wi-Fi саобраћаја"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="7633598524564320817">"Дозвољава апликацији да прима пакете који нису директно намењени уређају. То може бити корисно при откривању услуга које се нуде у близини. Користи више напајања од режима једносмерног саобраћаја."</string>
-    <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Администрирање преко Bluetooth-а"</string>
+    <!-- no translation found for permlab_bluetoothAdmin (6006967373935926659) -->
+    <skip />
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Дозвољава апликацији да конфигурише локални Bluetooth таблет, као и да открије даљинске уређаје и упари се са њима."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Дозвољава апликацији да конфигурише локални Bluetooth телефон, као и да открије даљинске уређаје и упари се са њима."</string>
-    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Прикажи WiMAX статус"</string>
+    <!-- no translation found for permlab_accessWimaxState (7436749103151096452) -->
+    <skip />
     <string name="permdesc_accessWimaxState" msgid="5914958077555177749">"Дозвољава апликацији да прегледа информације о статусу WiMAX мреже."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Промени WiMAX статус"</string>
     <string name="permdesc_changeWimaxState" msgid="3328853825006455912">"Дозвољава апликацији повезивање и прекид везе са WiMAX мрежом."</string>
-    <string name="permlab_bluetooth" msgid="8361038707857018732">"креирање Bluetooth веза"</string>
+    <!-- no translation found for permlab_bluetooth (6127769336339276828) -->
+    <skip />
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Дозвољава апликацији да конфигурише локални Bluetooth таблет, као и да успоставља и прихвата везе са упареним уређајима."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Дозвољава апликацији да конфигурише локални Bluetooth телефон, као и да успоставља и прихвата везе са упареним уређајима."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"контрола комуникације у ужем пољу (Near Field Communication)"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Дозвољава апликацији да комуницира са ознакама, картицама и читачима комуникације кратког домета (NFC)."</string>
-    <string name="permlab_disableKeyguard" msgid="4977406164311535092">"онемогућавање закључавања тастатуре"</string>
+    <!-- no translation found for permlab_disableKeyguard (3598496301486439258) -->
+    <skip />
     <string name="permdesc_disableKeyguard" msgid="6231611286892232626">"Дозвољава апликацији да онемогући закључавање тастатуре и свих повезаних безбедносних мера са лозинкама. Оправдани пример додељивања такве дозволе је када телефон онемогући закључавање тастатуре при пријему долазног телефонског позива и поново је омогући по завршетку позива."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"читање подешавања синхронизације"</string>
     <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"Дозвољава апликацији да мења подешавања синхронизације, нпр. да омогући или онемогући синхронизацију апликације Људи."</string>
-    <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"уписивање подешавања синхронизације"</string>
+    <!-- no translation found for permlab_writeSyncSettings (5408694875793945314) -->
+    <skip />
     <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"Дозвољава апликацији да измени подешавања синхронизације, нпр. да омогући или онемогући синхронизацију апликације Људи."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"читање статистике о синхронизацији"</string>
     <string name="permdesc_readSyncStats" msgid="3801971839939951678">"Дозвољава апликацији да чита статистику синхронизације, нпр. историју обављених синхронизација."</string>
@@ -513,16 +550,23 @@
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Дозвољава апликацији да преузима детаље о тренутно синхронизованим фидовима."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"уписивање пријављених фидова"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Дозвољава апликацији да измени тренутно синхронизоване фидове. Злонамерне апликације могу да промене синхронизоване фидове."</string>
-    <string name="permlab_readDictionary" msgid="8410247960433376352">"читање речника који је корисник дефинисао"</string>
+    <!-- no translation found for permlab_readDictionary (4107101525746035718) -->
+    <skip />
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Дозвољава апликацији да чита све приватне речи, називе и фразе које је корисник сачувао у корисничком речнику."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"уписивање у речник који је дефинисао корисник"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Дозвољава апликацији да уписује нове речи у кориснички речник."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="4086221374639183281">"читање садржаја USB меморије"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8537875151845139539">"читање садржаја SD картице"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"Дозвољава апл. да чита садржај USB меморије."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"Дозвољава апликацији да чита садржај SD картице."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"измена/брисање садржаја USB меморије"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"измена/брисање садржаја SD картице"</string>
+    <!-- no translation found for permlab_sdcardRead (367275095159405468) -->
+    <skip />
+    <!-- no translation found for permlab_sdcardRead (2188156462934977940) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (3530894470637667917) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (2555811422562526606) -->
+    <skip />
+    <!-- no translation found for permlab_sdcardWrite (8485979062254666748) -->
+    <skip />
+    <!-- no translation found for permlab_sdcardWrite (9084476432661578751) -->
+    <skip />
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Дозвољава апликацији да уписује податке на USB меморију."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Дозвољава апликацији да уписује податке на SD картицу."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"измена/брисање интерне меморије медија"</string>
@@ -775,12 +819,15 @@
     <string name="autofill_parish" msgid="8202206105468820057">"Парохија"</string>
     <string name="autofill_area" msgid="3547409050889952423">"Област"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Емират"</string>
-    <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"читање историје и обележивача у прегледачу"</string>
+    <!-- no translation found for permlab_readHistoryBookmarks (3775265775405106983) -->
+    <skip />
     <string name="permdesc_readHistoryBookmarks" msgid="4577476392604595921">"Дозвољава апликацији да чита све URL адресе које су посећене помоћу Прегледача, као и све обележиваче у њему."</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"уписивање историје и обележивача из прегледача"</string>
+    <!-- no translation found for permlab_writeHistoryBookmarks (3714785165273314490) -->
+    <skip />
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="1757103804824209530">"Дозвољава апликацији да измени историју или обележиваче Прегледача сачуване на таблету. Злонамерне апликације могу то да користе за брисање или измену података Прегледача."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="6693764355720719197">"Дозвољава апликацији да измени историју или обележиваче Прегледача који су ускладиштени на телефону. Злонамерне апликације могу то да користе за брисање или измену података Прегледача."</string>
-    <string name="permlab_setAlarm" msgid="5924401328803615165">"подешавање аларма у будилнику"</string>
+    <!-- no translation found for permlab_setAlarm (1379294556362091814) -->
+    <skip />
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Дозвољава апликацији да подеси аларм у инсталираној апликацији будилника. Неке апликације будилника можда не примењују ову функцију."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"додавање говорне поште"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Дозвољава апликацији да додаје поруке у пријемно сандуче говорне поште."</string>
