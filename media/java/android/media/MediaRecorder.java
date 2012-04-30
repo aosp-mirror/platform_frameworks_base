@@ -251,14 +251,12 @@ public class MediaRecorder
         public static final int AMR_NB = 1;
         /** AMR (Wideband) audio codec */
         public static final int AMR_WB = 2;
-        /** AAC audio codec */
+        /** AAC Low Complexity (AAC-LC) audio codec */
         public static final int AAC = 3;
-        /** @hide enhanced AAC audio codec */
-        public static final int AAC_PLUS = 4;
-        /** @hide enhanced AAC plus audio codec */
-        public static final int EAAC_PLUS = 5;
-        /** AAC-ELD audio codec */
-        public static final int AAC_ELD = 6;
+        /** High Efficiency AAC (HE-AAC) audio codec */
+        public static final int HE_AAC = 4;
+        /** Enhanced Low Delay AAC (AAC-ELD) audio codec */
+        public static final int AAC_ELD = 5;
     }
 
     /**
