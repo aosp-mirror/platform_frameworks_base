@@ -5942,7 +5942,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @hide
      */
     public boolean requestAccessibilityFocus() {
-        if (!AccessibilityManager.getInstance(mContext).isEnabled()) {
+        AccessibilityManager manager = AccessibilityManager.getInstance(mContext);
+        if (!manager.isEnabled() || !manager.isTouchExplorationEnabled()) {
             return false;
         }
         if ((mViewFlags & VISIBILITY_MASK) != VISIBLE) {
