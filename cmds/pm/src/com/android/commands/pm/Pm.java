@@ -136,6 +136,11 @@ public final class Pm {
             return;
         }
 
+        if ("set-permission-enforced".equals(op)) {
+            runSetPermissionEnforced();
+            return;
+        }
+
         if ("set-install-location".equals(op)) {
             runSetInstallLocation();
             return;
@@ -1114,6 +1119,33 @@ public final class Pm {
         }
     }
 
+    private void runSetPermissionEnforced() {
+        final String permission = nextArg();
+        if (permission == null) {
+            System.err.println("Error: no permission specified");
+            showUsage();
+            return;
+        }
+        final String enforcedRaw = nextArg();
+        if (enforcedRaw == null) {
+            System.err.println("Error: no enforcement specified");
+            showUsage();
+            return;
+        }
+        final boolean enforced = Boolean.parseBoolean(enforcedRaw);
+        try {
+            mPm.setPermissionEnforced(permission, enforced);
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Bad argument: " + e.toString());
+            showUsage();
+        } catch (SecurityException e) {
+            System.err.println("Operation not allowed: " + e.toString());
+        }
+    }
+
     /**
      * Displays the package file for a package.
      * @param pckg
@@ -1214,6 +1246,7 @@ public final class Pm {
         System.err.println("       pm revoke PACKAGE PERMISSION");
         System.err.println("       pm set-install-location [0/auto] [1/internal] [2/external]");
         System.err.println("       pm get-install-location");
+        System.err.println("       pm set-permission-enforced PERMISSION [true|false]");
         System.err.println("       pm create-user USER_NAME");
         System.err.println("       pm remove-user USER_ID");
         System.err.println("");
