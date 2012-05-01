@@ -541,6 +541,13 @@ public class RenderScript {
         validate();
         rsnScriptSetVarV(mContext, id, slot, val);
     }
+    native void rsnScriptSetVarVE(int con, int id, int slot, byte[] val,
+                                  int e, int[] dims);
+    synchronized void nScriptSetVarVE(int id, int slot, byte[] val,
+                                      int e, int[] dims) {
+        validate();
+        rsnScriptSetVarVE(mContext, id, slot, val, e, dims);
+    }
     native void rsnScriptSetVarObj(int con, int id, int slot, int val);
     synchronized void nScriptSetVarObj(int id, int slot, int val) {
         validate();
