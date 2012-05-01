@@ -6283,8 +6283,6 @@ public class WindowManagerService extends IWindowManager.Stub
         final int dh = mCurDisplayHeight;
 
         if (config != null) {
-            mInputManager.getInputConfiguration(config);
-
             int orientation = Configuration.ORIENTATION_SQUARE;
             if (dw < dh) {
                 orientation = Configuration.ORIENTATION_PORTRAIT;
@@ -6327,12 +6325,46 @@ public class WindowManagerService extends IWindowManager.Stub
             config.compatScreenHeightDp = (int)(config.screenHeightDp / mCompatibleScreenScale);
             config.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, dm, dw, dh);
 
+            // Update the configuration based on available input devices, lid switch,
+            // and platform configuration.
+            config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;
+            config.keyboard = Configuration.KEYBOARD_NOKEYS;
+            config.navigation = Configuration.NAVIGATION_NONAV;
+
+            int keyboardPresence = 0;
+            int navigationPresence = 0;
+            for (InputDevice device : mInputManager.getInputDevices()) {
+                if (!device.isVirtual()) {
+                    final int sources = device.getSources();
+                    final int presenceFlag = device.isExternal() ?
+                            WindowManagerPolicy.PRESENCE_EXTERNAL :
+                                    WindowManagerPolicy.PRESENCE_INTERNAL;
+
+                    if ((sources & InputDevice.SOURCE_TOUCHSCREEN) != 0) {
+                        config.touchscreen = Configuration.TOUCHSCREEN_FINGER;
+                    }
+
+                    if ((sources & InputDevice.SOURCE_TRACKBALL) != 0) {
+                        config.navigation = Configuration.NAVIGATION_TRACKBALL;
+                        navigationPresence |= presenceFlag;
+                    } else if ((sources & InputDevice.SOURCE_DPAD) != 0
+                            && config.navigation == Configuration.NAVIGATION_NONAV) {
+                        config.navigation = Configuration.NAVIGATION_DPAD;
+                        navigationPresence |= presenceFlag;
+                    }
+
+                    if (device.getKeyboardType() == InputDevice.KEYBOARD_TYPE_ALPHABETIC) {
+                        config.keyboard = Configuration.KEYBOARD_QWERTY;
+                        keyboardPresence |= presenceFlag;
+                    }
+                }
+            }
+
             // Determine whether a hard keyboard is available and enabled.
             boolean hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
             if (hardKeyboardAvailable != mHardKeyboardAvailable) {
                 mHardKeyboardAvailable = hardKeyboardAvailable;
                 mHardKeyboardEnabled = hardKeyboardAvailable;
-
                 mH.removeMessages(H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
                 mH.sendEmptyMessage(H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
             }
@@ -6340,13 +6372,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 config.keyboard = Configuration.KEYBOARD_NOKEYS;
             }
 
-            // Update value of keyboardHidden, hardKeyboardHidden and navigationHidden
-            // based on whether a hard or soft keyboard is present, whether navigation keys
-            // are present and the lid switch state.
+            // Let the policy update hidden states.
             config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
             config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
             config.navigationHidden = Configuration.NAVIGATIONHIDDEN_NO;
-            mPolicy.adjustConfigurationLw(config);
+            mPolicy.adjustConfigurationLw(config, keyboardPresence, navigationPresence);
         }
 
         return true;

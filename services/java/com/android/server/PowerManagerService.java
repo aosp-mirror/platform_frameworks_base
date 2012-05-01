@@ -2521,8 +2521,8 @@ public class PowerManagerService extends IPowerManager.Stub
             return val;
         } catch (Exception e) {
             // guard against null pointer or index out of bounds errors
-            Slog.e(TAG, "Values array must be non-empty and must be the same length "
-                    + "as the auto-brightness levels array.  Check config.xml.", e);
+            Slog.e(TAG, "Values array must be non-empty and must be one element longer than "
+                    + "the auto-brightness levels array.  Check config.xml.", e);
             return 255;
         }
     }

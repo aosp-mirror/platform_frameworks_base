@@ -91,6 +91,11 @@ public interface WindowManagerPolicy {
     public final static int FLAG_BRIGHT_HERE = 0x20000000;
     public final static int FLAG_PASS_TO_USER = 0x40000000;
 
+    // Flags used for indicating whether the internal and/or external input devices
+    // of some type are available.
+    public final static int PRESENCE_INTERNAL = 1 << 0;
+    public final static int PRESENCE_EXTERNAL = 1 << 1;
+
     public final static boolean WATCH_POINTER = false;
 
     /**
@@ -500,8 +505,13 @@ public interface WindowManagerPolicy {
      * 
      * @param config The Configuration being computed, for you to change as
      * desired.
+     * @param keyboardPresence Flags that indicate whether internal or external
+     * keyboards are present.
+     * @param navigationPresence Flags that indicate whether internal or external
+     * navigation devices are present.
      */
-    public void adjustConfigurationLw(Configuration config);
+    public void adjustConfigurationLw(Configuration config, int keyboardPresence,
+            int navigationPresence);
     
     /**
      * Assign a window type to a layer.  Allows you to control how different

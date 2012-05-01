@@ -38,6 +38,7 @@ import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.os.BatteryManager;
@@ -332,6 +333,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mRecentAppsDialogHeldModifiers;
 
     int mLidState = LID_ABSENT;
+    boolean mHaveBuiltInKeyboard;
 
     boolean mSystemReady;
     boolean mSystemBooted;
@@ -1259,46 +1261,42 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mLidState = mWindowManagerFuncs.getLidState();
     }
     
-    private int determineHiddenState(int mode, int hiddenValue, int visibleValue) {
-        if (mLidState != LID_ABSENT) {
-            switch (mode) {
-                case 1:
-                    return mLidState == LID_OPEN ? visibleValue : hiddenValue;
-                case 2:
-                    return mLidState == LID_OPEN ? hiddenValue : visibleValue;
-            }
+    private boolean isHidden(int accessibilityMode) {
+        switch (accessibilityMode) {
+            case 1:
+                return mLidState == LID_CLOSED;
+            case 2:
+                return mLidState == LID_OPEN;
+            default:
+                return false;
         }
-        return visibleValue;
     }
 
-    private boolean isKeyboardVisible() {
-        return determineHiddenState(mLidKeyboardAccessibility, 0, 1) == 1
-                || determineHiddenState(mLidNavigationAccessibility, 0, 1) == 1;
+    private boolean isBuiltInKeyboardVisible() {
+        return mHaveBuiltInKeyboard && !isHidden(mLidKeyboardAccessibility);
     }
 
     /** {@inheritDoc} */
-    public void adjustConfigurationLw(Configuration config) {
+    public void adjustConfigurationLw(Configuration config, int keyboardPresence,
+            int navigationPresence) {
+        mHaveBuiltInKeyboard = (keyboardPresence & PRESENCE_INTERNAL) != 0;
+
         readLidState();
         applyLidSwitchState();
 
-        if (config.keyboard == Configuration.KEYBOARD_NOKEYS) {
+        if (config.keyboard == Configuration.KEYBOARD_NOKEYS
+                || (keyboardPresence == PRESENCE_INTERNAL
+                        && isHidden(mLidKeyboardAccessibility))) {
             config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_YES;
-        } else {
-            config.hardKeyboardHidden = determineHiddenState(mLidKeyboardAccessibility,
-                    Configuration.HARDKEYBOARDHIDDEN_YES, Configuration.HARDKEYBOARDHIDDEN_NO);
+            if (!mHasSoftInput) {
+                config.keyboardHidden = Configuration.KEYBOARDHIDDEN_YES;
+            }
         }
 
-        if (config.navigation == Configuration.NAVIGATION_NONAV) {
+        if (config.navigation == Configuration.NAVIGATION_NONAV
+                || (navigationPresence == PRESENCE_INTERNAL
+                        && isHidden(mLidNavigationAccessibility))) {
             config.navigationHidden = Configuration.NAVIGATIONHIDDEN_YES;
-        } else {
-            config.navigationHidden = determineHiddenState(mLidNavigationAccessibility,
-                    Configuration.NAVIGATIONHIDDEN_YES, Configuration.NAVIGATIONHIDDEN_NO);
-        }
-
-        if (mHasSoftInput || config.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO) {
-            config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
-        } else {
-            config.keyboardHidden = Configuration.KEYBOARDHIDDEN_YES;
         }
     }
 
@@ -3890,7 +3888,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void applyLidSwitchState() {
-        mPowerManager.setKeyboardVisibility(isKeyboardVisible());
+        mPowerManager.setKeyboardVisibility(isBuiltInKeyboardVisible());
+
         if (mLidState == LID_CLOSED && mLidControlsSleep) {
             mPowerManager.goToSleep(SystemClock.uptimeMillis());
         }

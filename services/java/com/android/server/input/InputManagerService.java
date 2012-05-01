@@ -162,7 +162,6 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
     private static native void nativeSetSystemUiVisibility(int ptr, int visibility);
     private static native void nativeSetFocusedApplication(int ptr,
             InputApplicationHandle application);
-    private static native void nativeGetInputConfiguration(int ptr, Configuration configuration);
     private static native boolean nativeTransferTouchFocus(int ptr,
             InputChannel fromChannel, InputChannel toChannel);
     private static native void nativeSetPointerSpeed(int ptr, int speed);
@@ -297,14 +296,6 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
             Slog.d(TAG, "Setting display #" + displayId + " orientation to " + rotation);
         }
         nativeSetDisplayOrientation(mPtr, displayId, rotation);
-    }
-    
-    public void getInputConfiguration(Configuration config) {
-        if (config == null) {
-            throw new IllegalArgumentException("config must not be null.");
-        }
-        
-        nativeGetInputConfiguration(mPtr, config);
     }
 
     /**
@@ -519,6 +510,16 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
                 ids[i] = mInputDevices[i].getId();
             }
             return ids;
+        }
+    }
+
+    /**
+     * Gets all input devices in the system.
+     * @return The array of input devices.
+     */
+    public InputDevice[] getInputDevices() {
+        synchronized (mInputDevicesLock) {
+            return mInputDevices;
         }
     }
 

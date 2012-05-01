@@ -157,37 +157,6 @@ enum {
 };
 
 /*
- * Describes the basic configuration of input devices that are present.
- */
-struct InputConfiguration {
-    enum {
-        TOUCHSCREEN_UNDEFINED = 0,
-        TOUCHSCREEN_NOTOUCH = 1,
-        TOUCHSCREEN_STYLUS = 2,
-        TOUCHSCREEN_FINGER = 3
-    };
-
-    enum {
-        KEYBOARD_UNDEFINED = 0,
-        KEYBOARD_NOKEYS = 1,
-        KEYBOARD_QWERTY = 2,
-        KEYBOARD_12KEY = 3
-    };
-
-    enum {
-        NAVIGATION_UNDEFINED = 0,
-        NAVIGATION_NONAV = 1,
-        NAVIGATION_DPAD = 2,
-        NAVIGATION_TRACKBALL = 3,
-        NAVIGATION_WHEEL = 4
-    };
-
-    int32_t touchScreen;
-    int32_t keyboard;
-    int32_t navigation;
-};
-
-/*
  * Pointer coordinate data.
  */
 struct PointerCoords {
