@@ -69,7 +69,6 @@ void usage(void)
         "        [-F apk-file] [-J R-file-dir] \\\n"
         "        [--product product1,product2,...] \\\n"
         "        [-c CONFIGS] [--preferred-configurations CONFIGS] \\\n"
-        "        [-o] \\\n"
         "        [raw-files-dir [raw-files-dir] ...]\n"
         "\n"
         "   Package the android resources.  It will read assets and resources that are\n"
@@ -110,7 +109,6 @@ void usage(void)
         "   -j  specify a jar or zip file containing classes to include\n"
         "   -k  junk path of file(s) added\n"
         "   -m  make package directories under location specified by -J\n"
-        "   -o  create overlay package (ie only resources; expects <overlay-package> in manifest)\n"
 #if 0
         "   -p  pseudolocalize the default configuration\n"
 #endif
@@ -291,9 +289,6 @@ int main(int argc, char* const argv[])
                 break;
             case 'm':
                 bundle.setMakePackageDirs(true);
-                break;
-            case 'o':
-                bundle.setIsOverlayPackage(true);
                 break;
 #if 0
             case 'p':
