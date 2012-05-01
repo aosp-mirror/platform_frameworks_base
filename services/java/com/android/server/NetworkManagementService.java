@@ -942,9 +942,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public NetworkStats getNetworkStatsSummary() {
+    public NetworkStats getNetworkStatsSummaryDev() {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        return mStatsFactory.readNetworkStatsSummary();
+        return mStatsFactory.readNetworkStatsSummaryDev();
+    }
+
+    @Override
+    public NetworkStats getNetworkStatsSummaryXt() {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        return mStatsFactory.readNetworkStatsSummaryXt();
     }
 
     @Override

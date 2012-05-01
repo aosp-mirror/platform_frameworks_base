@@ -80,58 +80,6 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
         assertStatsEntry(stats, "rmnet2", 10001, SET_DEFAULT, 0x0, 1125899906842624L, 984L);
     }
 
-    public void testNetworkStatsSummary() throws Exception {
-        stageFile(R.raw.net_dev_typical, new File(mTestProc, "net/dev"));
-
-        final NetworkStats stats = mFactory.readNetworkStatsSummary();
-        assertEquals(6, stats.size());
-        assertStatsEntry(stats, "lo", UID_ALL, SET_ALL, TAG_NONE, 8308L, 8308L);
-        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_ALL, TAG_NONE, 1507570L, 489339L);
-        assertStatsEntry(stats, "ifb0", UID_ALL, SET_ALL, TAG_NONE, 52454L, 0L);
-        assertStatsEntry(stats, "ifb1", UID_ALL, SET_ALL, TAG_NONE, 52454L, 0L);
-        assertStatsEntry(stats, "sit0", UID_ALL, SET_ALL, TAG_NONE, 0L, 0L);
-        assertStatsEntry(stats, "ip6tnl0", UID_ALL, SET_ALL, TAG_NONE, 0L, 0L);
-    }
-
-    public void testNetworkStatsSummaryDown() throws Exception {
-        stageFile(R.raw.net_dev_typical, new File(mTestProc, "net/dev"));
-        stageLong(1L, new File(mTestProc, "net/xt_qtaguid/iface_stat/wlan0/active"));
-        stageLong(1024L, new File(mTestProc, "net/xt_qtaguid/iface_stat/wlan0/rx_bytes"));
-        stageLong(128L, new File(mTestProc, "net/xt_qtaguid/iface_stat/wlan0/rx_packets"));
-        stageLong(2048L, new File(mTestProc, "net/xt_qtaguid/iface_stat/wlan0/tx_bytes"));
-        stageLong(256L, new File(mTestProc, "net/xt_qtaguid/iface_stat/wlan0/tx_packets"));
-
-        final NetworkStats stats = mFactory.readNetworkStatsSummary();
-        assertEquals(7, stats.size());
-        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_ALL, TAG_NONE, 1507570L, 489339L);
-        assertStatsEntry(stats, "wlan0", UID_ALL, SET_ALL, TAG_NONE, 1024L, 2048L);
-    }
-
-    public void testNetworkStatsCombined() throws Exception {
-        stageFile(R.raw.net_dev_typical, new File(mTestProc, "net/dev"));
-        stageLong(1L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/active"));
-        stageLong(10L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/rx_bytes"));
-        stageLong(20L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/rx_packets"));
-        stageLong(30L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/tx_bytes"));
-        stageLong(40L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/tx_packets"));
-
-        final NetworkStats stats = mFactory.readNetworkStatsSummary();
-        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_ALL, TAG_NONE, 1507570L + 10L,
-                2205L + 20L, 489339L + 30L, 2237L + 40L);
-    }
-
-    public void testNetworkStatsCombinedInactive() throws Exception {
-        stageFile(R.raw.net_dev_typical, new File(mTestProc, "net/dev"));
-        stageLong(0L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/active"));
-        stageLong(10L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/rx_bytes"));
-        stageLong(20L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/rx_packets"));
-        stageLong(30L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/tx_bytes"));
-        stageLong(40L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/tx_packets"));
-
-        final NetworkStats stats = mFactory.readNetworkStatsSummary();
-        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_ALL, TAG_NONE, 10L, 20L, 30L, 40L);
-    }
-
     public void testKernelTags() throws Exception {
         assertEquals(0, kernelToTag("0x0000000000000000"));
         assertEquals(0x32, kernelToTag("0x0000003200000000"));
@@ -152,11 +100,22 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
     public void testNetworkStatsSingle() throws Exception {
         stageFile(R.raw.xt_qtaguid_iface_typical, new File(mTestProc, "net/xt_qtaguid/iface_stat_all"));
 
-        final NetworkStats stats = mFactory.readNetworkStatsSummary();
+        final NetworkStats stats = mFactory.readNetworkStatsSummaryDev();
         assertEquals(6, stats.size());
         assertStatsEntry(stats, "rmnet0", UID_ALL, SET_ALL, TAG_NONE, 2112L, 24L, 700L, 10L);
         assertStatsEntry(stats, "test1", UID_ALL, SET_ALL, TAG_NONE, 6L, 8L, 10L, 12L);
         assertStatsEntry(stats, "test2", UID_ALL, SET_ALL, TAG_NONE, 1L, 2L, 3L, 4L);
+    }
+
+    public void testNetworkStatsXt() throws Exception {
+        stageFile(R.raw.xt_qtaguid_iface_fmt_typical,
+                new File(mTestProc, "net/xt_qtaguid/iface_stat_fmt"));
+
+        final NetworkStats stats = mFactory.readNetworkStatsSummaryXt();
+        assertEquals(3, stats.size());
+        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_ALL, TAG_NONE, 6824L, 16L, 5692L, 10L);
+        assertStatsEntry(stats, "rmnet1", UID_ALL, SET_ALL, TAG_NONE, 11153922L, 8051L, 190226L, 2468L);
+        assertStatsEntry(stats, "rmnet2", UID_ALL, SET_ALL, TAG_NONE, 4968L, 35L, 3081L, 39L);
     }
 
     /**
