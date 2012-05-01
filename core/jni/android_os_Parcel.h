@@ -23,5 +23,7 @@ namespace android {
 // Conversion from Java Parcel Object to C++ Parcel instance.
 // Note: does not type checking; must guarantee jobject is a Java Parcel
 extern Parcel* parcelForJavaObject(JNIEnv* env, jobject obj);
+extern jobject createJavaParcelObject(JNIEnv* env);
+extern void recycleJavaParcelObject(JNIEnv* env, jobject object);
 
 }

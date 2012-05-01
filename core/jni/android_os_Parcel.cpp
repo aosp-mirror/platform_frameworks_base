@@ -61,7 +61,10 @@ namespace android {
 
 static struct parcel_offsets_t
 {
+    jclass clazz;
     jfieldID mNativePtr;
+    jmethodID obtain;
+    jmethodID recycle;
 } gParcelOffsets;
 
 Parcel* parcelForJavaObject(JNIEnv* env, jobject obj)
@@ -74,6 +77,16 @@ Parcel* parcelForJavaObject(JNIEnv* env, jobject obj)
         jniThrowException(env, "java/lang/IllegalStateException", "Parcel has been finalized!");
     }
     return NULL;
+}
+
+jobject createJavaParcelObject(JNIEnv* env)
+{
+    return env->CallStaticObjectMethod(gParcelOffsets.clazz, gParcelOffsets.obtain);
+}
+
+void recycleJavaParcelObject(JNIEnv* env, jobject parcelObj)
+{
+    env->CallVoidMethod(parcelObj, gParcelOffsets.recycle);
 }
 
 static jint android_os_Parcel_dataSize(JNIEnv* env, jclass clazz, jint nativePtr)
@@ -665,8 +678,11 @@ int register_android_os_Parcel(JNIEnv* env)
     clazz = env->FindClass(kParcelPathName);
     LOG_FATAL_IF(clazz == NULL, "Unable to find class android.os.Parcel");
 
-    gParcelOffsets.mNativePtr
-        = env->GetFieldID(clazz, "mNativePtr", "I");
+    gParcelOffsets.clazz = (jclass) env->NewGlobalRef(clazz);
+    gParcelOffsets.mNativePtr = env->GetFieldID(clazz, "mNativePtr", "I");
+    gParcelOffsets.obtain = env->GetStaticMethodID(clazz, "obtain",
+                                                   "()Landroid/os/Parcel;");
+    gParcelOffsets.recycle = env->GetMethodID(clazz, "recycle", "()V");
 
     return AndroidRuntime::registerNativeMethods(
         env, kParcelPathName,
