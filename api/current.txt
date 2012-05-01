@@ -10643,7 +10643,7 @@ package android.media {
     method public deprecated int getRouting(int);
     method public int getStreamMaxVolume(int);
     method public int getStreamVolume(int);
-    method public int getVibrateSetting(int);
+    method public deprecated int getVibrateSetting(int);
     method public boolean isBluetoothA2dpOn();
     method public boolean isBluetoothScoAvailableOffCall();
     method public boolean isBluetoothScoOn();
@@ -10668,9 +10668,9 @@ package android.media {
     method public void setStreamMute(int, boolean);
     method public void setStreamSolo(int, boolean);
     method public void setStreamVolume(int, int, int);
-    method public void setVibrateSetting(int, int);
+    method public deprecated void setVibrateSetting(int, int);
     method public deprecated void setWiredHeadsetOn(boolean);
-    method public boolean shouldVibrate(int);
+    method public deprecated boolean shouldVibrate(int);
     method public void startBluetoothSco();
     method public void stopBluetoothSco();
     method public void unloadSoundEffects();
@@ -10693,8 +10693,8 @@ package android.media {
     field public static final java.lang.String EXTRA_RINGER_MODE = "android.media.EXTRA_RINGER_MODE";
     field public static final java.lang.String EXTRA_SCO_AUDIO_PREVIOUS_STATE = "android.media.extra.SCO_AUDIO_PREVIOUS_STATE";
     field public static final java.lang.String EXTRA_SCO_AUDIO_STATE = "android.media.extra.SCO_AUDIO_STATE";
-    field public static final java.lang.String EXTRA_VIBRATE_SETTING = "android.media.EXTRA_VIBRATE_SETTING";
-    field public static final java.lang.String EXTRA_VIBRATE_TYPE = "android.media.EXTRA_VIBRATE_TYPE";
+    field public static final deprecated java.lang.String EXTRA_VIBRATE_SETTING = "android.media.EXTRA_VIBRATE_SETTING";
+    field public static final deprecated java.lang.String EXTRA_VIBRATE_TYPE = "android.media.EXTRA_VIBRATE_TYPE";
     field public static final int FLAG_ALLOW_RINGER_MODES = 2; // 0x2
     field public static final int FLAG_PLAY_SOUND = 4; // 0x4
     field public static final int FLAG_REMOVE_SOUND_AND_VIBRATE = 8; // 0x8
@@ -10739,12 +10739,12 @@ package android.media {
     field public static final int STREAM_SYSTEM = 1; // 0x1
     field public static final int STREAM_VOICE_CALL = 0; // 0x0
     field public static final int USE_DEFAULT_STREAM_TYPE = -2147483648; // 0x80000000
-    field public static final java.lang.String VIBRATE_SETTING_CHANGED_ACTION = "android.media.VIBRATE_SETTING_CHANGED";
-    field public static final int VIBRATE_SETTING_OFF = 0; // 0x0
-    field public static final int VIBRATE_SETTING_ON = 1; // 0x1
-    field public static final int VIBRATE_SETTING_ONLY_SILENT = 2; // 0x2
-    field public static final int VIBRATE_TYPE_NOTIFICATION = 1; // 0x1
-    field public static final int VIBRATE_TYPE_RINGER = 0; // 0x0
+    field public static final deprecated java.lang.String VIBRATE_SETTING_CHANGED_ACTION = "android.media.VIBRATE_SETTING_CHANGED";
+    field public static final deprecated int VIBRATE_SETTING_OFF = 0; // 0x0
+    field public static final deprecated int VIBRATE_SETTING_ON = 1; // 0x1
+    field public static final deprecated int VIBRATE_SETTING_ONLY_SILENT = 2; // 0x2
+    field public static final deprecated int VIBRATE_TYPE_NOTIFICATION = 1; // 0x1
+    field public static final deprecated int VIBRATE_TYPE_RINGER = 0; // 0x0
   }
 
   public static abstract interface AudioManager.OnAudioFocusChangeListener {
