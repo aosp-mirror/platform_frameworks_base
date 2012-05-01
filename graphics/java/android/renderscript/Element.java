@@ -149,8 +149,6 @@ public class Element extends BaseObj {
         RS_PROGRAM_VERTEX (1007, 4),
         RS_PROGRAM_RASTER (1008, 4),
         RS_PROGRAM_STORE (1009, 4),
-        /** @hide
-        */
         RS_FONT (1010, 4);
 
         int mID;
@@ -498,8 +496,8 @@ public class Element extends BaseObj {
         return rs.mElement_PROGRAM_STORE;
     }
 
-    /** @hide
-        */
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element FONT(RenderScript rs) {
         if(rs.mElement_FONT == null) {
             rs.mElement_FONT = createUser(rs, DataType.RS_FONT);
