@@ -198,7 +198,15 @@
              (optionally) be granted to development applications. -->
         <flag name="development" value="0x20" />
     </attr>
-    
+
+    <!-- Flags indicating more context for a permission group. -->
+    <attr name="permissionGroupFlags">
+        <!-- Set to indicate that this permission group contains permissions
+             protecting access to some information that is considered
+             personal to the user (such as contacts, e-mails, etc). -->
+        <flag name="personalInfo" value="0x0001" />
+    </attr>
+
     <!-- Specified the name of a group that this permission is associated
          with.  The group must have been defined with the
          {@link android.R.styleable#AndroidManifestPermissionGroup permission-group} tag. -->
@@ -895,6 +903,8 @@
         <attr name="icon" />
         <attr name="logo" />
         <attr name="description" />
+        <attr name="permissionGroupFlags" />
+        <attr name="priority" />
     </declare-styleable>
     
     <!-- The <code>permission-tree</code> tag declares the base of a tree of
