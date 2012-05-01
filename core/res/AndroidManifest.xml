@@ -258,7 +258,8 @@
          expressed as two distinct permissions). -->
     <permission-group android:name="android.permission-group.PERSONAL_INFO"
         android:label="@string/permgrouplab_personalInfo"
-        android:description="@string/permgroupdesc_personalInfo" />
+        android:description="@string/permgroupdesc_personalInfo"
+        android:permissionGroupFlags="personalInfo" />
 
     <!-- Allows an application to read the user's contacts data. -->
     <permission android:name="android.permission.READ_CONTACTS"
@@ -338,16 +339,14 @@
 
     <!-- Allows an application to read the user dictionary. This should
          really only be required by an IME, or a dictionary editor like
-         the Settings app.
-         @hide Pending API council approval -->
+         the Settings app. -->
     <permission android:name="android.permission.READ_USER_DICTIONARY"
         android:permissionGroup="android.permission-group.PERSONAL_INFO"
         android:protectionLevel="dangerous"
         android:label="@string/permlab_readDictionary"
         android:description="@string/permdesc_readDictionary" />
 
-    <!-- Allows an application to write to the user dictionary.
-         @hide Pending API council approval -->
+    <!-- Allows an application to write to the user dictionary. -->
     <permission android:name="android.permission.WRITE_USER_DICTIONARY"
         android:permissionGroup="android.permission-group.PERSONAL_INFO"
         android:protectionLevel="normal"
@@ -793,7 +792,7 @@
          as locale. -->
     <permission android:name="android.permission.CHANGE_CONFIGURATION"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="dangerous"
+        android:protectionLevel="signature|system|development"
         android:label="@string/permlab_changeConfiguration"
         android:description="@string/permdesc_changeConfiguration" />
 
@@ -844,7 +843,7 @@
     <!-- Modify the global animation scaling factor. -->
     <permission android:name="android.permission.SET_ANIMATION_SCALE"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="dangerous"
+        android:protectionLevel="signature|system|development"
         android:label="@string/permlab_setAnimationScale"
         android:description="@string/permdesc_setAnimationScale" />
 
