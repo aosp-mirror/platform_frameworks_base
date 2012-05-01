@@ -3735,7 +3735,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private void scrollLayerTo(int x, int y) {
         int dx = mScrollingLayerRect.left - x;
         int dy = mScrollingLayerRect.top - y;
-        if (dx == 0 && dy == 0) {
+        if ((dx == 0 && dy == 0) || mNativeClass == 0) {
             return;
         }
         if (mSelectingText) {
@@ -3756,7 +3756,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             mEditTextContentBounds.offset(dx, dy);
             mAutoCompletePopup.resetRect();
         }
-        nativeScrollLayer(mCurrentScrollingLayerId, x, y);
+        nativeScrollLayer(mNativeClass, mCurrentScrollingLayerId, x, y);
         mScrollingLayerRect.left = x;
         mScrollingLayerRect.top = y;
         mWebViewCore.sendMessage(WebViewCore.EventHub.SCROLL_LAYER, mCurrentScrollingLayerId,
@@ -5699,10 +5699,13 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     // See if there is a layer at x, y and switch to TOUCH_DRAG_LAYER_MODE if a
     // layer is found.
     private void startScrollingLayer(float x, float y) {
+        if (mNativeClass == 0)
+            return;
+
         int contentX = viewToContentX((int) x + getScrollX());
         int contentY = viewToContentY((int) y + getScrollY());
-        mCurrentScrollingLayerId = nativeScrollableLayer(contentX, contentY,
-                mScrollingLayerRect, mScrollingLayerBounds);
+        mCurrentScrollingLayerId = nativeScrollableLayer(mNativeClass,
+                contentX, contentY, mScrollingLayerRect, mScrollingLayerBounds);
         if (mCurrentScrollingLayerId != 0) {
             mTouchMode = TOUCH_DRAG_LAYER_MODE;
         }
@@ -5808,8 +5811,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     data.mX = contentX;
                     data.mY = contentY;
                     data.mNativeLayerRect = new Rect();
-                    data.mNativeLayer = nativeScrollableLayer(
-                            contentX, contentY, data.mNativeLayerRect, null);
+                    if (mNativeClass != 0) {
+                        data.mNativeLayer = nativeScrollableLayer(mNativeClass,
+                                contentX, contentY, data.mNativeLayerRect, null);
+                    } else {
+                        data.mNativeLayer = 0;
+                    }
                     data.mSlop = viewToContentDimension(mNavSlop);
                     removeTouchHighlight();
                     if (!mBlockWebkitViewMessages) {
@@ -8608,16 +8615,17 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private native void     nativeUseHardwareAccelSkia(boolean enabled);
 
     // Returns a pointer to the scrollable LayerAndroid at the given point.
-    private native int      nativeScrollableLayer(int x, int y, Rect scrollRect,
+    private native int      nativeScrollableLayer(int nativeInstance, int x, int y, Rect scrollRect,
             Rect scrollBounds);
     /**
      * Scroll the specified layer.
+     * @param nativeInstance Native WebView instance
      * @param layer Id of the layer to scroll, as determined by nativeScrollableLayer.
      * @param newX Destination x position to which to scroll.
      * @param newY Destination y position to which to scroll.
      * @return True if the layer is successfully scrolled.
      */
-    private native boolean  nativeScrollLayer(int layer, int newX, int newY);
+    private native boolean  nativeScrollLayer(int nativeInstance, int layer, int newX, int newY);
     private native void     nativeSetIsScrolling(boolean isScrolling);
     private native int      nativeGetBackgroundColor();
     native boolean  nativeSetProperty(String key, String value);
