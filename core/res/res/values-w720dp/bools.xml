@@ -16,4 +16,5 @@
 
 <resources>
     <bool name="action_bar_expanded_action_views_exclusive">false</bool>
+    <bool name="show_ongoing_ime_switcher">false</bool>
 </resources>
