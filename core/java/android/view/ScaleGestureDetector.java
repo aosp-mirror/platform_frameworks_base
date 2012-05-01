@@ -220,8 +220,10 @@ public class ScaleGestureDetector {
                 mActiveId1 = event.getPointerId(index1);
                 if (index0 < 0 || index0 == index1) {
                     // Probably someone sending us a broken event stream.
-                    index0 = findNewActiveIndex(event, index0 == index1 ? -1 : mActiveId1, index0);
-                    mActiveId0 = event.getPointerId(index0);
+                    boolean valid = handleBrokenEventStream(event);
+                    if (!valid) {
+                        return false;
+                    }
                 }
                 mActive0MostRecent = false;
 
@@ -377,13 +379,10 @@ public class ScaleGestureDetector {
                     int index0 = event.findPointerIndex(mActiveId0);
                     if (index0 < 0 || mActiveId0 == mActiveId1) {
                         // Probably someone sending us a broken event stream.
-                        Log.e(TAG, "Got " + MotionEvent.actionToString(action) +
-                                " with bad state while a gesture was in progress. " +
-                                "Did you forget to pass an event to " +
-                                "ScaleGestureDetector#onTouchEvent?");
-                        index0 = findNewActiveIndex(event,
-                                mActiveId0 == mActiveId1 ? -1 : mActiveId1, index0);
-                        mActiveId0 = event.getPointerId(index0);
+                        boolean valid = handleBrokenEventStream(event);
+                        if (!valid) {
+                            return false;
+                        }
                     }
 
                     setContext(event);
@@ -481,6 +480,27 @@ public class ScaleGestureDetector {
             mInputEventConsistencyVerifier.onUnhandledEvent(event, 0);
         }
         return handled;
+    }
+
+    private boolean handleBrokenEventStream(MotionEvent event) {
+        Log.e(TAG, "Got " + MotionEvent.actionToString(event.getActionMasked()) +
+                " with bad state while a gesture was in progress. " +
+                "Did you forget to pass an event to " +
+                "ScaleGestureDetector#onTouchEvent?");
+        int index0 = findNewActiveIndex(event,
+                mActiveId0 == mActiveId1 ? -1 : mActiveId1,
+                event.findPointerIndex(mActiveId0));
+        if (index0 >= 0) {
+            mActiveId0 = event.getPointerId(index0);
+            return true;
+        } else {
+            mInvalidGesture = true;
+            Log.e(TAG, "Invalid MotionEvent stream detected.", new Throwable());
+            if (mGestureInProgress) {
+                mListener.onScaleEnd(this);
+            }
+            return false;
+        }
     }
 
     private int findNewActiveIndex(MotionEvent ev, int otherActiveId, int oldIndex) {
