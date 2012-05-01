@@ -63,6 +63,7 @@ public class ResolverActivity extends AlertActivity implements
     private TextView mClearDefaultHint;
     private PackageManager mPm;
 
+    private boolean mRegistered;
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
         @Override public void onSomePackagesChanged() {
             mAdapter.handlePackagesChanged();
@@ -100,6 +101,7 @@ public class ResolverActivity extends AlertActivity implements
         ap.mOnClickListener = this;
 
         mPackageMonitor.register(this, getMainLooper(), false);
+        mRegistered = true;
 
         if (alwaysUseOption) {
             LayoutInflater inflater = (LayoutInflater) getSystemService(
@@ -118,6 +120,8 @@ public class ResolverActivity extends AlertActivity implements
             ap.mAdapter = mAdapter;
         } else if (count == 1) {
             startActivity(mAdapter.intentForPosition(0));
+            mPackageMonitor.unregister();
+            mRegistered = false;
             finish();
             return;
         } else {
@@ -135,14 +139,20 @@ public class ResolverActivity extends AlertActivity implements
     @Override
     protected void onRestart() {
         super.onRestart();
-        mPackageMonitor.register(this, getMainLooper(), false);
+        if (!mRegistered) {
+            mPackageMonitor.register(this, getMainLooper(), false);
+            mRegistered = true;
+        }
         mAdapter.handlePackagesChanged();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mPackageMonitor.unregister();
+        if (mRegistered) {
+            mPackageMonitor.unregister();
+            mRegistered = false;
+        }
     }
 
     public void onClick(DialogInterface dialog, int which) {
