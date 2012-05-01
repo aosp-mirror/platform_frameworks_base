@@ -22,6 +22,8 @@ import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -29,6 +31,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -490,7 +493,14 @@ public class RemoteViews implements Parcelable, Filter {
             if (mIsWidgetCollectionChild) {
                 Log.e("RemoteViews", "Cannot setOnClickPendingIntent for collection item " +
                         "(id: " + viewId + ")");
-                // TODO: return; We'll let this slide until apps are up to date.
+                ApplicationInfo appInfo = root.getContext().getApplicationInfo();
+
+                // We let this slide for HC and ICS so as to not break compatibility. It should have
+                // been disabled from the outset, but was left open by accident.
+                if (appInfo != null &&
+                        appInfo.targetSdkVersion >= Build.VERSION_CODES.JELLY_BEAN) {
+                    return;
+                }
             }
 
             if (target != null) {
