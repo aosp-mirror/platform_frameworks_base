@@ -4107,12 +4107,17 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public void dismissKeyguardOnNextActivity() {
         enforceNotIsolatedCaller("dismissKeyguardOnNextActivity");
-        synchronized (this) {
-            if (mLockScreenShown) {
-                mLockScreenShown = false;
-                comeOutOfSleepIfNeededLocked();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                if (mLockScreenShown) {
+                    mLockScreenShown = false;
+                    comeOutOfSleepIfNeededLocked();
+                }
+                mMainStack.dismissKeyguardOnNextActivityLocked();
             }
-            mMainStack.dismissKeyguardOnNextActivityLocked();
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
