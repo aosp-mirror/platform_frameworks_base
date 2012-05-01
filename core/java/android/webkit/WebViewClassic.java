@@ -6381,10 +6381,14 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 mSelectDraggingTextQuad.p4.x, mSelectDraggingTextQuad.p3.x);
         float newY = scaleCoordinate(scale,
                 mSelectDraggingTextQuad.p4.y, mSelectDraggingTextQuad.p3.y);
-        int x = Math.max(mEditTextContentBounds.left,
-                    Math.min(mEditTextContentBounds.right, Math.round(newX)));
-        int y = Math.max(mEditTextContentBounds.top,
-                    Math.min(mEditTextContentBounds.bottom, Math.round(newY)));
+        int x = Math.round(newX);
+        int y = Math.round(newY);
+        if (mIsEditingText) {
+            x = Math.max(mEditTextContentBounds.left,
+                    Math.min(mEditTextContentBounds.right, x));
+            y = Math.max(mEditTextContentBounds.top,
+                    Math.min(mEditTextContentBounds.bottom, y));
+        }
         mSelectDraggingCursor.set(x, y);
     }
 
