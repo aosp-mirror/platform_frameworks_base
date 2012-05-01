@@ -88,6 +88,8 @@ public class AudioManager {
      *
      * @see #EXTRA_VIBRATE_TYPE
      * @see #EXTRA_VIBRATE_SETTING
+     * @deprecated Applications should maintain their own vibrate policy based on
+     * current ringer mode and listen to {@link #RINGER_MODE_CHANGED_ACTION} instead.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String VIBRATE_SETTING_CHANGED_ACTION =
@@ -133,6 +135,8 @@ public class AudioManager {
      * @see #VIBRATE_SETTING_ON
      * @see #VIBRATE_SETTING_OFF
      * @see #VIBRATE_SETTING_ONLY_SILENT
+     * @deprecated Applications should maintain their own vibrate policy based on
+     * current ringer mode and listen to {@link #RINGER_MODE_CHANGED_ACTION} instead.
      */
     public static final String EXTRA_VIBRATE_SETTING = "android.media.EXTRA_VIBRATE_SETTING";
 
@@ -142,6 +146,8 @@ public class AudioManager {
      * @see #VIBRATE_SETTING_CHANGED_ACTION
      * @see #VIBRATE_TYPE_NOTIFICATION
      * @see #VIBRATE_TYPE_RINGER
+     * @deprecated Applications should maintain their own vibrate policy based on
+     * current ringer mode and listen to {@link #RINGER_MODE_CHANGED_ACTION} instead.
      */
     public static final String EXTRA_VIBRATE_TYPE = "android.media.EXTRA_VIBRATE_TYPE";
 
@@ -340,6 +346,8 @@ public class AudioManager {
      * @see #setVibrateSetting(int, int)
      * @see #getVibrateSetting(int)
      * @see #shouldVibrate(int)
+     * @deprecated Applications should maintain their own vibrate policy based on
+     * current ringer mode that can be queried via {@link #getRingerMode()}.
      */
     public static final int VIBRATE_TYPE_RINGER = 0;
 
@@ -349,6 +357,8 @@ public class AudioManager {
      * @see #setVibrateSetting(int, int)
      * @see #getVibrateSetting(int)
      * @see #shouldVibrate(int)
+     * @deprecated Applications should maintain their own vibrate policy based on
+     * current ringer mode that can be queried via {@link #getRingerMode()}.
      */
     public static final int VIBRATE_TYPE_NOTIFICATION = 1;
 
@@ -357,6 +367,8 @@ public class AudioManager {
      *
      * @see #setVibrateSetting(int, int)
      * @see #getVibrateSetting(int)
+     * @deprecated Applications should maintain their own vibrate policy based on
+     * current ringer mode that can be queried via {@link #getRingerMode()}.
      */
     public static final int VIBRATE_SETTING_OFF = 0;
 
@@ -365,6 +377,8 @@ public class AudioManager {
      *
      * @see #setVibrateSetting(int, int)
      * @see #getVibrateSetting(int)
+     * @deprecated Applications should maintain their own vibrate policy based on
+     * current ringer mode that can be queried via {@link #getRingerMode()}.
      */
     public static final int VIBRATE_SETTING_ON = 1;
 
@@ -374,6 +388,8 @@ public class AudioManager {
      *
      * @see #setVibrateSetting(int, int)
      * @see #getVibrateSetting(int)
+     * @deprecated Applications should maintain their own vibrate policy based on
+     * current ringer mode that can be queried via {@link #getRingerMode()}.
      */
     public static final int VIBRATE_SETTING_ONLY_SILENT = 2;
 
@@ -966,6 +982,8 @@ public class AudioManager {
      *         called.
      * @see #setVibrateSetting(int, int)
      * @see #getVibrateSetting(int)
+     * @deprecated Applications should maintain their own vibrate policy based on
+     * current ringer mode that can be queried via {@link #getRingerMode()}.
      */
     public boolean shouldVibrate(int vibrateType) {
         IAudioService service = getService();
@@ -991,6 +1009,8 @@ public class AudioManager {
      *         {@link #VIBRATE_SETTING_ONLY_SILENT}.
      * @see #setVibrateSetting(int, int)
      * @see #shouldVibrate(int)
+     * @deprecated Applications should maintain their own vibrate policy based on
+     * current ringer mode that can be queried via {@link #getRingerMode()}.
      */
     public int getVibrateSetting(int vibrateType) {
         IAudioService service = getService();
@@ -1017,6 +1037,8 @@ public class AudioManager {
      *            {@link #VIBRATE_SETTING_ONLY_SILENT}.
      * @see #getVibrateSetting(int)
      * @see #shouldVibrate(int)
+     * @deprecated Applications should maintain their own vibrate policy based on
+     * current ringer mode that can be queried via {@link #getRingerMode()}.
      */
     public void setVibrateSetting(int vibrateType, int vibrateSetting) {
         IAudioService service = getService();
