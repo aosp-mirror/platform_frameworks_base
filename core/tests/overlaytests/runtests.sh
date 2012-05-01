@@ -18,7 +18,6 @@ function atexit()
 
 log=$(mktemp)
 trap "atexit" EXIT
-failures=0
 
 function compile_module()
 {
@@ -38,6 +37,37 @@ function wait_for_boot_completed()
 	$adb wait-for-device logcat | grep -m 1 -e 'PowerManagerService.*bootCompleted' >/dev/null
 }
 
+function mkdir_if_needed()
+{
+	local path="$1"
+
+	if [[ "${path:0:1}" != "/" ]]; then
+		echo "mkdir_if_needed: error: path '$path' does not begin with /" | tee -a $log
+		exit 1
+	fi
+
+	local basename=$(basename "$path")
+	local dirname=$(dirname "$path")
+	local t=$($adb shell ls -l $dirname | tr -d '\r' | grep -e "${basename}$" | grep -oe '^.')
+
+	case "$t" in
+		d) # File exists, and is a directory ...
+			# do nothing
+			;;
+		l) # ... (or symbolic link possibly to a directory).
+			# do nothing
+			;;
+		"") # File does not exist.
+			mkdir_if_needed "$dirname"
+			$adb shell mkdir "$path"
+			;;
+		*) # File exists, but is not a directory.
+			echo "mkdir_if_needed: file '$path' exists, but is not a directory" | tee -a $log
+			exit 1
+			;;
+	esac
+}
+
 function disable_overlay()
 {
 	echo "Disabling overlay"
@@ -48,6 +78,8 @@ function disable_overlay()
 function enable_overlay()
 {
 	echo "Enabling overlay"
+	mkdir_if_needed "/system/vendor"
+	mkdir_if_needed "/vendor/overlay/framework"
 	$adb shell ln -s /data/app/com.android.overlaytest.overlay.apk /vendor/overlay/framework/framework-res.apk
 }
 
@@ -59,12 +91,20 @@ function instrument()
 	$adb shell am instrument -w -e class $class com.android.overlaytest/android.test.InstrumentationTestRunner | tee -a $log
 }
 
+function remount()
+{
+	echo "Remounting file system writable"
+	$adb remount | tee -a $log
+}
+
 function sync()
 {
 	echo "Syncing to device"
-	$adb remount | tee -a $log
 	$adb sync data | tee -a $log
 }
+
+# some commands require write access, remount once and for all
+remount
 
 # build and sync
 compile_module "$PWD/OverlayTest/Android.mk"
