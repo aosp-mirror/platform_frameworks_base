@@ -962,7 +962,7 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
                 float x = getFloat();
                 float y = getFloat();
                 SkPaint* paint = getPaint(renderer);
-                if (mCaching && mMultipliedAlpha < 255) {
+                if (mCaching) {
                     paint->setAlpha(mMultipliedAlpha);
                 }
                 DISPLAY_LIST_LOGD("%s%s %p, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
@@ -975,7 +975,7 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
                 float x = getFloat();
                 float y = getFloat();
                 SkPaint* paint = getPaint(renderer);
-                if (mCaching && mMultipliedAlpha < 255) {
+                if (mCaching) {
                     paint->setAlpha(mMultipliedAlpha);
                 }
                 DISPLAY_LIST_LOGD("%s%s %p, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
