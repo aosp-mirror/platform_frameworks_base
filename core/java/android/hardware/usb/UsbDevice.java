@@ -46,6 +46,9 @@ public class UsbDevice implements Parcelable {
     private static final String TAG = "UsbDevice";
 
     private final String mName;
+    private final String mManufacturerName;
+    private final String mProductName;
+    private final String mSerialNumber;
     private final int mVendorId;
     private final int mProductId;
     private final int mClass;
@@ -58,13 +61,18 @@ public class UsbDevice implements Parcelable {
      * @hide
      */
     public UsbDevice(String name, int vendorId, int productId,
-            int Class, int subClass, int protocol, Parcelable[] interfaces) {
+            int Class, int subClass, int protocol,
+            String manufacturerName, String productName, String serialNumber,
+            Parcelable[] interfaces) {
         mName = name;
         mVendorId = vendorId;
         mProductId = productId;
         mClass = Class;
         mSubclass = subClass;
         mProtocol = protocol;
+        mManufacturerName = manufacturerName;
+        mProductName = productName;
+        mSerialNumber = serialNumber;
         mInterfaces = interfaces;
     }
 
@@ -77,6 +85,33 @@ public class UsbDevice implements Parcelable {
      */
     public String getDeviceName() {
         return mName;
+    }
+
+    /**
+     * Returns the manufacturer name of the device.
+     *
+     * @return the manufacturer name
+     */
+    public String getManufacturerName() {
+        return mManufacturerName;
+    }
+
+    /**
+     * Returns the product name of the device.
+     *
+     * @return the product name
+     */
+    public String getProductName() {
+        return mProductName;
+    }
+
+    /**
+     * Returns the serial number of the device.
+     *
+     * @return the serial number name
+     */
+    public String getSerialNumber() {
+        return mSerialNumber;
     }
 
     /**
@@ -176,7 +211,8 @@ public class UsbDevice implements Parcelable {
         return "UsbDevice[mName=" + mName + ",mVendorId=" + mVendorId +
                 ",mProductId=" + mProductId + ",mClass=" + mClass +
                 ",mSubclass=" + mSubclass + ",mProtocol=" + mProtocol +
-                ",mInterfaces=" + mInterfaces + "]";
+                ",mManufacturerName=" + mManufacturerName + ",mProductName=" + mProductName +
+                ",mSerialNumber=" + mSerialNumber + ",mInterfaces=" + mInterfaces + "]";
     }
 
     public static final Parcelable.Creator<UsbDevice> CREATOR =
@@ -188,8 +224,12 @@ public class UsbDevice implements Parcelable {
             int clasz = in.readInt();
             int subClass = in.readInt();
             int protocol = in.readInt();
+            String manufacturerName = in.readString();
+            String productName = in.readString();
+            String serialNumber = in.readString();
             Parcelable[] interfaces = in.readParcelableArray(UsbInterface.class.getClassLoader());
-            return new UsbDevice(name, vendorId, productId, clasz, subClass, protocol, interfaces);
+            return new UsbDevice(name, vendorId, productId, clasz, subClass, protocol,
+                                 manufacturerName, productName, serialNumber, interfaces);
         }
 
         public UsbDevice[] newArray(int size) {
@@ -208,6 +248,9 @@ public class UsbDevice implements Parcelable {
         parcel.writeInt(mClass);
         parcel.writeInt(mSubclass);
         parcel.writeInt(mProtocol);
+        parcel.writeString(mManufacturerName);
+        parcel.writeString(mProductName);
+        parcel.writeString(mSerialNumber);
         parcel.writeParcelableArray(mInterfaces, 0);
    }
 
