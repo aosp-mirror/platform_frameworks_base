@@ -658,7 +658,7 @@ public class GridLayout extends ViewGroup {
     private void validateLayoutParams() {
         final boolean horizontal = (orientation == HORIZONTAL);
         final Axis axis = horizontal ? horizontalAxis : verticalAxis;
-        final int count = (axis.definedCount != UNDEFINED) ? axis.definedCount : 0;
+        final int count = max(0, axis.getCount()); // Handle negative values, including UNDEFINED
 
         int major = 0;
         int minor = 0;
