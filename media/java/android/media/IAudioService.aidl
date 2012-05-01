@@ -23,6 +23,7 @@ import android.media.IRemoteControlClient;
 import android.media.IRemoteControlDisplay;
 import android.media.IRingtonePlayer;
 import android.net.Uri;
+import android.view.KeyEvent;
 
 /**
  * {@hide}
@@ -101,6 +102,9 @@ interface IAudioService {
     int abandonAudioFocus(IAudioFocusDispatcher l, String clientId);
     
     void unregisterAudioFocusClient(String clientId);
+
+    oneway void dispatchMediaKeyEvent(in KeyEvent keyEvent);
+    void dispatchMediaKeyEventUnderWakelock(in KeyEvent keyEvent);
 
     oneway void registerMediaButtonIntent(in PendingIntent pi, in ComponentName c);
     oneway void unregisterMediaButtonIntent(in PendingIntent pi,  in ComponentName c);
