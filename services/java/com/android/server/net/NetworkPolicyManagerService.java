@@ -1497,6 +1497,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public boolean isNetworkMetered(NetworkState state) {
         final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state);
 
+        // roaming networks are always considered metered
+        if (ident.getRoaming()) {
+            return true;
+        }
+
         final NetworkPolicy policy;
         synchronized (mRulesLock) {
             policy = findPolicyForNetworkLocked(ident);
