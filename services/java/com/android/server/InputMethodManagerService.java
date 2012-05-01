@@ -39,6 +39,7 @@ import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -110,6 +111,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.TreeMap;
 
 /**
@@ -152,6 +154,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final String TAG_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE =
             "EnabledWhenDefaultIsNotAsciiCapable";
     private static final String TAG_ASCII_CAPABLE = "AsciiCapable";
+    private static final Locale ENGLISH_LOCALE = new Locale("en");
 
     final Context mContext;
     final Resources mRes;
@@ -371,6 +374,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private View mSwitchingDialogTitleView;
     private InputMethodInfo[] mIms;
     private int[] mSubtypeIds;
+    private Locale mLastSystemLocale;
 
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
@@ -586,6 +590,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mImeSwitcherNotification.vibrate = null;
         Intent intent = new Intent(Settings.ACTION_SHOW_INPUT_METHOD_PICKER);
         mImeSwitchPendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
+        mLastSystemLocale = mRes.getConfiguration().locale;
 
         mShowOngoingImeSwitcherForPhones = false;
 
@@ -612,32 +617,102 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         if (TextUtils.isEmpty(Settings.Secure.getString(
                 mContext.getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD))) {
-            InputMethodInfo defIm = null;
-            for (InputMethodInfo imi: mMethodList) {
-                if (defIm == null && imi.getIsDefaultResourceId() != 0) {
-                    try {
-                        Resources res = context.createPackageContext(
-                                imi.getPackageName(), 0).getResources();
-                        if (res.getBoolean(imi.getIsDefaultResourceId())) {
-                            defIm = imi;
-                            Slog.i(TAG, "Selected default: " + imi.getId());
-                        }
-                    } catch (PackageManager.NameNotFoundException ex) {
-                    } catch (Resources.NotFoundException ex) {
-                    }
-                }
-            }
-            if (defIm == null && mMethodList.size() > 0) {
-                defIm = getMostApplicableDefaultIMELocked();
-                Slog.i(TAG, "No default found, using " + defIm.getId());
-            }
-            if (defIm != null) {
-                setSelectedInputMethodAndSubtypeLocked(defIm, NOT_A_SUBTYPE_ID, false);
-            }
+            resetDefaultImeLocked(context);
         }
 
         mSettingsObserver = new SettingsObserver(mHandler);
         updateFromSettingsLocked();
+
+        // IMMS wants to receive Intent.ACTION_LOCALE_CHANGED in order to update the current IME
+        // according to the new system locale.
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_LOCALE_CHANGED);
+        mContext.registerReceiver(
+                new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        synchronized(mMethodMap) {
+                            checkCurrentLocaleChangedLocked();
+                        }
+                    }
+                }, filter);
+    }
+
+    private void checkCurrentLocaleChangedLocked() {
+        final Locale newLocale = mRes.getConfiguration().locale;
+        if (newLocale != null && !newLocale.equals(mLastSystemLocale)) {
+            if (DEBUG) {
+                Slog.i(TAG, "Locale has been changed to " + newLocale);
+            }
+            buildInputMethodListLocked(mMethodList, mMethodMap);
+            // Reset the current ime to the proper one
+            resetDefaultImeLocked(mContext);
+            mLastSystemLocale = newLocale;
+        }
+    }
+
+    private void resetDefaultImeLocked(Context context) {
+        // Do not reset the default (current) IME when it is a 3rd-party IME
+        if (mCurMethodId != null && !isSystemIme(mMethodMap.get(mCurMethodId))) {
+            return;
+        }
+
+        InputMethodInfo defIm = null;
+        for (InputMethodInfo imi : mMethodList) {
+            if (defIm == null) {
+                if (isValidSystemDefaultIme(imi, context)) {
+                    defIm = imi;
+                    Slog.i(TAG, "Selected default: " + imi.getId());
+                }
+            }
+        }
+        if (defIm == null && mMethodList.size() > 0) {
+            defIm = getMostApplicableDefaultIMELocked();
+            Slog.i(TAG, "No default found, using " + defIm.getId());
+        }
+        if (defIm != null) {
+            setSelectedInputMethodAndSubtypeLocked(defIm, NOT_A_SUBTYPE_ID, false);
+        }
+    }
+
+    private static boolean isValidSystemDefaultIme(InputMethodInfo imi, Context context) {
+        if (!isSystemIme(imi)) {
+            return false;
+        }
+        if (imi.getIsDefaultResourceId() != 0) {
+            try {
+                Resources res = context.createPackageContext(
+                        imi.getPackageName(), 0).getResources();
+                if (res.getBoolean(imi.getIsDefaultResourceId())
+                        && containsSubtypeOf(imi, context.getResources().getConfiguration().
+                                locale.getLanguage())) {
+                    return true;
+                }
+            } catch (PackageManager.NameNotFoundException ex) {
+            } catch (Resources.NotFoundException ex) {
+            }
+        }
+        if (imi.getSubtypeCount() == 0) {
+            Slog.w(TAG, "Found no subtypes in a system IME: " + imi.getPackageName());
+        }
+        return false;
+    }
+
+    private static boolean isSystemImeThatHasEnglishSubtype(InputMethodInfo imi) {
+        if (!isSystemIme(imi)) {
+            return false;
+        }
+        return containsSubtypeOf(imi, ENGLISH_LOCALE.getLanguage());
+    }
+
+    private static boolean containsSubtypeOf(InputMethodInfo imi, String language) {
+        final int N = imi.getSubtypeCount();
+        for (int i = 0; i < N; ++i) {
+            if (imi.getSubtypeAt(i).getLocale().startsWith(language)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -663,6 +738,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         mContext.getSystemService(Context.KEYGUARD_SERVICE);
                 mNotificationManager = (NotificationManager)
                         mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+                mLastSystemLocale = mContext.getResources().getConfiguration().locale;
                 mStatusBar = statusBar;
                 statusBar.setIconVisibility("ime", false);
                 updateImeWindowStatusLocked();
@@ -2043,7 +2119,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return false;
     }
 
-    private boolean isSystemIme(InputMethodInfo inputMethod) {
+    private static boolean isSystemIme(InputMethodInfo inputMethod) {
         return (inputMethod.getServiceInfo().applicationInfo.flags
                 & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
@@ -2139,9 +2215,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 final String id = p.getId();
                 map.put(id, p);
 
-                // System IMEs are enabled by default, unless there's a hard keyboard
-                // and the system IME was explicitly disabled
-                if (isSystemIme(p) && (!haveHardKeyboard || disabledSysImes.indexOf(id) < 0)) {
+                // Valid system default IMEs and IMEs that have English subtypes are enabled
+                // by default, unless there's a hard keyboard and the system IME was explicitly
+                // disabled
+                if ((isValidSystemDefaultIme(p, mContext) || isSystemImeThatHasEnglishSubtype(p))
+                        && (!haveHardKeyboard || disabledSysImes.indexOf(id) < 0)) {
                     setInputMethodEnabledLocked(id, true);
                 }
 
