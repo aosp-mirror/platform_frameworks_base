@@ -16,7 +16,7 @@
 
 package com.android.commands.svc;
 
-import android.content.Context;;
+import android.content.Context;
 import android.hardware.usb.IUsbManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -27,10 +27,12 @@ public class UsbCommand extends Svc.Command {
         super("usb");
     }
 
+    @Override
     public String shortHelp() {
         return "Control Usb state";
     }
 
+    @Override
     public String longHelp() {
         return shortHelp() + "\n"
                 + "\n"
@@ -40,6 +42,7 @@ public class UsbCommand extends Svc.Command {
                 + "          Gets the list of currently enabled functions\n";
     }
 
+    @Override
     public void run(String[] args) {
         boolean validCommand = false;
         if (args.length >= 2) {
