@@ -21,10 +21,12 @@ import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 
+import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
+import android.app.PendingIntent.OnFinished;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
@@ -48,6 +50,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -85,7 +88,7 @@ import java.util.Stack;
  *
  * @hide
  */
-public class AudioService extends IAudioService.Stub {
+public class AudioService extends IAudioService.Stub implements OnFinished {
 
     private static final String TAG = "AudioService";
 
@@ -289,10 +292,6 @@ public class AudioService extends IAudioService.Stub {
     // Broadcast receiver for device connections intent broadcasts
     private final BroadcastReceiver mReceiver = new AudioServiceBroadcastReceiver();
 
-    //  Broadcast receiver for media button broadcasts (separate from mReceiver to
-    //  independently change its priority)
-    private final BroadcastReceiver mMediaButtonReceiver = new MediaButtonBroadcastReceiver();
-
     // Used to alter media button redirection when the phone is ringing.
     private boolean mIsRinging = false;
 
@@ -383,6 +382,9 @@ public class AudioService extends IAudioService.Stub {
         mVoiceCapable = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_voice_capable);
 
+        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        mMediaEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "mediaKeyEvent");
+
        // Intialized volume
         MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = SystemProperties.getInt(
             "ro.config.vc_call_vol_steps",
@@ -433,13 +435,6 @@ public class AudioService extends IAudioService.Stub {
         pkgFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         pkgFilter.addDataScheme("package");
         context.registerReceiver(mReceiver, pkgFilter);
-
-        // Register for media button intent broadcasts.
-        intentFilter = new IntentFilter(Intent.ACTION_MEDIA_BUTTON);
-        // Workaround for bug on priority setting
-        //intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-        intentFilter.setPriority(Integer.MAX_VALUE);
-        context.registerReceiver(mMediaButtonReceiver, intentFilter);
 
         // Register for phone state monitoring
         TelephonyManager tmgr = (TelephonyManager)
@@ -3492,53 +3487,108 @@ public class AudioService extends IAudioService.Stub {
     //==========================================================================================
     // RemoteControl
     //==========================================================================================
+    public void dispatchMediaKeyEvent(KeyEvent keyEvent) {
+        dispatchMediaKeyEvent(keyEvent, false /*needWakeLock*/);
+    }
+
+    public void dispatchMediaKeyEventUnderWakelock(KeyEvent keyEvent) {
+        dispatchMediaKeyEvent(keyEvent, true /*needWakeLock*/);
+    }
+
     /**
-     * Receiver for media button intents. Handles the dispatching of the media button event
-     * to one of the registered listeners, or if there was none, resumes the intent broadcast
-     * to the rest of the system.
+     * Handles the dispatching of the media button events to one of the registered listeners,
+     * or if there was none, broadcast a ACTION_MEDIA_BUTTON intent to the rest of the system.
      */
-    private class MediaButtonBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (!Intent.ACTION_MEDIA_BUTTON.equals(action)) {
+    private void dispatchMediaKeyEvent(KeyEvent keyEvent, boolean needWakeLock) {
+        // sanity check on the incoming key event
+        if (!isValidMediaKeyEvent(keyEvent)) {
+            Log.e(TAG, "not dispatching invalid media key event " + keyEvent);
+            return;
+        }
+        // event filtering
+        synchronized(mRingingLock) {
+            if (mIsRinging || (getMode() == AudioSystem.MODE_IN_CALL) ||
+                    (getMode() == AudioSystem.MODE_IN_COMMUNICATION) ||
+                    (getMode() == AudioSystem.MODE_RINGTONE) ) {
                 return;
             }
-            KeyEvent event = (KeyEvent) intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
-            if (event != null) {
-                // if in a call or ringing, do not break the current phone app behavior
-                // TODO modify this to let the phone app specifically get the RC focus
-                //      add modify the phone app to take advantage of the new API
-                synchronized(mRingingLock) {
-                    if (mIsRinging || (getMode() == AudioSystem.MODE_IN_CALL) ||
-                            (getMode() == AudioSystem.MODE_IN_COMMUNICATION) ||
-                            (getMode() == AudioSystem.MODE_RINGTONE) ) {
-                        return;
-                    }
+        }
+        if (needWakeLock) {
+            mMediaEventWakeLock.acquire();
+        }
+        Intent keyIntent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
+        keyIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
+        synchronized(mRCStack) {
+            if (!mRCStack.empty()) {
+                // send the intent that was registered by the client
+                try {
+                    mRCStack.peek().mMediaIntent.send(mContext,
+                            needWakeLock ? WAKELOCK_RELEASE_ON_FINISHED : 0 /*code*/,
+                            keyIntent, AudioService.this, mAudioHandler);
+                } catch (CanceledException e) {
+                    Log.e(TAG, "Error sending pending intent " + mRCStack.peek());
+                    e.printStackTrace();
                 }
-                synchronized(mRCStack) {
-                    if (!mRCStack.empty()) {
-                        // create a new intent to fill in the extras of the registered PendingIntent
-                        Intent targetedIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-                        Bundle extras = intent.getExtras();
-                        if (extras != null) {
-                            targetedIntent.putExtras(extras);
-                            // trap the current broadcast
-                            abortBroadcast();
-                            //Log.v(TAG, " Sending intent" + targetedIntent);
-                            // send the intent that was registered by the client
-                            try {
-                                mRCStack.peek().mMediaIntent.send(context, 0, targetedIntent);
-                            } catch (CanceledException e) {
-                                Log.e(TAG, "Error sending pending intent " + mRCStack.peek());
-                                e.printStackTrace();
-                            }
-                        }
-                    }
+            } else {
+                // legacy behavior when nobody registered their media button event receiver
+                //    through AudioManager
+                if (needWakeLock) {
+                    keyIntent.putExtra(EXTRA_WAKELOCK_ACQUIRED, WAKELOCK_RELEASE_ON_FINISHED);
                 }
+                mContext.sendOrderedBroadcast(keyIntent, null, mKeyEventDone,
+                        mAudioHandler, Activity.RESULT_OK, null, null);
             }
         }
     }
+
+    private static boolean isValidMediaKeyEvent(KeyEvent keyEvent) {
+        if (keyEvent == null) {
+            return false;
+        }
+        final int keyCode = keyEvent.getKeyCode();
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_MUTE:
+            case KeyEvent.KEYCODE_HEADSETHOOK:
+            case KeyEvent.KEYCODE_MEDIA_PLAY:
+            case KeyEvent.KEYCODE_MEDIA_PAUSE:
+            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+            case KeyEvent.KEYCODE_MEDIA_STOP:
+            case KeyEvent.KEYCODE_MEDIA_NEXT:
+            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+            case KeyEvent.KEYCODE_MEDIA_REWIND:
+            case KeyEvent.KEYCODE_MEDIA_RECORD:
+            case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+            case KeyEvent.KEYCODE_MEDIA_CLOSE:
+            case KeyEvent.KEYCODE_MEDIA_EJECT:
+                break;
+            default:
+                return false;
+        }
+        return true;
+    }
+
+    private PowerManager.WakeLock mMediaEventWakeLock;
+
+    private static final int WAKELOCK_RELEASE_ON_FINISHED = 1980; //magic number
+
+    // only set when wakelock was acquired, no need to check value when received
+    private static final String EXTRA_WAKELOCK_ACQUIRED =
+            "android.media.AudioService.WAKELOCK_ACQUIRED";
+
+    public void onSendFinished(PendingIntent pendingIntent, Intent intent,
+            int resultCode, String resultData, Bundle resultExtras) {
+        if (resultCode == WAKELOCK_RELEASE_ON_FINISHED) {
+            mMediaEventWakeLock.release();
+        }
+    }
+
+    BroadcastReceiver mKeyEventDone = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getExtras().containsKey(EXTRA_WAKELOCK_ACQUIRED)) {
+                mMediaEventWakeLock.release();
+            }
+        }
+    };
 
     private final Object mCurrentRcLock = new Object();
     /**

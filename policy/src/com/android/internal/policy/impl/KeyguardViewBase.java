@@ -24,12 +24,17 @@ import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
+import android.media.IAudioService;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.telephony.TelephonyManager;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.util.Slog;
 
 /**
  * Base class for keyguard views.  {@link #reset} is where you should
@@ -194,9 +199,7 @@ public abstract class KeyguardViewBase extends FrameLayout {
                 case KeyEvent.KEYCODE_MEDIA_REWIND:
                 case KeyEvent.KEYCODE_MEDIA_RECORD:
                 case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD: {
-                    Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
-                    intent.putExtra(Intent.EXTRA_KEY_EVENT, event);
-                    getContext().sendOrderedBroadcast(intent, null);
+                    handleMediaKeyEvent(event);
                     return true;
                 }
 
@@ -240,14 +243,26 @@ public abstract class KeyguardViewBase extends FrameLayout {
                 case KeyEvent.KEYCODE_MEDIA_REWIND:
                 case KeyEvent.KEYCODE_MEDIA_RECORD:
                 case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD: {
-                    Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
-                    intent.putExtra(Intent.EXTRA_KEY_EVENT, event);
-                    getContext().sendOrderedBroadcast(intent, null);
+                    handleMediaKeyEvent(event);
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    void handleMediaKeyEvent(KeyEvent keyEvent) {
+        IAudioService audioService = IAudioService.Stub.asInterface(
+                ServiceManager.checkService(Context.AUDIO_SERVICE));
+        if (audioService != null) {
+            try {
+                audioService.dispatchMediaKeyEvent(keyEvent);
+            } catch (RemoteException e) {
+                Log.e("KeyguardViewBase", "dispatchMediaKeyEvent threw exception " + e);
+            }
+        } else {
+            Slog.w("KeyguardViewBase", "Unable to find IAudioService for media key event");
+        }
     }
 
     @Override

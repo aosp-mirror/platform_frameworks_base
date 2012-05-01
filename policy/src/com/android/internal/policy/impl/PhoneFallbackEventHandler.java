@@ -23,8 +23,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.media.AudioManager;
+import android.media.IAudioService;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.telephony.TelephonyManager;
 import android.util.EventLog;
+import android.util.Log;
 import android.util.Slog;
 import android.view.View;
 import android.view.HapticFeedbackConstants;
@@ -99,9 +103,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
             case KeyEvent.KEYCODE_MEDIA_REWIND:
             case KeyEvent.KEYCODE_MEDIA_RECORD:
             case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD: {
-                Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
-                intent.putExtra(Intent.EXTRA_KEY_EVENT, event);
-                mContext.sendOrderedBroadcast(intent, null);
+                handleMediaKeyEvent(event);
                 return true;
             }
 
@@ -213,9 +215,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
             case KeyEvent.KEYCODE_MEDIA_REWIND:
             case KeyEvent.KEYCODE_MEDIA_RECORD:
             case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD: {
-                Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
-                intent.putExtra(Intent.EXTRA_KEY_EVENT, event);
-                mContext.sendOrderedBroadcast(intent, null);
+                handleMediaKeyEvent(event);
                 return true;
             }
 
@@ -284,6 +284,20 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
     
     void sendCloseSystemWindows() {
         PhoneWindowManager.sendCloseSystemWindows(mContext, null);
+    }
+
+    private void handleMediaKeyEvent(KeyEvent keyEvent) {
+        IAudioService audioService = IAudioService.Stub.asInterface(
+                ServiceManager.checkService(Context.AUDIO_SERVICE));
+        if (audioService != null) {
+            try {
+                audioService.dispatchMediaKeyEvent(keyEvent);
+            } catch (RemoteException e) {
+                Log.e(TAG, "dispatchMediaKeyEvent threw exception " + e);
+            }
+        } else {
+            Slog.w(TAG, "Unable to find IAudioService for media key event.");
+        }
     }
 }
 
