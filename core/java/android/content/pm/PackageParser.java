@@ -970,7 +970,7 @@ public class PackageParser {
                     return null;
                 }
             } else if (tagName.equals("permission-group")) {
-                if (parsePermissionGroup(pkg, res, parser, attrs, outError) == null) {
+                if (parsePermissionGroup(pkg, flags, res, parser, attrs, outError) == null) {
                     return null;
                 }
             } else if (tagName.equals("permission")) {
@@ -1432,7 +1432,7 @@ public class PackageParser {
         return buildCompoundName(pkg, procSeq, "taskAffinity", outError);
     }
     
-    private PermissionGroup parsePermissionGroup(Package owner, Resources res,
+    private PermissionGroup parsePermissionGroup(Package owner, int flags, Resources res,
             XmlPullParser parser, AttributeSet attrs, String[] outError)
         throws XmlPullParserException, IOException {
         PermissionGroup perm = new PermissionGroup(owner);
@@ -1454,6 +1454,13 @@ public class PackageParser {
         perm.info.descriptionRes = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_description,
                 0);
+        perm.info.flags = sa.getInt(
+                com.android.internal.R.styleable.AndroidManifestPermissionGroup_permissionGroupFlags, 0);
+        perm.info.priority = sa.getInt(
+                com.android.internal.R.styleable.AndroidManifestPermissionGroup_priority, 0);
+        if (perm.info.priority > 0 && (flags&PARSE_IS_SYSTEM) != 0) {
+            perm.info.priority = 0;
+        }
 
         sa.recycle();
         
