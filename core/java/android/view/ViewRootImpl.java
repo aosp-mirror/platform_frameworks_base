@@ -3019,24 +3019,23 @@ public final class ViewRootImpl implements ViewParent,
                 // be when the window is first being added, and mFocused isn't
                 // set yet.
                 final View focused = mView.findFocus();
-                if (focused != null) {
-                    if (focused.isFocusableInTouchMode()) {
-                        return true;
-                    }
+                if (focused != null && !focused.isFocusableInTouchMode()) {
+
                     final ViewGroup ancestorToTakeFocus =
                             findAncestorToTakeFocusInTouchMode(focused);
                     if (ancestorToTakeFocus != null) {
                         // there is an ancestor that wants focus after its descendants that
                         // is focusable in touch mode.. give it focus
                         return ancestorToTakeFocus.requestFocus();
+                    } else {
+                        // nothing appropriate to have focus in touch mode, clear it out
+                        mView.unFocus();
+                        mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(focused, null);
+                        mFocusedView = null;
+                        mOldFocusedView = null;
+                        return true;
                     }
                 }
-                // nothing appropriate to have focus in touch mode, clear it out
-                mView.unFocus();
-                mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(focused, null);
-                mFocusedView = null;
-                mOldFocusedView = null;
-                return true;
             }
         }
         return false;
@@ -3067,45 +3066,25 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean leaveTouchMode() {
         if (mView != null) {
-            boolean inputFocusValid = false;
             if (mView.hasFocus()) {
                 // i learned the hard way to not trust mFocusedView :)
                 mFocusedView = mView.findFocus();
                 if (!(mFocusedView instanceof ViewGroup)) {
                     // some view has focus, let it keep it
-                    inputFocusValid = true;
-                } else if (((ViewGroup) mFocusedView).getDescendantFocusability() !=
+                    return false;
+                } else if (((ViewGroup)mFocusedView).getDescendantFocusability() !=
                         ViewGroup.FOCUS_AFTER_DESCENDANTS) {
                     // some view group has focus, and doesn't prefer its children
                     // over itself for focus, so let them keep it.
-                    inputFocusValid = true;
+                    return false;
                 }
             }
-            // In accessibility mode we always have a view that has the
-            // accessibility focus and input focus follows it, i.e. we
-            // try to give input focus to the accessibility focused view.
-            if (!AccessibilityManager.getInstance(mView.mContext).isEnabled()) {
-                // If the current input focus is not valid, find the best view to give
-                // focus to in this brave new non-touch-mode world.
-                if (!inputFocusValid) {
-                    final View focused = focusSearch(null, View.FOCUS_DOWN);
-                    if (focused != null) {
-                        return focused.requestFocus(View.FOCUS_DOWN);
-                    }
-                }
-            } else {
-                // If the current input focus is not valid clear it but do not
-                // give it to another view since the accessibility focus is
-                // leading now and the input one follows.
-                if (!inputFocusValid) {
-                    if (mFocusedView != null) {
-                        mView.unFocus();
-                        mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(mFocusedView, null);
-                        mFocusedView = null;
-                        mOldFocusedView = null;
-                        return true;
-                    }
-                }
+
+            // find the best view to give focus to in this brave new non-touch-mode
+            // world
+            final View focused = focusSearch(null, View.FOCUS_DOWN);
+            if (focused != null) {
+                return focused.requestFocus(View.FOCUS_DOWN);
             }
         }
         return false;
