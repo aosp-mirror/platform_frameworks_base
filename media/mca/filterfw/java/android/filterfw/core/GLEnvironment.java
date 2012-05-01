@@ -31,6 +31,8 @@ public class GLEnvironment {
 
     private int glEnvId;
 
+    private boolean mManageContext = true;
+
     public GLEnvironment() {
         nativeAllocate();
     }
@@ -51,12 +53,14 @@ public class GLEnvironment {
     }
 
     public void initWithNewContext() {
+        mManageContext = true;
         if (!nativeInitWithNewContext()) {
             throw new RuntimeException("Could not initialize GLEnvironment with new context!");
         }
     }
 
     public void initWithCurrentContext() {
+        mManageContext = false;
         if (!nativeInitWithCurrentContext()) {
             throw new RuntimeException("Could not initialize GLEnvironment with current context!");
         }
@@ -78,13 +82,13 @@ public class GLEnvironment {
         if (Looper.myLooper() != null && Looper.myLooper().equals(Looper.getMainLooper())) {
             Log.e("FilterFramework", "Activating GL context in UI thread!");
         }
-        if (!nativeActivate()) {
+        if (mManageContext && !nativeActivate()) {
             throw new RuntimeException("Could not activate GLEnvironment!");
         }
     }
 
     public void deactivate() {
-        if (!nativeDeactivate()) {
+        if (mManageContext && !nativeDeactivate()) {
             throw new RuntimeException("Could not deactivate GLEnvironment!");
         }
     }
