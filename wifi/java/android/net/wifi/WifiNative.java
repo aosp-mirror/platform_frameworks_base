@@ -442,8 +442,8 @@ public class WifiNative {
         return doBooleanCommand("SET p2p_ssid_postfix " + postfix);
     }
 
-    public boolean setP2pGroupIdle(String iface, int time) {
-        return doBooleanCommand("SET interface=" + iface + " p2p_group_idle " + time);
+    public boolean setP2pGroupIdle(int time) {
+        return doBooleanCommand("SET p2p_group_idle " + time);
     }
 
     public void setPowerSave(boolean enabled) {
@@ -467,7 +467,7 @@ public class WifiNative {
      * P2P connection over STA
      */
     public boolean setConcurrencyPriority(String s) {
-        return doBooleanCommand("P2P_SET conc_priority " + s);
+        return doBooleanCommand("P2P_SET conc_pref " + s);
     }
 
     public boolean p2pFind() {
@@ -536,15 +536,17 @@ public class WifiNative {
         /* Persist unless there is an explicit request to not do so*/
         //if (config.persist != WifiP2pConfig.Persist.NO) args.add("persistent");
 
-        if (joinExistingGroup) args.add("join");
-
-        //TODO: This can be adapted based on device plugged in state and
-        //device battery state
-        int groupOwnerIntent = config.groupOwnerIntent;
-        if (groupOwnerIntent < 0 || groupOwnerIntent > 15) {
-            groupOwnerIntent = DEFAULT_GROUP_OWNER_INTENT;
+        if (joinExistingGroup) {
+            args.add("join");
+        } else {
+            //TODO: This can be adapted based on device plugged in state and
+            //device battery state
+            int groupOwnerIntent = config.groupOwnerIntent;
+            if (groupOwnerIntent < 0 || groupOwnerIntent > 15) {
+                groupOwnerIntent = DEFAULT_GROUP_OWNER_INTENT;
+            }
+            args.add("go_intent=" + groupOwnerIntent);
         }
-        args.add("go_intent=" + groupOwnerIntent);
 
         String command = "P2P_CONNECT ";
         for (String s : args) command += s + " ";
