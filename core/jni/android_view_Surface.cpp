@@ -345,6 +345,32 @@ static inline SkBitmap::Config convertPixelFormat(PixelFormat format)
     }
 }
 
+static void Surface_setActiveRect(JNIEnv* env, jobject thiz, jobject activeRect)
+{
+    const sp<Surface>& surface(getSurface(env, thiz));
+    if (!Surface::isValid(surface)) {
+        doThrowIAE(env);
+        return;
+    }
+
+    android_native_rect_t nativeRect;
+    if (activeRect) {
+        nativeRect.left  = env->GetIntField(activeRect, ro.l);
+        nativeRect.top   = env->GetIntField(activeRect, ro.t);
+        nativeRect.right = env->GetIntField(activeRect, ro.r);
+        nativeRect.bottom= env->GetIntField(activeRect, ro.b);
+    } else {
+        doThrowIAE(env, "activeRect may not be null");
+        return;
+    }
+
+    int err = native_window_set_active_rect(surface.get(), &nativeRect);
+    if (err != NO_ERROR) {
+        doThrowRE(env, String8::format(
+                "Surface::setActiveRect returned an error: %d", err).string());
+    }
+}
+
 static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz, jobject dirtyRect)
 {
     const sp<Surface>& surface(getSurface(env, clazz));
@@ -889,6 +915,7 @@ static JNINativeMethod gSurfaceMethods[] = {
     {"readFromParcel",      "(Landroid/os/Parcel;)V", (void*)Surface_readFromParcel },
     {"writeToParcel",       "(Landroid/os/Parcel;I)V", (void*)Surface_writeToParcel },
     {"isConsumerRunningBehind", "()Z", (void*)Surface_isConsumerRunningBehind },
+    {"setActiveRect",       "(Landroid/graphics/Rect;)V", (void*)Surface_setActiveRect },
 };
 
 void nativeClassInit(JNIEnv* env, jclass clazz)
