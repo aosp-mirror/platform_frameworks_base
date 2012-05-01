@@ -199,6 +199,15 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
     /** The key is down but is a virtual key press that is being emulated by the system. */
     public static final int KEY_STATE_VIRTUAL = 2;
 
+    /** Scan code: Mouse / trackball button. */
+    public static final int BTN_MOUSE = 0x110;
+
+    /** Switch code: Lid switch.  When set, lid is shut. */
+    public static final int SW_LID = 0x00;
+
+    /** Switch code: Keypad slide.  When set, keyboard is exposed. */
+    public static final int SW_KEYPAD_SLIDE = 0x0a;
+
     public InputManagerService(Context context, Callbacks callbacks) {
         this.mContext = context;
         this.mCallbacks = callbacks;

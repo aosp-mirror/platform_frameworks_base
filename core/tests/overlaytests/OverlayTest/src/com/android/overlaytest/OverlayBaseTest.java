@@ -64,8 +64,8 @@ public abstract class OverlayBaseTest extends AndroidTestCase {
     }
 
     public void testBoolean() throws Throwable {
-        // config_bypass_keyguard_if_slider_open has no overlay
-        final int resId = com.android.internal.R.bool.config_bypass_keyguard_if_slider_open;
+        // config_annoy_dianne has no overlay
+        final int resId = com.android.internal.R.bool.config_annoy_dianne;
         assertResource(resId, true, true);
     }
 
