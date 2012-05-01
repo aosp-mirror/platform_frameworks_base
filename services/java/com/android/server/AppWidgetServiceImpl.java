@@ -1595,15 +1595,15 @@ class AppWidgetServiceImpl {
     AtomicFile savedStateFile() {
         File dir = new File("/data/system/users/" + mUserId);
         File settingsFile = getSettingsFile(mUserId);
-        if (!dir.exists()) {
-            dir.mkdirs();
-            if (mUserId == 0) {
-                // Migrate old data
-                File oldFile = new File("/data/system/" + SETTINGS_FILENAME);
-                // Method doesn't throw an exception on failure. Ignore any errors
-                // in moving the file (like non-existence)
-                oldFile.renameTo(settingsFile);
+        if (!settingsFile.exists() && mUserId == 0) {
+            if (!dir.exists()) {
+                dir.mkdirs();
             }
+            // Migrate old data
+            File oldFile = new File("/data/system/" + SETTINGS_FILENAME);
+            // Method doesn't throw an exception on failure. Ignore any errors
+            // in moving the file (like non-existence)
+            oldFile.renameTo(settingsFile);
         }
         return new AtomicFile(settingsFile);
     }
