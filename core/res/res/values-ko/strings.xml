@@ -355,12 +355,12 @@
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"앱이 브로드캐스트가 끝난 후에 남은 브로드캐스트를 보낼 수 있도록 허용합니다. 이 경우 악성 앱이 휴대전화에서 메모리를 너무 많이 사용하도록 하여 속도를 저하시키거나 불안정하게 만들 수 있습니다."</string>
     <!-- no translation found for permlab_readContacts (8348481131899886131) -->
     <skip />
-    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 내 태블릿에 저장된 연락처에 대한 모든 데이터를 앱이 읽도록 허용합니다. 이렇게 하면 이메일 주소 자동완성과 기타 편리한 기능을 사용할 수 있습니다. 한편 악성 앱이 이를 악용하여 내 연락처 데이터를 다른 사람에게 전송할 수 있습니다."</string>
-    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 내 휴대전화에 저장된 연락처에 대한 모든 데이터를 앱이 읽도록 허용합니다. 이렇게 하면 이메일 주소 자동완성과 기타 편리한 기능을 사용할 수 있습니다. 한편 악성 앱이 이를 악용하여 내 연락처 데이터를 다른 사람에게 전송할 수 있습니다."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 내 태블릿에 저장된 연락처에 대한 모든 데이터를 앱이 읽도록 허용합니다. 이렇게 하면 이메일 주소 자동완성과 기타 편리한 기능을 사용할 수 있습니다. 악성 앱이 이를 악용하여 내 연락처 데이터를 다른 사람에게 전송할 수 있습니다."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 내 휴대전화에 저장된 연락처에 대한 모든 데이터를 앱이 읽도록 허용합니다. 이렇게 하면 이메일 주소 자동완성과 기타 편리한 기능을 사용할 수 있습니다. 악성 앱이 이를 악용하여 내 연락처 데이터를 다른 사람에게 전송할 수 있습니다."</string>
     <!-- no translation found for permlab_writeContacts (5107492086416793544) -->
     <skip />
-    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 내 휴대전화에 저장된 연락처에 대한 모든 데이터를 앱이 수정하도록 허용합니다. 이렇게 하면 이메일 주소 자동완성과 기타 편리한 기능을 사용할 수 있습니다. 한편 악성 앱이 이를 악용하여 내 연락처 데이터를 삭제 또는 수정할 수 있습니다."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 내 휴대전화에 저장된 연락처에 대한 모든 데이터를 앱이 수정하도록 허용합니다. 이렇게 하면 이메일 주소 자동완성과 기타 편리한 기능을 사용할 수 있습니다. 한편 악성 앱이 이를 악용하여 내 연락처 데이터를 삭제 또는 수정할 수 있습니다."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 내 태블릿에 저장된 연락처에 대한 모든 데이터를 앱이 수정하도록 허용합니다. 이렇게 하면 이메일 주소 자동완성과 기타 편리한 기능을 사용할 수 있습니다. 악성 앱이 이를 악용하여 내 연락처 데이터를 삭제 또는 수정할 수 있습니다."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 내 휴대전화에 저장된 연락처에 대한 모든 데이터를 앱이 수정하도록 허용합니다. 이렇게 하면 이메일 주소 자동완성과 기타 편리한 기능을 사용할 수 있습니다. 악성 앱이 이를 악용하여 내 연락처 데이터를 삭제 또는 수정할 수 있습니다."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"통화 기록 읽기"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"앱에서 수신 및 발신 통화 데이터를 포함하여 태블릿의 통화 기록을 읽을 수 있도록 허용합니다. 이 경우 악성 앱이 데이터를 다른 사용자에게 보낼 수 있습니다."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"앱에서 수신 및 발신 통화 데이터를 포함하여 휴대전화의 통화 기록을 읽을 수 있도록 허용합니다. 이 경우 악성 앱이 데이터를 다른 사용자에게 보낼 수 있습니다."</string>
@@ -786,10 +786,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="granularity_label_character" msgid="7336470535385009523">"특성"</string>
+    <string name="granularity_label_character" msgid="7336470535385009523">"문자"</string>
     <string name="granularity_label_word" msgid="7075570328374918660">"단어"</string>
     <string name="granularity_label_link" msgid="5815508880782488267">"링크"</string>
-    <string name="granularity_label_line" msgid="5764267235026120888">"선"</string>
+    <string name="granularity_label_line" msgid="5764267235026120888">"행"</string>
     <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="AMPM">%P</xliff:g> <xliff:g id="HOUR">%-l</xliff:g>시"</string>
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="AMPM">%p</xliff:g> <xliff:g id="HOUR">%-l</xliff:g>시"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"출고 테스트 불합격"</string>
