@@ -711,9 +711,9 @@ public class AudioService extends IAudioService.Stub {
         final int oldIndex = streamState.getIndex(device,
                                                   (streamState.muteCount() != 0) /* lastAudible */);
 
-        // setting ring or notifications volume to 0 on voice capable devices enters silent mode
-        if (mVoiceCapable && (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
-                (mStreamVolumeAlias[streamType] == AudioSystem.STREAM_RING))) {
+        // setting volume on master stream type also controls silent mode
+        if (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
+                (mStreamVolumeAlias[streamType] == getMasterStreamType())) {
             int newRingerMode;
             if (index == 0) {
                 newRingerMode = System.getInt(mContentResolver, System.VIBRATE_IN_SILENT, 1) == 1
