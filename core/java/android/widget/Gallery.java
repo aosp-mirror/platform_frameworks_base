@@ -1187,15 +1187,15 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
         case KeyEvent.KEYCODE_DPAD_LEFT:
             if (movePrevious()) {
                 playSoundEffect(SoundEffectConstants.NAVIGATION_LEFT);
+                return true;
             }
-            return true;
-
+            break;
         case KeyEvent.KEYCODE_DPAD_RIGHT:
             if (moveNext()) {
                 playSoundEffect(SoundEffectConstants.NAVIGATION_RIGHT);
+                return true;
             }
-            return true;
-
+            break;
         case KeyEvent.KEYCODE_DPAD_CENTER:
         case KeyEvent.KEYCODE_ENTER:
             mReceivedInvokeKeyDown = true;
