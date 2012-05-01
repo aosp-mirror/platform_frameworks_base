@@ -4333,7 +4333,8 @@ status_t ResTable::createIdmap(const ResTable& overlay, uint32_t originalCrc, ui
     const uint32_t pkg_id = pkg->package->id << 24;
 
     for (size_t typeIndex = 0; typeIndex < typeCount; ++typeIndex) {
-        ssize_t offset = -1;
+        ssize_t first = -1;
+        ssize_t last = -1;
         const Type* typeConfigs = pkg->getType(typeIndex);
         ssize_t mapIndex = map.add();
         if (mapIndex < 0) {
@@ -4347,6 +4348,8 @@ status_t ResTable::createIdmap(const ResTable& overlay, uint32_t originalCrc, ui
             resource_name resName;
             if (!this->getResourceName(resID, &resName)) {
                 ALOGW("idmap: resource 0x%08x has spec but lacks values, skipping\n", resID);
+                // add dummy value, or trimming leading/trailing zeroes later will fail
+                vector.push(0);
                 continue;
             }
 
@@ -4360,11 +4363,12 @@ status_t ResTable::createIdmap(const ResTable& overlay, uint32_t originalCrc, ui
                                                               overlayPackage.size());
             if (overlayResID != 0) {
                 overlayResID = pkg_id | (0x00ffffff & overlayResID);
+                last = Res_GETENTRY(resID);
+                if (first == -1) {
+                    first = Res_GETENTRY(resID);
+                }
             }
             vector.push(overlayResID);
-            if (overlayResID != 0 && offset == -1) {
-                offset = Res_GETENTRY(resID);
-            }
 #if 0
             if (overlayResID != 0) {
                 ALOGD("%s/%s 0x%08x -> 0x%08x\n",
@@ -4375,13 +4379,16 @@ status_t ResTable::createIdmap(const ResTable& overlay, uint32_t originalCrc, ui
 #endif
         }
 
-        if (offset != -1) {
-            // shave off leading and trailing entries which lack overlay values
-            vector.removeItemsAt(0, offset);
-            vector.insertAt((uint32_t)offset, 0, 1);
-            while (vector.top() == 0) {
-                vector.pop();
+        if (first != -1) {
+            // shave off trailing entries which lack overlay values
+            const size_t last_past_one = last + 1;
+            if (last_past_one < vector.size()) {
+                vector.removeItemsAt(last_past_one, vector.size() - last_past_one);
             }
+            // shave off leading entries which lack overlay values
+            vector.removeItemsAt(0, first);
+            // store offset to first overlaid resource ID of this type
+            vector.insertAt((uint32_t)first, 0, 1);
             // reserve space for number and offset of entries, and the actual entries
             *outSize += (2 + vector.size()) * sizeof(uint32_t);
         } else {
@@ -4418,6 +4425,10 @@ status_t ResTable::createIdmap(const ResTable& overlay, uint32_t originalCrc, ui
         const size_t N = vector.size();
         if (N == 0) {
             continue;
+        }
+        if (N == 1) { // vector expected to hold (offset) + (N > 0 entries)
+            ALOGW("idmap: type %d supposedly has entries, but no entries found\n", i);
+            return UNKNOWN_ERROR;
         }
         *data++ = htodl(N - 1); // do not count the offset (which is vector's first element)
         for (size_t j = 0; j < N; ++j) {
