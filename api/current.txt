@@ -28243,10 +28243,6 @@ package android.widget {
     ctor public StackView(android.content.Context);
     ctor public StackView(android.content.Context, android.util.AttributeSet);
     ctor public StackView(android.content.Context, android.util.AttributeSet, int);
-    method public int getClickColor();
-    method public int getOutlineColor();
-    method public void setClickColor(int);
-    method public void setOutlineColor(int);
   }
 
   public class Switch extends android.widget.CompoundButton {

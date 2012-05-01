@@ -220,46 +220,6 @@ public class StackView extends AdapterViewAnimator {
     }
 
     /**
-     * Sets the color of the outlines of items in this StackView.
-     *
-     * @param color the color of the StackView item outlines.
-     * @attr ref android.R.styleable#StackView_resOutColor
-     */
-    @android.view.RemotableViewMethod
-    public void setOutlineColor(int color) {
-        mResOutColor = color;
-    }
-
-    /**
-     * Returns the color of the outlines of items in this StackView.
-     *
-     * @attr ref android.R.styleable#StackView_resOutColor
-     */
-    public int getOutlineColor() {
-        return mResOutColor;
-    }
-
-    /**
-     * Sets the color for the click feedback on items in this StackView.
-     *
-     * @param color the color of the StackView item click feedback.
-     * @attr ref android.R.styleable#StackView_clickColor
-     */
-    @android.view.RemotableViewMethod
-    public void setClickColor(int color) {
-        mClickColor = color;
-    }
-
-    /**
-     * Returns the color of the click feedback on items in this StackView.
-     *
-     * @attr ref android.R.styleable#StackView_clickColor
-     */
-    public int getClickColor() {
-        return mClickColor;
-    }
-
-    /**
      * Animate the views between different relative indexes within the {@link AdapterViewAnimator}
      */
     void transformViewForTransition(int fromIndex, int toIndex, final View view, boolean animate) {
