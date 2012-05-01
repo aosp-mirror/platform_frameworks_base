@@ -1459,6 +1459,11 @@ public class SIMRecords extends IccRecords {
      * After starting, FSM will search SPN EFs in order and stop after finding
      * the first valid SPN
      *
+     * If the FSM gets restart while waiting for one of
+     * SPN EFs results (i.e. a SIM refresh occurs after issuing
+     * read EF_CPHS_SPN), it will re-initialize only after
+     * receiving and discarding the unfinished SPN EF result.
+     *
      * @param start set true only for initialize loading
      * @param ar the AsyncResult from loadEFTransparent
      *        ar.exception holds exception in error
@@ -1468,7 +1473,19 @@ public class SIMRecords extends IccRecords {
         byte[] data;
 
         if (start) {
-            spnState = Get_Spn_Fsm_State.INIT;
+            // Check previous state to see if there is outstanding
+            // SPN read
+            if(spnState == Get_Spn_Fsm_State.READ_SPN_3GPP ||
+               spnState == Get_Spn_Fsm_State.READ_SPN_CPHS ||
+               spnState == Get_Spn_Fsm_State.READ_SPN_SHORT_CPHS ||
+               spnState == Get_Spn_Fsm_State.INIT) {
+                // Set INIT then return so the INIT code
+                // will run when the outstanding read done.
+                spnState = Get_Spn_Fsm_State.INIT;
+                return;
+            } else {
+                spnState = Get_Spn_Fsm_State.INIT;
+            }
         }
 
         switch(spnState){
