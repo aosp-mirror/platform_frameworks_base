@@ -1651,11 +1651,11 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews makeBigContentView() {
-            RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(R.layout.notification_template_big_text);
-
+            int bigTextId = R.layout.notification_template_big_text;
+            RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(bigTextId);
             contentView.setTextViewText(R.id.big_text, mBigText);
             contentView.setViewVisibility(R.id.big_text, View.VISIBLE);
-            contentView.setTextViewText(R.id.text, ""); // XXX: what do do with this spot?
+            contentView.setViewVisibility(R.id.text2, View.GONE);
 
             return contentView;
         }
@@ -1665,7 +1665,6 @@ public class Notification implements Parcelable
             if (mBuilder == null) {
                 throw new IllegalArgumentException("Style requires a valid Builder object");
             }
-            mBuilder.mSubText = null;
             Notification wip = mBuilder.buildUnstyled();
             wip.bigContentView = makeBigContentView();
             return wip;
