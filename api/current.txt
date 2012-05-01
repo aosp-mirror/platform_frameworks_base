@@ -18541,6 +18541,7 @@ package android.renderscript {
     method public static deprecated android.renderscript.Element F64_2(android.renderscript.RenderScript);
     method public static deprecated android.renderscript.Element F64_3(android.renderscript.RenderScript);
     method public static deprecated android.renderscript.Element F64_4(android.renderscript.RenderScript);
+    method public static deprecated android.renderscript.Element FONT(android.renderscript.RenderScript);
     method public static deprecated android.renderscript.Element I16(android.renderscript.RenderScript);
     method public static deprecated android.renderscript.Element I16_2(android.renderscript.RenderScript);
     method public static deprecated android.renderscript.Element I16_3(android.renderscript.RenderScript);
@@ -18626,6 +18627,7 @@ package android.renderscript {
     enum_constant public static final android.renderscript.Element.DataType MATRIX_4X4;
     enum_constant public static final android.renderscript.Element.DataType RS_ALLOCATION;
     enum_constant public static final android.renderscript.Element.DataType RS_ELEMENT;
+    enum_constant public static final android.renderscript.Element.DataType RS_FONT;
     enum_constant public static final android.renderscript.Element.DataType RS_MESH;
     enum_constant public static final android.renderscript.Element.DataType RS_PROGRAM_FRAGMENT;
     enum_constant public static final android.renderscript.Element.DataType RS_PROGRAM_RASTER;
