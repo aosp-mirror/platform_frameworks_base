@@ -3748,23 +3748,24 @@ package android.app {
     field public long when;
   }
 
-  public static class Notification.BigPictureStyle {
+  public static class Notification.BigPictureStyle extends android.app.Notification.Style {
+    ctor public Notification.BigPictureStyle();
     ctor public Notification.BigPictureStyle(android.app.Notification.Builder);
     method public android.app.Notification.BigPictureStyle bigPicture(android.graphics.Bitmap);
-    method public android.app.Notification build();
   }
 
-  public static class Notification.BigTextStyle {
+  public static class Notification.BigTextStyle extends android.app.Notification.Style {
+    ctor public Notification.BigTextStyle();
     ctor public Notification.BigTextStyle(android.app.Notification.Builder);
     method public android.app.Notification.BigTextStyle bigText(java.lang.CharSequence);
-    method public android.app.Notification build();
   }
 
   public static class Notification.Builder {
     ctor public Notification.Builder(android.content.Context);
     method public android.app.Notification.Builder addAction(int, java.lang.CharSequence, android.app.PendingIntent);
     method public android.app.Notification.Builder addKind(java.lang.String);
-    method public android.app.Notification getNotification();
+    method public android.app.Notification build();
+    method public deprecated android.app.Notification getNotification();
     method public android.app.Notification.Builder setAutoCancel(boolean);
     method public android.app.Notification.Builder setContent(android.widget.RemoteViews);
     method public android.app.Notification.Builder setContentInfo(java.lang.CharSequence);
@@ -3785,6 +3786,7 @@ package android.app {
     method public android.app.Notification.Builder setSmallIcon(int, int);
     method public android.app.Notification.Builder setSound(android.net.Uri);
     method public android.app.Notification.Builder setSound(android.net.Uri, int);
+    method public android.app.Notification.Builder setStyle(android.app.Notification.Style);
     method public android.app.Notification.Builder setSubText(java.lang.CharSequence);
     method public android.app.Notification.Builder setTicker(java.lang.CharSequence);
     method public android.app.Notification.Builder setTicker(java.lang.CharSequence, android.widget.RemoteViews);
@@ -3793,10 +3795,17 @@ package android.app {
     method public android.app.Notification.Builder setWhen(long);
   }
 
-  public static class Notification.InboxStyle {
+  public static class Notification.InboxStyle extends android.app.Notification.Style {
+    ctor public Notification.InboxStyle();
     ctor public Notification.InboxStyle(android.app.Notification.Builder);
     method public android.app.Notification.InboxStyle addLine(java.lang.CharSequence);
+  }
+
+  public static class Notification.Style {
+    ctor public Notification.Style();
     method public android.app.Notification build();
+    method public void setBuilder(android.app.Notification.Builder);
+    field protected android.app.Notification.Builder mBuilder;
   }
 
   public class NotificationManager {
