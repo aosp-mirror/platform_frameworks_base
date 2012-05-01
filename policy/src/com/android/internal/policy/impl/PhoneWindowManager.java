@@ -3343,19 +3343,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         public void run() {
             if (ActivityManagerNative.isSystemReady()) {
-                Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
-                intent.putExtra(Intent.EXTRA_KEY_EVENT, mKeyEvent);
-                mContext.sendOrderedBroadcast(intent, null, mBroadcastDone,
-                        mHandler, Activity.RESULT_OK, null, null);
+                IAudioService audioService = getAudioService();
+                if (audioService != null) {
+                    try {
+                        audioService.dispatchMediaKeyEventUnderWakelock(mKeyEvent);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "dispatchMediaKeyEvent threw exception " + e);
+                    }
+                }
+                mBroadcastWakeLock.release();
             }
         }
     }
-
-    BroadcastReceiver mBroadcastDone = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            mBroadcastWakeLock.release();
-        }
-    };
 
     BroadcastReceiver mDockReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
