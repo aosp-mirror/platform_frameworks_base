@@ -3179,6 +3179,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mActivePointerId = ev.getPointerId(pointerIndex);
             }
             final int y = (int) ev.getY(pointerIndex);
+
+            if (mDataChanged) {
+                // Re-sync everything if data has been changed
+                // since the scroll operation can query the adapter.
+                layoutChildren();
+            }
+
             switch (mTouchMode) {
             case TOUCH_MODE_DOWN:
             case TOUCH_MODE_TAP:
