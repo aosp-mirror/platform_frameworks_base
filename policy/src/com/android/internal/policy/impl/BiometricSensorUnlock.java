@@ -62,7 +62,7 @@ interface BiometricSensorUnlock {
     public boolean start();
 
     /**
-     * Stops the biometric unlock procedure and unbinds from the service.
+     * Stops the biometric unlock procedure and unbinds from the service.  Called on the UI thread.
      * @return whether the biometric unlock was running when called.
      */
     public boolean stop();
