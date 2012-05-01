@@ -1250,6 +1250,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * Note: The content of the return value should not be modified. If you want
      * a modifiable one, you should make your own copy first.
+     *
+     * @attr ref android.R.styleable#TextView_text
      */
     @ViewDebug.CapturedViewProperty
     public CharSequence getText() {
@@ -1294,6 +1296,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * @return the current key listener for this TextView.
      * This will frequently be null for non-EditText TextViews.
+     *
+     * @attr ref android.R.styleable#TextView_numeric
+     * @attr ref android.R.styleable#TextView_digits
+     * @attr ref android.R.styleable#TextView_phoneNumber
+     * @attr ref android.R.styleable#TextView_inputMethod
+     * @attr ref android.R.styleable#TextView_capitalize
+     * @attr ref android.R.styleable#TextView_autoText
      */
     public final KeyListener getKeyListener() {
         return mEditor == null ? null : mEditor.mKeyListener;
@@ -1408,6 +1417,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @return the current transformation method for this TextView.
      * This will frequently be null except for single-line and password
      * fields.
+     *
+     * @attr ref android.R.styleable#TextView_password
+     * @attr ref android.R.styleable#TextView_singleLine
      */
     public final TransformationMethod getTransformationMethod() {
         return mTransformation;
@@ -1988,6 +2000,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Returns drawables for the left, top, right, and bottom borders.
+     *
+     * @attr ref android.R.styleable#TextView_drawableLeft
+     * @attr ref android.R.styleable#TextView_drawableTop
+     * @attr ref android.R.styleable#TextView_drawableRight
+     * @attr ref android.R.styleable#TextView_drawableBottom
      */
     public Drawable[] getCompoundDrawables() {
         final Drawables dr = mDrawables;
@@ -2002,6 +2019,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Returns drawables for the start, top, end, and bottom borders.
+     *
+     * @attr ref android.R.styleable#TextView_drawableStart
+     * @attr ref android.R.styleable#TextView_drawableTop
+     * @attr ref android.R.styleable#TextView_drawableEnd
+     * @attr ref android.R.styleable#TextView_drawableBottom
      */
     public Drawable[] getCompoundDrawablesRelative() {
         final Drawables dr = mDrawables;
@@ -2040,6 +2062,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Returns the padding between the compound drawables and the text.
+     *
+     * @attr ref android.R.styleable#TextView_drawablePadding
      */
     public int getCompoundDrawablePadding() {
         final Drawables dr = mDrawables;
@@ -2235,6 +2259,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * {@link #setTypeface(Typeface, int)} to get the appearance
      * that you actually want.
      *
+     * @see #getTypeface()
+     *
      * @attr ref android.R.styleable#TextView_typeface
      * @attr ref android.R.styleable#TextView_textStyle
      */
@@ -2253,6 +2279,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * @return the current typeface and style in which the text is being
      * displayed.
+     *
+     * @see #setTypeface(Typeface)
+     *
+     * @attr ref android.R.styleable#TextView_typeface
+     * @attr ref android.R.styleable#TextView_textStyle
      */
     public Typeface getTypeface() {
         return mTextPaint.getTypeface();
@@ -2261,6 +2292,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Sets the text color for all the states (normal, selected,
      * focused) to be this color.
+     *
+     * @see #setTextColor(ColorStateList)
+     * @see #getTextColors()
      *
      * @attr ref android.R.styleable#TextView_textColor
      */
@@ -2272,6 +2306,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Sets the text color.
+     *
+     * @see #setTextColor(int)
+     * @see #getTextColors()
+     * @see #setHintTextColor(ColorStateList)
+     * @see #setLinkTextColor(ColorStateList)
      *
      * @attr ref android.R.styleable#TextView_textColor
      */
@@ -2285,9 +2324,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Return the set of text colors.
+     * Gets the text colors for the different states (normal, selected, focused) of the TextView.
      *
-     * @return Returns the set of text colors.
+     * @see #setTextColor(ColorStateList)
+     * @see #setTextColor(int)
+     *
+     * @attr ref android.R.styleable#TextView_textColor
      */
     public final ColorStateList getTextColors() {
         return mTextColor;
@@ -2313,6 +2355,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mHighlightColor = color;
             invalidate();
         }
+    }
+
+    /**
+     * @return the color used to display the selection highlight
+     *
+     * @see #setHighlightColor(int)
+     *
+     * @attr ref android.R.styleable#TextView_textColorHighlight
+     */
+    public int getHighlightColor() {
+        return mHighlightColor;
     }
 
     /**
@@ -2355,6 +2408,52 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Will change text clip region
         if (mEditor != null) mEditor.invalidateTextDisplayList();
         invalidate();
+    }
+
+    /**
+     * Gets the radius of the shadow layer.
+     *
+     * @return the radius of the shadow layer. If 0, the shadow layer is not visible
+     *
+     * @see #setShadowLayer(float, float, float, int)
+     *
+     * @attr ref android.R.styleable#TextView_shadowRadius
+     */
+    public float getShadowRadius() {
+        return mShadowRadius;
+    }
+
+    /**
+     * @return the horizontal offset of the shadow layer
+     *
+     * @see #setShadowLayer(float, float, float, int)
+     *
+     * @attr ref android.R.styleable#TextView_shadowDx
+     */
+    public float getShadowDx() {
+        return mShadowDx;
+    }
+
+    /**
+     * @return the vertical offset of the shadow layer
+     *
+     * @see #setShadowLayer(float, float, float, int)
+     *
+     * @attr ref android.R.styleable#TextView_shadowDy
+     */
+    public float getShadowDy() {
+        return mShadowDy;
+    }
+
+    /**
+     * @return the color of the shadow layer
+     *
+     * @see #setShadowLayer(float, float, float, int)
+     *
+     * @attr ref android.R.styleable#TextView_shadowColor
+     */
+    public int getShadowColor() {
+        return mTextPaint.shadowColor;
     }
 
     /**
@@ -2418,7 +2517,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Sets the color of the hint text.
+     * Sets the color of the hint text for all the states (disabled, focussed, selected...) of this
+     * TextView.
+     *
+     * @see #setHintTextColor(ColorStateList)
+     * @see #getHintTextColors()
+     * @see #setTextColor(int)
      *
      * @attr ref android.R.styleable#TextView_textColorHint
      */
@@ -2431,6 +2535,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Sets the color of the hint text.
      *
+     * @see #getHintTextColors()
+     * @see #setHintTextColor(int)
+     * @see #setTextColor(ColorStateList)
+     * @see #setLinkTextColor(ColorStateList)
+     *
      * @attr ref android.R.styleable#TextView_textColorHint
      */
     public final void setHintTextColor(ColorStateList colors) {
@@ -2439,9 +2548,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * <p>Return the color used to paint the hint text.</p>
+     * @return the color of the hint text, for the different states of this TextView.
      *
-     * @return Returns the list of hint text colors.
+     * @see #setHintTextColor(ColorStateList)
+     * @see #setHintTextColor(int)
+     * @see #setTextColor(ColorStateList)
+     * @see #setLinkTextColor(ColorStateList)
+     *
+     * @attr ref android.R.styleable#TextView_textColorHint
      */
     public final ColorStateList getHintTextColors() {
         return mHintTextColor;
@@ -2459,6 +2573,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Sets the color of links in the text.
      *
+     * @see #setLinkTextColor(ColorStateList)
+     * @see #getLinkTextColors()
+     *
      * @attr ref android.R.styleable#TextView_textColorLink
      */
     @android.view.RemotableViewMethod
@@ -2470,6 +2587,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Sets the color of links in the text.
      *
+     * @see #setLinkTextColor(int)
+     * @see #getLinkTextColors()
+     * @see #setTextColor(ColorStateList)
+     * @see #setHintTextColor(ColorStateList)
+     *
      * @attr ref android.R.styleable#TextView_textColorLink
      */
     public final void setLinkTextColor(ColorStateList colors) {
@@ -2478,9 +2600,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * <p>Returns the color used to paint links in the text.</p>
+     * @return the list of colors used to paint the links in the text, for the different states of
+     * this TextView
      *
-     * @return Returns the list of link text colors.
+     * @see #setLinkTextColor(ColorStateList)
+     * @see #setLinkTextColor(int)
+     *
+     * @attr ref android.R.styleable#TextView_textColorLink
      */
     public final ColorStateList getLinkTextColors() {
         return mLinkTextColor;
@@ -2598,6 +2724,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Setting this value overrides any other (minimum) height setting. A single line TextView will
      * set this value to 1.
      *
+     * @see #getMinLines()
+     *
      * @attr ref android.R.styleable#TextView_minLines
      */
     @android.view.RemotableViewMethod
@@ -2607,6 +2735,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         requestLayout();
         invalidate();
+    }
+
+    /**
+     * @return the minimum number of lines displayed in this TextView, or -1 if the minimum
+     * height was set in pixels instead using {@link #setMinHeight(int) or #setHeight(int)}.
+     *
+     * @see #setMinLines(int)
+     *
+     * @attr ref android.R.styleable#TextView_minLines
+     */
+    public int getMinLines() {
+        return mMinMode == LINES ? mMinimum : -1;
     }
 
     /**
@@ -2626,6 +2766,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * @return the minimum height of this TextView expressed in pixels, or -1 if the minimum
+     * height was set in number of lines instead using {@link #setMinLines(int) or #setLines(int)}.
+     *
+     * @see #setMinHeight(int)
+     *
+     * @attr ref android.R.styleable#TextView_minHeight
+     */
+    public int getMinHeight() {
+        return mMinMode == PIXELS ? mMinimum : -1;
+    }
+
+    /**
      * Makes the TextView at most this many lines tall.
      *
      * Setting this value overrides any other (maximum) height setting.
@@ -2639,6 +2791,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         requestLayout();
         invalidate();
+    }
+
+    /**
+     * @return the maximum number of lines displayed in this TextView, or -1 if the maximum
+     * height was set in pixels instead using {@link #setMaxHeight(int) or #setHeight(int)}.
+     *
+     * @see #setMaxLines(int)
+     *
+     * @attr ref android.R.styleable#TextView_maxLines
+     */
+    public int getMaxLines() {
+        return mMaxMode == LINES ? mMaximum : -1;
     }
 
     /**
@@ -2656,6 +2820,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         requestLayout();
         invalidate();
+    }
+
+    /**
+     * @return the maximum height of this TextView expressed in pixels, or -1 if the maximum
+     * height was set in number of lines instead using {@link #setMaxLines(int) or #setLines(int)}.
+     *
+     * @see #setMaxHeight(int)
+     *
+     * @attr ref android.R.styleable#TextView_maxHeight
+     */
+    public int getMaxHeight() {
+        return mMaxMode == PIXELS ? mMaximum : -1;
     }
 
     /**
@@ -2709,6 +2885,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * @return the minimum width of the TextView, expressed in ems or -1 if the minimum width
+     * was set in pixels instead (using {@link #setMinWidth(int)} or {@link #setWidth(int)}).
+     *
+     * @see #setMinEms(int)
+     * @see #setEms(int)
+     *
+     * @attr ref android.R.styleable#TextView_minEms
+     */
+    public int getMinEms() {
+        return mMinWidthMode == EMS ? mMinWidth : -1;
+    }
+
+    /**
      * Makes the TextView at least this many pixels wide
      *
      * @attr ref android.R.styleable#TextView_minWidth
@@ -2720,6 +2909,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         requestLayout();
         invalidate();
+    }
+
+    /**
+     * @return the minimum width of the TextView, in pixels or -1 if the minimum width
+     * was set in ems instead (using {@link #setMinEms(int)} or {@link #setEms(int)}).
+     *
+     * @see #setMinWidth(int)
+     * @see #setWidth(int)
+     *
+     * @attr ref android.R.styleable#TextView_minWidth
+     */
+    public int getMinWidth() {
+        return mMinWidthMode == PIXELS ? mMinWidth : -1;
     }
 
     /**
@@ -2737,6 +2939,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * @return the maximum width of the TextView, expressed in ems or -1 if the maximum width
+     * was set in pixels instead (using {@link #setMaxWidth(int)} or {@link #setWidth(int)}).
+     *
+     * @see #setMaxEms(int)
+     * @see #setEms(int)
+     *
+     * @attr ref android.R.styleable#TextView_maxEms
+     */
+    public int getMaxEms() {
+        return mMaxWidthMode == EMS ? mMaxWidth : -1;
+    }
+
+    /**
      * Makes the TextView at most this many pixels wide
      *
      * @attr ref android.R.styleable#TextView_maxWidth
@@ -2751,7 +2966,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * @return the maximum width of the TextView, in pixels or -1 if the maximum width
+     * was set in ems instead (using {@link #setMaxEms(int)} or {@link #setEms(int)}).
+     *
+     * @see #setMaxWidth(int)
+     * @see #setWidth(int)
+     *
+     * @attr ref android.R.styleable#TextView_maxWidth
+     */
+    public int getMaxWidth() {
+        return mMaxWidthMode == PIXELS ? mMaxWidth : -1;
+    }
+
+    /**
      * Makes the TextView exactly this many ems wide
+     *
+     * @see #setMaxEms(int)
+     * @see #setMinEms(int)
+     * @see #getMinEms()
+     * @see #getMaxEms()
      *
      * @attr ref android.R.styleable#TextView_ems
      */
@@ -2769,6 +3002,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * You could do the same thing by specifying this number in the
      * LayoutParams.
      *
+     * @see #setMaxWidth(int)
+     * @see #setMinWidth(int)
+     * @see #getMinWidth()
+     * @see #getMaxWidth()
+     *
      * @attr ref android.R.styleable#TextView_width
      */
     @android.view.RemotableViewMethod
@@ -2779,7 +3017,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         requestLayout();
         invalidate();
     }
-
 
     /**
      * Sets line spacing for this TextView.  Each line will have its height
@@ -2799,6 +3036,34 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 invalidate();
             }
         }
+    }
+
+    /**
+     * Gets the line spacing multiplier
+     *
+     * @return the value by which each line's height is multiplied to get its actual height.
+     *
+     * @see #setLineSpacing(float, float)
+     * @see #getLineSpacingExtra()
+     *
+     * @attr ref android.R.styleable#TextView_lineSpacingMultiplier
+     */
+    public float getLineSpacingMultiplier() {
+        return mSpacingMult;
+    }
+
+    /**
+     * Gets the line spacing extra space
+     *
+     * @return the extra space that is added to the height of each lines of this TextView.
+     *
+     * @see #setLineSpacing(float, float)
+     * @see #getLineSpacingMultiplier()
+     *
+     * @attr ref android.R.styleable#TextView_lineSpacingExtra
+     */
+    public float getLineSpacingExtra() {
+        return mSpacingAdd;
     }
 
     /**
@@ -3883,6 +4148,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Returns the current list of input filters.
+     *
+     * @attr ref android.R.styleable#TextView_maxLength
      */
     public InputFilter[] getFilters() {
         return mFilters;
@@ -5639,6 +5906,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * room for accents that go above the normal ascent and descent.
      * The default is true.
      *
+     * @see #getIncludeFontPadding()
+     *
      * @attr ref android.R.styleable#TextView_includeFontPadding
      */
     public void setIncludeFontPadding(boolean includepad) {
@@ -5651,6 +5920,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 invalidate();
             }
         }
+    }
+
+    /**
+     * Gets whether the TextView includes extra top and bottom padding to make
+     * room for accents that go above the normal ascent and descent.
+     *
+     * @see #setIncludeFontPadding(boolean)
+     *
+     * @attr ref android.R.styleable#TextView_includeFontPadding
+     */
+    public boolean getIncludeFontPadding() {
+        return mIncludePad;
     }
 
     private static final BoringLayout.Metrics UNKNOWN_BORING = new BoringLayout.Metrics();
@@ -6504,10 +6785,27 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Sets how many times to repeat the marquee animation. Only applied if the
      * TextView has marquee enabled. Set to -1 to repeat indefinitely.
      *
+     * @see #getMarqueeRepeatLimit()
+     *
      * @attr ref android.R.styleable#TextView_marqueeRepeatLimit
      */
     public void setMarqueeRepeatLimit(int marqueeLimit) {
         mMarqueeRepeatLimit = marqueeLimit;
+    }
+
+    /**
+     * Gets the number of times the marquee animation is repeated. Only meaningful if the
+     * TextView has marquee enabled.
+     *
+     * @return the number of times the marquee animation is repeated. -1 if the animation
+     * repeats indefinitely
+     *
+     * @see #setMarqueeRepeatLimit(int)
+     *
+     * @attr ref android.R.styleable#TextView_marqueeRepeatLimit
+     */
+    public int getMarqueeRepeatLimit() {
+        return mMarqueeRepeatLimit;
     }
 
     /**
@@ -6536,7 +6834,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Set whether the cursor is visible.  The default is true.
+     * Set whether the cursor is visible. The default is true. Note that this property only
+     * makes sense for editable TextView.
+     *
+     * @see #isCursorVisible()
      *
      * @attr ref android.R.styleable#TextView_cursorVisible
      */
@@ -6553,6 +6854,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // InsertionPointCursorController depends on mCursorVisible
             mEditor.prepareCursorControllers();
         }
+    }
+
+    /**
+     * @return whether or not the cursor is visible (assuming this TextView is editable)
+     *
+     * @see #setCursorVisible(boolean)
+     *
+     * @attr ref android.R.styleable#TextView_cursorVisible
+     */
+    public boolean isCursorVisible() {
+        // true is the default value
+        return mEditor == null ? true : mEditor.mCursorVisible;
     }
 
     private boolean canMarquee() {
