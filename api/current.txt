@@ -26902,6 +26902,7 @@ package android.widget {
     ctor public CheckedTextView(android.content.Context);
     ctor public CheckedTextView(android.content.Context, android.util.AttributeSet);
     ctor public CheckedTextView(android.content.Context, android.util.AttributeSet, int);
+    method public android.graphics.drawable.Drawable getCheckMarkDrawable();
     method public boolean isChecked();
     method public void setCheckMarkDrawable(int);
     method public void setCheckMarkDrawable(android.graphics.drawable.Drawable);

@@ -35,6 +35,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * {@link android.widget.ListView#setChoiceMode(int) setChoiceMode} has been set to
  * something other than {@link android.widget.ListView#CHOICE_MODE_NONE CHOICE_MODE_NONE}.
  *
+ * @attr ref android.R.styleable#CheckedTextView_checked
+ * @attr ref android.R.styleable#CheckedTextView_checkMark
  */
 public class CheckedTextView extends TextView implements Checkable {
     private boolean mChecked;
@@ -100,6 +102,11 @@ public class CheckedTextView extends TextView implements Checkable {
      * when {@link #isChecked()} is true.
      * 
      * @param resid The Drawable to use for the checkmark.
+     *
+     * @see #setCheckMarkDrawable(Drawable)
+     * @see #getCheckMarkDrawable()
+     *
+     * @attr ref android.R.styleable#CheckedTextView_checkMark
      */
     public void setCheckMarkDrawable(int resid) {
         if (resid != 0 && resid == mCheckMarkResource) {
@@ -119,6 +126,11 @@ public class CheckedTextView extends TextView implements Checkable {
      * Set the checkmark to a given Drawable. This will be drawn when {@link #isChecked()} is true.
      *
      * @param d The Drawable to use for the checkmark.
+     *
+     * @see #setCheckMarkDrawable(int)
+     * @see #getCheckMarkDrawable()
+     *
+     * @attr ref android.R.styleable#CheckedTextView_checkMark
      */
     public void setCheckMarkDrawable(Drawable d) {
         if (mCheckMarkDrawable != null) {
@@ -140,6 +152,20 @@ public class CheckedTextView extends TextView implements Checkable {
         mCheckMarkDrawable = d;
         // Do padding resolution. This will call setPadding() and do a requestLayout() if needed.
         resolvePadding();
+    }
+
+    /**
+     * Gets the checkmark drawable
+     *
+     * @return The drawable use to represent the checkmark, if any.
+     *
+     * @see #setCheckMarkDrawable(Drawable)
+     * @see #setCheckMarkDrawable(int)
+     *
+     * @attr ref android.R.styleable#CheckedTextView_checkMark
+     */
+    public Drawable getCheckMarkDrawable() {
+        return mCheckMarkDrawable;
     }
 
     @Override
