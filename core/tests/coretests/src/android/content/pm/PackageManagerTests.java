@@ -1229,9 +1229,8 @@ public class PackageManagerTests extends AndroidTestCase {
 
         installFromRawResource("install.apk", R.raw.install_loc_unspecified,
                 PackageManager.INSTALL_FORWARD_LOCK |
-                PackageManager.INSTALL_EXTERNAL, true, true,
-                PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION,
-                PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+                PackageManager.INSTALL_EXTERNAL, true, false, -1,
+                PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
     }
 
     @LargeTest
@@ -1626,8 +1625,8 @@ public class PackageManagerTests extends AndroidTestCase {
 
         int installFlags = PackageManager.INSTALL_FORWARD_LOCK;
         int moveFlags = PackageManager.MOVE_EXTERNAL_MEDIA;
-        boolean fail = true;
-        int result = PackageManager.MOVE_FAILED_FORWARD_LOCKED;
+        boolean fail = false;
+        int result = PackageManager.MOVE_SUCCEEDED;
         sampleMoveFromRawResource(installFlags, moveFlags, fail, result);
     }
 
@@ -1950,7 +1949,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 PackageManager.INSTALL_FORWARD_LOCK,
                 true,
                 false, -1,
-                PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
+                PackageInfo.INSTALL_LOCATION_AUTO);
     }
 
     /* The following test functions verify install location for existing apps.

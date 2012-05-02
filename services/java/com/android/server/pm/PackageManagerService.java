@@ -5863,9 +5863,28 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Log.w(TAG, "Insufficient storage to install");
                 return;
             }
-            // Create the file args now.
+
+            mRet = srcArgs.doPreCopy();
+            if (mRet != PackageManager.INSTALL_SUCCEEDED) {
+                return;
+            }
+
             mRet = targetArgs.copyApk(mContainerService, false);
-            targetArgs.doPreInstall(mRet);
+            if (mRet != PackageManager.INSTALL_SUCCEEDED) {
+                srcArgs.doPostCopy(uid);
+                return;
+            }
+
+            mRet = srcArgs.doPostCopy(uid);
+            if (mRet != PackageManager.INSTALL_SUCCEEDED) {
+                return;
+            }
+
+            mRet = targetArgs.doPreInstall(mRet);
+            if (mRet != PackageManager.INSTALL_SUCCEEDED) {
+                return;
+            }
+
             if (DEBUG_SD_INSTALL) {
                 StringBuilder builder = new StringBuilder();
                 if (srcArgs != null) {
@@ -5936,7 +5955,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             String nativeLibraryPath) {
         if (installOnSd(flags) || installForwardLocked(flags)) {
             return new AsecInstallArgs(fullCodePath, fullResourcePath, nativeLibraryPath,
-                    (flags & PackageManager.INSTALL_EXTERNAL) != 0);
+                    installOnSd(flags), installForwardLocked(flags));
         } else {
             return new FileInstallArgs(fullCodePath, fullResourcePath, nativeLibraryPath);
         }
@@ -5945,9 +5964,10 @@ public class PackageManagerService extends IPackageManager.Stub {
     // Used by package mover
     private InstallArgs createInstallArgs(Uri packageURI, int flags, String pkgName, String dataDir) {
         if (installOnSd(flags) || installForwardLocked(flags)) {
-            String cid = getNextCodePath(null, pkgName, "/" + AsecInstallArgs.RES_FILE_NAME);
-            return new AsecInstallArgs(packageURI, cid,
-                    (flags & PackageManager.INSTALL_EXTERNAL) != 0);
+            String cid = getNextCodePath(packageURI.getPath(), pkgName, "/"
+                    + AsecInstallArgs.RES_FILE_NAME);
+            return new AsecInstallArgs(packageURI, cid, installOnSd(flags),
+                    installForwardLocked(flags));
         } else {
             return new FileInstallArgs(packageURI, pkgName, dataDir);
         }
@@ -5983,6 +6003,26 @@ public class PackageManagerService extends IPackageManager.Stub {
         abstract void cleanUpResourcesLI();
         abstract boolean doPostDeleteLI(boolean delete);
         abstract boolean checkFreeStorage(IMediaContainerService imcs) throws RemoteException;
+
+        /**
+         * Called before the source arguments are copied. This is used mostly
+         * for MoveParams when it needs to read the source file to put it in the
+         * destination.
+         */
+        int doPreCopy() {
+            return PackageManager.INSTALL_SUCCEEDED;
+        }
+
+        /**
+         * Called after the source arguments are copied. This is used mostly for
+         * MoveParams when it needs to read the source file to put it in the
+         * destination.
+         *
+         * @return
+         */
+        int doPostCopy(int uid) {
+            return PackageManager.INSTALL_SUCCEEDED;
+        }
 
         protected boolean isFwdLocked() {
             return (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
@@ -6280,8 +6320,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         AsecInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath,
-                boolean isExternal) {
-            super(null, null, isExternal ? PackageManager.INSTALL_EXTERNAL : 0, null, null);
+                boolean isExternal, boolean isForwardLocked) {
+            super(null, null, (isExternal ? PackageManager.INSTALL_EXTERNAL : 0)
+                    | (isForwardLocked ? PackageManager.INSTALL_FORWARD_LOCK : 0), null, null);
             // Extract cid from fullCodePath
             int eidx = fullCodePath.lastIndexOf("/");
             String subStr1 = fullCodePath.substring(0, eidx);
@@ -6296,8 +6337,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             setCachePath(PackageHelper.getSdDir(cid));
         }
 
-        AsecInstallArgs(Uri packageURI, String cid, boolean isExternal) {
-            super(packageURI, null, isExternal ? PackageManager.INSTALL_EXTERNAL : 0, null, null);
+        AsecInstallArgs(Uri packageURI, String cid, boolean isExternal, boolean isForwardLocked) {
+            super(packageURI, null, (isExternal ? PackageManager.INSTALL_EXTERNAL : 0)
+                    | (isForwardLocked ? PackageManager.INSTALL_FORWARD_LOCK : 0), null, null);
             this.cid = cid;
         }
 
@@ -6443,8 +6485,18 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 cleanUp();
             } else {
+                final int groupOwner;
+                final String protectedFile;
+                if (isFwdLocked()) {
+                    groupOwner = uid;
+                    protectedFile = RES_FILE_NAME;
+                } else {
+                    groupOwner = -1;
+                    protectedFile = null;
+                }
+
                 if (uid < Process.FIRST_APPLICATION_UID
-                        || !PackageHelper.fixSdPermissions(cid, uid, RES_FILE_NAME)) {
+                        || !PackageHelper.fixSdPermissions(cid, groupOwner, protectedFile)) {
                     Slog.e(TAG, "Failed to finalize " + cid);
                     PackageHelper.destroySdDir(cid);
                     return PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
@@ -6504,6 +6556,33 @@ public class PackageManagerService extends IPackageManager.Stub {
                 cleanUpResourcesLI();
             }
             return ret;
+        }
+
+        @Override
+        int doPreCopy() {
+            if (isFwdLocked()) {
+                if (!PackageHelper.fixSdPermissions(cid,
+                        getPackageUid(DEFAULT_CONTAINER_PACKAGE, 0), RES_FILE_NAME)) {
+                    return PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
+                }
+            }
+
+            return PackageManager.INSTALL_SUCCEEDED;
+        }
+
+        @Override
+        int doPostCopy(int uid) {
+            if (isFwdLocked()) {
+                PackageHelper.fixSdPermissions(cid, uid, RES_FILE_NAME);
+                if (uid < Process.FIRST_APPLICATION_UID
+                        || !PackageHelper.fixSdPermissions(cid, uid, RES_FILE_NAME)) {
+                    Slog.e(TAG, "Failed to finalize " + cid);
+                    PackageHelper.destroySdDir(cid);
+                    return PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
+                }
+            }
+
+            return PackageManager.INSTALL_SUCCEEDED;
         }
     };
 
@@ -8696,9 +8775,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 : PackageManager.INSTALL_INTERNAL;
                         currFlags = isExternal(pkg) ? PackageManager.INSTALL_EXTERNAL
                                 : PackageManager.INSTALL_INTERNAL;
+
                         if (newFlags == currFlags) {
                             Slog.w(TAG, "No move required. Trying to move to same location");
                             returnCode = PackageManager.MOVE_FAILED_INVALID_LOCATION;
+                        } else {
+                            if (isForwardLocked(pkg)) {
+                                currFlags |= PackageManager.INSTALL_FORWARD_LOCK;
+                                newFlags |= PackageManager.INSTALL_FORWARD_LOCK;
+                            }
                         }
                     }
                     if (returnCode == PackageManager.MOVE_SUCCEEDED) {
@@ -8784,20 +8869,30 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     final String newNativePath = mp.targetArgs
                                             .getNativeLibraryPath();
 
-                                    if ((mp.flags & PackageManager.INSTALL_EXTERNAL) == 0) {
-                                        if (mInstaller
-                                                .unlinkNativeLibraryDirectory(pkg.applicationInfo.dataDir) < 0) {
-                                            returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
+                                    try {
+                                        final File newNativeDir = new File(newNativePath);
+
+                                        final String libParentDir = newNativeDir.getParentFile()
+                                                .getCanonicalPath();
+                                        if (newNativeDir.getParentFile().getCanonicalPath()
+                                                .equals(pkg.applicationInfo.dataDir)) {
+                                            if (mInstaller
+                                                    .unlinkNativeLibraryDirectory(pkg.applicationInfo.dataDir) < 0) {
+                                                returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
+                                            } else {
+                                                NativeLibraryHelper.copyNativeBinariesIfNeededLI(
+                                                        new File(newCodePath), newNativeDir);
+                                            }
                                         } else {
-                                            NativeLibraryHelper.copyNativeBinariesIfNeededLI(new File(
-                                                    newCodePath), new File(newNativePath));
+                                            if (mInstaller.linkNativeLibraryDirectory(
+                                                    pkg.applicationInfo.dataDir, newNativePath) < 0) {
+                                                returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
+                                            }
                                         }
-                                    } else {
-                                        if (mInstaller.linkNativeLibraryDirectory(
-                                                pkg.applicationInfo.dataDir, newNativePath) < 0) {
-                                            returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
-                                        }
+                                    } catch (IOException e) {
+                                        returnCode = PackageManager.MOVE_FAILED_INVALID_LOCATION;
                                     }
+
 
                                     if (returnCode == PackageManager.MOVE_SUCCEEDED) {
                                         pkg.mPath = newCodePath;
