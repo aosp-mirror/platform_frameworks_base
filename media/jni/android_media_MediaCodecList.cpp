@@ -27,7 +27,7 @@
 
 using namespace android;
 
-static jint android_media_MediaCodecList_countCodecs(
+static jint android_media_MediaCodecList_getCodecCount(
         JNIEnv *env, jobject thiz) {
     return MediaCodecList::getInstance()->countCodecs();
 }
@@ -105,13 +105,13 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
     }
 
     jclass capsClazz =
-        env->FindClass("android/media/MediaCodecList$CodecCapabilities");
+        env->FindClass("android/media/MediaCodecInfo$CodecCapabilities");
     CHECK(capsClazz != NULL);
 
     jobject caps = env->AllocObject(capsClazz);
 
     jclass profileLevelClazz =
-        env->FindClass("android/media/MediaCodecList$CodecProfileLevel");
+        env->FindClass("android/media/MediaCodecInfo$CodecProfileLevel");
     CHECK(profileLevelClazz != NULL);
 
     jobjectArray profileLevelArray =
@@ -140,7 +140,7 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
     jfieldID profileLevelsField = env->GetFieldID(
             capsClazz,
             "profileLevels",
-            "[Landroid/media/MediaCodecList$CodecProfileLevel;");
+            "[Landroid/media/MediaCodecInfo$CodecProfileLevel;");
 
     env->SetObjectField(caps, profileLevelsField, profileLevelArray);
 
@@ -169,7 +169,7 @@ static void android_media_MediaCodecList_native_init(JNIEnv *env) {
 }
 
 static JNINativeMethod gMethods[] = {
-    { "countCodecs", "()I", (void *)android_media_MediaCodecList_countCodecs },
+    { "getCodecCount", "()I", (void *)android_media_MediaCodecList_getCodecCount },
     { "getCodecName", "(I)Ljava/lang/String;",
       (void *)android_media_MediaCodecList_getCodecName },
     { "isEncoder", "(I)Z", (void *)android_media_MediaCodecList_isEncoder },
@@ -177,7 +177,7 @@ static JNINativeMethod gMethods[] = {
       (void *)android_media_MediaCodecList_getSupportedTypes },
 
     { "getCodecCapabilities",
-      "(ILjava/lang/String;)Landroid/media/MediaCodecList$CodecCapabilities;",
+      "(ILjava/lang/String;)Landroid/media/MediaCodecInfo$CodecCapabilities;",
       (void *)android_media_MediaCodecList_getCodecCapabilities },
 
     { "native_init", "()V", (void *)android_media_MediaCodecList_native_init },

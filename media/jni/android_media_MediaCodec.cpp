@@ -630,9 +630,9 @@ static void android_media_MediaCodec_releaseOutputBuffer(
     throwExceptionAsNecessary(env, err);
 }
 
-static jobject android_media_MediaCodec_getOutputFormat(
+static jobject android_media_MediaCodec_getOutputFormatNative(
         JNIEnv *env, jobject thiz) {
-    ALOGV("android_media_MediaCodec_getOutputFormat");
+    ALOGV("android_media_MediaCodec_getOutputFormatNative");
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
@@ -790,8 +790,8 @@ static JNINativeMethod gMethods[] = {
     { "releaseOutputBuffer", "(IZ)V",
       (void *)android_media_MediaCodec_releaseOutputBuffer },
 
-    { "getOutputFormat", "()Ljava/util/Map;",
-      (void *)android_media_MediaCodec_getOutputFormat },
+    { "getOutputFormatNative", "()Ljava/util/Map;",
+      (void *)android_media_MediaCodec_getOutputFormatNative },
 
     { "getBuffers", "(Z)[Ljava/nio/ByteBuffer;",
       (void *)android_media_MediaCodec_getBuffers },

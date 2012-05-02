@@ -11003,7 +11003,7 @@ package android.media {
   }
 
   public final class MediaCodec {
-    method public void configure(java.util.Map<java.lang.String, java.lang.Object>, android.view.Surface, android.media.MediaCrypto, int);
+    method public void configure(android.media.MediaFormat, android.view.Surface, android.media.MediaCrypto, int);
     method public static android.media.MediaCodec createByCodecName(java.lang.String);
     method public static android.media.MediaCodec createDecoderByType(java.lang.String);
     method public static android.media.MediaCodec createEncoderByType(java.lang.String);
@@ -11012,7 +11012,7 @@ package android.media {
     method public final void flush();
     method public java.nio.ByteBuffer[] getInputBuffers();
     method public java.nio.ByteBuffer[] getOutputBuffers();
-    method public final java.util.Map<java.lang.String, java.lang.Object> getOutputFormat();
+    method public final android.media.MediaFormat getOutputFormat();
     method public final void queueInputBuffer(int, int, int, long, int) throws android.media.MediaCodec.CryptoException;
     method public final void queueSecureInputBuffer(int, int, android.media.MediaCodec.CryptoInfo, long, int) throws android.media.MediaCodec.CryptoException;
     method public final void release();
@@ -11020,15 +11020,15 @@ package android.media {
     method public final void setVideoScalingMode(int);
     method public final void start();
     method public final void stop();
-    field public static int CONFIGURE_FLAG_ENCODE;
-    field public static final int FLAG_CODECCONFIG = 2; // 0x2
-    field public static final int FLAG_EOS = 4; // 0x4
-    field public static final int FLAG_SYNCFRAME = 1; // 0x1
+    field public static final int BUFFER_FLAG_CODEC_CONFIG = 2; // 0x2
+    field public static final int BUFFER_FLAG_END_OF_STREAM = 4; // 0x4
+    field public static final int BUFFER_FLAG_SYNC_FRAME = 1; // 0x1
+    field public static final int CONFIGURE_FLAG_ENCODE = 1; // 0x1
+    field public static final int CRYPTO_MODE_AES_CTR = 1; // 0x1
+    field public static final int CRYPTO_MODE_UNENCRYPTED = 0; // 0x0
     field public static final int INFO_OUTPUT_BUFFERS_CHANGED = -3; // 0xfffffffd
     field public static final int INFO_OUTPUT_FORMAT_CHANGED = -2; // 0xfffffffe
     field public static final int INFO_TRY_AGAIN_LATER = -1; // 0xffffffff
-    field public static final int MODE_AES_CTR = 1; // 0x1
-    field public static final int MODE_UNENCRYPTED = 0; // 0x0
     field public static final int VIDEO_SCALING_MODE_SCALE_TO_FIT = 1; // 0x1
     field public static final int VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING = 2; // 0x2
   }
@@ -11058,43 +11058,170 @@ package android.media {
     field public int numSubSamples;
   }
 
-  public final class MediaCodecList {
-    method public static final int countCodecs();
-    method public static final android.media.MediaCodecList.CodecCapabilities getCodecCapabilities(int, java.lang.String);
-    method public static final java.lang.String getCodecName(int);
-    method public static final java.lang.String[] getSupportedTypes(int);
-    method public static final boolean isEncoder(int);
+  public final class MediaCodecInfo {
+    method public final android.media.MediaCodecInfo.CodecCapabilities getCapabilitiesForType(java.lang.String);
+    method public final java.lang.String getName();
+    method public final java.lang.String[] getSupportedTypes();
+    method public final boolean isEncoder();
   }
 
-  public static final class MediaCodecList.CodecCapabilities {
-    ctor public MediaCodecList.CodecCapabilities();
+  public static final class MediaCodecInfo.CodecCapabilities {
+    ctor public MediaCodecInfo.CodecCapabilities();
+    field public static final int COLOR_Format12bitRGB444 = 3; // 0x3
+    field public static final int COLOR_Format16bitARGB1555 = 5; // 0x5
+    field public static final int COLOR_Format16bitARGB4444 = 4; // 0x4
+    field public static final int COLOR_Format16bitBGR565 = 7; // 0x7
+    field public static final int COLOR_Format16bitRGB565 = 6; // 0x6
+    field public static final int COLOR_Format18BitBGR666 = 41; // 0x29
+    field public static final int COLOR_Format18bitARGB1665 = 9; // 0x9
+    field public static final int COLOR_Format18bitRGB666 = 8; // 0x8
+    field public static final int COLOR_Format19bitARGB1666 = 10; // 0xa
+    field public static final int COLOR_Format24BitABGR6666 = 43; // 0x2b
+    field public static final int COLOR_Format24BitARGB6666 = 42; // 0x2a
+    field public static final int COLOR_Format24bitARGB1887 = 13; // 0xd
+    field public static final int COLOR_Format24bitBGR888 = 12; // 0xc
+    field public static final int COLOR_Format24bitRGB888 = 11; // 0xb
+    field public static final int COLOR_Format25bitARGB1888 = 14; // 0xe
+    field public static final int COLOR_Format32bitARGB8888 = 16; // 0x10
+    field public static final int COLOR_Format32bitBGRA8888 = 15; // 0xf
+    field public static final int COLOR_Format8bitRGB332 = 2; // 0x2
+    field public static final int COLOR_FormatCbYCrY = 27; // 0x1b
+    field public static final int COLOR_FormatCrYCbY = 28; // 0x1c
+    field public static final int COLOR_FormatL16 = 36; // 0x24
+    field public static final int COLOR_FormatL2 = 33; // 0x21
+    field public static final int COLOR_FormatL24 = 37; // 0x25
+    field public static final int COLOR_FormatL32 = 38; // 0x26
+    field public static final int COLOR_FormatL4 = 34; // 0x22
+    field public static final int COLOR_FormatL8 = 35; // 0x23
+    field public static final int COLOR_FormatMonochrome = 1; // 0x1
+    field public static final int COLOR_FormatRawBayer10bit = 31; // 0x1f
+    field public static final int COLOR_FormatRawBayer8bit = 30; // 0x1e
+    field public static final int COLOR_FormatRawBayer8bitcompressed = 32; // 0x20
+    field public static final int COLOR_FormatYCbYCr = 25; // 0x19
+    field public static final int COLOR_FormatYCrYCb = 26; // 0x1a
+    field public static final int COLOR_FormatYUV411PackedPlanar = 18; // 0x12
+    field public static final int COLOR_FormatYUV411Planar = 17; // 0x11
+    field public static final int COLOR_FormatYUV420PackedPlanar = 20; // 0x14
+    field public static final int COLOR_FormatYUV420PackedSemiPlanar = 39; // 0x27
+    field public static final int COLOR_FormatYUV420Planar = 19; // 0x13
+    field public static final int COLOR_FormatYUV420SemiPlanar = 21; // 0x15
+    field public static final int COLOR_FormatYUV422PackedPlanar = 23; // 0x17
+    field public static final int COLOR_FormatYUV422PackedSemiPlanar = 40; // 0x28
+    field public static final int COLOR_FormatYUV422Planar = 22; // 0x16
+    field public static final int COLOR_FormatYUV422SemiPlanar = 24; // 0x18
+    field public static final int COLOR_FormatYUV444Interleaved = 29; // 0x1d
+    field public static final int COLOR_QCOM_FormatYUV420SemiPlanar = 2141391872; // 0x7fa30c00
+    field public static final int COLOR_TI_FormatYUV420PackedSemiPlanar = 2130706688; // 0x7f000100
     field public int[] colorFormats;
-    field public android.media.MediaCodecList.CodecProfileLevel[] profileLevels;
+    field public android.media.MediaCodecInfo.CodecProfileLevel[] profileLevels;
   }
 
-  public static final class MediaCodecList.CodecProfileLevel {
-    ctor public MediaCodecList.CodecProfileLevel();
+  public static final class MediaCodecInfo.CodecProfileLevel {
+    ctor public MediaCodecInfo.CodecProfileLevel();
+    field public static final int AACObjectELD = 39; // 0x27
+    field public static final int AACObjectERLC = 17; // 0x11
+    field public static final int AACObjectHE = 5; // 0x5
+    field public static final int AACObjectHE_PS = 29; // 0x1d
+    field public static final int AACObjectLC = 2; // 0x2
+    field public static final int AACObjectLD = 23; // 0x17
+    field public static final int AACObjectLTP = 4; // 0x4
+    field public static final int AACObjectMain = 1; // 0x1
+    field public static final int AACObjectSSR = 3; // 0x3
+    field public static final int AACObjectScalable = 6; // 0x6
+    field public static final int AVCLevel1 = 1; // 0x1
+    field public static final int AVCLevel11 = 4; // 0x4
+    field public static final int AVCLevel12 = 8; // 0x8
+    field public static final int AVCLevel13 = 16; // 0x10
+    field public static final int AVCLevel1b = 2; // 0x2
+    field public static final int AVCLevel2 = 32; // 0x20
+    field public static final int AVCLevel21 = 64; // 0x40
+    field public static final int AVCLevel22 = 128; // 0x80
+    field public static final int AVCLevel3 = 256; // 0x100
+    field public static final int AVCLevel31 = 512; // 0x200
+    field public static final int AVCLevel32 = 1024; // 0x400
+    field public static final int AVCLevel4 = 2048; // 0x800
+    field public static final int AVCLevel41 = 4096; // 0x1000
+    field public static final int AVCLevel42 = 8192; // 0x2000
+    field public static final int AVCLevel5 = 16384; // 0x4000
+    field public static final int AVCLevel51 = 32768; // 0x8000
+    field public static final int AVCProfileBaseline = 1; // 0x1
+    field public static final int AVCProfileExtended = 4; // 0x4
+    field public static final int AVCProfileHigh = 8; // 0x8
+    field public static final int AVCProfileHigh10 = 16; // 0x10
+    field public static final int AVCProfileHigh422 = 32; // 0x20
+    field public static final int AVCProfileHigh444 = 64; // 0x40
+    field public static final int AVCProfileMain = 2; // 0x2
+    field public static final int H263Level10 = 1; // 0x1
+    field public static final int H263Level20 = 2; // 0x2
+    field public static final int H263Level30 = 4; // 0x4
+    field public static final int H263Level40 = 8; // 0x8
+    field public static final int H263Level45 = 16; // 0x10
+    field public static final int H263Level50 = 32; // 0x20
+    field public static final int H263Level60 = 64; // 0x40
+    field public static final int H263Level70 = 128; // 0x80
+    field public static final int H263ProfileBackwardCompatible = 4; // 0x4
+    field public static final int H263ProfileBaseline = 1; // 0x1
+    field public static final int H263ProfileH320Coding = 2; // 0x2
+    field public static final int H263ProfileHighCompression = 32; // 0x20
+    field public static final int H263ProfileHighLatency = 256; // 0x100
+    field public static final int H263ProfileISWV2 = 8; // 0x8
+    field public static final int H263ProfileISWV3 = 16; // 0x10
+    field public static final int H263ProfileInterlace = 128; // 0x80
+    field public static final int H263ProfileInternet = 64; // 0x40
+    field public static final int MPEG4Level0 = 1; // 0x1
+    field public static final int MPEG4Level0b = 2; // 0x2
+    field public static final int MPEG4Level1 = 4; // 0x4
+    field public static final int MPEG4Level2 = 8; // 0x8
+    field public static final int MPEG4Level3 = 16; // 0x10
+    field public static final int MPEG4Level4 = 32; // 0x20
+    field public static final int MPEG4Level4a = 64; // 0x40
+    field public static final int MPEG4Level5 = 128; // 0x80
+    field public static final int MPEG4ProfileAdvancedCoding = 4096; // 0x1000
+    field public static final int MPEG4ProfileAdvancedCore = 8192; // 0x2000
+    field public static final int MPEG4ProfileAdvancedRealTime = 1024; // 0x400
+    field public static final int MPEG4ProfileAdvancedScalable = 16384; // 0x4000
+    field public static final int MPEG4ProfileAdvancedSimple = 32768; // 0x8000
+    field public static final int MPEG4ProfileBasicAnimated = 256; // 0x100
+    field public static final int MPEG4ProfileCore = 4; // 0x4
+    field public static final int MPEG4ProfileCoreScalable = 2048; // 0x800
+    field public static final int MPEG4ProfileHybrid = 512; // 0x200
+    field public static final int MPEG4ProfileMain = 8; // 0x8
+    field public static final int MPEG4ProfileNbit = 16; // 0x10
+    field public static final int MPEG4ProfileScalableTexture = 32; // 0x20
+    field public static final int MPEG4ProfileSimple = 1; // 0x1
+    field public static final int MPEG4ProfileSimpleFBA = 128; // 0x80
+    field public static final int MPEG4ProfileSimpleFace = 64; // 0x40
+    field public static final int MPEG4ProfileSimpleScalable = 2; // 0x2
     field public int level;
     field public int profile;
   }
 
+  public final class MediaCodecList {
+    method public static final int getCodecCount();
+    method public static final android.media.MediaCodecInfo getCodecInfoAt(int);
+  }
+
   public final class MediaCrypto {
-    ctor public MediaCrypto(byte[], byte[]) throws java.lang.RuntimeException;
-    method public static final boolean isCryptoSchemeSupported(byte[]);
+    ctor public MediaCrypto(java.util.UUID, byte[]) throws android.media.MediaCryptoException;
+    method public static final boolean isCryptoSchemeSupported(java.util.UUID);
     method public final void release();
     method public final boolean requiresSecureDecoderComponent(java.lang.String);
+  }
+
+  public final class MediaCryptoException extends java.lang.Exception {
+    ctor public MediaCryptoException(java.lang.String);
   }
 
   public final class MediaExtractor {
     ctor public MediaExtractor();
     method public boolean advance();
-    method public int countTracks();
     method public long getCachedDuration();
     method public boolean getSampleCryptoInfo(android.media.MediaCodec.CryptoInfo);
     method public int getSampleFlags();
     method public long getSampleTime();
     method public int getSampleTrackIndex();
-    method public java.util.Map<java.lang.String, java.lang.Object> getTrackFormat(int);
+    method public final int getTrackCount();
+    method public android.media.MediaFormat getTrackFormat(int);
     method public boolean hasCacheReachedEndOfStream();
     method public int readSampleData(java.nio.ByteBuffer, int);
     method public final void release();
@@ -11112,6 +11239,37 @@ package android.media {
     field public static final int SEEK_TO_CLOSEST_SYNC = 2; // 0x2
     field public static final int SEEK_TO_NEXT_SYNC = 1; // 0x1
     field public static final int SEEK_TO_PREVIOUS_SYNC = 0; // 0x0
+  }
+
+  public final class MediaFormat {
+    ctor public MediaFormat();
+    method public final boolean containsKey(java.lang.String);
+    method public static final android.media.MediaFormat createAudioFormat(java.lang.String, int, int);
+    method public static final android.media.MediaFormat createVideoFormat(java.lang.String, int, int);
+    method public final java.nio.ByteBuffer getByteBuffer(java.lang.String);
+    method public final float getFloat(java.lang.String);
+    method public final int getInteger(java.lang.String);
+    method public final long getLong(java.lang.String);
+    method public final java.lang.String getString(java.lang.String);
+    method public final void setByteBuffer(java.lang.String, java.nio.ByteBuffer);
+    method public final void setFloat(java.lang.String, float);
+    method public final void setInteger(java.lang.String, int);
+    method public final void setLong(java.lang.String, long);
+    method public final void setString(java.lang.String, java.lang.String);
+    field public static final java.lang.String KEY_AAC_PROFILE = "aac-profile";
+    field public static final java.lang.String KEY_BIT_RATE = "bitrate";
+    field public static final java.lang.String KEY_CHANNEL_COUNT = "channel-count";
+    field public static final java.lang.String KEY_CHANNEL_MASK = "channel-mask";
+    field public static final java.lang.String KEY_COLOR_FORMAT = "color-format";
+    field public static final java.lang.String KEY_DURATION = "durationUs";
+    field public static final java.lang.String KEY_FRAME_RATE = "frame-rate";
+    field public static final java.lang.String KEY_HEIGHT = "height";
+    field public static final java.lang.String KEY_IS_ADTS = "is-adts";
+    field public static final java.lang.String KEY_I_FRAME_INTERVAL = "i-frame-interval";
+    field public static final java.lang.String KEY_MAX_INPUT_SIZE = "max-input-size";
+    field public static final java.lang.String KEY_MIME = "mime";
+    field public static final java.lang.String KEY_SAMPLE_RATE = "sample-rate";
+    field public static final java.lang.String KEY_WIDTH = "width";
   }
 
   public class MediaMetadataRetriever {
