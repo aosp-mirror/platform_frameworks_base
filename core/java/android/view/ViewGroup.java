@@ -3938,59 +3938,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // through
             final boolean drawAnimation = (child.mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION;
 
-            //noinspection PointlessBooleanExpression
-            if (!HardwareRenderer.RENDER_DIRTY_REGIONS) {
-                if (dirty == null) {
-                    if (child.mLayerType != LAYER_TYPE_NONE) {
-                        mPrivateFlags |= INVALIDATED;
-                        mPrivateFlags &= ~DRAWING_CACHE_VALID;
-                        child.mLocalDirtyRect.setEmpty();
-                    }
-                    do {
-                        View view = null;
-                        if (parent instanceof View) {
-                            view = (View) parent;
-                            if (view.mLayerType != LAYER_TYPE_NONE) {
-                                view.mLocalDirtyRect.setEmpty();
-                                if (view.getParent() instanceof View) {
-                                    final View grandParent = (View) view.getParent();
-                                    grandParent.mPrivateFlags |= INVALIDATED;
-                                    grandParent.mPrivateFlags &= ~DRAWING_CACHE_VALID;
-                                }
-                            }
-                            if ((view.mPrivateFlags & DIRTY_MASK) != 0) {
-                                // already marked dirty - we're done
-                                break;
-                            }
-                        }
-    
-                        if (drawAnimation) {
-                            if (view != null) {
-                                view.mPrivateFlags |= DRAW_ANIMATION;
-                            } else if (parent instanceof ViewRootImpl) {
-                                ((ViewRootImpl) parent).mIsAnimating = true;
-                            }
-                        }
-    
-                        if (parent instanceof ViewRootImpl) {
-                            ((ViewRootImpl) parent).invalidate();
-                            parent = null;
-                        } else if (view != null) {
-                            if ((view.mPrivateFlags & DRAWN) == DRAWN ||
-                                    (view.mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) {
-                                view.mPrivateFlags &= ~DRAWING_CACHE_VALID;
-                                view.mPrivateFlags |= DIRTY;
-                                parent = view.mParent;
-                            } else {
-                                parent = null;
-                            }
-                        }
-                    } while (parent != null);
-                }
-
-                return;
-            }
-
             // Check whether the child that requests the invalidate is fully opaque
             // Views being animated or transformed are not considered opaque because we may
             // be invalidating their old position and need the parent to paint behind them.
@@ -4025,12 +3972,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 View view = null;
                 if (parent instanceof View) {
                     view = (View) parent;
-                    if (view.mLayerType != LAYER_TYPE_NONE &&
-                            view.getParent() instanceof View) {
-                        final View grandParent = (View) view.getParent();
-                        grandParent.mPrivateFlags |= INVALIDATED;
-                        grandParent.mPrivateFlags &= ~DRAWING_CACHE_VALID;
-                    }
                 }
 
                 if (drawAnimation) {
@@ -4103,6 +4044,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     location[CHILD_TOP_INDEX] = top;
 
                     if (mLayerType != LAYER_TYPE_NONE) {
+                        mPrivateFlags |= INVALIDATED;
                         mLocalDirtyRect.union(dirty);
                     }
 
@@ -4121,6 +4063,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 }
 
                 if (mLayerType != LAYER_TYPE_NONE) {
+                    mPrivateFlags |= INVALIDATED;
                     mLocalDirtyRect.union(dirty);
                 }
 
