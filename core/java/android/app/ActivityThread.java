@@ -3843,7 +3843,7 @@ public final class ActivityThread {
         windowManager.endTrimMemory();        
     }
 
-    private void setupGraphicsSupport(LoadedApk info) {
+    private void setupGraphicsSupport(LoadedApk info, File cacheDir) {
         if (Process.isIsolated()) {
             // Isolated processes aren't going to do UI.
             return;
@@ -3855,11 +3855,8 @@ public final class ActivityThread {
             // If there are several packages in this application we won't
             // initialize the graphics disk caches 
             if (packages != null && packages.length == 1) {
-                ContextImpl appContext = new ContextImpl();
-                appContext.init(info, null, this);
-
-                HardwareRenderer.setupDiskCache(appContext.getCacheDir());
-                RenderScript.setupDiskCache(appContext.getCacheDir());
+                HardwareRenderer.setupDiskCache(cacheDir);
+                RenderScript.setupDiskCache(cacheDir);
             }
         } catch (RemoteException e) {
             // Ignore
@@ -3925,8 +3922,15 @@ public final class ActivityThread {
 
         data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
 
-        setupGraphicsSupport(data.info);        
-        
+        final ContextImpl appContext = new ContextImpl();
+        appContext.init(data.info, null, this);
+        final File cacheDir = appContext.getCacheDir();
+
+        // Provide a usable directory for temporary files
+        System.setProperty("java.io.tmpdir", cacheDir.getAbsolutePath());
+
+        setupGraphicsSupport(data.info, cacheDir);
+
         /**
          * For system applications on userdebug/eng builds, log stack
          * traces of disk and network access to dropbox for analysis.
@@ -4003,8 +4007,6 @@ public final class ActivityThread {
         }
 
         if (data.instrumentationName != null) {
-            ContextImpl appContext = new ContextImpl();
-            appContext.init(data.info, null, this);
             InstrumentationInfo ii = null;
             try {
                 ii = appContext.getPackageManager().
