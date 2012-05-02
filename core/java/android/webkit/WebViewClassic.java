@@ -2018,6 +2018,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     private void destroyImpl() {
+        int drawGLFunction = nativeGetDrawGLFunction(mNativeClass);
+        ViewRootImpl viewRoot = mWebView.getViewRootImpl();
+        Log.d(LOGTAG, String.format("destroyImpl, drawGLFunction %x,  viewroot == null %b, isHWAccel %b",
+                                    drawGLFunction, (viewRoot == null), mWebView.isHardwareAccelerated()));
+
         mCallbackProxy.blockMessages();
         clearHelpers();
         if (mListBoxDialog != null) {
@@ -5434,9 +5439,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         removeAccessibilityApisFromJavaScript();
         updateHwAccelerated();
 
+        int drawGLFunction = nativeGetDrawGLFunction(mNativeClass);
+        ViewRootImpl viewRoot = mWebView.getViewRootImpl();
+        Log.d(LOGTAG, String.format("onDetachedFromWindow, drawGLFunction %x,  viewroot == null %b, isHWAccel %b",
+                                    drawGLFunction, (viewRoot == null), mWebView.isHardwareAccelerated()));
         if (mWebView.isHardwareAccelerated()) {
-            int drawGLFunction = nativeGetDrawGLFunction(mNativeClass);
-            ViewRootImpl viewRoot = mWebView.getViewRootImpl();
             if (drawGLFunction != 0 && viewRoot != null) {
                 viewRoot.detachFunctor(drawGLFunction);
             }
