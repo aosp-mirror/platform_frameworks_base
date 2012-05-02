@@ -4362,7 +4362,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     private void removeTouchHighlight() {
-        mWebViewCore.removeMessages(EventHub.HIT_TEST);
+        if (mWebViewCore != null) {
+            mWebViewCore.removeMessages(EventHub.HIT_TEST);
+        }
         mPrivateHandler.removeMessages(HIT_TEST_RESULT);
         setTouchHighlightRects(null);
     }
