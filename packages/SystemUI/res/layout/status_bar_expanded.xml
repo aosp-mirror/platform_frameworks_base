@@ -21,120 +21,114 @@
 <FrameLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
-    android:focusable="true"
-    android:descendantFocusability="afterDescendants"
+    android:id="@+id/notification_panel"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/notification_tracking_bg"
+    android:paddingTop="@*android:dimen/status_bar_height"
+    android:layout_marginLeft="@dimen/notification_panel_margin_left"
     >
 
-    <FrameLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:id="@+id/notification_panel"
-        android:background="@drawable/notification_tracking_bg"
-        android:paddingTop="@*android:dimen/status_bar_height"
+        android:layout_height="52dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="5dp"
+        android:paddingRight="3dp"
+        android:background="@drawable/notification_header_bg"
         >
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:paddingTop="3dp"
-            android:paddingBottom="5dp"
-            android:paddingRight="3dp"
-            android:background="@drawable/notification_header_bg"
-            >
-            <com.android.systemui.statusbar.policy.DateView android:id="@+id/date"
-                android:textAppearance="@style/TextAppearance.StatusBar.Date"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_alignParentLeft="true"
-                android:singleLine="true"
-                android:gravity="center_vertical|left"
-                android:paddingLeft="16dp"
-                />
-            <!--
-            <com.android.systemui.statusbar.phone.CarrierLabel
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginTop="1dp"
-                android:layout_marginLeft="5dp"
-                android:layout_gravity="center_vertical"
-                android:paddingBottom="1dp"
-                android:paddingLeft="4dp"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="?android:attr/textColorSecondary"
-                />
-            -->
-    
-            <ImageView android:id="@+id/settings_button"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_toRightOf="@id/date"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
-                android:src="@drawable/ic_notify_quicksettings"
-                android:contentDescription="@string/accessibility_settings_button"
-                />
-    
-            <ImageView android:id="@+id/clear_all_button"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_alignParentRight="true"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
-                android:src="@drawable/ic_notify_clear"
-                android:contentDescription="@string/accessibility_clear_all"
-                />            
-        </RelativeLayout>
-    
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginTop="52dp"
-            android:background="@drawable/status_bar_hr"
-            />
-    
-        <ScrollView
-            android:id="@+id/scroll"
-            android:layout_width="match_parent"
+        <com.android.systemui.statusbar.policy.DateView android:id="@+id/date"
+            android:textAppearance="@style/TextAppearance.StatusBar.Date"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:fadingEdge="none"
-            android:overScrollMode="ifContentScrolls"
-			android:layout_marginTop="54dp"
-			android:layout_marginBottom="34dp"
-            >
-            <com.android.systemui.statusbar.policy.NotificationRowLayout
-                android:id="@+id/latestItems"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                systemui:rowHeight="@dimen/notification_height"
-                />
-        </ScrollView>
-    
-        <ImageView
+            android:layout_alignParentLeft="true"
+            android:singleLine="true"
+            android:gravity="center_vertical|left"
+            android:paddingLeft="16dp"
+            />
+        <!--
+        <com.android.systemui.statusbar.phone.CarrierLabel
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="1dp"
+            android:layout_marginLeft="5dp"
+            android:layout_gravity="center_vertical"
+            android:paddingBottom="1dp"
+            android:paddingLeft="4dp"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="?android:attr/textColorSecondary"
+            />
+        -->
+
+        <ImageView android:id="@+id/settings_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@id/date"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:src="@drawable/ic_notify_quicksettings"
+            android:contentDescription="@string/accessibility_settings_button"
+            />
+
+        <ImageView android:id="@+id/clear_all_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:src="@drawable/ic_notify_clear"
+            android:contentDescription="@string/accessibility_clear_all"
+            />            
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="52dp"
+        android:background="@drawable/status_bar_hr"
+        />
+
+    <ScrollView
+        android:id="@+id/scroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fadingEdge="none"
+        android:overScrollMode="ifContentScrolls"
+		android:layout_marginTop="54dp"
+		android:layout_marginBottom="34dp"
+        >
+        <com.android.systemui.statusbar.policy.NotificationRowLayout
+            android:id="@+id/latestItems"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:src="@drawable/title_bar_shadow"
-			android:layout_marginTop="54dp"
-            android:scaleType="fitXY"
-        />
-   
-        <com.android.systemui.statusbar.phone.CloseDragHandle android:id="@+id/close"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/close_handle_height"
-            android:layout_gravity="bottom"
-            android:orientation="vertical"
-            >
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="34dp"
-                android:layout_gravity="bottom"
-                android:scaleType="fitXY"
-                android:src="@drawable/status_bar_close_on"
-                />
-    
-        </com.android.systemui.statusbar.phone.CloseDragHandle>
-    
-    </FrameLayout><!-- end of sliding panel -->
+            systemui:rowHeight="@dimen/notification_height"
+            />
+    </ScrollView>
 
-</FrameLayout><!-- end of window -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/title_bar_shadow"
+		android:layout_marginTop="54dp"
+        android:scaleType="fitXY"
+    />
+
+    <com.android.systemui.statusbar.phone.CloseDragHandle android:id="@+id/close"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/close_handle_height"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        >
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="34dp"
+            android:layout_gravity="bottom"
+            android:scaleType="fitXY"
+            android:src="@drawable/status_bar_close_on"
+            />
+
+    </com.android.systemui.statusbar.phone.CloseDragHandle>
+
+</FrameLayout><!-- end of sliding panel -->
