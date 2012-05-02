@@ -1557,7 +1557,7 @@ public class WifiManager {
          */
         public void acquire() {
             synchronized (mBinder) {
-                if (mRefCounted ? (++mRefCount > 0) : (!mHeld)) {
+                if (mRefCounted ? (++mRefCount == 1) : (!mHeld)) {
                     try {
                         mService.acquireWifiLock(mBinder, mLockType, mTag, mWorkSource);
                         synchronized (WifiManager.this) {
@@ -1786,7 +1786,7 @@ public class WifiManager {
          */
         public void acquire() {
             synchronized (mBinder) {
-                if (mRefCounted ? (++mRefCount > 0) : (!mHeld)) {
+                if (mRefCounted ? (++mRefCount == 1) : (!mHeld)) {
                     try {
                         mService.acquireMulticastLock(mBinder, mTag);
                         synchronized (WifiManager.this) {
