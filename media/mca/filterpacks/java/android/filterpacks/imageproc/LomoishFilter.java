@@ -28,8 +28,6 @@ import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
 
-import java.util.Random;
-
 public class LomoishFilter extends Filter {
 
     @GenerateFieldPort(name = "tile_size", hasDefault = true)
@@ -41,19 +39,18 @@ public class LomoishFilter extends Filter {
     private int mHeight = 0;
     private int mTarget = FrameFormat.TARGET_UNSPECIFIED;
 
-    private Frame mNoiseFrame;
-    private Random mRandom;
-
     private final String mLomoishShader =
             "precision mediump float;\n" +
             "uniform sampler2D tex_sampler_0;\n" +
-            "uniform sampler2D tex_sampler_1;\n" +
             "uniform float stepsizeX;\n" +
             "uniform float stepsizeY;\n" +
             "uniform float stepsize;\n" +
             "uniform vec2 center;\n" +
             "uniform float inv_max_dist;\n" +
             "varying vec2 v_texcoord;\n" +
+            "float rand(vec2 loc) {\n" +
+            "  return fract(sin(dot(loc, vec2(12.9898, 78.233))) * 43758.5453);\n" +
+            "}\n" +
             "void main() {\n" +
             // sharpen
             "  vec3 nbr_color = vec3(0.0, 0.0, 0.0);\n" +
@@ -99,7 +96,7 @@ public class LomoishFilter extends Filter {
             "  }\n" +
             "  c_color.b = s_color.b * 0.5 + 0.25;\n" +
             // blackwhite
-            "  float dither = texture2D(tex_sampler_1, v_texcoord).r;\n" +
+            "  float dither = rand(v_texcoord);\n" +
             "  vec3 xform = clamp((c_color.rgb - 0.15) * 1.53846, 0.0, 1.0);\n" +
             "  vec3 temp = clamp((color.rgb + stepsize - 0.15) * 1.53846, 0.0, 1.0);\n" +
             "  vec3 bw_color = clamp(xform + (temp - xform) * (dither - 0.5), 0.0, 1.0);\n" +
@@ -111,8 +108,6 @@ public class LomoishFilter extends Filter {
 
     public LomoishFilter(String name) {
         super(name);
-
-        mRandom = new Random();
     }
 
     @Override
@@ -124,14 +119,6 @@ public class LomoishFilter extends Filter {
     @Override
     public FrameFormat getOutputFormat(String portName, FrameFormat inputFormat) {
         return inputFormat;
-    }
-
-    @Override
-    public void tearDown(FilterContext context) {
-        if (mNoiseFrame != null) {
-            mNoiseFrame.release();
-            mNoiseFrame = null;
-        }
     }
 
     public void initProgram(FilterContext context, int target) {
@@ -180,34 +167,14 @@ public class LomoishFilter extends Filter {
         if (inputFormat.getWidth() != mWidth || inputFormat.getHeight() != mHeight) {
             mWidth = inputFormat.getWidth();
             mHeight = inputFormat.getHeight();
-
-            int[] buffer = new int[mWidth * mHeight];
-            for (int i = 0; i < mWidth * mHeight; ++i) {
-              buffer[i] = mRandom.nextInt(255);
-            }
-            FrameFormat format = ImageFormat.create(mWidth, mHeight,
-                                                    ImageFormat.COLORSPACE_RGBA,
-                                                    FrameFormat.TARGET_GPU);
-            if (mNoiseFrame != null) {
-                mNoiseFrame.release();
-            }
-            mNoiseFrame = context.getFrameManager().newFrame(format);
-            mNoiseFrame.setInts(buffer);
-
             initParameters();
-        }
-
-        if (mNoiseFrame != null && (mNoiseFrame.getFormat().getWidth() != mWidth ||
-                                    mNoiseFrame.getFormat().getHeight() != mHeight)) {
-            throw new RuntimeException("Random map and imput image size mismatch!");
         }
 
         // Create output frame
         Frame output = context.getFrameManager().newFrame(inputFormat);
 
         // Process
-        Frame[] inputs = {input, mNoiseFrame};
-        mProgram.process(inputs, output);
+        mProgram.process(input, output);
 
         // Push output
         pushOutput("image", output);
