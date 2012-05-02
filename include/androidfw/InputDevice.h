@@ -67,7 +67,7 @@ public:
     };
 
     void initialize(int32_t id, int32_t generation, const InputDeviceIdentifier& identifier,
-            const String8& alias);
+            const String8& alias, bool isExternal);
 
     inline int32_t getId() const { return mId; }
     inline int32_t getGeneration() const { return mGeneration; }
@@ -76,6 +76,7 @@ public:
     inline const String8& getDisplayName() const {
         return mAlias.isEmpty() ? mIdentifier.name : mAlias;
     }
+    inline bool isExternal() const { return mIsExternal; }
     inline uint32_t getSources() const { return mSources; }
 
     const MotionRange* getMotionRange(int32_t axis, uint32_t source) const;
@@ -108,6 +109,7 @@ private:
     int32_t mGeneration;
     InputDeviceIdentifier mIdentifier;
     String8 mAlias;
+    bool mIsExternal;
     uint32_t mSources;
     int32_t mKeyboardType;
     sp<KeyCharacterMap> mKeyCharacterMap;

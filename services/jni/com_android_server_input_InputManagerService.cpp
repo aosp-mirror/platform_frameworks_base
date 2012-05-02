@@ -98,12 +98,6 @@ static struct {
     jclass clazz;
 } gMotionEventClassInfo;
 
-static struct {
-    jfieldID touchscreen;
-    jfieldID keyboard;
-    jfieldID navigation;
-} gConfigurationClassInfo;
-
 
 // --- Global functions ---
 
@@ -1228,18 +1222,6 @@ static void nativeSetSystemUiVisibility(JNIEnv* env,
     im->setSystemUiVisibility(visibility);
 }
 
-static void nativeGetInputConfiguration(JNIEnv* env,
-        jclass clazz, jint ptr, jobject configObj) {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-
-    InputConfiguration config;
-    im->getInputManager()->getReader()->getInputConfiguration(& config);
-
-    env->SetIntField(configObj, gConfigurationClassInfo.touchscreen, config.touchScreen);
-    env->SetIntField(configObj, gConfigurationClassInfo.keyboard, config.keyboard);
-    env->SetIntField(configObj, gConfigurationClassInfo.navigation, config.navigation);
-}
-
 static jboolean nativeTransferTouchFocus(JNIEnv* env,
         jclass clazz, jint ptr, jobject fromChannelObj, jobject toChannelObj) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
@@ -1372,8 +1354,6 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeSetInputDispatchMode },
     { "nativeSetSystemUiVisibility", "(II)V",
             (void*) nativeSetSystemUiVisibility },
-    { "nativeGetInputConfiguration", "(ILandroid/content/res/Configuration;)V",
-            (void*) nativeGetInputConfiguration },
     { "nativeTransferTouchFocus", "(ILandroid/view/InputChannel;Landroid/view/InputChannel;)Z",
             (void*) nativeTransferTouchFocus },
     { "nativeSetPointerSpeed", "(II)V",
@@ -1503,19 +1483,6 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     FIND_CLASS(gMotionEventClassInfo.clazz, "android/view/MotionEvent");
     gMotionEventClassInfo.clazz = jclass(env->NewGlobalRef(gMotionEventClassInfo.clazz));
-
-    // Configuration
-
-    FIND_CLASS(clazz, "android/content/res/Configuration");
-
-    GET_FIELD_ID(gConfigurationClassInfo.touchscreen, clazz,
-            "touchscreen", "I");
-
-    GET_FIELD_ID(gConfigurationClassInfo.keyboard, clazz,
-            "keyboard", "I");
-
-    GET_FIELD_ID(gConfigurationClassInfo.navigation, clazz,
-            "navigation", "I");
 
     return 0;
 }

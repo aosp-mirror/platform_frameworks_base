@@ -250,7 +250,6 @@ InputReader::InputReader(const sp<EventHubInterface>& eventHub,
 
         refreshConfigurationLocked(0);
         updateGlobalMetaStateLocked();
-        updateInputConfigurationLocked();
     } // release lock
 }
 
@@ -502,9 +501,6 @@ void InputReader::handleConfigurationChangedLocked(nsecs_t when) {
     // Reset global meta state because it depends on the list of all configured devices.
     updateGlobalMetaStateLocked();
 
-    // Update input configuration.
-    updateInputConfigurationLocked();
-
     // Enqueue configuration changed.
     NotifyConfigurationChangedArgs args(when);
     mQueuedListener->notifyConfigurationChanged(&args);
@@ -542,36 +538,6 @@ int32_t InputReader::getGlobalMetaStateLocked() {
     return mGlobalMetaState;
 }
 
-void InputReader::updateInputConfigurationLocked() {
-    int32_t touchScreenConfig = InputConfiguration::TOUCHSCREEN_NOTOUCH;
-    int32_t keyboardConfig = InputConfiguration::KEYBOARD_NOKEYS;
-    int32_t navigationConfig = InputConfiguration::NAVIGATION_NONAV;
-    InputDeviceInfo deviceInfo;
-    for (size_t i = 0; i < mDevices.size(); i++) {
-        InputDevice* device = mDevices.valueAt(i);
-        if (!(device->getClasses() & INPUT_DEVICE_CLASS_VIRTUAL)) {
-            device->getDeviceInfo(& deviceInfo);
-            uint32_t sources = deviceInfo.getSources();
-
-            if ((sources & AINPUT_SOURCE_TOUCHSCREEN) == AINPUT_SOURCE_TOUCHSCREEN) {
-                touchScreenConfig = InputConfiguration::TOUCHSCREEN_FINGER;
-            }
-            if ((sources & AINPUT_SOURCE_TRACKBALL) == AINPUT_SOURCE_TRACKBALL) {
-                navigationConfig = InputConfiguration::NAVIGATION_TRACKBALL;
-            } else if ((sources & AINPUT_SOURCE_DPAD) == AINPUT_SOURCE_DPAD) {
-                navigationConfig = InputConfiguration::NAVIGATION_DPAD;
-            }
-            if (deviceInfo.getKeyboardType() == AINPUT_KEYBOARD_TYPE_ALPHABETIC) {
-                keyboardConfig = InputConfiguration::KEYBOARD_QWERTY;
-            }
-        }
-    }
-
-    mInputConfiguration.touchScreen = touchScreenConfig;
-    mInputConfiguration.keyboard = keyboardConfig;
-    mInputConfiguration.navigation = navigationConfig;
-}
-
 void InputReader::disableVirtualKeysUntilLocked(nsecs_t time) {
     mDisableVirtualKeysTimeout = time;
 }
@@ -606,12 +572,6 @@ void InputReader::requestTimeoutAtTimeLocked(nsecs_t when) {
 
 int32_t InputReader::bumpGenerationLocked() {
     return ++mGeneration;
-}
-
-void InputReader::getInputConfiguration(InputConfiguration* outConfiguration) {
-    AutoMutex _l(mLock);
-
-    *outConfiguration = mInputConfiguration;
 }
 
 void InputReader::getInputDevices(Vector<InputDeviceInfo>& outInputDevices) {
@@ -1049,7 +1009,7 @@ void InputDevice::timeoutExpired(nsecs_t when) {
 }
 
 void InputDevice::getDeviceInfo(InputDeviceInfo* outDeviceInfo) {
-    outDeviceInfo->initialize(mId, mGeneration, mIdentifier, mAlias);
+    outDeviceInfo->initialize(mId, mGeneration, mIdentifier, mAlias, mIsExternal);
 
     size_t numMappers = mMappers.size();
     for (size_t i = 0; i < numMappers; i++) {
