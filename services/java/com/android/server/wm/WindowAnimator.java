@@ -140,6 +140,8 @@ public class WindowAnimator {
                     mService.debugLayoutRepeats("appToken " + appAnimator.mAppToken + " done",
                         mPendingLayoutChanges);
                 }
+                if (WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
+                        "updateWindowsApps...: done animating " + appAnimator.mAppToken);
             }
         }
 
@@ -154,9 +156,11 @@ public class WindowAnimator {
                 // stopped animating, do one more pass through the layout
                 mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                 if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                    mService.debugLayoutRepeats("exiting appToken " + appAnimator.mAppToken 
+                    mService.debugLayoutRepeats("exiting appToken " + appAnimator.mAppToken
                         + " done", mPendingLayoutChanges);
                 }
+                if (WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
+                        "updateWindowsApps...: done animating exiting " + appAnimator.mAppToken);
             }
         }
 
@@ -246,9 +250,9 @@ public class WindowAnimator {
 
                 if (mPolicy.doesForceHide(win, win.mAttrs)) {
                     if (!wasAnimating && nowAnimating) {
-                        if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
-                                "Animation started that could impact force hide: "
-                                + win);
+                        if (WindowManagerService.DEBUG_ANIM ||
+                                WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
+                                "Animation started that could impact force hide: " + win);
                         mBulkUpdateParams |= SET_FORCE_HIDING_CHANGED;
                         mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                         if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
