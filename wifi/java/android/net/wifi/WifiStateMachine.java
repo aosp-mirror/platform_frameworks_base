@@ -184,6 +184,9 @@ public class WifiStateMachine extends StateMachine {
 
     private LinkProperties mLinkProperties;
 
+    /* Tracks sequence number on a periodic scan message */
+    private int mPeriodicScanToken = 0;
+
     // Wakelock held during wifi start/stop and driver load/unload
     private PowerManager.WakeLock mWakeLock;
 
@@ -331,6 +334,9 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_SET_SUSPEND_OPTIMIZATIONS        = BASE + 86;
     /* Clear suspend mode optimizations in the driver */
     static final int CMD_CLEAR_SUSPEND_OPTIMIZATIONS      = BASE + 87;
+    /* When there are no saved networks, we do a periodic scan to notify user of
+     * an open network */
+    static final int CMD_NO_NETWORKS_PERIODIC_SCAN        = BASE + 88;
 
     /* arg1 values to CMD_STOP_PACKET_FILTERING and CMD_START_PACKET_FILTERING */
     static final int MULTICAST_V6  = 1;
@@ -385,10 +391,11 @@ public class WifiStateMachine extends StateMachine {
     private final int mDefaultFrameworkScanIntervalMs;
 
     /**
-     * Default supplicant scan interval in milliseconds.
-     * {@link Settings.Secure#WIFI_SUPPLICANT_SCAN_INTERVAL_MS} can override this.
+     * Supplicant scan interval in milliseconds.
+     * Comes from {@link Settings.Secure#WIFI_SUPPLICANT_SCAN_INTERVAL_MS} or
+     * from the default config if the setting is not set
      */
-    private final int mDefaultSupplicantScanIntervalMs;
+    private long mSupplicantScanIntervalMs;
 
     /**
      * Minimum time interval between enabling all networks.
@@ -567,9 +574,6 @@ public class WifiStateMachine extends StateMachine {
 
         mDefaultFrameworkScanIntervalMs = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_wifi_framework_scan_interval);
-
-        mDefaultSupplicantScanIntervalMs = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_wifi_supplicant_scan_interval);
 
         mDriverStopDelayMs = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_wifi_driver_stop_delay);
@@ -1870,6 +1874,7 @@ public class WifiStateMachine extends StateMachine {
                 case WifiWatchdogStateMachine.POOR_LINK_DETECTED:
                 case WifiWatchdogStateMachine.GOOD_LINK_DETECTED:
                 case CMD_CLEAR_SUSPEND_OPTIMIZATIONS:
+                case CMD_NO_NETWORKS_PERIODIC_SCAN:
                     break;
                 case CMD_SET_SUSPEND_OPTIMIZATIONS:
                     mSuspendWakeLock.release();
@@ -2269,11 +2274,15 @@ public class WifiStateMachine extends StateMachine {
             mIsScanMode = false;
             /* Wifi is available as long as we have a connection to supplicant */
             mNetworkInfo.setIsAvailable(true);
-            /* Set scan interval */
-            long supplicantScanIntervalMs = Settings.Secure.getLong(mContext.getContentResolver(),
+
+            int defaultInterval = mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_wifi_supplicant_scan_interval);
+
+            mSupplicantScanIntervalMs = Settings.Secure.getLong(mContext.getContentResolver(),
                     Settings.Secure.WIFI_SUPPLICANT_SCAN_INTERVAL_MS,
-                    mDefaultSupplicantScanIntervalMs);
-            mWifiNative.setScanInterval((int)supplicantScanIntervalMs / 1000);
+                    defaultInterval);
+
+            mWifiNative.setScanInterval((int)mSupplicantScanIntervalMs / 1000);
         }
         @Override
         public boolean processMessage(Message message) {
@@ -3270,11 +3279,39 @@ public class WifiStateMachine extends StateMachine {
             } else {
                 setScanAlarm(true);
             }
+
+            /**
+             * If we have no networks saved, the supplicant stops doing the periodic scan.
+             * The scans are useful to notify the user of the presence of an open network.
+             * Note that these are not wake up scans.
+             */
+            if (mWifiConfigStore.getConfiguredNetworks().size() == 0) {
+                sendMessageDelayed(obtainMessage(CMD_NO_NETWORKS_PERIODIC_SCAN,
+                            ++mPeriodicScanToken, 0), mSupplicantScanIntervalMs);
+            }
         }
         @Override
         public boolean processMessage(Message message) {
             if (DBG) log(getName() + message.toString() + "\n");
+            boolean ret = HANDLED;
             switch (message.what) {
+                case CMD_NO_NETWORKS_PERIODIC_SCAN:
+                    if (message.arg1 == mPeriodicScanToken &&
+                            mWifiConfigStore.getConfiguredNetworks().size() == 0) {
+                        sendMessage(CMD_START_SCAN);
+                        sendMessageDelayed(obtainMessage(CMD_NO_NETWORKS_PERIODIC_SCAN,
+                                    ++mPeriodicScanToken, 0), mSupplicantScanIntervalMs);
+                    }
+                    break;
+                case WifiManager.FORGET_NETWORK:
+                case CMD_REMOVE_NETWORK:
+                    // Set up a delayed message here. After the forget/remove is handled
+                    // the handled delayed message will determine if there is a need to
+                    // scan and continue
+                    sendMessageDelayed(obtainMessage(CMD_NO_NETWORKS_PERIODIC_SCAN,
+                                ++mPeriodicScanToken, 0), mSupplicantScanIntervalMs);
+                    ret = NOT_HANDLED;
+                    break;
                 case CMD_SET_SCAN_MODE:
                     if (message.arg1 == SCAN_ONLY_MODE) {
                         mWifiNative.setScanResultHandling(message.arg1);
@@ -3301,25 +3338,28 @@ public class WifiStateMachine extends StateMachine {
                     StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
                     setNetworkDetailedState(WifiInfo.getDetailedStateOf(stateChangeResult.state));
                     /* ConnectModeState does the rest of the handling */
-                    return NOT_HANDLED;
+                    ret = NOT_HANDLED;
+                    break;
                 case CMD_START_SCAN:
                     /* Disable background scan temporarily during a regular scan */
                     if (mEnableBackgroundScan) {
                         mWifiNative.enableBackgroundScan(false);
                     }
                     /* Handled in parent state */
-                    return NOT_HANDLED;
+                    ret = NOT_HANDLED;
+                    break;
                 case WifiMonitor.SCAN_RESULTS_EVENT:
                     /* Re-enable background scan when a pending scan result is received */
                     if (mEnableBackgroundScan && mScanResultIsPending) {
                         mWifiNative.enableBackgroundScan(true);
                     }
                     /* Handled in parent state */
-                    return NOT_HANDLED;
+                    ret = NOT_HANDLED;
+                    break;
                 default:
-                    return NOT_HANDLED;
+                    ret = NOT_HANDLED;
             }
-            return HANDLED;
+            return ret;
         }
 
         @Override
