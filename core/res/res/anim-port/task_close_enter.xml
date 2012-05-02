@@ -19,18 +19,25 @@
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:background="#ff000000" android:shareInterpolator="false" android:zAdjustment="top">
-    <scale android:fromXScale="1.0" android:toXScale=".8"
-            android:fromYScale="1.0" android:toYScale=".8"
+
+    <alpha android:fromAlpha="0" android:toAlpha="1.0"
+            android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
+            android:interpolator="@interpolator/decelerate_quad"
+            android:startOffset="150"
+            android:duration="350"/>
+
+    <translate android:fromYDelta="-140%" android:toYDelta="0"
+            android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
+            android:interpolator="@interpolator/decelerate_cubic"
+            android:startOffset="150"
+            android:duration="350"/>
+
+    <scale android:fromXScale=".6" android:toXScale="1.0"
+            android:fromYScale=".6" android:toYScale="1.0"
             android:pivotX="50%p" android:pivotY="50%p"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:interpolator="@interpolator/decelerate_cubic"
-            android:duration="300" />
-    <alpha android:fromAlpha="1.0" android:toAlpha="0"
-            android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:interpolator="@interpolator/decelerate_cubic"
-            android:duration="300"/>
+            android:interpolator="@interpolator/decelerate_quad"
+            android:startOffset="150"
+            android:duration="350" />
 
-    <!-- This is needed to keep the animation running while task_close_enter completes -->
-    <alpha android:fromAlpha="1.0" android:toAlpha="1.0"
-            android:duration="600" />
 </set>
