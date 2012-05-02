@@ -469,6 +469,11 @@ public class Camera {
          * Called as preview frames are displayed.  This callback is invoked
          * on the event thread {@link #open(int)} was called from.
          *
+         * <p>If using the {@link android.graphics.ImageFormat#YV12} format,
+         * refer to the equations in {@link Camera.Parameters#setPreviewFormat}
+         * for the arrangement of the pixel data in the preview callback
+         * buffers.
+         *
          * @param data the contents of the preview frame in the format defined
          *  by {@link android.graphics.ImageFormat}, which can be queried
          *  with {@link android.hardware.Camera.Parameters#getPreviewFormat()}.
@@ -609,12 +614,17 @@ public class Camera {
      * the frame is discarded. Applications should add buffers back when they
      * finish processing the data in them.
      *
-     * <p>The size of the buffer is determined by multiplying the preview
-     * image width, height, and bytes per pixel. The width and height can be
-     * read from {@link Camera.Parameters#getPreviewSize()}. Bytes per pixel
-     * can be computed from
-     * {@link android.graphics.ImageFormat#getBitsPerPixel(int)} / 8,
-     * using the image format from {@link Camera.Parameters#getPreviewFormat()}.
+     * <p>For formats besides YV12, the size of the buffer is determined by
+     * multiplying the preview image width, height, and bytes per pixel. The
+     * width and height can be read from
+     * {@link Camera.Parameters#getPreviewSize()}. Bytes per pixel can be
+     * computed from {@link android.graphics.ImageFormat#getBitsPerPixel(int)} /
+     * 8, using the image format from
+     * {@link Camera.Parameters#getPreviewFormat()}.
+     *
+     * <p>If using the {@link android.graphics.ImageFormat#YV12} format, the
+     * size can be calculated using the equations listed in
+     * {@link Camera.Parameters#setPreviewFormat}.
      *
      * <p>This method is only necessary when
      * {@link #setPreviewCallbackWithBuffer(PreviewCallback)} is used. When
@@ -624,8 +634,8 @@ public class Camera {
      * hold the preview frame data, preview callback will return null and
      * the buffer will be removed from the buffer queue.
      *
-     * @param callbackBuffer the buffer to add to the queue.
-     *     The size should be width * height * bits_per_pixel / 8.
+     * @param callbackBuffer the buffer to add to the queue. The size of the
+     *   buffer must match the values described above.
      * @see #setPreviewCallbackWithBuffer(PreviewCallback)
      */
     public final void addCallbackBuffer(byte[] callbackBuffer)
@@ -2270,12 +2280,44 @@ public class Camera {
          * {@link android.graphics.ImageFormat#NV21}, which
          * uses the NV21 encoding format.</p>
          *
-         * @param pixel_format the desired preview picture format, defined
-         *   by one of the {@link android.graphics.ImageFormat} constants.
-         *   (E.g., <var>ImageFormat.NV21</var> (default),
-         *                      <var>ImageFormat.RGB_565</var>, or
-         *                      <var>ImageFormat.JPEG</var>)
+         * <p>Use {@link Parameters#getSupportedPreviewFormats} to get a list of
+         * the available preview formats.
+         *
+         * <p>It is strongly recommended that either
+         * {@link android.graphics.ImageFormat#NV21} or
+         * {@link android.graphics.ImageFormat#YV12} is used, since
+         * they are supported by all camera devices.</p>
+         *
+         * <p>For YV12, the image buffer that is received is not necessarily
+         * tightly packed, as there may be padding at the end of each row of
+         * pixel data, as described in
+         * {@link android.graphics.ImageFormat#YV12}. For camera callback data,
+         * it can be assumed that the stride of the Y and UV data is the
+         * smallest possible that meets the alignment requirements. That is, if
+         * the preview size is <var>width x height</var>, then the following
+         * equations describe the buffer index for the beginning of row
+         * <var>y</var> for the Y plane and row <var>c</var> for the U and V
+         * planes:
+         *
+         * {@code
+         * <pre>
+         * yStride   = (int) ceil(width / 16.0) * 16;
+         * uvStride  = (int) ceil( (yStride / 2) / 16.0) * 16;
+         * ySize     = yStride * height;
+         * uvSize    = uvStride * height / 2;
+         * yRowIndex = yStride * y;
+         * uRowIndex = ySize + uvSize + uvStride * c;
+         * vRowIndex = ySize + uvStride * c;
+         * size      = ySize + uvSize * 2;</pre>
+         * }
+         *
+         * @param pixel_format the desired preview picture format, defined by
+         *   one of the {@link android.graphics.ImageFormat} constants.  (E.g.,
+         *   <var>ImageFormat.NV21</var> (default), or
+         *   <var>ImageFormat.YV12</var>)
+         *
          * @see android.graphics.ImageFormat
+         * @see android.hardware.Camera.Parameters#getSupportedPreviewFormats
          */
         public void setPreviewFormat(int pixel_format) {
             String s = cameraFormatForPixelFormat(pixel_format);
@@ -2293,6 +2335,7 @@ public class Camera {
          *
          * @return the preview format.
          * @see android.graphics.ImageFormat
+         * @see #setPreviewFormat
          */
         public int getPreviewFormat() {
             return pixelFormatForCameraFormat(get(KEY_PREVIEW_FORMAT));
@@ -2306,6 +2349,7 @@ public class Camera {
          * @return a list of supported preview formats. This method will always
          *         return a list with at least one element.
          * @see android.graphics.ImageFormat
+         * @see #setPreviewFormat
          */
         public List<Integer> getSupportedPreviewFormats() {
             String str = get(KEY_PREVIEW_FORMAT + SUPPORTED_VALUES_SUFFIX);
