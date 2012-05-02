@@ -43,8 +43,8 @@ interface IAppWidgetService {
     // for AppWidgetManager
     //
     void updateAppWidgetIds(in int[] appWidgetIds, in RemoteViews views);
-    void updateAppWidgetExtras(int appWidgetId, in Bundle extras);
-    Bundle getAppWidgetExtras(int appWidgetId);
+    void updateAppWidgetOptions(int appWidgetId, in Bundle extras);
+    Bundle getAppWidgetOptions(int appWidgetId);
     void partiallyUpdateAppWidgetIds(in int[] appWidgetIds, in RemoteViews views);
     void updateAppWidgetProvider(in ComponentName provider, in RemoteViews views);
     void notifyAppWidgetViewDataChanged(in int[] appWidgetIds, int viewId);
