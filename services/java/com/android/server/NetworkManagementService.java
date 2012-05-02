@@ -23,7 +23,6 @@ import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_TETHERING;
-import static android.provider.Settings.Secure.NETSTATS_ENABLED;
 import static com.android.server.NetworkManagementService.NetdResponseCode.InterfaceGetCfgResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.InterfaceListResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.InterfaceRxThrottleResult;
@@ -45,19 +44,19 @@ import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
+import android.os.Handler;
 import android.os.INetworkManagementService;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.net.NetworkStatsFactory;
 import com.android.server.NativeDaemonConnector.Command;
-import com.google.android.collect.Sets;
+import com.google.android.collect.Maps;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -74,7 +73,8 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.concurrent.CountDownLatch;
@@ -133,8 +133,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      */
     private NativeDaemonConnector mConnector;
 
+    private final Handler mMainHandler = new Handler();
+
     private Thread mThread;
-    private final CountDownLatch mConnectedSignal = new CountDownLatch(1);
+    private CountDownLatch mConnectedSignal = new CountDownLatch(1);
 
     private final RemoteCallbackList<INetworkManagementEventObserver> mObservers =
             new RemoteCallbackList<INetworkManagementEventObserver>();
@@ -143,9 +145,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private Object mQuotaLock = new Object();
     /** Set of interfaces with active quotas. */
-    private HashSet<String> mActiveQuotaIfaces = Sets.newHashSet();
+    private HashMap<String, Long> mActiveQuotas = Maps.newHashMap();
     /** Set of interfaces with active alerts. */
-    private HashSet<String> mActiveAlertIfaces = Sets.newHashSet();
+    private HashMap<String, Long> mActiveAlerts = Maps.newHashMap();
     /** Set of UIDs with active reject rules. */
     private SparseBooleanArray mUidRejectOnQuota = new SparseBooleanArray();
 
@@ -172,35 +174,19 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     public static NetworkManagementService create(Context context) throws InterruptedException {
-        NetworkManagementService service = new NetworkManagementService(context);
+        final NetworkManagementService service = new NetworkManagementService(context);
+        final CountDownLatch connectedSignal = service.mConnectedSignal;
         if (DBG) Slog.d(TAG, "Creating NetworkManagementService");
         service.mThread.start();
         if (DBG) Slog.d(TAG, "Awaiting socket connection");
-        service.mConnectedSignal.await();
+        connectedSignal.await();
         if (DBG) Slog.d(TAG, "Connected");
         return service;
     }
 
     public void systemReady() {
-        // only enable bandwidth control when support exists, and requested by
-        // system setting.
-        final boolean hasKernelSupport = new File("/proc/net/xt_qtaguid/ctrl").exists();
-        final boolean shouldEnable =
-                Settings.Secure.getInt(mContext.getContentResolver(), NETSTATS_ENABLED, 1) != 0;
-
-        if (hasKernelSupport && shouldEnable) {
-            Slog.d(TAG, "enabling bandwidth control");
-            try {
-                mConnector.execute("bandwidth", "enable");
-                mBandwidthControlEnabled = true;
-            } catch (NativeDaemonConnectorException e) {
-                Log.wtf(TAG, "problem enabling bandwidth controls", e);
-            }
-        } else {
-            Slog.d(TAG, "not enabling bandwidth control");
-        }
-
-        SystemProperties.set(PROP_QTAGUID_ENABLED, mBandwidthControlEnabled ? "1" : "0");
+        prepareNativeDaemon();
+        if (DBG) Slog.d(TAG, "Prepared");
     }
 
     @Override
@@ -264,8 +250,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     private void notifyInterfaceRemoved(String iface) {
         // netd already clears out quota and alerts for removed ifaces; update
         // our sanity-checking state.
-        mActiveAlertIfaces.remove(iface);
-        mActiveQuotaIfaces.remove(iface);
+        mActiveAlerts.remove(iface);
+        mActiveQuotas.remove(iface);
 
         final int length = mObservers.beginBroadcast();
         for (int i = 0; i < length; i++) {
@@ -292,24 +278,85 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     /**
-     * Let us know the daemon is connected
+     * Prepare native daemon once connected, enabling modules and pushing any
+     * existing in-memory rules.
      */
-    protected void onDaemonConnected() {
-        mConnectedSignal.countDown();
-    }
+    private void prepareNativeDaemon() {
+        mBandwidthControlEnabled = false;
 
+        // only enable bandwidth control when support exists
+        final boolean hasKernelSupport = new File("/proc/net/xt_qtaguid/ctrl").exists();
+        if (hasKernelSupport) {
+            Slog.d(TAG, "enabling bandwidth control");
+            try {
+                mConnector.execute("bandwidth", "enable");
+                mBandwidthControlEnabled = true;
+            } catch (NativeDaemonConnectorException e) {
+                Log.wtf(TAG, "problem enabling bandwidth controls", e);
+            }
+        } else {
+            Slog.d(TAG, "not enabling bandwidth control");
+        }
+
+        SystemProperties.set(PROP_QTAGUID_ENABLED, mBandwidthControlEnabled ? "1" : "0");
+
+        // push any existing quota or UID rules
+        synchronized (mQuotaLock) {
+            int size = mActiveQuotas.size();
+            if (size > 0) {
+                Slog.d(TAG, "pushing " + size + " active quota rules");
+                final HashMap<String, Long> activeQuotas = mActiveQuotas;
+                mActiveQuotas = Maps.newHashMap();
+                for (Map.Entry<String, Long> entry : activeQuotas.entrySet()) {
+                    setInterfaceQuota(entry.getKey(), entry.getValue());
+                }
+            }
+
+            size = mActiveAlerts.size();
+            if (size > 0) {
+                Slog.d(TAG, "pushing " + size + " active alert rules");
+                final HashMap<String, Long> activeAlerts = mActiveAlerts;
+                mActiveAlerts = Maps.newHashMap();
+                for (Map.Entry<String, Long> entry : activeAlerts.entrySet()) {
+                    setInterfaceAlert(entry.getKey(), entry.getValue());
+                }
+            }
+
+            size = mUidRejectOnQuota.size();
+            if (size > 0) {
+                Slog.d(TAG, "pushing " + size + " active uid rules");
+                final SparseBooleanArray uidRejectOnQuota = mUidRejectOnQuota;
+                mUidRejectOnQuota = new SparseBooleanArray();
+                for (int i = 0; i < uidRejectOnQuota.size(); i++) {
+                    setUidNetworkRules(uidRejectOnQuota.keyAt(i), uidRejectOnQuota.valueAt(i));
+                }
+            }
+        }
+    }
 
     //
     // Netd Callback handling
     //
 
-    class NetdCallbackReceiver implements INativeDaemonConnectorCallbacks {
-        /** {@inheritDoc} */
+    private class NetdCallbackReceiver implements INativeDaemonConnectorCallbacks {
+        @Override
         public void onDaemonConnected() {
-            NetworkManagementService.this.onDaemonConnected();
+            // event is dispatched from internal NDC thread, so we prepare the
+            // daemon back on main thread.
+            if (mConnectedSignal != null) {
+                mConnectedSignal.countDown();
+                mConnectedSignal = null;
+            } else {
+                mMainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        prepareNativeDaemon();
+                    }
+                });
+            }
         }
 
-        /** {@inheritDoc} */
+        @Override
         public boolean onEvent(int code, String raw, String[] cooked) {
             switch (code) {
             case NetdResponseCode.InterfaceChange:
@@ -962,14 +1009,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         if (!mBandwidthControlEnabled) return;
 
         synchronized (mQuotaLock) {
-            if (mActiveQuotaIfaces.contains(iface)) {
+            if (mActiveQuotas.containsKey(iface)) {
                 throw new IllegalStateException("iface " + iface + " already has quota");
             }
 
             try {
                 // TODO: support quota shared across interfaces
                 mConnector.execute("bandwidth", "setiquota", iface, quotaBytes);
-                mActiveQuotaIfaces.add(iface);
+                mActiveQuotas.put(iface, quotaBytes);
             } catch (NativeDaemonConnectorException e) {
                 throw e.rethrowAsParcelableException();
             }
@@ -985,13 +1032,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         if (!mBandwidthControlEnabled) return;
 
         synchronized (mQuotaLock) {
-            if (!mActiveQuotaIfaces.contains(iface)) {
+            if (!mActiveQuotas.containsKey(iface)) {
                 // TODO: eventually consider throwing
                 return;
             }
 
-            mActiveQuotaIfaces.remove(iface);
-            mActiveAlertIfaces.remove(iface);
+            mActiveQuotas.remove(iface);
+            mActiveAlerts.remove(iface);
 
             try {
                 // TODO: support quota shared across interfaces
@@ -1011,19 +1058,19 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         if (!mBandwidthControlEnabled) return;
 
         // quick sanity check
-        if (!mActiveQuotaIfaces.contains(iface)) {
+        if (!mActiveQuotas.containsKey(iface)) {
             throw new IllegalStateException("setting alert requires existing quota on iface");
         }
 
         synchronized (mQuotaLock) {
-            if (mActiveAlertIfaces.contains(iface)) {
+            if (mActiveAlerts.containsKey(iface)) {
                 throw new IllegalStateException("iface " + iface + " already has alert");
             }
 
             try {
                 // TODO: support alert shared across interfaces
                 mConnector.execute("bandwidth", "setinterfacealert", iface, alertBytes);
-                mActiveAlertIfaces.add(iface);
+                mActiveAlerts.put(iface, alertBytes);
             } catch (NativeDaemonConnectorException e) {
                 throw e.rethrowAsParcelableException();
             }
@@ -1039,7 +1086,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         if (!mBandwidthControlEnabled) return;
 
         synchronized (mQuotaLock) {
-            if (!mActiveAlertIfaces.contains(iface)) {
+            if (!mActiveAlerts.containsKey(iface)) {
                 // TODO: eventually consider throwing
                 return;
             }
@@ -1047,7 +1094,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             try {
                 // TODO: support alert shared across interfaces
                 mConnector.execute("bandwidth", "removeinterfacealert", iface);
-                mActiveAlertIfaces.remove(iface);
+                mActiveAlerts.remove(iface);
             } catch (NativeDaemonConnectorException e) {
                 throw e.rethrowAsParcelableException();
             }
@@ -1077,7 +1124,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         // TODO: eventually migrate to be always enabled
         if (!mBandwidthControlEnabled) return;
 
-        synchronized (mUidRejectOnQuota) {
+        synchronized (mQuotaLock) {
             final boolean oldRejectOnQuota = mUidRejectOnQuota.get(uid, false);
             if (oldRejectOnQuota == rejectOnQuotaInterfaces) {
                 // TODO: eventually consider throwing
@@ -1272,8 +1319,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         pw.print("Bandwidth control enabled: "); pw.println(mBandwidthControlEnabled);
 
         synchronized (mQuotaLock) {
-            pw.print("Active quota ifaces: "); pw.println(mActiveQuotaIfaces.toString());
-            pw.print("Active alert ifaces: "); pw.println(mActiveAlertIfaces.toString());
+            pw.print("Active quota ifaces: "); pw.println(mActiveQuotas.toString());
+            pw.print("Active alert ifaces: "); pw.println(mActiveAlerts.toString());
         }
 
         synchronized (mUidRejectOnQuota) {
