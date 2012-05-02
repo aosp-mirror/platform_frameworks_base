@@ -1315,6 +1315,7 @@
   <java-symbol type="string" name="lockscreen_password_wrong" />
   <java-symbol type="string" name="lockscreen_pattern_instructions" />
   <java-symbol type="string" name="lockscreen_pattern_wrong" />
+  <java-symbol type="string" name="lockscreen_permanent_disabled_sim_message_short" />
   <java-symbol type="string" name="lockscreen_permanent_disabled_sim_instructions" />
   <java-symbol type="string" name="lockscreen_plugged_in" />
   <java-symbol type="string" name="lockscreen_sim_locked_message" />
