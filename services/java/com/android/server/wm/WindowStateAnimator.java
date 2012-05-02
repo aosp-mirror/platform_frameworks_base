@@ -380,8 +380,9 @@ class WindowStateAnimator {
 
     boolean finishDrawingLocked() {
         if (mDrawState == DRAW_PENDING) {
-            if (SHOW_TRANSACTIONS || DEBUG_ORIENTATION) Slog.v(
-                TAG, "finishDrawingLocked: " + this + " in " + mSurface);
+            if (DEBUG_ANIM || SHOW_TRANSACTIONS || DEBUG_ORIENTATION) Slog.v(
+                TAG, "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING " + this + " in "
+                        + mSurface);
             mDrawState = COMMIT_DRAW_PENDING;
             return true;
         }
@@ -393,7 +394,8 @@ class WindowStateAnimator {
         if (mDrawState != COMMIT_DRAW_PENDING) {
             return false;
         }
-        //Slog.i(TAG, "commitFinishDrawingLocked: Draw pending. " + mSurface);
+        if (DEBUG_ANIM)
+            Slog.i(TAG, "commitFinishDrawingLocked: mDrawState=READY_TO_SHOW " + mSurface);
         mDrawState = READY_TO_SHOW;
         final boolean starting = mWin.mAttrs.type == TYPE_APPLICATION_STARTING;
         final AppWindowToken atoken = mWin.mAppToken;
@@ -526,8 +528,8 @@ class WindowStateAnimator {
         if (mSurface == null) {
             mReportDestroySurface = false;
             mSurfacePendingDestroy = false;
-            if (DEBUG_ORIENTATION) Slog.i(TAG,
-                    "createSurface " + this + ": DRAW NOW PENDING");
+            if (DEBUG_ANIM || DEBUG_ORIENTATION) Slog.i(TAG,
+                    "createSurface " + this + ": mDrawState=DRAW_PENDING");
             mDrawState = DRAW_PENDING;
             if (mWin.mAppToken != null) {
                 mWin.mAppToken.allDrawn = false;
@@ -1062,6 +1064,9 @@ class WindowStateAnimator {
                 }
             }
         } else {
+            if (DEBUG_ANIM) {
+                Slog.v(TAG, "prepareSurface: No changes in animation for " + mWin);
+            }
             displayed = true;
         }
 
@@ -1145,6 +1150,7 @@ class WindowStateAnimator {
 
             // Force the show in the next prepareSurfaceLocked() call.
             mLastAlpha = -1;
+            if (DEBUG_ANIM) Slog.v(TAG, "performShowLocked: mDrawState=HAS_DRAWN");
             mDrawState = HAS_DRAWN;
             mService.scheduleAnimationLocked();
 
@@ -1285,7 +1291,7 @@ class WindowStateAnimator {
                     + " anim=" + anim + " attr=0x" + Integer.toHexString(attr)
                     + " a=" + a
                     + " mAnimation=" + mAnimation
-                    + " isEntrance=" + isEntrance);
+                    + " isEntrance=" + isEntrance + " Callers " + Debug.getCallers(3));
             if (a != null) {
                 if (WindowManagerService.DEBUG_ANIM) {
                     RuntimeException e = null;
