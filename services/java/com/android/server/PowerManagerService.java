@@ -2709,6 +2709,12 @@ public class PowerManagerService extends IPowerManager.Stub
     }
 
     private void goToSleepLocked(long time, int reason) {
+        if (mSpew) {
+            Exception ex = new Exception();
+            ex.fillInStackTrace();
+            Slog.d(TAG, "goToSleep mLastEventTime=" + mLastEventTime + " time=" + time
+                    + " reason=" + reason, ex);
+        }
 
         if (mLastEventTime <= time) {
             mLastEventTime = time;
