@@ -193,14 +193,11 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Antaa sovelluksen sijaita tilapalkissa."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"laajentaa/tiivistää tilarivin"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Antaa sovelluksen laajentaa tai tiivistää tilarivin."</string>
-    <!-- no translation found for permlab_processOutgoingCalls (3906007831192990946) -->
-    <skip />
+    <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"ohjaa uudelleen lähtevät puhelut"</string>
     <string name="permdesc_processOutgoingCalls" msgid="1152111671618301044">"Antaa sovelluksen käsitellä lähteviä puheluita ja muuttaa kohdenumeroita. Haitalliset sovellukset voivat valvoa, uudelleenohjata tai estää lähteviä puheluita."</string>
-    <!-- no translation found for permlab_receiveSms (8673471768947895082) -->
-    <skip />
+    <string name="permlab_receiveSms" msgid="8673471768947895082">"vastaanota tekstiviestejä (teksti)"</string>
     <string name="permdesc_receiveSms" msgid="8107887121893611793">"Antaa sovelluksen vastaanottaa ja käsitellä tekstiviestejä. Haitalliset sovellukset voivat valvoa viestejä tai poistaa niitä näyttämättä niitä sinulle."</string>
-    <!-- no translation found for permlab_receiveMms (1821317344668257098) -->
-    <skip />
+    <string name="permlab_receiveMms" msgid="1821317344668257098">"vastaanota tekstiviestejä (multimedia)"</string>
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Antaa sovelluksen vastaanottaa ja käsitellä MMS-viestejä. Haitalliset sovellukset voivat valvoa viestejä tai poistaa niitä näyttämättä niitä sinulle."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"vastaanota hätätilalähetyksiä"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Antaa sovelluksen vastaanottaa ja käsitellä hätälähetysviestejä. Tämä lupa on vain järjestelmäsovellusten käytettävissä."</string>
@@ -210,16 +207,13 @@
     <string name="permdesc_sendSms" msgid="906546667507626156">"Antaa sovelluksen lähettää tekstiviestejä. Haitalliset sovellukset voivat tuhlata rahaa lähettämällä viestejä ilman vahvistusta."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"lähettää tekstiviestejä ilman vahvistusta"</string>
     <string name="permdesc_sendSmsNoConfirmation" msgid="3437759207020400204">"Antaa sovelluksen lähettää tekstiviestejä. Haitalliset sovellukset voivat tuhlata rahaa lähettämällä viestejä ilman vahvistusta."</string>
-    <!-- no translation found for permlab_readSms (8745086572213270480) -->
-    <skip />
+    <string name="permlab_readSms" msgid="8745086572213270480">"lue tekstiviestejä (teksti tai multimedia)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2341692916884515613">"Antaa sovelluksen lukea tablet-laitteelle tai SIM-kortille tallennettuja tekstiviestejä. Haitalliset sovellukset saattavat lukea luottamuksellisia viestejä."</string>
     <string name="permdesc_readSms" product="default" msgid="5653850482025875493">"Antaa sovelluksen lukea puhelimelle tai SIM-kortille tallennettuja tekstiviestejä. Haitalliset sovellukset saattavat lukea luottamuksellisia viestejä."</string>
-    <!-- no translation found for permlab_writeSms (3216950472636214774) -->
-    <skip />
+    <string name="permlab_writeSms" msgid="3216950472636214774">"muokkaa tekstiviestejä (teksti tai multimedia)"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Antaa sovelluksen kirjoittaa tablet-laitteelle tai SIM-kortille tallennettuihin tekstiviesteihin. Haitalliset sovellukset voivat poistaa viestejä."</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Antaa sovelluksen kirjoittaa puhelimelle tai SIM-kortille tallennettuihin tekstiviesteihin. Haitalliset sovellukset voivat poistaa viestejä."</string>
-    <!-- no translation found for permlab_receiveWapPush (5991398711936590410) -->
-    <skip />
+    <string name="permlab_receiveWapPush" msgid="5991398711936590410">"vastaanota tekstiviestejä (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Antaa sovelluksen vastaanottaa ja käsitellä WAP-viestejä. Haitalliset sovellukset voivat valvoa viestejä tai poistaa niitä näyttämättä niitä sinulle."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"käynnissä olevien sovellusten noutaminen"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Antaa sovelluksen noutaa käynnissä oleviin ja käynnissä olleisiin tehtäviin liittyviä tietoja. Haitalliset sovellukset saattavat saada näin muihin sovelluksiin liittyviä yksityisiä tietoja."</string>
@@ -235,13 +229,11 @@
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Sallii sovelluksen hallita toisten sovellusten näytön yhteensopivuustilaa. Haittasovellukset voivat häiritä toisten sovellusten toimintaa."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"sovellusten vianetsinnän käyttöönotto"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Antaa sovelluksen ottaa vianetsinnän käyttöön toisessa sovelluksessa. Haitalliset ohjelmat voivat lopettaa tällä muita sovelluksia."</string>
-    <!-- no translation found for permlab_changeConfiguration (4162092185124234480) -->
-    <skip />
+    <string name="permlab_changeConfiguration" msgid="4162092185124234480">"muuta järjestelmän näyttöasetuksia"</string>
     <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Sallii sovelluksen muuttaa nykyistä määritystä, kuten maata tai yleistä kirjasinkokoa."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"ota autotila käyttöön"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Antaa sovelluksen ottaa autotilan käyttöön."</string>
-    <!-- no translation found for permlab_killBackgroundProcesses (3914026687420177202) -->
-    <skip />
+    <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"sulje muita sovelluksia"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="931129103262126617">"Antaa sovelluksen lopettaa muiden sovellusten taustaprosesseja myös silloin, kun muisti ei ole vähissä."</string>
     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"muiden sovellusten pysähtymisen pakottaminen"</string>
     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Antaa sovelluksen pakottaa muita sovelluksia pysähtymään."</string>
@@ -265,8 +257,7 @@
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Antaa sovelluksen lähettää ilmoituksen WAP PUSH -viestin vastaanotosta. Haitalliset sovellukset voivat käyttää tätä MMS-viestien vastaanoton väärentämiseen tai sivujen sisällön korvaamiseen huomaamattomasti haitallisella sisällöllä."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"rajoita käynnissä olevien prosessien määrää"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Antaa sovelluksen hallita suoritettavien sovellusten enimmäismäärää. Ei tavallisten sovellusten käyttöön."</string>
-    <!-- no translation found for permlab_setAlwaysFinish (550958507798796965) -->
-    <skip />
+    <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"pakota taustasovelluksia sulkeutumaan"</string>
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Antaa sovelluksen hallita, suoritetaanko toiminnot aina loppuun heti, kun ne siirtyvät taustalle. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"muokkaa akun tilastoja"</string>
     <string name="permdesc_batteryStats" msgid="6835186932305744068">"Antaa sovelluksen muokata kerättyjä akkutilastoja. Ei tavallisten sovellusten käyttöön."</string>
@@ -276,8 +267,7 @@
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Antaa sovelluksen käynnistää täyden varmuuskopioinnin vahvistuskäyttöliittymän. Minkään sovelluksen ei tule käyttää tätä."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"näytä luvattomia ikkunoita"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Antaa sovelluksen luoda ikkunoita, jotka on tarkoitettu sisäisen järjestelmäkäyttöliittymän käytettäviksi. Ei tavallisten sovellusten käyttöön."</string>
-    <!-- no translation found for permlab_systemAlertWindow (3543347980839518613) -->
-    <skip />
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"piirrä muihin sovelluksiin"</string>
     <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"Antaa sovelluksen näyttää järjestelmähälytysikkunoita. Haitalliset ohjelmat voivat ottaa koko näytön haltuun."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"muokkaa yleistä animaationopeutta"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Antaa sovelluksen muuttaa yleistä animaationopeutta (nopeuttaa tai hidastaa animaatioita) milloin tahansa."</string>
@@ -339,26 +329,22 @@
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Antaa sovelluksen myöntää tai kieltää tiettyjä käyttööoikeuksia itselleen tai muille sovelluksille. Haittaohjelmat voivat käyttää tämän ominaisuuden avulla toimintoja, joiden käyttöön et ole antanut lupaa."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"ensisijaisten sovellusten asettaminen"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Antaa sovelluksen muokata ensisijaisia sovelluksia. Haitalliset sovellukset voivat muuttaa käynnistettäviä sovelluksia huomaamattomasti ja kerätä henkilökohtaisia tietoja matkimalla nykyisiä sovelluksia."</string>
-    <!-- no translation found for permlab_writeSettings (2226195290955224730) -->
-    <skip />
+    <string name="permlab_writeSettings" msgid="2226195290955224730">"muokkaa järjestelmän asetuksia"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Antaa sovelluksen muokata järjestelmän asetustietoja. Haitalliset sovellukset voivat vahingoittaa järjestelmän määritystä."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"muokkaa suojatun järjestelmän asetuksia"</string>
     <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Antaa sovelluksen muokata järjestelmän suojattuja asetustietoja. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"muokkaa Googlen palvelukarttaa"</string>
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Antaa sovelluksen muokata Googlen palvelukarttaa. Ei tavallisten sovellusten käyttöön."</string>
-    <!-- no translation found for permlab_receiveBootCompleted (5312965565987800025) -->
-    <skip />
+    <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"suorita laitteen käynnistyessä"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Antaa sovelluksen käynnistyä heti, kun laite on käynnistynyt. Tämä voi pidentää tablet-laitteen käynnistysaikaa ja hidastaa sen yleistä käyttöä sovelluksen ollessa aina käynnissä."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Antaa sovelluksen käynnistyä heti, kun laite on käynnistynyt. Tämä voi pidentää puhelimen käynnistysaikaa ja hidastaa puhelimen yleistä käyttöä sovelluksen ollessa aina käynnissä."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"lähetä tärkeä lähetys"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Antaa sovelluksen lähettää pysyviä lähetyksiä, jotka pysyvät olemassa lähetyksen päätyttyä. Haitalliset sovellukset voivat tehdä tablet-laitteesta hitaan tai epävakaan kasvattamalla sen muistinkäyttöä liikaa."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Antaa sovelluksen lähettää pysyviä lähetyksiä, jotka pysyvät olemassa lähetyksen päätyttyä. Haitalliset sovellukset voivat tehdä puhelimesta hitaan tai epävakaan kasvattamalla sen muistinkäyttöä liikaa."</string>
-    <!-- no translation found for permlab_readContacts (8348481131899886131) -->
-    <skip />
+    <string name="permlab_readContacts" msgid="8348481131899886131">"lue yhteystietoja"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Antaa sovelluksen lukea kaikki tablet-laitteesi yhteystiedot, myös tiedot siitä, miten usein olet puhelimitse, sähköpostitse tai muilla tavoin viestinyt tiettyjen henkilöiden kanssa. Ominaisuus helpottaa sähköpostiosoitteiden automaattista hakemista sekä monia muita hyödyllisiä toimintoja, mutta haittasovellukset voivat lähettää sen avulla yhteystietojasi muille."</string>
     <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Antaa sovelluksen lukea kaikki puhelimesi yhteystiedot, myös tiedot siitä, miten usein olet puhelimitse, sähköpostitse tai muilla tavoin viestinyt tiettyjen henkilöiden kanssa. Ominaisuus helpottaa sähköpostiosoitteiden automaattista hakemista sekä monia muita hyödyllisiä toimintoja, mutta haittasovellukset voivat lähettää sen avulla yhteystietojasi muille."</string>
-    <!-- no translation found for permlab_writeContacts (5107492086416793544) -->
-    <skip />
+    <string name="permlab_writeContacts" msgid="5107492086416793544">"muokkaa yhteystietoja"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Antaa sovelluksen muokata kaikkia tablet-laitteesi yhteystietoja, myös tietoja siitä, miten usein olet puhelimitse, sähköpostitse tai muilla tavoin viestinyt tiettyjen henkilöiden kanssa. Ominaisuus helpottaa sähköpostiosoitteiden automaattista hakemista sekä monia muita hyödyllisiä toimintoja, mutta haittasovellukset voivat poistaa tai muokata sen avulla yhteystietojasi."</string>
     <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Antaa sovelluksen muokata kaikkia puhelimesi yhteystietoja, myös tietoja siitä, miten usein olet puhelimitse, sähköpostitse tai muilla tavoin viestinyt tiettyjen henkilöiden kanssa. Ominaisuus helpottaa sähköpostiosoitteiden automaattista hakemista sekä monia muita hyödyllisiä toimintoja, mutta haittasovellukset voivat poistaa tai muokata sen avulla yhteystietojasi."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"lue puhelulokia"</string>
@@ -367,11 +353,9 @@
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"kirjoita puhelulokiin"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Antaa sovelluksen muokata tablet-laitteesi puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Antaa sovelluksen muokata puhelimesi puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
-    <!-- no translation found for permlab_readProfile (4701889852612716678) -->
-    <skip />
+    <string name="permlab_readProfile" msgid="4701889852612716678">"lue omia yhteystietoja"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Antaa sovelluksen lukea laitteelle tallennettuja henkilökohtaisia tietoja, kuten nimen ja yhteystietoja. Tämä antaa sovelluksen tunnistaa sinut ja lähettää profiilitietojasi muille."</string>
-    <!-- no translation found for permlab_writeProfile (907793628777397643) -->
-    <skip />
+    <string name="permlab_writeProfile" msgid="907793628777397643">"muokkaa omia yhteystietoja"</string>
     <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"Antaa sovelluksen muuttaa laitteelle tallennettuja henkilökohtaisia tietoja, kuten nimeä ja yhteystietoja, tai lisätä niitä. Tämä antaa muiden sovellusten tunnistaa sinut ja lähettää profiilitietojasi muille."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lue sosiaalista streamia"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="3419050808547335320">"Antaa sovelluksen käyttää ja synkronoida sinun ja kavereidesi päivityksiä sosiaalisista palveluista. Haitalliset sovellukset voivat käyttää tätä sosiaalisissa verkostoissa kavereidesi kanssa käytyjen yksityisten keskustelujen lukemiseen."</string>
@@ -412,15 +396,11 @@
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"pakota puhelin käynnistymään uudelleen"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Antaa sovelluksen pakottaa tablet-laitteen käynnistymään uudelleen."</string>
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Antaa sovelluksen pakottaa puhelimen käynnistymään uudelleen."</string>
-    <!-- no translation found for permlab_mount_unmount_filesystems (2927361537942591841) -->
-    <skip />
-    <!-- no translation found for permlab_mount_unmount_filesystems (4402305049890953810) -->
-    <skip />
+    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"käytä USB:n tiedostojärj."</string>
+    <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"käytä SD-kortin tiedostojärjestelmää"</string>
     <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Antaa sovelluksen ottaa käyttöön ja poistaa käytöstä siirrettävän tallennustilan tiedostojärjestelmiä."</string>
-    <!-- no translation found for permlab_mount_format_filesystems (6227819582624904972) -->
-    <skip />
-    <!-- no translation found for permlab_mount_format_filesystems (262582698639274056) -->
-    <skip />
+    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"tyhjennä USB-tallennustila"</string>
+    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"tyhjennä SD-kortti"</string>
     <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Antaa sovelluksen alustaa siirrettävän tallennustilan."</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"hae tietoja sisäisestä tallennustilasta"</string>
     <string name="permdesc_asec_access" msgid="3094563844593878548">"Antaa sovelluksen hakea tietoja sisäisestä tallennustilasta."</string>
@@ -432,8 +412,7 @@
     <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Antaa sovelluksen ottaa käyttöön tai poistaa käytöstä sisäistä tallennustilaa."</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"nimeä sisäistä tallennustilaa uudelleen"</string>
     <string name="permdesc_asec_rename" msgid="1794757588472127675">"Antaa sovelluksen nimetä sisäisen tallennustilan uudelleen."</string>
-    <!-- no translation found for permlab_vibrate (7696427026057705834) -->
-    <skip />
+    <string name="permlab_vibrate" msgid="7696427026057705834">"hallitse värinää"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Antaa sovelluksen hallita värinää."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"hallitse taskulamppua"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Antaa sovelluksen hallita taskulamppua."</string>
@@ -458,8 +437,7 @@
     <string name="permdesc_bindGadget" msgid="8261326938599049290">"Antaa sovelluksen kertoa järjestelmälle, mitä widgetejä mikäkin sovellus voi käyttää. Tämän luvan saanut sovellus voi antaa muille sovelluksille oikeuden käyttää henkilökohtaisia tietoja. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"muokkaa puhelimen tilaa"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Antaa sovelluksen hallita laitteen puhelinominaisuuksia. Jos sovelluksella on tämä oikeus, se voi esimerkiksi vaihtaa verkkoa tai ottaa puhelinradion käyttöön tai poistaa sen käytöstä ilmoittamatta käyttäjälle."</string>
-    <!-- no translation found for permlab_readPhoneState (9178228524507610486) -->
-    <skip />
+    <string name="permlab_readPhoneState" msgid="9178228524507610486">"lue puhelimen tila ja identiteetti"</string>
     <string name="permdesc_readPhoneState" msgid="5127767618743602782">"Antaa sovelluksen käyttää laitteen puhelinominaisuuksia. Tällä luvalla sovellus voi määrittää puhelimen puhelinnumeron ja sarjanumeron, puhelun aktiivisuuden, puhelun kohdenumeron sekä muita vastaavia tietoja."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"estä tablet-laitetta menemästä virransäästötilaan"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"estä puhelinta menemästä virransäästötilaan"</string>
@@ -474,8 +452,7 @@
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Suorita alemman tason valmistajan testinä ja anna täydet oikeudet puhelimen laitteistolle. Käytettävissä vain, kun puhelin on valmistajan testitilassa."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"aseta taustakuva"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Antaa sovelluksen asettaa laitteen taustakuvan."</string>
-    <!-- no translation found for permlab_setWallpaperHints (3278608165977736538) -->
-    <skip />
+    <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"säädä taustakuvan kokoa"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Antaa sovelluksen asettaa laitteen taustakuvakoon vinkkejä."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"palauta järjestelmän tehdasasetukset"</string>
     <string name="permdesc_masterClear" msgid="3665380492633910226">"Antaa sovelluksen palauttaa laitteen täysin tehdasasetuksiin sekä poistaa kaikki tiedot, määritykset ja asennetut sovellukset."</string>
@@ -487,21 +464,16 @@
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Antaa sovelluksen muuttaa puhelimen aikavyöhykettä."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"toimi AccountManagerService-sovelluksena"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Antaa sovelluksen soittaa puheluja tilien todentajille."</string>
-    <!-- no translation found for permlab_getAccounts (1086795467760122114) -->
-    <skip />
+    <string name="permlab_getAccounts" msgid="1086795467760122114">"etsi tilejä laitteelta"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="3238360555257773358">"Antaa sovelluksen noutaa tablet-laitteella käytettävien tilien luettelon."</string>
     <string name="permdesc_getAccounts" product="default" msgid="2735689364629830348">"Antaa sovelluksen noutaa puhelimella käytettävien tilien luettelon."</string>
-    <!-- no translation found for permlab_authenticateAccounts (5265908481172736933) -->
-    <skip />
+    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"luo tilejä ja aseta salasanoja"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Antaa sovelluksen käyttää tilienhallinnan tilintodennustehtäviä, kuten uusien tilien luomista sekä niiden salasanojen lukemista ja asettamista."</string>
-    <!-- no translation found for permlab_manageAccounts (4983126304757177305) -->
-    <skip />
+    <string name="permlab_manageAccounts" msgid="4983126304757177305">"lisää tai poista tilejä"</string>
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Antaa sovelluksen suorittaa toimintoja, kuten lisätä ja poistaa tilejä sekä poistaa niiden salasanoja."</string>
-    <!-- no translation found for permlab_useCredentials (235481396163877642) -->
-    <skip />
+    <string name="permlab_useCredentials" msgid="235481396163877642">"käytä laitteen tilejä"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Antaa sovelluksen pyytää todennustunnuksia."</string>
-    <!-- no translation found for permlab_accessNetworkState (4951027964348974773) -->
-    <skip />
+    <string name="permlab_accessNetworkState" msgid="4951027964348974773">"tarkastele verkkoyhteyksiä"</string>
     <string name="permdesc_accessNetworkState" msgid="479772796952547198">"Antaa sovelluksen tarkastella kaikkien verkkojen tilaa."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"käytä internetiä"</string>
     <string name="permdesc_createNetworkSockets" msgid="5963922297444265950">"Antaa sovelluksen luoda verkkopistokkeita."</string>
@@ -513,36 +485,29 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Antaa sovelluksen muuttaa internetyhteyden jakamisen tilaa."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"muuta taustatietojen käyttöasetuksia"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Antaa sovelluksen muuttaa taustatietojen käyttöasetuksia."</string>
-    <!-- no translation found for permlab_accessWifiState (5202012949247040011) -->
-    <skip />
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"näytä wifi-yhteydet"</string>
     <string name="permdesc_accessWifiState" msgid="7770452658226256831">"Antaa sovelluksen tarkastella wifi-yhteyden tilaa."</string>
-    <!-- no translation found for permlab_changeWifiState (6550641188749128035) -->
-    <skip />
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"muodosta ja katkaise wifi-yhteys"</string>
     <string name="permdesc_changeWifiState" msgid="7399961004537946240">"Antaa sovelluksen yhdistää wifi-tukiasemiin tai katkaista yhteyden sekä tehdä muutoksia määritettyihin wifi-verkkoihin."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"anna ottaa vastaan wifi-ryhmälähetyksiä"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="7633598524564320817">"Antaa sovelluksen vastaanottaa paketteja, joita ei ole osoitettu suoraan laitteellesi. Tämä saattaa olla hyödyllistä etsittäessä lähellä olevia palveluita. Tila käyttää enemmän virtaa kuin ei-monilähetystila."</string>
-    <!-- no translation found for permlab_bluetoothAdmin (6006967373935926659) -->
-    <skip />
+    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"käytä Bluetooth-asetuksia"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Antaa sovelluksen määrittää paikallisen Bluetooth-tabletin asetukset sekä tunnistaa muita laitteita ja muodostaa niiden kanssa laitepareja."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Antaa sovelluksen määrittää paikallisen Bluetooth-puhelimen asetukset sekä tunnistaa muita laitteita ja muodostaa niiden kanssa laitepareja."</string>
-    <!-- no translation found for permlab_accessWimaxState (7436749103151096452) -->
-    <skip />
+    <string name="permlab_accessWimaxState" msgid="7436749103151096452">"Näytä WiMAX-yhteydet"</string>
     <string name="permdesc_accessWimaxState" msgid="5914958077555177749">"Antaa sovelluksen tarkastella WiMAX-verkon tilaa."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Vaihda WiMAX-verkon tilaa"</string>
     <string name="permdesc_changeWimaxState" msgid="3328853825006455912">"Antaa sovelluksen muodostaa yhteyden WiMAX-verkkoon ja katkaista yhteyden."</string>
-    <!-- no translation found for permlab_bluetooth (6127769336339276828) -->
-    <skip />
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"muodosta laitepari Bluetooth-laitteiden kanssa"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Antaa sovelluksen tarkastella paikallisen Bluetooth-tabletin asetuksia sekä muodostaa ja hyväksyä laitepariyhteyksiä."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Antaa sovelluksen tarkastella paikallisen Bluetooth-puhelimen asetuksia sekä muodostaa ja hyväksyä laitepariyhteyksiä muihin laitteisiin."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"hallitse Near Field Communication -tunnistusta"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Antaa sovelluksen kommunikoida NFC (Near Field Communication) -tunnisteiden, -korttien ja -lukijoiden kanssa."</string>
-    <!-- no translation found for permlab_disableKeyguard (3598496301486439258) -->
-    <skip />
+    <string name="permlab_disableKeyguard" msgid="3598496301486439258">"poista ruudun lukitus käytöstä"</string>
     <string name="permdesc_disableKeyguard" msgid="6231611286892232626">"Antaa sovelluksen ottaa näppäinlukon ja siihen liittyvän salasanasuojauksen pois käytöstä. Luvallinen esimerkki tästä on, kun puhelin poistaa näppäinlukon käytöstä puhelun saapuessa ja asettaa lukon takaisin käyttöön puhelun päättyessä."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lue synkronointiasetuksia"</string>
     <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"Antaa sovelluksen lukea synkronointiasetuksia, kuten sitä, onko Ihmiset-sovelluksen synkronointi käytössä."</string>
-    <!-- no translation found for permlab_writeSyncSettings (5408694875793945314) -->
-    <skip />
+    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ota synkronointi käyttöön tai poista se käytöstä"</string>
     <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"Antaa sovelluksen muokata synkronointiasetuksia, kuten sitä, onko Ihmiset-sovelluksen synkronointi käytössä."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"lue synkronointitilastoja"</string>
     <string name="permdesc_readSyncStats" msgid="3801971839939951678">"Antaa sovelluksen lukea synkronointitilastoja, kuten tehtyjen synkronointien historiaa."</string>
@@ -550,23 +515,16 @@
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Antaa sovelluksen saada tietoja tällä hetkellä synkronoitavista syötteistä."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"kirjoita tilattuja syötteitä"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Antaa sovelluksen muokata synkronoitavia syötteitä. Haitalliset sovellukset voivat muuttaa synkronoitavia syötteitä."</string>
-    <!-- no translation found for permlab_readDictionary (4107101525746035718) -->
-    <skip />
+    <string name="permlab_readDictionary" msgid="4107101525746035718">"lue sanakirjaan lisättyjä termejä"</string>
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Antaa sovelluksen lukea yksityisiä sanoja, nimiä tai ilmauksia, joita käyttäjä on voinut tallentaa käyttäjän sanakirjaan."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"käyttäjän määrittelemään sanakirjaan kirjoittaminen"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Antaa sovelluksen kirjoittaa uusia sanoja käyttäjän sanakirjaan."</string>
-    <!-- no translation found for permlab_sdcardRead (367275095159405468) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (2188156462934977940) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (3530894470637667917) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (2555811422562526606) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardWrite (8485979062254666748) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardWrite (9084476432661578751) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"lue USB-tallennustilan sis."</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lue SD-kortin sisältöä"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Lue USB-muistin sisältöä (kuvia ja mediaa)."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Antaa sovelluksen lukea SD-kortin sisältöä. Kortti voi sisältää valokuvia ja muuta mediaa."</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"muokkaa tai poista USB:n sis."</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"muokkaa tai poista SD-kortin sisältöä"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Antaa sovelluksen kirjoittaa USB-tallennustilaan."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Antaa sovelluksen kirjoittaa SD-kortille."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"muokkaa/poista sisäisen säilytystilan sisältöä"</string>
@@ -819,15 +777,12 @@
     <string name="autofill_parish" msgid="8202206105468820057">"Kunta"</string>
     <string name="autofill_area" msgid="3547409050889952423">"Alue"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emiraatti"</string>
-    <!-- no translation found for permlab_readHistoryBookmarks (3775265775405106983) -->
-    <skip />
+    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"lue verkon kirjanmerkkejä ja historiaa"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4577476392604595921">"Antaa sovelluksen lukea kaikkia selaimen avaamia URL-osoitteita ja kaikkia selaimen kirjanmerkkejä."</string>
-    <!-- no translation found for permlab_writeHistoryBookmarks (3714785165273314490) -->
-    <skip />
+    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"kirjoita verkon kirjanmerkkejä ja historiaa"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="1757103804824209530">"Antaa sovelluksen muokata Selaimen historiaa tai tablet-laitteelle tallennettuja kirjanmerkkejä. Haitalliset sovellukset voivat käyttää tätä Selaimen tietojen poistamiseen tai muokkaamiseen."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="6693764355720719197">"Antaa sovelluksen muokata Selaimen historiaa tai puhelimelle tallennettuja kirjanmerkkejä. Haitalliset sovellukset voivat käyttää tätä Selaimen tietojen poistamiseen tai muokkaamiseen."</string>
-    <!-- no translation found for permlab_setAlarm (1379294556362091814) -->
-    <skip />
+    <string name="permlab_setAlarm" msgid="1379294556362091814">"aseta herätys"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Antaa sovelluksen asettaa hälytyksen sisäiseen herätyskellosovellukseen. Jotkin herätyskellosovellukset eivät välttämättä käytä tätä ominaisuutta."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"lisää vastaajaviesti"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Antaa sovelluksen lisätä viestejä saapuneisiin vastaajaviesteihin."</string>
