@@ -279,13 +279,13 @@ class AppWidgetService extends IAppWidgetService.Stub
     }
 
     @Override
-    public void updateAppWidgetExtras(int appWidgetId, Bundle extras) {
-        getImplForUser().updateAppWidgetExtras(appWidgetId, extras);
+    public void updateAppWidgetOptions(int appWidgetId, Bundle options) {
+        getImplForUser().updateAppWidgetOptions(appWidgetId, options);
     }
 
     @Override
-    public Bundle getAppWidgetExtras(int appWidgetId) {
-        return getImplForUser().getAppWidgetExtras(appWidgetId);
+    public Bundle getAppWidgetOptions(int appWidgetId) {
+        return getImplForUser().getAppWidgetOptions(appWidgetId);
     }
 
     static int[] getAppWidgetIds(Provider p) {

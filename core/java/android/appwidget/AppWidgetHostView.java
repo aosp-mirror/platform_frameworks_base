@@ -210,36 +210,37 @@ public class AppWidgetHostView extends FrameLayout {
     /**
      * Provide guidance about the size of this widget to the AppWidgetManager. This information
      * gets embedded into the AppWidgetExtras and causes a callback to the AppWidgetProvider.
-     * @see AppWidgetProvider#onAppWidgetExtrasChanged(Context, AppWidgetManager, int, Bundle)
+     * @see AppWidgetProvider#onAppWidgetOptionsChanged(Context, AppWidgetManager, int, Bundle)
      *
-     * @param extras The bundle of extra information, in addition to the size information
+     * @param options The bundle of options, in addition to the size information,
      *          can be null.
      * @param minWidth The minimum width that the widget will be displayed at.
      * @param minHeight The maximum height that the widget will be displayed at.
-     * @param maxWidth The maximum height that the widget will be displayed at.
+     * @param maxWidth The maximum width that the widget will be displayed at.
+     * @param maxHeight The maximum height that the widget will be displayed at.
      *
      */
-    public void updateAppWidgetSize(Bundle extras, int minWidth, int minHeight, int maxWidth,
+    public void updateAppWidgetSize(Bundle options, int minWidth, int minHeight, int maxWidth,
             int maxHeight) {
-        if (extras == null) {
-            extras = new Bundle();
+        if (options == null) {
+            options = new Bundle();
         }
-        extras.putInt(AppWidgetManager.EXTRA_APPWIDGET_MIN_WIDTH, minWidth);
-        extras.putInt(AppWidgetManager.EXTRA_APPWIDGET_MIN_HEIGHT, minHeight);
-        extras.putInt(AppWidgetManager.EXTRA_APPWIDGET_MAX_WIDTH, maxWidth);
-        extras.putInt(AppWidgetManager.EXTRA_APPWIDGET_MAX_HEIGHT, maxHeight);
-        updateAppWidgetExtras(extras);
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, minWidth);
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, minHeight);
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, maxWidth);
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, maxHeight);
+        updateAppWidgetOptions(options);
     }
 
     /**
      * Specify some extra information for the widget provider. Causes a callback to the
      * AppWidgetProvider.
-     * @see AppWidgetProvider#onAppWidgetExtrasChanged(Context, AppWidgetManager, int, Bundle)
+     * @see AppWidgetProvider#onAppWidgetOptionsChanged(Context, AppWidgetManager, int, Bundle)
      *
-     * @param extras The bundle of extra information.
+     * @param options The bundle of options information.
      */
-    public void updateAppWidgetExtras(Bundle extras) {
-        AppWidgetManager.getInstance(mContext).updateAppWidgetExtras(mAppWidgetId, extras);
+    public void updateAppWidgetOptions(Bundle options) {
+        AppWidgetManager.getInstance(mContext).updateAppWidgetOptions(mAppWidgetId, options);
     }
 
     /** {@inheritDoc} */
