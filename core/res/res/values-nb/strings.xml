@@ -223,7 +223,7 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Lar appen flytte oppgaver til forgrunnen eller bakgrunnen. Ondsinnede apper kan tvinge seg frem til forgrunnen utenfor din kontroll."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"avslutte apper som kjører"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Lar appen fjerne oppgaver og avslutte apper. Ondsinnede apper kan forstyrre atferden til andre apper."</string>
-    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"igangsetting av aktivitet"</string>
+    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"igangsetting av aktiviteter"</string>
     <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Tillater at appen kan starte en aktivitet, uavhengig av tillatelsesbeskyttelse og eksportstatus."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"angi skjermkompatibilitet"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Lar appen kontrollere modus for skjermkompatibilitet i andre apper. Skadelige apper kan ødelegge funksjoner i andre apper."</string>
