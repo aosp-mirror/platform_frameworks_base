@@ -4846,8 +4846,13 @@ public class Activity extends ContextThemeWrapper
      * Navigate from this activity to the activity specified by upIntent, finishing this activity
      * in the process. If the activity indicated by upIntent already exists in the task's history,
      * this activity and all others before the indicated activity in the history stack will be
-     * finished. If the indicated activity does not appear in the history stack, this is equivalent
-     * to simply calling finish() on this activity.
+     * finished.
+     *
+     * <p>If the indicated activity does not appear in the history stack, this will finish
+     * each activity in this task until the root activity of the task is reached, resulting in
+     * an "in-app home" behavior. This can be useful in apps with a complex navigation hierarchy
+     * when an activity may be reached by a path not passing through a canonical parent
+     * activity.</p>
      *
      * <p>This method should be used when performing up navigation from within the same task
      * as the destination. If up navigation should cross tasks in some cases, see
