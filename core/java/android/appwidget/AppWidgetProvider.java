@@ -74,13 +74,13 @@ public class AppWidgetProvider extends BroadcastReceiver {
                 this.onDeleted(context, new int[] { appWidgetId });
             }
         }
-        else if (AppWidgetManager.ACTION_APPWIDGET_EXTRAS_CHANGED.equals(action)) {
+        else if (AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED.equals(action)) {
             Bundle extras = intent.getExtras();
             if (extras != null && extras.containsKey(AppWidgetManager.EXTRA_APPWIDGET_ID)
-                    && extras.containsKey(AppWidgetManager.EXTRA_APPWIDGET_EXTRAS)) {
+                    && extras.containsKey(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS)) {
                 int appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID);
-                Bundle widgetExtras = extras.getBundle(AppWidgetManager.EXTRA_APPWIDGET_EXTRAS);
-                this.onAppWidgetExtrasChanged(context, AppWidgetManager.getInstance(context),
+                Bundle widgetExtras = extras.getBundle(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS);
+                this.onAppWidgetOptionsChanged(context, AppWidgetManager.getInstance(context),
                         appWidgetId, widgetExtras);
             }
         }
@@ -114,7 +114,7 @@ public class AppWidgetProvider extends BroadcastReceiver {
     }
 
     /**
-     * Called in response to the {@link AppWidgetManager#ACTION_APPWIDGET_EXTRAS_CHANGED}
+     * Called in response to the {@link AppWidgetManager#ACTION_APPWIDGET_OPTIONS_CHANGED}
      * broadcast when this widget has been layed out at a new size.
      *
      * {@more}
@@ -124,12 +124,12 @@ public class AppWidgetProvider extends BroadcastReceiver {
      * @param appWidgetManager A {@link AppWidgetManager} object you can call {@link
      *                  AppWidgetManager#updateAppWidget} on.
      * @param appWidgetId The appWidgetId of the widget who's size changed.
-     * @param newExtras The appWidgetId of the widget who's size changed.
+     * @param newOptions The appWidgetId of the widget who's size changed.
      *
-     * @see AppWidgetManager#ACTION_APPWIDGET_EXTRAS_CHANGED
+     * @see AppWidgetManager#ACTION_APPWIDGET_OPTIONS_CHANGED
      */
-    public void onAppWidgetExtrasChanged(Context context, AppWidgetManager appWidgetManager,
-            int appWidgetId, Bundle newExtras) {
+    public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager,
+            int appWidgetId, Bundle newOptions) {
     }
 
     /**

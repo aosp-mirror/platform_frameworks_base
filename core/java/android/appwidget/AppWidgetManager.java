@@ -152,28 +152,28 @@ public class AppWidgetManager {
     /**
      * An bundle extra that contains the lower bound on the current width, in dips, of a widget instance.
      */
-    public static final String EXTRA_APPWIDGET_MIN_WIDTH = "appWidgetMinWidth";
+    public static final String OPTION_APPWIDGET_MIN_WIDTH = "appWidgetMinWidth";
 
     /**
      * An bundle extra that contains the lower bound on the current height, in dips, of a widget instance.
      */
-    public static final String EXTRA_APPWIDGET_MIN_HEIGHT = "appWidgetMinHeight";
+    public static final String OPTION_APPWIDGET_MIN_HEIGHT = "appWidgetMinHeight";
 
     /**
      * An bundle extra that contains the upper bound on the current width, in dips, of a widget instance.
      */
-    public static final String EXTRA_APPWIDGET_MAX_WIDTH = "appWidgetMaxWidth";
+    public static final String OPTION_APPWIDGET_MAX_WIDTH = "appWidgetMaxWidth";
 
     /**
      * An bundle extra that contains the upper bound on the current width, in dips, of a widget instance.
      */
-    public static final String EXTRA_APPWIDGET_MAX_HEIGHT = "appWidgetMaxHeight";
+    public static final String OPTION_APPWIDGET_MAX_HEIGHT = "appWidgetMaxHeight";
 
     /**
      * An intent extra which points to a bundle of extra information for a particular widget id.
      * In particular this bundle can contain EXTRA_APPWIDGET_WIDTH and EXTRA_APPWIDGET_HEIGHT.
      */
-    public static final String EXTRA_APPWIDGET_EXTRAS = "appWidgetExtras";
+    public static final String EXTRA_APPWIDGET_OPTIONS = "appWidgetOptions";
 
     /**
      * An intent extra that contains multiple appWidgetIds.
@@ -240,7 +240,7 @@ public class AppWidgetManager {
      * @see AppWidgetProvider#onAppWidgetExtrasChanged AppWidgetProvider#onAppWidgetExtrasChanged(
      *      Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newExtras)
      */
-    public static final String ACTION_APPWIDGET_EXTRAS_CHANGED = "android.appwidget.action.APPWIDGET_UPDATE_EXTRAS";
+    public static final String ACTION_APPWIDGET_OPTIONS_CHANGED = "android.appwidget.action.APPWIDGET_UPDATE_OPTIONS";
 
     /**
      * Sent when an instance of an AppWidget is deleted from its host.
@@ -339,14 +339,14 @@ public class AppWidgetManager {
      * The extras can be used to embed additional information about this widget to be accessed
      * by the associated widget's AppWidgetProvider.
      *
-     * @see #getAppWidgetExtras(int)
+     * @see #getAppWidgetOptions(int)
      *
      * @param appWidgetId    The AppWidget instances for which to set the RemoteViews.
-     * @param extras         The extras to associate with this widget
+     * @param options         The options to associate with this widget
      */
-    public void updateAppWidgetExtras(int appWidgetId, Bundle extras) {
+    public void updateAppWidgetOptions(int appWidgetId, Bundle options) {
         try {
-            sService.updateAppWidgetExtras(appWidgetId, extras);
+            sService.updateAppWidgetOptions(appWidgetId, options);
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
@@ -359,14 +359,14 @@ public class AppWidgetManager {
      * The extras can be used to embed additional information about this widget to be accessed
      * by the associated widget's AppWidgetProvider.
      *
-     * @see #updateAppWidgetExtras(int, Bundle)
+     * @see #updateAppWidgetOptions(int, Bundle)
      *
      * @param appWidgetId     The AppWidget instances for which to set the RemoteViews.
-     * @return                The extras associated with the given widget instance.
+     * @return                The options associated with the given widget instance.
      */
-    public Bundle getAppWidgetExtras(int appWidgetId) {
+    public Bundle getAppWidgetOptions(int appWidgetId) {
         try {
-            return sService.getAppWidgetExtras(appWidgetId);
+            return sService.getAppWidgetOptions(appWidgetId);
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
