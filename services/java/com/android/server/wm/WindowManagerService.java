@@ -130,8 +130,6 @@ import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.ScaleAnimation;
-import android.view.animation.Transformation;
-import android.view.animation.TranslateAnimation;
 
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
@@ -3245,12 +3243,21 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mNextAppTransitionType == ActivityOptions.ANIM_CUSTOM) {
                 a = loadAnimation(mNextAppTransitionPackage, enter ?
                         mNextAppTransitionEnter : mNextAppTransitionExit);
+                if (DEBUG_ANIM) Slog.v(TAG, "applyAnimation: wtoken=" + wtoken
+                        + " anim=" + a + " nextAppTransition=ANIM_CUSTOM"
+                        + " transit=" + transit + " Callers " + Debug.getCallers(3));
             } else if (mNextAppTransitionType == ActivityOptions.ANIM_SCALE_UP) {
                 a = createScaleUpAnimationLocked(transit, enter);
                 initialized = true;
+                if (DEBUG_ANIM) Slog.v(TAG, "applyAnimation: wtoken=" + wtoken
+                        + " anim=" + a + " nextAppTransition=ANIM_SCALE_UP"
+                        + " transit=" + transit + " Callers " + Debug.getCallers(3));
             } else if (mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL) {
                 a = createThumbnailAnimationLocked(transit, enter, false);
                 initialized = true;
+                if (DEBUG_ANIM) Slog.v(TAG, "applyAnimation: wtoken=" + wtoken
+                        + " anim=" + a + " nextAppTransition=ANIM_THUMBNAIL"
+                        + " transit=" + transit + " Callers " + Debug.getCallers(3));
             } else {
                 int animAttr = 0;
                 switch (transit) {
@@ -3309,7 +3316,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_ANIM) Slog.v(TAG, "applyAnimation: wtoken=" + wtoken
                         + " anim=" + a
                         + " animAttr=0x" + Integer.toHexString(animAttr)
-                        + " transit=" + transit);
+                        + " transit=" + transit + " Callers " + Debug.getCallers(3));
             }
             if (a != null) {
                 if (DEBUG_ANIM) {
@@ -7856,7 +7863,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 mToTopApps.clear();
             }
 
-            WindowState oldWallpaper = mWallpaperTarget;
+            WindowState oldWallpaper =
+                    mWallpaperTarget != null && mWallpaperTarget.mWinAnimator.isAnimating()
+                    ? null : mWallpaperTarget;
 
             adjustWallpaperWindowsLocked();
             mInnerFields.mWallpaperMayChange = false;
@@ -8167,8 +8176,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 // to go through the process of getting informed
                 // by the application when it has finished drawing.
                 if (w.mOrientationChanging) {
-                    if (DEBUG_ORIENTATION) Slog.v(TAG,
-                            "Orientation start waiting for draw in "
+                    if (DEBUG_ANIM || DEBUG_ORIENTATION) Slog.v(TAG,
+                            "Orientation start waiting for draw mDrawState=DRAW_PENDING in "
                             + w + ", surface " + winAnimator.mSurface);
                     winAnimator.mDrawState = WindowStateAnimator.DRAW_PENDING;
                     if (w.mAppToken != null) {
