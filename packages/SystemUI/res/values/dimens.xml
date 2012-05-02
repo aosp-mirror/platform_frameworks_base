@@ -120,4 +120,12 @@
 
     <!-- Height of the draggable handle at the bottom of the phone notification panel -->
     <dimen name="close_handle_height">34dp</dimen>
+
+	<!-- Layout parameters for the notification panel -->
+	<dimen name="notification_panel_margin_bottom">0dp</dimen>
+    <dimen name="notification_panel_margin_left">0dp</dimen>
+
+    <!-- Gravity for the notification panel -->
+    <!-- 0x37 = fill_horizontal|top -->
+    <integer name="notification_panel_layout_gravity">0x37</integer>
 </resources>
