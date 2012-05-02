@@ -1813,8 +1813,7 @@ public class WifiStateMachine extends StateMachine {
                     replyToMessage(message, message.what, FAILURE);
                     break;
                 case CMD_GET_CONFIGURED_NETWORKS:
-                    replyToMessage(message, message.what,
-                            mWifiConfigStore.getConfiguredNetworks());
+                    replyToMessage(message, message.what, (List<WifiConfiguration>) null);
                     break;
                 case CMD_ENABLE_RSSI_POLL:
                     mEnableRssiPolling = (message.arg1 == 1);
@@ -2352,6 +2351,10 @@ public class WifiStateMachine extends StateMachine {
                             // Try again later
                         }
                     }
+                    break;
+                case CMD_GET_CONFIGURED_NETWORKS:
+                    replyToMessage(message, message.what,
+                            mWifiConfigStore.getConfiguredNetworks());
                     break;
                     /* Cannot start soft AP while in client mode */
                 case CMD_START_AP:
