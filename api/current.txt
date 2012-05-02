@@ -4001,17 +4001,20 @@ package android.app {
     method public void setDefaultTab(int);
   }
 
-  public class TaskStackBuilder implements java.lang.Iterable {
+  public class TaskStackBuilder {
     method public android.app.TaskStackBuilder addNextIntent(android.content.Intent);
+    method public android.app.TaskStackBuilder addNextIntentWithParentStack(android.content.Intent);
     method public android.app.TaskStackBuilder addParentStack(android.app.Activity);
     method public android.app.TaskStackBuilder addParentStack(java.lang.Class<?>);
     method public android.app.TaskStackBuilder addParentStack(android.content.ComponentName);
-    method public static android.app.TaskStackBuilder from(android.content.Context);
-    method public android.content.Intent getIntent(int);
+    method public static android.app.TaskStackBuilder create(android.content.Context);
+    method public android.content.Intent editIntentAt(int);
     method public int getIntentCount();
+    method public android.content.Intent[] getIntents();
     method public android.app.PendingIntent getPendingIntent(int, int);
-    method public java.util.Iterator<android.content.Intent> iterator();
+    method public android.app.PendingIntent getPendingIntent(int, int, android.os.Bundle);
     method public void startActivities();
+    method public void startActivities(android.os.Bundle);
   }
 
   public class TimePickerDialog extends android.app.AlertDialog implements android.content.DialogInterface.OnClickListener android.widget.TimePicker.OnTimeChangedListener {
