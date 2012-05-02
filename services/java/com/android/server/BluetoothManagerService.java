@@ -25,12 +25,11 @@ import android.provider.Settings;
 import android.util.Log;
 import java.util.List;
 import java.util.ArrayList;
-
 class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final String TAG = "BluetoothManagerService";
     private static final boolean DBG = true;
 
-    private static final boolean ALWAYS_SYNC_NAME_ADDRESS=true; //If true, always load name and address
+    private static final boolean ALWAYS_SYNC_NAME_ADDRESS=false; //true; //If true, always load name and address
     private static final String BLUETOOTH_ADMIN_PERM = android.Manifest.permission.BLUETOOTH_ADMIN;
     private static final String BLUETOOTH_PERM = android.Manifest.permission.BLUETOOTH;
     private static final String ACTION_SERVICE_STATE_CHANGED="com.android.bluetooth.btservice.action.STATE_CHANGED";
