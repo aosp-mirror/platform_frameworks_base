@@ -1194,7 +1194,8 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
     // As of Linux 3.4, there is a new EVIOCSCLOCKID ioctl to set the desired clock.
     // Therefore, we no longer require the Android-specific kernel patch described above
     // as long as we make sure to set select the monotonic clock.  We do that here.
-    bool usingClockIoctl = !ioctl(fd, EVIOCSCLOCKID, CLOCK_MONOTONIC);
+    int clockId = CLOCK_MONOTONIC;
+    bool usingClockIoctl = !ioctl(fd, EVIOCSCLOCKID, &clockId);
 
     ALOGI("New device: id=%d, fd=%d, path='%s', name='%s', classes=0x%x, "
             "configuration='%s', keyLayout='%s', keyCharacterMap='%s', builtinKeyboard=%s, "
