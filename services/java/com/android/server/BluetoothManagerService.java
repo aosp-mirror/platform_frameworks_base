@@ -132,7 +132,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         boolean bluetoothOn = isBluetoothPersistedStateOn();
         loadStoredNameAndAddress();
         if (DBG) Log.d(TAG, "airplaneModeOn: " + airplaneModeOn + " bluetoothOn: " + bluetoothOn);
-        if (!airplaneModeOn &&  bluetoothOn) {
+        if (bluetoothOn) {
             //Enable
             if (DBG) Log.d(TAG, "Auto-enabling Bluetooth.");
             enable();
