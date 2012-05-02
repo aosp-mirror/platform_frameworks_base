@@ -259,12 +259,6 @@ public:
      */
     virtual void loopOnce() = 0;
 
-    /* Gets the current input device configuration.
-     *
-     * This method may be called on any thread (usually by the input manager).
-     */
-    virtual void getInputConfiguration(InputConfiguration* outConfiguration) = 0;
-
     /* Gets information about all input devices.
      *
      * This method may be called on any thread (usually by the input manager).
@@ -344,7 +338,6 @@ public:
 
     virtual void loopOnce();
 
-    virtual void getInputConfiguration(InputConfiguration* outConfiguration);
     virtual void getInputDevices(Vector<InputDeviceInfo>& outInputDevices);
 
     virtual int32_t getScanCodeState(int32_t deviceId, uint32_t sourceMask,
@@ -424,9 +417,6 @@ private:
 
     int32_t mGeneration;
     int32_t bumpGenerationLocked();
-
-    InputConfiguration mInputConfiguration;
-    void updateInputConfigurationLocked();
 
     void getInputDevicesLocked(Vector<InputDeviceInfo>& outInputDevices);
 

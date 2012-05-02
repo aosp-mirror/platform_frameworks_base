@@ -46,6 +46,7 @@ public final class InputDevice implements Parcelable {
     private final int mGeneration;
     private final String mName;
     private final String mDescriptor;
+    private final boolean mIsExternal;
     private final int mSources;
     private final int mKeyboardType;
     private final KeyCharacterMap mKeyCharacterMap;
@@ -322,12 +323,14 @@ public final class InputDevice implements Parcelable {
     };
 
     // Called by native code.
-    private InputDevice(int id, int generation, String name, String descriptor, int sources,
+    private InputDevice(int id, int generation, String name, String descriptor,
+            boolean isExternal, int sources,
             int keyboardType, KeyCharacterMap keyCharacterMap, boolean hasVibrator) {
         mId = id;
         mGeneration = generation;
         mName = name;
         mDescriptor = descriptor;
+        mIsExternal = isExternal;
         mSources = sources;
         mKeyboardType = keyboardType;
         mKeyCharacterMap = keyCharacterMap;
@@ -339,6 +342,7 @@ public final class InputDevice implements Parcelable {
         mGeneration = in.readInt();
         mName = in.readString();
         mDescriptor = in.readString();
+        mIsExternal = in.readInt() != 0;
         mSources = in.readInt();
         mKeyboardType = in.readInt();
         mKeyCharacterMap = KeyCharacterMap.CREATOR.createFromParcel(in);
@@ -414,7 +418,7 @@ public final class InputDevice implements Parcelable {
      * has a trackpad.  Alternately, it may be that the input devices are simply
      * indistinguishable, such as two keyboards made by the same manufacturer.
      * </p><p>
-     * The input device descriptor returned by {@link #getDescriptor} should only bt
+     * The input device descriptor returned by {@link #getDescriptor} should only be
      * used when an application needs to remember settings associated with a particular
      * input device.  For all other purposes when referring to a logical
      * {@link InputDevice} instance at runtime use the id returned by {@link #getId()}.
@@ -440,6 +444,18 @@ public final class InputDevice implements Parcelable {
      */
     public boolean isVirtual() {
         return mId < 0;
+    }
+
+    /**
+     * Returns true if the device is external (connected to USB or Bluetooth or some other
+     * peripheral bus), otherwise it is built-in.
+     *
+     * @return True if the device is external.
+     *
+     * @hide
+     */
+    public boolean isExternal() {
+        return mIsExternal;
     }
 
     /**
@@ -660,6 +676,7 @@ public final class InputDevice implements Parcelable {
         out.writeInt(mGeneration);
         out.writeString(mName);
         out.writeString(mDescriptor);
+        out.writeInt(mIsExternal ? 1 : 0);
         out.writeInt(mSources);
         out.writeInt(mKeyboardType);
         mKeyCharacterMap.writeToParcel(out, flags);
@@ -689,6 +706,7 @@ public final class InputDevice implements Parcelable {
         description.append("Input Device ").append(mId).append(": ").append(mName).append("\n");
         description.append("  Descriptor: ").append(mDescriptor).append("\n");
         description.append("  Generation: ").append(mGeneration).append("\n");
+        description.append("  Location: ").append(mIsExternal ? "external" : "built-in").append("\n");
 
         description.append("  Keyboard Type: ");
         switch (mKeyboardType) {
