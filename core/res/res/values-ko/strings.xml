@@ -193,14 +193,11 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"앱이 상태 표시줄이 되도록 허용합니다."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"상태 표시줄 확장/축소"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"앱이 상태 표시줄을 확장하거나 축소할 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_processOutgoingCalls (3906007831192990946) -->
-    <skip />
+    <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"발신전화 경로 전환"</string>
     <string name="permdesc_processOutgoingCalls" msgid="1152111671618301044">"앱이 발신전화를 처리하고 전화를 걸 번호를 변경할 수 있도록 허용합니다. 이 경우 악성 앱이 발신전화를 모니터링하거나, 리디렉션하거나, 차단할 수도 있습니다."</string>
-    <!-- no translation found for permlab_receiveSms (8673471768947895082) -->
-    <skip />
+    <string name="permlab_receiveSms" msgid="8673471768947895082">"문자 메시지 받기(SMS)"</string>
     <string name="permdesc_receiveSms" msgid="8107887121893611793">"앱이 SMS 메시지를 받고 처리할 수 있도록 허용합니다. 이 경우 악성 앱이 메시지를 모니터링하거나 사용자가 보기 전에 삭제할 수 있습니다."</string>
-    <!-- no translation found for permlab_receiveMms (1821317344668257098) -->
-    <skip />
+    <string name="permlab_receiveMms" msgid="1821317344668257098">"문자 메시지 받기(MMS)"</string>
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"앱이 MMS 메시지를 받고 처리할 수 있도록 허용합니다. 이 경우 악성 앱이 메시지를 모니터링하거나 사용자가 보기 전에 삭제할 수 있습니다."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"긴급 방송 수신"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"앱이 긴급 브로드캐스트 메시지를 수신하고 처리할 수 있도록 허용합니다. 이 권한은 시스템 앱에만 사용할 수 있습니다."</string>
@@ -210,16 +207,13 @@
     <string name="permdesc_sendSms" msgid="906546667507626156">"앱이 SMS 메시지를 보낼 수 있도록 허용합니다. 이 경우 악성 앱이 사용자의 확인 없이 메시지를 전송하여 요금이 부과될 수 있습니다."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"확인 없이 SMS 메시지 보내기"</string>
     <string name="permdesc_sendSmsNoConfirmation" msgid="3437759207020400204">"앱이 SMS 메시지를 보낼 수 있도록 허용합니다. 이 경우 악성 앱이 사용자의 확인 없이 메시지를 전송하여 요금이 부과될 수 있습니다."</string>
-    <!-- no translation found for permlab_readSms (8745086572213270480) -->
-    <skip />
+    <string name="permlab_readSms" msgid="8745086572213270480">"내 문자 메시지 읽기(SMS 또는 MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2341692916884515613">"앱이 태블릿 또는 SIM 카드에 저장된 SMS 메시지를 읽을 수 있도록 허용합니다. 이 경우 악성 앱이 기밀 메시지를 읽을 수 있습니다."</string>
     <string name="permdesc_readSms" product="default" msgid="5653850482025875493">"앱이 휴대전화 또는 SIM 카드에 저장된 SMS 메시지를 읽을 수 있도록 허용합니다. 이 경우 악성 앱이 기밀 메시지를 읽을 수 있습니다."</string>
-    <!-- no translation found for permlab_writeSms (3216950472636214774) -->
-    <skip />
+    <string name="permlab_writeSms" msgid="3216950472636214774">"내 문자 메시지 수정(SMS 또는 MMS)"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"앱이 태블릿 또는 SIM 카드에 저장된 SMS 메시지에 쓸 수 있도록 허용합니다. 이 경우 악성 앱이 이 기능을 이용하여 메시지를 삭제할 수 있습니다."</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"앱이 휴대전화 또는 SIM 카드에 저장된 SMS 메시지에 쓸 수 있도록 허용합니다. 이 경우 악성 앱이 이 기능을 이용하여 메시지를 삭제할 수 있습니다."</string>
-    <!-- no translation found for permlab_receiveWapPush (5991398711936590410) -->
-    <skip />
+    <string name="permlab_receiveWapPush" msgid="5991398711936590410">"문자 메시지 받기(WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"앱이 WAP 메시지를 받고 처리할 수 있도록 허용합니다. 이 경우 악성 앱이 메시지를 모니터링하거나 사용자가 보기 전에 삭제할 수 있습니다."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"실행 중인 앱 검색"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"앱이 현재 실행 중이거나 최근에 실행된 작업에 대한 정보를 검색할 수 있도록 허용합니다. 이 경우 악성 앱이 다른 앱에 대한 개인 정보를 검색할 수 있습니다."</string>
@@ -235,13 +229,11 @@
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"앱이 다른 애플리케이션의 화면 호환성 모드를 제어할 수 있도록 허용합니다. 이 경우 악성 애플리케이션이 다른 애플리케이션의 동작을 멈추게 할 수 있습니다."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"앱 디버깅 사용"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"애플리케이션이 다른 애플리케이션에 대해 디버깅을 사용할 수 있도록 허용합니다. 이 경우 악성 애플리케이션이 다른 애플리케이션을 중지시킬 수 있습니다."</string>
-    <!-- no translation found for permlab_changeConfiguration (4162092185124234480) -->
-    <skip />
+    <string name="permlab_changeConfiguration" msgid="4162092185124234480">"시스템 표시 설정 변경"</string>
     <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"애플리케이션이 언어 또는 전체 글꼴 크기와 같은 현재 구성을 변경할 수 있도록 허용합니다."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"운전모드 사용"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"앱이 운전모드를 사용할 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_killBackgroundProcesses (3914026687420177202) -->
-    <skip />
+    <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"다른 앱 종료"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="931129103262126617">"메모리가 부족하지 않은 경우에도 앱이 다른 앱의 백그라운드 프로세스를 중단할 수 있도록 허용합니다."</string>
     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"다른 앱 강제 종료"</string>
     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"앱이 다른 앱을 강제로 종료할 수 있도록 허용합니다."</string>
@@ -265,8 +257,7 @@
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"앱이 WAP PUSH 메시지를 받았다는 알림을 브로드캐스트할 수 있도록 허용합니다. 이 경우 악성 앱이 MMS 메시지를 받은 것처럼 위장하거나 웹페이지의 콘텐츠를 악성 콘텐츠로 몰래 바꿀 수 있습니다."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"실행 중인 프로세스 수 제한"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"앱이 실행할 최대 프로세스 수를 제어할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
-    <!-- no translation found for permlab_setAlwaysFinish (550958507798796965) -->
-    <skip />
+    <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"백그라운드 앱 강제 종료"</string>
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"앱이 백그라운드로 이동한 활동을 항상 바로 종료할지 여부를 제어할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"배터리 통계 수정"</string>
     <string name="permdesc_batteryStats" msgid="6835186932305744068">"앱이 수집된 배터리 통계를 수정할 수 있도록 허용합니다. 일반 앱에서는 사용하지 않습니다."</string>
@@ -276,8 +267,7 @@
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"앱이 전체 백업 확인 UI를 실행하도록 허용합니다. 다른 앱에는 사용할 수 없습니다."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"인증되지 않은 창 표시"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"애플리케이션이 내부 시스템 사용자 인터페이스에서 사용하는 창을 만들 수 있도록 허용합니다. 일반 애플리케이션에서는 사용하지 않습니다."</string>
-    <!-- no translation found for permlab_systemAlertWindow (3543347980839518613) -->
-    <skip />
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"다른 앱 위에 그리기"</string>
     <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"앱이 시스템 경고 창을 표시할 수 있도록 허용합니다. 이 경우 악성 앱이 화면 전체를 차지할 수 있습니다."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"전체 애니메이션 속도 수정"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"애플리케이션이 언제든지 전체 애니메이션 속도를 빠르게 또는 느리게 변경할 수 있도록 허용합니다."</string>
@@ -339,26 +329,22 @@
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"애플리케이션이 해당 애플리케이션 및 기타 애플리케이션에 대한 특정 권한을 승인 또는 취소하도록 허용합니다. 이 경우 악성 애플리케이션이 승인되지 않은 기능에 액세스할 수 있습니다."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"기본 앱 설정"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"앱이 기본 앱을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 실행되는 앱을 몰래 변경하고 기존 앱으로 위장하여 사용자의 개인 정보를 수집할 수 있습니다."</string>
-    <!-- no translation found for permlab_writeSettings (2226195290955224730) -->
-    <skip />
+    <string name="permlab_writeSettings" msgid="2226195290955224730">"시스템 설정 수정"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"앱이 시스템의 설정 데이터를 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 시스템 구성을 손상시킬 수 있습니다."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"보안 시스템 설정 수정"</string>
     <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"앱이 시스템의 보안 설정값 데이터를 수정할 수 있도록 허용합니다. 일반 앱에서는 사용하지 않습니다."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"Google 서비스 지도 수정"</string>
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"앱이 Google 서비스 지도를 수정할 수 있도록 허용합니다. 일반 앱에서는 사용하지 않습니다."</string>
-    <!-- no translation found for permlab_receiveBootCompleted (5312965565987800025) -->
-    <skip />
+    <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"시작할 때 실행"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"앱이 시스템 부팅이 끝난 후 바로 시작할 수 있도록 허용합니다. 이 경우 태블릿이 시작하는 데 시간이 오래 걸리고 앱이 항상 실행되어 전체 태블릿 속도가 느려질 수 있습니다."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"앱이 시스템 부팅이 끝난 후 바로 시작할 수 있도록 허용합니다. 이 경우 휴대전화가 시작하는 데 시간이 오래 걸리고 앱이 항상 실행되어 전체 휴대전화 속도가 느려질 수 있습니다."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"스티키 브로드캐스트 보내기"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"앱이 브로드캐스트가 끝난 후에 남은 브로드캐스트를 보낼 수 있도록 허용합니다. 이 경우 악성 앱이 태블릿에서 메모리를 너무 많이 사용하도록 하여 속도를 저하시키거나 불안정하게 만들 수 있습니다."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"앱이 브로드캐스트가 끝난 후에 남은 브로드캐스트를 보낼 수 있도록 허용합니다. 이 경우 악성 앱이 휴대전화에서 메모리를 너무 많이 사용하도록 하여 속도를 저하시키거나 불안정하게 만들 수 있습니다."</string>
-    <!-- no translation found for permlab_readContacts (8348481131899886131) -->
-    <skip />
+    <string name="permlab_readContacts" msgid="8348481131899886131">"주소록 읽기"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 내 태블릿에 저장된 연락처에 대한 모든 데이터를 앱이 읽도록 허용합니다. 이렇게 하면 이메일 주소 자동완성과 기타 편리한 기능을 사용할 수 있습니다. 악성 앱이 이를 악용하여 내 연락처 데이터를 다른 사람에게 전송할 수 있습니다."</string>
     <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 내 휴대전화에 저장된 연락처에 대한 모든 데이터를 앱이 읽도록 허용합니다. 이렇게 하면 이메일 주소 자동완성과 기타 편리한 기능을 사용할 수 있습니다. 악성 앱이 이를 악용하여 내 연락처 데이터를 다른 사람에게 전송할 수 있습니다."</string>
-    <!-- no translation found for permlab_writeContacts (5107492086416793544) -->
-    <skip />
+    <string name="permlab_writeContacts" msgid="5107492086416793544">"주소록 수정"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 내 태블릿에 저장된 연락처에 대한 모든 데이터를 앱이 수정하도록 허용합니다. 이렇게 하면 이메일 주소 자동완성과 기타 편리한 기능을 사용할 수 있습니다. 악성 앱이 이를 악용하여 내 연락처 데이터를 삭제 또는 수정할 수 있습니다."</string>
     <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 내 휴대전화에 저장된 연락처에 대한 모든 데이터를 앱이 수정하도록 허용합니다. 이렇게 하면 이메일 주소 자동완성과 기타 편리한 기능을 사용할 수 있습니다. 악성 앱이 이를 악용하여 내 연락처 데이터를 삭제 또는 수정할 수 있습니다."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"통화 기록 읽기"</string>
@@ -367,11 +353,9 @@
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"통화 기록 쓰기"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"앱에서 수신 및 발신 통화 데이터를 포함하여 태블릿의 통화 기록을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 통화 기록을 지우거나 수정할 수 있습니다."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"앱에서 수신 및 발신 통화 데이터를 포함하여 휴대전화의 통화 기록을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 통화 기록을 지우거나 수정할 수 있습니다."</string>
-    <!-- no translation found for permlab_readProfile (4701889852612716678) -->
-    <skip />
+    <string name="permlab_readProfile" msgid="4701889852612716678">"나만의 연락처 카드 읽기"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"앱이 기기에 저장된 개인 프로필 정보(예: 사용자 이름, 연락처 정보 등)를 읽을 수 있도록 허용합니다. 이는 앱이 사용자를 확인하고 다른 사용자들에게 해당 프로필 정보를 전송할 수 있다는 것을 의미합니다."</string>
-    <!-- no translation found for permlab_writeProfile (907793628777397643) -->
-    <skip />
+    <string name="permlab_writeProfile" msgid="907793628777397643">"나만의 연락처 카드 수정"</string>
     <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"앱이 기기에 저장된 개인 프로필 정보(예: 사용자 이름, 연락처 정보 등)를 변경하거나 추가할 수 있도록 허용합니다. 이는 다른 앱이 사용자를 확인하고 다른 사용자들에게 해당 프로필 정보를 전송할 수 있다는 것을 의미합니다."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"소셜 스트림 읽기"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="3419050808547335320">"앱이 나와 친구의 최신 소셜 소식에 액세스하고 동기화할 수 있도록 허용합니다. 이 경우 악성 앱이 소셜 네트워크에서 나와 친구가 주고받은 사적인 내용을 읽을 수 있습니다."</string>
@@ -412,15 +396,11 @@
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"휴대전화 강제로 다시 부팅"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"앱이 태블릿을 강제로 재부팅할 수 있도록 허용합니다."</string>
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"앱이 휴대전화를 강제로 재부팅할 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_mount_unmount_filesystems (2927361537942591841) -->
-    <skip />
-    <!-- no translation found for permlab_mount_unmount_filesystems (4402305049890953810) -->
-    <skip />
+    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"USB 저장소 파일 시스템에 액세스"</string>
+    <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"SD 카드 파일 시스템에 액세스"</string>
     <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"앱이 이동식 저장소의 파일 시스템을 마운트하고 마운트 해제할 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_mount_format_filesystems (6227819582624904972) -->
-    <skip />
-    <!-- no translation found for permlab_mount_format_filesystems (262582698639274056) -->
-    <skip />
+    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"USB 저장소 지우기"</string>
+    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"SD 카드 지우기"</string>
     <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"앱이 이동식 저장소를 포맷할 수 있도록 허용합니다."</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"내부 저장소에 대한 정보 가져오기"</string>
     <string name="permdesc_asec_access" msgid="3094563844593878548">"앱이 내부 저장소의 정보를 가져올 수 있도록 허용합니다."</string>
@@ -432,8 +412,7 @@
     <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"앱이 내부 저장소를 마운트/마운트 해제할 수 있도록 허용합니다."</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"내부 저장소 이름 바꾸기"</string>
     <string name="permdesc_asec_rename" msgid="1794757588472127675">"앱이 내부 저장소의 이름을 바꿀 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_vibrate (7696427026057705834) -->
-    <skip />
+    <string name="permlab_vibrate" msgid="7696427026057705834">"진동 제어"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"앱이 진동을 제어할 수 있도록 허용합니다."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"카메라 플래시 제어"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"앱이 카메라 플래시를 제어할 수 있도록 허용합니다."</string>
@@ -458,8 +437,7 @@
     <string name="permdesc_bindGadget" msgid="8261326938599049290">"앱이 각 앱에 대해 사용할 수 있는 위젯을 시스템에 알릴 수 있도록 허용합니다. 이 권한을 갖는 앱은 개인 정보에 대한 액세스 권한을 다른 앱에 부여할 수 있습니다. 일반 앱에서는 사용하지 않습니다."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"휴대전화 상태 수정"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"앱이 기기의 휴대전화 기능을 관리할 수 있도록 허용합니다. 이 권한을 갖는 앱은 사용자에게 알리지 않고 네트워크를 전환하거나 무선 기능을 켜고 끄는 등의 작업을 수행할 수 있습니다."</string>
-    <!-- no translation found for permlab_readPhoneState (9178228524507610486) -->
-    <skip />
+    <string name="permlab_readPhoneState" msgid="9178228524507610486">"휴대전화 상태 및 ID 읽기"</string>
     <string name="permdesc_readPhoneState" msgid="5127767618743602782">"앱이 기기의 휴대전화 기능에 접근할 수 있도록 허용합니다. 이 권한을 갖는 앱은 휴대전화의 전화번호 및 일련번호, 통화가 활성인지 여부, 통화가 연결된 번호 등을 확인할 수 있습니다."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"태블릿이 절전 모드로 전환되지 않도록 설정"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"휴대전화가 절전 모드로 전환되지 않도록 설정"</string>
@@ -474,8 +452,7 @@
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"휴대전화 하드웨어에 대한 완전한 액세스를 허용하는 하위 수준의 제조업체 테스트로 실행됩니다. 휴대전화가 제조업체 테스트 모드로 실행 중일 때만 사용할 수 있습니다."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"배경화면 설정"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"앱이 시스템 배경화면을 설정할 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_setWallpaperHints (3278608165977736538) -->
-    <skip />
+    <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"배경화면 크기 조정"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"앱이 시스템 배경화면 크기 힌트를 설정할 수 있도록 허용합니다."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"시스템 초기화"</string>
     <string name="permdesc_masterClear" msgid="3665380492633910226">"앱이 모든 데이터, 구성 및 설치된 앱을 지워서 시스템을 완전히 초기화할 수 있도록 허용합니다."</string>
@@ -487,21 +464,16 @@
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"앱이 휴대전화의 표준시간대를 변경할 수 있도록 허용합니다."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"AccountManagerService로 활동"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"애플리케이션이 AccountAuthenticators를 호출할 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_getAccounts (1086795467760122114) -->
-    <skip />
+    <string name="permlab_getAccounts" msgid="1086795467760122114">"기기에서 계정 검색"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="3238360555257773358">"앱이 태블릿에 알려진 계정 목록을 가져올 수 있도록 허용합니다."</string>
     <string name="permdesc_getAccounts" product="default" msgid="2735689364629830348">"앱이 휴대전화에 알려진 계정 목록을 가져올 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_authenticateAccounts (5265908481172736933) -->
-    <skip />
+    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"계정 만들기 및 비밀번호 설정"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"앱이 계정 만들기, 비밀번호 가져오기 및 설정 등과 같은 관리자의 계정 인증자 기능을 사용할 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_manageAccounts (4983126304757177305) -->
-    <skip />
+    <string name="permlab_manageAccounts" msgid="4983126304757177305">"계정 추가 또는 삭제"</string>
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"앱이 계정 추가, 삭제 및 비밀번호 삭제 등의 작업을 수행할 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_useCredentials (235481396163877642) -->
-    <skip />
+    <string name="permlab_useCredentials" msgid="235481396163877642">"기기에서 계정 사용"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"앱이 인증 토큰을 요청하도록 허용합니다."</string>
-    <!-- no translation found for permlab_accessNetworkState (4951027964348974773) -->
-    <skip />
+    <string name="permlab_accessNetworkState" msgid="4951027964348974773">"네트워크 연결 보기"</string>
     <string name="permdesc_accessNetworkState" msgid="479772796952547198">"앱이 모든 네트워크의 상태를 볼 수 있도록 허용합니다."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"인터넷 액세스"</string>
     <string name="permdesc_createNetworkSockets" msgid="5963922297444265950">"앱이 네트워크 소켓을 만들 수 있도록 허용합니다."</string>
@@ -513,36 +485,29 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"앱이 테더링된 네트워크 연결 상태를 변경할 수 있도록 허용합니다."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"백그라운드 데이터 사용 설정 변경"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"앱이 백그라운드 데이터 사용 설정을 변경할 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_accessWifiState (5202012949247040011) -->
-    <skip />
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"Wi-Fi 연결 보기"</string>
     <string name="permdesc_accessWifiState" msgid="7770452658226256831">"앱이 Wi-Fi의 상태에 대한 정보를 볼 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_changeWifiState (6550641188749128035) -->
-    <skip />
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fi 연결 및 연결 해제"</string>
     <string name="permdesc_changeWifiState" msgid="7399961004537946240">"앱이 Wi-Fi 액세스 포인트에 연결하거나 연결을 끊고, 설정된 Wi-Fi 네트워크를 변경할 수 있도록 허용합니다."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi 멀티캐스트 수신 허용"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="7633598524564320817">"앱이 기기로 직접 주소가 지정되지 않은 패킷을 받을 수 있도록 허용합니다. 이 기능은 가까운 곳에서 제공되는 서비스를 검색할 때 유용하며 비멀티캐스트 모드보다 전원을 더 많이 소비합니다."</string>
-    <!-- no translation found for permlab_bluetoothAdmin (6006967373935926659) -->
-    <skip />
+    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"블루투스 설정에 액세스"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"앱이 로컬 블루투스 태블릿을 설정한 다음 원격 기기를 검색하여 페어링할 수 있도록 허용합니다."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"앱이 로컬 블루투스 휴대전화를 설정한 다음 원격 기기를 검색하여 페어링할 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_accessWimaxState (7436749103151096452) -->
-    <skip />
+    <string name="permlab_accessWimaxState" msgid="7436749103151096452">"WiMAX 연결 보기"</string>
     <string name="permdesc_accessWimaxState" msgid="5914958077555177749">"애플리케이션이 WiMAX의 상태에 대한 정보를 볼 수 있도록 허용합니다."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX 상태 변경"</string>
     <string name="permdesc_changeWimaxState" msgid="3328853825006455912">"애플리케이션이 WiMAX 네트워크에 연결하거나 연결을 끊을 수 있도록 합니다."</string>
-    <!-- no translation found for permlab_bluetooth (6127769336339276828) -->
-    <skip />
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"블루투스 기기와 페어링"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"앱이 로컬 블루투스 태블릿의 구성을 보고 페어링된 기기에 연결하며 연결을 수락할 수 있도록 허용합니다."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"앱이 로컬 블루투스 전화의 구성을 보고 페어링된 기기에 연결하며 연결을 수락할 수 있도록 허용합니다."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"NFC(Near Field Communication) 제어"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"앱이 NFC(근거리 무선 통신) 태그, 카드 및 리더와 통신할 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_disableKeyguard (3598496301486439258) -->
-    <skip />
+    <string name="permlab_disableKeyguard" msgid="3598496301486439258">"화면 잠금 사용 중지"</string>
     <string name="permdesc_disableKeyguard" msgid="6231611286892232626">"앱이 키 잠금 및 관련 비밀번호 보안을 사용중지할 수 있도록 허용합니다. 예를 들어, 휴대전화가 수신전화를 받을 때 키 잠금을 사용중지했다가 통화가 끝나면 키 잠금을 다시 사용할 수 있습니다."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"동기화 설정 읽기"</string>
     <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"앱이 피플 앱(People app)에 동기화를 사용할지 여부 등의 동기화 설정을 읽을 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_writeSyncSettings (5408694875793945314) -->
-    <skip />
+    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"동기화 사용 및 사용 중지 전환"</string>
     <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"앱이 피플 앱(People app)에 대해 동기화를 사용할지 여부 등의 동기화 설정을 수정할 수 있도록 허용합니다."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"동기화 통계 읽기"</string>
     <string name="permdesc_readSyncStats" msgid="3801971839939951678">"앱이 동기화 통계(예: 실행된 동기화 기록)을 읽을 수 있도록 허용합니다."</string>
@@ -550,23 +515,16 @@
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"앱이 현재 동기화된 피드에 대한 세부정보를 가져올 수 있도록 허용합니다."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"가입 피드 작성"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"앱이 현재 동기화된 피드를 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 동기화된 피드를 변경할 수 있습니다."</string>
-    <!-- no translation found for permlab_readDictionary (4107101525746035718) -->
-    <skip />
+    <string name="permlab_readDictionary" msgid="4107101525746035718">"사전에 추가한 단어 읽기"</string>
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"앱이 사용자 사전에 보관되어 있는 비공개 단어, 이름 및 구문을 읽도록 허용합니다."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"사용자 정의 사전에 작성"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"앱이 사용자 사전에 새 단어를 입력할 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_sdcardRead (367275095159405468) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (2188156462934977940) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (3530894470637667917) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (2555811422562526606) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardWrite (8485979062254666748) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardWrite (9084476432661578751) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB 저장소의 콘텐츠 읽기"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"SD 카드의 콘텐츠 읽기"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"앱이 사진과 미디어를 포함하고 있을 수 있는 USB 저장소의 콘텐츠를 읽도록 허용합니다."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"앱이 사진과 미디어를 포함하고 있을 수 있는 SD 카드의 콘텐츠를 읽도록 허용합니다."</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB 저장소의 콘텐츠 수정 또는 삭제"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"SD 카드의 콘텐츠 수정 또는 삭제"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"앱이 USB 저장소에 쓸 수 있도록 허용합니다."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"앱이 SD 카드에 쓸 수 있도록 허용합니다."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"내부 미디어 저장소 콘텐츠 수정/삭제"</string>
@@ -819,15 +777,12 @@
     <string name="autofill_parish" msgid="8202206105468820057">"군"</string>
     <string name="autofill_area" msgid="3547409050889952423">"구역"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"에미리트"</string>
-    <!-- no translation found for permlab_readHistoryBookmarks (3775265775405106983) -->
-    <skip />
+    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"웹 북마크 및 내역 읽기"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4577476392604595921">"앱이 브라우저로 방문한 모든 URL과 브라우저의 모든 북마크를 읽을 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_writeHistoryBookmarks (3714785165273314490) -->
-    <skip />
+    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"웹 북마크 및 내역 쓰기"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="1757103804824209530">"앱이 태블릿에 저장된 브라우저 기록 또는 북마크를 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 브라우저의 데이터를 지우거나 수정할 수 있습니다."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="6693764355720719197">"앱이 휴대전화에 저장된 브라우저 기록 또는 북마크를 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 브라우저의 데이터를 지우거나 수정할 수 있습니다."</string>
-    <!-- no translation found for permlab_setAlarm (1379294556362091814) -->
-    <skip />
+    <string name="permlab_setAlarm" msgid="1379294556362091814">"알람 설정"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"앱이 설치된 알람 시계 앱에서 알람을 설정할 수 있도록 허용합니다. 일부 알람 시계 앱에는 이 기능이 구현되지 않을 수 있습니다."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"음성사서함 추가"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"앱이 음성사서함에 메시지를 추가할 수 있도록 허용합니다."</string>

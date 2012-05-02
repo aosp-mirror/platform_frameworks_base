@@ -193,14 +193,11 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Επιτρέπει στην εφαρμογή να αποτελεί τη γραμμή κατάστασης."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"ανάπτυξη/σύμπτυξη γραμμής κατάστασης"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Επιτρέπει στην εφαρμογή να αναπτύξει ή να συμπτύξει τη γραμμή κατάστασης."</string>
-    <!-- no translation found for permlab_processOutgoingCalls (3906007831192990946) -->
-    <skip />
+    <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"αναδρομολόγηση εξερχόμενων κλήσεων"</string>
     <string name="permdesc_processOutgoingCalls" msgid="1152111671618301044">"Επιτρέπει στην εφαρμογή την επεξεργασία εξερχόμενων κλήσεων και την αλλαγή του αριθμού που προορίζεται για κλήση. Τυχόν κακόβουλες εφαρμογές ενδέχεται να παρακολουθούν, να ανακατευθύνουν ή να αποτρέπουν τις εξερχόμενες κλήσεις."</string>
-    <!-- no translation found for permlab_receiveSms (8673471768947895082) -->
-    <skip />
+    <string name="permlab_receiveSms" msgid="8673471768947895082">"λήψη μηνυμάτων κειμένου (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="8107887121893611793">"Επιτρέπει στην εφαρμογή τη λήψη και την επεξεργασία μηνυμάτων SMS. Τυχόν κακόβουλες εφαρμογές ενδέχεται να παρακολουθούν τα μηνύματά σας ή να τα διαγράφουν χωρίς να εμφανίζονται πρώτα σε εσάς."</string>
-    <!-- no translation found for permlab_receiveMms (1821317344668257098) -->
-    <skip />
+    <string name="permlab_receiveMms" msgid="1821317344668257098">"λήψη μηνυμάτων κειμένου (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Επιτρέπει στην εφαρμογή τη λήψη και την επεξεργασία μηνυμάτων MMS. Τυχόν κακόβουλες εφαρμογές ενδέχεται να παρακολουθούν τα μηνύματά σας ή να τα διαγράφουν χωρίς να εμφανίζονται πρώτα σε εσάς."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"λαμβάνει τις μεταδόσεις σε περιπτώσεις έκτακτης ανάγκης"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Επιτρέπει στην εφαρμογή τη λήψη και την επεξεργασία μηνυμάτων μετάδοσης. Αυτή η άδεια διατίθεται μόνο για εφαρμογές συστήματος."</string>
@@ -210,16 +207,13 @@
     <string name="permdesc_sendSms" msgid="906546667507626156">"Επιτρέπει στην εφαρμογή την αποστολή μηνυμάτων SMS. Τυχόν κακόβουλες εφαρμογές ενδέχεται να κοστίσουν μέσω της αποστολής μηνυμάτων χωρίς δική σας επιβεβαίωση."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"αποστολή μηνυμάτων SMS χωρίς επιβεβαίωση"</string>
     <string name="permdesc_sendSmsNoConfirmation" msgid="3437759207020400204">"Επιτρέπει στην εφαρμογή την αποστολή μηνυμάτων SMS. Τυχόν κακόβουλες εφαρμογές ενδέχεται να κοστίσουν μέσω της αποστολής μηνυμάτων χωρίς δική σας επιβεβαίωση."</string>
-    <!-- no translation found for permlab_readSms (8745086572213270480) -->
-    <skip />
+    <string name="permlab_readSms" msgid="8745086572213270480">"ανάγνωση των μηνυμάτων κειμένου σας (SMS ή MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2341692916884515613">"Επιτρέπει στην εφαρμογή την ανάγνωση μηνυμάτων SMS τα οποία βρίσκονται αποθηκευμένα στο tablet σας ή στην κάρτα SIM. Τυχόν κακόβουλες εφαρμογές ενδέχεται να διαβάσουν τα απόρρητα μηνύματά σας."</string>
     <string name="permdesc_readSms" product="default" msgid="5653850482025875493">"Επιτρέπει στην εφαρμογή την ανάγνωση μηνυμάτων SMS τα οποία βρίσκονται αποθηκευμένα στο τηλέφωνό σας ή στην κάρτα SIM. Τυχόν κακόβουλες εφαρμογές ενδέχεται να διαβάσουν τα απόρρητα μηνύματά σας."</string>
-    <!-- no translation found for permlab_writeSms (3216950472636214774) -->
-    <skip />
+    <string name="permlab_writeSms" msgid="3216950472636214774">"επεξεργασία των μηνυμάτων κειμένου σας (SMS ή MMS)"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Επιτρέπει στην εφαρμογή την εγγραφή σε μηνύματα SMS που είναι αποθηκευμένα στο tablet σας ή στην κάρτα SIM. Τυχόν κακόβουλες εφαρμογές ενδέχεται να διαγράψουν τα μηνύματά σας."</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Επιτρέπει στην εφαρμογή την εγγραφή σε μηνύματα SMS που είναι αποθηκευμένα στο τηλέφωνό σας ή στην κάρτα SIM. Τυχόν κακόβουλες εφαρμογές ενδέχεται να διαγράψουν τα μηνύματά σας."</string>
-    <!-- no translation found for permlab_receiveWapPush (5991398711936590410) -->
-    <skip />
+    <string name="permlab_receiveWapPush" msgid="5991398711936590410">"λήψη μηνυμάτων κειμένου (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Επιτρέπει στην εφαρμογή τη λήψη και την επεξεργασία μηνυμάτων WAP. Τυχόν κακόβουλες εφαρμογές ενδέχεται να παρακολουθούν τα μηνύματά σας ή να τα διαγράφουν χωρίς να εμφανίζονται πρώτα σε εσάς."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ανάκτηση εκτελούμενων εφαρμογών"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Επιτρέπει στην εφαρμογή να ανακτήσει πληροφορίες σχετικά με τις τρέχουσες εκτελούμενες εργασίες και στις εργασίες που έχουν πρόσφατα εκτελεστεί. Τυχόν κακόβουλες εφαρμογές ενδέχεται να ανακαλύψουν ιδιωτικές πληροφορίες σχετικά με άλλες εφαρμογές."</string>
@@ -235,13 +229,11 @@
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Επιτρέπει στην εφαρμογή να ελέγξει τη λειτουργία συμβατότητας της οθόνης με άλλες εφαρμογές. Οι κακόβουλες εφαρμογές μπορεί να επηρεάσουν τη συμπεριφορά άλλων εφαρμογών."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"ενεργοποίηση εντοπισμού σφαλμάτων εφαρμογής"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Επιτρέπει στην εφαρμογή να ενεργοποιήσει τον εντοπισμό σφαλμάτων για μια άλλη εφαρμογή. Τυχόν κακόβουλες εφαρμογές ενδέχεται να χρησιμοποιήσουν αυτήν τη δυνατότητα για τον τερματισμό άλλων εφαρμογών."</string>
-    <!-- no translation found for permlab_changeConfiguration (4162092185124234480) -->
-    <skip />
+    <string name="permlab_changeConfiguration" msgid="4162092185124234480">"αλλαγή ρυθμίσεων προβολής συστήματος"</string>
     <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Επιτρέπει στην εφαρμογή την αλλαγή της τρέχουσας διαμόρφωσης, όπως είναι οι τοπικές ρυθμίσεις ή το μέγεθος γραμματοσειράς γενικά."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"ενεργοποίηση λειτουργίας αυτοκινήτου"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Επιτρέπει στην εφαρμογή την ενεργοποίηση της λειτουργίας αυτοκινήτου."</string>
-    <!-- no translation found for permlab_killBackgroundProcesses (3914026687420177202) -->
-    <skip />
+    <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"κλείσιμο των άλλων εφαρμογών"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="931129103262126617">"Επιτρέπει στην εφαρμογή τον τερματισμό των διεργασιών παρασκηνίου άλλων εφαρμογών, ακόμα και αν η μνήμη είναι επαρκής."</string>
     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"επιβολή διακοπής άλλων εφαρμογών"</string>
     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Επιτρέπει στην εφαρμογή να πραγματοποιήσει αναγκαστική διακοπή άλλων εφαρμογών."</string>
@@ -265,8 +257,7 @@
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Επιτρέπει στην εφαρμογή τη μετάδοση μιας ειδοποίησης ότι έχει ληφθεί κάποιο μήνυμα WAP PUSH. Τυχόν κακόβουλες εφαρμογές ενδέχεται να χρησιμοποιήσουν αυτήν τη δυνατότητα για τη λήψη πλαστών μηνυμάτων MMS ή την εν αγνοία του χρήστη αντικατάσταση του περιεχομένου οποιασδήποτε ιστοσελίδας με κακόβουλες παραλλαγές."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"περιορισμός αριθμού εκτελούμενων διαδικασιών"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Επιτρέπει στην εφαρμογή τον έλεγχο του μέγιστου αριθμού διαδικασιών που θα εκτελούνται. Δεν είναι απαραίτητο για συνήθεις εφαρμογές."</string>
-    <!-- no translation found for permlab_setAlwaysFinish (550958507798796965) -->
-    <skip />
+    <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"αναγκαστικός τερματισμός εφαρμογών στο παρασκήνιο"</string>
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Επιτρέπει στην εφαρμογή να ελέγχει αν οι δραστηριότητες ολοκληρώνονται πάντοτε μόλις μεταβούν στο φόντο. Δεν απαιτείται για συνήθεις εφαρμογές."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"τροποποίηση στατιστικών μπαταρίας"</string>
     <string name="permdesc_batteryStats" msgid="6835186932305744068">"Επιτρέπει στην εφαρμογή την τροποποίηση στατιστικών μπαταρίας που έχουν συλλεχθεί. Δεν πρέπει να χρησιμοποιείται από συνήθεις εφαρμογές."</string>
@@ -276,8 +267,7 @@
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Επιτρέπει στην εφαρμογή την εκκίνηση της διεπαφής χρήστη επιβεβαίωσης δημιουργίας αντιγράφου ασφαλείας. Δεν προορίζεται για χρήση από οποιαδήποτε εφαρμογή."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"προβολή μη εξουσιοδοτημένων παραθύρων"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Επιτρέπει στην εφαρμογή τη δημιουργία παραθύρων τα οποία προορίζονται για χρήση από τη διεπαφή χρήστη του εσωτερικού συστήματος. Δεν προορίζεται για χρήση με συνήθεις εφαρμογές."</string>
-    <!-- no translation found for permlab_systemAlertWindow (3543347980839518613) -->
-    <skip />
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"σχεδίαση πάνω σε άλλες εφαρμογές"</string>
     <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"Επιτρέπει στην εφαρμογή την εμφάνιση παραθύρων ειδοποίησης συστήματος. Τυχόν κακόβουλες εφαρμογές ενδέχεται εμφανιστούν σε ολόκληρη την οθόνη του τηλεφώνου."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"τροποποίηση καθολικής ταχύτητας κίνησης εικόνας"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Επιτρέπει στην εφαρμογή την αλλαγή της καθολικής ταχύτητας κίνησης (ταχύτερη ή βραδύτερη κίνηση) οποιαδήποτε στιγμή."</string>
@@ -339,26 +329,22 @@
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Επιτρέπει σε μια εφαρμογή να εκχωρήσει ή να ανακαλέσει ειδικά δικαιώματα για αυτήν ή για άλλες εφαρμογές. Οι κακόβουλες εφαρμογές μπορεί να το χρησιμοποιήσουν αυτό ώστε να αποκτήσουν πρόσβαση σε λειτουργίες για τις οποίες δεν τους έχει εκχωρηθεί δικαίωμα."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"ορισμός προτιμώμενων εφαρμογών"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Επιτρέπει στην εφαρμογή την τροποποίηση των εφαρμογών της προτίμησής σας. Τυχόν κακόβουλες εφαρμογές ενδέχεται να να αλλάξουν χωρίς ειδοποίηση τις εφαρμογές που εκτελούνται, \"ξεγελώντας\" τις υπάρχουσες εφαρμογές ώστε να συλλέξουν ιδιωτικά δεδομένα από εσάς."</string>
-    <!-- no translation found for permlab_writeSettings (2226195290955224730) -->
-    <skip />
+    <string name="permlab_writeSettings" msgid="2226195290955224730">"τροποποίηση ρυθμίσεων συστήματος"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Επιτρέπει στην εφαρμογή την τροποποίηση των δεδομένων των ρυθμίσεων του συστήματος. Τυχόν κακόβουλες εφαρμογές ενδέχεται να καταστρέψουν τη διαμόρφωση του συστήματός σας."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"τροποποίηση ασφαλών ρυθμίσεων συστήματος"</string>
     <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Επιτρέπει στην εφαρμογή την τροποποίηση των δεδομένων των ρυθμίσεων του συστήματος. Δεν προορίζεται για χρήση από συνήθεις εφαρμογές."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"μετατροπή του χάρτη υπηρεσιών Google"</string>
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Επιτρέπει στην εφαρμογή την τροποποίηση του χάρτη υπηρεσιών Google. Δεν προορίζεται για χρήση από συνήθεις εφαρμογές."</string>
-    <!-- no translation found for permlab_receiveBootCompleted (5312965565987800025) -->
-    <skip />
+    <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"εκτέλεση κατά την έναρξη"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Επιτρέπει στην εφαρμογή να εκκινηθεί αμέσως μόλις ολοκληρωθεί η εκκίνηση του συστήματος. Αυτό ενδέχεται να καθυστερήσει την εκκίνηση του tablet και να προκαλέσει γενική μείωση της ταχύτητας λειτουργίας του tablet, καθώς η εφαρμογή θα εκτελείται συνεχώς."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Επιτρέπει στην εφαρμογή να εκκινηθεί αμέσως μόλις ολοκληρωθεί η εκκίνηση του συστήματος. Αυτό ενδέχεται να καθυστερήσει την εκκίνηση του τηλεφώνου και να προκαλέσει γενική μείωση της ταχύτητας λειτουργίας του τηλεφώνου, καθώς η εφαρμογή θα εκτελείται συνεχώς."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"αποστολή εκπομπής sticky"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Επιτρέπει στην εφαρμογή την αποστολή εκπομπών sticky, οι οποίες παραμένουν μετά το τέλος της εκπομπής. Τυχόν κακόβουλες εφαρμογές ενδέχεται να καταστήσουν τη λειτουργία του tablet αργή ή ασταθή προκαλώντας τη χρήση μεγάλου τμήματος της μνήμης."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Επιτρέπει στην εφαρμογή την αποστολή εκπομπών sticky, οι οποίες παραμένουν μετά το τέλος της εκπομπής. Τυχόν κακόβουλες εφαρμογές ενδέχεται να καταστήσουν τη λειτουργία του τηλεφώνου αργή ή ασταθή προκαλώντας τη χρήση μεγάλου τμήματος της μνήμης."</string>
-    <!-- no translation found for permlab_readContacts (8348481131899886131) -->
-    <skip />
+    <string name="permlab_readContacts" msgid="8348481131899886131">"ανάγνωση των επαφών σας"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Επιτρέπει στην εφαρμογή να διαβάζει όλα τα δεδομένα σχετικά με τις επαφές που έχουν αποθηκευτεί στο tablet σας, συμπεριλαμβανομένης της συχνότητας με την οποία κάνατε κλήσεις, στείλατε μηνύματα ηλεκτρονικού ταχυδρομείου ή επικοινωνήσατε με άλλους τρόπους με συγκεκριμένα άτομα. Αυτό βοηθάει με την αυτόματη συμπλήρωση των διευθύνσεων ηλεκτρονικού ταχυδρομείου και άλλες χρήσιμες λειτουργίες. Οι κακόβουλες εφαρμογές μπορούν να χρησιμοποιήσουν αυτήν την άδεια για να στείλουν τα στοιχεία επικοινωνίας σας σε άλλα άτομα."</string>
     <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Δίνει τη δυνατότητα στην εφαρμογή να διαβάζει όλα τα δεδομένα σχετικά με τις επαφές σας που έχουν αποθηκευτεί στο τηλέφωνό σας, συμπεριλαμβανομένης της συχνότητας με την οποία κάνατε κλήσεις, στείλατε μηνύματα ηλεκτρονικού ταχυδρομείου ή επικοινωνήσατε με άλλους τρόπους με συγκεκριμένα άτομα. Αυτό βοηθάει με την αυτόματη συμπλήρωση των διευθύνσεων ηλεκτρονικού ταχυδρομείου και άλλες χρήσιμες λειτουργίες. Οι κακόβουλες εφαρμογές μπορούν να χρησιμοποιήσουν αυτήν την άδεια για να στείλουν τα στοιχεία επικοινωνίας σας σε άλλα άτομα."</string>
-    <!-- no translation found for permlab_writeContacts (5107492086416793544) -->
-    <skip />
+    <string name="permlab_writeContacts" msgid="5107492086416793544">"τροποποίηση των επαφών σας"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Επιτρέπει στην εφαρμογή να τροποποιεί τα δεδομένα σχετικά με τις επαφές σας που έχουν αποθηκευτεί στο tablet σας, συμπεριλαμβανομένης της συχνότητας με την οποία κάνατε κλήσεις, στείλατε μηνύματα ηλεκτρονικού ταχυδρομείου ή επικοινωνήσατε με άλλους τρόπους με συγκεκριμένα άτομα. Αυτό βοηθάει με την αυτόματη συμπλήρωση των διευθύνσεων ηλεκτρονικού ταχυδρομείου και άλλες χρήσιμες λειτουργίες. Οι κακόβουλες εφαρμογές μπορούν να χρησιμοποιήσουν αυτήν την άδεια για να διαγράψουν ή να τροποποιήσουν τα στοιχεία επικοινωνίας σας."</string>
     <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Επιτρέπει στην εφαρμογή να τροποποιεί τα δεδομένα σχετικά με τις επαφές σας που έχουν αποθηκευτεί στο τηλέφωνό σας, συμπεριλαμβανομένης της συχνότητας με την οποία κάνατε κλήσεις, στείλατε μηνύματα ηλεκτρονικού ταχυδρομείου ή επικοινωνήσατε με άλλους τρόπους με συγκεκριμένα άτομα. Αυτό βοηθάει με την αυτόματη συμπλήρωση των διευθύνσεων ηλεκτρονικού ταχυδρομείου και άλλες χρήσιμες λειτουργίες. Οι κακόβουλες εφαρμογές μπορούν να χρησιμοποιήσουν αυτήν την άδεια για να διαγράψουν ή να τροποποιήσουν τα στοιχεία επικοινωνίας σας."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"ανάγνωση αρχείου καταγραφής κλήσεων"</string>
@@ -367,11 +353,9 @@
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"εγγραφή αρχείου καταγραφής κλήσεων"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Επιτρέπει στην εφαρμογή να τροποποιεί το αρχείο καταγραφής κλήσεων του tablet σας, συμπεριλαμβανομένων των δεδομένων σχετικά με τις εισερχόμενες και τις εξερχόμενες κλήσεις. Οι κακόβουλες εφαρμογές μπορεί να το χρησιμοποιήσουν για να διαγράψουν ή να τροποποιήσουν το αρχείο καταγραφής κλήσεων."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Επιτρέπει στην εφαρμογή να τροποποιεί το αρχείο καταγραφής κλήσεων του τηλεφώνου σας, συμπεριλαμβανομένων των δεδομένων σχετικά με τις εισερχόμενες και τις εξερχόμενες κλήσεις. Οι κακόβουλες εφαρμογές μπορεί να το χρησιμοποιήσουν για να διαγράψουν ή να τροποποιήσουν το αρχείο καταγραφής κλήσεων."</string>
-    <!-- no translation found for permlab_readProfile (4701889852612716678) -->
-    <skip />
+    <string name="permlab_readProfile" msgid="4701889852612716678">"ανάγνωση της κάρτας επαφής σας"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Επιτρέπει στην εφαρμογή την ανάγνωση προσωπικών πληροφοριών προφίλ οι οποίες είναι αποθηκευμένες στη συσκευή σας, όπως το όνομα και τα στοιχεία επικοινωνίας σας. Αυτό σημαίνει ότι η εφαρμογή μπορεί να σας αναγνωρίσει και να στείλει τις πληροφορίες σας προφίλ σε άλλους."</string>
-    <!-- no translation found for permlab_writeProfile (907793628777397643) -->
-    <skip />
+    <string name="permlab_writeProfile" msgid="907793628777397643">"τροποποίηση κάρτας επαφής"</string>
     <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"Επιτρέπει στην εφαρμογή την αλλαγή ή την προσθήκη προσωπικών πληροφοριών προφίλ οι οποίες είναι αποθηκευμένες στη συσκευή σας, όπως το όνομα και τα στοιχεία επικοινωνίας σας. Αυτό σημαίνει ότι οι άλλες εφαρμογές μπορούν να σας αναγνωρίσουν και να στείλουν τις πληροφορίες σας προφίλ σε άλλους."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"διαβάστε τη ροή σας κοινωνικών δικτύων"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="3419050808547335320">"Επιτρέπει στην εφαρμογή να έχει πρόσβαση και να συγχρονίζει τις ενημερώσεις κοινωνικού περιεχομένου από τους φίλους σας. Τυχόν κακόβουλες εφαρμογές ενδέχεται να χρησιμοποιήσουν αυτήν τη δυνατότητα για να διαβάσουν απόρρητες επικοινωνίες μεταξύ εσάς και των φίλων σας σε κοινωνικά δίκτυα."</string>
@@ -412,15 +396,11 @@
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"αναγκαστική επανεκκίνηση τηλεφώνου"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Επιτρέπει στην εφαρμογή να προκαλέσει αναγκαστική επανεκκίνηση του tablet."</string>
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Επιτρέπει στην εφαρμογή να προκαλέσει αναγκαστική επανεκκίνηση του τηλεφώνου."</string>
-    <!-- no translation found for permlab_mount_unmount_filesystems (2927361537942591841) -->
-    <skip />
-    <!-- no translation found for permlab_mount_unmount_filesystems (4402305049890953810) -->
-    <skip />
+    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"πρόσβ. σε σύστ.αρχ.αποθ.χώρ.USB"</string>
+    <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"πρόσβαση στο σύστημα αρχείων της κάρτας SD"</string>
     <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Επιτρέπει στην εφαρμογή τη σύνδεση και αποσύνδεση συστημάτων αρχείων για αφαιρούμενο χώρο αποθήκευσης."</string>
-    <!-- no translation found for permlab_mount_format_filesystems (6227819582624904972) -->
-    <skip />
-    <!-- no translation found for permlab_mount_format_filesystems (262582698639274056) -->
-    <skip />
+    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"διαγραφή αποθ. χώρου USB"</string>
+    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"διαγραφή κάρτας SD"</string>
     <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Επιτρέπει στην εφαρμογή τη διαμόρφωση αφαιρούμενου χώρου αποθήκευσης."</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"λήψη πληροφοριών στον εσωτερικό χώρο αποθήκευσης"</string>
     <string name="permdesc_asec_access" msgid="3094563844593878548">"Επιτρέπει στην εφαρμογή τη λήψη πληροφοριών στον εσωτερικό χώρο αποθήκευσης."</string>
@@ -432,8 +412,7 @@
     <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Επιτρέπει στην εφαρμογή τη σύνδεση/αποσύνδεση του εσωτερικού χώρου αποθήκευσης."</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"μετονομασία εσωτερικού αποθηκευτικού χώρου"</string>
     <string name="permdesc_asec_rename" msgid="1794757588472127675">"Επιτρέπει στην εφαρμογή τη μετονομασία του εσωτερικού χώρου αποθήκευσης."</string>
-    <!-- no translation found for permlab_vibrate (7696427026057705834) -->
-    <skip />
+    <string name="permlab_vibrate" msgid="7696427026057705834">"έλεγχος δόνησης"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Επιτρέπει στην εφαρμογή τον έλεγχο της δόνησης."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"έλεγχος φακού"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Επιτρέπει στην εφαρμογή τον έλεγχο του φακού."</string>
@@ -458,8 +437,7 @@
     <string name="permdesc_bindGadget" msgid="8261326938599049290">"Επιτρέπει στην εφαρμογή να ορίσει στο σύστημα ποια γραφικά στοιχεία μπορεί να χρησιμοποιήσει κάθε εφαρμογή. Με αυτή την άδεια, οι εφαρμογές μπορούν να παρέχουν πρόσβαση σε προσωπικά δεδομένα σε άλλες εφαρμογές. Δεν προορίζεται για χρήση με συνήθεις εφαρμογές."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"τροποποίηση κατάστασης τηλεφώνου"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Επιτρέπει στην εφαρμογή να ελέγχει τις λειτουργίες τηλεφώνου της συσκευής. Μια εφαρμογή η οποία διαθέτει αυτήν την άδεια μπορεί να κάνει εναλλαγή μεταξύ δικτύων, να ενεργοποιεί και να απενεργοποιεί το ραδιόφωνο του τηλεφώνου και άλλα, χωρίς να ειδοποιείστε."</string>
-    <!-- no translation found for permlab_readPhoneState (9178228524507610486) -->
-    <skip />
+    <string name="permlab_readPhoneState" msgid="9178228524507610486">"ανάγνωση κατάστασης και ταυτότητας τηλεφώνου"</string>
     <string name="permdesc_readPhoneState" msgid="5127767618743602782">"Επιτρέπει στην εφαρμογή την πρόσβαση στις λειτουργίες τηλεφώνου της συσκευής. Μια εφαρμογή με αυτή την άδεια μπορεί να προσδιορίσει τον τηλεφωνικό και τον σειριακό αριθμό του τηλεφώνου, αν μια κλήση είναι ενεργή ή όχι, τον τηλεφωνικό αριθμό της κλήσης κλπ."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"παρεμπόδιση μετάβασης του tablet σε κατάσταση αδράνειας"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"παρεμπόδιση μετάβασης του τηλεφώνου σε κατάσταση αδράνειας"</string>
@@ -474,8 +452,7 @@
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Εκτέλεση ως χαμηλού επιπέδου δοκιμή κατασκευαστή, ώστε να επιτρέπεται πλήρης πρόσβαση στο υλικό του τηλεφώνου. Διαθέσιμο μόνο όταν το τηλέφωνο βρίσκεται σε λειτουργία δοκιμής κατασκευαστή."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"ορισμός ταπετσαρίας"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Επιτρέπει στην εφαρμογή τον ορισμό της ταπετσαρίας συστήματος."</string>
-    <!-- no translation found for permlab_setWallpaperHints (3278608165977736538) -->
-    <skip />
+    <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"ρύθμιση του μεγέθους της ταπετσαρίας σας"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Επιτρέπει στην εφαρμογή τον ορισμό συμβουλών μεγέθους ταπετσαρίας συστήματος."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"επαναφορά συστήματος στις εργοστασιακές προεπιλογές"</string>
     <string name="permdesc_masterClear" msgid="3665380492633910226">"Επιτρέπει στην εφαρμογή την πλήρη επαναφορά του συστήματος στις εργοστασιακές του ρυθμίσεις, τη διαγραφή όλων των δεδομένων, τη διαμόρφωση και τις εγκατεστημένες εφαρμογές."</string>
@@ -487,21 +464,16 @@
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Επιτρέπει στην εφαρμογή την αλλαγή της ζώνης ώρας του τηλεφώνου."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"ενεργεί ως AccountManagerService"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Επιτρέπει στην εφαρμογή την πραγματοποίηση κλήσεων σε προγράμματα ελέγχου ταυτότητας λογαριασμού (AccountAuthenticators)."</string>
-    <!-- no translation found for permlab_getAccounts (1086795467760122114) -->
-    <skip />
+    <string name="permlab_getAccounts" msgid="1086795467760122114">"εύρεση λογαριασμών στη συσκευή"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="3238360555257773358">"Επιτρέπει στην εφαρμογή να λάβει τη λίστα λογαριασμών του tablet."</string>
     <string name="permdesc_getAccounts" product="default" msgid="2735689364629830348">"Επιτρέπει στην εφαρμογή να λάβει τη λίστα λογαριασμών του τηλεφώνου."</string>
-    <!-- no translation found for permlab_authenticateAccounts (5265908481172736933) -->
-    <skip />
+    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"δημιουργία λογαριασμών και ορισμός κωδικών πρόσβασης"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Επιτρέπει στην εφαρμογή τη χρήση των δυνατοτήτων του προγράμματος ελέγχου ταυτότητας λογαριασμού του AccountManager, συμπεριλαμβανομένης της δημιουργίας λογαριασμών και της λήψης και ρύθμισης των κωδικών πρόσβασής τους."</string>
-    <!-- no translation found for permlab_manageAccounts (4983126304757177305) -->
-    <skip />
+    <string name="permlab_manageAccounts" msgid="4983126304757177305">"προσθήκη ή κατάργηση λογαριασμών"</string>
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Επιτρέπει στην εφαρμογή να εκτελεί ενέργειες όπως προσθήκη και κατάργηση λογαριασμών και διαγραφή των κωδικών πρόσβασής τους."</string>
-    <!-- no translation found for permlab_useCredentials (235481396163877642) -->
-    <skip />
+    <string name="permlab_useCredentials" msgid="235481396163877642">"χρήση λογαριασμών στη συσκευή"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Επιτρέπει στην εφαρμογή να ζητά διακριτικά ελέγχου ταυτότητας."</string>
-    <!-- no translation found for permlab_accessNetworkState (4951027964348974773) -->
-    <skip />
+    <string name="permlab_accessNetworkState" msgid="4951027964348974773">"προβολή συνδέσεων δικτύου"</string>
     <string name="permdesc_accessNetworkState" msgid="479772796952547198">"Επιτρέπει στην εφαρμογή την προβολή της κατάστασης όλων των δικτύων."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"πλήρης πρόσβαση στο Διαδίκτυο"</string>
     <string name="permdesc_createNetworkSockets" msgid="5963922297444265950">"Επιτρέπει στην εφαρμογή τη δημιουργία υποδοχών δικτύου (sockets)."</string>
@@ -513,36 +485,29 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Επιτρέπει στην εφαρμογή την αλλαγή της κατάστασης συνδεσιμότητας δικτύου."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"αλλαγή ρύθμισης της χρήσης δεδομένων στο παρασκήνιο"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Επιτρέπει στην εφαρμογή την αλλαγή της ρύθμισης χρήσης δεδομένων φόντου."</string>
-    <!-- no translation found for permlab_accessWifiState (5202012949247040011) -->
-    <skip />
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"προβολή συνδέσεων Wi-Fi"</string>
     <string name="permdesc_accessWifiState" msgid="7770452658226256831">"Επιτρέπει στην εφαρμογή την προβολή των πληροφοριών σχετικά με την κατάσταση του Wi-Fi."</string>
-    <!-- no translation found for permlab_changeWifiState (6550641188749128035) -->
-    <skip />
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"σύνδεση και αποσύνδεση από το Wi-Fi"</string>
     <string name="permdesc_changeWifiState" msgid="7399961004537946240">"Επιτρέπει στην εφαρμογή τη σύνδεση σε σημεία πρόσβασης Wi-Fi και την αποσύνδεση από αυτά, καθώς και την πραγματοποίηση αλλαγών σε διαμορφωμένα δίκτυα Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"να επιτρέπεται η λήψη πολλαπλής διανομής Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="7633598524564320817">"Επιτρέπει στην εφαρμογή να λαμβάνει πακέτα τα οποία δεν αποστέλλονται απευθείας στη συσκευή σας. Αυτό μπορεί να φανεί χρήσιμο κατά την ανακάλυψη υπηρεσιών που προσφέρονται σε κοντινές τοποθεσίες. Χρησιμοποιεί περισσότερη ενέργεια σε σχέση με την κατάσταση μη πολλαπλής διανομής."</string>
-    <!-- no translation found for permlab_bluetoothAdmin (6006967373935926659) -->
-    <skip />
+    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"πρόσβαση στις ρυθμίσεις Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Επιτρέπει στην εφαρμογή τη διαμόρφωση του τοπικού tablet Bluetooth, τον εντοπισμό και τη σύζευξη με απομακρυσμένες συσκευές."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Επιτρέπει στην εφαρμογή τη διαμόρφωση του τοπικού tablet Bluetooth, τον εντοπισμό και τη σύζευξη με απομακρυσμένες συσκευές."</string>
-    <!-- no translation found for permlab_accessWimaxState (7436749103151096452) -->
-    <skip />
+    <string name="permlab_accessWimaxState" msgid="7436749103151096452">"Προβολή συνδέσεων WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="5914958077555177749">"Επιτρέπει στην εφαρμογή την προβολή των πληροφοριών σχετικά με την κατάσταση του WiMAX."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Αλλαγή κατάστασης WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="3328853825006455912">"Επιτρέπει στην εφαρμογή τη σύνδεση και αποσύνδεση στο δίκτυο WiMAX."</string>
-    <!-- no translation found for permlab_bluetooth (6127769336339276828) -->
-    <skip />
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"σύζευξη με συσκευές Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Επιτρέπει στην εφαρμογή να προβάλει τη διαμόρφωση του τοπικού tablet Bluetooth και επίσης να πραγματοποιεί και να αποδέχεται συνδέσεις με συζευγμένες συσκευές."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Επιτρέπει στην εφαρμογή να προβάλει τη διαμόρφωση του τοπικού τηλεφώνου Bluetooth και επίσης να πραγματοποιεί και να αποδέχεται συνδέσεις με συζευγμένες συσκευές."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"έλεγχος Επικοινωνίας κοντινού πεδίου (Near Field Communication)"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Επιτρέπει στην εφαρμογή την επικοινωνία με ετικέτες, κάρτες και αναγνώστες της Επικοινωνίας κοντινού πεδίου (NFC)."</string>
-    <!-- no translation found for permlab_disableKeyguard (3598496301486439258) -->
-    <skip />
+    <string name="permlab_disableKeyguard" msgid="3598496301486439258">"απενεργοποίηση κλειδώματος οθόνης"</string>
     <string name="permdesc_disableKeyguard" msgid="6231611286892232626">"Επιτρέπει στην εφαρμογή την απενεργοποίηση του κλειδώματος πληκτρολογίου και άλλης σχετικής ασφάλειας με κωδικό πρόσβασης. Για παράδειγμα, η απενεργοποίηση του κλειδώματος πληκτρολογίου όταν λαμβάνεται εισερχόμενη τηλεφωνική κλήση και η επανενεργοποίηση του κλειδώματος πληκτρολογίου όταν η κλήση τερματιστεί."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ανάγνωση ρυθμίσεων συγχρονισμού"</string>
     <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"Επιτρέπει στην εφαρμογή την ανάγνωση των ρυθμίσεων συγχρονισμού, όπως την ενεργοποίηση ή όχι του συγχρονισμού για την εφαρμογή \"Άτομα\"."</string>
-    <!-- no translation found for permlab_writeSyncSettings (5408694875793945314) -->
-    <skip />
+    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"εναλλαγή ενεργοποίησης και απενεργοποίησης συγχρονισμού"</string>
     <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"Επιτρέπει στην εφαρμογή την τροποποίηση των ρυθμίσεων συγχρονισμού, όπως την ενεργοποίηση ή όχι του συγχρονισμού για την εφαρμογή \"Άτομα\"."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"ανάγνωση στατιστικών συγχρονισμού"</string>
     <string name="permdesc_readSyncStats" msgid="3801971839939951678">"Επιτρέπει στην εφαρμογή την ανάγνωση των στατιστικών συγχρονισμού (π.χ. το ιστορικό των συγχρονισμών που έχουν πραγματοποιηθεί)."</string>
@@ -550,23 +515,16 @@
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Επιτρέπει στην εφαρμογή τη λήψη λεπτομερειών σχετικά με τις τρέχουσες συγχρονισμένες ροές δεδομένων."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"εγγραφή ροών δεδομένων στις οποίες έχετε εγγραφεί"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Επιτρέπει στην εφαρμογή να τροποποιήσει τις ροές δεδομένων, με τις οποίες είστε συγχρονισμένοι αυτήν τη στιγμή. Τυχόν κακόβουλες εφαρμογές ενδέχεται να αλλάξουν τις συγχρονισμένες ροές δεδομένων σας."</string>
-    <!-- no translation found for permlab_readDictionary (4107101525746035718) -->
-    <skip />
+    <string name="permlab_readDictionary" msgid="4107101525746035718">"ανάγνωση όρων που έχετε προσθέσει στο λεξικό"</string>
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Επιτρέπει στην εφαρμογή την ανάγνωση ιδιωτικών λέξεων, ονομάτων και φράσεων, τα οποία ο χρήστης ενδέχεται να έχει αποθηκεύσει στο λεξικό χρήστη."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"εγγραφή σε λεξικό καθορισμένο από τον χρήστη"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Επιτρέπει στην εφαρμογή την εγγραφή νέων λέξεων στο λεξικό χρήστη."</string>
-    <!-- no translation found for permlab_sdcardRead (367275095159405468) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (2188156462934977940) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (3530894470637667917) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (2555811422562526606) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardWrite (8485979062254666748) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardWrite (9084476432661578751) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"ανάγν. περιεχ. αποθηκ. χώρ.USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"ανάγνωση του περιεχομένου της κάρτας SD"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Επιτρ. η ανάγν. περ. αποθ. χώρ. USB, με φωτ. και μέσα"</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Επιτρέπει στην εφαρμογή την ανάγνωση του περιεχομένου της κάρτας SD, το οποίο μπορεί να περιλαμβάνει φωτογραφίες και μέσα."</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"τροπ. ή διαγρ. περιεχ. αποθ. χώρ. USB"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"τροποποίηση ή διαγραφή του περιεχομένου της κάρτας SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Επιτρέπει στην εφαρμογή την εγγραφή στον αποθηκευτικό χώρο USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Επιτρέπει στην εφαρμογή την εγγραφή στην κάρτα SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"τροπ./διαγ. περ. απ. εσ. μνήμ."</string>
@@ -819,15 +777,12 @@
     <string name="autofill_parish" msgid="8202206105468820057">"Ενορία"</string>
     <string name="autofill_area" msgid="3547409050889952423">"Περιοχή"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Εμιράτο"</string>
-    <!-- no translation found for permlab_readHistoryBookmarks (3775265775405106983) -->
-    <skip />
+    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"ανάγνωση των σελιδοδεικτών και του ιστορικού ιστού σας"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4577476392604595921">"Επιτρέπει στην εφαρμογή την ανάγνωση όλων των διευθύνσεων URL τις οποίες έχει επισκεφτεί το Πρόγραμμα περιήγησης, καθώς και όλων των σελιδοδεικτών του Προγράμματος περιήγησης."</string>
-    <!-- no translation found for permlab_writeHistoryBookmarks (3714785165273314490) -->
-    <skip />
+    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"εγγραφή σελιδοδεικτών και ιστορικού ιστού"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="1757103804824209530">"Επιτρέπει στην εφαρμογή την τροποποίηση του ιστορικού ή σελιδοδεικτών του Προγράμματος περιήγησης που βρίσκεται αποθηκευμένο στο tablet σας. Τυχόν κακόβουλες εφαρμογές ενδέχεται να χρησιμοποιούν αυτήν τη δυνατότητα για τη διαγραφή ή τροποποίηση των δεδομένων του Προγράμματος περιήγησής σας."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="6693764355720719197">"Επιτρέπει στην εφαρμογή την τροποποίηση του ιστορικού ή σελιδοδεικτών του Προγράμματος περιήγησης που βρίσκεται αποθηκευμένο στο τηλέφωνό σας. Τυχόν κακόβουλες εφαρμογές ενδέχεται να χρησιμοποιούν αυτήν τη δυνατότητα για τη διαγραφή ή τροποποίηση των δεδομένων του Προγράμματος περιήγησής σας."</string>
-    <!-- no translation found for permlab_setAlarm (1379294556362091814) -->
-    <skip />
+    <string name="permlab_setAlarm" msgid="1379294556362091814">"ρύθμιση ξυπνητηριού"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Επιτρέπει στην εφαρμογή τη ρύθμιση μιας ειδοποίησης σε μια εγκατεστημένη εφαρμογή ξυπνητηριού. Ορισμένες εφαρμογές ξυπνητηριού ενδέχεται να μην μπορούν να ενσωματώσουν αυτήν τη λειτουργία."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"προσθήκη τηλεφωνητή"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Επιτρέπει στην εφαρμογή να προσθέτει μηνύματα στα εισερχόμενα του αυτόματου τηλεφωνητή σας."</string>

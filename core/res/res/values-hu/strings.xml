@@ -193,14 +193,11 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Lehetővé teszi az alkalmazás számára, hogy az állapotsoron legyen."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"állapotsáv részletes- és listanézete"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Lehetővé teszi az alkalmazás számára, hogy váltson az állapotsor részletes és listanézete között."</string>
-    <!-- no translation found for permlab_processOutgoingCalls (3906007831192990946) -->
-    <skip />
+    <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"kimenő hívások átirányítása"</string>
     <string name="permdesc_processOutgoingCalls" msgid="1152111671618301044">"Lehetővé teszi az alkalmazás számára a kimenő hívások kezdeményezését és a tárcsázandó szám módosítását. Rosszindulatú alkalmazások felügyelhetik, átirányíthatják vagy megakadályozhatják a kimenő hívásokat."</string>
-    <!-- no translation found for permlab_receiveSms (8673471768947895082) -->
-    <skip />
+    <string name="permlab_receiveSms" msgid="8673471768947895082">"szöveges üzenetek (SMS) fogadása"</string>
     <string name="permdesc_receiveSms" msgid="8107887121893611793">"Lehetővé teszi az alkalmazás számára, hogy SMS-eet fogadjon és dolgozzon fel. A rosszindulatú alkalmazások megfigyelhetik vagy törölhetik az üzeneteket anélkül, hogy Ön látná azokat."</string>
-    <!-- no translation found for permlab_receiveMms (1821317344668257098) -->
-    <skip />
+    <string name="permlab_receiveMms" msgid="1821317344668257098">"szöveges üzenetek (MMS) fogadása"</string>
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Lehetővé teszi az alkalmazás számára, hogy MMS-eket fogadjon és dolgozzon fel. A rosszindulatú alkalmazások megfigyelhetik vagy törölhetik az üzeneteket anélkül, hogy Ön látná azokat."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"vészhelyzeti közlemények fogadása"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Lehetővé teszi az alkalmazás számára vészhelyzeti üzenetek fogadását és feldolgozását. Ez az engedély csak rendszeralkalmazások számára érhető el."</string>
@@ -210,16 +207,13 @@
     <string name="permdesc_sendSms" msgid="906546667507626156">"Lehetővé teszi az alkalmazás számára SMS üzeneteket küldését. A rosszindulatú alkalmazások pénzbe kerülő üzeneteket küldhetnek az Ön jóváhagyása nélkül."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"SMS üzenetek küldése megerősítés nélkül"</string>
     <string name="permdesc_sendSmsNoConfirmation" msgid="3437759207020400204">"Lehetővé teszi az alkalmazás számára SMS üzeneteket küldését. A rosszindulatú alkalmazások pénzbe kerülő üzeneteket küldhetnek az Ön jóváhagyása nélkül."</string>
-    <!-- no translation found for permlab_readSms (8745086572213270480) -->
-    <skip />
+    <string name="permlab_readSms" msgid="8745086572213270480">"szöveges üzenetek (SMS vagy MMS) olvasása"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2341692916884515613">"Lehetővé teszi az alkalmazás számára, hogy olvassa a táblagépen vagy a SIM kártyán lévő SMS-eket. A rosszindulatú alkalmazások elolvashatják a bizalmas üzeneteket."</string>
     <string name="permdesc_readSms" product="default" msgid="5653850482025875493">"Lehetővé teszi az alkalmazás számára, hogy olvassa a táblagépen vagy a SIM kártyán lévő SMS-eket. A rosszindulatú alkalmazások elolvashatják a bizalmas üzeneteket."</string>
-    <!-- no translation found for permlab_writeSms (3216950472636214774) -->
-    <skip />
+    <string name="permlab_writeSms" msgid="3216950472636214774">"szöveges üzenetek (SMS vagy MMS) szerkesztése"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Lehetővé teszi az alkalmazás számára, hogy írjon a táblagépen vagy a SIM kártyán lévő SMS-ekbe. A rosszindulatú alkalmazások törölhetik az üzeneteket."</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Lehetővé teszi az alkalmazás számára, hogy írjon a telefonon vagy a SIM kártyán lévő SMS-ekbe. A rosszindulatú alkalmazások törölhetik az üzeneteket."</string>
-    <!-- no translation found for permlab_receiveWapPush (5991398711936590410) -->
-    <skip />
+    <string name="permlab_receiveWapPush" msgid="5991398711936590410">"szöveges üzenetek (WAP) fogadása"</string>
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Lehetővé teszi az alkalmazás számára, hogy WAP üzeneteket fogadjon és dolgozzon fel. A rosszindulatú alkalmazások megfigyelhetik vagy törölhetik az üzeneteket anélkül, hogy Ön látná azokat."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"futó alkalmazások lekérése"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Lehetővé teszi az alkalmazás számára a jelenleg és a nemrég futó feladatok adatainak lekérését. A rosszindulatú alkalmazások privát adatokhoz juthatnak más alkalmazásokról."</string>
@@ -235,13 +229,11 @@
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Lehetővé teszi, hogy az alkalmazás szabályozza az egyéb alkalmazások képernyő-kompatibilitási módját. A kártékony alkalmazások megzavarhatják a többi alkalmazás viselkedését."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"alkalmazások hibakeresésének bekapcsolása"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Lehetővé teszi az alkalmazás számára, hogy hibakeresést végezzen egy másik alkalmazáson. A rosszindulatú alkalmazások ezzel leállíthatnak más alkalmazásokat."</string>
-    <!-- no translation found for permlab_changeConfiguration (4162092185124234480) -->
-    <skip />
+    <string name="permlab_changeConfiguration" msgid="4162092185124234480">"rendszer megjelenítési beállításainak módosítása"</string>
     <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Lehetővé teszi az alkalmazás számára a jelenlegi konfiguráció, így például a nyelv- és országkód vagy az általános betűméret módosítását."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"gépkocsi üzemmód bekapcsolása"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Lehetővé teszi az alkalmazás számára a gépkocsi üzemmód bekapcsolását."</string>
-    <!-- no translation found for permlab_killBackgroundProcesses (3914026687420177202) -->
-    <skip />
+    <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"más alkalmazások bezárása"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="931129103262126617">"Lehetővé teszi az alkalmazás számára más alkalmazások háttérben futó folyamatainak leállítását akkor is, ha a memória nem alacsony."</string>
     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"más alkalmazások kényszerített leállítása"</string>
     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Lehetővé teszi az alkalmazás számára, hogy kényszerrel leállítson más alkalmazásokat."</string>
@@ -265,8 +257,7 @@
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Lehetővé teszi az alkalmazás számára értesítés küldését WAP PUSH üzenet érkezése esetén. A rosszindulatú alkalmazások arra használhatják ezt, hogy MMS-kézbesítési jelentést hamisítsanak, vagy hogy a háttérben rosszindulatú variánssal cseréljék le bármelyik weboldal tartalmát."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"futó folyamatok számának korlátozása"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Lehetővé teszi az alkalmazás számára a futtatható folyamatok maximális számának vezérlését. Soha nem lehet rá szüksége a normál alkalmazásoknak."</string>
-    <!-- no translation found for permlab_setAlwaysFinish (550958507798796965) -->
-    <skip />
+    <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"háttéralkalmazások leállításának kényszerítése"</string>
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Lehetővé teszi az alkalmazás számára annak vezérlését, hogy a tevékenységek mindig befejeződjenek-e, amint a háttérbe kerülnek. A normál alkalmazások soha nem használják ezt."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"akkumulátorstatisztikák módosítása"</string>
     <string name="permdesc_batteryStats" msgid="6835186932305744068">"Lehetővé teszi az alkalmazás számára az összegyűjtött akkumulátorhasználati statisztikák módosítását. Normál alkalmazások nem használhatják."</string>
@@ -276,8 +267,7 @@
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Lehetővé teszi, hogy az alkalmazás elindítsa a teljes biztonsági mentést megerősítő kezelőfelületet. Nem használható egyetlen alkalmazás által sem."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"azonosítatlan ablakok megjelenítése"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Lehetővé teszi az alkalmazás számára olyan ablakok létrehozását, amelyek a belső rendszer felhasználói felületét kívánják használni. Normál alkalmazások nem használhatják."</string>
-    <!-- no translation found for permlab_systemAlertWindow (3543347980839518613) -->
-    <skip />
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"ráhúzás más alkalmazásokra"</string>
     <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"Lehetővé teszi az alkalmazás számára a rendszerriasztás-ablakok megjelenítését. A rosszindulatú alkalmazások elfoglalhatják a teljes képernyőt."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"animáció általános sebességének módosítása"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Lehetővé teszi az alkalmazás számára, hogy bármikor globálisan módosítsa az animációk sebességét (gyorsabb vagy lassabb animációk)."</string>
@@ -339,26 +329,22 @@
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Lehetővé teszi, hogy egy alkalmazás engedélyeket adjon vagy vonjon vissza saját maga vagy más alkalmazás számára. A rosszindulatú alkalmazások olyan funkciókhoz való hozzáféréshez használhatják ezt, amelyeket nem engedélyezett számukra."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"előnyben részesített alkalmazások beállítása"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Lehetővé teszi az alkalmazás számára a preferált alkalmazások módosítását. A rosszindulatú alkalmazások ezáltal észrevétlenül megváltoztathatják a futó alkalmazásokat, személyes adatokat gyűjtve Öntől."</string>
-    <!-- no translation found for permlab_writeSettings (2226195290955224730) -->
-    <skip />
+    <string name="permlab_writeSettings" msgid="2226195290955224730">"rendszerbeállítások módosítása"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Lehetővé teszi az alkalmazás számára a rendszer beállítási adatainak módosítását. A rosszindulatú alkalmazások tönkretehetik a rendszer konfigurációját."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"rendszer biztonsági beállításainak módosítása"</string>
     <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Lehetővé teszi az alkalmazás számára, hogy módosítsa a rendszer biztonsági beállításainak adatait. Normál alkalmazások nem használhatják."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"Google-szolgáltatások térképének módosítása"</string>
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Lehetővé teszi az alkalmazás számára, hogy módosítsa a Google-szolgáltatások térképét. Normál alkalmazások nem használhatják."</string>
-    <!-- no translation found for permlab_receiveBootCompleted (5312965565987800025) -->
-    <skip />
+    <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"futtatás indításkor"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Lehetővé teszi az alkalmazás számára, hogy elindítsa magát a rendszerindítás befejezése után. Ez meghosszabbíthatja a táblagép elindításának idejét, az állandó futás miatt pedig lelassíthatja a táblagépet."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Lehetővé teszi az alkalmazás számára, hogy elindítsa magát a rendszerindítás befejezése után. Ez meghosszabbíthatja a telefon elindításának idejét, az állandó futás miatt pedig lelassíthatja a telefont."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"ragadós üzenet küldése"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Lehetővé teszi az alkalmazás számára a ragadós üzenetek küldését, amelyek a sugárzás után is megmaradnak. A rosszindulatú alkalmazások lelassíthatják vagy instabillá tehetik a táblagépet a túlzott memóriahasználattal."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Lehetővé teszi az alkalmazás számára ragadós üzenetek küldését, amelyek a sugárzás után is megmaradnak. A rosszindulatú alkalmazások lelassíthatják vagy instabillá tehetik a táblagépet a túlzott memóriahasználattal."</string>
-    <!-- no translation found for permlab_readContacts (8348481131899886131) -->
-    <skip />
+    <string name="permlab_readContacts" msgid="8348481131899886131">"saját névjegyek olvasása"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Lehetővé teszi az alkalmazás számára a táblagépen tárolt névjegyekre vonatkozó összes adat -- például az egyes személyekkel telefonon, e-mailben vagy más módon folytatott kommunikáció gyakoriságára vonatkozó adatok -- olvasását. Ez segítséget nyújt az e-mail címek automatikus kiegészítéséhez és az egyéb kényelmi funkciók működéséhez. A rosszindulatú alkalmazások ezt az engedélyt arra használhatják, hogy névjegyeit elküldjék más személyeknek."</string>
     <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Lehetővé teszi az alkalmazás számára a telefonon tárolt névjegyekre vonatkozó összes adat -- például az egyes személyekkel telefonon, e-mailben vagy más módon folytatott kommunikáció gyakoriságára vonatkozó adatok -- olvasását. Ez segítséget nyújt az e-mail címek automatikus kiegészítéséhez és az egyéb kényelmi funkciók működéséhez. A rosszindulatú alkalmazások ezt az engedélyt arra használhatják, hogy névjegyeit elküldjék más személyeknek."</string>
-    <!-- no translation found for permlab_writeContacts (5107492086416793544) -->
-    <skip />
+    <string name="permlab_writeContacts" msgid="5107492086416793544">"kapcsolatok módosítása"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Lehetővé teszi az alkalmazás számára a táblagépen tárolt névjegyekre vonatkozó adatok -- például az egyes személyekkel telefonon, e-mailben vagy más módon folytatott kommunikáció gyakoriságára vonatkozó adatok -- módosítását. Ez segítséget nyújt az e-mail címek automatikus kiegészítéséhez és az egyéb kényelmi funkciók működéséhez. A rosszindulatú alkalmazások ezt az engedélyt arra használhatják, hogy módosítsák vagy töröljék névjegyeinek adatait."</string>
     <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Lehetővé teszi az alkalmazás számára a telefonon tárolt névjegyekre vonatkozó adatok -- például az egyes személyekkel telefonon, e-mailben vagy más módon folytatott kommunikáció gyakoriságára vonatkozó adatok -- módosítását. Ez segítséget nyújt az e-mail címek automatikus kiegészítéséhez és az egyéb kényelmi funkciók működéséhez. A rosszindulatú alkalmazások ezt az engedélyt arra használhatják, hogy módosítsák vagy töröljék névjegyeinek adatait."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"Híváslista beolvasása"</string>
@@ -367,11 +353,9 @@
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"Híváslista készítése"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Lehetővé teszi, hogy az alkalmazás módosítsa a táblagép híváslistáját, beleértve a bejövő és kimenő hívások adatait is. A rosszindulatú alkalmazások ezt arra használhatják, hogy híváslistáját töröljék vagy módosítsák."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Lehetővé teszi, hogy az alkalmazás módosítsa a telefon híváslistáját, beleértve a bejövő és kimenő hívások adatait is. A rosszindulatú alkalmazások ezt arra használhatják, hogy híváslistáját töröljék vagy módosítsák."</string>
-    <!-- no translation found for permlab_readProfile (4701889852612716678) -->
-    <skip />
+    <string name="permlab_readProfile" msgid="4701889852612716678">"saját névjegykártya olvasása"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Lehetővé teszi az alkalmazás számára a készüléken tárolt személyes profiladatok, például a név és elérhetőség olvasását. Ez azt jelenti, hogy más alkalmazások is azonosíthatják Önt, és elküldhetik másoknak a profiladatait."</string>
-    <!-- no translation found for permlab_writeProfile (907793628777397643) -->
-    <skip />
+    <string name="permlab_writeProfile" msgid="907793628777397643">"saját névjegykártya módosítása"</string>
     <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"Lehetővé teszi az alkalmazás számára a készüléken tárolt személyes profiladatok, például a név és elérhetőség módosítását vagy hozzáadását. Ez azt jelenti, hogy más alkalmazások is azonosíthatják Önt, és elküldhetik másoknak a profiladatait."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"közösségi adatfolyam olvasása"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="3419050808547335320">"Lehetővé teszi az alkalmazás számára, hogy hozzáférjen közösségi frissítéseihez, és szinkronizálja azokat. Rosszindulatú alkalmazások arra használhatják ezt, hogy hozzáférjenek barátaival történő magánbeszélgetéseihez a közösségi hálózatokon."</string>
@@ -412,15 +396,11 @@
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"telefon újraindításának kikényszerítése"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Lehetővé teszi az alkalmazások számára, hogy újraindítsák a táblagépet."</string>
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Lehetővé teszi az alkalmazás számára a telefon kényszerített újraindítását."</string>
-    <!-- no translation found for permlab_mount_unmount_filesystems (2927361537942591841) -->
-    <skip />
-    <!-- no translation found for permlab_mount_unmount_filesystems (4402305049890953810) -->
-    <skip />
+    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"hozzáférés az USB-háttértárhoz"</string>
+    <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"hozzáférés az SD-kártyához"</string>
     <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Lehetővé teszi az alkalmazás számára a külső adathordozók fájlrendszereinek csatlakoztatását és leválasztását."</string>
-    <!-- no translation found for permlab_mount_format_filesystems (6227819582624904972) -->
-    <skip />
-    <!-- no translation found for permlab_mount_format_filesystems (262582698639274056) -->
-    <skip />
+    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"USB-háttértár törlése"</string>
+    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"SD-kártya törlése"</string>
     <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Lehetővé teszi az alkalmazás számára a cserélhető tárhely megformázását."</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"információkérés a belső tárhelyről"</string>
     <string name="permdesc_asec_access" msgid="3094563844593878548">"Lehetővé teszi az alkalmazás számára, hogy információkat kérjen a belső tárhelyről."</string>
@@ -432,8 +412,7 @@
     <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Lehetővé teszi az alkalmazás számára, hogy csatlakoztassa/leválassza a belső tárhelyet."</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"belső tárhely átnevezése"</string>
     <string name="permdesc_asec_rename" msgid="1794757588472127675">"Lehetővé teszi az alkalmazás számára, hogy átnevezze a belső tárhelyet."</string>
-    <!-- no translation found for permlab_vibrate (7696427026057705834) -->
-    <skip />
+    <string name="permlab_vibrate" msgid="7696427026057705834">"rezgés szabályozása"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Lehetővé teszi az alkalmazás számára a rezgés vezérlését."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"vaku vezérlése"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Lehetővé teszi az alkalmazás számára a vaku vezérlését."</string>
@@ -458,8 +437,7 @@
     <string name="permdesc_bindGadget" msgid="8261326938599049290">"Lehetővé teszi az alkalmazás számára, hogy megmondja a rendszernek, melyik alkalmazás melyik modulokat használhatja. Ezzel az engedéllyel az alkalmazások hozzáférést biztosíthatnak a személyes adatokhoz más alkalmazásoknak. Normál alkalmazások nem használhatják."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"telefon állapotának módosítása"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Lehetővé teszi az alkalmazás számára, hogy az eszköz telefonálási funkcióit vezérelje. Egy ilyen engedéllyel rendelkező alkalmazás váltani tud a hálózatok között, be- és kikapcsolhatja a telefon rádióját, és hasonlókat tehet anélkül, hogy valaha értesítené Önt."</string>
-    <!-- no translation found for permlab_readPhoneState (9178228524507610486) -->
-    <skip />
+    <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefonállapot és azonosító olvasása"</string>
     <string name="permdesc_readPhoneState" msgid="5127767618743602782">"Lehetővé teszi az alkalmazás számára, hogy hozzáférjen az eszköz telefonálási funkcióihoz. Az engedéllyel rendelkező alkalmazás megállapíthatja a telefon sorozat- és telefonszámát, hívás során a másik fél telefonszámát stb."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"táblagép alvás üzemmódjának megakadályozása"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"telefon alvó üzemmódjának megakadályozása"</string>
@@ -474,8 +452,7 @@
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Futtatás alacsony szintű gyártói tesztként, lehetővé téve a telefon hardverének teljes körű elérését. Csak akkor érhető el, ha a telefon gyártói tesztüzemmódban van."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"háttérkép beállítása"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Lehetővé teszi az alkalmazás számára, hogy beállítása a rendszer háttérképét."</string>
-    <!-- no translation found for permlab_setWallpaperHints (3278608165977736538) -->
-    <skip />
+    <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"háttérkép méretének módosítása"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Lehetővé teszi az alkalmazás számára, hogy beállítsa a rendszer háttérképének méretével kapcsolatos tippeket."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"rendszer visszaállítása a gyári beállításokra"</string>
     <string name="permdesc_masterClear" msgid="3665380492633910226">"Lehetővé teszi az alkalmazás számára a gyári beállítások teljes visszaállítását, törölve minden adatot, beállítást és telepített alkalmazást."</string>
@@ -487,21 +464,16 @@
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Lehetővé teszi az alkalmazás számára, hogy módosítsa a telefon időzónáját."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"fiókfelügyeleti szolgáltatásként szereplés"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Lehetővé teszi az alkalmazás számára, hogy meghívjon fiókhitelesítőket."</string>
-    <!-- no translation found for permlab_getAccounts (1086795467760122114) -->
-    <skip />
+    <string name="permlab_getAccounts" msgid="1086795467760122114">"fiókok keresése az eszközön"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="3238360555257773358">"Lehetővé teszi az alkalmazás számára, hogy lekérje a táblagép által ismert fiókok listáját."</string>
     <string name="permdesc_getAccounts" product="default" msgid="2735689364629830348">"Lehetővé teszi az alkalmazás számára, hogy lekérje a telefon által ismert fiókok listáját."</string>
-    <!-- no translation found for permlab_authenticateAccounts (5265908481172736933) -->
-    <skip />
+    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"fiókok létrehozása, és jelszavak beállítása"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Lehetővé teszi az alkalmazás számára, hogy használja a Fiókkezelő fiókhitelesítő funkcióit, beleértve a fiókok létrehozását, illetve jelszavuk lekérdezését és beállítását."</string>
-    <!-- no translation found for permlab_manageAccounts (4983126304757177305) -->
-    <skip />
+    <string name="permlab_manageAccounts" msgid="4983126304757177305">"fiókok hozzáadása vagy eltávolítása"</string>
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Lehetővé teszi az alkalmazás számára olyan műveletek végrehajtását, mint a fiókok hozzáadása és eltávolítása, illetve a jelszavuk törlése."</string>
-    <!-- no translation found for permlab_useCredentials (235481396163877642) -->
-    <skip />
+    <string name="permlab_useCredentials" msgid="235481396163877642">"a készüléken lévő fiókok használata"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Lehetővé teszi az alkalmazás számára azonosítási tokenek kérését."</string>
-    <!-- no translation found for permlab_accessNetworkState (4951027964348974773) -->
-    <skip />
+    <string name="permlab_accessNetworkState" msgid="4951027964348974773">"hálózati kapcsolatok megtekintése"</string>
     <string name="permdesc_accessNetworkState" msgid="479772796952547198">"Lehetővé teszi az alkalmazás számára, hogy megtekintse az összes hálózat állapotát."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"teljes internet-hozzáférés"</string>
     <string name="permdesc_createNetworkSockets" msgid="5963922297444265950">"Lehetővé teszi az alkalmazás számára hálózati socketek létrehozását."</string>
@@ -513,36 +485,29 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Lehetővé teszi az alkalmazás számára a megosztott hálózati csatlakoztathatóság állapotának módosítását."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"háttéradatok használati beállításának módosítása"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Lehetővé teszi az alkalmazás számára a háttérben történő adathasználat beállításainak módosítását."</string>
-    <!-- no translation found for permlab_accessWifiState (5202012949247040011) -->
-    <skip />
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"Wi-Fi kapcsolatok megtekintése"</string>
     <string name="permdesc_accessWifiState" msgid="7770452658226256831">"Lehetővé teszi az alkalmazás számára a Wi-Fi állapotinformációk megtekintését."</string>
-    <!-- no translation found for permlab_changeWifiState (6550641188749128035) -->
-    <skip />
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"kapcsolódás Wi-Fi-hez és a kapcsolat bontása"</string>
     <string name="permdesc_changeWifiState" msgid="7399961004537946240">"Lehetővé teszi az alkalmazás számára, hogy kapcsolódjon Wi-Fi hozzáférési pontokhoz, és megszüntesse a kapcsolatot, valamint hogy módosítsa a beállított Wi-Fi hálózatokat."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi multicast vétel engedélyezése"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="7633598524564320817">"Lehetővé teszi az alkalmazás számára a nem közvetlenül a készüléknek címzett csomagok fogadását. Ez hasznos lehet a közelben kínált szolgáltatások felfedezésére. Több energiát használ, mint a nem többirányú üzemmód."</string>
-    <!-- no translation found for permlab_bluetoothAdmin (6006967373935926659) -->
-    <skip />
+    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth-beállítások elérése"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Lehetővé teszi az alkalmazás számára, hogy konfigurálja a helyi Bluetooth-t, valamint hogy távoli eszközöket fedezzen fel és párosítson."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Lehetővé teszi az alkalmazás számára, hogy konfigurálja a helyi Bluetooth telefont, valamint hogy távoli eszközöket fedezzen fel és párosítson."</string>
-    <!-- no translation found for permlab_accessWimaxState (7436749103151096452) -->
-    <skip />
+    <string name="permlab_accessWimaxState" msgid="7436749103151096452">"WiMAX kapcsolatok megtekintése"</string>
     <string name="permdesc_accessWimaxState" msgid="5914958077555177749">"Lehetővé teszi, hogy az alkalmazás megtekintse a WiMAX-állapotinformációkat."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX-állapot módosítása"</string>
     <string name="permdesc_changeWimaxState" msgid="3328853825006455912">"Lehetővé teszi az alkalmazás WiMAX hálózathoz való kapcsolódását, és a lekapcsolódását onnan."</string>
-    <!-- no translation found for permlab_bluetooth (6127769336339276828) -->
-    <skip />
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetooth-eszközök párosítása"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Lehetővé teszi az alkalmazás számára a helyi Bluetooth táblagép konfigurációjának megtekintését, valamint kapcsolatok kezdeményezését és fogadását a párosított eszközökkel."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Lehetővé teszi az alkalmazás számára a helyi Bluetooth telefon konfigurációjának megtekintését, valamint kapcsolatok kezdeményezését és fogadását a párosított eszközökkel."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"NFC technológia vezérlése"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Lehetővé teszi az alkalmazás számára, hogy NFC (Near Field Communication - kis hatósugarú vezeték nélküli kommunikáció) technológiát használó címkékkel, kártyákkal és leolvasókkal kommunikáljon."</string>
-    <!-- no translation found for permlab_disableKeyguard (3598496301486439258) -->
-    <skip />
+    <string name="permlab_disableKeyguard" msgid="3598496301486439258">"képernyőzár kikapcsolása"</string>
     <string name="permdesc_disableKeyguard" msgid="6231611286892232626">"Lehetővé teszi az alkalmazás számára a billentyűzár és bármely kapcsolódó jelszavas védelem kikapcsolását. Jogos példa erre, amikor a telefon letiltja a billentyűzárat bejövő hívás esetén, majd újra bekapcsolja azt, ha a hívás befejeződik."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"szinkronizálási beállítások olvasása"</string>
     <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"Lehetővé teszi az alkalmazás számára a szinkronizálási beállítások olvasását, például, hogy a szinkronizálás aktiválva van-e a Személyek alkalmazás esetében."</string>
-    <!-- no translation found for permlab_writeSyncSettings (5408694875793945314) -->
-    <skip />
+    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"szinkronizálás be-és kikapcsolása"</string>
     <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"Lehetővé teszi az alkalmazás számára, hogy módosítsa a szinkronizálási beállításokat, például, hogy a szinkronizálás aktiválva van-e a Személyek alkalmazás esetében."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"szinkronizálási statisztikák olvasása"</string>
     <string name="permdesc_readSyncStats" msgid="3801971839939951678">"Lehetővé teszi az alkalmazás számára a szinkronizálási statisztikák, például a megtörtént szinkronizálások előzményeinek olvasását."</string>
@@ -550,23 +515,16 @@
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Lehetővé teszi az alkalmazás számára, hogy részleteket kapjon a jelenleg szinkronizált hírcsatornákról."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"feliratkozott hírcsatornák írása"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Lehetővé teszi az alkalmazás számára, hogy módosítsa a jelenleg szinkronizált hírcsatornákat. A rosszindulatú alkalmazások módosíthatják a szinkronizált hírcsatornákat."</string>
-    <!-- no translation found for permlab_readDictionary (4107101525746035718) -->
-    <skip />
+    <string name="permlab_readDictionary" msgid="4107101525746035718">"szótárhoz adott kifejezések olvasása"</string>
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Lehetővé teszi az alkalmazás számára, hogy olvassa a felhasználói szótárban tárolt saját szavakat, neveket és kifejezéseket."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"a felhasználó által definiált szótár írása"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Lehetővé teszi az alkalmazás számára, hogy új szavakat írjon a felhasználói szótárba."</string>
-    <!-- no translation found for permlab_sdcardRead (367275095159405468) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (2188156462934977940) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (3530894470637667917) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (2555811422562526606) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardWrite (8485979062254666748) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardWrite (9084476432661578751) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB-tár tartalmának olvasása"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"SD-kártya tartalmának olvasása"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Lehetővé teszi az alkalmazás számára az USB-háttértár tartalmának olvasását, beleértve a fényképeket és a médiafájlokat."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Lehetővé teszi az alkalmazás számára az SD-kártya tartalmának olvasását, beleértve a fényképeket és a médiafájlokat."</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB-tár tart. mód./törlése"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"SD-kártya tartalmának módosítása vagy törlése"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Az alkalmazás USB-tárra írhat."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Lehetővé teszi az alkalmazás számára, hogy írjon az SD-kártyára."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"belső tár tartalmának módosítása/törlése"</string>
@@ -819,15 +777,12 @@
     <string name="autofill_parish" msgid="8202206105468820057">"Közösség"</string>
     <string name="autofill_area" msgid="3547409050889952423">"Terület"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emirátus"</string>
-    <!-- no translation found for permlab_readHistoryBookmarks (3775265775405106983) -->
-    <skip />
+    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"internetes könyvjelzők és előzmények olvasása"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4577476392604595921">"Lehetővé teszi az alkalmazás számára, hogy beolvassa a böngésző által felkeresett összes URL-t és a böngésző könyvjelzőit."</string>
-    <!-- no translation found for permlab_writeHistoryBookmarks (3714785165273314490) -->
-    <skip />
+    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"internetes könyvjelzők és előzmények írása"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="1757103804824209530">"Lehetővé teszi az alkalmazás számára, hogy módosítsa a böngésző előzményeit vagy a táblagépén tárolt könyvjelzőket. A rosszindulatú alkalmazások kihasználhatják ezt a böngésző adatainak törlésére vagy módosítására."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="6693764355720719197">"Lehetővé teszi az alkalmazás számára, hogy módosítsa a böngésző előzményeit vagy a telefonján tárolt könyvjelzőket. A rosszindulatú alkalmazások kihasználhatják ezt a böngésző adatainak törlésére vagy módosítására."</string>
-    <!-- no translation found for permlab_setAlarm (1379294556362091814) -->
-    <skip />
+    <string name="permlab_setAlarm" msgid="1379294556362091814">"ébresztés beállítása"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Lehetővé teszi az alkalmazás számára, hogy ébresztőt állítson be egy telepített ébresztőóra alkalmazásban. Egyes ilyen alkalmazásokban lehet, hogy nem működik ez a funkció."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"hangposta hozzáadása"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Lehetővé teszi az alkalmazás számára, hogy üzeneteket adjon hozzá bejövő hangpostájához."</string>
