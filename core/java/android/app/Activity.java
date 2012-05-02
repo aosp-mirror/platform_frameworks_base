@@ -2710,7 +2710,7 @@ public class Activity extends ContextThemeWrapper
         Intent upIntent = getParentActivityIntent();
         if (upIntent != null) {
             if (shouldUpRecreateTask(upIntent)) {
-                TaskStackBuilder b = TaskStackBuilder.from(this);
+                TaskStackBuilder b = TaskStackBuilder.create(this);
                 onCreateNavigateUpTaskStack(b);
                 onPrepareNavigateUpTaskStack(b);
                 b.startActivities();
