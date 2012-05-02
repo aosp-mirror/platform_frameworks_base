@@ -50,19 +50,10 @@ public class WifiP2pProvDiscEvent {
     /**
      * @param string formats supported include
      *
-     *  P2P-PROV-DISC-PBC-REQ 42:fc:89:e1:e2:27 p2p_dev_addr=42:fc:89:e1:e2:27
-     *  pri_dev_type=1-0050F204-1 name='p2p-TEST2' config_methods=0x188 dev_capab=0x27
-     *  group_capab=0x0
-     *
+     *  P2P-PROV-DISC-PBC-REQ 42:fc:89:e1:e2:27
      *  P2P-PROV-DISC-PBC-RESP 02:12:47:f2:5a:36
-     *
-     *  P2P-PROV-DISC-ENTER-PIN 42:fc:89:e1:e2:27 p2p_dev_addr=42:fc:89:e1:e2:27
-     *  pri_dev_type=1-0050F204-1 name='p2p-TEST2' config_methods=0x188 dev_capab=0x27
-     *  group_capab=0x0
-     *
-     *  P2P-PROV-DISC-SHOW-PIN 42:fc:89:e1:e2:27 44490607 p2p_dev_addr=42:fc:89:e1:e2:27
-     *  pri_dev_type=1-0050F204-1 name='p2p-TEST2' config_methods=0x188 dev_capab=0x27
-     *  group_capab=0x0
+     *  P2P-PROV-DISC-ENTER-PIN 42:fc:89:e1:e2:27
+     *  P2P-PROV-DISC-SHOW-PIN 42:fc:89:e1:e2:27 44490607
      *
      *  Note: The events formats can be looked up in the wpa_supplicant code
      * @hide
@@ -80,51 +71,12 @@ public class WifiP2pProvDiscEvent {
         else if (tokens[0].endsWith("SHOW-PIN")) event = SHOW_PIN;
         else throw new IllegalArgumentException("Malformed event " + string);
 
+
         device = new WifiP2pDevice();
+        device.deviceAddress = tokens[1];
 
-        for (String token : tokens) {
-            String[] nameValue = token.split("=");
-            if (nameValue.length != 2) {
-                //mac address without key is device address
-                if (token.matches("(([0-9a-f]{2}:){5}[0-9a-f]{2})")) {
-                    device.deviceAddress = token;
-                } else if (token.matches("[0-9]+")) {
-                    pin = token;
-                } else {
-                    //ignore;
-                }
-                continue;
-            }
-
-            if (nameValue[0].equals("p2p_dev_addr")) {
-                device.deviceAddress = nameValue[1];
-                continue;
-            }
-
-            if (nameValue[0].equals("pri_dev_type")) {
-                device.primaryDeviceType = nameValue[1];
-                continue;
-            }
-
-            if (nameValue[0].equals("name")) {
-                device.deviceName = trimQuotes(nameValue[1]);
-                continue;
-            }
-
-            if (nameValue[0].equals("config_methods")) {
-                device.wpsConfigMethodsSupported = parseHex(nameValue[1]);
-                continue;
-            }
-
-            if (nameValue[0].equals("dev_capab")) {
-                device.deviceCapability = parseHex(nameValue[1]);
-                continue;
-            }
-
-            if (nameValue[0].equals("group_capab")) {
-                device.groupCapability = parseHex(nameValue[1]);
-                continue;
-            }
+        if (event == SHOW_PIN) {
+            pin = tokens[2];
         }
     }
 
@@ -134,28 +86,5 @@ public class WifiP2pProvDiscEvent {
         sbuf.append("\n event: ").append(event);
         sbuf.append("\n pin: ").append(pin);
         return sbuf.toString();
-    }
-
-    private String trimQuotes(String str) {
-        str = str.trim();
-        if (str.startsWith("'") && str.endsWith("'")) {
-            return str.substring(1, str.length()-1);
-        }
-        return str;
-    }
-
-    //supported formats: 0x1abc, 0X1abc, 1abc
-    private int parseHex(String hexString) {
-        int num = 0;
-        if (hexString.startsWith("0x") || hexString.startsWith("0X")) {
-            hexString = hexString.substring(2);
-        }
-
-        try {
-            num = Integer.parseInt(hexString, 16);
-        } catch(NumberFormatException e) {
-            Log.e(TAG, "Failed to parse hex string " + hexString);
-        }
-        return num;
     }
 }
