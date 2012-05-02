@@ -141,6 +141,7 @@ package android {
   public static final class Manifest.permission_group {
     ctor public Manifest.permission_group();
     field public static final java.lang.String ACCOUNTS = "android.permission-group.ACCOUNTS";
+    field public static final java.lang.String AFFECTS_BATTERY = "android.permission-group.AFFECTS_BATTERY";
     field public static final java.lang.String APP_INFO = "android.permission-group.APP_INFO";
     field public static final java.lang.String AUDIO_SETTINGS = "android.permission-group.AUDIO_SETTINGS";
     field public static final java.lang.String BOOKMARKS = "android.permission-group.BOOKMARKS";
@@ -150,7 +151,6 @@ package android {
     field public static final java.lang.String DEVELOPMENT_TOOLS = "android.permission-group.DEVELOPMENT_TOOLS";
     field public static final java.lang.String DEVICE_ALARMS = "android.permission-group.DEVICE_ALARMS";
     field public static final java.lang.String DISPLAY = "android.permission-group.DISPLAY";
-    field public static final java.lang.String AFFECTS_BATTERY = "android.permission-group.AFFECTS_BATTERY";
     field public static final java.lang.String HARDWARE_CONTROLS = "android.permission-group.HARDWARE_CONTROLS";
     field public static final java.lang.String LOCATION = "android.permission-group.LOCATION";
     field public static final java.lang.String MESSAGES = "android.permission-group.MESSAGES";
@@ -5669,6 +5669,7 @@ package android.content {
     field public static final java.lang.String ACTION_ALL_APPS = "android.intent.action.ALL_APPS";
     field public static final java.lang.String ACTION_ANSWER = "android.intent.action.ANSWER";
     field public static final java.lang.String ACTION_APP_ERROR = "android.intent.action.APP_ERROR";
+    field public static final java.lang.String ACTION_ASSIST = "android.intent.action.ASSIST";
     field public static final java.lang.String ACTION_ATTACH_DATA = "android.intent.action.ATTACH_DATA";
     field public static final java.lang.String ACTION_BATTERY_CHANGED = "android.intent.action.BATTERY_CHANGED";
     field public static final java.lang.String ACTION_BATTERY_LOW = "android.intent.action.BATTERY_LOW";
