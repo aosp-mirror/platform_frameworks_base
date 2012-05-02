@@ -184,8 +184,15 @@ public class ActionBarImpl extends ActionBar {
         mContextDisplayMode = mActionView.isSplitActionBar() ?
                 CONTEXT_DISPLAY_SPLIT : CONTEXT_DISPLAY_NORMAL;
 
+        // This was initially read from the action bar style
+        final int current = mActionView.getDisplayOptions();
+        final boolean homeAsUp = (current & DISPLAY_HOME_AS_UP) != 0;
+        if (homeAsUp) {
+            mDisplayHomeAsUpSet = true;
+        }
+
         ActionBarPolicy abp = ActionBarPolicy.get(mContext);
-        setHomeButtonEnabled(abp.enableHomeButtonByDefault());
+        setHomeButtonEnabled(abp.enableHomeButtonByDefault() || homeAsUp);
         setHasEmbeddedTabs(abp.hasEmbeddedTabs());
     }
 
