@@ -1223,8 +1223,6 @@ public class Editor {
 
     private void drawHardwareAccelerated(Canvas canvas, Layout layout, Path highlight,
             Paint highlightPaint, int cursorOffsetVertical) {
-        final int width = mTextView.getWidth();
-
         final long lineRange = layout.getLineRangeForDraw(canvas);
         int firstLine = TextUtils.unpackRangeStartFromLong(lineRange);
         int lastLine = TextUtils.unpackRangeEndFromLong(lineRange);
@@ -1243,10 +1241,6 @@ public class Editor {
             int[] blockIndices = dynamicLayout.getBlockIndices();
             final int numberOfBlocks = dynamicLayout.getNumberOfBlocks();
 
-            final int scrollX = mTextView.getScrollX();
-            final int scrollY = mTextView.getScrollY();
-            canvas.translate(scrollX, scrollY);
-            
             int endOfPreviousBlock = -1;
             int searchStartIndex = 0;
             for (int i = 0; i < numberOfBlocks; i++) {
@@ -1274,34 +1268,43 @@ public class Editor {
                     final int blockBeginLine = endOfPreviousBlock + 1;
                     final int top = layout.getLineTop(blockBeginLine);
                     final int bottom = layout.getLineBottom(blockEndLine);
+                    int left = 0;
+                    int right = mTextView.getWidth();
+                    if (mTextView.getHorizontallyScrolling()) {
+                        float min = Float.MAX_VALUE;
+                        float max = Float.MIN_VALUE;
+                        for (int line = blockBeginLine; line <= blockEndLine; line++) {
+                            min = Math.min(min, layout.getLineLeft(line));
+                            max = Math.max(max, layout.getLineRight(line));
+                        }
+                        left = (int) min;
+                        right = (int) (max + 0.5f);
+                    }
 
                     final HardwareCanvas hardwareCanvas = blockDisplayList.start();
                     try {
-                        hardwareCanvas.setViewport(width, bottom - top);
+                        // Tighten the bounds of the viewport to the actual text size
+                        hardwareCanvas.setViewport(right - left, bottom - top);
                         // The dirty rect should always be null for a display list
                         hardwareCanvas.onPreDraw(null);
                         // drawText is always relative to TextView's origin, this translation brings
-                        // this range of text back to the top of the viewport
-                        hardwareCanvas.translate(-scrollX, -top);
+                        // this range of text back to the top left corner of the viewport
+                        hardwareCanvas.translate(-left, -top);
                         layout.drawText(hardwareCanvas, blockBeginLine, blockEndLine);
-                        hardwareCanvas.translate(scrollX, top);
+                        // No need to untranslate, previous context is popped after drawDisplayList
                     } finally {
                         hardwareCanvas.onPostDraw();
                         blockDisplayList.end();
-                        blockDisplayList.setLeftTopRightBottom(0, top, width, bottom);
+                        blockDisplayList.setLeftTopRightBottom(left, top, right, bottom);
                         // Same as drawDisplayList below, handled by our TextView's parent
                         blockDisplayList.setClipChildren(false);
                     }
                 }
 
-                // TODO When View.USE_DISPLAY_LIST_PROPERTIES is the only code path, the
-                // width and height parameters should be removed and the bounds set above in
-                // setLeftTopRightBottom should be used instead for quick rejection.
                 ((HardwareCanvas) canvas).drawDisplayList(blockDisplayList, null,
                         0 /* no child clipping, our TextView parent enforces it */);
+
                 endOfPreviousBlock = blockEndLine;
-                
-                canvas.translate(-scrollX, -scrollY);
             }
         } else {
             // Boring layout is used for empty and hint text
