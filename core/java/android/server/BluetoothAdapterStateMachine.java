@@ -441,9 +441,10 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                         if (mPublicState == BluetoothAdapter.STATE_TURNING_OFF) {
                             transitionTo(mHotOff);
                             finishSwitchingOff();
-                            if (!mContext.getResources().getBoolean
-                            (com.android.internal.R.bool.config_bluetooth_adapter_quick_switch)) {
-                                deferMessage(obtainMessage(TURN_COLD));
+                            deferMessage(obtainMessage(TURN_COLD));
+                            if (mContext.getResources().getBoolean
+                                (com.android.internal.R.bool.config_bluetooth_adapter_quick_switch)) {
+                                deferMessage(obtainMessage(TURN_HOT));
                             }
                         }
                     } else {
@@ -612,9 +613,10 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                     removeMessages(POWER_DOWN_TIMEOUT);
                     if (!((Boolean) message.obj)) {
                         transitionTo(mHotOff);
-                        if (!mContext.getResources().getBoolean
+                        deferMessage(obtainMessage(TURN_COLD));
+                        if (mContext.getResources().getBoolean
                             (com.android.internal.R.bool.config_bluetooth_adapter_quick_switch)) {
-                            deferMessage(obtainMessage(TURN_COLD));
+                            deferMessage(obtainMessage(TURN_HOT));
                         }
                     } else {
                         if (!isTurningOn) {
