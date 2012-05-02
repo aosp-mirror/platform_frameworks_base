@@ -610,12 +610,6 @@ public final class WebViewCore {
 
     private native boolean nativeFocusBoundsChanged(int nativeClass);
 
-    /**
-     * Splits slow parts of the picture set. Called from the webkit thread after
-     * WebView.nativeDraw() returns content to be split.
-     */
-    private native void nativeSplitContent(int nativeClass, int content);
-
     private native boolean nativeKey(int nativeClass, int keyCode,
             int unichar, int repeatCount, boolean isShift, boolean isAlt,
             boolean isSym, boolean isDown);
@@ -1018,7 +1012,7 @@ public final class WebViewCore {
             "WEBKIT_DRAW", // = 130;
             "131", // = 131;
             "POST_URL", // = 132;
-            "SPLIT_PICTURE_SET", // = 133;
+            "", // = 133;
             "CLEAR_CONTENT", // = 134;
             "", // = 135;
             "", // = 136;
@@ -1094,7 +1088,6 @@ public final class WebViewCore {
 
         static final int WEBKIT_DRAW = 130;
         static final int POST_URL = 132;
-        static final int SPLIT_PICTURE_SET = 133;
         static final int CLEAR_CONTENT = 134;
 
         // UI nav messages
@@ -1611,13 +1604,6 @@ public final class WebViewCore {
                                     data.mOrigin, data.mAllow, data.mRemember);
                             break;
 
-                        case SPLIT_PICTURE_SET:
-                            nativeSplitContent(mNativeClass, msg.arg1);
-                            mWebViewClassic.mPrivateHandler.obtainMessage(
-                                    WebViewClassic.REPLACE_BASE_CONTENT, msg.arg1, 0);
-                            mSplitPictureIsScheduled = false;
-                            break;
-
                         case CLEAR_CONTENT:
                             // Clear the view so that onDraw() will draw nothing
                             // but white background
@@ -1879,7 +1865,6 @@ public final class WebViewCore {
         private synchronized void removeMessages() {
             // reset mDrawIsScheduled flag as WEBKIT_DRAW may be removed
             mDrawIsScheduled = false;
-            mSplitPictureIsScheduled = false;
             if (mMessages != null) {
                 mMessages.clear();
             } else {
@@ -2141,19 +2126,8 @@ public final class WebViewCore {
         return usedQuota;
     }
 
-    // called from UI thread
-    void splitContent(int content) {
-        if (!mSplitPictureIsScheduled) {
-            mSplitPictureIsScheduled = true;
-            sendMessage(EventHub.SPLIT_PICTURE_SET, content, 0);
-        }
-    }
-
     // Used to avoid posting more than one draw message.
     private boolean mDrawIsScheduled;
-
-    // Used to avoid posting more than one split picture message.
-    private boolean mSplitPictureIsScheduled;
 
     // Used to suspend drawing.
     private boolean mDrawIsPaused;
