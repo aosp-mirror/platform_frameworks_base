@@ -268,6 +268,11 @@ class BluetoothEventLoop {
      */
     private void onDeviceCreated(String deviceObjectPath) {
         String address = mBluetoothService.getAddressFromObjectPath(deviceObjectPath);
+        if (address == null) {
+            Log.e(TAG, "onDeviceCreated: device address null!" + " deviceObjectPath: " +
+                  deviceObjectPath);
+            return;
+        }
         if (!mBluetoothService.isRemoteDeviceInCache(address)) {
             // Incoming connection, we haven't seen this device, add to cache.
             String[] properties = mBluetoothService.getRemoteDeviceProperties(address);
@@ -275,7 +280,6 @@ class BluetoothEventLoop {
                 addDevice(address, properties);
             }
         }
-        return;
     }
 
     /**
