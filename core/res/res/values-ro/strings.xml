@@ -193,14 +193,11 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Permite aplicaţiei să fie bară de stare."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"extindere/restrângere bară de stare"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Permite aplicaţiei să extindă sau să restrângă bara de stare."</string>
-    <!-- no translation found for permlab_processOutgoingCalls (3906007831192990946) -->
-    <skip />
+    <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"redirecţionează apelurile efectuate"</string>
     <string name="permdesc_processOutgoingCalls" msgid="1152111671618301044">"Permite aplicaţiei să proceseze apelurile efectuate şi să schimbe numărul care trebuie format. Aplicaţiile rău intenţionate pot monitoriza, redirecţiona sau împiedica apelurile efectuate."</string>
-    <!-- no translation found for permlab_receiveSms (8673471768947895082) -->
-    <skip />
+    <string name="permlab_receiveSms" msgid="8673471768947895082">"primeşte mesaje text (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="8107887121893611793">"Permite aplicaţiei să primească şi să proceseze mesaje SMS. Aplicaţiile rău intenţionate pot să monitorizeze mesajele sau să le şteargă fără să vi le arate."</string>
-    <!-- no translation found for permlab_receiveMms (1821317344668257098) -->
-    <skip />
+    <string name="permlab_receiveMms" msgid="1821317344668257098">"primeşte mesaje text (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Permite aplicaţiei să primească şi să proceseze mesaje MMS. Aplicaţiile rău intenţionate pot să monitorizeze mesajele sau să le şteargă fără să vi le arate."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"primeşte mesaje difuzate de urgenţă"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Permite aplicaţiei să primească şi să proceseze mesajele difuzate de urgenţă. Această permisiune este disponibilă numai pentru aplicaţiile de sistem."</string>
@@ -210,16 +207,13 @@
     <string name="permdesc_sendSms" msgid="906546667507626156">"Permite aplicaţiei să trimită mesaje SMS. Aplicaţiile rău intenţionate pot să vă genereze costuri, deoarece trimit mesaje fără confirmarea dvs."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"trimitere mesaje SMS fără confirmare"</string>
     <string name="permdesc_sendSmsNoConfirmation" msgid="3437759207020400204">"Permite aplicaţiei să trimită mesaje SMS. Aplicaţiile rău intenţionate pot să vă genereze costuri, deoarece trimit mesaje fără confirmarea dvs."</string>
-    <!-- no translation found for permlab_readSms (8745086572213270480) -->
-    <skip />
+    <string name="permlab_readSms" msgid="8745086572213270480">"citeşte mesajele text (SMS sau MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2341692916884515613">"Permite aplicaţiei să citească mesajele SMS stocate pe tabletă sau pe cardul SIM. Aplicaţiile rău intenţionate pot să vă citească mesajele confidenţiale"</string>
     <string name="permdesc_readSms" product="default" msgid="5653850482025875493">"Permite aplicaţiei să citească mesajele SMS stocate pe telefon sau pe cardul SIM. Aplicaţiile rău intenţionate pot să vă citească mesajele confidenţiale."</string>
-    <!-- no translation found for permlab_writeSms (3216950472636214774) -->
-    <skip />
+    <string name="permlab_writeSms" msgid="3216950472636214774">"editează mesajele text (SMS sau MMS)"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Permite aplicaţiei să scrie în mesajele SMS stocate pe tabletă sau pe cardul SIM. Aplicaţiile rău intenţionate pot să vă şteargă mesajele."</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Permite aplicaţiei să scrie în mesajele SMS stocate pe telefon sau pe cardul SIM. Aplicaţiile rău intenţionate pot să vă şteargă mesajele."</string>
-    <!-- no translation found for permlab_receiveWapPush (5991398711936590410) -->
-    <skip />
+    <string name="permlab_receiveWapPush" msgid="5991398711936590410">"primeşte mesaje text (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"Permite aplicaţiei să primească şi să proceseze mesaje WAP. Aplicaţiile rău intenţionate pot să monitorizeze mesajele sau să le şteargă fără să vi le arate."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"preluare aplicaţii care rulează"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"Permite aplicaţiei să preia informaţii despre activităţile rulate curent şi recent. Aplicaţiile rău intenţionate pot să descopere informaţii private despre alte aplicaţii."</string>
@@ -235,13 +229,11 @@
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Permite aplicaţiei să controleze modul de compatibilitate a ecranului pentru alte aplicaţii. Aplicaţiile rău intenţionate pot afecta comportamentul altor aplicaţii."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"activare depanare aplicaţie"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Permite aplicaţiei să activeze depanarea pentru o altă aplicaţie. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a închide alte aplicaţii."</string>
-    <!-- no translation found for permlab_changeConfiguration (4162092185124234480) -->
-    <skip />
+    <string name="permlab_changeConfiguration" msgid="4162092185124234480">"modifică setările de afişare ale sistemului"</string>
     <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Permite aplicaţiei să modifice configurarea curentă, cum ar fi limba sau dimensiunea generală a fontului."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"activare mod Maşină"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Permite aplicaţiei să activeze modul Maşină."</string>
-    <!-- no translation found for permlab_killBackgroundProcesses (3914026687420177202) -->
-    <skip />
+    <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"închide alte aplicaţii"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="931129103262126617">"Permite aplicaţiei să oprească procesele derulate în fundal de alte aplicaţii, chiar dacă există suficientă memorie."</string>
     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"forţare oprire a altor aplicaţii"</string>
     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Permite aplicaţiei să oprească alte aplicaţii în mod forţat."</string>
@@ -265,8 +257,7 @@
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Permite aplicaţiei să difuzeze o notificare de primire a unui mesaj WAP PUSH. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a deturna primirea mesajelor MMS sau pentru a înlocui fără a vă înştiinţa conţinutul oricărei pagini web cu variante rău intenţionate."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"limitare număr de procese în derulare"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Permite aplicaţiei să controleze numărul maxim de procese care vor rula. Nu este niciodată necesară pentru aplicaţiile obişnuite."</string>
-    <!-- no translation found for permlab_setAlwaysFinish (550958507798796965) -->
-    <skip />
+    <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"forţează închiderea aplicaţiilor de fundal"</string>
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Permite aplicaţiei să controleze dacă activităţile sunt întotdeauna închise imediat ce ajung în fundal. Nu este niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"modificare statistici referitoare la baterie"</string>
     <string name="permdesc_batteryStats" msgid="6835186932305744068">"Permite aplicaţiei să modifice statisticile colectate despre baterie. Nu se utilizează de aplicaţiile obişnuite."</string>
@@ -276,8 +267,7 @@
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Permite aplicaţiei să lanseze interfaţa de utilizare pentru confirmarea copiei de rezervă complete. Nu poate fi utilizată de orice aplicaţie."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"afişare ferestre neautorizate"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Permite aplicaţiei să creeze ferestre destinate a fi folosite de către interfaţa de utilizare a sistemului intern. Nu se utilizează de aplicaţiile obişnuite."</string>
-    <!-- no translation found for permlab_systemAlertWindow (3543347980839518613) -->
-    <skip />
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"desenează peste alte aplicaţii"</string>
     <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"Permite aplicaţiei să afişeze ferestre de alertă de sistem. Aplicaţiile rău intenţionate pot să preia controlul asupra întregului ecran."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"modificare viteză de animaţie globală"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Permite aplicaţiei să modifice oricând viteza globală de animaţie (animaţii mai rapide sau mai lente)."</string>
@@ -339,26 +329,22 @@
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Permite unei aplicaţii să acorde sau să revoce permisiuni specifice acelei aplicaţii sau altor aplicaţii. Aplicaţiile rău intenţionate pot utiliza această permisiune pentru a accesa funcţii pe care nu le-aţi permis."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"setare aplicaţii preferate"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Permite aplicaţiei să modifice aplicaţiile dvs. preferate. Aplicaţiile rău intenţionate pot să modifice fără a vă înştiinţa aplicaţiile care rulează, păcălind aplicaţiile existente să colecteze date private de la dvs."</string>
-    <!-- no translation found for permlab_writeSettings (2226195290955224730) -->
-    <skip />
+    <string name="permlab_writeSettings" msgid="2226195290955224730">"modifică setări de sistem"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Permite aplicaţiei să modifice datele din setările sistemului. Aplicaţiile rău intenţionate pot corupe configuraţia sistemului dvs."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"modificare setări securizate sistem"</string>
     <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Permite aplicaţiei să modifice datele setărilor securizate ale sistemului. Nu se utilizează de aplicaţiile obişnuite."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"modificare hartă servicii Google"</string>
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Permite aplicaţiei să modifice harta serviciilor Google. Nu se utilizează de aplicaţiile obişnuite."</string>
-    <!-- no translation found for permlab_receiveBootCompleted (5312965565987800025) -->
-    <skip />
+    <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"rulează la pornire"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Permite aplicaţiei să pornească imediat ce s-a terminat încărcarea sistemului. Din acest motiv, pornirea tabletei poate dura mai mult timp, iar rularea continuă a aplicaţiei poate încetini dispozitivul."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Permite aplicaţiei să pornească imediat ce s-a terminat încărcarea sistemului. Din acest motiv, pornirea telefonului poate dura mai mult timp, iar rularea continuă a aplicaţiei poate încetini dispozitivul."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"trimitere mesaj difuzat persistent"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"Permite aplicaţiei să trimită mesaje difuzate persistente, care rămân după terminarea mesajului difuzat. Aplicaţiile rău intenţionate pot să încetinească sau să destabilizeze tableta, determinând-o să utilizeze prea multă memorie."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"Permite aplicaţiei să trimită mesaje difuzate persistente, care rămân după terminarea mesajului difuzat. Aplicaţiile rău intenţionate pot să încetinească sau să destabilizeze telefonul, determinându-l să utilizeze prea multă memorie."</string>
-    <!-- no translation found for permlab_readContacts (8348481131899886131) -->
-    <skip />
+    <string name="permlab_readContacts" msgid="8348481131899886131">"citeşte agenda"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="6370069055638209432">"Permite aplicaţiei să citească toate datele despre persoanele de contact stocate pe tabletă, inclusiv frecvenţa cu care aţi apelat, aţi trimis mesaje de e-mail către anumite persoane sau aţi comunicat în alte moduri cu acestea. Acest lucru permite completarea automată a adreselor de e-mail, precum şi alte funcţii care vă uşurează utilizarea. Aplicaţiile rău intenţionate pot folosi această permisiune pentru a trimite datele dvs. de contact altor persoane."</string>
     <string name="permdesc_readContacts" product="default" msgid="4093353182535351501">"Permite aplicaţiei să citească toate datele despre persoanele de contact stocate pe telefon, inclusiv frecvenţa cu care aţi apelat, aţi trimis mesaje de e-mail către anumite persoane sau aţi comunicat în alte moduri cu acestea. Acest lucru permite completarea automată a adreselor de e-mail, precum şi alte funcţii care vă uşurează utilizarea. Aplicaţiile rău intenţionate pot folosi această permisiune pentru a trimite datele dvs. de contact altor persoane."</string>
-    <!-- no translation found for permlab_writeContacts (5107492086416793544) -->
-    <skip />
+    <string name="permlab_writeContacts" msgid="5107492086416793544">"modifică agenda"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="5495863352173533286">"Permite aplicaţiei să modifice datele despre persoanele de contact stocate pe tabletă, inclusiv frecvenţa cu care aţi apelat, aţi trimis mesaje de e-mail către anumite persoane sau aţi comunicat în alte moduri cu acestea. Acest lucru permite completarea automată a adreselor de e-mail, precum şi alte funcţii care vă uşurează utilizarea. Aplicaţiile rău intenţionate pot folosi această permisiune pentru a şterge sau pentru a modifica datele dvs. de contact."</string>
     <string name="permdesc_writeContacts" product="default" msgid="6108469962248865715">"Permite aplicaţiei să modifice datele despre persoanele de contact stocate pe telefon, inclusiv frecvenţa cu care aţi apelat, aţi trimis mesaje de e-mail către anumite persoane sau aţi comunicat în alte moduri cu acestea. Acest lucru permite completarea automată a adreselor de e-mail, precum şi alte funcţii care vă uşurează utilizarea. Aplicaţiile rău intenţionate pot folosi această permisiune pentru a şterge sau pentru a modifica datele dvs. de contact."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"citeşte jurnalul de apeluri"</string>
@@ -367,11 +353,9 @@
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"scrie jurnalul de apeluri"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Permite aplicaţiei să modifice jurnalul de apeluri al tabletei dvs., inclusiv datele despre apelurile primite sau efectuate. Aplicaţiile rău intenţionate pot utiliza această permisiune pentru a şterge sau pentru a modifica jurnalul dvs. de apeluri."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Permite aplicaţiei să modifice jurnalul de apeluri al telefonului dvs., inclusiv datele despre apelurile primite sau efectuate. Aplicaţiile rău intenţionate pot utiliza această permisiune pentru a şterge sau pentru a modifica jurnalul dvs. de apeluri."</string>
-    <!-- no translation found for permlab_readProfile (4701889852612716678) -->
-    <skip />
+    <string name="permlab_readProfile" msgid="4701889852612716678">"citeşte cartea dvs. de vizită"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Permite aplicaţiei să citească informaţii de profil personal stocate pe dispozitiv, cum ar fi numele şi informaţiile de contact, ceea ce înseamnă că aplicaţia vă poate identifica şi poate trimite informaţiile dvs. de profil altor utilizatori."</string>
-    <!-- no translation found for permlab_writeProfile (907793628777397643) -->
-    <skip />
+    <string name="permlab_writeProfile" msgid="907793628777397643">"modifică cartea dvs. de vizită"</string>
     <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"Permite aplicaţiei să schimbe sau să adauge conţinut în informaţiile din profilul personal stocate pe dispozitivul dvs., cum ar fi numele şi informaţiile dvs. de contact. Aceasta înseamnă că alte aplicaţii vă pot identifica şi pot trimite informaţiile din profilul dvs. altor persoane."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"citeşte fluxul social"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="3419050808547335320">"Permite aplicaţiei să acceseze şi să sincronizeze actualizările sociale de la dvs. şi de la prietenii dvs. Aplicaţiile rău intenţionate se pot folosi de această permisiune pentru a citi comunicările private dintre dvs. şi prietenii dvs. de pe reţelele sociale."</string>
@@ -412,15 +396,11 @@
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"forţare repornire telefon"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Permite aplicaţiei să forţeze repornirea tabletei."</string>
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Permite aplicaţiei să forţeze repornirea telefonului."</string>
-    <!-- no translation found for permlab_mount_unmount_filesystems (2927361537942591841) -->
-    <skip />
-    <!-- no translation found for permlab_mount_unmount_filesystems (4402305049890953810) -->
-    <skip />
+    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"acces. sist. fişiere stoc. USB"</string>
+    <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"accesează sistemul de fişiere pe cardul SD"</string>
     <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Permite aplicaţiei să monteze şi să demonteze sisteme de fişiere pentru stocarea pe suporturi amovibile."</string>
-    <!-- no translation found for permlab_mount_format_filesystems (6227819582624904972) -->
-    <skip />
-    <!-- no translation found for permlab_mount_format_filesystems (262582698639274056) -->
-    <skip />
+    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"şterge stocarea USB"</string>
+    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"şterge cardul SD"</string>
     <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Permite aplicaţiei să formateze stocarea pe suporturi amovibile."</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"descărcare informaţii pe stocarea internă"</string>
     <string name="permdesc_asec_access" msgid="3094563844593878548">"Permite aplicaţiei să obţină informaţii despre stocarea internă."</string>
@@ -432,8 +412,7 @@
     <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Permite aplicaţiei să monteze/demonteze stocarea internă."</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"redenumire stocare internă"</string>
     <string name="permdesc_asec_rename" msgid="1794757588472127675">"Permite aplicaţiei să redenumească stocarea internă."</string>
-    <!-- no translation found for permlab_vibrate (7696427026057705834) -->
-    <skip />
+    <string name="permlab_vibrate" msgid="7696427026057705834">"controlează vibrarea"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Permite aplicaţiei să controleze mecanismul de vibrare."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"control lanternă"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Permite aplicaţiei să controleze lanterna."</string>
@@ -458,8 +437,7 @@
     <string name="permdesc_bindGadget" msgid="8261326938599049290">"Permite aplicaţiei să indice sistemului ce aplicaţii pot utiliza anumite widgeturi. Cu ajutorul acestei permisiuni, aplicaţiile pot să acorde altor aplicaţii accesul la datele personale. Nu se utilizează de aplicaţiile obişnuite."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"modificare stare telefon"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Permite aplicaţiei să controleze funcţiile de telefon ale dispozitivului. O aplicaţie cu această permisiune poate să schimbe reţeaua, să închidă şi să deschidă radioul şi să efectueze alte acţiuni similare, fără să vă înştiinţeze."</string>
-    <!-- no translation found for permlab_readPhoneState (9178228524507610486) -->
-    <skip />
+    <string name="permlab_readPhoneState" msgid="9178228524507610486">"citeşte starea şi identitatea telefonului"</string>
     <string name="permdesc_readPhoneState" msgid="5127767618743602782">"Permite aplicaţiei să acceseze funcţiile de telefon ale dispozitivului. O aplicaţie cu această permisiune poate regăsi numărul de telefon şi numărul serial al telefonului, dacă un apel este activ, numărul la care este conectat apelul şi alte aspecte similare."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"împiedicarea computerului tablet PC să intre în repaus"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"împiedicare intrare telefon în repaus"</string>
@@ -474,8 +452,7 @@
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Rulează ca testare de nivel redus al producătorului, permiţând accesul complet la hardware-ul telefonului. Permisiune disponibilă doar când telefonul rulează în modul de testare a producător."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"setare imagine de fundal"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Permite aplicaţiei să seteze imaginea de fundal a sistemului."</string>
-    <!-- no translation found for permlab_setWallpaperHints (3278608165977736538) -->
-    <skip />
+    <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"ajustează dimensiunea imaginii de fundal"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Permite aplicaţiei să seteze sugestiile privind dimensiunile imaginii de fundal a sistemului."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"resetare sistem la setările prestabilite din fabrică"</string>
     <string name="permdesc_masterClear" msgid="3665380492633910226">"Permite aplicaţiei să reseteze complet sistemul la setările din fabrică, ştergând toate datele, configurările şi aplicaţiile instalate."</string>
@@ -487,21 +464,16 @@
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Permite aplicaţiei să schimbe fusul orar al telefonului."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"efectuare ca AccountManagerService"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Permite aplicaţiei să efectueze apeluri către AccountAuthenticators."</string>
-    <!-- no translation found for permlab_getAccounts (1086795467760122114) -->
-    <skip />
+    <string name="permlab_getAccounts" msgid="1086795467760122114">"găseşte conturi pe dispozitiv"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="3238360555257773358">"Permite aplicaţiei să obţină lista conturilor cunoscute de tabletă."</string>
     <string name="permdesc_getAccounts" product="default" msgid="2735689364629830348">"Permite aplicaţiei să obţină lista conturilor cunoscute de telefon."</string>
-    <!-- no translation found for permlab_authenticateAccounts (5265908481172736933) -->
-    <skip />
+    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"creează conturi şi setează parole"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Permite aplicaţiei să utilizeze capacităţile de autentificator de cont ale AccountManager, incluzând crearea conturilor şi obţinerea şi setarea parolelor."</string>
-    <!-- no translation found for permlab_manageAccounts (4983126304757177305) -->
-    <skip />
+    <string name="permlab_manageAccounts" msgid="4983126304757177305">"adaugă sau elimină conturi"</string>
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Permite aplicaţiei să efectueze operaţii cum ar fi adăugarea şi eliminarea conturilor şi ştergerea parolelor."</string>
-    <!-- no translation found for permlab_useCredentials (235481396163877642) -->
-    <skip />
+    <string name="permlab_useCredentials" msgid="235481396163877642">"utilizează conturile de pe dispozitiv"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Permite aplicaţiei să solicite indicative de autentificare."</string>
-    <!-- no translation found for permlab_accessNetworkState (4951027964348974773) -->
-    <skip />
+    <string name="permlab_accessNetworkState" msgid="4951027964348974773">"vizualizează conexiunile la reţea"</string>
     <string name="permdesc_accessNetworkState" msgid="479772796952547198">"Permite aplicaţiei să vizualizeze starea tuturor reţelelor."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"acces complet la Internet"</string>
     <string name="permdesc_createNetworkSockets" msgid="5963922297444265950">"Permite aplicaţiei să creeze socluri de reţea."</string>
@@ -513,36 +485,29 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permite aplicaţiei să modifice starea de conectivitate prin tethering la reţea."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"modificare setare pentru utilizarea datelor din fundal"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Permite aplicaţiei să modifice setarea pentru utilizarea datelor de fundal."</string>
-    <!-- no translation found for permlab_accessWifiState (5202012949247040011) -->
-    <skip />
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"vizualizează conexiunile Wi-Fi"</string>
     <string name="permdesc_accessWifiState" msgid="7770452658226256831">"Permite aplicaţiei să vizualizeze informaţiile despre starea Wi-Fi."</string>
-    <!-- no translation found for permlab_changeWifiState (6550641188749128035) -->
-    <skip />
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"se conectează şi se deconectează de la Wi-Fi"</string>
     <string name="permdesc_changeWifiState" msgid="7399961004537946240">"Permite aplicaţiei să se conecteze la şi să se deconecteze de la punctele de acces Wi-Fi, precum şi să efectueze modificări în reţelele Wi-Fi configurate."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"permitere recepţionare difuzare multiplă Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="7633598524564320817">"Permite aplicaţiei să primească pachete care nu sunt direct adresate dispozitivului dvs. Această permisiune poate fi utilă la descoperirea serviciilor oferite în apropiere. Consumă mai multă energie decât modul fără difuzare multiplă."</string>
-    <!-- no translation found for permlab_bluetoothAdmin (6006967373935926659) -->
-    <skip />
+    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"accesează setările Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permite aplicaţiei să configureze tableta Bluetooth locală, să descopere şi să se împerecheze cu dispozitive la distanţă."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permite aplicaţiei să configureze telefonul Bluetooth local, să descopere şi să se împerecheze cu dispozitive la distanţă."</string>
-    <!-- no translation found for permlab_accessWimaxState (7436749103151096452) -->
-    <skip />
+    <string name="permlab_accessWimaxState" msgid="7436749103151096452">"Afişaţi conexiunile WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="5914958077555177749">"Permite aplicaţiei să vizualizeze informaţiile despre starea WiMAX."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Schimbaţi starea WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="3328853825006455912">"Permite aplicaţiei să se conecteze la şi să se deconecteze de la reţeaua WiMAX."</string>
-    <!-- no translation found for permlab_bluetooth (6127769336339276828) -->
-    <skip />
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"împerechează dispozitive Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Permite aplicaţiei să vizualizeze configuraţia tabletei Bluetooth locale, să efectueze şi să accepte conexiuni cu dispozitive împerecheate."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Permite aplicaţiei să vizualizeze configuraţia telefonului Bluetooth local, să efectueze şi să accepte conexiuni cu dispozitive împerecheate."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controlare schimb de date prin Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permite aplicaţiei să comunice cu etichetele, cardurile şi cititoarele NFC (Near Field Communication)."</string>
-    <!-- no translation found for permlab_disableKeyguard (3598496301486439258) -->
-    <skip />
+    <string name="permlab_disableKeyguard" msgid="3598496301486439258">"dezactivează blocarea ecranului"</string>
     <string name="permdesc_disableKeyguard" msgid="6231611286892232626">"Permite aplicaţiei să dezactiveze blocarea tastelor şi orice modalitate asociată de securizare prin parolă. Un bun exemplu este dezactivarea blocării tastelor de către telefon atunci când se primeşte un apel telefonic şi reactivarea blocării tastelor la terminarea apelului."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"citire setări sincronizare"</string>
     <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"Permite aplicaţiei să citească setările de sincronizare, cum ar fi activarea sincronizării pentru aplicaţia Persoane."</string>
-    <!-- no translation found for permlab_writeSyncSettings (5408694875793945314) -->
-    <skip />
+    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activează/dezactivează sincronizarea"</string>
     <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"Permite aplicaţiei să modifice setările de sincronizare, cum ar fi activarea sincronizării pentru aplicaţia Persoane."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"citire statistici privind sincronizarea"</string>
     <string name="permdesc_readSyncStats" msgid="3801971839939951678">"Permite aplicaţiei să citească statisticile privind sincronizarea, de exemplu, istoricul sincronizărilor care au avut loc."</string>
@@ -550,23 +515,16 @@
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permite aplicaţiei să obţină detalii despre feedurile sincronizate în prezent."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"scriere feeduri abonat"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Permite aplicaţiei să modifice fluxurile sincronizate curent. Aplicaţiile rău intenţionate pot să modifice fluxurile sincronizate."</string>
-    <!-- no translation found for permlab_readDictionary (4107101525746035718) -->
-    <skip />
+    <string name="permlab_readDictionary" msgid="4107101525746035718">"citeşte termenii adăugaţi în dicţionar"</string>
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Permite aplicaţiei să citească cuvinte, nume şi expresii private stocate de utilizator în dicţionarul său."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"scriere în dicţionarul definit de utilizator"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permite aplicaţiei să scrie cuvinte noi în dicţionarul utilizatorului."</string>
-    <!-- no translation found for permlab_sdcardRead (367275095159405468) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (2188156462934977940) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (3530894470637667917) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (2555811422562526606) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardWrite (8485979062254666748) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardWrite (9084476432661578751) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"citeşte conţinutul stocării USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"citeşte conţinutul cardului SD"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Permite aplic. să citească conţin. stoc. USB, care poate include fotogr. şi media."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Permite aplicaţiei să citească conţinutul cardului SD, care poate include fotografii şi conţinut media."</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modifică sau şterge conţinutul stocării USB"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"modifică sau şterge conţinutul cardului SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permite scriere în stoc. USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Permite aplicaţiei să scrie pe cardul SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modif./şterg. conţinutul media stocat intern"</string>
@@ -819,15 +777,12 @@
     <string name="autofill_parish" msgid="8202206105468820057">"Cartier"</string>
     <string name="autofill_area" msgid="3547409050889952423">"Zonă"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emirat"</string>
-    <!-- no translation found for permlab_readHistoryBookmarks (3775265775405106983) -->
-    <skip />
+    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"citeşte marcajele şi istoricul web"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4577476392604595921">"Permite aplicaţiei să citească toate adresele URL accesate din browser şi toate marcajele aflate în acesta."</string>
-    <!-- no translation found for permlab_writeHistoryBookmarks (3714785165273314490) -->
-    <skip />
+    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"scrie în marcajele şi în istoricul web"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="1757103804824209530">"Permite aplicaţiei să modifice istoricul sau marcajele din browser stocate pe tabletă. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a şterge sau pentru a modifica datele din browser."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="6693764355720719197">"Permite aplicaţiei să modifice istoricul sau marcajele din browser stocate pe telefon. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a şterge sau a modifica datele din browser."</string>
-    <!-- no translation found for permlab_setAlarm (1379294556362091814) -->
-    <skip />
+    <string name="permlab_setAlarm" msgid="1379294556362091814">"setează o alarmă"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permite aplicaţiei să seteze o alarmă într-o aplicaţie de ceas cu alarmă instalată. Este posibil ca unele aplicaţii de ceas cu alarmă să nu implementeze această funcţie."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"adăugare mesagerie vocală"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Permite aplicaţiei să adauge mesaje în Mesaje primite în mesageria vocală."</string>
