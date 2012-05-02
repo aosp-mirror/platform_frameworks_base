@@ -1731,8 +1731,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private static final int RETRIEVAL_ALLOWING_WINDOW_CHANGE_EVENT_TYPES =
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
             | AccessibilityEvent.TYPE_VIEW_HOVER_ENTER
-            | AccessibilityEvent.TYPE_VIEW_HOVER_EXIT
-            | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED;
+            | AccessibilityEvent.TYPE_VIEW_HOVER_EXIT;
 
         private int mRetrievalAlowingWindowId;
 
