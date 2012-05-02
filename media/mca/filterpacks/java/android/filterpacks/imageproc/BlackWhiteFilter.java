@@ -47,20 +47,19 @@ public class BlackWhiteFilter extends Filter {
     private int mHeight = 0;
     private int mTarget = FrameFormat.TARGET_UNSPECIFIED;
 
-    private Frame mNoiseFrame = null;
-    private Random mRandom;
-
     private final String mBlackWhiteShader =
             "precision mediump float;\n" +
             "uniform sampler2D tex_sampler_0;\n" +
-            "uniform sampler2D tex_sampler_1;\n" +
             "uniform float black;\n" +
             "uniform float scale;\n" +
             "uniform float stepsize;\n" +
             "varying vec2 v_texcoord;\n" +
+            "float rand(vec2 loc) {\n" +
+            "  return fract(sin(dot(loc, vec2(12.9898, 78.233))) * 43758.5453);\n" +
+            "}\n" +
             "void main() {\n" +
             "  vec4 color = texture2D(tex_sampler_0, v_texcoord);\n" +
-            "  float dither = texture2D(tex_sampler_1, v_texcoord).r;\n" +
+            "  float dither = rand(v_texcoord);\n" +
             "  vec3 xform = clamp((color.rgb - black) * scale, 0.0, 1.0);\n" +
             "  vec3 temp = clamp((color.rgb + stepsize - black) * scale, 0.0, 1.0);\n" +
             "  vec3 new_color = clamp(xform + (temp - xform) * (dither - 0.5), 0.0, 1.0);\n" +
@@ -69,8 +68,6 @@ public class BlackWhiteFilter extends Filter {
 
     public BlackWhiteFilter(String name) {
         super(name);
-
-        mRandom = new Random();
     }
 
     @Override
@@ -82,14 +79,6 @@ public class BlackWhiteFilter extends Filter {
     @Override
     public FrameFormat getOutputFormat(String portName, FrameFormat inputFormat) {
         return inputFormat;
-    }
-
-    @Override
-    public void tearDown(FilterContext context) {
-        if (mNoiseFrame != null) {
-            mNoiseFrame.release();
-            mNoiseFrame = null;
-        }
     }
 
     public void initProgram(FilterContext context, int target) {
@@ -139,33 +128,13 @@ public class BlackWhiteFilter extends Filter {
         if (inputFormat.getWidth() != mWidth || inputFormat.getHeight() != mHeight) {
             mWidth = inputFormat.getWidth();
             mHeight = inputFormat.getHeight();
-
-            if (mNoiseFrame != null) {
-                mNoiseFrame.release();
-            }
-
-            int[] buffer = new int[mWidth * mHeight];
-            for (int i = 0; i < mWidth * mHeight; ++i) {
-              buffer[i] = mRandom.nextInt(255);
-            }
-            FrameFormat format = ImageFormat.create(mWidth, mHeight,
-                                                    ImageFormat.COLORSPACE_RGBA,
-                                                    FrameFormat.TARGET_GPU);
-            mNoiseFrame = context.getFrameManager().newFrame(format);
-            mNoiseFrame.setInts(buffer);
-        }
-
-        if (mNoiseFrame != null && (mNoiseFrame.getFormat().getWidth() != mWidth ||
-                                    mNoiseFrame.getFormat().getHeight() != mHeight)) {
-            throw new RuntimeException("Random map and imput image size mismatch!");
         }
 
         // Create output frame
         Frame output = context.getFrameManager().newFrame(inputFormat);
 
         // Process
-        Frame[] inputs = {input, mNoiseFrame};
-        mProgram.process(inputs, output);
+        mProgram.process(input, output);
 
         // Push output
         pushOutput("image", output);
