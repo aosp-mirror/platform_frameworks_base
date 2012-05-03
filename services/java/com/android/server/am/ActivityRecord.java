@@ -552,7 +552,8 @@ final class ActivityRecord {
 
     void applyOptionsLocked() {
         if (pendingOptions != null) {
-            switch (pendingOptions.getAnimationType()) {
+            final int animationType = pendingOptions.getAnimationType();
+            switch (animationType) {
                 case ActivityOptions.ANIM_CUSTOM:
                     service.mWindowManager.overridePendingAppTransition(
                             pendingOptions.getPackageName(),
@@ -571,10 +572,13 @@ final class ActivityRecord {
                     }
                     break;
                 case ActivityOptions.ANIM_THUMBNAIL:
+                case ActivityOptions.ANIM_THUMBNAIL_DELAYED:
+                    boolean delayed = (animationType == ActivityOptions.ANIM_THUMBNAIL_DELAYED);
                     service.mWindowManager.overridePendingAppTransitionThumb(
                             pendingOptions.getThumbnail(),
                             pendingOptions.getStartX(), pendingOptions.getStartY(),
-                            pendingOptions.getOnAnimationStartListener());
+                            pendingOptions.getOnAnimationStartListener(),
+                            delayed);
                     if (intent.getSourceBounds() == null) {
                         intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
                                 pendingOptions.getStartY(),
