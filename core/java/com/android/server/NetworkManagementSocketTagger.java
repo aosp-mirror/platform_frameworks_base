@@ -16,20 +16,14 @@
 
 package com.android.server;
 
-import android.net.NetworkStats;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Slog;
 
 import dalvik.system.SocketTagger;
-import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
 import java.net.SocketException;
-import java.nio.charset.Charsets;
 
 /**
  * Assigns tags to sockets for traffic stats.
@@ -141,8 +135,12 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
      * format like {@code 0x7fffffff00000000}.
      */
     public static int kernelToTag(String string) {
-        // TODO: migrate to direct integer instead of odd shifting
-        return (int) (Long.decode(string) >> 32);
+        int length = string.length();
+        if (length > 10) {
+            return Long.decode(string.substring(0, length - 8)).intValue();
+        } else {
+            return 0;
+        }
     }
 
     private static native int native_tagSocketFd(FileDescriptor fd, int tag, int uid);
