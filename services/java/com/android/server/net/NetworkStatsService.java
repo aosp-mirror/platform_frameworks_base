@@ -36,6 +36,7 @@ import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileWildcard;
 import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
+import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.provider.Settings.Secure.NETSTATS_DEV_BUCKET_DURATION;
 import static android.provider.Settings.Secure.NETSTATS_DEV_DELETE_AGE;
@@ -49,6 +50,10 @@ import static android.provider.Settings.Secure.NETSTATS_UID_BUCKET_DURATION;
 import static android.provider.Settings.Secure.NETSTATS_UID_DELETE_AGE;
 import static android.provider.Settings.Secure.NETSTATS_UID_PERSIST_BYTES;
 import static android.provider.Settings.Secure.NETSTATS_UID_ROTATE_AGE;
+import static android.provider.Settings.Secure.NETSTATS_UID_TAG_BUCKET_DURATION;
+import static android.provider.Settings.Secure.NETSTATS_UID_TAG_DELETE_AGE;
+import static android.provider.Settings.Secure.NETSTATS_UID_TAG_PERSIST_BYTES;
+import static android.provider.Settings.Secure.NETSTATS_UID_TAG_ROTATE_AGE;
 import static android.telephony.PhoneStateListener.LISTEN_DATA_CONNECTION_STATE;
 import static android.telephony.PhoneStateListener.LISTEN_NONE;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
@@ -94,10 +99,12 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.NtpTrustedTime;
 import android.util.Slog;
 import android.util.SparseIntArray;
@@ -169,19 +176,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     public interface NetworkStatsSettings {
         public long getPollInterval();
         public long getTimeCacheMaxAge();
-        public long getGlobalAlertBytes();
         public boolean getSampleEnabled();
 
         public static class Config {
             public final long bucketDuration;
-            public final long persistBytes;
             public final long rotateAgeMillis;
             public final long deleteAgeMillis;
 
-            public Config(long bucketDuration, long persistBytes, long rotateAgeMillis,
-                    long deleteAgeMillis) {
+            public Config(long bucketDuration, long rotateAgeMillis, long deleteAgeMillis) {
                 this.bucketDuration = bucketDuration;
-                this.persistBytes = persistBytes;
                 this.rotateAgeMillis = rotateAgeMillis;
                 this.deleteAgeMillis = deleteAgeMillis;
             }
@@ -191,6 +194,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         public Config getXtConfig();
         public Config getUidConfig();
         public Config getUidTagConfig();
+
+        public long getGlobalAlertBytes(long def);
+        public long getDevPersistBytes(long def);
+        public long getXtPersistBytes(long def);
+        public long getUidPersistBytes(long def);
+        public long getUidTagPersistBytes(long def);
     }
 
     private final Object mStatsLock = new Object();
@@ -223,6 +232,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private final Handler mHandler;
 
     private boolean mSystemReady;
+    private long mPersistThreshold = 2 * MB_IN_BYTES;
+    private long mGlobalAlertBytes;
 
     public NetworkStatsService(
             Context context, INetworkManagementService networkManager, IAlarmManager alarmManager) {
@@ -275,6 +286,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mUidRecorder = buildRecorder(PREFIX_UID, mSettings.getUidConfig(), false);
         mUidTagRecorder = buildRecorder(PREFIX_UID_TAG, mSettings.getUidTagConfig(), true);
 
+        updatePersistThresholds();
+
         synchronized (mStatsLock) {
             // upgrade any legacy stats, migrating them to rotated files
             maybeUpgradeLegacyStatsLocked();
@@ -325,10 +338,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private NetworkStatsRecorder buildRecorder(
             String prefix, NetworkStatsSettings.Config config, boolean includeTags) {
-        return new NetworkStatsRecorder(
-                new FileRotator(mBaseDir, prefix, config.rotateAgeMillis, config.deleteAgeMillis),
-                mNonMonotonicObserver, prefix, config.bucketDuration, config.persistBytes,
-                includeTags);
+        return new NetworkStatsRecorder(new FileRotator(
+                mBaseDir, prefix, config.rotateAgeMillis, config.deleteAgeMillis),
+                mNonMonotonicObserver, prefix, config.bucketDuration, includeTags);
     }
 
     private void shutdownLocked() {
@@ -414,8 +426,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      */
     private void registerGlobalAlert() {
         try {
-            final long alertBytes = mSettings.getGlobalAlertBytes();
-            mNetworkManager.setGlobalAlert(alertBytes);
+            mNetworkManager.setGlobalAlert(mGlobalAlertBytes);
         } catch (IllegalStateException e) {
             Slog.w(TAG, "problem registering for global alert: " + e);
         } catch (RemoteException e) {
@@ -437,14 +448,18 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
             private NetworkStatsCollection getUidComplete() {
                 if (mUidComplete == null) {
-                    mUidComplete = mUidRecorder.getOrLoadCompleteLocked();
+                    synchronized (mStatsLock) {
+                        mUidComplete = mUidRecorder.getOrLoadCompleteLocked();
+                    }
                 }
                 return mUidComplete;
             }
 
             private NetworkStatsCollection getUidTagComplete() {
                 if (mUidTagComplete == null) {
-                    mUidTagComplete = mUidTagRecorder.getOrLoadCompleteLocked();
+                    synchronized (mStatsLock) {
+                        mUidTagComplete = mUidTagRecorder.getOrLoadCompleteLocked();
+                    }
                 }
                 return mUidTagComplete;
             }
@@ -582,6 +597,45 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+    }
+
+    @Override
+    public void advisePersistThreshold(long thresholdBytes) {
+        mContext.enforceCallingOrSelfPermission(MODIFY_NETWORK_ACCOUNTING, TAG);
+        assertBandwidthControlEnabled();
+
+        // clamp threshold into safe range
+        mPersistThreshold = MathUtils.constrain(thresholdBytes, 128 * KB_IN_BYTES, 2 * MB_IN_BYTES);
+        updatePersistThresholds();
+
+        if (LOGV) {
+            Slog.v(TAG, "advisePersistThreshold() given " + thresholdBytes + ", clamped to "
+                    + mPersistThreshold);
+        }
+
+        // persist if beyond new thresholds
+        final long currentTime = mTime.hasCache() ? mTime.currentTimeMillis()
+                : System.currentTimeMillis();
+        mDevRecorder.maybePersistLocked(currentTime);
+        mXtRecorder.maybePersistLocked(currentTime);
+        mUidRecorder.maybePersistLocked(currentTime);
+        mUidTagRecorder.maybePersistLocked(currentTime);
+
+        // re-arm global alert
+        registerGlobalAlert();
+    }
+
+    /**
+     * Update {@link NetworkStatsRecorder} and {@link #mGlobalAlertBytes} to
+     * reflect current {@link #mPersistThreshold} value. Always defers to
+     * {@link Secure} values when defined.
+     */
+    private void updatePersistThresholds() {
+        mDevRecorder.setPersistThreshold(mSettings.getDevPersistBytes(mPersistThreshold));
+        mXtRecorder.setPersistThreshold(mSettings.getXtPersistBytes(mPersistThreshold));
+        mUidRecorder.setPersistThreshold(mSettings.getUidPersistBytes(mPersistThreshold));
+        mUidTagRecorder.setPersistThreshold(mSettings.getUidTagPersistBytes(mPersistThreshold));
+        mGlobalAlertBytes = mSettings.getGlobalAlertBytes(mPersistThreshold);
     }
 
     /**
@@ -1122,41 +1176,50 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             return getSecureLong(NETSTATS_TIME_CACHE_MAX_AGE, DAY_IN_MILLIS);
         }
         @Override
-        public long getGlobalAlertBytes() {
-            return getSecureLong(NETSTATS_GLOBAL_ALERT_BYTES, 2 * MB_IN_BYTES);
+        public long getGlobalAlertBytes(long def) {
+            return getSecureLong(NETSTATS_GLOBAL_ALERT_BYTES, def);
         }
         @Override
         public boolean getSampleEnabled() {
             return getSecureBoolean(NETSTATS_SAMPLE_ENABLED, true);
         }
-
         @Override
         public Config getDevConfig() {
             return new Config(getSecureLong(NETSTATS_DEV_BUCKET_DURATION, HOUR_IN_MILLIS),
-                    getSecureLong(NETSTATS_DEV_PERSIST_BYTES, 2 * MB_IN_BYTES),
                     getSecureLong(NETSTATS_DEV_ROTATE_AGE, 15 * DAY_IN_MILLIS),
                     getSecureLong(NETSTATS_DEV_DELETE_AGE, 90 * DAY_IN_MILLIS));
         }
-
         @Override
         public Config getXtConfig() {
             return getDevConfig();
         }
-
         @Override
         public Config getUidConfig() {
             return new Config(getSecureLong(NETSTATS_UID_BUCKET_DURATION, 2 * HOUR_IN_MILLIS),
-                    getSecureLong(NETSTATS_UID_PERSIST_BYTES, 2 * MB_IN_BYTES),
                     getSecureLong(NETSTATS_UID_ROTATE_AGE, 15 * DAY_IN_MILLIS),
                     getSecureLong(NETSTATS_UID_DELETE_AGE, 90 * DAY_IN_MILLIS));
         }
-
         @Override
         public Config getUidTagConfig() {
-            return new Config(getSecureLong(NETSTATS_UID_BUCKET_DURATION, 2 * HOUR_IN_MILLIS),
-                    getSecureLong(NETSTATS_UID_PERSIST_BYTES, 2 * MB_IN_BYTES),
-                    getSecureLong(NETSTATS_UID_ROTATE_AGE, 5 * DAY_IN_MILLIS),
-                    getSecureLong(NETSTATS_UID_DELETE_AGE, 15 * DAY_IN_MILLIS));
+            return new Config(getSecureLong(NETSTATS_UID_TAG_BUCKET_DURATION, 2 * HOUR_IN_MILLIS),
+                    getSecureLong(NETSTATS_UID_TAG_ROTATE_AGE, 5 * DAY_IN_MILLIS),
+                    getSecureLong(NETSTATS_UID_TAG_DELETE_AGE, 15 * DAY_IN_MILLIS));
+        }
+        @Override
+        public long getDevPersistBytes(long def) {
+            return getSecureLong(NETSTATS_DEV_PERSIST_BYTES, def);
+        }
+        @Override
+        public long getXtPersistBytes(long def) {
+            return getDevPersistBytes(def);
+        }
+        @Override
+        public long getUidPersistBytes(long def) {
+            return getSecureLong(NETSTATS_UID_PERSIST_BYTES, def);
+        }
+        @Override
+        public long getUidTagPersistBytes(long def) {
+            return getSecureLong(NETSTATS_UID_TAG_PERSIST_BYTES, def);
         }
     }
 }
