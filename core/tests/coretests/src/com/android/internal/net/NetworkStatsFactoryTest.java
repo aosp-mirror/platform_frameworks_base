@@ -25,6 +25,7 @@ import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
 
 import android.content.res.Resources;
 import android.net.NetworkStats;
+import android.net.TrafficStats;
 import android.test.AndroidTestCase;
 
 import com.android.frameworks.coretests.R;
@@ -138,6 +139,12 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
         assertEquals(2147483647, kernelToTag("0x7fffffff00000000"));
         assertEquals(0, kernelToTag("0x0000000000000000"));
         assertEquals(2147483136, kernelToTag("0x7FFFFE0000000000"));
+
+        assertEquals(0, kernelToTag("0x0"));
+        assertEquals(0, kernelToTag("0xf00d"));
+        assertEquals(1, kernelToTag("0x100000000"));
+        assertEquals(14438007, kernelToTag("0xdc4e7700000000"));
+        assertEquals(TrafficStats.TAG_SYSTEM_DOWNLOAD, kernelToTag("0xffffff0100000000"));
     }
 
     public void testNetworkStatsWithSet() throws Exception {
