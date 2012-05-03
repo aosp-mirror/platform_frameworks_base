@@ -311,6 +311,14 @@ public class DefaultContainerService extends IntentService {
             return null;
         }
 
+        try {
+            Libcore.os.chmod(resFile.getAbsolutePath(), 0640);
+        } catch (ErrnoException e) {
+            Slog.e(TAG, "Could not chown APK: " + e.getMessage());
+            PackageHelper.destroySdDir(newCid);
+            return null;
+        }
+
         if (isForwardLocked) {
             File publicZipFile = new File(newCachePath, publicResFileName);
             try {
@@ -326,10 +334,9 @@ public class DefaultContainerService extends IntentService {
             }
 
             try {
-                Libcore.os.chmod(resFile.getAbsolutePath(), 0640);
                 Libcore.os.chmod(publicZipFile.getAbsolutePath(), 0644);
             } catch (ErrnoException e) {
-                Slog.e(TAG, "Could not chown APK or resource file: " + e.getMessage());
+                Slog.e(TAG, "Could not chown public resource file: " + e.getMessage());
                 PackageHelper.destroySdDir(newCid);
                 return null;
             }
