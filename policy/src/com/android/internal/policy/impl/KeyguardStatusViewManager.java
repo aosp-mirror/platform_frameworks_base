@@ -509,7 +509,8 @@ class KeyguardStatusViewManager implements OnClickListener {
                 break;
 
             case SimPermDisabled:
-                carrierText = getContext().getText(R.string.lockscreen_missing_sim_message_short);
+                carrierText = getContext().getText(
+                        R.string.lockscreen_permanent_disabled_sim_message_short);
                 carrierHelpTextId = R.string.lockscreen_permanent_disabled_sim_instructions;
                 mEmergencyButtonEnabledBecauseSimLocked = true;
                 break;
