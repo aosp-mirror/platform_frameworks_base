@@ -168,12 +168,76 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Jou boodskappe"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Lees en skryf jou SMS, e-pos en ander boodskappe."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Jou persoonlike inligting"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Direkte toegang tot jou kontakte en kalender wat op die tablet gestoor is."</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Direkte toegang tot jou kontakte en kalender wat op die foon gestoor is."</string>
+    <!-- no translation found for permgroupdesc_personalInfo (8426453129788861338) -->
+    <skip />
+    <!-- no translation found for permgrouplab_socialInfo (5799096623412043791) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_socialInfo (7129842457611643493) -->
+    <skip />
     <string name="permgrouplab_location" msgid="635149742436692049">"Jou ligging"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Monitor jou fisiese ligging."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Netwerkkommunikasie"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Kry toegang tot verskeie netwerkfunksies."</string>
+    <!-- no translation found for permgrouplab_shortRangeNetwork (4504840216096355984) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_shortRangeNetwork (8821013030346680806) -->
+    <skip />
+    <!-- no translation found for permgrouplab_audioSettings (8329261670151871235) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_audioSettings (2641515403347568130) -->
+    <skip />
+    <!-- no translation found for permgrouplab_affectsBattery (6209246653424798033) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_affectsBattery (6441275320638916947) -->
+    <skip />
+    <!-- no translation found for permgrouplab_calendar (5863508437783683902) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_calendar (5777534316982184416) -->
+    <skip />
+    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_dictionary (40926483968949978) -->
+    <skip />
+    <!-- no translation found for permgrouplab_bookmarks (1949519673103968229) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_bookmarks (4169771606257963028) -->
+    <skip />
+    <!-- no translation found for permgrouplab_deviceAlarms (6117704629728824101) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_deviceAlarms (4769356362251641175) -->
+    <skip />
+    <!-- no translation found for permgrouplab_voicemail (4162237145027592133) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_voicemail (2498403969862951393) -->
+    <skip />
+    <!-- no translation found for permgrouplab_microphone (171539900250043464) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_microphone (7106618286905738408) -->
+    <skip />
+    <!-- no translation found for permgrouplab_camera (4820372495894586615) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_camera (2933667372289567714) -->
+    <skip />
+    <!-- no translation found for permgrouplab_appInfo (8028789762634147725) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_appInfo (3950378538049625907) -->
+    <skip />
+    <!-- no translation found for permgrouplab_wallpaper (3850280158041175998) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_wallpaper (5630417854750540154) -->
+    <skip />
+    <!-- no translation found for permgrouplab_systemClock (406535759236612992) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_systemClock (3944359833624094992) -->
+    <skip />
+    <!-- no translation found for permgrouplab_statusBar (2095862568113945398) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_statusBar (6242593432226807171) -->
+    <skip />
+    <!-- no translation found for permgrouplab_syncSettings (3341990986147826541) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_syncSettings (7603195265129031797) -->
+    <skip />
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Jou rekeninge"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Kry toegang tot beskikbare rekeninge."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Hardewarekontroles"</string>
@@ -184,6 +248,10 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Laervlak-toegang en -beheer van die stelsel."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Ontwikkelingshulpmiddels"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Kenmerke net nodig vir programontwikkelaars."</string>
+    <!-- no translation found for permgrouplab_display (4279909676036402636) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_display (6051002031933013714) -->
+    <skip />
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stoor"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Gebruik die USB-berging."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Lees die SD-kaart."</string>
@@ -335,7 +403,7 @@
     <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Laat die program toe om die stelsel se beveiligde instellingsdata te verander. Nie vir gebruik deur normale programme nie."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"verander die Google-dienstekaart"</string>
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Laat die program toe om die Google-dienste-kaart te verander. Nie vir gebruik deur normale programme nie."</string>
-    <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"laat loop as begin"</string>
+    <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"laat loop wanneer begin"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Laat die program toe om homself te begin so gou as moontlik nadat die stelsel laai. Dit maak dat dit langer neem vir die tablet om te begin, en dit laat die foon toe om die tablet stadiger te maak omdat dit altyd loop."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Laat die program toe om homself te begin so gou as moontlik nadat die stelsel laai. Dit maak dat dit langer neem vir die foon om te begin, en dit laat die foon toe om die foon stadiger te maak omdat dit altyd loop."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"Stuur klewerige uitsending"</string>
@@ -396,10 +464,10 @@
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"forseer foonherlaai"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Laat die program toe om die tablet te dwing om te herselflaai."</string>
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Laat die program toe om die foon te dwing om te herselflaai."</string>
-    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"gaan in by USB-geheue se lêerstelsel"</string>
+    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"gaan in by USB-berging se lêerstelsel"</string>
     <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"gaan in by SD-kaart se lêerstelsel"</string>
     <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Laat die program toe om lêerstelsels vir verwyderbare berging te heg of te ontheg."</string>
-    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"vee USB-geheue uit"</string>
+    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"vee USB-berging uit"</string>
     <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"vee SD-kaart uit"</string>
     <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Laat die program toe om verwyderbare geheue te formateer."</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"kry inligting oor interne berging"</string>
@@ -519,11 +587,11 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Laat die program toe om enige private woorde, name en frases te lees wat die gebruiker in die gebruikerwoordeboek gestoor het."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"skryf na gebruikergedefinieerde woordeboek"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Laat die program toe om nuwe woorde in die gebruikerwoordeboek te skryf."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"lees jou USB-geheue se inhoud"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"lees jou USB-berging se inhoud"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lees jou SD-kaart se inhoud"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Laat die program toe om die USB-geheue se inhoud te lees, wat foto\'s en media kan insluit."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Laat die program toe om die USB-berging se inhoud te lees, wat foto\'s en media kan insluit."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Laat die program toe om die SD-kaart se inhoud te lees, wat foto\'s en media kan insluit."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"verander of vee die inhoud van jou USB-geheue uit"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"verander of vee die inhoud van jou USB-berging uit"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"verander of vee die inhoud van jou SD-kaart uit"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Laat die program toe om die USB-geheue te skryf."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Laat die program toe om na die SD-kaart te skryf."</string>
@@ -702,6 +770,8 @@
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Geen SIM-kaart in foon nie."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Steek \'n SIM-kaart in."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Die SIM-kaart is weg of nie leesbaar nie. Steek \'n SIM-kaart in."</string>
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (5096149665138916184) -->
+    <skip />
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Jou SIM-kaart is permanent gedeaktiveer."\n" Kontak jou draadlose diensverskaffer vir \'n ander SIM-kaart."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Vorigesnit-knoppie"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Volgendesnit-knoppie"</string>
@@ -779,7 +849,7 @@
     <string name="autofill_emirate" msgid="2893880978835698818">"Emiraat"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"lees jou web-boekmerke en geskiedenis"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4577476392604595921">"Laat die program toe om al die URL\'e te lees wat die blaaier besoek het, en al blaaier se boekmerke ook."</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"skryf webboekmerke en geskiedenis"</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"skryf webboekmerke en -geskiedenis"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="1757103804824209530">"Laat die program toe om die blaaier se geskiedenis of boekmerke wat op jou tablet gestoor is, te verander. Kwaadwillige programme kan dit gebruik om jou blaaier se data uit te vee of te verander."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="6693764355720719197">"Laat die program toe om die blaaier se geskiedenis of boekmerke wat op jou foon gestoor is, te verander. Kwaadwillige programme kan dit gebruik om jou blaaier se data uit te vee of te verander."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"stel \'n wekker"</string>
