@@ -47,6 +47,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TypedValue;
+import android.view.Choreographer;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.IWindowManager;
@@ -106,8 +107,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     static final int EXPANDED_LEAVE_ALONE = -10000;
     static final int EXPANDED_FULL_OPEN = -10001;
 
-    private static final int MSG_ANIMATE = 100;
-    private static final int MSG_ANIMATE_REVEAL = 101;
     private static final int MSG_OPEN_NOTIFICATION_PANEL = 1000;
     private static final int MSG_CLOSE_NOTIFICATION_PANEL = 1001;
     private static final int MSG_SHOW_INTRUDER = 1002;
@@ -207,14 +206,12 @@ public class PhoneStatusBar extends BaseStatusBar {
     boolean mTracking;
     VelocityTracker mVelocityTracker;
 
-    static final int ANIM_FRAME_DURATION = (1000/60);
-
+    Choreographer mChoreographer;
     boolean mAnimating;
-    long mCurAnimationTime;
     float mAnimY;
     float mAnimVel;
     float mAnimAccel;
-    long mAnimLastTime;
+    long mAnimLastTimeNanos;
     boolean mAnimatingReveal = false;
     int mViewDelta;
     int[] mAbsPos = new int[2];
@@ -309,6 +306,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         mStatusBarView.mService = this;
+
+        mChoreographer = Choreographer.getInstance();
 
         try {
             boolean showNav = mWindowManager.hasNavigationBar();
@@ -1090,12 +1089,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         public void handleMessage(Message m) {
             super.handleMessage(m);
             switch (m.what) {
-                case MSG_ANIMATE:
-                    doAnimation();
-                    break;
-                case MSG_ANIMATE_REVEAL:
-                    doRevealAnimation();
-                    break;
                 case MSG_OPEN_NOTIFICATION_PANEL:
                     animateExpand();
                     break;
@@ -1112,6 +1105,20 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         }
     }
+
+    final Runnable mAnimationCallback = new Runnable() {
+        @Override
+        public void run() {
+            doAnimation(mChoreographer.getFrameTimeNanos());
+        }
+    };
+
+    final Runnable mRevealAnimationCallback = new Runnable() {
+        @Override
+        public void run() {
+            doRevealAnimation(mChoreographer.getFrameTimeNanos());
+        }
+    };
 
     View.OnFocusChangeListener mFocusChangeListener = new View.OnFocusChangeListener() {
         public void onFocusChange(View v, boolean hasFocus) {
@@ -1241,11 +1248,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
-    void doAnimation() {
+    void doAnimation(long frameTimeNanos) {
         if (mAnimating) {
             if (SPEW) Slog.d(TAG, "doAnimation");
             if (SPEW) Slog.d(TAG, "doAnimation before mAnimY=" + mAnimY);
-            incrementAnim();
+            incrementAnim(frameTimeNanos);
             if (SPEW) Slog.d(TAG, "doAnimation after  mAnimY=" + mAnimY);
             if (mAnimY >= getExpandedViewMaxHeight()-1) {
                 if (SPEW) Slog.d(TAG, "Animation completed to expanded state.");
@@ -1261,8 +1268,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
             else {
                 updateExpandedViewPos((int)mAnimY);
-                mCurAnimationTime += ANIM_FRAME_DURATION;
-                mHandler.sendMessageAtTime(mHandler.obtainMessage(MSG_ANIMATE), mCurAnimationTime);
+                mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION,
+                        mAnimationCallback, null);
             }
         }
     }
@@ -1274,31 +1281,30 @@ public class PhoneStatusBar extends BaseStatusBar {
         mVelocityTracker = null;
     }
 
-    void incrementAnim() {
-        long now = SystemClock.uptimeMillis();
-        float t = ((float)(now - mAnimLastTime)) / 1000;            // ms -> s
+    void incrementAnim(long frameTimeNanos) {
+        final long deltaNanos = Math.max(frameTimeNanos - mAnimLastTimeNanos, 0);
+        final float t = deltaNanos * 0.000000001f;                  // ns -> s
         final float y = mAnimY;
         final float v = mAnimVel;                                   // px/s
         final float a = mAnimAccel;                                 // px/s/s
         mAnimY = y + (v*t) + (0.5f*a*t*t);                          // px
         mAnimVel = v + (a*t);                                       // px/s
-        mAnimLastTime = now;                                        // ms
+        mAnimLastTimeNanos = frameTimeNanos;                        // ns
         //Slog.d(TAG, "y=" + y + " v=" + v + " a=" + a + " t=" + t + " mAnimY=" + mAnimY
         //        + " mAnimAccel=" + mAnimAccel);
     }
     
-    void doRevealAnimation() {
+    void doRevealAnimation(long frameTimeNanos) {
         final int h = getCloseViewHeight() + getStatusBarHeight();
         if (mAnimatingReveal && mAnimating && mAnimY < h) {
-            incrementAnim();
+            incrementAnim(frameTimeNanos);
             if (mAnimY >= h) {
                 mAnimY = h;
                 updateExpandedViewPos((int)mAnimY);
             } else {
                 updateExpandedViewPos((int)mAnimY);
-                mCurAnimationTime += ANIM_FRAME_DURATION;
-                mHandler.sendMessageAtTime(mHandler.obtainMessage(MSG_ANIMATE_REVEAL),
-                        mCurAnimationTime);
+                mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION,
+                        mRevealAnimationCallback, null);
             }
         }
     }
@@ -1318,20 +1324,20 @@ public class PhoneStatusBar extends BaseStatusBar {
             updateExpandedViewPos((int)mAnimY);
             mAnimating = true;
             mAnimatingReveal = true;
-            mHandler.removeMessages(MSG_ANIMATE);
-            mHandler.removeMessages(MSG_ANIMATE_REVEAL);
-            long now = SystemClock.uptimeMillis();
-            mAnimLastTime = now;
-            mCurAnimationTime = now + ANIM_FRAME_DURATION;
-            mAnimating = true;
-            mHandler.sendMessageAtTime(mHandler.obtainMessage(MSG_ANIMATE_REVEAL),
-                    mCurAnimationTime);
+            mAnimLastTimeNanos = System.nanoTime();
+            mChoreographer.removeCallbacks(Choreographer.CALLBACK_ANIMATION,
+                    mAnimationCallback, null);
+            mChoreographer.removeCallbacks(Choreographer.CALLBACK_ANIMATION,
+                    mRevealAnimationCallback, null);
+            mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION,
+                    mRevealAnimationCallback, null);
             makeExpandedVisible();
         } else {
             // it's open, close it?
             if (mAnimating) {
                 mAnimating = false;
-                mHandler.removeMessages(MSG_ANIMATE);
+                mChoreographer.removeCallbacks(Choreographer.CALLBACK_ANIMATION,
+                        mAnimationCallback, null);
             }
             updateExpandedViewPos(y + mViewDelta);
         }
@@ -1392,13 +1398,15 @@ public class PhoneStatusBar extends BaseStatusBar {
         //Slog.d(TAG, "mAnimY=" + mAnimY + " mAnimVel=" + mAnimVel
         //        + " mAnimAccel=" + mAnimAccel);
 
-        long now = SystemClock.uptimeMillis();
-        mAnimLastTime = now;
-        mCurAnimationTime = now + ANIM_FRAME_DURATION;
+        mAnimLastTimeNanos = System.nanoTime();
         mAnimating = true;
-        mHandler.removeMessages(MSG_ANIMATE);
-        mHandler.removeMessages(MSG_ANIMATE_REVEAL);
-        mHandler.sendMessageAtTime(mHandler.obtainMessage(MSG_ANIMATE), mCurAnimationTime);
+
+        mChoreographer.removeCallbacks(Choreographer.CALLBACK_ANIMATION,
+                mAnimationCallback, null);
+        mChoreographer.removeCallbacks(Choreographer.CALLBACK_ANIMATION,
+                mRevealAnimationCallback, null);
+        mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION,
+                mAnimationCallback, null);
         stopTracking();
     }
 
@@ -1780,8 +1788,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             pw.println("  mAnimating=" + mAnimating
                     + ", mAnimY=" + mAnimY + ", mAnimVel=" + mAnimVel
                     + ", mAnimAccel=" + mAnimAccel);
-            pw.println("  mCurAnimationTime=" + mCurAnimationTime
-                    + " mAnimLastTime=" + mAnimLastTime);
+            pw.println("  mAnimLastTimeNanos=" + mAnimLastTimeNanos);
             pw.println("  mAnimatingReveal=" + mAnimatingReveal
                     + " mViewDelta=" + mViewDelta);
             pw.println("  mDisplayMetrics=" + mDisplayMetrics);
