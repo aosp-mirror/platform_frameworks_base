@@ -268,7 +268,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         WindowManager.LayoutParams lp = mNotificationPanelParams = new WindowManager.LayoutParams(
                 res.getDimensionPixelSize(R.dimen.notification_panel_width),
                 getNotificationPanelHeight(),
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
+                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                     | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
@@ -636,7 +636,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 (int) mContext.getResources().getDimension(R.dimen.status_bar_recents_width),
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
+                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                 | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
