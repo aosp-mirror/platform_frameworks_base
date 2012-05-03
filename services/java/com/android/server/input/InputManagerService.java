@@ -140,7 +140,8 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
     private static native void nativeStart(int ptr);
     private static native void nativeSetDisplaySize(int ptr, int displayId,
             int width, int height, int externalWidth, int externalHeight);
-    private static native void nativeSetDisplayOrientation(int ptr, int displayId, int rotation);
+    private static native void nativeSetDisplayOrientation(int ptr, int displayId,
+            int rotation, int externalRotation);
     
     private static native int nativeGetScanCodeState(int ptr,
             int deviceId, int sourceMask, int scanCode);
@@ -287,15 +288,16 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
         nativeSetDisplaySize(mPtr, displayId, width, height, externalWidth, externalHeight);
     }
     
-    public void setDisplayOrientation(int displayId, int rotation) {
+    public void setDisplayOrientation(int displayId, int rotation, int externalRotation) {
         if (rotation < Surface.ROTATION_0 || rotation > Surface.ROTATION_270) {
             throw new IllegalArgumentException("Invalid rotation.");
         }
         
         if (DEBUG) {
-            Slog.d(TAG, "Setting display #" + displayId + " orientation to " + rotation);
+            Slog.d(TAG, "Setting display #" + displayId + " orientation to rotation " + rotation
+                    + " external rotation " + externalRotation);
         }
-        nativeSetDisplayOrientation(mPtr, displayId, rotation);
+        nativeSetDisplayOrientation(mPtr, displayId, rotation, externalRotation);
     }
 
     /**

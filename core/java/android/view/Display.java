@@ -391,6 +391,15 @@ public class Display {
     }
 
     /**
+     * If the display is mirrored to an external HDMI display, returns the
+     * rotation of that display relative to its natural orientation.
+     * @hide
+     */
+    public int getExternalRotation() {
+        return Surface.ROTATION_0;
+    }
+
+    /**
      * Gets display metrics based on an explicit assumed display size.
      * @hide
      */
