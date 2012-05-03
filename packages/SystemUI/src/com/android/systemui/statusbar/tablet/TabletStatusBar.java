@@ -70,6 +70,7 @@ import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CompatModeButton;
@@ -110,6 +111,9 @@ public class TabletStatusBar extends BaseStatusBar implements
     final static boolean NOTIFICATION_PEEK_ENABLED = false;
     final static int NOTIFICATION_PEEK_HOLD_THRESH = 200; // ms
     final static int NOTIFICATION_PEEK_FADE_DELAY = 3000; // ms
+
+    private static final int NOTIFICATION_PRIORITY_MULTIPLIER = 10; // see NotificationManagerService
+    private static final int HIDE_ICONS_BELOW_SCORE = Notification.PRIORITY_LOW * NOTIFICATION_PRIORITY_MULTIPLIER;
 
     // The height of the bar, as definied by the build.  It may be taller if we're plugged
     // into hdmi.
@@ -1713,9 +1717,12 @@ public class TabletStatusBar extends BaseStatusBar implements
         if (mInputMethodSwitchButton.getVisibility() != View.GONE) maxNotificationIconsCount --;
         if (mCompatModeButton.getVisibility()        != View.GONE) maxNotificationIconsCount --;
 
-        for (int i=0; i< maxNotificationIconsCount; i++) {
-            if (i>=N) break;
-            toShow.add(mNotificationData.get(N-i-1).icon);
+        for (int i=0; toShow.size()< maxNotificationIconsCount; i++) {
+            if (i >= N) break;
+            Entry ent = mNotificationData.get(N-i-1);
+            if (ent.notification.score >= HIDE_ICONS_BELOW_SCORE) {
+                toShow.add(ent.icon);
+            }
         }
 
         ArrayList<View> toRemove = new ArrayList<View>();
@@ -1764,7 +1771,8 @@ public class TabletStatusBar extends BaseStatusBar implements
         for (int i=0; i<toShow.size(); i++) {
             View v = toShow.get(i);
             if (v.getParent() == null) {
-                mPile.addView(v, N-1-i); // the notification panel has newest at the bottom
+                // the notification panel has the most important things at the bottom
+                mPile.addView(v, N-1-i);
             }
         }
 
