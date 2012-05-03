@@ -472,7 +472,7 @@ public abstract class ServiceStateTracker extends Handler {
      * @param needToFixTimeZone
      * @return true if time zone needs to be fixed
      */
-    protected boolean isTimeZoneFixNeeded(PhoneBase phoneBase, String operatorNumeric,
+    protected boolean shouldFixTimeZoneNow(PhoneBase phoneBase, String operatorNumeric,
             String prevOperatorNumeric, boolean needToFixTimeZone) {
         // Return false if the mcc isn't valid as we don't know where we are.
         // Return true if we have an IccCard and the mcc changed or we
@@ -485,7 +485,7 @@ public abstract class ServiceStateTracker extends Handler {
             mcc = Integer.parseInt(operatorNumeric.substring(0, 3));
         } catch (Exception e) {
             if (DBG) {
-                log("isTimeZoneFixNeeded: no mcc, operatorNumeric=" + operatorNumeric +
+                log("shouldFixTimeZoneNow: no mcc, operatorNumeric=" + operatorNumeric +
                         " retVal=false");
             }
             return false;
@@ -507,7 +507,7 @@ public abstract class ServiceStateTracker extends Handler {
         // Determine retVal
         boolean retVal = ((iccCardExist && (mcc != prevMcc)) || needToFixTimeZone);
         if (DBG) {
-            log("isTimeZoneFixNeeded: retVal=" + retVal +
+            log("shouldFixTimeZoneNow: retVal=" + retVal +
                     " iccCard=" + iccCard +
                     " iccCard.state=" + (iccCard == null ? "null" : iccCard.getState().toString()) +
                     " iccCardExist=" + iccCardExist +
