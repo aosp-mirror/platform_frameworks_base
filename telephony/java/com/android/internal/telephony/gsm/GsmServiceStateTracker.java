@@ -905,7 +905,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     }
                 }
 
-                if (isTimeZoneFixNeeded(phone, operatorNumeric, prevOperatorNumeric,
+                if (shouldFixTimeZoneNow(phone, operatorNumeric, prevOperatorNumeric,
                         mNeedFixZone)) {
                     // If the offset is (0, false) and the timezone property
                     // is set, use the timezone property rather than
