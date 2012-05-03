@@ -168,12 +168,76 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Dine beskeder"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Læs og skriv sms-beskeder, e-mails og andre beskeder."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Dine personlige oplysninger"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Få direkte adgang til dine kontakter og din kalender, der er gemt på tabletcomputeren."</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Få direkte adgang til dine kontakter og din kalender, der er gemt på telefonen."</string>
+    <!-- no translation found for permgroupdesc_personalInfo (8426453129788861338) -->
+    <skip />
+    <!-- no translation found for permgrouplab_socialInfo (5799096623412043791) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_socialInfo (7129842457611643493) -->
+    <skip />
     <string name="permgrouplab_location" msgid="635149742436692049">"Din placering"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Overvåg din fysiske placering."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Netværkskommunikation"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Få adgang til forskellige netværksfunktioner."</string>
+    <!-- no translation found for permgrouplab_shortRangeNetwork (4504840216096355984) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_shortRangeNetwork (8821013030346680806) -->
+    <skip />
+    <!-- no translation found for permgrouplab_audioSettings (8329261670151871235) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_audioSettings (2641515403347568130) -->
+    <skip />
+    <!-- no translation found for permgrouplab_affectsBattery (6209246653424798033) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_affectsBattery (6441275320638916947) -->
+    <skip />
+    <!-- no translation found for permgrouplab_calendar (5863508437783683902) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_calendar (5777534316982184416) -->
+    <skip />
+    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_dictionary (40926483968949978) -->
+    <skip />
+    <!-- no translation found for permgrouplab_bookmarks (1949519673103968229) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_bookmarks (4169771606257963028) -->
+    <skip />
+    <!-- no translation found for permgrouplab_deviceAlarms (6117704629728824101) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_deviceAlarms (4769356362251641175) -->
+    <skip />
+    <!-- no translation found for permgrouplab_voicemail (4162237145027592133) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_voicemail (2498403969862951393) -->
+    <skip />
+    <!-- no translation found for permgrouplab_microphone (171539900250043464) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_microphone (7106618286905738408) -->
+    <skip />
+    <!-- no translation found for permgrouplab_camera (4820372495894586615) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_camera (2933667372289567714) -->
+    <skip />
+    <!-- no translation found for permgrouplab_appInfo (8028789762634147725) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_appInfo (3950378538049625907) -->
+    <skip />
+    <!-- no translation found for permgrouplab_wallpaper (3850280158041175998) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_wallpaper (5630417854750540154) -->
+    <skip />
+    <!-- no translation found for permgrouplab_systemClock (406535759236612992) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_systemClock (3944359833624094992) -->
+    <skip />
+    <!-- no translation found for permgrouplab_statusBar (2095862568113945398) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_statusBar (6242593432226807171) -->
+    <skip />
+    <!-- no translation found for permgrouplab_syncSettings (3341990986147826541) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_syncSettings (7603195265129031797) -->
+    <skip />
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Dine konti"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Få adgang til de tilgængelige konti."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Hardwarekontroller"</string>
@@ -184,6 +248,10 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Adgang og kontrol til systemet på lavere niveau."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Udviklingsværktøjer"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Funktioner, der kun er nødvendige for udviklere af apps."</string>
+    <!-- no translation found for permgrouplab_display (4279909676036402636) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_display (6051002031933013714) -->
+    <skip />
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Få adgang til USB-lager."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Få adgang til SD-kortet."</string>
@@ -195,7 +263,7 @@
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Tillader, at appen kan udvide og skjule statusbjælken."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"omdirigere udgående opkald"</string>
     <string name="permdesc_processOutgoingCalls" msgid="1152111671618301044">"Tillader, at appen kan behandle udgående opkald og ændre det nummer, der ringes op til. Ondsindede apps kan overvåge, omdirigere eller forhindre udgående opkald."</string>
-    <string name="permlab_receiveSms" msgid="8673471768947895082">"modtage tekstbeskeder (sms)"</string>
+    <string name="permlab_receiveSms" msgid="8673471768947895082">"modtage tekstbeskeder (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="8107887121893611793">"Tillader, at appen kan modtage og behandle sms-beskeder. Ondsindede apps kan overvåge dine beskeder eller slette dem uden at vise dem til dig."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"modtage tekstbeskeder (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="1424805308566612086">"Tillader, at appen kan modtage og behandle mms-beskeder. Ondsindede apps kan overvåge dine beskeder eller slette dem uden at vise dem til dig."</string>
@@ -207,10 +275,10 @@
     <string name="permdesc_sendSms" msgid="906546667507626156">"Tillader, at appen kan sende sms-beskeder. Ondsindede apps kan medføre store omkostninger ved at sende beskeder uden din bekræftelse."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"sende sms-meddelelser uden bekræftelse"</string>
     <string name="permdesc_sendSmsNoConfirmation" msgid="3437759207020400204">"Tillader, at appen kan sende sms-beskeder. Ondsindede apps kan koste dig penge, hvis de sender beskeder uden din bekræftelse."</string>
-    <string name="permlab_readSms" msgid="8745086572213270480">"læse dine tekstbeskeder (sms eller MMS)"</string>
+    <string name="permlab_readSms" msgid="8745086572213270480">"læse dine tekstbeskeder (SMS eller MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2341692916884515613">"Tillader, at appen kan læse sms-beskeder, der er gemt på din tablet eller dit SIM-kort. Ondsindede apps kan læse dine fortrolige beskeder."</string>
     <string name="permdesc_readSms" product="default" msgid="5653850482025875493">"Tillader, at appen kan læse sms-beskeder, der er gemt på din telefon eller dit SIM-kort. Ondsindede apps kan læse dine fortrolige beskeder."</string>
-    <string name="permlab_writeSms" msgid="3216950472636214774">"redigere dine tekstbeskeder (sms eller MMS)"</string>
+    <string name="permlab_writeSms" msgid="3216950472636214774">"redigere dine tekstbeskeder (SMS eller MMS)"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Tillader, at appen kan skrive til sms-beskeder, der er gemt på din tablet eller på SIM-kortet. Ondsindede apps kan slette dine beskeder."</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Tillader, at appen kan skrive til sms-beskeder, der er gemt på din telefon eller dit SIM-kort. Ondsindede apps kan slette dine beskeder."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"modtage tekstbeskeder (WAP)"</string>
@@ -267,7 +335,7 @@
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Tillader, at appen kan åbne brugergrænsefladen til bekræftelse af komplet sikkerhedskopiering. Må ikke anvendes af nogen app."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"vis uautoriserede vinduer"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Tillader, at appen kan oprette vinduer, der er beregnet til brugergrænsefladen i det interne system. Anvendes ikke af normale apps."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"overskrive andre apps"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"tegne over andre apps"</string>
     <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"Tillader, at appen kan vise vinduer med systemmeddelelser. Ondsindede apps kan overtage hele skærmen."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"rediger global animationshastighed"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Tillader, at appen til enhver tid kan ændre den globale animationshastighed (hurtigere eller langsommere animationer)."</string>
@@ -702,6 +770,8 @@
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Der er ikke noget SIM-kort i telefonen."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Indsæt et SIM-kort."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-kortet mangler eller kan ikke læses. Indsæt et SIM-kort."</string>
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (5096149665138916184) -->
+    <skip />
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Dit SIM-kort er blevet permanent deaktiveret."\n"Kontakt din tjenesteudbyder for at få et nyt SIM-kort."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Knap til forrige nummer"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Knap til næste nummer"</string>
