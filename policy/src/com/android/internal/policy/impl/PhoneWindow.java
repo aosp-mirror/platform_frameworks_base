@@ -2108,8 +2108,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         w = 0;
                     }
 
-                    final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-                    widthMeasureSpec = MeasureSpec.makeMeasureSpec(Math.min(w, widthSize), EXACTLY);
+                    if (w > 0) {
+                        final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+                        widthMeasureSpec = MeasureSpec.makeMeasureSpec(
+                                Math.min(w, widthSize), EXACTLY);
+                    }
                 }
             }
 
@@ -2125,9 +2128,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         h = 0;
                     }
 
-                    final int heightSize = MeasureSpec.getSize(heightMeasureSpec);
-                    heightMeasureSpec =
-                            MeasureSpec.makeMeasureSpec(Math.min(h, heightSize), EXACTLY);
+                    if (h > 0) {
+                        final int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+                        heightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                                Math.min(h, heightSize), EXACTLY);
+                    }
                 }
             }
 
