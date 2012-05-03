@@ -33,7 +33,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="fill_vertical"
         android:layout_marginLeft="@dimen/notification_large_icon_width"
-        android:minHeight="@dimen/notification_large_icon_height"
         android:orientation="vertical"
         android:paddingLeft="12dp"
         android:paddingRight="12dp"
@@ -42,55 +41,73 @@
         android:gravity="center_vertical"
         >
         <LinearLayout
-            android:id="@+id/line1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            >
-            <TextView android:id="@+id/title"
-                android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Title"
+            android:minHeight="@dimen/notification_large_icon_height"
+            android:orientation="vertical"
+           >
+            <LinearLayout
+                android:id="@+id/line1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                >
+                <TextView android:id="@+id/title"
+                    android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:ellipsize="marquee"
+                    android:fadingEdge="horizontal"
+                    android:layout_weight="1"
+                    />
+                <ViewStub android:id="@+id/time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="0"
+                    android:visibility="gone"
+                    android:layout="@layout/notification_template_part_time"
+                    />
+                <ViewStub android:id="@+id/chronometer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="0"
+                    android:visibility="gone"
+                    android:layout="@layout/notification_template_part_chronometer"
+                    />
+            </LinearLayout>
+            <TextView android:id="@+id/text2"
+                android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Line2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-2dp"
+                android:layout_marginBottom="-2dp"
                 android:singleLine="true"
-                android:ellipsize="marquee"
                 android:fadingEdge="horizontal"
-                android:layout_weight="1"
-                />
-            <ViewStub android:id="@+id/time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_weight="0"
+                android:ellipsize="marquee"
                 android:visibility="gone"
-                android:layout="@layout/notification_template_part_time"
                 />
-            <ViewStub android:id="@+id/chronometer"
-                android:layout_width="wrap_content"
+            <TextView android:id="@+id/big_text"
+                android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_weight="0"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"
+                android:singleLine="false"
                 android:visibility="gone"
-                android:layout="@layout/notification_template_part_chronometer"
                 />
         </LinearLayout>
-        <TextView android:id="@+id/text2"
-            android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Line2"
+        <LinearLayout
+                android:id="@+id/actions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-2dp"
-            android:layout_marginBottom="-2dp"
-            android:singleLine="true"
-            android:fadingEdge="horizontal"
-            android:ellipsize="marquee"
+            android:orientation="vertical"
             android:visibility="gone"
-            />
-        <TextView android:id="@+id/big_text"
-            android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:singleLine="false"
-            android:visibility="gone"
-            />
+                >
+                <!-- actions will be added here -->
+        </LinearLayout>
         <LinearLayout
             android:id="@+id/line3"
             android:layout_width="match_parent"
@@ -135,13 +152,5 @@
             android:visibility="gone"
             style="?android:attr/progressBarStyleHorizontal"
             />
-        <LinearLayout
-                android:id="@+id/actions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-                >
-                <!-- actions will be added here -->
-        </LinearLayout>
     </LinearLayout>
 </FrameLayout>
