@@ -1898,6 +1898,8 @@
     <string name="lockscreen_missing_sim_instructions">Insert a SIM card.</string>
     <!-- Shown in the lock screen to ask the user to insert a SIM card when sim is missing or not readable. -->
     <string name="lockscreen_missing_sim_instructions_long">The SIM card is missing or not readable. Insert a SIM card.</string>
+    <!-- Shown in the lock screen when SIM card is permanently disabled. -->
+    <string name="lockscreen_permanent_disabled_sim_message_short">Unusable SIM card.</string>
     <!-- Shown in the lock screen to inform the user to SIM card is permanently disabled. -->
     <string name="lockscreen_permanent_disabled_sim_instructions">Your SIM card has been permanently disabled.\n
     Contact your wireless service provider for another SIM card.</string>
