@@ -102,6 +102,7 @@ import android.webkit.WebView.PictureListener;
 import android.webkit.WebViewCore.DrawData;
 import android.webkit.WebViewCore.EventHub;
 import android.webkit.WebViewCore.TextFieldInitData;
+import android.webkit.WebViewCore.TextSelectionData;
 import android.webkit.WebViewCore.TouchHighlightData;
 import android.webkit.WebViewCore.WebKitHitTest;
 import android.widget.AbsoluteLayout;
@@ -4211,7 +4212,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
         // decide which adornments to draw
         int extras = DRAW_EXTRAS_NONE;
-        if (!mFindIsUp && mSelectingText) {
+        if (!mFindIsUp && mShowTextSelectionExtra) {
             extras = DRAW_EXTRAS_SELECTION;
         }
 
@@ -4535,11 +4536,13 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     private void startSelectingText() {
         mSelectingText = true;
+        mShowTextSelectionExtra = true;
         mHandleAlphaAnimator.setIntValues(255);
         mHandleAlphaAnimator.start();
     }
     private void endSelectingText() {
         mSelectingText = false;
+        mShowTextSelectionExtra = false;
         mHandleAlphaAnimator.setIntValues(0);
         mHandleAlphaAnimator.start();
     }
@@ -5311,9 +5314,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             if (mSelectCallback != null) {
                 mSelectCallback.finish();
                 mSelectCallback = null;
-            }
-            if (!mIsCaretSelection) {
-                updateWebkitSelection();
             }
             invalidate(); // redraw without selection
             mAutoScrollX = 0;
@@ -6442,6 +6442,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private int mTrackballXMove = 0;
     private int mTrackballYMove = 0;
     private boolean mSelectingText = false;
+    private boolean mShowTextSelectionExtra = false;
     private boolean mSelectionStarted = false;
     private static final int TRACKBALL_KEY_TIMEOUT = 1000;
     private static final int TRACKBALL_TIMEOUT = 200;
@@ -7941,6 +7942,13 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             }
         }
         nativeSetTextSelection(mNativeClass, data.mSelectTextPtr);
+
+        if (data.mSelectionReason == TextSelectionData.REASON_ACCESSIBILITY_INJECTOR) {
+            selectionDone();
+            mShowTextSelectionExtra = true;
+            invalidate();
+            return;
+        }
 
         if (data.mSelectTextPtr != 0 &&
                 (data.mStart != data.mEnd ||

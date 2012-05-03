@@ -143,6 +143,7 @@ public final class WebViewCore {
     private int mHighUsageDeltaMb;
 
     private int mChromeCanFocusDirection;
+    private int mTextSelectionChangeReason = TextSelectionData.REASON_UNKNOWN;
 
     // The thread name used to identify the WebCore thread and for use in
     // debugging other classes that require operation within the WebCore thread.
@@ -861,6 +862,8 @@ public final class WebViewCore {
     }
 
     static class TextSelectionData {
+        static final int REASON_UNKNOWN = 0;
+        static final int REASON_ACCESSIBILITY_INJECTOR = 1;
         public TextSelectionData(int start, int end, int selectTextPtr) {
             mStart = start;
             mEnd = end;
@@ -869,6 +872,7 @@ public final class WebViewCore {
         int mStart;
         int mEnd;
         int mSelectTextPtr;
+        int mSelectionReason = TextSelectionData.REASON_UNKNOWN;
     }
 
     static class TouchUpData {
@@ -1544,12 +1548,16 @@ public final class WebViewCore {
                             break;
 
                         case MODIFY_SELECTION:
+                            mTextSelectionChangeReason
+                                    = TextSelectionData.REASON_ACCESSIBILITY_INJECTOR;
                             String modifiedSelectionString =
                                 nativeModifySelection(mNativeClass, msg.arg1,
                                         msg.arg2);
                             mWebViewClassic.mPrivateHandler.obtainMessage(
                                     WebViewClassic.SELECTION_STRING_CHANGED,
                                     modifiedSelectionString).sendToTarget();
+                            mTextSelectionChangeReason
+                                    = TextSelectionData.REASON_UNKNOWN;
                             break;
 
                         case LISTBOX_CHOICES:
@@ -2763,13 +2771,19 @@ public final class WebViewCore {
         }
     }
 
+    private TextSelectionData createTextSelection(int start, int end, int selPtr) {
+        TextSelectionData data = new TextSelectionData(start, end, selPtr);
+        data.mSelectionReason = mTextSelectionChangeReason;
+        return data;
+    }
+
     // called by JNI
     private void updateTextSelection(int pointer, int start, int end,
             int textGeneration, int selectionPtr) {
         if (mWebViewClassic != null) {
             Message.obtain(mWebViewClassic.mPrivateHandler,
                 WebViewClassic.UPDATE_TEXT_SELECTION_MSG_ID, pointer, textGeneration,
-                new TextSelectionData(start, end, selectionPtr)).sendToTarget();
+                createTextSelection(start, end, selectionPtr)).sendToTarget();
         }
     }
 
@@ -2803,7 +2817,7 @@ public final class WebViewCore {
         Message.obtain(mWebViewClassic.mPrivateHandler,
                 WebViewClassic.UPDATE_TEXT_SELECTION_MSG_ID,
                 initData.mFieldPointer, 0,
-                new TextSelectionData(start, end, selectionPtr))
+                createTextSelection(start, end, selectionPtr))
                 .sendToTarget();
     }
 
