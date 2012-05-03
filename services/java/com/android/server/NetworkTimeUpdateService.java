@@ -165,9 +165,15 @@ public class NetworkTimeUpdateService {
             if (mTime.getCacheAge() < POLLING_INTERVAL_MS) {
                 final long ntp = mTime.currentTimeMillis();
                 mTryAgainCounter = 0;
-                mLastNtpFetchTime = SystemClock.elapsedRealtime();
-                if (Math.abs(ntp - currentTime) > TIME_ERROR_THRESHOLD_MS) {
+                // If the clock is more than N seconds off or this is the first time it's been
+                // fetched since boot, set the current time.
+                if (Math.abs(ntp - currentTime) > TIME_ERROR_THRESHOLD_MS
+                        || mLastNtpFetchTime == NOT_SET) {
                     // Set the system time
+                    if (DBG && mLastNtpFetchTime == NOT_SET
+                            && Math.abs(ntp - currentTime) <= TIME_ERROR_THRESHOLD_MS) {
+                        Log.d(TAG, "For initial setup, rtc = " + currentTime);
+                    }
                     if (DBG) Log.d(TAG, "Ntp time to be set = " + ntp);
                     // Make sure we don't overflow, since it's going to be converted to an int
                     if (ntp / 1000 < Integer.MAX_VALUE) {
@@ -176,6 +182,7 @@ public class NetworkTimeUpdateService {
                 } else {
                     if (DBG) Log.d(TAG, "Ntp time is close enough = " + ntp);
                 }
+                mLastNtpFetchTime = SystemClock.elapsedRealtime();
             } else {
                 // Try again shortly
                 mTryAgainCounter++;
