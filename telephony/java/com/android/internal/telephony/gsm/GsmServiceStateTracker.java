@@ -21,6 +21,7 @@ import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.EventLogTags;
 import com.android.internal.telephony.IccCard;
+import com.android.internal.telephony.IccCardStatus;
 import com.android.internal.telephony.MccTable;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.RestrictedState;
@@ -645,8 +646,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     String opNames[] = (String[])ar.result;
 
                     if (opNames != null && opNames.length >= 3) {
-                        newSS.setOperatorName (
-                                opNames[0], opNames[1], opNames[2]);
+                         newSS.setOperatorName (opNames[0], opNames[1], opNames[2]);
                     }
                 break;
 
@@ -858,12 +858,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_NUMERIC, operatorNumeric);
 
             if (operatorNumeric == null) {
-                if (DBG) {
-                    log("pollStateDone: operatorNumeric=" + operatorNumeric +
-                            " prevOperatorNumeric=" + prevOperatorNumeric +
-                            " mNeedFixZone=" + mNeedFixZone +
-                            " clear PROPERTY_OPERATOR_ISO_COUNTRY");
-                }
+                if (DBG) log("operatorNumeric is null");
                 phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY, "");
                 mGotCountryCode = false;
                 mNitzUpdatedTime = false;
@@ -876,12 +871,6 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     loge("pollStateDone: countryCodeForMcc error" + ex);
                 } catch ( StringIndexOutOfBoundsException ex) {
                     loge("pollStateDone: countryCodeForMcc error" + ex);
-                }
-                if (DBG) {
-                    log("pollStateDone: operatorNumeric=" + operatorNumeric +
-                            " prevOperatorNumeric=" + prevOperatorNumeric +
-                            " mNeedFixZone=" + mNeedFixZone +
-                            " mcc=" + mcc + " iso-cc=" + iso);
                 }
 
                 phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY, iso);
@@ -916,9 +905,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     }
                 }
 
-                // Fix the time zone If the operator changed or we need to fix it because
-                // when the NITZ time came in we didn't know the country code.
-                if ( ! operatorNumeric.equals(prevOperatorNumeric) || mNeedFixZone) {
+                if (isTimeZoneFixNeeded(phone, operatorNumeric, prevOperatorNumeric,
+                        mNeedFixZone)) {
                     // If the offset is (0, false) and the timezone property
                     // is set, use the timezone property rather than
                     // GMT.

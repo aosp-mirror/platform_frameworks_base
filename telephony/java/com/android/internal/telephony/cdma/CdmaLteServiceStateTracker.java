@@ -377,12 +377,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
             phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_NUMERIC, operatorNumeric);
 
             if (operatorNumeric == null) {
-                if (DBG) {
-                    log("pollStateDone: operatorNumeric=" + operatorNumeric +
-                            " prevOperatorNumeric=" + prevOperatorNumeric +
-                            " mNeedFixZone=" + mNeedFixZone +
-                            " clear PROPERTY_OPERATOR_ISO_COUNTRY");
-                }
+                if (DBG) log("operatorNumeric is null");
                 phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY, "");
                 mGotCountryCode = false;
             } else {
@@ -396,20 +391,13 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 } catch (StringIndexOutOfBoundsException ex) {
                     loge("countryCodeForMcc error" + ex);
                 }
-                if (DBG) {
-                    log("pollStateDone: operatorNumeric=" + operatorNumeric +
-                            " prevOperatorNumeric=" + prevOperatorNumeric +
-                            " mNeedFixZone=" + mNeedFixZone +
-                            " mcc=" + mcc + " iso-cc=" + isoCountryCode);
-                }
 
                 phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY,
                         isoCountryCode);
                 mGotCountryCode = true;
 
-                // Fix the time zone If the operator changed or we need to fix it because
-                // when the NITZ time came in we didn't know the country code.
-                if ( ! operatorNumeric.equals(prevOperatorNumeric) || mNeedFixZone) {
+                if (isTimeZoneFixNeeded(phone, operatorNumeric, prevOperatorNumeric,
+                        mNeedFixZone)) {
                     fixTimeZone(isoCountryCode);
                 }
             }
