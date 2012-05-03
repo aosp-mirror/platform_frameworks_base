@@ -75,6 +75,7 @@ import com.android.systemui.R;
 import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -117,6 +118,9 @@ public class PhoneStatusBar extends BaseStatusBar {
     private static final int INTRUDER_ALERT_DECAY_MS = 0; // disabled, was 10000;
 
     private static final boolean CLOSE_PANEL_WHEN_EMPTIED = true;
+
+    private static final int NOTIFICATION_PRIORITY_MULTIPLIER = 10; // see NotificationManagerService
+    private static final int HIDE_ICONS_BELOW_SCORE = Notification.PRIORITY_LOW * NOTIFICATION_PRIORITY_MULTIPLIER;
 
     // fling gesture tuning parameters, scaled to display density
     private float mSelfExpandVelocityPx; // classic value: 2000px/s
@@ -905,7 +909,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         ArrayList<View> toShow = new ArrayList<View>();
 
         for (int i=0; i<N; i++) {
-            toShow.add(mNotificationData.get(N-i-1).icon);
+            Entry ent = mNotificationData.get(N-i-1);
+            if (ent.notification.score >= HIDE_ICONS_BELOW_SCORE) {
+                toShow.add(ent.icon);
+            }
         }
 
         ArrayList<View> toRemove = new ArrayList<View>();
