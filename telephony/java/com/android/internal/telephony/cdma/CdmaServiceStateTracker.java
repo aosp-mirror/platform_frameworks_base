@@ -1024,7 +1024,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                         isoCountryCode);
                 mGotCountryCode = true;
 
-                if (isTimeZoneFixNeeded(phone, operatorNumeric, prevOperatorNumeric,
+                if (shouldFixTimeZoneNow(phone, operatorNumeric, prevOperatorNumeric,
                         mNeedFixZone)) {
                     fixTimeZone(isoCountryCode);
                 }
