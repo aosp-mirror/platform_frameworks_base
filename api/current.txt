@@ -2006,26 +2006,24 @@ package android.accessibilityservice {
     method protected void onServiceConnected();
     method public final boolean performGlobalAction(int);
     method public final void setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo);
-    field public static final int GESTURE_CLOCKWISE_CIRCLE = 9; // 0x9
-    field public static final int GESTURE_COUNTER_CLOCKWISE_CIRCLE = 10; // 0xa
     field public static final int GESTURE_SWIPE_DOWN = 2; // 0x2
-    field public static final int GESTURE_SWIPE_DOWN_AND_LEFT = 17; // 0x11
-    field public static final int GESTURE_SWIPE_DOWN_AND_RIGHT = 18; // 0x12
+    field public static final int GESTURE_SWIPE_DOWN_AND_LEFT = 15; // 0xf
+    field public static final int GESTURE_SWIPE_DOWN_AND_RIGHT = 16; // 0x10
     field public static final int GESTURE_SWIPE_DOWN_AND_UP = 8; // 0x8
     field public static final int GESTURE_SWIPE_LEFT = 3; // 0x3
-    field public static final int GESTURE_SWIPE_LEFT_AND_DOWN = 12; // 0xc
+    field public static final int GESTURE_SWIPE_LEFT_AND_DOWN = 10; // 0xa
     field public static final int GESTURE_SWIPE_LEFT_AND_RIGHT = 5; // 0x5
-    field public static final int GESTURE_SWIPE_LEFT_AND_UP = 11; // 0xb
+    field public static final int GESTURE_SWIPE_LEFT_AND_UP = 9; // 0x9
     field public static final int GESTURE_SWIPE_RIGHT = 4; // 0x4
-    field public static final int GESTURE_SWIPE_RIGHT_AND_DOWN = 14; // 0xe
+    field public static final int GESTURE_SWIPE_RIGHT_AND_DOWN = 12; // 0xc
     field public static final int GESTURE_SWIPE_RIGHT_AND_LEFT = 6; // 0x6
-    field public static final int GESTURE_SWIPE_RIGHT_AND_UP = 13; // 0xd
+    field public static final int GESTURE_SWIPE_RIGHT_AND_UP = 11; // 0xb
     field public static final int GESTURE_SWIPE_UP = 1; // 0x1
     field public static final int GESTURE_SWIPE_UP_AND_DOWN = 7; // 0x7
-    field public static final int GESTURE_SWIPE_UP_AND_LEFT = 15; // 0xf
-    field public static final int GESTURE_SWIPE_UP_AND_RIGHT = 16; // 0x10
-    field public static final int GESTURE_TWO_FINGER_LONG_PRESS = 20; // 0x14
-    field public static final int GESTURE_TWO_FINGER_TAP = 19; // 0x13
+    field public static final int GESTURE_SWIPE_UP_AND_LEFT = 13; // 0xd
+    field public static final int GESTURE_SWIPE_UP_AND_RIGHT = 14; // 0xe
+    field public static final int GESTURE_TWO_FINGER_LONG_PRESS = 18; // 0x12
+    field public static final int GESTURE_TWO_FINGER_TAP = 17; // 0x11
     field public static final int GLOBAL_ACTION_BACK = 1; // 0x1
     field public static final int GLOBAL_ACTION_HOME = 2; // 0x2
     field public static final int GLOBAL_ACTION_NOTIFICATIONS = 4; // 0x4
