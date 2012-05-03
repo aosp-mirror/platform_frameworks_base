@@ -624,14 +624,20 @@ public class ViewPropertyAnimator {
     /**
      * The View associated with this ViewPropertyAnimator will have its
      * {@link View#setLayerType(int, android.graphics.Paint) layer type} set to
-     * {@link View#LAYER_TYPE_HARDWARE} for the duration of the next animation. This state
-     * is not persistent, either on the View or on this ViewPropertyAnimator: the layer type
-     * of the View will be restored when the animation ends to what it was when this method was
-     * called, and this setting on ViewPropertyAnimator is only valid for the next animation.
-     * Note that calling this method and then independently setting the layer type of the View
-     * (by a direct call to {@link View#setLayerType(int, android.graphics.Paint)}) will result
-     * in some inconsistency, including having the layer type restored to its pre-withLayer()
-     * value when the animation ends.
+     * {@link View#LAYER_TYPE_HARDWARE} for the duration of the next animation.
+     * As stated in the documentation for {@link View#LAYER_TYPE_HARDWARE},
+     * the actual type of layer used internally depends on the runtime situation of the
+     * view. If the activity and this view are hardware-accelerated, then the layer will be
+     * accelerated as well. If the activity or the view is not accelerated, then the layer will
+     * effectively be the same as {@link View#LAYER_TYPE_SOFTWARE}.
+     *
+     * <p>This state is not persistent, either on the View or on this ViewPropertyAnimator: the
+     * layer type of the View will be restored when the animation ends to what it was when this
+     * method was called, and this setting on ViewPropertyAnimator is only valid for the next
+     * animation. Note that calling this method and then independently setting the layer type of
+     * the View (by a direct call to {@link View#setLayerType(int, android.graphics.Paint)}) will
+     * result in some inconsistency, including having the layer type restored to its pre-withLayer()
+     * value when the animation ends.</p>
      *
      * @see View#setLayerType(int, android.graphics.Paint)
      * @return This object, allowing calls to methods in this class to be chained.
