@@ -99,6 +99,8 @@ final class WebViewInputDispatcher {
     private boolean mPostDoNotSendTouchEventsToWebKitUntilNextGesture;
     private boolean mPostLongPressScheduled;
     private boolean mPostClickScheduled;
+    private boolean mPostShowTapHighlightScheduled;
+    private boolean mPostHideTapHighlightScheduled;
     private int mPostLastWebKitXOffset;
     private int mPostLastWebKitYOffset;
     private float mPostLastWebKitScale;
@@ -133,6 +135,7 @@ final class WebViewInputDispatcher {
     private static final int LONG_PRESS_TIMEOUT =
             ViewConfiguration.getLongPressTimeout() + TAP_TIMEOUT;
     private static final int DOUBLE_TAP_TIMEOUT = ViewConfiguration.getDoubleTapTimeout();
+    private static final int PRESSED_STATE_DURATION = ViewConfiguration.getPressedStateDuration();
 
     /**
      * Event type: Indicates a touch event type.
@@ -310,6 +313,7 @@ final class WebViewInputDispatcher {
                     }
                     unscheduleLongPressLocked();
                     unscheduleClickLocked();
+                    hideTapCandidateLocked();
                     return false;
                 }
 
@@ -349,12 +353,6 @@ final class WebViewInputDispatcher {
         }
     }
 
-    public boolean shouldShowTapHighlight() {
-        synchronized (mLock) {
-            return mPostLongPressScheduled || mPostClickScheduled;
-        }
-    }
-
     private void postLongPress() {
         synchronized (mLock) {
             if (!mPostLongPressScheduled) {
@@ -385,6 +383,64 @@ final class WebViewInputDispatcher {
         }
     }
 
+    private void hideTapCandidateLocked() {
+        unscheduleHideTapHighlightLocked();
+        unscheduleShowTapHighlightLocked();
+        mUiCallbacks.showTapHighlight(false);
+    }
+
+    private void showTapCandidateLocked() {
+        unscheduleHideTapHighlightLocked();
+        unscheduleShowTapHighlightLocked();
+        mUiCallbacks.showTapHighlight(true);
+        scheduleHideTapHighlightLocked();
+    }
+
+    private void scheduleShowTapHighlightLocked() {
+        unscheduleShowTapHighlightLocked();
+        mPostShowTapHighlightScheduled = true;
+        mUiHandler.sendEmptyMessageDelayed(UiHandler.MSG_SHOW_TAP_HIGHLIGHT,
+                TAP_TIMEOUT);
+    }
+
+    private void unscheduleShowTapHighlightLocked() {
+        if (mPostShowTapHighlightScheduled) {
+            mPostShowTapHighlightScheduled = false;
+            mUiHandler.removeMessages(UiHandler.MSG_SHOW_TAP_HIGHLIGHT);
+        }
+    }
+
+    private void scheduleHideTapHighlightLocked() {
+        unscheduleHideTapHighlightLocked();
+        mPostHideTapHighlightScheduled = true;
+        mUiHandler.sendEmptyMessageDelayed(UiHandler.MSG_HIDE_TAP_HIGHLIGHT,
+                PRESSED_STATE_DURATION);
+    }
+
+    private void unscheduleHideTapHighlightLocked() {
+        if (mPostHideTapHighlightScheduled) {
+            mPostHideTapHighlightScheduled = false;
+            mUiHandler.removeMessages(UiHandler.MSG_HIDE_TAP_HIGHLIGHT);
+        }
+    }
+
+    private void postShowTapHighlight(boolean show) {
+        synchronized (mLock) {
+            if (show) {
+                if (!mPostShowTapHighlightScheduled) {
+                    return;
+                }
+                mPostShowTapHighlightScheduled = false;
+            } else {
+                if (!mPostHideTapHighlightScheduled) {
+                    return;
+                }
+                mPostHideTapHighlightScheduled = false;
+            }
+            mUiCallbacks.showTapHighlight(show);
+        }
+    }
+
     private void scheduleClickLocked() {
         unscheduleClickLocked();
         mPostClickScheduled = true;
@@ -404,6 +460,7 @@ final class WebViewInputDispatcher {
                 return;
             }
             mPostClickScheduled = false;
+            showTapCandidateLocked();
 
             MotionEvent event = mPostTouchStream.getLastEvent();
             if (event == null || event.getAction() != MotionEvent.ACTION_UP) {
@@ -442,6 +499,7 @@ final class WebViewInputDispatcher {
 
     private void enqueueDoubleTapLocked(MotionEvent event) {
         unscheduleClickLocked();
+        hideTapCandidateLocked();
         MotionEvent eventToEnqueue = MotionEvent.obtainNoHistory(event);
         DispatchEvent d = obtainDispatchEventLocked(eventToEnqueue, EVENT_TYPE_DOUBLE_TAP, 0,
                 mPostLastWebKitXOffset, mPostLastWebKitYOffset, mPostLastWebKitScale);
@@ -458,6 +516,7 @@ final class WebViewInputDispatcher {
         if ((deltaX * deltaX + deltaY * deltaY) > mTouchSlopSquared) {
             unscheduleLongPressLocked();
             mIsTapCandidate = false;
+            hideTapCandidateLocked();
         }
     }
 
@@ -474,14 +533,17 @@ final class WebViewInputDispatcher {
                 || event.getPointerCount() > 1) {
             unscheduleLongPressLocked();
             unscheduleClickLocked();
+            hideTapCandidateLocked();
             mIsDoubleTapCandidate = false;
             mIsTapCandidate = false;
+            hideTapCandidateLocked();
         } else if (action == MotionEvent.ACTION_DOWN) {
             checkForDoubleTapOnDownLocked(event);
             scheduleLongPressLocked();
             mIsTapCandidate = true;
             mInitialDownX = event.getX();
             mInitialDownY = event.getY();
+            scheduleShowTapHighlightLocked();
         } else if (action == MotionEvent.ACTION_UP) {
             unscheduleLongPressLocked();
             if (isClickCandidateLocked(event)) {
@@ -490,6 +552,8 @@ final class WebViewInputDispatcher {
                 } else {
                     scheduleClickLocked();
                 }
+            } else {
+                hideTapCandidateLocked();
             }
         } else if (action == MotionEvent.ACTION_MOVE) {
             checkForSlopLocked(event);
@@ -959,6 +1023,12 @@ final class WebViewInputDispatcher {
          * through webkit or false otherwise.
          */
         public boolean shouldInterceptTouchEvent(MotionEvent event);
+
+        /**
+         * Inform's the UI that it should show the tap highlight
+         * @param show True if it should show the highlight, false if it should hide it
+         */
+        public void showTapHighlight(boolean show);
     }
 
     /* Implemented by {@link WebViewCore} to perform operations on the web kit thread. */
@@ -985,6 +1055,8 @@ final class WebViewInputDispatcher {
         public static final int MSG_WEBKIT_TIMEOUT = 2;
         public static final int MSG_LONG_PRESS = 3;
         public static final int MSG_CLICK = 4;
+        public static final int MSG_SHOW_TAP_HIGHLIGHT = 5;
+        public static final int MSG_HIDE_TAP_HIGHLIGHT = 6;
 
         public UiHandler(Looper looper) {
             super(looper);
@@ -1004,6 +1076,12 @@ final class WebViewInputDispatcher {
                     break;
                 case MSG_CLICK:
                     postClick();
+                    break;
+                case MSG_SHOW_TAP_HIGHLIGHT:
+                    postShowTapHighlight(true);
+                    break;
+                case MSG_HIDE_TAP_HIGHLIGHT:
+                    postShowTapHighlight(false);
                     break;
                 default:
                     throw new IllegalStateException("Unknown message type: " + msg.what);

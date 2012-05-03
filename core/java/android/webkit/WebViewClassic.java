@@ -935,7 +935,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private Paint mTouchCrossHairColor;
     private int mTouchHighlightX;
     private int mTouchHighlightY;
-    private long mTouchHighlightRequested;
+    private boolean mShowTapHighlight;
 
     // Basically this proxy is used to tell the Video to update layer tree at
     // SetBaseLayer time and to pause when WebView paused.
@@ -5828,7 +5828,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     data.mSlop = viewToContentDimension(mNavSlop);
                     removeTouchHighlight();
                     if (!mBlockWebkitViewMessages) {
-                        mTouchHighlightRequested = SystemClock.uptimeMillis();
                         mWebViewCore.sendMessageAtFrontOfQueue(
                                 EventHub.HIT_TEST, data);
                     }
@@ -7647,6 +7646,14 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             }
             return isPressingHandle;
         }
+
+        @Override
+        public void showTapHighlight(boolean show) {
+            if (mShowTapHighlight != show) {
+                mShowTapHighlight = show;
+                invalidate();
+            }
+        }
     }
 
     private void setHitTestTypeFromUrl(String url) {
@@ -7709,16 +7716,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (mFocusedNode.mHasFocus && mFocusedNode.mEditable) {
             return false;
         }
-        long delay = SystemClock.uptimeMillis() - mTouchHighlightRequested;
-        if (delay < ViewConfiguration.getTapTimeout()) {
-            Rect r = mTouchHighlightRegion.getBounds();
-            mWebView.postInvalidateDelayed(delay, r.left, r.top, r.right, r.bottom);
-            return false;
-        }
-        if (mInputDispatcher == null) {
-            return false;
-        }
-        return mInputDispatcher.shouldShowTapHighlight();
+        return mShowTapHighlight;
     }
 
 
