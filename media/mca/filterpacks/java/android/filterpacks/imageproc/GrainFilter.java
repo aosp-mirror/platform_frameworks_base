@@ -42,14 +42,25 @@ public class GrainFilter extends Filter {
     @GenerateFieldPort(name = "tile_size", hasDefault = true)
     private int mTileSize = 640;
 
-    private Program mProgram;
+    private Program mGrainProgram;
+    private Program mNoiseProgram;
 
     private int mWidth = 0;
     private int mHeight = 0;
     private int mTarget = FrameFormat.TARGET_UNSPECIFIED;
 
-    private Frame mNoiseFrame = null;
-    private Random mRandom;
+    private Random mRandom = new Random();
+
+    private final String mNoiseShader =
+            "precision mediump float;\n" +
+            "uniform vec2 seed;\n" +
+            "varying vec2 v_texcoord;\n" +
+            "float rand(vec2 loc) {\n" +
+            "  return fract(sin(dot(loc, vec2(12.9898, 78.233))) * 43758.5453);\n" +
+            "}\n" +
+            "void main() {\n" +
+            "  gl_FragColor = vec4(rand(v_texcoord + seed), 0.0, 0.0, 1.0);\n" +
+            "}\n";
 
     private final String mGrainShader =
             "precision mediump float;\n" +
@@ -75,8 +86,6 @@ public class GrainFilter extends Filter {
 
     public GrainFilter(String name) {
         super(name);
-
-        mRandom = new Random();
     }
 
     @Override
@@ -93,9 +102,13 @@ public class GrainFilter extends Filter {
     public void initProgram(FilterContext context, int target) {
         switch (target) {
             case FrameFormat.TARGET_GPU:
-                ShaderProgram shaderProgram = new ShaderProgram(context, mGrainShader);
+                ShaderProgram shaderProgram = new ShaderProgram(context, mNoiseShader);
                 shaderProgram.setMaximumTileSize(mTileSize);
-                mProgram = shaderProgram;
+                mNoiseProgram = shaderProgram;
+
+                shaderProgram = new ShaderProgram(context, mGrainShader);
+                shaderProgram.setMaximumTileSize(mTileSize);
+                mGrainProgram = shaderProgram;
                 break;
 
             default:
@@ -106,32 +119,27 @@ public class GrainFilter extends Filter {
     }
 
     private void updateParameters() {
-        mProgram.setHostValue("scale", mScale);
+        float seed[] = { mRandom.nextFloat(), mRandom.nextFloat() };
+        mNoiseProgram.setHostValue("seed", seed);
+
+        mGrainProgram.setHostValue("scale", mScale);
     }
 
     private void updateFrameSize(int width, int height) {
         mWidth = width;
         mHeight = height;
 
-        if (mProgram != null) {
-            mProgram.setHostValue("stepX", 0.5f / mWidth);
-            mProgram.setHostValue("stepY", 0.5f / mHeight);
+        if (mGrainProgram != null) {
+            mGrainProgram.setHostValue("stepX", 0.5f / mWidth);
+            mGrainProgram.setHostValue("stepY", 0.5f / mHeight);
             updateParameters();
         }
     }
 
     @Override
     public void fieldPortValueUpdated(String name, FilterContext context) {
-        if (mProgram != null) {
+        if (mGrainProgram != null && mNoiseProgram != null) {
             updateParameters();
-        }
-    }
-
-    @Override
-    public void tearDown(FilterContext context) {
-        if (mNoiseFrame != null) {
-            mNoiseFrame.release();
-            mNoiseFrame = null;
         }
     }
 
@@ -141,11 +149,19 @@ public class GrainFilter extends Filter {
         Frame input = pullInput("image");
         FrameFormat inputFormat = input.getFormat();
 
+        FrameFormat noiseFormat = ImageFormat.create(inputFormat.getWidth() / 2,
+                                                     inputFormat.getHeight() / 2,
+                                                     ImageFormat.COLORSPACE_RGBA,
+                                                     FrameFormat.TARGET_GPU);
+
+        // Create noise frame
+        Frame noiseFrame = context.getFrameManager().newFrame(inputFormat);
+
         // Create output frame
         Frame output = context.getFrameManager().newFrame(inputFormat);
 
         // Create program if not created already
-        if (mProgram == null || inputFormat.getTarget() != mTarget) {
+        if (mNoiseProgram == null || mGrainProgram == null || inputFormat.getTarget() != mTarget) {
             initProgram(context, inputFormat.getTarget());
             updateParameters();
         }
@@ -153,35 +169,20 @@ public class GrainFilter extends Filter {
         // Check if the frame size has changed
         if (inputFormat.getWidth() != mWidth || inputFormat.getHeight() != mHeight) {
             updateFrameSize(inputFormat.getWidth(), inputFormat.getHeight());
-
-            int[] buffer = new int[mWidth * mHeight];
-            for (int i = 0; i < mWidth * mHeight; ++i) {
-                buffer[i] = (mRandom.nextInt(256) < RAND_THRESHOLD) ?
-                    mRandom.nextInt(256) : 0;
-            }
-            FrameFormat format = ImageFormat.create(mWidth, mHeight,
-                                                    ImageFormat.COLORSPACE_RGBA,
-                                                    FrameFormat.TARGET_GPU);
-            if (mNoiseFrame != null) {
-                mNoiseFrame.release();
-            }
-            mNoiseFrame = context.getFrameManager().newFrame(format);
-            mNoiseFrame.setInts(buffer);
         }
 
-        if (mNoiseFrame.getFormat().getWidth() != mWidth ||
-            mNoiseFrame.getFormat().getHeight() != mHeight) {
-            throw new RuntimeException("Random map and imput image size mismatch!");
-        }
+        Frame[] empty = {};
+        mNoiseProgram.process(empty, noiseFrame);
 
         // Process
-        Frame[] inputs = {input, mNoiseFrame};
-        mProgram.process(inputs, output);
+        Frame[] inputs = {input, noiseFrame};
+        mGrainProgram.process(inputs, output);
 
         // Push output
         pushOutput("image", output);
 
         // Release pushed frame
         output.release();
+        noiseFrame.release();
     }
 }
