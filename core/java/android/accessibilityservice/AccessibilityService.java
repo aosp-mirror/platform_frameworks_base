@@ -244,64 +244,54 @@ public abstract class AccessibilityService extends Service {
     public static final int GESTURE_SWIPE_DOWN_AND_UP = 8;
 
     /**
-     * The user has performed a clockwise circle gesture on the touch screen.
-     */
-    public static final int GESTURE_CLOCKWISE_CIRCLE = 9;
-
-    /**
-     * The user has performed a counter clockwise circle gesture on the touch screen.
-     */
-    public static final int GESTURE_COUNTER_CLOCKWISE_CIRCLE = 10;
-
-    /**
      * The user has performed a left and up gesture on the touch screen.
      */
-    public static final int GESTURE_SWIPE_LEFT_AND_UP = 11;
+    public static final int GESTURE_SWIPE_LEFT_AND_UP = 9;
 
     /**
      * The user has performed a left and down gesture on the touch screen.
      */
-    public static final int GESTURE_SWIPE_LEFT_AND_DOWN = 12;
+    public static final int GESTURE_SWIPE_LEFT_AND_DOWN = 10;
 
     /**
      * The user has performed a right and up gesture on the touch screen.
      */
-    public static final int GESTURE_SWIPE_RIGHT_AND_UP = 13;
+    public static final int GESTURE_SWIPE_RIGHT_AND_UP = 11;
 
     /**
      * The user has performed a right and down gesture on the touch screen.
      */
-    public static final int GESTURE_SWIPE_RIGHT_AND_DOWN = 14;
+    public static final int GESTURE_SWIPE_RIGHT_AND_DOWN = 12;
 
     /**
      * The user has performed an up and left gesture on the touch screen.
      */
-    public static final int GESTURE_SWIPE_UP_AND_LEFT = 15;
+    public static final int GESTURE_SWIPE_UP_AND_LEFT = 13;
 
     /**
      * The user has performed an up and right gesture on the touch screen.
      */
-    public static final int GESTURE_SWIPE_UP_AND_RIGHT = 16;
+    public static final int GESTURE_SWIPE_UP_AND_RIGHT = 14;
 
     /**
      * The user has performed an down and left gesture on the touch screen.
      */
-    public static final int GESTURE_SWIPE_DOWN_AND_LEFT = 17;
+    public static final int GESTURE_SWIPE_DOWN_AND_LEFT = 15;
 
     /**
      * The user has performed an down and right gesture on the touch screen.
      */
-    public static final int GESTURE_SWIPE_DOWN_AND_RIGHT = 18;
+    public static final int GESTURE_SWIPE_DOWN_AND_RIGHT = 16;
 
     /**
      * The user has performed a two finger tap gesture on the touch screen.
      */
-    public static final int GESTURE_TWO_FINGER_TAP = 19;
+    public static final int GESTURE_TWO_FINGER_TAP = 17;
 
     /**
      * The user has performed a two finger long press gesture on the touch screen.
      */
-    public static final int GESTURE_TWO_FINGER_LONG_PRESS = 20;
+    public static final int GESTURE_TWO_FINGER_LONG_PRESS = 18;
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
