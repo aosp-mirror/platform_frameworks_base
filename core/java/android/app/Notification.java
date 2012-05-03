@@ -888,7 +888,7 @@ public class Notification implements Parcelable
      *         .setContentText(subject)
      *         .setSmallIcon(R.drawable.new_mail)
      *         .setLargeIcon(aBitmap)
-     *         .getNotification();
+     *         .build();
      * </pre>
      */
     public static class Builder {
@@ -925,6 +925,7 @@ public class Notification implements Parcelable
         private int mPriority;
         private ArrayList<Action> mActions = new ArrayList<Action>(3);
         private boolean mUseChronometer;
+        private Style mStyle;
 
         /**
          * Constructs a new Builder with the defaults:
@@ -1305,7 +1306,7 @@ public class Notification implements Parcelable
          * Add metadata to this notification.
          *
          * A reference to the Bundle is held for the lifetime of this Builder, and the Bundle's
-         * current contents are copied into the Notification each time {@link #getNotification()} is
+         * current contents are copied into the Notification each time {@link #build()} is
          * called.
          *
          * @see Notification#extras
@@ -1326,6 +1327,19 @@ public class Notification implements Parcelable
          */
         public Builder addAction(int icon, CharSequence title, PendingIntent intent) {
             mActions.add(new Action(icon, title, intent));
+            return this;
+        }
+
+        /**
+         * Add a rich notification style to be applied at build time.
+         *
+         * @param style Object responsible for modifying the notification style.
+         */
+        public Builder setStyle(Style style) {
+            if (mStyle != style) {
+                mStyle = style;
+                mStyle.setBuilder(this);
+            }
             return this;
         }
 
@@ -1464,10 +1478,9 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Combine all of the options that have been set and return a new {@link Notification}
-         * object.
+         * Apply the unstyled operations and return a new {@link Notification} object.
          */
-        public Notification getNotification() {
+        private Notification buildUnstyled() {
             Notification n = new Notification();
             n.when = mWhen;
             n.icon = mSmallIcon;
@@ -1509,6 +1522,49 @@ public class Notification implements Parcelable
             }
             return n;
         }
+
+        /**
+         * @deprecated Use {@link #build()} instead.
+         */
+        @Deprecated
+        public Notification getNotification() {
+            return build();
+        }
+
+        /**
+         * Combine all of the options that have been set and return a new {@link Notification}
+         * object.
+         */
+        public Notification build() {
+            if (mStyle != null) {
+                return mStyle.build();
+            } else {
+                return buildUnstyled();
+            }
+        }
+    }
+
+
+    /**
+     * An object that can apply a rich notification style to a {@link Notification.Builder}
+     * object.
+     */
+    public static class Style {
+        protected Builder mBuilder;
+
+        public void setBuilder(Builder builder) {
+            if (mBuilder != builder) {
+                mBuilder = builder;
+                mBuilder.setStyle(this);
+            }
+        }
+
+        public Notification build() {
+            if (mBuilder == null) {
+                throw new IllegalArgumentException("Style requires a valid Builder object");
+            }
+            return mBuilder.buildUnstyled();
+        }
     }
 
     /**
@@ -1528,12 +1584,14 @@ public class Notification implements Parcelable
      * 
      * @see Notification#bigContentView
      */
-    public static class BigPictureStyle {
-        private Builder mBuilder;
+    public static class BigPictureStyle extends Style {
         private Bitmap mPicture;
 
+        public BigPictureStyle() {
+        }
+
         public BigPictureStyle(Builder builder) {
-            mBuilder = builder;
+            setBuilder(builder);
         }
 
         public BigPictureStyle bigPicture(Bitmap b) {
@@ -1549,8 +1607,12 @@ public class Notification implements Parcelable
             return contentView;
         }
 
+        @Override
         public Notification build() {
-            Notification wip = mBuilder.getNotification();
+            if (mBuilder == null) {
+                throw new IllegalArgumentException("Style requires a valid Builder object");
+            }
+            Notification wip = mBuilder.buildUnstyled();
             wip.bigContentView = makeBigContentView();
             return wip;
         }
@@ -1573,12 +1635,14 @@ public class Notification implements Parcelable
      * 
      * @see Notification#bigContentView
      */
-    public static class BigTextStyle {
-        private Builder mBuilder;
+    public static class BigTextStyle extends Style {
         private CharSequence mBigText;
 
+        public BigTextStyle() {
+        }
+
         public BigTextStyle(Builder builder) {
-            mBuilder = builder;
+            setBuilder(builder);
         }
 
         public BigTextStyle bigText(CharSequence cs) {
@@ -1596,8 +1660,13 @@ public class Notification implements Parcelable
             return contentView;
         }
 
+        @Override
         public Notification build() {
-            Notification wip = mBuilder.getNotification();
+            if (mBuilder == null) {
+                throw new IllegalArgumentException("Style requires a valid Builder object");
+            }
+            mBuilder.mSubText = null;
+            Notification wip = mBuilder.buildUnstyled();
             wip.bigContentView = makeBigContentView();
             return wip;
         }
@@ -1608,7 +1677,7 @@ public class Notification implements Parcelable
      * 
      * This class is a "rebuilder": It consumes a Builder object and modifies its behavior, like so:
      * <pre class="prettyprint">
-     * Notification noti = new Notification.DigestStyle(
+     * Notification noti = new Notification.InboxStyle(
      *      new Notification.Builder()
      *         .setContentTitle(&quot;New mail from &quot; + sender.toString())
      *         .setContentText(subject)
@@ -1621,12 +1690,14 @@ public class Notification implements Parcelable
      * 
      * @see Notification#bigContentView
      */
-    public static class InboxStyle {
-        private Builder mBuilder;
+    public static class InboxStyle extends Style {
         private ArrayList<CharSequence> mTexts = new ArrayList<CharSequence>(5);
 
+        public InboxStyle() {
+        }
+
         public InboxStyle(Builder builder) {
-            mBuilder = builder;
+            setBuilder(builder);
         }
 
         public InboxStyle addLine(CharSequence cs) {
@@ -1652,8 +1723,12 @@ public class Notification implements Parcelable
             return contentView;
         }
 
+        @Override
         public Notification build() {
-            Notification wip = mBuilder.getNotification();
+            if (mBuilder == null) {
+                throw new IllegalArgumentException("Style requires a valid Builder object");
+            }
+            Notification wip = mBuilder.buildUnstyled();
             wip.bigContentView = makeBigContentView();
             return wip;
         }
