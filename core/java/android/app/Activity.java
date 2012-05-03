@@ -2742,6 +2742,10 @@ public class Activity extends ContextThemeWrapper
      * may choose to override this method to construct the desired task stack in a different
      * way.</p>
      *
+     * <p>This method will be invoked by the default implementation of {@link #onNavigateUp()}
+     * if {@link #shouldUpRecreateTask(Intent)} returns true when supplied with the intent
+     * returned by {@link #getParentActivityIntent()}.</p>
+     *
      * <p>Applications that wish to supply extra Intent parameters to the parent stack defined
      * by the manifest should override {@link #onPrepareNavigateUpTaskStack(TaskStackBuilder)}.</p>
      *
