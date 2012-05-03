@@ -30,6 +30,7 @@ package android.view;
  */
 public abstract class ActionMode {
     private Object mTag;
+    private boolean mTitleOptionalHint;
 
     /**
      * Set a tag object associated with this ActionMode.
@@ -119,6 +120,18 @@ public abstract class ActionMode {
      * @param titleOptional true if the title only presents optional information.
      */
     public void setTitleOptionalHint(boolean titleOptional) {
+        mTitleOptionalHint = titleOptional;
+    }
+
+    /**
+     * @return true if this action mode has been given a hint to consider the
+     *         title/subtitle display to be optional.
+     *
+     * @see #setTitleOptionalHint(boolean)
+     * @see #isTitleOptional()
+     */
+    public boolean getTitleOptionalHint() {
+        return mTitleOptionalHint;
     }
 
     /**

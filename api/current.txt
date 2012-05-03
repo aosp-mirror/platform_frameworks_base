@@ -22532,6 +22532,7 @@ package android.view {
     method public abstract java.lang.CharSequence getSubtitle();
     method public java.lang.Object getTag();
     method public abstract java.lang.CharSequence getTitle();
+    method public boolean getTitleOptionalHint();
     method public abstract void invalidate();
     method public boolean isTitleOptional();
     method public abstract void setCustomView(android.view.View);

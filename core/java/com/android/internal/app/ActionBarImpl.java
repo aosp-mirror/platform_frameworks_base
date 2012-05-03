@@ -817,6 +817,7 @@ public class ActionBarImpl extends ActionBar {
         
         @Override
         public void setTitleOptionalHint(boolean titleOptional) {
+            super.setTitleOptionalHint(titleOptional);
             mContextView.setTitleOptional(titleOptional);
         }
 
