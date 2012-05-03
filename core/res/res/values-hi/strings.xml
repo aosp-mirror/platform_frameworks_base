@@ -168,12 +168,76 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"आपके संदेश"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"अपने SMS, ईमेल, और अन्य संदेशों को पढ़ें और लिखें."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"आपकी निजी जानकारी"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"टेबलेट पर संग्रहीत आपके संपर्कों और कैलेंडर में सीधे पहुंचें."</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"फ़ोन पर संग्रहीत आपके संपर्कों और कैलेंडर में सीधे पहुंचें."</string>
+    <!-- no translation found for permgroupdesc_personalInfo (8426453129788861338) -->
+    <skip />
+    <!-- no translation found for permgrouplab_socialInfo (5799096623412043791) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_socialInfo (7129842457611643493) -->
+    <skip />
     <string name="permgrouplab_location" msgid="635149742436692049">"आपका स्‍थान"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"अपने भौतिक स्‍थान पर नज़र रखें."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"नेटवर्क संचार"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"विभिन्‍न नेटवर्क सुविधाओं पर पहुंचें."</string>
+    <!-- no translation found for permgrouplab_shortRangeNetwork (4504840216096355984) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_shortRangeNetwork (8821013030346680806) -->
+    <skip />
+    <!-- no translation found for permgrouplab_audioSettings (8329261670151871235) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_audioSettings (2641515403347568130) -->
+    <skip />
+    <!-- no translation found for permgrouplab_affectsBattery (6209246653424798033) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_affectsBattery (6441275320638916947) -->
+    <skip />
+    <!-- no translation found for permgrouplab_calendar (5863508437783683902) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_calendar (5777534316982184416) -->
+    <skip />
+    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_dictionary (40926483968949978) -->
+    <skip />
+    <!-- no translation found for permgrouplab_bookmarks (1949519673103968229) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_bookmarks (4169771606257963028) -->
+    <skip />
+    <!-- no translation found for permgrouplab_deviceAlarms (6117704629728824101) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_deviceAlarms (4769356362251641175) -->
+    <skip />
+    <!-- no translation found for permgrouplab_voicemail (4162237145027592133) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_voicemail (2498403969862951393) -->
+    <skip />
+    <!-- no translation found for permgrouplab_microphone (171539900250043464) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_microphone (7106618286905738408) -->
+    <skip />
+    <!-- no translation found for permgrouplab_camera (4820372495894586615) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_camera (2933667372289567714) -->
+    <skip />
+    <!-- no translation found for permgrouplab_appInfo (8028789762634147725) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_appInfo (3950378538049625907) -->
+    <skip />
+    <!-- no translation found for permgrouplab_wallpaper (3850280158041175998) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_wallpaper (5630417854750540154) -->
+    <skip />
+    <!-- no translation found for permgrouplab_systemClock (406535759236612992) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_systemClock (3944359833624094992) -->
+    <skip />
+    <!-- no translation found for permgrouplab_statusBar (2095862568113945398) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_statusBar (6242593432226807171) -->
+    <skip />
+    <!-- no translation found for permgrouplab_syncSettings (3341990986147826541) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_syncSettings (7603195265129031797) -->
+    <skip />
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"आपके खाते"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"उपलब्‍ध खातों में पहुंचें."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"हार्डवेयर नियंत्रण"</string>
@@ -184,6 +248,10 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"सिस्‍टम का निम्‍न-स्‍तर पहुंच और नियंत्रण."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"डेवलपमेंट टूल"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"सुविधाएं जो केवल एप्लिकेशन डेवलपर के लिए आवश्यक हैं."</string>
+    <!-- no translation found for permgrouplab_display (4279909676036402636) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_display (6051002031933013714) -->
+    <skip />
     <string name="permgrouplab_storage" msgid="1971118770546336966">"संग्रहण"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"USB संग्रहण में पहुंचें."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD कार्ड में पहुंचें."</string>
@@ -702,6 +770,8 @@
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"फ़ोन में कोई सिम कार्ड नहीं है."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"कोई सिमकार्ड डालें."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"सिम कार्ड गुम है या पढ़ने योग्‍य नहीं है. कोई सिम कार्ड डालें."</string>
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (5096149665138916184) -->
+    <skip />
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"आपका सिम कार्ड स्‍थायी रूप से अक्षम कर दिया गया है."\n" दूसरे SIM कार्ड के लिए अपने वायरलेस सेवा प्रदाता से संपर्क करें."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"पिछला ट्रैक बटन"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"अगला ट्रैक बटन"</string>
