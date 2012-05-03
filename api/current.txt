@@ -21098,19 +21098,6 @@ package android.text {
     method public int getTopPadding();
   }
 
-  public abstract interface TextDirectionHeuristic {
-  }
-
-  public class TextDirectionHeuristics {
-    ctor public TextDirectionHeuristics();
-    field public static final android.text.TextDirectionHeuristic ANYRTL_LTR;
-    field public static final android.text.TextDirectionHeuristic FIRSTSTRONG_LTR;
-    field public static final android.text.TextDirectionHeuristic FIRSTSTRONG_RTL;
-    field public static final android.text.TextDirectionHeuristic LOCALE;
-    field public static final android.text.TextDirectionHeuristic LTR;
-    field public static final android.text.TextDirectionHeuristic RTL;
-  }
-
   public class TextPaint extends android.graphics.Paint {
     ctor public TextPaint();
     ctor public TextPaint(int);
