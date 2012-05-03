@@ -1254,23 +1254,36 @@ public class PhoneStatusBar extends BaseStatusBar {
             if (SPEW) Slog.d(TAG, "doAnimation before mAnimY=" + mAnimY);
             incrementAnim(frameTimeNanos);
             if (SPEW) Slog.d(TAG, "doAnimation after  mAnimY=" + mAnimY);
+
             if (mAnimY >= getExpandedViewMaxHeight()-1) {
                 if (SPEW) Slog.d(TAG, "Animation completed to expanded state.");
                 mAnimating = false;
                 updateExpandedViewPos(EXPANDED_FULL_OPEN);
                 performExpand();
+                return;
             }
-            else if (mAnimY < getStatusBarHeight()) {
+
+            if (mAnimY == 0 && mAnimAccel == 0 && mAnimVel == 0) {
                 if (SPEW) Slog.d(TAG, "Animation completed to collapsed state.");
                 mAnimating = false;
-                updateExpandedViewPos(0);
                 performCollapse();
+                return;
             }
-            else {
-                updateExpandedViewPos((int)mAnimY);
-                mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION,
-                        mAnimationCallback, null);
+
+            if (mAnimY < getStatusBarHeight()) {
+                // Draw one more frame with the bar positioned at the top of the screen
+                // before ending the animation so that the user sees the bar in
+                // its final position.  The call to performCollapse() causes a window
+                // relayout which takes time and might cause the animation to skip
+                // on the very last frame before the bar disappears if we did it now.
+                mAnimY = 0;
+                mAnimAccel = 0;
+                mAnimVel = 0;
             }
+
+            updateExpandedViewPos((int)mAnimY);
+            mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION,
+                    mAnimationCallback, null);
         }
     }
 
