@@ -536,9 +536,14 @@ public class HorizontalScrollView extends FrameLayout {
 
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
-                mIsBeingDragged = getChildCount() != 0;
-                if (!mIsBeingDragged) {
+                if (getChildCount() == 0) {
                     return false;
+                }
+                if ((mIsBeingDragged = !mScroller.isFinished())) {
+                    final ViewParent parent = getParent();
+                    if (parent != null) {
+                        parent.requestDisallowInterceptTouchEvent(true);
+                    }
                 }
 
                 /*
@@ -555,11 +560,23 @@ public class HorizontalScrollView extends FrameLayout {
                 break;
             }
             case MotionEvent.ACTION_MOVE:
+                final int activePointerIndex = ev.findPointerIndex(mActivePointerId);
+                final int x = (int) ev.getX(activePointerIndex);
+                int deltaX = mLastMotionX - x;
+                if (!mIsBeingDragged && Math.abs(deltaX) > mTouchSlop) {
+                    final ViewParent parent = getParent();
+                    if (parent != null) {
+                        parent.requestDisallowInterceptTouchEvent(true);
+                    }
+                    mIsBeingDragged = true;
+                    if (deltaX > 0) {
+                        deltaX -= mTouchSlop;
+                    } else {
+                        deltaX += mTouchSlop;
+                    }
+                }
                 if (mIsBeingDragged) {
                     // Scroll to follow the motion event
-                    final int activePointerIndex = ev.findPointerIndex(mActivePointerId);
-                    final int x = (int) ev.getX(activePointerIndex);
-                    final int deltaX = (int) (mLastMotionX - x);
                     mLastMotionX = x;
 
                     final int oldX = mScrollX;
