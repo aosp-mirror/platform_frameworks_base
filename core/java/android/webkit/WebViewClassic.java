@@ -4696,8 +4696,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         if (mInputConnection == null) {
             mInputConnection = new WebViewInputConnection();
-            mAutoCompletePopup = new AutoCompletePopup(mContext, this,
-                    mInputConnection);
+            mAutoCompletePopup = new AutoCompletePopup(this, mInputConnection);
         }
         mInputConnection.setupEditorInfo(outAttrs);
         return mInputConnection;
