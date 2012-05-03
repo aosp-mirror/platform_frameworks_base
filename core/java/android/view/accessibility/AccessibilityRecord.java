@@ -135,7 +135,12 @@ public class AccessibilityRecord {
      */
     public void setSource(View root, int virtualDescendantId) {
         enforceNotSealed();
-        final boolean important = (root != null) ? root.isImportantForAccessibility() : true;
+        final boolean important;
+        if (virtualDescendantId == UNDEFINED) {
+            important = (root != null) ? root.isImportantForAccessibility() : true;
+        } else {
+            important = true;
+        }
         setBooleanProperty(PROPERTY_IMPORTANT_FOR_ACCESSIBILITY, important);
         mSourceWindowId = (root != null) ? root.getAccessibilityWindowId() : UNDEFINED;
         final int rootViewId = (root != null) ? root.getAccessibilityViewId() : UNDEFINED;
