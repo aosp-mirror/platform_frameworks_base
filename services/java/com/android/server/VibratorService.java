@@ -391,9 +391,15 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     private boolean doVibratorExists() {
-        synchronized (mInputDeviceVibrators) {
-            return !mInputDeviceVibrators.isEmpty() || vibratorExists();
-        }
+        // For now, we choose to ignore the presence of input devices that have vibrators
+        // when reporting whether the device has a vibrator.  Applications often use this
+        // information to decide whether to enable certain features so they expect the
+        // result of hasVibrator() to be constant.  For now, just report whether
+        // the device has a built-in vibrator.
+        //synchronized (mInputDeviceVibrators) {
+        //    return !mInputDeviceVibrators.isEmpty() || vibratorExists();
+        //}
+        return vibratorExists();
     }
 
     private void doVibratorOn(long millis) {
