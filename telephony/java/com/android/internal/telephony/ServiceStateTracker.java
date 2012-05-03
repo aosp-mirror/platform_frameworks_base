@@ -463,6 +463,61 @@ public abstract class ServiceStateTracker extends Handler {
         pollingContext = new int[1];
     }
 
+    /**
+     * Return true if time zone needs fixing.
+     *
+     * @param phoneBase
+     * @param operatorNumeric
+     * @param prevOperatorNumeric
+     * @param needToFixTimeZone
+     * @return true if time zone needs to be fixed
+     */
+    protected boolean isTimeZoneFixNeeded(PhoneBase phoneBase, String operatorNumeric,
+            String prevOperatorNumeric, boolean needToFixTimeZone) {
+        // Return false if the mcc isn't valid as we don't know where we are.
+        // Return true if we have an IccCard and the mcc changed or we
+        // need to fix it because when the NITZ time came in we didn't
+        // know the country code.
+
+        // If mcc is invalid then we'll return false
+        int mcc;
+        try {
+            mcc = Integer.parseInt(operatorNumeric.substring(0, 3));
+        } catch (Exception e) {
+            if (DBG) {
+                log("isTimeZoneFixNeeded: no mcc, operatorNumeric=" + operatorNumeric +
+                        " retVal=false");
+            }
+            return false;
+        }
+
+        // If prevMcc is invalid will make it different from mcc
+        // so we'll return true if the card exists.
+        int prevMcc;
+        try {
+            prevMcc = Integer.parseInt(prevOperatorNumeric.substring(0, 3));
+        } catch (Exception e) {
+            prevMcc = mcc + 1;
+        }
+
+        // Determine if the Icc card exists
+        IccCard iccCard = phoneBase.getIccCard();
+        boolean iccCardExist = (iccCard != null) && iccCard.getState().iccCardExist();
+
+        // Determine retVal
+        boolean retVal = ((iccCardExist && (mcc != prevMcc)) || needToFixTimeZone);
+        if (DBG) {
+            log("isTimeZoneFixNeeded: retVal=" + retVal +
+                    " iccCard=" + iccCard +
+                    " iccCard.state=" + (iccCard == null ? "null" : iccCard.getState().toString()) +
+                    " iccCardExist=" + iccCardExist +
+                    " operatorNumeric=" + operatorNumeric + " mcc=" + mcc +
+                    " prevOperatorNumeric=" + prevOperatorNumeric + " prevMcc=" + prevMcc +
+                    " needToFixTimeZone=" + needToFixTimeZone);
+        }
+        return retVal;
+    }
+
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("ServiceStateTracker:");
         pw.println(" ss=" + ss);
