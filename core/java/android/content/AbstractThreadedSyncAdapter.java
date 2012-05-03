@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.Trace;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -233,8 +234,14 @@ public abstract class AbstractThreadedSyncAdapter {
             mThreadsKey = toSyncKey(account);
         }
 
+        @Override
         public void run() {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+
+            // Trace this sync instance.  Note, conceptually this should be in
+            // SyncStorageEngine.insertStartSyncEvent(), but the trace functions require unique
+            // threads in order to track overlapping operations, so we'll do it here for now.
+            Trace.traceBegin(Trace.TRACE_TAG_SYNC_MANAGER, mAuthority);
 
             SyncResult syncResult = new SyncResult();
             ContentProviderClient provider = null;
@@ -250,6 +257,8 @@ public abstract class AbstractThreadedSyncAdapter {
                     syncResult.databaseError = true;
                 }
             } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_SYNC_MANAGER);
+
                 if (provider != null) {
                     provider.release();
                 }
