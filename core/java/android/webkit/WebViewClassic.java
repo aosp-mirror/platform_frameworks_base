@@ -1315,6 +1315,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         case WebViewInputDispatcher.EVENT_TYPE_TOUCH:
             onHandleUiTouchEvent(event);
             break;
+        case WebViewInputDispatcher.EVENT_TYPE_CLICK:
+            if (mFocusedNode != null && mFocusedNode.mIntentUrl != null) {
+                mWebView.playSoundEffect(SoundEffectConstants.CLICK);
+                overrideLoading(mFocusedNode.mIntentUrl);
+            }
+            break;
         }
     }
 
