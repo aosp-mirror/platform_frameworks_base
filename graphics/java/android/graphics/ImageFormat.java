@@ -48,14 +48,26 @@ public class ImageFormat {
      * </p>
      *
      * <pre> y_size = stride * height
-     * c_size = ALIGN(stride/2, 16) * height/2
+     * c_stride = ALIGN(stride/2, 16)
+     * c_size = c_stride * height/2
      * size = y_size + c_size * 2
      * cr_offset = y_size
      * cb_offset = y_size + c_size</pre>
      *
-     * This format is guaranteed to be supported for camera preview images since
+     * <p>This format is guaranteed to be supported for camera preview images since
      * API level 12; for earlier API versions, check
      * {@link android.hardware.Camera.Parameters#getSupportedPreviewFormats()}.
+     *
+     * <p>Note that for camera preview callback use (see
+     * {@link android.hardware.Camera#setPreviewCallback}), the
+     * <var>stride</var> value is the smallest possible; that is, it is equal
+     * to:
+     *
+     * <pre>stride = ALIGN(width, 16)</pre>
+     *
+     * @see android.hardware.Camera.Parameters#setPreviewCallback
+     * @see android.hardware.Camera.Parameters#setPreviewFormat
+     * @see android.hardware.Camera.Parameters#getSupportedPreviewFormats
      * </p>
      */
     public static final int YV12 = 0x32315659;
