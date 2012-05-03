@@ -387,7 +387,7 @@ class ContextImpl extends Context {
                 public Object createService(ContextImpl ctx) {
                     IBinder b = ServiceManager.getService(NSD_SERVICE);
                     INsdManager service = INsdManager.Stub.asInterface(b);
-                    return new NsdManager(service);
+                    return new NsdManager(ctx.getOuterContext(), service);
                 }});
 
         // Note: this was previously cached in a static variable, but

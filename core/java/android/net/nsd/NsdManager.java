@@ -22,12 +22,16 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.Messenger;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseArray;
+
+import java.util.concurrent.CountDownLatch;
 
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
@@ -39,88 +43,73 @@ import com.android.internal.util.Protocol;
  * B. Another example use case is an application discovering printers on the network.
  *
  * <p> The API currently supports DNS based service discovery and discovery is currently
- * limited to a local network over Multicast DNS. In future, it will be extended to
- * support wide area discovery and other service discovery mechanisms.
- * DNS service discovery is described at http://files.dns-sd.org/draft-cheshire-dnsext-dns-sd.txt
+ * limited to a local network over Multicast DNS. DNS service discovery is described at
+ * http://files.dns-sd.org/draft-cheshire-dnsext-dns-sd.txt
  *
  * <p> The API is asynchronous and responses to requests from an application are on listener
- * callbacks provided by the application. The application must invoke {@link #initialize} before
- * doing any other operation.
+ * callbacks on a seperate thread.
  *
  * <p> There are three main operations the API supports - registration, discovery and resolution.
  * <pre>
  *                          Application start
  *                                 |
- *                                 |         <----------------------------------------------
- *                             initialize()                                                 |
- *                                 |                                                        |
- *                                 | Wait until channel connects                            |
- *                                 | before doing any operation                             |
- *                                 |                                                        |
- *                           onChannelConnected()                    __________             |
- *                                 |                                           |            |
- *                                 |                                           |            |
- *                                 |                  onServiceRegistered()    |            |
- *                     Register any local services  /                          |            |
- *                      to be advertised with       \                          |            | If application needs to
- *                       registerService()            onFailure()              |            | do any further operations
- *                                 |                                           |            | again, it needs to
- *                                 |                                           |            | initialize() connection
- *                          discoverServices()                                 |            | to framework again
- *                                 |                                           |            |
- *                      Maintain a list to track                               |            |
- *                        discovered services                                  |            |
- *                                 |                                           |            |
- *                                 |--------->                                 |-> onChannelDisconnected()
- *                                 |          |                                |
- *                                 |      onServiceFound()                     |
- *                                 |          |                                |
- *                                 |     add service to list                   |
- *                                 |          |                                |
- *                                 |<----------                                |
- *                                 |                                           |
- *                                 |--------->                                 |
- *                                 |          |                                |
- *                                 |      onServiceLost()                      |
- *                                 |          |                                |
- *                                 |   remove service from list                |
- *                                 |          |                                |
- *                                 |<----------                                |
- *                                 |                                           |
- *                                 |                                           |
- *                                 | Connect to a service                      |
- *                                 | from list ?                               |
- *                                 |                                           |
- *                          resolveService()                                   |
- *                                 |                                           |
- *                         onServiceResolved()                                 |
- *                                 |                                           |
- *                     Establish connection to service                         |
- *                     with the host and port information                      |
- *                                 |                                           |
- *                                 |                                ___________|
- *                           deinitialize()
- *                    when done with all operations
- *                          or before quit
+ *                                 |
+ *                                 |                  onServiceRegistered()
+ *                     Register any local services  /
+ *                      to be advertised with       \
+ *                       registerService()            onRegistrationFailed()
+ *                                 |
+ *                                 |
+ *                          discoverServices()
+ *                                 |
+ *                      Maintain a list to track
+ *                        discovered services
+ *                                 |
+ *                                 |--------->
+ *                                 |          |
+ *                                 |      onServiceFound()
+ *                                 |          |
+ *                                 |     add service to list
+ *                                 |          |
+ *                                 |<----------
+ *                                 |
+ *                                 |--------->
+ *                                 |          |
+ *                                 |      onServiceLost()
+ *                                 |          |
+ *                                 |   remove service from list
+ *                                 |          |
+ *                                 |<----------
+ *                                 |
+ *                                 |
+ *                                 | Connect to a service
+ *                                 | from list ?
+ *                                 |
+ *                          resolveService()
+ *                                 |
+ *                         onServiceResolved()
+ *                                 |
+ *                     Establish connection to service
+ *                     with the host and port information
  *
  * </pre>
  * An application that needs to advertise itself over a network for other applications to
  * discover it can do so with a call to {@link #registerService}. If Example is a http based
  * application that can provide HTML data to peer services, it can register a name "Example"
  * with service type "_http._tcp". A successful registration is notified with a callback to
- * {@link DnsSdRegisterListener#onServiceRegistered} and a failure to register is notified
- * over {@link DnsSdRegisterListener#onFailure}
+ * {@link RegistrationListener#onServiceRegistered} and a failure to register is notified
+ * over {@link RegistrationListener#onRegistrationFailed}
  *
  * <p> A peer application looking for http services can initiate a discovery for "_http._tcp"
  * with a call to {@link #discoverServices}. A service found is notified with a callback
- * to {@link DnsSdDiscoveryListener#onServiceFound} and a service lost is notified on
- * {@link DnsSdDiscoveryListener#onServiceLost}.
+ * to {@link DiscoveryListener#onServiceFound} and a service lost is notified on
+ * {@link DiscoveryListener#onServiceLost}.
  *
  * <p> Once the peer application discovers the "Example" http srevice, and needs to receive data
  * from the "Example" application, it can initiate a resolve with {@link #resolveService} to
  * resolve the host and port details for the purpose of establishing a connection. A successful
- * resolve is notified on {@link DnsSdResolveListener#onServiceResolved} and a failure is notified
- * on {@link DnsSdResolveListener#onFailure}.
+ * resolve is notified on {@link ResolveListener#onServiceResolved} and a failure is notified
+ * on {@link ResolveListener#onResolveFailed}.
  *
  * Applications can reserve for a service type at
  * http://www.iana.org/form/ports-service. Existing services can be found at
@@ -129,9 +118,9 @@ import com.android.internal.util.Protocol;
  * Get an instance of this class by calling {@link android.content.Context#getSystemService(String)
  * Context.getSystemService(Context.NSD_SERVICE)}.
  *
- * {@see DnsSdServiceInfo}
+ * {@see NsdServiceInfo}
  */
-public class NsdManager {
+public final class NsdManager {
     private static final String TAG = "NsdManager";
     INsdManager mService;
 
@@ -204,13 +193,6 @@ public class NsdManager {
     public static final int UNREGISTER_SERVICE_SUCCEEDED            = BASE + 14;
 
     /** @hide */
-    public static final int UPDATE_SERVICE                          = BASE + 15;
-    /** @hide */
-    public static final int UPDATE_SERVICE_FAILED                   = BASE + 16;
-    /** @hide */
-    public static final int UPDATE_SERVICE_SUCCEEDED                = BASE + 17;
-
-    /** @hide */
     public static final int RESOLVE_SERVICE                         = BASE + 18;
     /** @hide */
     public static final int RESOLVE_SERVICE_FAILED                  = BASE + 19;
@@ -218,17 +200,27 @@ public class NsdManager {
     public static final int RESOLVE_SERVICE_SUCCEEDED               = BASE + 20;
 
     /** @hide */
-    public static final int STOP_RESOLVE                            = BASE + 21;
-    /** @hide */
-    public static final int STOP_RESOLVE_FAILED                     = BASE + 22;
-    /** @hide */
-    public static final int STOP_RESOLVE_SUCCEEDED                  = BASE + 23;
-
-    /** @hide */
     public static final int ENABLE                                  = BASE + 24;
     /** @hide */
     public static final int DISABLE                                 = BASE + 25;
 
+    /** @hide */
+    public static final int NATIVE_DAEMON_EVENT                     = BASE + 26;
+
+    /** Dns based service discovery protocol */
+    public static final int PROTOCOL_DNS_SD = 0x0001;
+
+    private Context mContext;
+
+    private static final int INVALID_LISTENER_KEY = 0;
+    private int mListenerKey = 1;
+    private final SparseArray mListenerMap = new SparseArray();
+    private final SparseArray<NsdServiceInfo> mServiceMap = new SparseArray<NsdServiceInfo>();
+    private final Object mMapLock = new Object();
+
+    private final AsyncChannel mAsyncChannel = new AsyncChannel();
+    private ServiceHandler mHandler;
+    private final CountDownLatch mConnected = new CountDownLatch(1);
 
     /**
      * Create a new Nsd instance. Applications use
@@ -238,271 +230,213 @@ public class NsdManager {
      * @hide - hide this because it takes in a parameter of type INsdManager, which
      * is a system private class.
      */
-    public NsdManager(INsdManager service) {
+    public NsdManager(Context context, INsdManager service) {
         mService = service;
+        mContext = context;
+        init();
     }
 
     /**
-     * Passed with onFailure() calls.
+     * Failures are passed with {@link RegistrationListener#onRegistrationFailed},
+     * {@link RegistrationListener#onUnregistrationFailed},
+     * {@link DiscoveryListener#onStartDiscoveryFailed},
+     * {@link DiscoveryListener#onStopDiscoveryFailed} or {@link ResolveListener#onResolveFailed}.
+     *
      * Indicates that the operation failed due to an internal error.
      */
-    public static final int ERROR               = 0;
+    public static final int FAILURE_INTERNAL_ERROR               = 0;
 
     /**
-     * Passed with onFailure() calls.
-     * Indicates that the operation failed because service discovery
-     * is unsupported on the device.
-     */
-    public static final int UNSUPPORTED         = 1;
-
-    /**
-     * Passed with onFailure() calls.
-     * Indicates that the operation failed because the framework is
-     * busy and unable to service the request.
-     */
-    public static final int BUSY                = 2;
-
-    /**
-     * Passed with onFailure() calls.
      * Indicates that the operation failed because it is already active.
      */
-    public static final int ALREADY_ACTIVE      = 3;
+    public static final int FAILURE_ALREADY_ACTIVE              = 3;
 
     /**
-     * Passed with onFailure() calls.
-     * Indicates that the operation failed because maximum limit on
-     * service registrations has reached.
+     * Indicates that the operation failed because the maximum outstanding
+     * requests from the applications have reached.
      */
-    public static final int MAX_REGS_REACHED    = 4;
-
-    /** Interface for callback invocation when framework channel is connected or lost */
-    public interface ChannelListener {
-       /**
-         * The channel to the framework is connected.
-         * Application can initiate calls into the framework using the channel instance passed.
-         */
-        public void onChannelConnected(Channel c);
-        /**
-         * The channel to the framework has been disconnected.
-         * Application could try re-initializing using {@link #initialize}
-         */
-        public void onChannelDisconnected();
-    }
-
-    /** Generic interface for callback invocation for a success or failure */
-    public interface ActionListener {
-
-        public void onFailure(int errorCode);
-
-        public void onSuccess();
-    }
+    public static final int FAILURE_MAX_LIMIT                   = 4;
 
     /** Interface for callback invocation for service discovery */
-    public interface DnsSdDiscoveryListener {
+    public interface DiscoveryListener {
 
-        public void onFailure(int errorCode);
+        public void onStartDiscoveryFailed(String serviceType, int errorCode);
 
-        public void onStarted(String serviceType);
+        public void onStopDiscoveryFailed(String serviceType, int errorCode);
 
-        public void onServiceFound(DnsSdServiceInfo serviceInfo);
+        public void onDiscoveryStarted(String serviceType);
 
-        public void onServiceLost(DnsSdServiceInfo serviceInfo);
+        public void onDiscoveryStopped(String serviceType);
+
+        public void onServiceFound(NsdServiceInfo serviceInfo);
+
+        public void onServiceLost(NsdServiceInfo serviceInfo);
 
     }
 
     /** Interface for callback invocation for service registration */
-    public interface DnsSdRegisterListener {
+    public interface RegistrationListener {
 
-        public void onFailure(int errorCode);
+        public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode);
 
-        public void onServiceRegistered(int registeredId, DnsSdServiceInfo serviceInfo);
-    }
+        public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode);
 
-    /** @hide */
-    public interface DnsSdUpdateRegistrationListener {
+        public void onServiceRegistered(NsdServiceInfo serviceInfo);
 
-        public void onFailure(int errorCode);
-
-        public void onServiceUpdated(int registeredId, DnsSdTxtRecord txtRecord);
+        public void onServiceUnregistered(NsdServiceInfo serviceInfo);
     }
 
     /** Interface for callback invocation for service resolution */
-    public interface DnsSdResolveListener {
+    public interface ResolveListener {
 
-        public void onFailure(int errorCode);
+        public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode);
 
-        public void onServiceResolved(DnsSdServiceInfo serviceInfo);
+        public void onServiceResolved(NsdServiceInfo serviceInfo);
     }
 
-    /**
-     * A channel that connects the application to the NetworkService framework.
-     * Most service operations require a Channel as an argument. An instance of Channel is obtained
-     * by doing a call on {@link #initialize}
-     */
-    public static class Channel {
-        Channel(Looper looper, ChannelListener l) {
-            mAsyncChannel = new AsyncChannel();
-            mHandler = new ServiceHandler(looper);
-            mChannelListener = l;
+    private class ServiceHandler extends Handler {
+        ServiceHandler(Looper looper) {
+            super(looper);
         }
-        private ChannelListener mChannelListener;
-        private DnsSdDiscoveryListener mDnsSdDiscoveryListener;
-        private ActionListener mDnsSdStopDiscoveryListener;
-        private DnsSdRegisterListener mDnsSdRegisterListener;
-        private ActionListener mDnsSdUnregisterListener;
-        private DnsSdUpdateRegistrationListener mDnsSdUpdateListener;
-        private DnsSdResolveListener mDnsSdResolveListener;
-        private ActionListener mDnsSdStopResolveListener;
 
-        private AsyncChannel mAsyncChannel;
-        private ServiceHandler mHandler;
-        class ServiceHandler extends Handler {
-            ServiceHandler(Looper looper) {
-                super(looper);
+        @Override
+        public void handleMessage(Message message) {
+            Object listener = getListener(message.arg2);
+            boolean listenerRemove = true;
+            switch (message.what) {
+                case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
+                    mAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
+                    mConnected.countDown();
+                    break;
+                case AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED:
+                    // Ignore
+                    break;
+                case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
+                    Log.e(TAG, "Channel lost");
+                    break;
+                case DISCOVER_SERVICES_STARTED:
+                    String s = ((NsdServiceInfo) message.obj).getServiceType();
+                    ((DiscoveryListener) listener).onDiscoveryStarted(s);
+                    // Keep listener until stop discovery
+                    listenerRemove = false;
+                    break;
+                case DISCOVER_SERVICES_FAILED:
+                    ((DiscoveryListener) listener).onStartDiscoveryFailed(
+                            getNsdService(message.arg2).getServiceType(), message.arg1);
+                    break;
+                case SERVICE_FOUND:
+                    ((DiscoveryListener) listener).onServiceFound((NsdServiceInfo) message.obj);
+                    // Keep listener until stop discovery
+                    listenerRemove = false;
+                    break;
+                case SERVICE_LOST:
+                    ((DiscoveryListener) listener).onServiceLost((NsdServiceInfo) message.obj);
+                    // Keep listener until stop discovery
+                    listenerRemove = false;
+                    break;
+                case STOP_DISCOVERY_FAILED:
+                    ((DiscoveryListener) listener).onStopDiscoveryFailed(
+                            getNsdService(message.arg2).getServiceType(), message.arg1);
+                    break;
+                case STOP_DISCOVERY_SUCCEEDED:
+                    ((DiscoveryListener) listener).onDiscoveryStopped(
+                            getNsdService(message.arg2).getServiceType());
+                    break;
+                case REGISTER_SERVICE_FAILED:
+                    ((RegistrationListener) listener).onRegistrationFailed(
+                            getNsdService(message.arg2), message.arg1);
+                    break;
+                case REGISTER_SERVICE_SUCCEEDED:
+                    ((RegistrationListener) listener).onServiceRegistered(
+                            (NsdServiceInfo) message.obj);
+                    // Keep listener until unregister
+                    listenerRemove = false;
+                    break;
+                case UNREGISTER_SERVICE_FAILED:
+                    ((RegistrationListener) listener).onUnregistrationFailed(
+                            getNsdService(message.arg2), message.arg1);
+                    break;
+                case UNREGISTER_SERVICE_SUCCEEDED:
+                    ((RegistrationListener) listener).onServiceUnregistered(
+                            getNsdService(message.arg2));
+                    break;
+                case RESOLVE_SERVICE_FAILED:
+                    ((ResolveListener) listener).onResolveFailed(
+                            getNsdService(message.arg2), message.arg1);
+                    break;
+                case RESOLVE_SERVICE_SUCCEEDED:
+                    ((ResolveListener) listener).onServiceResolved((NsdServiceInfo) message.obj);
+                    break;
+                default:
+                    Log.d(TAG, "Ignored " + message);
+                    break;
             }
-
-            @Override
-            public void handleMessage(Message message) {
-                switch (message.what) {
-                    case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
-                        mAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
-                        break;
-                    case AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED:
-                        if (mChannelListener != null) {
-                            mChannelListener.onChannelConnected(Channel.this);
-                        }
-                        break;
-                    case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
-                        if (mChannelListener != null) {
-                            mChannelListener.onChannelDisconnected();
-                            mChannelListener = null;
-                        }
-                        break;
-                    case DISCOVER_SERVICES_STARTED:
-                        if (mDnsSdDiscoveryListener != null) {
-                            mDnsSdDiscoveryListener.onStarted((String) message.obj);
-                        }
-                        break;
-                    case DISCOVER_SERVICES_FAILED:
-                        if (mDnsSdDiscoveryListener != null) {
-                            mDnsSdDiscoveryListener.onFailure(message.arg1);
-                        }
-                        break;
-                    case SERVICE_FOUND:
-                        if (mDnsSdDiscoveryListener != null) {
-                            mDnsSdDiscoveryListener.onServiceFound(
-                                    (DnsSdServiceInfo) message.obj);
-                        }
-                        break;
-                    case SERVICE_LOST:
-                        if (mDnsSdDiscoveryListener != null) {
-                            mDnsSdDiscoveryListener.onServiceLost(
-                                    (DnsSdServiceInfo) message.obj);
-                        }
-                        break;
-                    case STOP_DISCOVERY_FAILED:
-                        if (mDnsSdStopDiscoveryListener != null) {
-                            mDnsSdStopDiscoveryListener.onFailure(message.arg1);
-                        }
-                        break;
-                    case STOP_DISCOVERY_SUCCEEDED:
-                        if (mDnsSdStopDiscoveryListener != null) {
-                            mDnsSdStopDiscoveryListener.onSuccess();
-                        }
-                        break;
-                    case REGISTER_SERVICE_FAILED:
-                        if (mDnsSdRegisterListener != null) {
-                            mDnsSdRegisterListener.onFailure(message.arg1);
-                        }
-                        break;
-                    case REGISTER_SERVICE_SUCCEEDED:
-                        if (mDnsSdRegisterListener != null) {
-                            mDnsSdRegisterListener.onServiceRegistered(message.arg1,
-                                    (DnsSdServiceInfo) message.obj);
-                        }
-                        break;
-                    case UNREGISTER_SERVICE_FAILED:
-                        if (mDnsSdUnregisterListener != null) {
-                            mDnsSdUnregisterListener.onFailure(message.arg1);
-                        }
-                        break;
-                    case UNREGISTER_SERVICE_SUCCEEDED:
-                        if (mDnsSdUnregisterListener != null) {
-                            mDnsSdUnregisterListener.onSuccess();
-                        }
-                        break;
-                   case UPDATE_SERVICE_FAILED:
-                        if (mDnsSdUpdateListener != null) {
-                            mDnsSdUpdateListener.onFailure(message.arg1);
-                        }
-                        break;
-                    case UPDATE_SERVICE_SUCCEEDED:
-                        if (mDnsSdUpdateListener != null) {
-                            mDnsSdUpdateListener.onServiceUpdated(message.arg1,
-                                    (DnsSdTxtRecord) message.obj);
-                        }
-                        break;
-                    case RESOLVE_SERVICE_FAILED:
-                        if (mDnsSdResolveListener != null) {
-                            mDnsSdResolveListener.onFailure(message.arg1);
-                        }
-                        break;
-                    case RESOLVE_SERVICE_SUCCEEDED:
-                        if (mDnsSdResolveListener != null) {
-                            mDnsSdResolveListener.onServiceResolved(
-                                    (DnsSdServiceInfo) message.obj);
-                        }
-                        break;
-                    case STOP_RESOLVE_FAILED:
-                        if (mDnsSdStopResolveListener!= null) {
-                            mDnsSdStopResolveListener.onFailure(message.arg1);
-                        }
-                        break;
-                    case STOP_RESOLVE_SUCCEEDED:
-                        if (mDnsSdStopResolveListener != null) {
-                            mDnsSdStopResolveListener.onSuccess();
-                        }
-                        break;
-                    default:
-                        Log.d(TAG, "Ignored " + message);
-                        break;
-                }
+            if (listenerRemove) {
+                removeListener(message.arg2);
             }
         }
-   }
-
-    private static void checkChannel(Channel c) {
-        if (c == null) throw new IllegalArgumentException("Channel needs to be initialized");
     }
 
+    private int putListener(Object listener, NsdServiceInfo s) {
+        if (listener == null) return INVALID_LISTENER_KEY;
+        int key;
+        synchronized (mMapLock) {
+            do {
+                key = mListenerKey++;
+            } while (key == INVALID_LISTENER_KEY);
+            mListenerMap.put(key, listener);
+            mServiceMap.put(key, s);
+        }
+        return key;
+    }
+
+    private Object getListener(int key) {
+        if (key == INVALID_LISTENER_KEY) return null;
+        synchronized (mMapLock) {
+            return mListenerMap.get(key);
+        }
+    }
+
+    private NsdServiceInfo getNsdService(int key) {
+        synchronized (mMapLock) {
+            return mServiceMap.get(key);
+        }
+    }
+
+    private void removeListener(int key) {
+        if (key == INVALID_LISTENER_KEY) return;
+        synchronized (mMapLock) {
+            mListenerMap.remove(key);
+            mServiceMap.remove(key);
+        }
+    }
+
+    private int getListenerKey(Object listener) {
+        synchronized (mMapLock) {
+            int valueIndex = mListenerMap.indexOfValue(listener);
+            if (valueIndex != -1) {
+                return mListenerMap.keyAt(valueIndex);
+            }
+        }
+        return INVALID_LISTENER_KEY;
+    }
+
+
     /**
-     * Registers the application with the service discovery framework. This function
-     * must be the first to be called before any other operations are performed. No service
-     * discovery operations must be performed until the ChannelListener callback notifies
-     * that the channel is connected
-     *
-     * @param srcContext is the context of the source
-     * @param srcLooper is the Looper on which the callbacks are receivied
-     * @param listener for callback at loss of framework communication. Cannot be null.
+     * Initialize AsyncChannel
      */
-    public void initialize(Context srcContext, Looper srcLooper, ChannelListener listener) {
-        Messenger messenger = getMessenger();
+    private void init() {
+        final Messenger messenger = getMessenger();
         if (messenger == null) throw new RuntimeException("Failed to initialize");
-        if (listener == null) throw new IllegalArgumentException("ChannelListener cannot be null");
-
-        Channel c = new Channel(srcLooper, listener);
-        c.mAsyncChannel.connect(srcContext, c.mHandler, messenger);
-    }
-
-    /**
-     * Disconnects application from service discovery framework. No further operations
-     * will succeed until a {@link #initialize} is called again.
-     *
-     * @param c channel initialized with {@link #initialize}
-     */
-    public void deinitialize(Channel c) {
-        checkChannel(c);
-        c.mAsyncChannel.disconnect();
+        HandlerThread t = new HandlerThread("NsdManager");
+        t.start();
+        mHandler = new ServiceHandler(t.getLooper());
+        mAsyncChannel.connect(mContext, mHandler, messenger);
+        try {
+            mConnected.await();
+        } catch (InterruptedException e) {
+            Log.e(TAG, "interrupted wait at init");
+        }
     }
 
     /**
@@ -510,45 +444,51 @@ public class NsdManager {
      *
      * <p> The function call immediately returns after sending a request to register service
      * to the framework. The application is notified of a success to initiate
-     * discovery through the callback {@link DnsSdRegisterListener#onServiceRegistered} or a failure
-     * through {@link DnsSdRegisterListener#onFailure}.
+     * discovery through the callback {@link RegistrationListener#onServiceRegistered} or a failure
+     * through {@link RegistrationListener#onRegistrationFailed}.
      *
-     * @param c is the channel created at {@link #initialize}
-     * @param serviceType The service type being advertised.
-     * @param port on which the service is listenering for incoming connections
-     * @param listener for success or failure callback. Can be null.
+     * @param serviceInfo The service being registered
+     * @param protocolType The service discovery protocol
+     * @param listener The listener notifies of a successful registration and is used to
+     * unregister this service through a call on {@link #unregisterService}. Cannot be null.
      */
-    public void registerService(Channel c, String serviceName, String serviceType, int port,
-            DnsSdRegisterListener listener) {
-        checkChannel(c);
-        if (TextUtils.isEmpty(serviceName) || TextUtils.isEmpty(serviceType)) {
+    public void registerService(NsdServiceInfo serviceInfo, int protocolType,
+            RegistrationListener listener) {
+        if (TextUtils.isEmpty(serviceInfo.getServiceName()) ||
+                TextUtils.isEmpty(serviceInfo.getServiceType())) {
             throw new IllegalArgumentException("Service name or type cannot be empty");
         }
-        if (port <= 0) {
+        if (serviceInfo.getPort() <= 0) {
             throw new IllegalArgumentException("Invalid port number");
         }
-        DnsSdServiceInfo serviceInfo = new DnsSdServiceInfo(serviceName, serviceType, null);
-        serviceInfo.setPort(port);
-        c.mDnsSdRegisterListener = listener;
-        c.mAsyncChannel.sendMessage(REGISTER_SERVICE, serviceInfo);
+        if (listener == null) {
+            throw new IllegalArgumentException("listener cannot be null");
+        }
+        if (protocolType != PROTOCOL_DNS_SD) {
+            throw new IllegalArgumentException("Unsupported protocol");
+        }
+        mAsyncChannel.sendMessage(REGISTER_SERVICE, 0, putListener(listener, serviceInfo),
+                serviceInfo);
     }
 
     /**
-     * Unregister a service registered through {@link #registerService}
-     * @param c is the channel created at {@link #initialize}
-     * @param registeredId is obtained at {@link DnsSdRegisterListener#onServiceRegistered}
-     * @param listener provides callbacks for success or failure. Can be null.
+     * Unregister a service registered through {@link #registerService}. A successful
+     * unregister is notified to the application with a call to
+     * {@link RegistrationListener#onServiceUnregistered}.
+     *
+     * @param listener This should be the listener object that was passed to
+     * {@link #registerService}. It identifies the service that should be unregistered
+     * and notifies of a successful unregistration.
      */
-    public void unregisterService(Channel c, int registeredId, ActionListener listener) {
-        checkChannel(c);
-        c.mDnsSdUnregisterListener = listener;
-        c.mAsyncChannel.sendMessage(UNREGISTER_SERVICE, registeredId);
-    }
-
-    /** @hide */
-    public void updateService(Channel c, int registeredId, DnsSdTxtRecord txtRecord) {
-        checkChannel(c);
-        c.mAsyncChannel.sendMessage(UPDATE_SERVICE, registeredId, 0, txtRecord);
+    public void unregisterService(RegistrationListener listener) {
+        int id = getListenerKey(listener);
+        if (id == INVALID_LISTENER_KEY) {
+            throw new IllegalArgumentException("listener not registered");
+        }
+        if (listener == null) {
+            throw new IllegalArgumentException("listener cannot be null");
+        }
+        mAsyncChannel.sendMessage(UNREGISTER_SERVICE, 0, id);
     }
 
     /**
@@ -558,51 +498,61 @@ public class NsdManager {
      *
      * <p> The function call immediately returns after sending a request to start service
      * discovery to the framework. The application is notified of a success to initiate
-     * discovery through the callback {@link DnsSdDiscoveryListener#onStarted} or a failure
-     * through {@link DnsSdDiscoveryListener#onFailure}.
+     * discovery through the callback {@link DiscoveryListener#onDiscoveryStarted} or a failure
+     * through {@link DiscoveryListener#onStartDiscoveryFailed}.
      *
      * <p> Upon successful start, application is notified when a service is found with
-     * {@link DnsSdDiscoveryListener#onServiceFound} or when a service is lost with
-     * {@link DnsSdDiscoveryListener#onServiceLost}.
+     * {@link DiscoveryListener#onServiceFound} or when a service is lost with
+     * {@link DiscoveryListener#onServiceLost}.
      *
      * <p> Upon failure to start, service discovery is not active and application does
      * not need to invoke {@link #stopServiceDiscovery}
      *
-     * @param c is the channel created at {@link #initialize}
      * @param serviceType The service type being discovered. Examples include "_http._tcp" for
      * http services or "_ipp._tcp" for printers
-     * @param listener provides callbacks when service is found or lost. Cannot be null.
+     * @param protocolType The service discovery protocol
+     * @param listener  The listener notifies of a successful discovery and is used
+     * to stop discovery on this serviceType through a call on {@link #stopServiceDiscovery}.
+     * Cannot be null.
      */
-    public void discoverServices(Channel c, String serviceType, DnsSdDiscoveryListener listener) {
-        checkChannel(c);
+    public void discoverServices(String serviceType, int protocolType, DiscoveryListener listener) {
         if (listener == null) {
-            throw new IllegalStateException("Discovery listener needs to be set first");
+            throw new IllegalArgumentException("listener cannot be null");
         }
         if (TextUtils.isEmpty(serviceType)) {
-            throw new IllegalStateException("Service type cannot be empty");
+            throw new IllegalArgumentException("Service type cannot be empty");
         }
-        DnsSdServiceInfo s = new DnsSdServiceInfo();
+
+        if (protocolType != PROTOCOL_DNS_SD) {
+            throw new IllegalArgumentException("Unsupported protocol");
+        }
+
+        NsdServiceInfo s = new NsdServiceInfo();
         s.setServiceType(serviceType);
-        c.mDnsSdDiscoveryListener = listener;
-        c.mAsyncChannel.sendMessage(DISCOVER_SERVICES, s);
+        mAsyncChannel.sendMessage(DISCOVER_SERVICES, 0, putListener(listener, s), s);
     }
 
     /**
      * Stop service discovery initiated with {@link #discoverServices}. An active service
-     * discovery is notified to the application with {@link DnsSdDiscoveryListener#onStarted}
-     * and it stays active until the application invokes a stop service discovery.
+     * discovery is notified to the application with {@link DiscoveryListener#onDiscoveryStarted}
+     * and it stays active until the application invokes a stop service discovery. A successful
+     * stop is notified to with a call to {@link DiscoveryListener#onDiscoveryStopped}.
      *
-     * <p> Upon failure to start service discovery notified through
-     * {@link DnsSdDiscoveryListener#onFailure} service discovery is not active and
-     * application does not need to stop it.
+     * <p> Upon failure to stop service discovery, application is notified through
+     * {@link DiscoveryListener#onStopDiscoveryFailed}.
      *
-     * @param c is the channel created at {@link #initialize}
-     * @param listener notifies success or failure. Can be null.
+     * @param listener This should be the listener object that was passed to {@link #discoverServices}.
+     * It identifies the discovery that should be stopped and notifies of a successful stop.
      */
-    public void stopServiceDiscovery(Channel c, ActionListener listener) {
-        checkChannel(c);
-        c.mDnsSdStopDiscoveryListener = listener;
-        c.mAsyncChannel.sendMessage(STOP_DISCOVERY);
+    public void stopServiceDiscovery(DiscoveryListener listener) {
+        int id = getListenerKey(listener);
+        if (id == INVALID_LISTENER_KEY) {
+            throw new IllegalArgumentException("service discovery not active on listener");
+        }
+        if (listener == null) {
+            throw new IllegalArgumentException("listener cannot be null");
+        }
+        mAsyncChannel.sendMessage(STOP_DISCOVERY, 0, id);
     }
 
     /**
@@ -610,30 +560,19 @@ public class NsdManager {
      * establishing a connection to fetch the IP and port details on which to setup
      * the connection.
      *
-     * @param c is the channel created at {@link #initialize}
-     * @param serviceName of the the service
-     * @param serviceType of the service
+     * @param serviceInfo service to be resolved
      * @param listener to receive callback upon success or failure. Cannot be null.
      */
-    public void resolveService(Channel c, String serviceName, String serviceType,
-            DnsSdResolveListener listener) {
-        checkChannel(c);
-        if (TextUtils.isEmpty(serviceName) || TextUtils.isEmpty(serviceType)) {
+    public void resolveService(NsdServiceInfo serviceInfo, ResolveListener listener) {
+        if (TextUtils.isEmpty(serviceInfo.getServiceName()) ||
+                TextUtils.isEmpty(serviceInfo.getServiceType())) {
             throw new IllegalArgumentException("Service name or type cannot be empty");
         }
-        if (listener == null) throw new
-                IllegalStateException("Resolve listener cannot be null");
-        c.mDnsSdResolveListener = listener;
-        DnsSdServiceInfo serviceInfo = new DnsSdServiceInfo(serviceName, serviceType, null);
-        c.mAsyncChannel.sendMessage(RESOLVE_SERVICE, serviceInfo);
-    }
-
-    /** @hide */
-    public void stopServiceResolve(Channel c) {
-        checkChannel(c);
-        if (c.mDnsSdResolveListener == null) throw new
-                IllegalStateException("Resolve listener needs to be set first");
-        c.mAsyncChannel.sendMessage(STOP_RESOLVE);
+        if (listener == null) {
+            throw new IllegalArgumentException("listener cannot be null");
+        }
+        mAsyncChannel.sendMessage(RESOLVE_SERVICE, 0, putListener(listener, serviceInfo),
+                serviceInfo);
     }
 
     /** Internal use only @hide */

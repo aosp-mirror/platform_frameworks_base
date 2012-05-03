@@ -25,7 +25,7 @@ import java.net.InetAddress;
  * A class representing service information for network service discovery
  * {@see NsdManager}
  */
-public class DnsSdServiceInfo implements NetworkServiceInfo, Parcelable {
+public final class NsdServiceInfo implements Parcelable {
 
     private String mServiceName;
 
@@ -37,36 +37,32 @@ public class DnsSdServiceInfo implements NetworkServiceInfo, Parcelable {
 
     private int mPort;
 
-    public DnsSdServiceInfo() {
+    public NsdServiceInfo() {
     }
 
     /** @hide */
-    public DnsSdServiceInfo(String sn, String rt, DnsSdTxtRecord tr) {
+    public NsdServiceInfo(String sn, String rt, DnsSdTxtRecord tr) {
         mServiceName = sn;
         mServiceType = rt;
         mTxtRecord = tr;
     }
 
     /** Get the service name */
-    @Override
     public String getServiceName() {
         return mServiceName;
     }
 
     /** Set the service name */
-    @Override
     public void setServiceName(String s) {
         mServiceName = s;
     }
 
     /** Get the service type */
-    @Override
     public String getServiceType() {
         return mServiceType;
     }
 
     /** Set the service type */
-    @Override
     public void setServiceType(String s) {
         mServiceType = s;
     }
@@ -132,10 +128,10 @@ public class DnsSdServiceInfo implements NetworkServiceInfo, Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final Creator<DnsSdServiceInfo> CREATOR =
-        new Creator<DnsSdServiceInfo>() {
-            public DnsSdServiceInfo createFromParcel(Parcel in) {
-                DnsSdServiceInfo info = new DnsSdServiceInfo();
+    public static final Creator<NsdServiceInfo> CREATOR =
+        new Creator<NsdServiceInfo>() {
+            public NsdServiceInfo createFromParcel(Parcel in) {
+                NsdServiceInfo info = new NsdServiceInfo();
                 info.mServiceName = in.readString();
                 info.mServiceType = in.readString();
                 info.mTxtRecord = in.readParcelable(null);
@@ -150,8 +146,8 @@ public class DnsSdServiceInfo implements NetworkServiceInfo, Parcelable {
                 return info;
             }
 
-            public DnsSdServiceInfo[] newArray(int size) {
-                return new DnsSdServiceInfo[size];
+            public NsdServiceInfo[] newArray(int size) {
+                return new NsdServiceInfo[size];
             }
         };
 }
