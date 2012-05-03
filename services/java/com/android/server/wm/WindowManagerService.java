@@ -512,6 +512,7 @@ public class WindowManagerService extends IWindowManager.Stub
     int mNextAppTransitionType = ActivityOptions.ANIM_NONE;
     String mNextAppTransitionPackage;
     Bitmap mNextAppTransitionThumbnail;
+    boolean mNextAppTransitionDelayed;
     IRemoteCallback mNextAppTransitionCallback;
     int mNextAppTransitionEnter;
     int mNextAppTransitionExit;
@@ -3176,7 +3177,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private Animation createThumbnailAnimationLocked(int transit,
-            boolean enter, boolean thumb) {
+            boolean enter, boolean thumb, boolean delayed) {
         Animation a;
         final int thumbWidthI = mNextAppTransitionThumbnail.getWidth();
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
@@ -3186,6 +3187,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // it  is the standard duration for that.  Otherwise we use the longer
         // task transition duration.
         int duration;
+        int delayDuration = delayed ? 200 : 0;
         switch (transit) {
             case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
             case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
@@ -3193,7 +3195,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         com.android.internal.R.integer.config_shortAnimTime);
                 break;
             default:
-                duration = 300;
+                duration = delayed ? 200 : 300;
                 break;
         }
         if (thumb) {
@@ -3201,6 +3203,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // filling the screen.
             float scaleW = mAppDisplayWidth/thumbWidth;
             float scaleH = mAppDisplayHeight/thumbHeight;
+
             Animation scale = new ScaleAnimation(1, scaleW, 1, scaleH,
                     computePivot(mNextAppTransitionStartX, 1/scaleW),
                     computePivot(mNextAppTransitionStartY, 1/scaleH));
@@ -3210,17 +3213,38 @@ public class WindowManagerService extends IWindowManager.Stub
             set.addAnimation(scale);
             alpha.setDuration(duration);
             set.addAnimation(alpha);
+            set.setFillBefore(true);
+            if (delayDuration > 0) {
+                set.setStartOffset(delayDuration);
+            }
             a = set;
         } else if (enter) {
             // Entering app zooms out from the center of the thumbnail.
-            float scaleW = thumbWidth/mAppDisplayWidth;
-            float scaleH = thumbHeight/mAppDisplayHeight;
-            a = new ScaleAnimation(scaleW, 1, scaleH, 1,
+            float scaleW = thumbWidth / mAppDisplayWidth;
+            float scaleH = thumbHeight / mAppDisplayHeight;
+            AnimationSet set = new AnimationSet(true);
+            Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
                     computePivot(mNextAppTransitionStartX, scaleW),
                     computePivot(mNextAppTransitionStartY, scaleH));
-            a.setDuration(duration);
+            scale.setDuration(duration);
+            scale.setFillBefore(true);
+            set.addAnimation(scale);
+            // Need to set an alpha animation on the entering app window
+            // in case it appears one frame before the thumbnail window
+            // (this solves flicker)
+            Animation alpha = new AlphaAnimation(0, 1);
+            alpha.setDuration(1);
+            alpha.setFillAfter(true);
+            set.addAnimation(alpha);
+            a = set;
+            if (delayDuration > 0) {
+                a.setStartOffset(delayDuration);
+            }
         } else {
             a = createExitAnimationLocked(transit, duration);
+            if (delayDuration > 0) {
+                a.setStartOffset(delayDuration);
+            }
         }
         a.setFillAfter(true);
         final Interpolator interpolator = AnimationUtils.loadInterpolator(mContext,
@@ -3252,12 +3276,18 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_ANIM) Slog.v(TAG, "applyAnimation: wtoken=" + wtoken
                         + " anim=" + a + " nextAppTransition=ANIM_SCALE_UP"
                         + " transit=" + transit + " Callers " + Debug.getCallers(3));
-            } else if (mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL) {
-                a = createThumbnailAnimationLocked(transit, enter, false);
+            } else if (mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL ||
+                    mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_DELAYED) {
+                boolean delayed = (mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_DELAYED);
+                a = createThumbnailAnimationLocked(transit, enter, false, delayed);
                 initialized = true;
-                if (DEBUG_ANIM) Slog.v(TAG, "applyAnimation: wtoken=" + wtoken
-                        + " anim=" + a + " nextAppTransition=ANIM_THUMBNAIL"
-                        + " transit=" + transit + " Callers " + Debug.getCallers(3));
+
+                if (DEBUG_ANIM) {
+                    String animName = delayed ? "ANIM_THUMBNAIL_DELAYED" : "ANIM_THUMBNAIL";
+                    Slog.v(TAG, "applyAnimation: wtoken=" + wtoken
+                            + " anim=" + a + " nextAppTransition=" + animName
+                            + " transit=" + transit + " Callers " + Debug.getCallers(3));
+                }
             } else {
                 int animAttr = 0;
                 switch (transit) {
@@ -3879,11 +3909,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX,
-            int startY, IRemoteCallback startedCallback) {
+            int startY, IRemoteCallback startedCallback, boolean delayed) {
         if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
-            mNextAppTransitionType = ActivityOptions.ANIM_THUMBNAIL;
+            mNextAppTransitionType =
+                    delayed ? ActivityOptions.ANIM_THUMBNAIL_DELAYED : ActivityOptions.ANIM_THUMBNAIL;
             mNextAppTransitionPackage = null;
             mNextAppTransitionThumbnail = srcThumb;
+            mNextAppTransitionDelayed = delayed;
             mNextAppTransitionStartX = startX;
             mNextAppTransitionStartY = startY;
             mNextAppTransitionCallback = startedCallback;
@@ -8024,7 +8056,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     drawSurface.unlockCanvasAndPost(c);
                     drawSurface.release();
                     topOpeningApp.mAppAnimator.thumbnailLayer = topOpeningLayer;
-                    Animation anim = createThumbnailAnimationLocked(transit, true, true);
+                    Animation anim = createThumbnailAnimationLocked(
+                            transit, true, true, mNextAppTransitionDelayed);
                     topOpeningApp.mAppAnimator.thumbnailAnimation = anim;
                     anim.restrictDuration(MAX_ANIMATION_DURATION);
                     anim.scaleCurrentDuration(mTransitionAnimationScale);
@@ -9602,10 +9635,12 @@ public class WindowManagerService extends IWindowManager.Stub
                             pw.println(mNextAppTransitionStartHeight);
                     break;
                 case ActivityOptions.ANIM_THUMBNAIL:
+                case ActivityOptions.ANIM_THUMBNAIL_DELAYED:
                     pw.print("  mNextAppTransitionThumbnail=");
                             pw.print(mNextAppTransitionThumbnail);
                             pw.print(" mNextAppTransitionStartX="); pw.print(mNextAppTransitionStartX);
                             pw.print(" mNextAppTransitionStartY="); pw.println(mNextAppTransitionStartY);
+                            pw.print(" mNextAppTransitionDelayed="); pw.println(mNextAppTransitionDelayed);
                     break;
             }
             pw.print("  mStartingIconInTransition="); pw.print(mStartingIconInTransition);

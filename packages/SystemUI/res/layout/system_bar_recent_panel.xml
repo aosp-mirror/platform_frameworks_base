@@ -39,6 +39,12 @@
         android:clipToPadding="false"
         android:clipChildren="false">
 
+        <ImageView
+            android:id="@+id/recents_transition_placeholder_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible" />
+
         <com.android.systemui.recent.RecentsVerticalScrollView android:id="@+id/recents_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
