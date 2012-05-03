@@ -16,16 +16,19 @@
 
 package android.app;
 
-import com.android.internal.R;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.DatePicker.OnDateChangedListener;
+
+import com.android.internal.R;
+
+import java.util.Calendar;
 
 /**
  * A simple dialog containing an {@link android.widget.DatePicker}.
@@ -42,6 +45,9 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
 
     private final DatePicker mDatePicker;
     private final OnDateSetListener mCallBack;
+    private final Calendar mCalendar;
+
+    private boolean mTitleNeedsUpdate = true;
 
     /**
      * The callback used to indicate the user is done filling in the date.
@@ -91,10 +97,11 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
 
         mCallBack = callBack;
 
+        mCalendar = Calendar.getInstance();
+
         Context themeContext = getContext();
         setButton(BUTTON_POSITIVE, themeContext.getText(R.string.date_time_done), this);
         setIcon(0);
-        setTitle(R.string.date_picker_dialog_title);
 
         LayoutInflater inflater =
                 (LayoutInflater) themeContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -102,6 +109,7 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
         setView(view);
         mDatePicker = (DatePicker) view.findViewById(R.id.datePicker);
         mDatePicker.init(year, monthOfYear, dayOfMonth, this);
+        updateTitle(year, monthOfYear, dayOfMonth);
     }
 
     public void onClick(DialogInterface dialog, int which) {
@@ -110,7 +118,8 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
 
     public void onDateChanged(DatePicker view, int year,
             int month, int day) {
-        mDatePicker.init(year, month, day, null);
+        mDatePicker.init(year, month, day, this);
+        updateTitle(year, month, day);
     }
 
     /**
@@ -145,6 +154,28 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
     protected void onStop() {
         tryNotifyDateSet();
         super.onStop();
+    }
+
+    private void updateTitle(int year, int month, int day) {
+        if (!mDatePicker.getCalendarViewShown()) {
+            mCalendar.set(Calendar.YEAR, year);
+            mCalendar.set(Calendar.MONTH, month);
+            mCalendar.set(Calendar.DAY_OF_MONTH, day);
+            String title = DateUtils.formatDateTime(mContext,
+                    mCalendar.getTimeInMillis(),
+                    DateUtils.FORMAT_SHOW_DATE
+                    | DateUtils.FORMAT_SHOW_WEEKDAY
+                    | DateUtils.FORMAT_SHOW_YEAR
+                    | DateUtils.FORMAT_ABBREV_MONTH
+                    | DateUtils.FORMAT_ABBREV_WEEKDAY);
+            setTitle(title);
+            mTitleNeedsUpdate = true;
+        } else {
+            if (mTitleNeedsUpdate) {
+                mTitleNeedsUpdate = false;
+                setTitle(R.string.date_picker_dialog_title);
+            }
+        }
     }
 
     @Override
