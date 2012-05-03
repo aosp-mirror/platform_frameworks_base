@@ -223,7 +223,7 @@ public class TabletTicker
             windowFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
         }
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(width, mLargeIconHeight,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL, windowFlags,
+                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL, windowFlags,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
 //        lp.windowAnimations = com.android.internal.R.style.Animation_Toast;
