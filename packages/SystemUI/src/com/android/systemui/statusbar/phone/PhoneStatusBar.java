@@ -46,6 +46,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.IWindowManager;
@@ -61,6 +62,7 @@ import android.view.WindowManagerImpl;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
@@ -158,6 +160,9 @@ public class PhoneStatusBar extends BaseStatusBar {
     View mNotificationPanel; // the sliding/resizing panel within the notification window
     ScrollView mScrollView;
     View mExpandedContents;
+    int mNotificationPanelMarginBottomPx, mNotificationPanelMarginLeftPx;
+    int mNotificationPanelGravity;
+
     // top bar
     View mClearButton;
     View mSettingsButton;
@@ -279,6 +284,17 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (DEBUG) {
             mStatusBarWindow.setBackgroundColor(0x6000FF80);
         }
+        mStatusBarWindow.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (mExpanded && !mAnimating) {
+                        animateCollapse();
+                    }
+                }
+                return true;
+            }});
+
         mStatusBarView = (PhoneStatusBarView) mStatusBarWindow.findViewById(R.id.status_bar);
         mNotificationPanel = mStatusBarWindow.findViewById(R.id.notification_panel);
 
@@ -1111,7 +1127,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         // Expand the window to encompass the full screen in anticipation of the drag.
         // This is only possible to do atomically because the status bar is at the top of the screen!
         WindowManager.LayoutParams lp = (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
-        lp.height = mDisplayMetrics.heightPixels;
+        lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
         final WindowManager wm = WindowManagerImpl.getDefault();
         wm.updateViewLayout(mStatusBarWindow, lp);
 
@@ -1162,7 +1178,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mAnimating) {
             y = (int)mAnimY;
         } else {
-            y = mDisplayMetrics.heightPixels-1;
+            y = getExpandedViewMaxHeight()-1;
         }
         // Let the fling think that we're open so it goes in the right direction
         // and doesn't try to re-open the windowshade.
@@ -1224,7 +1240,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             if (SPEW) Slog.d(TAG, "doAnimation before mAnimY=" + mAnimY);
             incrementAnim();
             if (SPEW) Slog.d(TAG, "doAnimation after  mAnimY=" + mAnimY);
-            if (mAnimY >= mDisplayMetrics.heightPixels-1) {
+            if (mAnimY >= getExpandedViewMaxHeight()-1) {
                 if (SPEW) Slog.d(TAG, "Animation completed to expanded state.");
                 mAnimating = false;
                 updateExpandedViewPos(EXPANDED_FULL_OPEN);
@@ -1329,7 +1345,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mExpanded) {
             if (!always && (
                     vel > mFlingCollapseMinVelocityPx
-                    || (y > (mDisplayMetrics.heightPixels*(1f-mCollapseMinDisplayFraction)) &&
+                    || (y > (getExpandedViewMaxHeight()*(1f-mCollapseMinDisplayFraction)) &&
                         vel > -mFlingExpandMinVelocityPx))) {
                 // We are expanded, but they didn't move sufficiently to cause
                 // us to retract.  Animate back to the expanded position.
@@ -1348,7 +1364,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         } else {
             if (always || (
                     vel > mFlingExpandMinVelocityPx
-                    || (y > (mDisplayMetrics.heightPixels*(1f-mExpandMinDisplayFraction)) &&
+                    || (y > (getExpandedViewMaxHeight()*(1f-mExpandMinDisplayFraction)) &&
                         vel > -mFlingCollapseMinVelocityPx))) {
                 // We are collapsed, and they moved enough to allow us to
                 // expand.  Animate in the notifications.
@@ -1412,7 +1428,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 //                mViewDelta = mAbsPos[1] + mTrackingView.getHeight() - y;
             }
             if ((!mExpanded && y < hitSize) ||
-                    (mExpanded && y > (mDisplayMetrics.heightPixels-hitSize))) {
+                    // @@ add taps outside the panel if it's not full-screen
+                    (mExpanded && y > (getExpandedViewMaxHeight()-hitSize))) {
 
                 // We drop events at the edge of the screen to make the windowshade come
                 // down by accident less, especially when pushing open a device with a keyboard
@@ -1864,15 +1881,22 @@ public class PhoneStatusBar extends BaseStatusBar {
         return a < 0f ? 0f : (a > 1f ? 1f : a);
     }
 
+    int getExpandedViewMaxHeight() {
+        return mDisplayMetrics.heightPixels - mNotificationPanelMarginBottomPx;
+    }
+
     void updateExpandedViewPos(int expandedPosition) {
         if (SPEW) {
             Slog.d(TAG, "updateExpandedViewPos before expandedPosition=" + expandedPosition
                     //+ " mTrackingParams.y=" + ((mTrackingParams == null) ? "?" : mTrackingParams.y)
-                    + " mTrackingPosition=" + mTrackingPosition);
+                    + " mTrackingPosition=" + mTrackingPosition
+                    + " gravity=" + mNotificationPanelGravity);
         }
 
         int panelh = 0;
-        final int disph = mDisplayMetrics.heightPixels;
+        final boolean portrait = mDisplayMetrics.heightPixels > mDisplayMetrics.widthPixels;
+        
+        final int disph = getExpandedViewMaxHeight();
 
         // If the expanded view is not visible, make sure they're still off screen.
         // Maybe the view was resized.
@@ -1906,112 +1930,24 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mTrackingPosition = panelh;
 
-        final View cropView = mNotificationPanel;
-        ViewGroup.LayoutParams lp = cropView.getLayoutParams();
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mNotificationPanel.getLayoutParams();
         lp.height = panelh;
+        lp.gravity = mNotificationPanelGravity;
+        lp.leftMargin = mNotificationPanelMarginLeftPx;
         if (SPEW) {
-            Slog.v(TAG, "updated cropView height=" + panelh);
+            Slog.v(TAG, "updated cropView height=" + panelh + " grav=" + lp.gravity);
         }
-        cropView.setLayoutParams(lp);
+        mNotificationPanel.setLayoutParams(lp);
         // woo, special effects
         final int barh = getCloseViewHeight() + getStatusBarHeight();
         final float frac = saturate((float)(panelh - barh) / (disph - barh));
         final int color = ((int)(0xB0 * Math.sin(frac * 1.57f))) << 24;
         mStatusBarWindow.setBackgroundColor(color);
-
-//        Slog.d(TAG, String.format("updateExpanded: pos=%d frac=%.2f col=0x%08x", pos, frac, color));
-
-//        if (mExpandedParams != null) {
-//            if (mCloseView.getWindowVisibility() == View.VISIBLE) {
-//                mCloseView.getLocationInWindow(mPositionTmp);
-//                final int closePos = mPositionTmp[1];
-//
-//                mExpandedContents.getLocationInWindow(mPositionTmp);
-//                final int contentsBottom = mPositionTmp[1] + mExpandedContents.getHeight();
-//
-//                mExpandedParams.y = pos + mTrackingView.getHeight()
-//                        - (mTrackingParams.height-closePos) - contentsBottom;
-//
-//                if (SPEW) {
-//                    Slog.d(PhoneStatusBar.TAG,
-//                            "pos=" + pos +
-//                            " trackingHeight=" + mTrackingView.getHeight() +
-//                            " (trackingParams.height - closePos)=" +
-//                                (mTrackingParams.height - closePos) +
-//                            " contentsBottom=" + contentsBottom);
-//                }
-//
-//            } else {
-//                // If the tracking view is not yet visible, then we can't have
-//                // a good value of the close view location.  We need to wait for
-//                // it to be visible to do a layout.
-//                mExpandedParams.y = -mDisplayMetrics.heightPixels;
-//            }
-//            int max = h;
-//            if (mExpandedParams.y > max) {
-//                mExpandedParams.y = max;
-//            }
-//            int min = mTrackingPosition;
-//            if (mExpandedParams.y < min) {
-//                mExpandedParams.y = min;
-//            }
-//
-//            boolean visible = (mTrackingPosition + mTrackingView.getHeight()) > h;
-//            if (!visible) {
-//                // if the contents aren't visible, move the expanded view way off screen
-//                // because the window itself extends below the content view.
-//                mExpandedParams.y = -disph;
-//            }
-//            mExpandedDialog.getWindow().setAttributes(mExpandedParams);
-//
-//            // As long as this isn't just a repositioning that's not supposed to affect
-//            // the user's perception of what's showing, call to say that the visibility
-//            // has changed. (Otherwise, someone else will call to do that).
-//            if (expandedPosition != EXPANDED_LEAVE_ALONE) {
-//                if (SPEW) Slog.d(TAG, "updateExpandedViewPos visibilityChanged(" + visible + ")");
-//                visibilityChanged(visible);
-//            }
-//        }
-//
-//        if (SPEW) {
-//            Slog.d(TAG, "updateExpandedViewPos after  expandedPosition=" + expandedPosition
-//                    + " mTrackingParams.y=" + mTrackingParams.y
-//                    + " mTrackingPosition=" + mTrackingPosition
-//                    + " mExpandedParams.y=" + mExpandedParams.y
-//                    + " mExpandedParams.height=" + mExpandedParams.height);
-//        }
-    }
-
-    int getExpandedHeight() {
-        return mDisplayMetrics.heightPixels;
     }
 
     void updateDisplaySize() {
         mDisplay.getMetrics(mDisplayMetrics);
-//        if (DEBUG) {
-//            Slog.d(TAG, "updateDisplaySize: " + mDisplayMetrics);
-//        }
-//        updateExpandedSize();
     }
-
-//    void updateExpandedSize() {
-//        if (DEBUG) {
-//            Slog.d(TAG, "updateExpandedSize()");
-//        }
-//        if (mStatusBarWindow != null && mDisplayMetrics != null) {
-//            mExpandedParams.width = mDisplayMetrics.widthPixels;
-//            mExpandedParams.height = getExpandedHeight();
-//            if (!mExpandedVisible) {
-//                updateExpandedInvisiblePosition();
-//            } else {
-//                mExpandedDialog.getWindow().setAttributes(mExpandedParams);
-//            }
-//            if (DEBUG) {
-//                Slog.d(TAG, "updateExpandedSize: height=" + mExpandedParams.height + " " +
-//                    (mExpandedVisible ? "VISIBLE":"INVISIBLE"));
-//            }
-//        }
-//    }
 
     void performDisableActions(int net) {
         int old = mDisabled;
@@ -2152,8 +2088,9 @@ public class PhoneStatusBar extends BaseStatusBar {
                 animateCollapse(excludeRecents);
             }
             else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
-                repositionNavigationBar();
                 updateResources();
+                repositionNavigationBar();
+                updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
             }
         }
     };
@@ -2228,6 +2165,15 @@ public class PhoneStatusBar extends BaseStatusBar {
         mCollapseAccelPx = res.getDimension(R.dimen.collapse_accel);
 
         mFlingGestureMaxXVelocityPx = res.getDimension(R.dimen.fling_gesture_max_x_velocity);
+        
+        mNotificationPanelMarginBottomPx
+            = (int) res.getDimension(R.dimen.notification_panel_margin_bottom);
+        mNotificationPanelMarginLeftPx
+            = (int) res.getDimension(R.dimen.notification_panel_margin_left);
+        mNotificationPanelGravity = res.getInteger(R.integer.notification_panel_layout_gravity);
+        if (mNotificationPanelGravity <= 0) {
+            mNotificationPanelGravity = Gravity.CENTER_VERTICAL | Gravity.TOP; 
+        }
 
         if (false) Slog.v(TAG, "updateResources");
     }
