@@ -168,12 +168,76 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Ihre Nachrichten"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"SMS, E-Mails und andere Nachrichten lesen und schreiben"</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Ihre persönlichen Informationen"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Direkter Zugriff auf die Kontakte und den Kalender Ihres Tablets"</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Direkter Zugriff auf die Kontakte und den Kalender Ihres Telefons"</string>
+    <!-- no translation found for permgroupdesc_personalInfo (8426453129788861338) -->
+    <skip />
+    <!-- no translation found for permgrouplab_socialInfo (5799096623412043791) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_socialInfo (7129842457611643493) -->
+    <skip />
     <string name="permgrouplab_location" msgid="635149742436692049">"Ihren Standort"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Ihren physischen Standort überwachen"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Netzkommunikation"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Zugriff auf verschiedene Netzwerkfunktionen"</string>
+    <!-- no translation found for permgrouplab_shortRangeNetwork (4504840216096355984) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_shortRangeNetwork (8821013030346680806) -->
+    <skip />
+    <!-- no translation found for permgrouplab_audioSettings (8329261670151871235) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_audioSettings (2641515403347568130) -->
+    <skip />
+    <!-- no translation found for permgrouplab_affectsBattery (6209246653424798033) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_affectsBattery (6441275320638916947) -->
+    <skip />
+    <!-- no translation found for permgrouplab_calendar (5863508437783683902) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_calendar (5777534316982184416) -->
+    <skip />
+    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_dictionary (40926483968949978) -->
+    <skip />
+    <!-- no translation found for permgrouplab_bookmarks (1949519673103968229) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_bookmarks (4169771606257963028) -->
+    <skip />
+    <!-- no translation found for permgrouplab_deviceAlarms (6117704629728824101) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_deviceAlarms (4769356362251641175) -->
+    <skip />
+    <!-- no translation found for permgrouplab_voicemail (4162237145027592133) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_voicemail (2498403969862951393) -->
+    <skip />
+    <!-- no translation found for permgrouplab_microphone (171539900250043464) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_microphone (7106618286905738408) -->
+    <skip />
+    <!-- no translation found for permgrouplab_camera (4820372495894586615) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_camera (2933667372289567714) -->
+    <skip />
+    <!-- no translation found for permgrouplab_appInfo (8028789762634147725) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_appInfo (3950378538049625907) -->
+    <skip />
+    <!-- no translation found for permgrouplab_wallpaper (3850280158041175998) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_wallpaper (5630417854750540154) -->
+    <skip />
+    <!-- no translation found for permgrouplab_systemClock (406535759236612992) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_systemClock (3944359833624094992) -->
+    <skip />
+    <!-- no translation found for permgrouplab_statusBar (2095862568113945398) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_statusBar (6242593432226807171) -->
+    <skip />
+    <!-- no translation found for permgrouplab_syncSettings (3341990986147826541) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_syncSettings (7603195265129031797) -->
+    <skip />
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Ihre Konten"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Zugriff auf verfügbare Konten"</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Hardware-Steuerelemente"</string>
@@ -184,6 +248,10 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Zugriff und Steuerung des Systems auf niedrigerer Ebene."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Entwickler-Tools"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Funktionen nur für App-Entwickler vorgesehen"</string>
+    <!-- no translation found for permgrouplab_display (4279909676036402636) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_display (6051002031933013714) -->
+    <skip />
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Speicher"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Zugriff auf USB-Speicher"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Zugriff auf SD-Karte"</string>
@@ -464,7 +532,7 @@
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Ermöglicht der App, die Zeitzone des Telefons zu ändern"</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"Als Konto-Manager fungieren"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Ermöglicht der App, Anrufe an Kontoauthentifizierer zu tätigen"</string>
-    <string name="permlab_getAccounts" msgid="1086795467760122114">"Konten auf dem Gerät finden"</string>
+    <string name="permlab_getAccounts" msgid="1086795467760122114">"Konten auf dem Gerät suchen"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="3238360555257773358">"Ermöglicht der App, eine Liste der dem Tablet bekannten Konten abzurufen"</string>
     <string name="permdesc_getAccounts" product="default" msgid="2735689364629830348">"Ermöglicht der App, eine Liste der dem Telefon bekannten Konten abzurufen"</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"Konten erstellen und Passwörter festlegen"</string>
@@ -515,14 +583,14 @@
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Ermöglicht der App, Details zu den zurzeit synchronisierten Feeds abzurufen"</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"abonnierte Feeds schreiben"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Ermöglicht der App, Änderungen an kürzlich synchronisierten Feeds vorzunehmen. Schädliche Apps können so Ihre synchronisierten Feeds ändern."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"Begriffe lesen, die ich zum Wörterbuch hinzugefügt habe"</string>
+    <string name="permlab_readDictionary" msgid="4107101525746035718">"Begriffe lesen, die Sie zum Wörterbuch hinzugefügt haben"</string>
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Ermöglicht der App, alle privaten Wörter, Namen und Ausdrücke zu lesen, die ein Nutzer in seinem Wörterbuch gespeichert hat"</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"In benutzerdefiniertes Wörterbuch schreiben"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Ermöglicht der App, dem Nutzerwörterbuch neue Einträge hinzuzufügen"</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB-Speicherinhalte lesen"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"SD-Karteninhalte lesen"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Ermöglicht der App, die Inhalte des USB-Speichers, einschließlich Fotos und Medien, zu lesen"</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Ermöglicht der App, die Inhalte der SD-Karte, einschließlich Fotos und Medien, zu lesen"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Ermöglicht der App, die Inhalte des USB-Speichers einschließlich Fotos und Medien, zu lesen"</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Ermöglicht der App, die Inhalte der SD-Karte einschließlich Fotos und Medien, zu lesen"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB-Speicherinhalte ändern oder löschen"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"SD-Karteninhalte ändern oder löschen"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Ermöglicht der App, in den USB-Speicher zu schreiben"</string>
@@ -702,6 +770,8 @@
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Keine SIM-Karte im Telefon"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Legen Sie eine SIM-Karte ein."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-Karte fehlt oder ist nicht lesbar. Bitte legen Sie eine SIM-Karte ein."</string>
+    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (5096149665138916184) -->
+    <skip />
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Ihre SIM-Karte wurde dauerhaft deaktiviert."\n" Wenden Sie sich an Ihren Mobilfunkanbieter, um eine andere SIM-Karte zu erhalten."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Schaltfläche für vorherigen Track"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Schaltfläche für nächsten Track"</string>
