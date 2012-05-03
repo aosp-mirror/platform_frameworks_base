@@ -7593,6 +7593,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
                 case UPDATE_CONTENT_BOUNDS:
                     mEditTextContentBounds.set((Rect) msg.obj);
+                    nativeMapLayerRect(mNativeClass, mEditTextLayerId,
+                            mEditTextContentBounds);
                     break;
 
                 case SCROLL_EDIT_TEXT:
@@ -7618,6 +7620,26 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         @Override
         public Context getContext() {
             return WebViewClassic.this.getContext();
+        }
+
+        @Override
+        public boolean shouldInterceptTouchEvent(MotionEvent event) {
+            if (!mSelectingText) {
+                return false;
+            }
+            ensureSelectionHandles();
+            int y = Math.round(event.getY() - getTitleHeight() + getScrollY());
+            int x = Math.round(event.getX() + getScrollX());
+            boolean isPressingHandle;
+            if (mIsCaretSelection) {
+                isPressingHandle = mSelectHandleCenter.getBounds()
+                        .contains(x, y);
+            } else {
+                isPressingHandle =
+                        mSelectHandleLeft.getBounds().contains(x, y)
+                        || mSelectHandleRight.getBounds().contains(x, y);
+            }
+            return isPressingHandle;
         }
     }
 

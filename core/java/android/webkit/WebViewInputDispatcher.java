@@ -22,7 +22,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
-import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
@@ -314,11 +313,13 @@ final class WebViewInputDispatcher {
                     return false;
                 }
 
-                if (mPostSendTouchEventsToWebKit
-                        && mPostDoNotSendTouchEventsToWebKitUntilNextGesture
-                        && action == MotionEvent.ACTION_DOWN) {
-                    // Recover from a previous web kit timeout.
-                    mPostDoNotSendTouchEventsToWebKitUntilNextGesture = false;
+                if (action == MotionEvent.ACTION_DOWN && mPostSendTouchEventsToWebKit) {
+                    if (mUiCallbacks.shouldInterceptTouchEvent(eventToEnqueue)) {
+                        mPostDoNotSendTouchEventsToWebKitUntilNextGesture = true;
+                    } else if (mPostDoNotSendTouchEventsToWebKitUntilNextGesture) {
+                        // Recover from a previous web kit timeout.
+                        mPostDoNotSendTouchEventsToWebKitUntilNextGesture = false;
+                    }
                 }
             }
 
@@ -949,6 +950,15 @@ final class WebViewInputDispatcher {
          * @param flags The event's dispatch flags.
          */
         public void dispatchUiEvent(MotionEvent event, int eventType, int flags);
+
+        /**
+         * Asks the UI thread whether this touch event stream should be
+         * intercepted based on the touch down event.
+         * @param event The touch down event.
+         * @return true if the UI stream wants the touch stream without going
+         * through webkit or false otherwise.
+         */
+        public boolean shouldInterceptTouchEvent(MotionEvent event);
     }
 
     /* Implemented by {@link WebViewCore} to perform operations on the web kit thread. */
