@@ -99,6 +99,7 @@
   <java-symbol type="id" name="issued_on" />
   <java-symbol type="id" name="left_icon" />
   <java-symbol type="id" name="leftSpacer" />
+  <java-symbol type="id" name="line1" />
   <java-symbol type="id" name="line3" />
   <java-symbol type="id" name="list_footer" />
   <java-symbol type="id" name="list_item" />
@@ -121,6 +122,7 @@
   <java-symbol type="id" name="old_app_action" />
   <java-symbol type="id" name="old_app_description" />
   <java-symbol type="id" name="old_app_icon" />
+  <java-symbol type="id" name="overflow_title" />
   <java-symbol type="id" name="package_label" />
   <java-symbol type="id" name="packages_list" />
   <java-symbol type="id" name="pause" />

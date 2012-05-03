@@ -85,6 +85,16 @@
             android:ellipsize="marquee"
             android:visibility="gone"
             />
+        <TextView android:id="@+id/overflow_title"
+            android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:fadingEdge="horizontal"
+            android:visibility="gone"
+            android:layout_weight="1"
+            />
         <LinearLayout
             android:id="@+id/line3"
             android:layout_width="match_parent"
@@ -129,14 +139,5 @@
             android:visibility="gone"
             style="?android:attr/progressBarStyleHorizontal"
             />
-        <LinearLayout
-                android:id="@+id/actions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone"
-                >
-                <!-- actions will be added here -->
-        </LinearLayout>
     </LinearLayout>
 </FrameLayout>
