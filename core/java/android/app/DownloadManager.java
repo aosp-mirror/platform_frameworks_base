@@ -1155,7 +1155,7 @@ public class DownloadManager {
         validateArgumentIsNonEmpty("description", description);
         validateArgumentIsNonEmpty("path", path);
         validateArgumentIsNonEmpty("mimeType", mimeType);
-        if (length <= 0) {
+        if (length < 0) {
             throw new IllegalArgumentException(" invalid value for param: totalBytes");
         }
 
