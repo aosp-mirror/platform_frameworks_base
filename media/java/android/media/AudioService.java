@@ -40,6 +40,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
@@ -371,6 +372,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     // Used to play ringtones outside system_server
     private volatile IRingtonePlayer mRingtonePlayer;
 
+    private int mDeviceOrientation = Configuration.ORIENTATION_UNDEFINED;
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -428,6 +431,16 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         intentFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+
+        // Register a configuration change listener only if requested by system properties
+        // to monitor orientation changes (off by default)
+        if (SystemProperties.getBoolean("ro.audio.monitorOrientation", false)) {
+            Log.v(TAG, "monitoring device orientation");
+            intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+            // initialize orientation in AudioSystem
+            setOrientationForAudioSystem();
+        }
+
         context.registerReceiver(mReceiver, intentFilter);
 
         // Register for package removal intent broadcasts for media button receiver persistence
@@ -2778,6 +2791,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     // Restore master volume
                     restoreMasterVolume();
 
+                    // Reset device orientation (if monitored for this device)
+                    if (SystemProperties.getBoolean("ro.audio.monitorOrientation", false)) {
+                        setOrientationForAudioSystem();
+                    }
+
                     // indicate the end of reconfiguration phase to audio HAL
                     AudioSystem.setParameters("restarting=false");
                     break;
@@ -3165,6 +3183,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 AudioSystem.setParameters("screen_state=on");
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 AudioSystem.setParameters("screen_state=off");
+            } else if (action.equalsIgnoreCase(Intent.ACTION_CONFIGURATION_CHANGED)) {
+                handleConfigurationChanged(context);
             }
         }
     }
@@ -4281,6 +4301,52 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             mArtworkExpectedHeight = h;
         }
     }
+
+    //==========================================================================================
+    // Device orientation
+    //==========================================================================================
+    /**
+     * Handles device configuration changes that may map to a change in the orientation.
+     * This feature is optional, and is defined by the definition and value of the
+     * "ro.audio.monitorOrientation" system property.
+     */
+    private void handleConfigurationChanged(Context context) {
+        try {
+            // reading new orientation "safely" (i.e. under try catch) in case anything
+            // goes wrong when obtaining resources and configuration
+            int newOrientation = context.getResources().getConfiguration().orientation;
+            if (newOrientation != mDeviceOrientation) {
+                mDeviceOrientation = newOrientation;
+                setOrientationForAudioSystem();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error retrieving device orientation: " + e);
+        }
+    }
+
+    private void setOrientationForAudioSystem() {
+        switch (mDeviceOrientation) {
+            case Configuration.ORIENTATION_LANDSCAPE:
+                //Log.i(TAG, "orientation is landscape");
+                AudioSystem.setParameters("orientation=landscape");
+                break;
+            case Configuration.ORIENTATION_PORTRAIT:
+                //Log.i(TAG, "orientation is portrait");
+                AudioSystem.setParameters("orientation=portrait");
+                break;
+            case Configuration.ORIENTATION_SQUARE:
+                //Log.i(TAG, "orientation is square");
+                AudioSystem.setParameters("orientation=square");
+                break;
+            case Configuration.ORIENTATION_UNDEFINED:
+                //Log.i(TAG, "orientation is undefined");
+                AudioSystem.setParameters("orientation=undefined");
+                break;
+            default:
+                Log.e(TAG, "Unknown orientation");
+        }
+    }
+
 
     @Override
     public void setRingtonePlayer(IRingtonePlayer player) {
