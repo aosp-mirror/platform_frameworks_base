@@ -141,6 +141,7 @@ package android {
   public static final class Manifest.permission_group {
     ctor public Manifest.permission_group();
     field public static final java.lang.String ACCOUNTS = "android.permission-group.ACCOUNTS";
+    field public static final java.lang.String AFFECTS_BATTERY = "android.permission-group.AFFECTS_BATTERY";
     field public static final java.lang.String APP_INFO = "android.permission-group.APP_INFO";
     field public static final java.lang.String AUDIO_SETTINGS = "android.permission-group.AUDIO_SETTINGS";
     field public static final java.lang.String BOOKMARKS = "android.permission-group.BOOKMARKS";
@@ -150,7 +151,6 @@ package android {
     field public static final java.lang.String DEVELOPMENT_TOOLS = "android.permission-group.DEVELOPMENT_TOOLS";
     field public static final java.lang.String DEVICE_ALARMS = "android.permission-group.DEVICE_ALARMS";
     field public static final java.lang.String DISPLAY = "android.permission-group.DISPLAY";
-    field public static final java.lang.String AFFECTS_BATTERY = "android.permission-group.AFFECTS_BATTERY";
     field public static final java.lang.String HARDWARE_CONTROLS = "android.permission-group.HARDWARE_CONTROLS";
     field public static final java.lang.String LOCATION = "android.permission-group.LOCATION";
     field public static final java.lang.String MESSAGES = "android.permission-group.MESSAGES";
@@ -2935,11 +2935,11 @@ package android.app {
   }
 
   public class ActivityOptions {
-    method public void join(android.app.ActivityOptions);
     method public static android.app.ActivityOptions makeCustomAnimation(android.content.Context, int, int);
     method public static android.app.ActivityOptions makeScaleUpAnimation(android.view.View, int, int, int, int);
     method public static android.app.ActivityOptions makeThumbnailScaleUpAnimation(android.view.View, android.graphics.Bitmap, int, int);
     method public android.os.Bundle toBundle();
+    method public void update(android.app.ActivityOptions);
   }
 
   public class AlarmManager {
