@@ -298,6 +298,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * activity's manifest.
      *
      * Default value is false (no support for RTL).
+     * @hide
      */
     public static final int FLAG_SUPPORTS_RTL = 1<<22;
 

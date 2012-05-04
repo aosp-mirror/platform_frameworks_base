@@ -21779,7 +21779,6 @@ package android.view {
     method public static void apply(int, int, int, android.graphics.Rect, android.graphics.Rect);
     method public static void apply(int, int, int, android.graphics.Rect, int, int, android.graphics.Rect);
     method public static void applyDisplay(int, android.graphics.Rect, android.graphics.Rect);
-    method public static int getAbsoluteGravity(int, int);
     method public static boolean isHorizontal(int);
     method public static boolean isVertical(int);
     field public static final int AXIS_CLIP = 8; // 0x8
@@ -23502,8 +23501,6 @@ package android.view {
     method public void requestDisallowInterceptTouchEvent(boolean);
     method public boolean requestSendAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
     method public void requestTransparentRegion(android.view.View);
-    method protected void resetResolvedLayoutDirection();
-    method protected void resetResolvedTextDirection();
     method public void scheduleLayoutAnimation();
     method public void setAddStatesFromChildren(boolean);
     method public void setAlwaysDrawnWithCacheEnabled(boolean);
@@ -27296,7 +27293,6 @@ package android.widget {
     method public void removeTextChangedListener(android.text.TextWatcher);
     method protected void resetResolvedDrawables();
     method protected void resolveDrawables();
-    method protected void resolveTextDirection();
     method public void setAllCaps(boolean);
     method public final void setAutoLinkMask(int);
     method public void setCompoundDrawablePadding(int);

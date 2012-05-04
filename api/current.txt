@@ -141,6 +141,7 @@ package android {
   public static final class Manifest.permission_group {
     ctor public Manifest.permission_group();
     field public static final java.lang.String ACCOUNTS = "android.permission-group.ACCOUNTS";
+    field public static final java.lang.String AFFECTS_BATTERY = "android.permission-group.AFFECTS_BATTERY";
     field public static final java.lang.String APP_INFO = "android.permission-group.APP_INFO";
     field public static final java.lang.String AUDIO_SETTINGS = "android.permission-group.AUDIO_SETTINGS";
     field public static final java.lang.String BOOKMARKS = "android.permission-group.BOOKMARKS";
@@ -150,7 +151,6 @@ package android {
     field public static final java.lang.String DEVELOPMENT_TOOLS = "android.permission-group.DEVELOPMENT_TOOLS";
     field public static final java.lang.String DEVICE_ALARMS = "android.permission-group.DEVICE_ALARMS";
     field public static final java.lang.String DISPLAY = "android.permission-group.DISPLAY";
-    field public static final java.lang.String AFFECTS_BATTERY = "android.permission-group.AFFECTS_BATTERY";
     field public static final java.lang.String HARDWARE_CONTROLS = "android.permission-group.HARDWARE_CONTROLS";
     field public static final java.lang.String LOCATION = "android.permission-group.LOCATION";
     field public static final java.lang.String MESSAGES = "android.permission-group.MESSAGES";
@@ -314,7 +314,7 @@ package android {
     field public static final int cacheColorHint = 16843009; // 0x1010101
     field public static final int calendarViewShown = 16843596; // 0x101034c
     field public static final int calendarViewStyle = 16843613; // 0x101035d
-    field public static final int canHandleGestures = 16843699; // 0x10103b3
+    field public static final int canHandleGestures = 16843691; // 0x10103ab
     field public static final int canRetrieveWindowContent = 16843653; // 0x1010385
     field public static final int candidatesTextStyleSpans = 16843312; // 0x1010230
     field public static final deprecated int capitalize = 16843113; // 0x1010169
@@ -555,7 +555,7 @@ package android {
     field public static final int imeSubtypeLocale = 16843500; // 0x10102ec
     field public static final int imeSubtypeMode = 16843501; // 0x10102ed
     field public static final int immersive = 16843456; // 0x10102c0
-    field public static final int importantForAccessibility = 16843698; // 0x10103b2
+    field public static final int importantForAccessibility = 16843690; // 0x10103aa
     field public static final int inAnimation = 16843127; // 0x1010177
     field public static final int includeFontPadding = 16843103; // 0x101015f
     field public static final int includeInGlobalSearch = 16843374; // 0x101026e
@@ -593,7 +593,7 @@ package android {
     field public static final int itemIconDisabledAlpha = 16843057; // 0x1010131
     field public static final int itemPadding = 16843565; // 0x101032d
     field public static final int itemTextAppearance = 16843052; // 0x101012c
-    field public static final int kcm = 16843696; // 0x10103b0
+    field public static final int kcm = 16843688; // 0x10103a8
     field public static final int keepScreenOn = 16843286; // 0x1010216
     field public static final int key = 16843240; // 0x10101e8
     field public static final int keyBackground = 16843315; // 0x1010233
@@ -620,7 +620,6 @@ package android {
     field public static final int layerType = 16843604; // 0x1010354
     field public static final int layout = 16842994; // 0x10100f2
     field public static final int layoutAnimation = 16842988; // 0x10100ec
-    field public static final int layoutDirection = 16843691; // 0x10103ab
     field public static final int layout_above = 16843140; // 0x1010184
     field public static final int layout_alignBaseline = 16843142; // 0x1010186
     field public static final int layout_alignBottom = 16843146; // 0x101018a
@@ -642,10 +641,8 @@ package android {
     field public static final int layout_height = 16842997; // 0x10100f5
     field public static final int layout_margin = 16842998; // 0x10100f6
     field public static final int layout_marginBottom = 16843002; // 0x10100fa
-    field public static final int layout_marginEnd = 16843695; // 0x10103af
     field public static final int layout_marginLeft = 16842999; // 0x10100f7
     field public static final int layout_marginRight = 16843001; // 0x10100f9
-    field public static final int layout_marginStart = 16843694; // 0x10103ae
     field public static final int layout_marginTop = 16843000; // 0x10100f8
     field public static final int layout_row = 16843643; // 0x101037b
     field public static final int layout_rowSpan = 16843644; // 0x101037c
@@ -741,24 +738,22 @@ package android {
     field public static final int packageNames = 16843649; // 0x1010381
     field public static final int padding = 16842965; // 0x10100d5
     field public static final int paddingBottom = 16842969; // 0x10100d9
-    field public static final int paddingEnd = 16843693; // 0x10103ad
     field public static final int paddingLeft = 16842966; // 0x10100d6
     field public static final int paddingRight = 16842968; // 0x10100d8
-    field public static final int paddingStart = 16843692; // 0x10103ac
     field public static final int paddingTop = 16842967; // 0x10100d7
     field public static final int panelBackground = 16842846; // 0x101005e
     field public static final int panelColorBackground = 16842849; // 0x1010061
     field public static final int panelColorForeground = 16842848; // 0x1010060
     field public static final int panelFullBackground = 16842847; // 0x101005f
     field public static final int panelTextAppearance = 16842850; // 0x1010062
-    field public static final int parentActivityName = 16843697; // 0x10103b1
+    field public static final int parentActivityName = 16843689; // 0x10103a9
     field public static final deprecated int password = 16843100; // 0x101015c
     field public static final int path = 16842794; // 0x101002a
     field public static final int pathPattern = 16842796; // 0x101002c
     field public static final int pathPrefix = 16842795; // 0x101002b
     field public static final int permission = 16842758; // 0x1010006
     field public static final int permissionGroup = 16842762; // 0x101000a
-    field public static final int permissionGroupFlags = 16843700; // 0x10103b4
+    field public static final int permissionGroupFlags = 16843692; // 0x10103ac
     field public static final int persistent = 16842765; // 0x101000d
     field public static final int persistentDrawingCache = 16842990; // 0x10100ee
     field public static final deprecated int phoneNumber = 16843111; // 0x1010167
@@ -957,7 +952,6 @@ package android {
     field public static final int summaryColumn = 16843426; // 0x10102a2
     field public static final int summaryOff = 16843248; // 0x10101f0
     field public static final int summaryOn = 16843247; // 0x10101ef
-    field public static final int supportsRtl = 16843688; // 0x10103a8
     field public static final int supportsUploading = 16843419; // 0x101029b
     field public static final int switchMinWidth = 16843632; // 0x1010370
     field public static final int switchPadding = 16843633; // 0x1010371
@@ -988,7 +982,6 @@ package android {
     field public static final int tension = 16843370; // 0x101026a
     field public static final int testOnly = 16843378; // 0x1010272
     field public static final int text = 16843087; // 0x101014f
-    field public static final int textAlignment = 16843690; // 0x10103aa
     field public static final int textAllCaps = 16843660; // 0x101038c
     field public static final int textAppearance = 16842804; // 0x1010034
     field public static final int textAppearanceButton = 16843271; // 0x1010207
@@ -1028,7 +1021,6 @@ package android {
     field public static final int textColorTertiary = 16843282; // 0x1010212
     field public static final int textColorTertiaryInverse = 16843283; // 0x1010213
     field public static final int textCursorDrawable = 16843618; // 0x1010362
-    field public static final int textDirection = 16843689; // 0x10103a9
     field public static final int textEditNoPasteWindowLayout = 16843541; // 0x1010315
     field public static final int textEditPasteWindowLayout = 16843540; // 0x1010314
     field public static final int textEditSideNoPasteWindowLayout = 16843615; // 0x101035f
@@ -6269,7 +6261,6 @@ package android.content.pm {
     field public static final int FLAG_STOPPED = 2097152; // 0x200000
     field public static final int FLAG_SUPPORTS_LARGE_SCREENS = 2048; // 0x800
     field public static final int FLAG_SUPPORTS_NORMAL_SCREENS = 1024; // 0x400
-    field public static final int FLAG_SUPPORTS_RTL = 4194304; // 0x400000
     field public static final int FLAG_SUPPORTS_SCREEN_DENSITIES = 8192; // 0x2000
     field public static final int FLAG_SUPPORTS_SMALL_SCREENS = 512; // 0x200
     field public static final int FLAG_SUPPORTS_XLARGE_SCREENS = 524288; // 0x80000
@@ -9292,10 +9283,6 @@ package android.graphics.drawable {
     method public abstract void invalidateDrawable(android.graphics.drawable.Drawable);
     method public abstract void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
     method public abstract void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
-  }
-
-  public static abstract interface Drawable.Callback2 implements android.graphics.drawable.Drawable.Callback {
-    method public abstract int getResolvedLayoutDirection(android.graphics.drawable.Drawable);
   }
 
   public static abstract class Drawable.ConstantState {
@@ -22365,10 +22352,6 @@ package android.util {
     method public android.util.JsonWriter value(java.lang.Number) throws java.io.IOException;
   }
 
-  public class LocaleUtil {
-    method public static int getLayoutDirectionFromLocale(java.util.Locale);
-  }
-
   public final class Log {
     method public static int d(java.lang.String, java.lang.String);
     method public static int d(java.lang.String, java.lang.String, java.lang.Throwable);
@@ -22836,12 +22819,8 @@ package android.view {
   public class Gravity {
     ctor public Gravity();
     method public static void apply(int, int, int, android.graphics.Rect, android.graphics.Rect);
-    method public static void apply(int, int, int, android.graphics.Rect, android.graphics.Rect, int);
     method public static void apply(int, int, int, android.graphics.Rect, int, int, android.graphics.Rect);
-    method public static void apply(int, int, int, android.graphics.Rect, int, int, android.graphics.Rect, int);
     method public static void applyDisplay(int, android.graphics.Rect, android.graphics.Rect);
-    method public static void applyDisplay(int, android.graphics.Rect, android.graphics.Rect, int);
-    method public static int getAbsoluteGravity(int, int);
     method public static boolean isHorizontal(int);
     method public static boolean isVertical(int);
     field public static final int AXIS_CLIP = 8; // 0x8
@@ -23864,7 +23843,7 @@ package android.view {
     method public void recycle();
   }
 
-  public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.graphics.drawable.Drawable.Callback2 android.view.KeyEvent.Callback {
+  public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
     ctor public View(android.content.Context);
     ctor public View(android.content.Context, android.util.AttributeSet);
     ctor public View(android.content.Context, android.util.AttributeSet, int);
@@ -23884,9 +23863,6 @@ package android.view {
     method public void buildDrawingCache(boolean);
     method public void buildLayer();
     method public boolean callOnClick();
-    method public boolean canResolveLayoutDirection();
-    method public boolean canResolveTextAlignment();
-    method public boolean canResolveTextDirection();
     method public boolean canScrollHorizontally(int);
     method public boolean canScrollVertically(int);
     method public void cancelLongPress();
@@ -23975,7 +23951,6 @@ package android.view {
     method public boolean getKeepScreenOn();
     method public android.view.KeyEvent.DispatcherState getKeyDispatcherState();
     method public int getLayerType();
-    method public int getLayoutDirection();
     method public android.view.ViewGroup.LayoutParams getLayoutParams();
     method public final int getLeft();
     method protected float getLeftFadingEdgeStrength();
@@ -23999,19 +23974,13 @@ package android.view {
     method public android.view.View.OnFocusChangeListener getOnFocusChangeListener();
     method public int getOverScrollMode();
     method public int getPaddingBottom();
-    method public int getPaddingEnd();
     method public int getPaddingLeft();
     method public int getPaddingRight();
-    method public int getPaddingStart();
     method public int getPaddingTop();
     method public final android.view.ViewParent getParent();
     method public android.view.ViewParent getParentForAccessibility();
     method public float getPivotX();
     method public float getPivotY();
-    method public int getResolvedLayoutDirection();
-    method public int getResolvedLayoutDirection(android.graphics.drawable.Drawable);
-    method public int getResolvedTextAlignment();
-    method public int getResolvedTextDirection();
     method public android.content.res.Resources getResources();
     method public final int getRight();
     method protected float getRightFadingEdgeStrength();
@@ -24034,8 +24003,6 @@ package android.view {
     method public int getSystemUiVisibility();
     method public java.lang.Object getTag();
     method public java.lang.Object getTag(int);
-    method public int getTextAlignment();
-    method public int getTextDirection();
     method public final int getTop();
     method protected float getTopFadingEdgeStrength();
     method protected int getTopPaddingOffset();
@@ -24085,13 +24052,10 @@ package android.view {
     method public boolean isHovered();
     method public boolean isInEditMode();
     method public boolean isInTouchMode();
-    method protected static boolean isLayoutDirectionRtl(java.util.Locale);
     method public boolean isLayoutRequested();
-    method public boolean isLayoutRtl();
     method public boolean isLongClickable();
     method public boolean isOpaque();
     method protected boolean isPaddingOffsetRequired();
-    method public boolean isPaddingRelative();
     method public boolean isPressed();
     method public boolean isSaveEnabled();
     method public boolean isSaveFromParentEnabled();
@@ -24139,14 +24103,7 @@ package android.view {
     method protected void onLayout(boolean, int, int, int, int);
     method protected void onMeasure(int, int);
     method protected void onOverScrolled(int, int, boolean, boolean);
-    method public void onPaddingChanged(int);
     method public void onPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
-    method public void onResolvedLayoutDirectionChanged();
-    method public void onResolvedLayoutDirectionReset();
-    method public void onResolvedTextAlignmentChanged();
-    method public void onResolvedTextAlignmentReset();
-    method public void onResolvedTextDirectionChanged();
-    method public void onResolvedTextDirectionReset();
     method protected void onRestoreInstanceState(android.os.Parcelable);
     method protected android.os.Parcelable onSaveInstanceState();
     method public void onScreenStateChanged(int);
@@ -24189,15 +24146,8 @@ package android.view {
     method public void requestLayout();
     method public boolean requestRectangleOnScreen(android.graphics.Rect);
     method public boolean requestRectangleOnScreen(android.graphics.Rect, boolean);
-    method public void resetResolvedLayoutDirection();
-    method public void resetResolvedTextAlignment();
-    method public void resetResolvedTextDirection();
-    method public void resolveLayoutDirection();
-    method public void resolvePadding();
     method public static int resolveSize(int, int);
     method public static int resolveSizeAndState(int, int, int);
-    method public void resolveTextAlignment();
-    method public void resolveTextDirection();
     method public void restoreHierarchyState(android.util.SparseArray<android.os.Parcelable>);
     method public void saveHierarchyState(android.util.SparseArray<android.os.Parcelable>);
     method public void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
@@ -24236,7 +24186,6 @@ package android.view {
     method public void setImportantForAccessibility(int);
     method public void setKeepScreenOn(boolean);
     method public void setLayerType(int, android.graphics.Paint);
-    method public void setLayoutDirection(int);
     method public void setLayoutParams(android.view.ViewGroup.LayoutParams);
     method public final void setLeft(int);
     method public void setLongClickable(boolean);
@@ -24260,7 +24209,6 @@ package android.view {
     method public void setOnTouchListener(android.view.View.OnTouchListener);
     method public void setOverScrollMode(int);
     method public void setPadding(int, int, int, int);
-    method public void setPaddingRelative(int, int, int, int);
     method public void setPivotX(float);
     method public void setPivotY(float);
     method public void setPressed(boolean);
@@ -24285,8 +24233,6 @@ package android.view {
     method public void setSystemUiVisibility(int);
     method public void setTag(java.lang.Object);
     method public void setTag(int, java.lang.Object);
-    method public void setTextAlignment(int);
-    method public void setTextDirection(int);
     method public final void setTop(int);
     method public void setTouchDelegate(android.view.TouchDelegate);
     method public void setTranslationX(float);
@@ -24352,10 +24298,6 @@ package android.view {
     field public static final int LAYER_TYPE_HARDWARE = 2; // 0x2
     field public static final int LAYER_TYPE_NONE = 0; // 0x0
     field public static final int LAYER_TYPE_SOFTWARE = 1; // 0x1
-    field public static final int LAYOUT_DIRECTION_INHERIT = 2; // 0x2
-    field public static final int LAYOUT_DIRECTION_LOCALE = 3; // 0x3
-    field public static final int LAYOUT_DIRECTION_LTR = 0; // 0x0
-    field public static final int LAYOUT_DIRECTION_RTL = 1; // 0x1
     field public static final int MEASURED_HEIGHT_STATE_SHIFT = 16; // 0x10
     field public static final int MEASURED_SIZE_MASK = 16777215; // 0xffffff
     field public static final int MEASURED_STATE_MASK = -16777216; // 0xff000000
@@ -24406,22 +24348,8 @@ package android.view {
     field public static final int SYSTEM_UI_FLAG_LOW_PROFILE = 1; // 0x1
     field public static final int SYSTEM_UI_FLAG_VISIBLE = 0; // 0x0
     field public static final int SYSTEM_UI_LAYOUT_FLAGS = 1536; // 0x600
-    field public static final int TEXT_ALIGNMENT_CENTER = 4; // 0x4
-    field protected static int TEXT_ALIGNMENT_DEFAULT;
-    field public static final int TEXT_ALIGNMENT_GRAVITY = 1; // 0x1
     field public static final int TEXT_ALIGNMENT_INHERIT = 0; // 0x0
     field public static final int TEXT_ALIGNMENT_RESOLVED_DEFAULT = 131072; // 0x20000
-    field public static final int TEXT_ALIGNMENT_TEXT_END = 3; // 0x3
-    field public static final int TEXT_ALIGNMENT_TEXT_START = 2; // 0x2
-    field public static final int TEXT_ALIGNMENT_VIEW_END = 6; // 0x6
-    field public static final int TEXT_ALIGNMENT_VIEW_START = 5; // 0x5
-    field public static final int TEXT_DIRECTION_ANY_RTL = 2; // 0x2
-    field protected static int TEXT_DIRECTION_DEFAULT;
-    field public static final int TEXT_DIRECTION_FIRST_STRONG = 1; // 0x1
-    field public static final int TEXT_DIRECTION_INHERIT = 0; // 0x0
-    field public static final int TEXT_DIRECTION_LOCALE = 5; // 0x5
-    field public static final int TEXT_DIRECTION_LTR = 3; // 0x3
-    field public static final int TEXT_DIRECTION_RTL = 4; // 0x4
     field public static final android.util.Property TRANSLATION_X;
     field public static final android.util.Property TRANSLATION_Y;
     field protected static final java.lang.String VIEW_LOG_TAG = "View";
@@ -24728,7 +24656,6 @@ package android.view {
     ctor public ViewGroup.LayoutParams(android.content.Context, android.util.AttributeSet);
     ctor public ViewGroup.LayoutParams(int, int);
     ctor public ViewGroup.LayoutParams(android.view.ViewGroup.LayoutParams);
-    method public void onResolveLayoutDirection(int);
     method protected void setBaseAttributes(android.content.res.TypedArray, int, int);
     field public static final deprecated int FILL_PARENT = -1; // 0xffffffff
     field public static final int MATCH_PARENT = -1; // 0xffffffff
@@ -24743,15 +24670,10 @@ package android.view {
     ctor public ViewGroup.MarginLayoutParams(int, int);
     ctor public ViewGroup.MarginLayoutParams(android.view.ViewGroup.MarginLayoutParams);
     ctor public ViewGroup.MarginLayoutParams(android.view.ViewGroup.LayoutParams);
-    method public int getMarginEnd();
-    method public int getMarginStart();
-    method public boolean isMarginRelative();
     method public void setMargins(int, int, int, int);
     field public int bottomMargin;
-    field public int endMargin;
     field public int leftMargin;
     field public int rightMargin;
-    field public int startMargin;
     field public int topMargin;
   }
 
@@ -27078,6 +27000,7 @@ package android.widget {
     ctor public CheckedTextView(android.content.Context, android.util.AttributeSet, int);
     method public android.graphics.drawable.Drawable getCheckMarkDrawable();
     method public boolean isChecked();
+    method public void onPaddingChanged(int);
     method public void setCheckMarkDrawable(int);
     method public void setCheckMarkDrawable(android.graphics.drawable.Drawable);
     method public void setChecked(boolean);
@@ -28107,7 +28030,6 @@ package android.widget {
     method public void setString(int, java.lang.String, java.lang.String);
     method public void setTextColor(int, int);
     method public void setTextViewCompoundDrawables(int, int, int, int, int);
-    method public void setTextViewCompoundDrawablesRelative(int, int, int, int, int);
     method public void setTextViewText(int, java.lang.CharSequence);
     method public void setUri(int, java.lang.String, android.net.Uri);
     method public void setViewVisibility(int, int);
@@ -28587,12 +28509,9 @@ package android.widget {
     method public final int getAutoLinkMask();
     method public int getCompoundDrawablePadding();
     method public android.graphics.drawable.Drawable[] getCompoundDrawables();
-    method public android.graphics.drawable.Drawable[] getCompoundDrawablesRelative();
     method public int getCompoundPaddingBottom();
-    method public int getCompoundPaddingEnd();
     method public int getCompoundPaddingLeft();
     method public int getCompoundPaddingRight();
-    method public int getCompoundPaddingStart();
     method public int getCompoundPaddingTop();
     method public final int getCurrentHintTextColor();
     method public final int getCurrentTextColor();
@@ -28652,10 +28571,8 @@ package android.widget {
     method public float getTextScaleX();
     method public float getTextSize();
     method public int getTotalPaddingBottom();
-    method public int getTotalPaddingEnd();
     method public int getTotalPaddingLeft();
     method public int getTotalPaddingRight();
-    method public int getTotalPaddingStart();
     method public int getTotalPaddingTop();
     method public final android.text.method.TransformationMethod getTransformationMethod();
     method public android.graphics.Typeface getTypeface();
@@ -28674,6 +28591,8 @@ package android.widget {
     method public void onEndBatchEdit();
     method public boolean onPreDraw();
     method public boolean onPrivateIMECommand(java.lang.String, android.os.Bundle);
+    method public void onResolvedLayoutDirectionReset();
+    method public void onResolvedTextDirectionChanged();
     method public void onRestoreInstanceState(android.os.Parcelable);
     method public android.os.Parcelable onSaveInstanceState();
     method protected void onSelectionChanged(int, int);
@@ -28686,9 +28605,6 @@ package android.widget {
     method public final void setAutoLinkMask(int);
     method public void setCompoundDrawablePadding(int);
     method public void setCompoundDrawables(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
-    method public void setCompoundDrawablesRelative(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
-    method public void setCompoundDrawablesRelativeWithIntrinsicBounds(int, int, int, int);
-    method public void setCompoundDrawablesRelativeWithIntrinsicBounds(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
     method public void setCompoundDrawablesWithIntrinsicBounds(int, int, int, int);
     method public void setCompoundDrawablesWithIntrinsicBounds(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
     method public void setCursorVisible(boolean);
@@ -28732,6 +28648,7 @@ package android.widget {
     method public void setMinWidth(int);
     method public final void setMovementMethod(android.text.method.MovementMethod);
     method public void setOnEditorActionListener(android.widget.TextView.OnEditorActionListener);
+    method public void setPaddingRelative(int, int, int, int);
     method public void setPaintFlags(int);
     method public void setPrivateImeOptions(java.lang.String);
     method public void setRawInputType(int);
