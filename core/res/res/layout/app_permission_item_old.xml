@@ -14,30 +14,42 @@
      limitations under the License.
 -->
 
-<!-- Describes permission item consisting of a group name and the list of permisisons under the group -->
+<!--
+  Defines the layout of a single permission item.
+  Contains the group name and a list of permission labels under the group.
+-->
 
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/perm_icon"
+        android:layout_width="30dip"
+        android:layout_height="30dip"
+        android:layout_alignParentLeft="true" 
+        android:scaleType="fitCenter" />
+
 
     <TextView
-        android:id="@+id/no_permissions"
-        android:text="@string/no_permissions"
+        android:id="@+id/permission_group"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:visibility="gone"
+        android:textStyle="bold"
+        android:paddingLeft="6dip"
+        android:layout_toRightOf="@id/perm_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <!-- Populated with all permissions. -->
-    <LinearLayout
-        android:id="@+id/perms_list"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/permission_list"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:layout_marginTop="-4dip"
+        android:paddingBottom="8dip"
+        android:paddingLeft="6dip"
+        android:layout_below="@id/permission_group"
+        android:layout_toRightOf="@id/perm_icon"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-</LinearLayout>
-
+</RelativeLayout>

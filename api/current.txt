@@ -5783,7 +5783,7 @@ package android.content {
     field public static final java.lang.String CATEGORY_UNIT_TEST = "android.intent.category.UNIT_TEST";
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final java.lang.String EXTRA_ALARM_COUNT = "android.intent.extra.ALARM_COUNT";
-    field public static final java.lang.String EXTRA_ALLOW_REPLACE = "android.intent.extra.ALLOW_REPLACE";
+    field public static final deprecated java.lang.String EXTRA_ALLOW_REPLACE = "android.intent.extra.ALLOW_REPLACE";
     field public static final java.lang.String EXTRA_BCC = "android.intent.extra.BCC";
     field public static final java.lang.String EXTRA_BUG_REPORT = "android.intent.extra.BUG_REPORT";
     field public static final java.lang.String EXTRA_CC = "android.intent.extra.CC";
