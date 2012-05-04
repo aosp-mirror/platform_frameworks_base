@@ -186,12 +186,12 @@ public class NetworkStatsCollection implements FileRotator.Reader {
         if (history.size() == 0) return;
         noteRecordedHistory(history.getStart(), history.getEnd(), history.getTotalBytes());
 
-        final NetworkStatsHistory existing = mStats.get(key);
-        if (existing != null) {
-            existing.recordEntireHistory(history);
-        } else {
-            mStats.put(key, history);
+        NetworkStatsHistory target = mStats.get(key);
+        if (target == null) {
+            target = new NetworkStatsHistory(history.getBucketDuration());
+            mStats.put(key, target);
         }
+        target.recordEntireHistory(history);
     }
 
     /**
