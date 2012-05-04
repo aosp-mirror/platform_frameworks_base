@@ -318,6 +318,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     public void systemReady() {
+        if (!isBandwidthControlEnabled()) {
+            Slog.w(TAG, "bandwidth controls disabled, unable to enforce policy");
+            return;
+        }
+
         synchronized (mRulesLock) {
             // read policy from disk
             readPolicyLocked();
@@ -1894,6 +1899,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         } catch (RemoteException e) {
             // ignored; service lives in system_server
             return 0;
+        }
+    }
+
+    private boolean isBandwidthControlEnabled() {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return mNetworkManager.isBandwidthControlEnabled();
+        } catch (RemoteException e) {
+            // ignored; service lives in system_server
+            return false;
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
