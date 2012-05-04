@@ -153,7 +153,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         @Override
         public void onGlobalLayout() {
             if (mWebView.isShown()) {
-                setGLRectViewport();
+                setInvScreenRect();
             }
         }
     }
@@ -162,7 +162,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         @Override
         public void onScrollChanged() {
             if (mWebView.isShown()) {
-                setGLRectViewport();
+                setInvScreenRect();
             }
         }
     }
@@ -644,8 +644,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     private ZoomManager mZoomManager;
 
-    private final Rect mGLRectViewport = new Rect();
-    private final Rect mViewRectViewport = new Rect();
+    private final Rect mInvScreenRect = new Rect();
+    private final Rect mScreenRect = new Rect();
     private final RectF mVisibleContentRect = new RectF();
     private boolean mGLViewportEmpty = false;
     WebViewInputConnection mInputConnection = null;
@@ -4224,11 +4224,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
         calcOurContentVisibleRectF(mVisibleContentRect);
         if (canvas.isHardwareAccelerated()) {
-            Rect glRectViewport = mGLViewportEmpty ? null : mGLRectViewport;
-            Rect viewRectViewport = mGLViewportEmpty ? null : mViewRectViewport;
+            Rect invScreenRect = mGLViewportEmpty ? null : mInvScreenRect;
+            Rect screenRect = mGLViewportEmpty ? null : mScreenRect;
 
-            int functor = nativeCreateDrawGLFunction(mNativeClass, glRectViewport,
-                    viewRectViewport, mVisibleContentRect, getScale(), extras);
+            int functor = nativeCreateDrawGLFunction(mNativeClass, invScreenRect,
+                    screenRect, mVisibleContentRect, getScale(), extras);
             ((HardwareCanvas) canvas).callDrawGLFunction(functor);
             if (mHardwareAccelSkia != getSettings().getHardwareAccelSkiaEnabled()) {
                 mHardwareAccelSkia = getSettings().getHardwareAccelSkiaEnabled();
@@ -5548,26 +5548,26 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
     }
 
-    void setGLRectViewport() {
+    void setInvScreenRect() {
         // Use the getGlobalVisibleRect() to get the intersection among the parents
         // visible == false means we're clipped - send a null rect down to indicate that
         // we should not draw
-        boolean visible = mWebView.getGlobalVisibleRect(mGLRectViewport);
+        boolean visible = mWebView.getGlobalVisibleRect(mInvScreenRect);
         if (visible) {
             // Then need to invert the Y axis, just for GL
             View rootView = mWebView.getRootView();
             int rootViewHeight = rootView.getHeight();
-            mViewRectViewport.set(mGLRectViewport);
-            int savedWebViewBottom = mGLRectViewport.bottom;
-            mGLRectViewport.bottom = rootViewHeight - mGLRectViewport.top - getVisibleTitleHeightImpl();
-            mGLRectViewport.top = rootViewHeight - savedWebViewBottom;
+            mScreenRect.set(mInvScreenRect);
+            int savedWebViewBottom = mInvScreenRect.bottom;
+            mInvScreenRect.bottom = rootViewHeight - mInvScreenRect.top - getVisibleTitleHeightImpl();
+            mInvScreenRect.top = rootViewHeight - savedWebViewBottom;
             mGLViewportEmpty = false;
         } else {
             mGLViewportEmpty = true;
         }
         calcOurContentVisibleRectF(mVisibleContentRect);
-        nativeUpdateDrawGLFunction(mNativeClass, mGLViewportEmpty ? null : mGLRectViewport,
-                mGLViewportEmpty ? null : mViewRectViewport,
+        nativeUpdateDrawGLFunction(mNativeClass, mGLViewportEmpty ? null : mInvScreenRect,
+                mGLViewportEmpty ? null : mScreenRect,
                 mVisibleContentRect, getScale());
     }
 
@@ -5583,7 +5583,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             // notify the WebKit about the new dimensions.
             sendViewSizeZoom(false);
         }
-        setGLRectViewport();
+        setInvScreenRect();
         return changed;
     }
 
@@ -8602,11 +8602,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             int color, int extra);
     private native void     nativeDumpDisplayTree(String urlOrNull);
     private native boolean  nativeEvaluateLayersAnimations(int nativeInstance);
-    private native int      nativeCreateDrawGLFunction(int nativeInstance, Rect rect,
-            Rect viewRect, RectF visibleRect, float scale, int extras);
+    private native int      nativeCreateDrawGLFunction(int nativeInstance, Rect invScreenRect,
+            Rect screenRect, RectF visibleContentRect, float scale, int extras);
     private native int      nativeGetDrawGLFunction(int nativeInstance);
-    private native void     nativeUpdateDrawGLFunction(int nativeInstance, Rect rect, Rect viewRect,
-            RectF visibleRect, float scale);
+    private native void     nativeUpdateDrawGLFunction(int nativeInstance, Rect invScreenRect,
+            Rect screenRect, RectF visibleContentRect, float scale);
     private native String   nativeGetSelection();
     private native Rect     nativeLayerBounds(int layer);
     private native void     nativeSetHeightCanMeasure(boolean measure);
