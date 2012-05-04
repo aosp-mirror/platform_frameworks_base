@@ -30,7 +30,7 @@ import android.graphics.Matrix;
 public abstract class DisplayList {
     /**
      * Flag used when calling
-     * {@link HardwareCanvas#drawDisplayList(DisplayList, int, int, android.graphics.Rect, int)}.
+     * {@link HardwareCanvas#drawDisplayList(DisplayList, android.graphics.Rect, int)} 
      * When this flag is set, draw operations lying outside of the bounds of the
      * display list will be culled early. It is recommeneded to always set this
      * flag.
@@ -42,21 +42,21 @@ public abstract class DisplayList {
     /**
      * Indicates that the display list is done drawing.
      * 
-     * @see HardwareCanvas#drawDisplayList(DisplayList, int, int, android.graphics.Rect, int) 
+     * @see HardwareCanvas#drawDisplayList(DisplayList, android.graphics.Rect, int)  
      */
     public static final int STATUS_DONE = 0x0;
 
     /**
      * Indicates that the display list needs another drawing pass.
      * 
-     * @see HardwareCanvas#drawDisplayList(DisplayList, int, int, android.graphics.Rect, int)
+     * @see HardwareCanvas#drawDisplayList(DisplayList, android.graphics.Rect, int) 
      */
     public static final int STATUS_DRAW = 0x1;
 
     /**
      * Indicates that the display list needs to re-execute its GL functors.
      * 
-     * @see HardwareCanvas#drawDisplayList(DisplayList, int, int, android.graphics.Rect, int)
+     * @see HardwareCanvas#drawDisplayList(DisplayList, android.graphics.Rect, int) 
      * @see HardwareCanvas#callDrawGLFunction(int) 
      */
     public static final int STATUS_INVOKE = 0x2;
