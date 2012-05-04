@@ -16,49 +16,35 @@
 
 package android.media;
 
+import android.media.MediaCodecInfo;
+
 /**
  * MediaCodecList class can be used to enumerate available codecs,
  * find a codec supporting a given format and query the capabilities
  * of a given codec.
-*/
+ */
 final public class MediaCodecList {
-    /** Count the number of available codecs.
-      */
-    public static native final int countCodecs();
+    /**
+     * Count the number of available codecs.
+     */
+    public static native final int getCodecCount();
 
-    /** Retrieve the codec name at the specified index. */
-    public static native final String getCodecName(int index);
+    public static final MediaCodecInfo getCodecInfoAt(int index) {
+        if (index < 0 || index > getCodecCount()) {
+            throw new IllegalArgumentException();
+        }
 
-    /** Query if the codec at the specified index is an encoder. */
-    public static native final boolean isEncoder(int index);
+        return new MediaCodecInfo(index);
+    }
 
-    /** Query the media types supported by the codec at the specified index */
-    public static native final String[] getSupportedTypes(int index);
+    /* package private */ static native final String getCodecName(int index);
 
-    public static final class CodecProfileLevel {
-        /** Defined in the OpenMAX IL specs, depending on the type of media
-          * this can be OMX_VIDEO_AVCPROFILETYPE, OMX_VIDEO_H263PROFILETYPE
-          * or OMX_VIDEO_MPEG4PROFILETYPE.
-        */
-        public int profile;
+    /* package private */ static native final boolean isEncoder(int index);
 
-        /** Defined in the OpenMAX IL specs, depending on the type of media
-          * this can be OMX_VIDEO_AVCLEVELTYPE, OMX_VIDEO_H263LEVELTYPE
-          * or OMX_VIDEO_MPEG4LEVELTYPE.
-        */
-        public int level;
-    };
+    /* package private */ static native final String[] getSupportedTypes(int index);
 
-    public static final class CodecCapabilities {
-        public CodecProfileLevel[] profileLevels;
-
-        /** Defined in the OpenMAX IL specs, color format values are drawn from
-          * OMX_COLOR_FORMATTYPE.
-        */
-        public int[] colorFormats;
-    };
-    public static native final CodecCapabilities getCodecCapabilities(
-            int index, String type);
+    /* package private */ static native final MediaCodecInfo.CodecCapabilities
+        getCodecCapabilities(int index, String type);
 
     private static native final void native_init();
 

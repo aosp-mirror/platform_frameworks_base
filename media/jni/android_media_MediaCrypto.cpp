@@ -210,7 +210,7 @@ static void android_media_MediaCrypto_native_setup(
     if (err != OK) {
         jniThrowException(
                 env,
-                "java/lang/RuntimeException",
+                "android/media/MediaCryptoException",
                 "Failed to instantiate crypto object.");
         return;
     }
@@ -223,7 +223,7 @@ static void android_media_MediaCrypto_native_finalize(
     android_media_MediaCrypto_release(env, thiz);
 }
 
-static jboolean android_media_MediaCrypto_isCryptoSchemeSupported(
+static jboolean android_media_MediaCrypto_isCryptoSchemeSupportedNative(
         JNIEnv *env, jobject thiz, jbyteArray uuidObj) {
     jsize uuidLength = env->GetArrayLength(uuidObj);
 
@@ -284,8 +284,8 @@ static JNINativeMethod gMethods[] = {
     { "native_finalize", "()V",
       (void *)android_media_MediaCrypto_native_finalize },
 
-    { "isCryptoSchemeSupported", "([B)Z",
-      (void *)android_media_MediaCrypto_isCryptoSchemeSupported },
+    { "isCryptoSchemeSupportedNative", "([B)Z",
+      (void *)android_media_MediaCrypto_isCryptoSchemeSupportedNative },
 
     { "requiresSecureDecoderComponent", "(Ljava/lang/String;)Z",
       (void *)android_media_MediaCrypto_requiresSecureDecoderComponent },

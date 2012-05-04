@@ -20,6 +20,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaCodec;
+import android.media.MediaFormat;
 import android.net.Uri;
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -33,7 +34,7 @@ import java.util.Map;
  * <pre>
  * MediaExtractor extractor = new MediaExtractor();
  * extractor.setDataSource(...);
- * int numTracks = extractor.countTracks();
+ * int numTracks = extractor.getTrackCount();
  * for (int i = 0; i &lt; numTracks; ++i) {
  *   Map%lt;String, Object&gt; format = extractor.getTrackFormat(i);
  *   String mime = (String)format.get("mime");
@@ -52,7 +53,7 @@ import java.util.Map;
  * extractor.release();
  * extractor = null;
  * </pre>
-*/
+ */
 final public class MediaExtractor {
     public MediaExtractor() {
         native_setup();
@@ -174,105 +175,134 @@ final public class MediaExtractor {
         native_finalize();
     }
 
-    /** Make sure you call this when you're done to free up any resources
-     *  instead of relying on the garbage collector to do this for you at
-     *   some point in the future.
-    */
+    /**
+     * Make sure you call this when you're done to free up any resources
+     * instead of relying on the garbage collector to do this for you at
+     * some point in the future.
+     */
     public native final void release();
 
-    /** Count the number of tracks found in the data source.
+    /**
+     * Count the number of tracks found in the data source.
      */
-    public native int countTracks();
+    public native final int getTrackCount();
 
-    /** Get the track format at the specified index.
-      * More detail on the representation can be found at {@link android.media.MediaCodec}
-    */
-    public native Map<String, Object> getTrackFormat(int index);
+    /**
+     * Get the track format at the specified index.
+     * More detail on the representation can be found at {@link android.media.MediaCodec}
+     */
+    public MediaFormat getTrackFormat(int index) {
+        return new MediaFormat(getTrackFormatNative(index));
+    }
 
-    /** Subsequent calls to {@link #readSampleData}, {@link #getSampleTrackIndex} and
-     *  {@link #getSampleTime} only retrieve information for the subset of tracks
-     *  selected.
-     *  Selecting the same track multiple times has no effect, the track is
-     *  only selected once.
-    */
+    private native Map<String, Object> getTrackFormatNative(int index);
+
+    /**
+     * Subsequent calls to {@link #readSampleData}, {@link #getSampleTrackIndex} and
+     * {@link #getSampleTime} only retrieve information for the subset of tracks
+     * selected.
+     * Selecting the same track multiple times has no effect, the track is
+     * only selected once.
+     */
     public native void selectTrack(int index);
 
-    /** Subsequent calls to {@link #readSampleData}, {@link #getSampleTrackIndex} and
-     *  {@link #getSampleTime} only retrieve information for the subset of tracks
-     *  selected.
-    */
+    /**
+     * Subsequent calls to {@link #readSampleData}, {@link #getSampleTrackIndex} and
+     * {@link #getSampleTime} only retrieve information for the subset of tracks
+     * selected.
+     */
     public native void unselectTrack(int index);
 
-    /** If possible, seek to a sync sample at or before the specified time */
+    /**
+     * If possible, seek to a sync sample at or before the specified time
+     */
     public static final int SEEK_TO_PREVIOUS_SYNC       = 0;
-    /** If possible, seek to a sync sample at or after the specified time */
+    /**
+     * If possible, seek to a sync sample at or after the specified time
+     */
     public static final int SEEK_TO_NEXT_SYNC           = 1;
-    /** If possible, seek to the sync sample closest to the specified time */
+    /**
+     * If possible, seek to the sync sample closest to the specified time
+     */
     public static final int SEEK_TO_CLOSEST_SYNC        = 2;
-    /** If possible, seek to a sample closest to the specified time, which may
-      * NOT be a sync sample!
-      */
+    /**
+     * If possible, seek to a sample closest to the specified time, which may
+     * NOT be a sync sample!
+     */
     public static final int SEEK_TO_CLOSEST             = 3;
 
-    /** All selected tracks seek near the requested time according to the
-      * specified mode.
-      */
+    /**
+     * All selected tracks seek near the requested time according to the
+     * specified mode.
+     */
     public native void seekTo(long timeUs, int mode);
 
-    /** Advance to the next sample. Returns false if no more sample data
-     *  is available (end of stream).
+    /**
+     * Advance to the next sample. Returns false if no more sample data
+     * is available (end of stream).
      */
     public native boolean advance();
 
-    /** Retrieve the current encoded sample and store it in the byte buffer
-     *  starting at the given offset. Returns the sample size (or -1 if
-     *  no more samples are available).
-    */
+    /**
+     * Retrieve the current encoded sample and store it in the byte buffer
+     * starting at the given offset. Returns the sample size (or -1 if
+     * no more samples are available).
+     */
     public native int readSampleData(ByteBuffer byteBuf, int offset);
 
-    /** Returns the track index the current sample originates from (or -1
-     *  if no more samples are available)
-    */
+    /**
+     * Returns the track index the current sample originates from (or -1
+     * if no more samples are available)
+     */
     public native int getSampleTrackIndex();
 
-    /** Returns the current sample's presentation time in microseconds.
-     *  or -1 if no more samples are available.
-    */
+    /**
+     * Returns the current sample's presentation time in microseconds.
+     * or -1 if no more samples are available.
+     */
     public native long getSampleTime();
 
     // Keep these in sync with their equivalents in NuMediaExtractor.h
-    /** The sample is a sync sample */
+    /**
+     * The sample is a sync sample
+     */
     public static final int SAMPLE_FLAG_SYNC      = 1;
 
-    /** The sample is (at least partially) encrypted, see also the documentation
-     *  for {@link android.media.MediaCodec#queueSecureInputBuffer}
-    */
+    /**
+     * The sample is (at least partially) encrypted, see also the documentation
+     * for {@link android.media.MediaCodec#queueSecureInputBuffer}
+     */
     public static final int SAMPLE_FLAG_ENCRYPTED = 2;
 
-    /** Returns the current sample's flags. */
+    /**
+     * Returns the current sample's flags.
+     */
     public native int getSampleFlags();
 
-    /** If the sample flags indicate that the current sample is at least
-     *  partially encrypted, this call returns relevant information about
-     *  the structure of the sample data required for decryption.
-     *  @param info The android.media.MediaCodec.CryptoInfo structure
-     *              to be filled in.
-     *  @return true iff the sample flags contain {@link #SAMPLE_FLAG_ENCRYPTED}
-    */
+    /**
+     * If the sample flags indicate that the current sample is at least
+     * partially encrypted, this call returns relevant information about
+     * the structure of the sample data required for decryption.
+     * @param info The android.media.MediaCodec.CryptoInfo structure
+     *             to be filled in.
+     * @return true iff the sample flags contain {@link #SAMPLE_FLAG_ENCRYPTED}
+     */
     public native boolean getSampleCryptoInfo(MediaCodec.CryptoInfo info);
 
-    /** Returns an estimate of how much data is presently cached in memory
-        expressed in microseconds. Returns -1 if that information is unavailable
-        or not applicable (no cache).
+    /**
+     * Returns an estimate of how much data is presently cached in memory
+     * expressed in microseconds. Returns -1 if that information is unavailable
+     * or not applicable (no cache).
      */
     public native long getCachedDuration();
 
-    /** Returns true iff we are caching data and the cache has reached the
-     *  end of the data stream (for now, a future seek may of course restart
-     *  the fetching of data).
-     *  This API only returns a meaningful result if {link #getCachedDuration}
-     *  indicates the presence of a cache, i.e. does NOT return -1.
-    */
+    /**
+     * Returns true iff we are caching data and the cache has reached the
+     * end of the data stream (for now, a future seek may of course restart
+     * the fetching of data).
+     * This API only returns a meaningful result if {link #getCachedDuration}
+     * indicates the presence of a cache, i.e. does NOT return -1.
+     */
     public native boolean hasCacheReachedEndOfStream();
 
     private static native final void native_init();
