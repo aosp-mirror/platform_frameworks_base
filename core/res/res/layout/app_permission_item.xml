@@ -19,37 +19,32 @@
   Contains the group name and a list of permission labels under the group.
 -->
 
-<RelativeLayout
+<view class="android.widget.AppSecurityPermissions$PermissionItemView"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="?android:attr/selectableItemBackground">
 
     <ImageView
         android:id="@+id/perm_icon"
-        android:layout_width="30dip"
-        android:layout_height="30dip"
-        android:layout_alignParentLeft="true" 
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="8dp"
         android:scaleType="fitCenter" />
 
-
-    <TextView
-        android:id="@+id/permission_group"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textStyle="bold"
-        android:paddingLeft="6dip"
-        android:layout_toRightOf="@id/perm_icon"
+    <ImageView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent"
+        android:background="?android:attr/dividerVertical" />
 
     <TextView
-        android:id="@+id/permission_list"
+        android:id="@+id/perm_name"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:layout_marginTop="-4dip"
-        android:paddingBottom="8dip"
-        android:paddingLeft="6dip"
-        android:layout_below="@id/permission_group"
-        android:layout_toRightOf="@id/perm_icon"
+        android:layout_marginLeft="8dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|left" />
 
-</RelativeLayout>
+</view>
