@@ -69,7 +69,7 @@ sensors_module_get_next_sensor(JNIEnv *env, jobject clazz, jobject sensor, jint 
     jstring vendor = env->NewStringUTF(list->getVendor().string());
     env->SetObjectField(sensor, sensorOffsets.name,      name);
     env->SetObjectField(sensor, sensorOffsets.vendor,    vendor);
-    env->SetIntField(sensor, sensorOffsets.version,      1);
+    env->SetIntField(sensor, sensorOffsets.version,      list->getVersion());
     env->SetIntField(sensor, sensorOffsets.handle,       list->getHandle());
     env->SetIntField(sensor, sensorOffsets.type,         list->getType());
     env->SetFloatField(sensor, sensorOffsets.range,      list->getMaxValue());
