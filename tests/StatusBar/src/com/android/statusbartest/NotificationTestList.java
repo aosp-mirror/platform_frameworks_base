@@ -715,20 +715,28 @@ public class NotificationTestList extends TestActivity
         new Test("Ten Notifications") {
             public void run() {
                 for (int i = 0; i < 2; i++) {
-                    Notification n = new Notification(NotificationTestList.this,
+                    Notification n = new Notification(
                             kNumberedIconResIDs[i],
-                            null, System.currentTimeMillis(), "Persistent #" + i,
-                            "Notify me!!!" + i, null);
-                    n.flags |= Notification.FLAG_ONGOING_EVENT;
+                            null, System.currentTimeMillis());
                     n.number = i;
+                    n.setLatestEventInfo(
+                            NotificationTestList.this,
+                            "Persistent #" + i,
+                            "Notify me!!!" + i, 
+                            null);
+                    n.flags |= Notification.FLAG_ONGOING_EVENT;
                     mNM.notify((i+1)*10, n);
                 }
                 for (int i = 2; i < 10; i++) {
-                    Notification n = new Notification(NotificationTestList.this,
+                    Notification n = new Notification(
                             kNumberedIconResIDs[i],
-                            null, System.currentTimeMillis(), "Persistent #" + i,
-                            "Notify me!!!" + i, null);
+                            null, System.currentTimeMillis());
                     n.number = i;
+                    n.setLatestEventInfo(
+                            NotificationTestList.this,
+                            "Persistent #" + i,
+                            "Notify me!!!" + i, 
+                            null);
                     mNM.notify((i+1)*10, n);
                 }
             }
