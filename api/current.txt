@@ -8613,7 +8613,6 @@ package android.graphics {
     method public android.graphics.Paint.Align getTextAlign();
     method public void getTextBounds(java.lang.String, int, int, android.graphics.Rect);
     method public void getTextBounds(char[], int, int, android.graphics.Rect);
-    method public java.util.Locale getTextLocale();
     method public void getTextPath(char[], int, int, float, float, android.graphics.Path);
     method public void getTextPath(java.lang.String, int, int, float, float, android.graphics.Path);
     method public float getTextScaleX();
@@ -8663,7 +8662,6 @@ package android.graphics {
     method public void setStyle(android.graphics.Paint.Style);
     method public void setSubpixelText(boolean);
     method public void setTextAlign(android.graphics.Paint.Align);
-    method public void setTextLocale(java.util.Locale);
     method public void setTextScaleX(float);
     method public void setTextSize(float);
     method public void setTextSkewX(float);
