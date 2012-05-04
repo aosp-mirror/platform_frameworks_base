@@ -5827,7 +5827,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     }
                     data.mSlop = viewToContentDimension(mNavSlop);
                     removeTouchHighlight();
-                    if (!mBlockWebkitViewMessages) {
+                    if (!mBlockWebkitViewMessages && mWebViewCore != null) {
                         mWebViewCore.sendMessageAtFrontOfQueue(
                                 EventHub.HIT_TEST, data);
                     }
