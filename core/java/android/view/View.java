@@ -537,9 +537,32 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * themselves rather than by putting them in a separate structure.
  * </p>
  *
+ * <a name="Properties"></a>
+ * <h3>Properties</h3>
+ * <p>
+ * The View class exposes an {@link #ALPHA} property, as well as several transform-related
+ * properties, such as {@link #TRANSLATION_X} and {@link #TRANSLATION_Y}. These properties are
+ * available both in the {@link Property} form as well as in similarly-named setter/getter
+ * methods (such as {@link #setAlpha(float)} for {@link #ALPHA}). These properties can
+ * be used to set persistent state associated with these rendering-related properties on the view.
+ * The properties and methods can also be used in conjunction with
+ * {@link android.animation.Animator Animator}-based animations, described more in the
+ * <a href="#Animation">Animation</a> section.
+ * </p>
+ *
  * <a name="Animation"></a>
  * <h3>Animation</h3>
  * <p>
+ * Starting with Android 3.0, the preferred way of animating views is to use the
+ * {@link android.animation} package APIs. These {@link android.animation.Animator Animator}-based
+ * classes change actual properties of the View object, such as {@link #setAlpha(float) alpha} and
+ * {@link #setTranslationX(float) translationX}. This behavior is contrasted to that of the pre-3.0
+ * {@link android.view.animation.Animation Animation}-based classes, which instead animate only
+ * how the view is drawn on the display. In particular, the {@link ViewPropertyAnimator} class
+ * makes animating these View properties particularly easy and efficient.
+ * </p>
+ * <p>
+ * Alternatively, you can use the pre-3.0 animation classes to animate how Views are rendered.
  * You can attach an {@link Animation} object to a view using
  * {@link #setAnimation(Animation)} or
  * {@link #startAnimation(Animation)}. The animation can alter the scale,
@@ -547,10 +570,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * attached to a view that has children, the animation will affect the entire
  * subtree rooted by that node. When an animation is started, the framework will
  * take care of redrawing the appropriate views until the animation completes.
- * </p>
- * <p>
- * Starting with Android 3.0, the preferred way of animating views is to use the
- * {@link android.animation} package APIs.
  * </p>
  *
  * <a name="Security"></a>
