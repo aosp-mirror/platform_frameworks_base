@@ -17,6 +17,8 @@
 package com.android.server.net;
 
 import static android.net.NetworkStats.TAG_NONE;
+import static android.net.TrafficStats.KB_IN_BYTES;
+import static android.net.TrafficStats.MB_IN_BYTES;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.net.NetworkStats;
@@ -25,6 +27,7 @@ import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TrafficStats;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.Slog;
 
 import com.android.internal.util.FileRotator;
@@ -58,9 +61,9 @@ public class NetworkStatsRecorder {
     private final String mCookie;
 
     private final long mBucketDuration;
-    private final long mPersistThresholdBytes;
     private final boolean mOnlyTags;
 
+    private long mPersistThresholdBytes = 2 * MB_IN_BYTES;
     private NetworkStats mLastSnapshot;
 
     private final NetworkStatsCollection mPending;
@@ -71,19 +74,24 @@ public class NetworkStatsRecorder {
     private WeakReference<NetworkStatsCollection> mComplete;
 
     public NetworkStatsRecorder(FileRotator rotator, NonMonotonicObserver<String> observer,
-            String cookie, long bucketDuration, long persistThresholdBytes, boolean onlyTags) {
+            String cookie, long bucketDuration, boolean onlyTags) {
         mRotator = checkNotNull(rotator, "missing FileRotator");
         mObserver = checkNotNull(observer, "missing NonMonotonicObserver");
         mCookie = cookie;
 
         mBucketDuration = bucketDuration;
-        mPersistThresholdBytes = persistThresholdBytes;
         mOnlyTags = onlyTags;
 
         mPending = new NetworkStatsCollection(bucketDuration);
         mSinceBoot = new NetworkStatsCollection(bucketDuration);
 
         mPendingRewriter = new CombiningRewriter(mPending);
+    }
+
+    public void setPersistThreshold(long thresholdBytes) {
+        if (LOGV) Slog.v(TAG, "setPersistThreshold() with " + thresholdBytes);
+        mPersistThresholdBytes = MathUtils.constrain(
+                thresholdBytes, 1 * KB_IN_BYTES, 100 * MB_IN_BYTES);
     }
 
     public void resetLocked() {
@@ -153,7 +161,7 @@ public class NetworkStatsRecorder {
                 continue;
             }
 
-            // skip when no delta occured
+            // skip when no delta occurred
             if (entry.isEmpty()) continue;
 
             // only record tag data when requested

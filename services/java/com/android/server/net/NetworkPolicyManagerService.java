@@ -118,6 +118,7 @@ import android.telephony.TelephonyManager;
 import android.text.format.Formatter;
 import android.text.format.Time;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.NtpTrustedTime;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -166,7 +167,7 @@ import libcore.io.IoUtils;
  */
 public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String TAG = "NetworkPolicy";
-    private static final boolean LOGD = true;
+    private static final boolean LOGD = false;
     private static final boolean LOGV = false;
 
     private static final int VERSION_INIT = 1;
@@ -962,6 +963,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
 
+        long lowestRule = Long.MAX_VALUE;
         final HashSet<String> newMeteredIfaces = Sets.newHashSet();
 
         // apply each policy that we found ifaces for; compute remaining data
@@ -985,6 +987,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         + Arrays.toString(ifaces));
             }
 
+            final boolean hasWarning = policy.warningBytes != LIMIT_DISABLED;
             final boolean hasLimit = policy.limitBytes != LIMIT_DISABLED;
             if (hasLimit || policy.metered) {
                 final long quotaBytes;
@@ -1014,6 +1017,23 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     newMeteredIfaces.add(iface);
                 }
             }
+
+            // keep track of lowest warning or limit of active policies
+            if (hasWarning && policy.warningBytes < lowestRule) {
+                lowestRule = policy.warningBytes;
+            }
+            if (hasLimit && policy.limitBytes < lowestRule) {
+                lowestRule = policy.limitBytes;
+            }
+        }
+
+        try {
+            // make sure stats are recorded frequently enough; we aim for 2MB
+            // threshold for 2GB/month rules.
+            final long persistThreshold = lowestRule / 1000;
+            mNetworkStats.advisePersistThreshold(persistThreshold);
+        } catch (RemoteException e) {
+            // ignored; service lives in system_server
         }
 
         // remove quota on any trailing interfaces
