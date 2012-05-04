@@ -238,7 +238,8 @@ interface INetworkManagementService
      * Return global network statistics summarized at an interface level,
      * without any UID-level granularity.
      */
-    NetworkStats getNetworkStatsSummary();
+    NetworkStats getNetworkStatsSummaryDev();
+    NetworkStats getNetworkStatsSummaryXt();
 
     /**
      * Return detailed network statistics with UID-level granularity,
