@@ -217,6 +217,9 @@ private:
      */
     UnicodeString mBuffer;
 
+    SkTypeface* typefaceForUnichar(const SkPaint* paint, SkTypeface* typeface,
+        SkUnichar unichar, HB_Script script);
+
     size_t shapeFontRun(const SkPaint* paint, bool isRTL);
 
     void computeValues(const SkPaint* paint, const UChar* chars,

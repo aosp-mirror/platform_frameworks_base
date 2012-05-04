@@ -739,18 +739,18 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* chars
 #endif
 }
 
-
-size_t TextLayoutShaper::shapeFontRun(const SkPaint* paint, bool isRTL) {
-    // Reset kerning
-    mShaperItem.kerning_applied = false;
-
-    // Update Harfbuzz Shaper
-    mShaperItem.item.bidiLevel = isRTL;
-
-    SkTypeface* typeface = paint->getTypeface();
-
+/**
+ * Return the first typeface in the logical change, starting with this typeface,
+ * that contains the specified unichar, or NULL if none is found.
+ * 
+ * Note that this function does _not_ increment the reference count on the typeface, as the
+ * assumption is that its lifetime is managed elsewhere - in particular, the fallback typefaces
+ * for the default font live in a global cache.
+ */
+SkTypeface* TextLayoutShaper::typefaceForUnichar(const SkPaint* paint, SkTypeface* typeface,
+        SkUnichar unichar, HB_Script script) {
     // Set the correct Typeface depending on the script
-    switch (mShaperItem.item.script) {
+    switch (script) {
     case HB_Script_Arabic:
         typeface = getCachedTypeface(&mArabicTypeface, TYPEFACE_ARABIC);
 #if DEBUG_GLYPHS
@@ -815,32 +815,31 @@ size_t TextLayoutShaper::shapeFontRun(const SkPaint* paint, bool isRTL) {
         break;
 
     default:
-        if (!typeface) {
-            typeface = mDefaultTypeface;
 #if DEBUG_GLYPHS
-            ALOGD("Using Default Typeface");
-#endif
-        } else {
-#if DEBUG_GLYPHS
+        if (typeface) {
             ALOGD("Using Paint Typeface");
-#endif
         }
+#endif
         break;
     }
+    return typeface;
+}
 
-    mShapingPaint.setTypeface(typeface);
-    mShaperItem.face = getCachedHBFace(typeface);
+size_t TextLayoutShaper::shapeFontRun(const SkPaint* paint, bool isRTL) {
+    // Reset kerning
+    mShaperItem.kerning_applied = false;
 
-#if DEBUG_GLYPHS
-    ALOGD("Run typeface = %p, uniqueID = %d, hb_face = %p",
-            typeface, typeface->uniqueID(), mShaperItem.face);
-#endif
+    // Update Harfbuzz Shaper
+    mShaperItem.item.bidiLevel = isRTL;
+
+    SkTypeface* typeface = paint->getTypeface();
 
     // Get the glyphs base count for offsetting the glyphIDs returned by Harfbuzz
     // This is needed as the Typeface used for shaping can be not the default one
     // when we are shaping any script that needs to use a fallback Font.
     // If we are a "common" script we dont need to shift
     size_t baseGlyphCount = 0;
+    SkUnichar firstUnichar = 0;
     switch (mShaperItem.item.script) {
     case HB_Script_Arabic:
     case HB_Script_Hebrew:
@@ -850,7 +849,7 @@ size_t TextLayoutShaper::shapeFontRun(const SkPaint* paint, bool isRTL) {
     case HB_Script_Thai:{
         const uint16_t* text16 = (const uint16_t*)(mShaperItem.string + mShaperItem.item.pos);
         const uint16_t* text16End = text16 + mShaperItem.item.length;
-        SkUnichar firstUnichar = SkUTF16_NextUnichar(&text16);
+        firstUnichar = SkUTF16_NextUnichar(&text16);
         while (firstUnichar == ' ' && text16 < text16End) {
             firstUnichar = SkUTF16_NextUnichar(&text16);
         }
@@ -860,6 +859,25 @@ size_t TextLayoutShaper::shapeFontRun(const SkPaint* paint, bool isRTL) {
     default:
         break;
     }
+
+    // We test the baseGlyphCount to see if the typeface supports the requested script
+    if (baseGlyphCount != 0) {
+        typeface = typefaceForUnichar(paint, typeface, firstUnichar, mShaperItem.item.script);
+    }
+
+    if (!typeface) {
+        typeface = mDefaultTypeface;
+#if DEBUG_GLYPHS
+        ALOGD("Using Default Typeface");
+#endif
+    }
+    mShapingPaint.setTypeface(typeface);
+    mShaperItem.face = getCachedHBFace(typeface);
+
+#if DEBUG_GLYPHS
+    ALOGD("Run typeface = %p, uniqueID = %d, hb_face = %p",
+            typeface, typeface->uniqueID(), mShaperItem.face);
+#endif
 
     // Shape
     assert(mShaperItem.item.length > 0); // Harfbuzz will overwrite other memory if length is 0.
