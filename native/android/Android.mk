@@ -30,8 +30,7 @@ LOCAL_STATIC_LIBRARIES := \
 
 LOCAL_C_INCLUDES += \
     frameworks/base/native/include \
-    frameworks/base/core/jni/android \
-    dalvik/libnativehelper/include/nativehelper
+    frameworks/base/core/jni/android
 
 LOCAL_MODULE:= libandroid
 
