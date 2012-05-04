@@ -20,7 +20,6 @@ import com.android.internal.os.AtomicFile;
 
 import android.accounts.Account;
 import android.os.Bundle;
-import android.os.Debug;
 import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 import android.test.mock.MockContentResolver;
@@ -57,7 +56,8 @@ public class SyncStorageEngineTest extends AndroidTestCase {
 
         long time0 = 1000;
         long historyId = engine.insertStartSyncEvent(
-                account, 0, authority, time0, SyncStorageEngine.SOURCE_LOCAL);
+                account, 0, authority, time0, SyncStorageEngine.SOURCE_LOCAL,
+                false /* initialization */);
         long time1 = time0 + SyncStorageEngine.MILLIS_IN_4WEEKS * 2;
         engine.stopSyncEvent(historyId, time1 - time0, "yay", 0, 0);
     }
