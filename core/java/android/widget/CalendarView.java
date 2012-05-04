@@ -421,6 +421,8 @@ public class CalendarView extends FrameLayout {
      * Sets the number of weeks to be shown.
      *
      * @param count The shown week count.
+     *
+     * @attr ref android.R.styleable#CalendarView_shownWeekCount
      */
     public void setShownWeekCount(int count) {
         if (mShownWeekCount != count) {
@@ -433,6 +435,8 @@ public class CalendarView extends FrameLayout {
      * Gets the number of weeks to be shown.
      *
      * @return The shown week count.
+     *
+     * @attr ref android.R.styleable#CalendarView_shownWeekCount
      */
     public int getShownWeekCount() {
         return mShownWeekCount;
@@ -442,6 +446,8 @@ public class CalendarView extends FrameLayout {
      * Sets the background color for the selected week.
      *
      * @param color The week background color.
+     *
+     * @attr ref android.R.styleable#CalendarView_selectedWeekBackgroundColor
      */
     public void setSelectedWeekBackgroundColor(int color) {
         if (mSelectedWeekBackgroundColor != color) {
@@ -460,6 +466,8 @@ public class CalendarView extends FrameLayout {
      * Gets the background color for the selected week.
      *
      * @return The week background color.
+     *
+     * @attr ref android.R.styleable#CalendarView_selectedWeekBackgroundColor
      */
     public int getSelectedWeekBackgroundColor() {
         return mSelectedWeekBackgroundColor;
@@ -469,6 +477,8 @@ public class CalendarView extends FrameLayout {
      * Sets the color for the dates of the focused month.
      *
      * @param color The focused month date color.
+     *
+     * @attr ref android.R.styleable#CalendarView_focusedMonthDateColor
      */
     public void setFocusedMonthDateColor(int color) {
         if (mFocusedMonthDateColor != color) {
@@ -487,6 +497,8 @@ public class CalendarView extends FrameLayout {
      * Gets the color for the dates in the focused month.
      *
      * @return The focused month date color.
+     *
+     * @attr ref android.R.styleable#CalendarView_focusedMonthDateColor
      */
     public int getFocusedMonthDateColor() {
         return mFocusedMonthDateColor;
@@ -496,6 +508,8 @@ public class CalendarView extends FrameLayout {
      * Sets the color for the dates of a not focused month.
      *
      * @param color A not focused month date color.
+     *
+     * @attr ref android.R.styleable#CalendarView_unfocusedMonthDateColor
      */
     public void setUnfocusedMonthDateColor(int color) {
         if (mUnfocusedMonthDateColor != color) {
@@ -514,6 +528,8 @@ public class CalendarView extends FrameLayout {
      * Gets the color for the dates in a not focused month.
      *
      * @return A not focused month date color.
+     *
+     * @attr ref android.R.styleable#CalendarView_unfocusedMonthDateColor
      */
     public int getUnfocusedMonthDateColor() {
         return mFocusedMonthDateColor;
@@ -523,6 +539,8 @@ public class CalendarView extends FrameLayout {
      * Sets the color for the week numbers.
      *
      * @param color The week number color.
+     *
+     * @attr ref android.R.styleable#CalendarView_weekNumberColor
      */
     public void setWeekNumberColor(int color) {
         if (mWeekNumberColor != color) {
@@ -537,6 +555,8 @@ public class CalendarView extends FrameLayout {
      * Gets the color for the week numbers.
      *
      * @return The week number color.
+     *
+     * @attr ref android.R.styleable#CalendarView_weekNumberColor
      */
     public int getWeekNumberColor() {
         return mWeekNumberColor;
@@ -546,6 +566,8 @@ public class CalendarView extends FrameLayout {
      * Sets the color for the separator line between weeks.
      *
      * @param color The week separator color.
+     *
+     * @attr ref android.R.styleable#CalendarView_weekSeparatorLineColor
      */
     public void setWeekSeparatorLineColor(int color) {
         if (mWeekSeparatorLineColor != color) {
@@ -558,6 +580,8 @@ public class CalendarView extends FrameLayout {
      * Gets the color for the separator line between weeks.
      *
      * @return The week separator color.
+     *
+     * @attr ref android.R.styleable#CalendarView_weekSeparatorLineColor
      */
     public int getWeekSeparatorLineColor() {
         return mWeekSeparatorLineColor;
@@ -568,6 +592,8 @@ public class CalendarView extends FrameLayout {
      * the end of the selected date.
      *
      * @param resourceId The vertical bar drawable resource id.
+     *
+     * @attr ref android.R.styleable#CalendarView_selectedDateVerticalBar
      */
     public void setSelectedDateVerticalBar(int resourceId) {
         Drawable drawable = getResources().getDrawable(resourceId);
@@ -579,6 +605,8 @@ public class CalendarView extends FrameLayout {
      * the end of the selected date.
      *
      * @param drawable The vertical bar drawable.
+     *
+     * @attr ref android.R.styleable#CalendarView_selectedDateVerticalBar
      */
     public void setSelectedDateVerticalBar(Drawable drawable) {
         if (mSelectedDateVerticalBar != drawable) {
@@ -607,6 +635,8 @@ public class CalendarView extends FrameLayout {
      * Sets the text appearance for the week day abbreviation of the calendar header.
      *
      * @param resourceId The text appearance resource id.
+     *
+     * @attr ref android.R.styleable#CalendarView_weekDayTextAppearance
      */
     public void setWeekDayTextAppearance(int resourceId) {
         if (mWeekDayTextAppearanceResId != resourceId) {
@@ -619,6 +649,8 @@ public class CalendarView extends FrameLayout {
      * Gets the text appearance for the week day abbreviation of the calendar header.
      *
      * @return The text appearance resource id.
+     *
+     * @attr ref android.R.styleable#CalendarView_weekDayTextAppearance
      */
     public int getWeekDayTextAppearance() {
         return mWeekDayTextAppearanceResId;
@@ -628,6 +660,8 @@ public class CalendarView extends FrameLayout {
      * Sets the text appearance for the calendar dates.
      *
      * @param resourceId The text appearance resource id.
+     *
+     * @attr ref android.R.styleable#CalendarView_dateTextAppearance
      */
     public void setDateTextAppearance(int resourceId) {
         if (mDateTextAppearanceResId != resourceId) {
@@ -641,6 +675,8 @@ public class CalendarView extends FrameLayout {
      * Gets the text appearance for the calendar dates.
      *
      * @return The text appearance resource id.
+     *
+     * @attr ref android.R.styleable#CalendarView_dateTextAppearance
      */
     public int getDateTextAppearance() {
         return mDateTextAppearanceResId;
@@ -683,6 +719,8 @@ public class CalendarView extends FrameLayout {
      * <p>
      *
      * @return The minimal supported date.
+     *
+     * @attr ref android.R.styleable#CalendarView_minDate
      */
     public long getMinDate() {
         return mMinDate.getTimeInMillis();
@@ -694,6 +732,8 @@ public class CalendarView extends FrameLayout {
      * zone.
      *
      * @param minDate The minimal supported date.
+     *
+     * @attr ref android.R.styleable#CalendarView_minDate
      */
     public void setMinDate(long minDate) {
         mTempDate.setTimeInMillis(minDate);
@@ -731,6 +771,8 @@ public class CalendarView extends FrameLayout {
      * <p>
      *
      * @return The maximal supported date.
+     *
+     * @attr ref android.R.styleable#CalendarView_maxDate
      */
     public long getMaxDate() {
         return mMaxDate.getTimeInMillis();
@@ -742,6 +784,8 @@ public class CalendarView extends FrameLayout {
      * zone.
      *
      * @param maxDate The maximal supported date.
+     *
+     * @attr ref android.R.styleable#CalendarView_maxDate
      */
     public void setMaxDate(long maxDate) {
         mTempDate.setTimeInMillis(maxDate);
@@ -767,6 +811,8 @@ public class CalendarView extends FrameLayout {
      * Sets whether to show the week number.
      *
      * @param showWeekNumber True to show the week number.
+     *
+     * @attr ref android.R.styleable#CalendarView_showWeekNumber
      */
     public void setShowWeekNumber(boolean showWeekNumber) {
         if (mShowWeekNumber == showWeekNumber) {
@@ -781,6 +827,8 @@ public class CalendarView extends FrameLayout {
      * Gets whether to show the week number.
      *
      * @return True if showing the week number.
+     *
+     * @attr ref android.R.styleable#CalendarView_showWeekNumber
      */
     public boolean getShowWeekNumber() {
         return mShowWeekNumber;
@@ -798,6 +846,8 @@ public class CalendarView extends FrameLayout {
      * @see Calendar#FRIDAY
      * @see Calendar#SATURDAY
      * @see Calendar#SUNDAY
+     *
+     * @attr ref android.R.styleable#CalendarView_firstDayOfWeek
      */
     public int getFirstDayOfWeek() {
         return mFirstDayOfWeek;
@@ -815,6 +865,8 @@ public class CalendarView extends FrameLayout {
      * @see Calendar#FRIDAY
      * @see Calendar#SATURDAY
      * @see Calendar#SUNDAY
+     *
+     * @attr ref android.R.styleable#CalendarView_firstDayOfWeek
      */
     public void setFirstDayOfWeek(int firstDayOfWeek) {
         if (mFirstDayOfWeek == firstDayOfWeek) {
