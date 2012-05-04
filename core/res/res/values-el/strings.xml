@@ -168,76 +168,43 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Τα μηνύματά σας"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Ανάγνωση και εγγραφή μηνυμάτων SMS, μηνυμάτων ηλεκτρονικού ταχυδρομείου και άλλων μηνυμάτων."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Οι προσωπικές σας πληροφορίες"</string>
-    <!-- no translation found for permgroupdesc_personalInfo (8426453129788861338) -->
-    <skip />
-    <!-- no translation found for permgrouplab_socialInfo (5799096623412043791) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_socialInfo (7129842457611643493) -->
-    <skip />
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Άμεση πρόσβαση σε πληροφορίες σχετικά με εσάς, οι οποίες είναι αποθηκευμένες στην κάρτα επαφών σας."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Οι κοινωνικές πληροφορίες σας"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Άμεση πρόσβαση σε πληροφορίες σχετικά με τις επαφές και τις κοινωνικές συνδέσεις σας."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Η τοποθεσία σας"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Παρακολούθηση της φυσικής τοποθεσίας σας."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Επικοινωνία δικτύου"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Πρόσβαση σε διάφορες λειτουργίες δικτύου."</string>
-    <!-- no translation found for permgrouplab_shortRangeNetwork (4504840216096355984) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_shortRangeNetwork (8821013030346680806) -->
-    <skip />
-    <!-- no translation found for permgrouplab_audioSettings (8329261670151871235) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_audioSettings (2641515403347568130) -->
-    <skip />
-    <!-- no translation found for permgrouplab_affectsBattery (6209246653424798033) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_affectsBattery (6441275320638916947) -->
-    <skip />
-    <!-- no translation found for permgrouplab_calendar (5863508437783683902) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calendar (5777534316982184416) -->
-    <skip />
-    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (40926483968949978) -->
-    <skip />
-    <!-- no translation found for permgrouplab_bookmarks (1949519673103968229) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_bookmarks (4169771606257963028) -->
-    <skip />
-    <!-- no translation found for permgrouplab_deviceAlarms (6117704629728824101) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_deviceAlarms (4769356362251641175) -->
-    <skip />
-    <!-- no translation found for permgrouplab_voicemail (4162237145027592133) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_voicemail (2498403969862951393) -->
-    <skip />
-    <!-- no translation found for permgrouplab_microphone (171539900250043464) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_microphone (7106618286905738408) -->
-    <skip />
-    <!-- no translation found for permgrouplab_camera (4820372495894586615) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_camera (2933667372289567714) -->
-    <skip />
-    <!-- no translation found for permgrouplab_appInfo (8028789762634147725) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_appInfo (3950378538049625907) -->
-    <skip />
-    <!-- no translation found for permgrouplab_wallpaper (3850280158041175998) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_wallpaper (5630417854750540154) -->
-    <skip />
-    <!-- no translation found for permgrouplab_systemClock (406535759236612992) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_systemClock (3944359833624094992) -->
-    <skip />
-    <!-- no translation found for permgrouplab_statusBar (2095862568113945398) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_statusBar (6242593432226807171) -->
-    <skip />
-    <!-- no translation found for permgrouplab_syncSettings (3341990986147826541) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_syncSettings (7603195265129031797) -->
-    <skip />
+    <string name="permgrouplab_shortRangeNetwork" msgid="4504840216096355984">"Bluetooth και NFC"</string>
+    <string name="permgroupdesc_shortRangeNetwork" msgid="8821013030346680806">"Πρόσβαση δικτύων και συσκευών Bluetooth ή NFC."</string>
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Ρυθμίσεις ήχου"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Αλλαγή ρυθμίσεων ήχου."</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Επηρεάζει την μπαταρία"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Χρήση λειτουργιών που μπορούν να εξαντλήσουν γρήγορα την μπαταρία."</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Ημερολόγιο"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Άμεση πρόσβαση σε ημερολόγιο και συμβάντα."</string>
+    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Λεξικό χρήστη"</string>
+    <string name="permgroupdesc_dictionary" msgid="40926483968949978">"Άμεση πρόσβαση στο λεξικό χρήστη."</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Σελιδοδείκτες και ιστορικό"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Άμεση πρόσβαση σε σελιδοδείκτες και ιστορικού προγράμματος περιήγησης."</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Ξυπνητήρι"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Ρύθμιση ξυπνητηριού."</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Αυτόματος τηλεφωνητής"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Άμεση πρόσβαση στον αυτόματο τηλεφωνητή."</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Μικρόφωνο"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Άμεση πρόσβαση στο μικρόφωνο για την εγγραφή ήχου."</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"Κάμερα"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Άμεση πρόσβαση σε κάμερα για λήψη εικόνας ή βίντεο."</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Οι πληροφορίες των εφαρμογών σας"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Δυνατότητα επιρροής συμπεριφοράς άλλων εφαρμογών στη συσκευή σας."</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Ταπετσαρία"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Αλλαγή των ρυθμίσεων ταπετσαρίας συσκευής."</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Ρολόι"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Αλλαγή της ώρας ή της ζώνης ώρας συσκευής."</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Γραμμή κατάστασης"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Αλλαγή των ρυθμίσεων γραμμής κατάστασης συσκευής."</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Ρυθμίσεις συγχρονισμού"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Πρόσβαση στις ρυθμίσεις συγχρονισμού."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Οι λογαριασμοί σας"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Πρόσβαση στους διαθέσιμους λογαριασμούς."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Στοιχεία ελέγχου υλικού"</string>
@@ -248,10 +215,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Χαμηλού επιπέδου πρόσβαση και έλεγχος του συστήματος."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Εργαλεία ανάπτυξης"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Δυνατότητες που είναι απαραίτητες μόνο σε προγραμματιστές εφαρμογών."</string>
-    <!-- no translation found for permgrouplab_display (4279909676036402636) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_display (6051002031933013714) -->
-    <skip />
+    <string name="permgrouplab_display" msgid="4279909676036402636">"Άλλες διεπαφές εφαρμογών"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"Επιρροή διεπαφής άλλων εφαρμογών."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Αποθηκευτικός χώρος"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Πρόσβαση στον χώρο αποθ. USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Πρόσβαση στην κάρτα SD."</string>
@@ -770,8 +735,7 @@
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Δεν υπάρχει κάρτα SIM στο τηλέφωνο."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Τοποθετήστε μια κάρτα SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Η κάρτα SIM δεν υπάρχει ή δεν είναι δυνατή η ανάγνωσή της. Τοποθετήστε μια κάρτα SIM."</string>
-    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (5096149665138916184) -->
-    <skip />
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Η κάρτα SIM δεν μπορεί να χρησιμοποιηθεί."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Η κάρτα SIM έχει απενεργοποιηθεί οριστικά."\n" Επικοινωνήστε με τον παροχέα υπηρεσιών ασύρματου δικτύου για να λάβετε μια νέα κάρτα SIM."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Κουμπί προηγούμενου κομματιού"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Κουμπί επόμενου κομματιού"</string>
@@ -1113,7 +1077,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Ορισμός"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Τέλος"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Προεπιλεγμένο"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"ΝΕΟ: "</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"ΝΕΟ: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"Δεν απαιτούνται άδειες"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Απόκρυψη"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Εμφάνιση όλων"</b></string>

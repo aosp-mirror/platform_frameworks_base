@@ -285,8 +285,8 @@
     <string name="permdesc_receiveWapPush" msgid="7983455145335316872">"允許應用程式接收及處理 WAP 訊息。請注意，惡意應用程式可能利用此功能監視訊息，或在您讀取訊息前擅自將其刪除。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"擷取執行中的應用程式"</string>
     <string name="permdesc_getTasks" msgid="6608159250520381359">"允許應用程式取得最近執行任務的資訊。請注意，惡意應用程式可能利用此功能找出其他應用程式的隱私資訊。"</string>
-    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"擷取執行中應用程式的詳細資料"</string>
-    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"允許應用程式擷取目前及最近執行任務的詳細資訊。惡意應用程式可能會找出其他應用程式的私人資訊。"</string>
+    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"擷取執行中應用程式的詳細資訊"</string>
+    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"允許應用程式擷取目前及最近所執行任務的詳細資訊。請注意，惡意應用程式可能會找出其他應用程式的不公開資訊。"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"重新排序正在執行的應用程式"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"允許應用程式將工作移至前景或背景。請注意，惡意應用程式可能利用此功能自行移動至前景。"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"停止執行中的應用程式"</string>
@@ -1113,7 +1113,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"設定"</string>
     <string name="date_time_done" msgid="2507683751759308828">"完成"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"預設值"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"新增："</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"新增："</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"無須許可"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>" 隱藏"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"顯示全部"</b></string>

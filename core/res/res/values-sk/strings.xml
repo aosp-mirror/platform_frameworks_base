@@ -587,11 +587,11 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Umožňuje aplikácii čítať súkromné slová, názvy a frázy, ktoré mohol používateľ uložiť do slovníka používateľa."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"zapisovať do slovníka definovaného používateľom"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Umožňuje aplikácii zapisovať nové slová do používateľského slovníka."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"čítať obsah ukladacieho priestoru USB"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"čítať obsah úložiska USB"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"čítať obsah karty SD"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Umožňuje aplikácii čítať obsah ukladacieho priestoru USB, ktorý môže zahrnovať fotografie a mediálne údaje."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Umožňuje aplikácii čítať obsah úložiska USB, ktorý môže obsahovať fotografie a mediálne údaje."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Umožňuje aplikácii čítať obsah karty SD, ktorý môže zahrnovať fotografie a mediálne údaje."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"upraviť alebo odstrániť obsah ukladacieho priestoru USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"upraviť alebo odstrániť obsah úložiska USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"upraviť alebo odstrániť obsah karty SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Umožňuje aplikácii zápis do ukladacieho priestoru USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Umožňuje aplikácii zápis na kartu SD."</string>
@@ -1113,7 +1113,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Nastaviť"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Hotovo"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Predvolené"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"NOVINKA: "</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NOVINKA: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"Nevyžadujú sa žiadne oprávnenia."</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Skryť"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Zobraziť všetky"</b></string>

@@ -168,76 +168,43 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Dine beskeder"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Læs og skriv sms-beskeder, e-mails og andre beskeder."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Dine personlige oplysninger"</string>
-    <!-- no translation found for permgroupdesc_personalInfo (8426453129788861338) -->
-    <skip />
-    <!-- no translation found for permgrouplab_socialInfo (5799096623412043791) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_socialInfo (7129842457611643493) -->
-    <skip />
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Direkte adgang til oplysninger om dig, som er gemt på dit kontaktkort."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Dine sociale oplysninger"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Direkte adgang til oplysninger om dine kontaktpersoner og sociale forbindelser."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Din placering"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Overvåg din fysiske placering."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Netværkskommunikation"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Få adgang til forskellige netværksfunktioner."</string>
-    <!-- no translation found for permgrouplab_shortRangeNetwork (4504840216096355984) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_shortRangeNetwork (8821013030346680806) -->
-    <skip />
-    <!-- no translation found for permgrouplab_audioSettings (8329261670151871235) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_audioSettings (2641515403347568130) -->
-    <skip />
-    <!-- no translation found for permgrouplab_affectsBattery (6209246653424798033) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_affectsBattery (6441275320638916947) -->
-    <skip />
-    <!-- no translation found for permgrouplab_calendar (5863508437783683902) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calendar (5777534316982184416) -->
-    <skip />
-    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (40926483968949978) -->
-    <skip />
-    <!-- no translation found for permgrouplab_bookmarks (1949519673103968229) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_bookmarks (4169771606257963028) -->
-    <skip />
-    <!-- no translation found for permgrouplab_deviceAlarms (6117704629728824101) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_deviceAlarms (4769356362251641175) -->
-    <skip />
-    <!-- no translation found for permgrouplab_voicemail (4162237145027592133) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_voicemail (2498403969862951393) -->
-    <skip />
-    <!-- no translation found for permgrouplab_microphone (171539900250043464) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_microphone (7106618286905738408) -->
-    <skip />
-    <!-- no translation found for permgrouplab_camera (4820372495894586615) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_camera (2933667372289567714) -->
-    <skip />
-    <!-- no translation found for permgrouplab_appInfo (8028789762634147725) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_appInfo (3950378538049625907) -->
-    <skip />
-    <!-- no translation found for permgrouplab_wallpaper (3850280158041175998) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_wallpaper (5630417854750540154) -->
-    <skip />
-    <!-- no translation found for permgrouplab_systemClock (406535759236612992) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_systemClock (3944359833624094992) -->
-    <skip />
-    <!-- no translation found for permgrouplab_statusBar (2095862568113945398) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_statusBar (6242593432226807171) -->
-    <skip />
-    <!-- no translation found for permgrouplab_syncSettings (3341990986147826541) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_syncSettings (7603195265129031797) -->
-    <skip />
+    <string name="permgrouplab_shortRangeNetwork" msgid="4504840216096355984">"Bluetooth og NFC"</string>
+    <string name="permgroupdesc_shortRangeNetwork" msgid="8821013030346680806">"Adgang til Bluetooth- eller NFC-netværk og -enheder."</string>
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Lydindstillinger"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Skifte lydindstillinger."</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Påvirker batteriet"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Bruge funktioner, der hurtigt kan dræne batteriet."</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Direkte adgang til kalender og begivenheder."</string>
+    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Brugerordbog"</string>
+    <string name="permgroupdesc_dictionary" msgid="40926483968949978">"Direkte adgang til brugerordbogen."</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Bogmærker og historik"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Direkte adgang til bogmærker og browserhistorik."</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Alarm"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Indstille vækkeuret."</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Telefonsvarer"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Direkte adgang til telefonsvarer."</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Direkte adgang til mikrofonen, så der kan optages lyd."</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Direkte adgang til kamera, så der kan tages billeder eller optages video."</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Oplysninger om dine applikationer"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Evne til at påvirke andre applikationers adfærd på din enhed."</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Baggrund"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Ændre enhedens baggrundsindstillinger."</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Ur"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Ændre klokkeslæt eller tidszone på enheden."</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Statusbjælke"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Ændre indstillinger for enhedens statusbjælke."</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Synkronisering"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Adgang til synkroniseringsindstillingerne."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Dine konti"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Få adgang til de tilgængelige konti."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Hardwarekontroller"</string>
@@ -248,10 +215,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Adgang og kontrol til systemet på lavere niveau."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Udviklingsværktøjer"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Funktioner, der kun er nødvendige for udviklere af apps."</string>
-    <!-- no translation found for permgrouplab_display (4279909676036402636) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_display (6051002031933013714) -->
-    <skip />
+    <string name="permgrouplab_display" msgid="4279909676036402636">"Andre applikationers brugergrænseflade"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"Påvirke brugergrænsefladen for andre applikationer."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Få adgang til USB-lager."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Få adgang til SD-kortet."</string>
@@ -770,8 +735,7 @@
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Der er ikke noget SIM-kort i telefonen."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Indsæt et SIM-kort."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-kortet mangler eller kan ikke læses. Indsæt et SIM-kort."</string>
-    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (5096149665138916184) -->
-    <skip />
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Ubrugeligt SIM-kort."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Dit SIM-kort er blevet permanent deaktiveret."\n"Kontakt din tjenesteudbyder for at få et nyt SIM-kort."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Knap til forrige nummer"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Knap til næste nummer"</string>
@@ -1113,7 +1077,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Angiv"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Udført"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Standard"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"NYHED! "</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NYHED! "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"Der kræves ingen tilladelser"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Skjul"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Vis alle"</b></string>

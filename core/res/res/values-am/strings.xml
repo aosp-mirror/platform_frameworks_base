@@ -335,7 +335,7 @@
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"ትግበራ ሙሉ የመጠባበቂያ ማረጋገጫ UI ለማስነሳት ይፈቅዳል። በሌላ በማንኛውም እንዳይገለገል።"</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"ያልተፈቀደ Windows አሳይ"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"በውስጣዊ የስርዓት የተጠቃሚ በይነገፅ ለመጠቀም የተዘጋጁ መስኮቶችን ለመፍጠር ለመተግበሪያው ይፈቅዳሉ። ለመደበኛ መተግበሪያዎች አገልግሎት አይደለም።"</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"በሌሎች መተግበሪያዎች ላይ ሳብ"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"በሌሎች መተግበሪያዎች ላይ ሳል"</string>
     <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"የስርዓት ማንቂያ መስኮትን ለማሳየት ለመተግበሪያው ይፈቅዳሉ፡፡ ተንኮል አዘል መተግበሪያዎች ጠቅላላውን ማሳያ ሊቆጣጠሩት ይችላሉ፡፡"</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"የሁሉንም እነማ ፍጥነት ቀይር"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"የአለም አቀፍ ተልወስዋሽ ምስሎች ፍጥነት(ፈጣን ወይም ቀርፋፋ ተልወስዋሽ ምስሎችን) በማንኛውም ጊዜ ለመለወጥ ለመተግበሪያው ይፈቅዳሉ።"</string>
@@ -403,7 +403,7 @@
     <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"የስርዓቱን ደህንነቱ የተጠበቀ ቅንጅቶችን ውሂብ ለመቀየር ለመተግበሪያው ይፈቅዳሉ፡፡ለመደበኛ ትግበራዎች  አያስፈልግም።"</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"የGoogle አገልግሎቶች ካርታን ቀይር"</string>
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"ትግበራ የGoogle ካርታ አገልግሎቶችን ለመቀየር ይፈቅዳል።ለመደበኛ ትግበራዎች ጥቅም አይደለም።"</string>
-    <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"ጅማሬ ላይ አሂድ"</string>
+    <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"መነሻ ላይ አሂድ"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"ስርዓቱ  ማስጀመር  እንደጨረሰ ወዲያውኑ እራሱን እንዲያስጀምር ለመተግበሪያው ይፈቅዳሉ፡፡ ይሄ ጡባዊ ተኮን ለማስጀመር ብዙ ጊዜ ሊፈጅ ይችላል እና ሁልጊዜ በማስኬድ ጠቅላላውን ጡባዊ ተኮን እንዲቀራፈፍ ለመተግበሪያው ይፈቅዳል፡፡"</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"ወዲያውኑ ስርዓቱ ማስነሳት ሲጨርስ ራሱን እንዲያስጀምር ለመተግበሪያው ይፈቅዳሉ፡፡ ይሄ ስልኩን ለማስጀመር ብዙ ጊዜ እንዲወስድ ሊያደርገው ይችላል እና  ሁልጊዜ በማስኬድ ሁሉንም ስልክ ለማንቀራፈፍ ለመተግበሪያው ይፈቅዳል፡፡"</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"ልጥፍ ዝርዝር ላክ"</string>
@@ -421,9 +421,9 @@
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"የጥሪ ምዝግብ ማስታወሻን ፃፍ"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ስለ ገቢ እና ወጪ ጥሪዎችን ውሂብ ጨምሮ፣ የጡባዊተኮህን ምዝግብ ማስታወሻ ለመቀየር ለመተግበሪያው ይፈቅዳል። ይሄንን ተንኮል አዘል መተግበሪያዎች የስልክህን ምዝግብ ማስታወሻ ለመሰረዝ ወይም ለመለወጥ ሊጠቀሙበት ይችላሉ።"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"ስለ ገቢ እና ወጪ ጥሪዎችን ውሂብ ጨምሮ፣ የስልክህን ምዝግብ ማስታወሻ ለመቀየር ለመተግበሪያው ይፈቅዳል። ይሄንን ተንኮል አዘል መተግበሪያዎች የስልክህን ምዝግብ ማስታወሻ ለመሰረዝ ወይም ለመለወጥ ሊጠቀሙበት ይችላሉ።"</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"የራስህ የእውቂያ ካርድ አንብብ"</string>
+    <string name="permlab_readProfile" msgid="4701889852612716678">"የራስህን የእውቂያ ካርድ አንብብ"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"ልክ እንደ አንተ ስም እና የዕውቂያ መረጃ ፣ በአንተ መሳሪያ ወስጥ የተከማቹ የግል መገለጫ መረጃ ለማንበብ ለመተግበሪያው ይፈቅዳሉ፡፡ይሄም ማለት ሌሎች መተግበሪያዎች ሊለዩህ ይችላሉ እና ለሌሎች የመገለጫ መረጃህን ይልካሉ፡፡"</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"የራስህ የዕውቂያ ካርድ አስተካክል"</string>
+    <string name="permlab_writeProfile" msgid="907793628777397643">"የራስህን የዕውቂያ ካርድ አስተካክል"</string>
     <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"ልክ እንደ አንተ ስም እና የዕውቂያ መረጃ ፣ በአንተ መሳሪያ ወስጥ የተከማቹ የግል መገለጫ መረጃ ለመለወጥ ወይም ለማከል ለመተግበሪያው ይፈቅዳሉ፡፡ይሄም ማለት ሌሎች መተግበሪያዎች ሊለዩህ ይችላሉ እና ለሌሎች የመገለጫ መረጃህን ይልካሉ፡፡"</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"የአንተን ማህበራዊ የውይይት ክፍሎች አንብብ"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="3419050808547335320">" ከአንተ ጓደኞች ማህበራዊ ዝማኔዎችን እንዲደርስባቸው እና እንዲያመሳስል ለመተግበሪያውይፈቅዳሉ፡፡ ተንኮል አዘል መተግበሪያዎች ይህን መዳረሻ ባንተና በጓደኞችህ መካከል በማህበራዊ አውታረመረቦች ያሉ የግል ተግባቦቶችን ለመዳረስ ሊጠቀሙበት ይችላሉ፡፡"</string>
@@ -520,7 +520,7 @@
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"ለስልኩ ሀርድዌር ሙሉመድረስበመፍቀድእንደ ዝቅተኛ-ደረጃ አምራች ሙከራ አሂድ። የሚገኘው ስልኩ በአምራች ሙከራ ሁነታ ላይ ሲአሄድ ብቻ ነው።"</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"ልጣፍአዘጋጅ"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"የስረዓቱን ልጥፍ ለማዘጋጀት ለመተግበሪያው ይፈቅዳሉ ።"</string>
-    <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"የግድግዳ ወረቀትህ መጠን አስተካክል"</string>
+    <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"የልጣፍህን መጠን አስተካክል"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"የስርዓቱን ልጥፍ መጠንለማዘጋጀት ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"ስርዓትን ወደ ፋብሪካ ነባሪዎች ዳግም አስጀምር"</string>
     <string name="permdesc_masterClear" msgid="3665380492633910226">"ወደ ፋብሪካው ቅንብሮች  ሙሉ በሙሉ ስርዓቱን ዳግም ለማስጀመር ለመተግበሪያው ይፈቅዳሉ ፤ ሁሉንም ውሂብ፣ አወቃቀር፣ እና የተጫኑ መተግበሪያዎችን በማጥፈት፡፡"</string>
@@ -587,12 +587,12 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">" ተጠቃሚው በተጠቃሚ መዝገበ ቃላት ሊያከማች የቻለውን ማንኛውም የግል ቃላት፣ ስሞች፣እና ሀረጎች ለማንበብ  ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"በተጠቃሚ በተወሰነ መዝገበ ቃላት ፃፍ"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"በተጠቃሚ መዝገበ ቃላት ውስጥ አዲስ ቃል እንዲጽፍ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"የUSB ማከማቻህ ይዘቶችን አንብብ"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"የSD ካርድህ ይዘቶች አንብብ"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"የUSB ማከማቻህን ይዘቶች አንብብ"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"የSD ካርድህን ይዘቶች አንብብ"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"መተግበሪያው የUSB ማከማቻ ይዘቶችን እንዲያነብ ይፈቅዳል፣ ይህም ፎቶዎችና ሚዲያ ሊያካትት ይችላል።"</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"መተግበሪያው የSD ካርድ ይዘቶችን እንዲያነብ ይፈቅዳል፣ ይህም ፎቶዎችና ሚዲያ ሊያካትት ይችላል።"</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"የUSB ማከማቻህ ይዘቶችን ቀይር ወይም ሰርዝ"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"የSD ካርድህ ይዘቶችን ቀይር ወይም ሰርዝ"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"የUSB ማከማቻህን ይዘቶች ቀይር ወይም ሰርዝ"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"የSD ካርድህን ይዘቶች ቀይር ወይም ሰርዝ"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"ወደ USB ማህደረ ትውስታው ለመፃፍ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"መተግበሪያውን ወደ SD ካርድ ለመፃፍ ይፈቅዳል።"</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"የውስጥ ማህደረ መረጃ ማከማቻ ይዘቶችን ቀይር/ሰርዝ"</string>
@@ -1113,7 +1113,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"አዘጋጅ"</string>
     <string name="date_time_done" msgid="2507683751759308828">"ተጠናቋል"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"ነባሪ"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"አዲስ፦ "</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"አዲስ፦ "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"ምንም ፍቃዶች አይጠየቁም"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"ደብቅ "</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"ሁሉንም አሳይ"</b></string>

@@ -423,7 +423,7 @@
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Membenarkan apl untuk mengubah suai panggilan telefon anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakannya untuk memadam atau mengubah suai log panggilan anda."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"baca kad kenalan anda sendiri"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Membenarkan apl untuk membaca maklumat profil peribadi yang disimpan dalam peranti anda, seperti nama dan maklumat kenalan anda. Ini bermakna apl lain boleh mengenal pasti anda dan menghantar maklumat profil anda kepada orang lain."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"ubah suai kad kenalan anda sendiri"</string>
+    <string name="permlab_writeProfile" msgid="907793628777397643">"ubah suai kad kenalan sendiri"</string>
     <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"Membenarkan apl untuk menukar atau menambah maklumat profil peribadi yang disimpan dalam peranti anda, seperti nama dan maklumat kenalan anda. Ini bermakna apl lain boleh mengenal pasti anda dan menghantar maklumat profil anda kepada orang lain."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"baca aliran sosial anda"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="3419050808547335320">"Membenarkan apl mengakses dan menyegerakkan kemas kini sosial daripada rakan-rakan anda. Apl hasad boleh menggunakannya untuk membaca komunikasi peribadi di antara anda dan rakan-rakan anda pada rangkaian sosial."</string>
@@ -1113,7 +1113,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Tetapkan"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Selesai"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Lalai"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"BAHARU: "</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"BAHARU: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"Tiada kebenaran diperlukan"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Sembunyikan"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Tunjukkan semua"</b></string>
