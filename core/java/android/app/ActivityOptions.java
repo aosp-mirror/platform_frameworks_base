@@ -325,10 +325,11 @@ public class ActivityOptions {
     }
 
     /**
-     * Join the values in <var>otherOptions</var> in to this one.  Any values
+     * Update the current values in this ActivityOptions from those supplied
+     * in <var>otherOptions</var>.  Any values
      * defined in <var>otherOptions</var> replace those in the base options.
      */
-    public void join(ActivityOptions otherOptions) {
+    public void update(ActivityOptions otherOptions) {
         if (otherOptions.mPackageName != null) {
             mPackageName = otherOptions.mPackageName;
         }
