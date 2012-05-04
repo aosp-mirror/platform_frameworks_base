@@ -1556,15 +1556,13 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Equivalent to calling {@link 
-     * TextView#setCompoundDrawablesRelativeWithIntrinsicBounds(int, int, int, int)}.
-     *
      * @param viewId The id of the view whose text should change
-     * @param start The id of a drawable to place before the text (relative to the 
+     * @param start The id of a drawable to place before the text (relative to the
      * layout direction), or 0
      * @param top The id of a drawable to place above the text, or 0
      * @param end The id of a drawable to place after the text, or 0
-     * @param bottom The id of a drawable to place below the text, or 0 
+     * @param bottom The id of a drawable to place below the text, or 0
+     * @hide
      */
     public void setTextViewCompoundDrawablesRelative(int viewId, int start, int top, int end, int bottom) {
         addAction(new TextViewDrawableAction(viewId, true, start, top, end, bottom));

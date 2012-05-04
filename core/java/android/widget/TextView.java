@@ -1512,6 +1512,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Returns the start padding of the view, plus space for the start
      * Drawable if any.
+     * @hide
      */
     public int getCompoundPaddingStart() {
         resolveDrawables();
@@ -1527,6 +1528,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Returns the end padding of the view, plus space for the end
      * Drawable if any.
+     * @hide
      */
     public int getCompoundPaddingEnd() {
         resolveDrawables();
@@ -1624,6 +1626,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Returns the total start padding of the view, including the start
      * Drawable if any.
+     * @hide
      */
     public int getTotalPaddingStart() {
         return getCompoundPaddingStart();
@@ -1632,6 +1635,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Returns the total end padding of the view, including the end
      * Drawable if any.
+     * @hide
      */
     public int getTotalPaddingEnd() {
         return getCompoundPaddingEnd();
@@ -1834,6 +1838,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_drawableTop
      * @attr ref android.R.styleable#TextView_drawableEnd
      * @attr ref android.R.styleable#TextView_drawableBottom
+     * @hide
      */
     public void setCompoundDrawablesRelative(Drawable start, Drawable top,
                                      Drawable end, Drawable bottom) {
@@ -1955,6 +1960,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_drawableTop
      * @attr ref android.R.styleable#TextView_drawableEnd
      * @attr ref android.R.styleable#TextView_drawableBottom
+     * @hide
      */
     @android.view.RemotableViewMethod
     public void setCompoundDrawablesRelativeWithIntrinsicBounds(int start, int top, int end,
@@ -1978,6 +1984,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_drawableTop
      * @attr ref android.R.styleable#TextView_drawableEnd
      * @attr ref android.R.styleable#TextView_drawableBottom
+     * @hide
      */
     public void setCompoundDrawablesRelativeWithIntrinsicBounds(Drawable start, Drawable top,
             Drawable end, Drawable bottom) {
@@ -2024,6 +2031,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_drawableTop
      * @attr ref android.R.styleable#TextView_drawableEnd
      * @attr ref android.R.styleable#TextView_drawableBottom
+     * @hide
      */
     public Drawable[] getCompoundDrawablesRelative() {
         final Drawables dr = mDrawables;
@@ -4543,6 +4551,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    /**
+     * @hide
+     */
     @Override
     public int getResolvedLayoutDirection(Drawable who) {
         if (who == null) return View.LAYOUT_DIRECTION_LTR;
