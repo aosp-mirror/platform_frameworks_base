@@ -592,7 +592,7 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Permet à l\'appli de lire le contenu de la mémoire USB (photos, fichiers multimédias, etc.)."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Permet à l\'application de lire le contenu d\'une carte SD, qui peut inclure des photos et des fichiers multimédias."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modifier ou supprimer le contenu de la mémoire USB"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"modifier ou supprimer le contenu de la SD"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"modifier ou supprimer le contenu de la carte SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permet à l\'application de modifier le contenu de la mémoire de stockage USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Permet à l\'application de modifier le contenu de la carte SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"Modifier/Supprimer contenu mémoire interne"</string>
@@ -1113,7 +1113,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Définir"</string>
     <string name="date_time_done" msgid="2507683751759308828">"OK"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Par défaut"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"NOUVEAU"</font>" :"</string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NOUVEAU"</font>" :"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Aucune autorisation requise"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Masquer"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Tout afficher"</b></string>

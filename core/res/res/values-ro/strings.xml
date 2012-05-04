@@ -335,7 +335,7 @@
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Permite aplicaţiei să lanseze interfaţa de utilizare pentru confirmarea copiei de rezervă complete. Nu poate fi utilizată de orice aplicaţie."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"afişare ferestre neautorizate"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Permite aplicaţiei să creeze ferestre destinate a fi folosite de către interfaţa de utilizare a sistemului intern. Nu se utilizează de aplicaţiile obişnuite."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"desenează peste alte aplicaţii"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"suprapune elemente vizuale peste alte aplicaţii"</string>
     <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"Permite aplicaţiei să afişeze ferestre de alertă de sistem. Aplicaţiile rău intenţionate pot să preia controlul asupra întregului ecran."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"modificare viteză de animaţie globală"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Permite aplicaţiei să modifice oricând viteza globală de animaţie (animaţii mai rapide sau mai lente)."</string>
@@ -1113,7 +1113,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Setaţi"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Terminat"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Prestabilit"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"NOU: "</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NOU: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"Nu se solicită nicio permisiune"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Ascundeţi"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Afişaţi-le pe toate"</b></string>
