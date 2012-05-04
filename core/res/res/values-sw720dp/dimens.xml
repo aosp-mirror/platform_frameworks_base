@@ -20,6 +20,20 @@
     <!-- Height of the bottom navigation bar in portrait; on sw720dp devices
          this is the same as the height in landscape -->
     <dimen name="navigation_bar_height_portrait">@dimen/navigation_bar_height</dimen>
+
+    <!-- The platform's desired fixed width for a dialog along the major axis
+         (the screen is in landscape). This may be either a fraction or a dimension.-->
+    <item type="dimen" name="dialog_fixed_width_major">50%</item>
+    <!-- The platform's desired fixed width for a dialog along the minor axis
+         (the screen is in portrait). This may be either a fraction or a dimension.-->
+    <item type="dimen" name="dialog_fixed_width_minor">70%</item>
+    <!-- The platform's desired fixed height for a dialog along the major axis
+         (the screen is in portrait). This may be either a fraction or a dimension.-->
+    <item type="dimen" name="dialog_fixed_height_major">60%</item>
+    <!-- The platform's desired fixed height for a dialog along the minor axis
+         (the screen is in landscape). This may be either a fraction or a dimension.-->
+    <item type="dimen" name="dialog_fixed_height_minor">90%</item>
+
 </resources>
 
 
