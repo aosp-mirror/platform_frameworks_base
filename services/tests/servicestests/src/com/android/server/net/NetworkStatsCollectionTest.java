@@ -43,7 +43,7 @@ import libcore.io.Streams;
  */
 @MediumTest
 public class NetworkStatsCollectionTest extends AndroidTestCase {
-    
+
     private static final String TEST_FILE = "test.bin";
     private static final String TEST_IMSI = "310260000000000";
 
@@ -53,10 +53,10 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
 
         final NetworkStatsCollection collection = new NetworkStatsCollection(30 * MINUTE_IN_MILLIS);
         collection.readLegacyNetwork(testFile);
-        
+
         // verify that history read correctly
         assertSummaryTotal(collection, buildTemplateMobileAll(TEST_IMSI),
-                636014522L, 709291L, 88037144L, 518820L);
+                636016770L, 709306L, 88038768L, 518836L);
 
         // now export into a unified format
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -70,7 +70,7 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
         // and read back into structure, verifying that totals are same
         collection.read(new ByteArrayInputStream(bos.toByteArray()));
         assertSummaryTotal(collection, buildTemplateMobileAll(TEST_IMSI),
-                636014522L, 709291L, 88037144L, 518820L);
+                636016770L, 709306L, 88038768L, 518836L);
     }
 
     public void testReadLegacyUid() throws Exception {
@@ -82,7 +82,7 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
 
         // verify that history read correctly
         assertSummaryTotal(collection, buildTemplateMobileAll(TEST_IMSI),
-                637073904L, 711398L, 88342093L, 521006L);
+                637076152L, 711413L, 88343717L, 521022L);
 
         // now export into a unified format
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -96,7 +96,7 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
         // and read back into structure, verifying that totals are same
         collection.read(new ByteArrayInputStream(bos.toByteArray()));
         assertSummaryTotal(collection, buildTemplateMobileAll(TEST_IMSI),
-                637073904L, 711398L, 88342093L, 521006L);
+                637076152L, 711413L, 88343717L, 521022L);
     }
 
     public void testReadLegacyUidTags() throws Exception {
