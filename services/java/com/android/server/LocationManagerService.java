@@ -489,6 +489,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             mNetworkLocationProvider =
                 new LocationProviderProxy(mContext, LocationManager.NETWORK_PROVIDER,
                         mNetworkLocationProviderPackageName, mLocationHandler);
+
             addProvider(mNetworkLocationProvider);
         }
 
@@ -1156,11 +1157,11 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         if (p == null) {
             throw new IllegalArgumentException("provider=" + provider);
         }
-
         receiver.requiredPermissions = checkPermissionsSafe(provider,
                 receiver.requiredPermissions);
 
         // so wakelock calls will succeed
+        final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
         boolean newUid = !providerHasListener(provider, callingUid, null);
         long identity = Binder.clearCallingIdentity();
@@ -1179,6 +1180,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             boolean isProviderEnabled = isAllowedBySettingsLocked(provider);
             if (isProviderEnabled) {
                 long minTimeForProvider = getMinTimeLocked(provider);
+                Slog.i(TAG, "request " + provider + " (pid " + callingPid + ") " + minTime +
+                        " " + minTimeForProvider + (singleShot ? " (singleshot)" : ""));
                 p.setMinTime(minTimeForProvider, mTmpWorkSource);
                 // try requesting single shot if singleShot is true, and fall back to
                 // regular location tracking if requestSingleShotFix() is not supported
@@ -1231,6 +1234,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
 
         // so wakelock calls will succeed
+        final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
         long identity = Binder.clearCallingIdentity();
         try {
@@ -1280,8 +1284,13 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 LocationProviderInterface p = mProvidersByName.get(provider);
                 if (p != null) {
                     if (hasOtherListener) {
-                        p.setMinTime(getMinTimeLocked(provider), mTmpWorkSource);
+                        long minTime = getMinTimeLocked(provider);
+                        Slog.i(TAG, "remove " + provider + " (pid " + callingPid +
+                                "), next minTime = " + minTime);
+                        p.setMinTime(minTime, mTmpWorkSource);
                     } else {
+                        Slog.i(TAG, "remove " + provider + " (pid " + callingPid +
+                                "), disabled");
                         p.enableLocationTracking(false);
                     }
                 }
