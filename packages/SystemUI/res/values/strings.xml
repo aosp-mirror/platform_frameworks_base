@@ -377,4 +377,12 @@
     <!-- Content text for do-not-disturb mode notification -->
     <string name="notifications_off_text">Tap here to turn notifications back on.</string>
 
+    <!-- Description of the button in the phone-style notification panel that controls auto-rotation, when auto-rotation is on. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_rotation_lock_off">Screen will rotate automatically.</string>
+
+    <!-- Description of the button in the phone-style notification panel that controls auto-rotation, when auto-rotation is off. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_rotation_lock_on_landscape">Screen is locked in landscape orientation.</string>
+
+    <!-- Description of the button in the phone-style notification panel that controls auto-rotation, when auto-rotation is off. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_rotation_lock_on_portrait">Screen is locked in portrait orientation.</string>
 </resources>
