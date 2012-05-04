@@ -967,6 +967,9 @@ public class ProgressBar extends View {
         }
     }
 
+    /**
+     * @hide
+     */
     @Override
     public int getResolvedLayoutDirection(Drawable who) {
         return (who == mProgressDrawable || who == mIndeterminateDrawable) ?

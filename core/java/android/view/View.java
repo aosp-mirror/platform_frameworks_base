@@ -340,10 +340,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Padding can be used to offset the content of the view by a specific amount of
  * pixels. For instance, a left padding of 2 will push the view's content by
  * 2 pixels to the right of the left edge. Padding can be set using the
- * {@link #setPadding(int, int, int, int)} or {@link #setPaddingRelative(int, int, int, int)}
- * method and queried by calling {@link #getPaddingLeft()}, {@link #getPaddingTop()},
- * {@link #getPaddingRight()}, {@link #getPaddingBottom()}, {@link #getPaddingStart()},
- * {@link #getPaddingEnd()}.
+ * {@link #setPadding(int, int, int, int)} method and queried by calling
+ * {@link #getPaddingLeft()}, {@link #getPaddingTop()}, {@link #getPaddingRight()},
+ * {@link #getPaddingBottom()}.
  * </p>
  *
  * <p>
@@ -625,8 +624,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @attr ref android.R.styleable#View_paddingLeft
  * @attr ref android.R.styleable#View_paddingRight
  * @attr ref android.R.styleable#View_paddingTop
- * @attr ref android.R.styleable#View_paddingStart
- * @attr ref android.R.styleable#View_paddingEnd
  * @attr ref android.R.styleable#View_saveEnabled
  * @attr ref android.R.styleable#View_rotation
  * @attr ref android.R.styleable#View_rotationX
@@ -648,7 +645,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @attr ref android.R.styleable#View_scrollbarAlwaysDrawVerticalTrack
  * @attr ref android.R.styleable#View_soundEffectsEnabled
  * @attr ref android.R.styleable#View_tag
- * @attr ref android.R.styleable#View_textAlignment
  * @attr ref android.R.styleable#View_transformPivotX
  * @attr ref android.R.styleable#View_transformPivotY
  * @attr ref android.R.styleable#View_translationX
@@ -1782,24 +1778,28 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * Horizontal layout direction of this view is from Left to Right.
      * Use with {@link #setLayoutDirection}.
+     * @hide
      */
     public static final int LAYOUT_DIRECTION_LTR = 0;
 
     /**
      * Horizontal layout direction of this view is from Right to Left.
      * Use with {@link #setLayoutDirection}.
+     * @hide
      */
     public static final int LAYOUT_DIRECTION_RTL = 1;
 
     /**
      * Horizontal layout direction of this view is inherited from its parent.
      * Use with {@link #setLayoutDirection}.
+     * @hide
      */
     public static final int LAYOUT_DIRECTION_INHERIT = 2;
 
     /**
      * Horizontal layout direction of this view is from deduced from the default language
      * script for the locale. Use with {@link #setLayoutDirection}.
+     * @hide
      */
     public static final int LAYOUT_DIRECTION_LOCALE = 3;
 
@@ -1864,6 +1864,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
     /**
      * Text direction is inherited thru {@link ViewGroup}
+     * @hide
      */
     public static final int TEXT_DIRECTION_INHERIT = 0;
 
@@ -1871,6 +1872,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Text direction is using "first strong algorithm". The first strong directional character
      * determines the paragraph direction. If there is no strong directional character, the
      * paragraph direction is the view's resolved layout direction.
+     * @hide
      */
     public static final int TEXT_DIRECTION_FIRST_STRONG = 1;
 
@@ -1878,26 +1880,31 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Text direction is using "any-RTL" algorithm. The paragraph direction is RTL if it contains
      * any strong RTL character, otherwise it is LTR if it contains any strong LTR characters.
      * If there are neither, the paragraph direction is the view's resolved layout direction.
+     * @hide
      */
     public static final int TEXT_DIRECTION_ANY_RTL = 2;
 
     /**
      * Text direction is forced to LTR.
+     * @hide
      */
     public static final int TEXT_DIRECTION_LTR = 3;
 
     /**
      * Text direction is forced to RTL.
+     * @hide
      */
     public static final int TEXT_DIRECTION_RTL = 4;
 
     /**
      * Text direction is coming from the system Locale.
+     * @hide
      */
     public static final int TEXT_DIRECTION_LOCALE = 5;
 
     /**
      * Default text direction is inherited
+     * @hide
      */
     protected static int TEXT_DIRECTION_DEFAULT = TEXT_DIRECTION_INHERIT;
 
@@ -1955,6 +1962,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /*
      * Default text alignment. The text alignment of this View is inherited from its parent.
      * Use with {@link #setTextAlignment(int)}
+     * @hide
      */
     public static final int TEXT_ALIGNMENT_INHERIT = 0;
 
@@ -1963,6 +1971,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * ALIGN_CENTER, or ALIGN_OPPOSITE, which are relative to each paragraph’s text direction.
      *
      * Use with {@link #setTextAlignment(int)}
+     * @hide
      */
     public static final int TEXT_ALIGNMENT_GRAVITY = 1;
 
@@ -1970,6 +1979,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Align to the start of the paragraph, e.g. ALIGN_NORMAL.
      *
      * Use with {@link #setTextAlignment(int)}
+     * @hide
      */
     public static final int TEXT_ALIGNMENT_TEXT_START = 2;
 
@@ -1977,6 +1987,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Align to the end of the paragraph, e.g. ALIGN_OPPOSITE.
      *
      * Use with {@link #setTextAlignment(int)}
+     * @hide
      */
     public static final int TEXT_ALIGNMENT_TEXT_END = 3;
 
@@ -1984,6 +1995,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Center the paragraph, e.g. ALIGN_CENTER.
      *
      * Use with {@link #setTextAlignment(int)}
+     * @hide
      */
     public static final int TEXT_ALIGNMENT_CENTER = 4;
 
@@ -1992,6 +2004,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * layoutDirection is LTR, and ALIGN_RIGHT otherwise.
      *
      * Use with {@link #setTextAlignment(int)}
+     * @hide
      */
     public static final int TEXT_ALIGNMENT_VIEW_START = 5;
 
@@ -2000,11 +2013,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * layoutDirection is LTR, and ALIGN_LEFT otherwise.
      *
      * Use with {@link #setTextAlignment(int)}
+     * @hide
      */
     public static final int TEXT_ALIGNMENT_VIEW_END = 6;
 
     /**
      * Default text alignment is inherited
+     * @hide
      */
     protected static int TEXT_ALIGNMENT_DEFAULT = TEXT_ALIGNMENT_GRAVITY;
 
@@ -5371,7 +5386,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *   {@link #LAYOUT_DIRECTION_RTL},
      *   {@link #LAYOUT_DIRECTION_INHERIT} or
      *   {@link #LAYOUT_DIRECTION_LOCALE}.
+     *
      * @attr ref android.R.styleable#View_layoutDirection
+     * @hide
      */
     @ViewDebug.ExportedProperty(category = "layout", mapping = {
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_LTR,     to = "LTR"),
@@ -5393,6 +5410,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *   {@link #LAYOUT_DIRECTION_LOCALE}.
      *
      * @attr ref android.R.styleable#View_layoutDirection
+     * @hide
      */
     @RemotableViewMethod
     public void setLayoutDirection(int layoutDirection) {
@@ -5412,6 +5430,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @return {@link #LAYOUT_DIRECTION_RTL} if the layout direction is RTL or returns
      * {@link #LAYOUT_DIRECTION_LTR} if the layout direction is not RTL.
+     * @hide
      */
     @ViewDebug.ExportedProperty(category = "layout", mapping = {
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_LTR, to = "RESOLVED_DIRECTION_LTR"),
@@ -5431,6 +5450,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * layout attribute and/or the inherited value from the parent
      *
      * @return true if the layout is right-to-left.
+     * @hide
      */
     @ViewDebug.ExportedProperty(category = "layout")
     public boolean isLayoutRtl() {
@@ -10897,6 +10917,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Resolve and cache the layout direction. LTR is set initially. This is implicitly supposing
      * that the parent directionality can and will be resolved before its children.
      * Will call {@link View#onResolvedLayoutDirectionChanged} when resolution is done.
+     * @hide
      */
     public void resolveLayoutDirection() {
         // Clear any previous layout direction resolution
@@ -10941,12 +10962,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Called when layout direction has been resolved.
      *
      * The default implementation does nothing.
+     * @hide
      */
     public void onResolvedLayoutDirectionChanged() {
     }
 
     /**
      * Resolve padding depending on layout direction.
+     * @hide
      */
     public void resolvePadding() {
         // If the user specified the absolute padding (either with android:padding or
@@ -11006,6 +11029,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @see {@link #LAYOUT_DIRECTION_LTR}
      * @see {@link #LAYOUT_DIRECTION_RTL}
+     * @hide
      */
     public void onPaddingChanged(int layoutDirection) {
     }
@@ -11014,6 +11038,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Check if layout direction resolution can be done.
      *
      * @return true if layout direction resolution can be done otherwise return false.
+     * @hide
      */
     public boolean canResolveLayoutDirection() {
         switch (getLayoutDirection()) {
@@ -11027,6 +11052,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * Reset the resolved layout direction. Will call {@link View#onResolvedLayoutDirectionReset}
      * when reset is done.
+     * @hide
      */
     public void resetResolvedLayoutDirection() {
         // Reset the current resolved bits
@@ -11043,6 +11069,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * resolved layout direction, or to inform child views that inherit their layout direction.
      *
      * The default implementation does nothing.
+     * @hide
      */
     public void onResolvedLayoutDirectionReset() {
     }
@@ -11052,6 +11079,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @param locale Locale to check
      * @return true if the Locale uses an RTL script.
+     * @hide
      */
     protected static boolean isLayoutDirectionRtl(Locale locale) {
         return (LAYOUT_DIRECTION_RTL == LocaleUtil.getLayoutDirectionFromLocale(locale));
@@ -13356,6 +13384,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     * Return the layout direction of a given Drawable.
     *
     * @param who the Drawable to query
+    * @hide
     */
     public int getResolvedLayoutDirection(Drawable who) {
         return (who == mBackground) ? getResolvedLayoutDirection() : LAYOUT_DIRECTION_DEFAULT;
@@ -13791,19 +13820,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * Sets the relative padding. The view may add on the space required to display
      * the scrollbars, depending on the style and visibility of the scrollbars.
-     * So the values returned from {@link #getPaddingStart}, {@link #getPaddingTop},
-     * {@link #getPaddingEnd} and {@link #getPaddingBottom} may be different
      * from the values set in this call.
      *
-     * @attr ref android.R.styleable#View_padding
-     * @attr ref android.R.styleable#View_paddingBottom
-     * @attr ref android.R.styleable#View_paddingStart
-     * @attr ref android.R.styleable#View_paddingEnd
-     * @attr ref android.R.styleable#View_paddingTop
      * @param start the start padding in pixels
      * @param top the top padding in pixels
      * @param end the end padding in pixels
      * @param bottom the bottom padding in pixels
+     * @hide
      */
     public void setPaddingRelative(int start, int top, int end, int bottom) {
         mUserPaddingStart = start;
@@ -13857,6 +13880,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * required to display the scrollbars as well.
      *
      * @return the start padding in pixels
+     * @hide
      */
     public int getPaddingStart() {
         return (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
@@ -13880,6 +13904,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * required to display the scrollbars as well.
      *
      * @return the end padding in pixels
+     * @hide
      */
     public int getPaddingEnd() {
         return (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
@@ -13888,11 +13913,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
     /**
      * Return if the padding as been set thru relative values
-     * {@link #setPaddingRelative(int, int, int, int)} or thru
-     * @attr ref android.R.styleable#View_paddingStart or
-     * @attr ref android.R.styleable#View_paddingEnd
+     * {@link #setPaddingRelative(int, int, int, int)}
      *
      * @return true if the padding is relative or false if it is not.
+     * @hide
      */
     public boolean isPaddingRelative() {
         return mUserPaddingRelative;
@@ -15736,6 +15760,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
      * {@link #TEXT_DIRECTION_LOCALE}
+     * @hide
      */
     @ViewDebug.ExportedProperty(category = "text", mapping = {
             @ViewDebug.IntToString(from = TEXT_DIRECTION_INHERIT, to = "INHERIT"),
@@ -15760,6 +15785,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
      * {@link #TEXT_DIRECTION_LOCALE}
+     * @hide
      */
     public void setTextDirection(int textDirection) {
         if (getTextDirection() != textDirection) {
@@ -15789,6 +15815,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
      * {@link #TEXT_DIRECTION_LOCALE}
+     * @hide
      */
     public int getResolvedTextDirection() {
         // The text direction will be resolved only if needed
@@ -15801,6 +15828,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * Resolve the text direction. Will call {@link View#onResolvedTextDirectionChanged} when
      * resolution is done.
+     * @hide
      */
     public void resolveTextDirection() {
         // Reset any previous text direction resolution
@@ -15861,6 +15889,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * resolution should override this method.
      *
      * The default implementation does nothing.
+     * @hide
      */
     public void onResolvedTextDirectionChanged() {
     }
@@ -15869,6 +15898,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Check if text direction resolution can be done.
      *
      * @return true if text direction resolution can be done otherwise return false.
+     * @hide
      */
     public boolean canResolveTextDirection() {
         switch (getTextDirection()) {
@@ -15883,6 +15913,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Reset resolved text direction. Text direction can be resolved with a call to
      * getResolvedTextDirection(). Will call {@link View#onResolvedTextDirectionReset} when
      * reset is done.
+     * @hide
      */
     public void resetResolvedTextDirection() {
         mPrivateFlags2 &= ~(TEXT_DIRECTION_RESOLVED | TEXT_DIRECTION_RESOLVED_MASK);
@@ -15893,6 +15924,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Called when text direction is reset. Subclasses that care about text direction reset should
      * override this method and do a reset of the text direction of their children. The default
      * implementation does nothing.
+     * @hide
      */
     public void onResolvedTextDirectionReset() {
     }
@@ -15910,6 +15942,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_ALIGNMENT_TEXT_END},
      * {@link #TEXT_ALIGNMENT_VIEW_START},
      * {@link #TEXT_ALIGNMENT_VIEW_END}
+     * @hide
      */
     @ViewDebug.ExportedProperty(category = "text", mapping = {
             @ViewDebug.IntToString(from = TEXT_ALIGNMENT_INHERIT, to = "INHERIT"),
@@ -15938,6 +15971,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_ALIGNMENT_VIEW_END}
      *
      * @attr ref android.R.styleable#View_textAlignment
+     * @hide
      */
     public void setTextAlignment(int textAlignment) {
         if (textAlignment != getTextAlignment()) {
@@ -15967,6 +16001,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_ALIGNMENT_TEXT_END},
      * {@link #TEXT_ALIGNMENT_VIEW_START},
      * {@link #TEXT_ALIGNMENT_VIEW_END}
+     * @hide
      */
     @ViewDebug.ExportedProperty(category = "text", mapping = {
             @ViewDebug.IntToString(from = TEXT_ALIGNMENT_INHERIT, to = "INHERIT"),
@@ -15988,6 +16023,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * Resolve the text alignment. Will call {@link View#onResolvedTextAlignmentChanged} when
      * resolution is done.
+     * @hide
      */
     public void resolveTextAlignment() {
         // Reset any previous text alignment resolution
@@ -16052,6 +16088,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Check if text alignment resolution can be done.
      *
      * @return true if text alignment resolution can be done otherwise return false.
+     * @hide
      */
     public boolean canResolveTextAlignment() {
         switch (getTextAlignment()) {
@@ -16067,6 +16104,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * resolution should override this method.
      *
      * The default implementation does nothing.
+     * @hide
      */
     public void onResolvedTextAlignmentChanged() {
     }
@@ -16075,6 +16113,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Reset resolved text alignment. Text alignment can be resolved with a call to
      * getResolvedTextAlignment(). Will call {@link View#onResolvedTextAlignmentReset} when
      * reset is done.
+     * @hide
      */
     public void resetResolvedTextAlignment() {
         // Reset any previous text alignment resolution
@@ -16086,6 +16125,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Called when text alignment is reset. Subclasses that care about text alignment reset should
      * override this method and do a reset of the text alignment of their children. The default
      * implementation does nothing.
+     * @hide
      */
     public void onResolvedTextAlignmentReset() {
     }

@@ -5229,6 +5229,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    /**
+     * @hide
+     */
     @Override
     public void onResolvedLayoutDirectionReset() {
         // Take care of resetting the children resolution too
@@ -5241,6 +5244,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    /**
+     * @hide
+     */
     @Override
     public void onResolvedTextDirectionReset() {
         // Take care of resetting the children resolution too
@@ -5253,6 +5259,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    /**
+     * @hide
+     */
     @Override
     public void onResolvedTextAlignmentReset() {
         // Take care of resetting the children resolution too
@@ -5443,6 +5452,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          *
          * {@link View#LAYOUT_DIRECTION_LTR}
          * {@link View#LAYOUT_DIRECTION_RTL}
+         * @hide
          */
         public void onResolveLayoutDirection(int layoutDirection) {
         }
@@ -5534,6 +5544,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * The start margin in pixels of the child.
          * Call {@link ViewGroup#setLayoutParams(LayoutParams)} after reassigning a new value
          * to this field.
+         * @hide
          */
         @ViewDebug.ExportedProperty(category = "layout")
         public int startMargin = DEFAULT_RELATIVE;
@@ -5542,6 +5553,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * The end margin in pixels of the child.
          * Call {@link ViewGroup#setLayoutParams(LayoutParams)} after reassigning a new value
          * to this field.
+         * @hide
          */
         @ViewDebug.ExportedProperty(category = "layout")
         public int endMargin = DEFAULT_RELATIVE;
@@ -5660,7 +5672,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginTop
          * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginEnd
          * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginBottom
-         *
          * @hide
          */
         public void setMarginsRelative(int start, int top, int end, int bottom) {
@@ -5676,6 +5687,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginStart
          *
          * @return the start margin in pixels.
+         * @hide
          */
         public int getMarginStart() {
             return startMargin;
@@ -5687,6 +5699,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginEnd
          *
          * @return the end margin in pixels.
+         * @hide
          */
         public int getMarginEnd() {
             return endMargin;
@@ -5699,6 +5712,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginEnd
          *
          * @return true if either marginStart or marginEnd has been set
+         * @hide
          */
         public boolean isMarginRelative() {
             return (startMargin != DEFAULT_RELATIVE) || (endMargin != DEFAULT_RELATIVE);
@@ -5707,6 +5721,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         /**
          * This will be called by {@link android.view.View#requestLayout()}. Left and Right margins
          * may be overridden depending on layout direction.
+         * @hide
          */
         @Override
         public void onResolveLayoutDirection(int layoutDirection) {

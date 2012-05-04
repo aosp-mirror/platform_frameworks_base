@@ -22,7 +22,6 @@ import android.view.View;
 
 /**
  * Some objects that implement TextDirectionHeuristic.
- *
  * @hide
  */
 public class TextDirectionHeuristics {
