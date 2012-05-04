@@ -2981,7 +2981,7 @@
     <!-- Do not translate. -->
     <string name="permissions_format"><xliff:g id="perm_line1">%1$s</xliff:g>, <xliff:g id="perm_line2">%2$s</xliff:g></string>
     <!-- Text that is placed at the front of a permission name that is being added to an app [CHAR LIMIT=NONE] -->
-    <string name="perms_new_perm_prefix"><font size="12" fgcolor="#ffffa3a3">NEW: </font></string>
+    <string name="perms_new_perm_prefix"><font size="12" fgcolor="#ff900000">NEW: </font></string>
     <!-- Shown for an application when it doesn't require any permission grants. -->
     <string name="no_permissions">No permissions required</string>
     <!-- When installing an application, the less-dangerous permissions are hidden.  If the user showed those, this is the text to hide them again.  -->

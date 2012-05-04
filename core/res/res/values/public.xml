@@ -63,7 +63,6 @@
   <java-symbol type="id" name="clearDefaultHint" />
   <java-symbol type="id" name="contentPanel" />
   <java-symbol type="id" name="customPanel" />
-  <java-symbol type="id" name="dangerous_perms_list" />
   <java-symbol type="id" name="datePicker" />
   <java-symbol type="id" name="day" />
   <java-symbol type="id" name="day_names" />
@@ -117,9 +116,7 @@
   <java-symbol type="id" name="new_app_action" />
   <java-symbol type="id" name="new_app_description" />
   <java-symbol type="id" name="new_app_icon" />
-  <java-symbol type="id" name="new_perms_list" />
   <java-symbol type="id" name="no_permissions" />
-  <java-symbol type="id" name="non_dangerous_perms_list" />
   <java-symbol type="id" name="numberpicker_input" />
   <java-symbol type="id" name="old_app_action" />
   <java-symbol type="id" name="old_app_description" />
@@ -127,7 +124,9 @@
   <java-symbol type="id" name="package_label" />
   <java-symbol type="id" name="packages_list" />
   <java-symbol type="id" name="pause" />
+  <java-symbol type="id" name="perms_list" />
   <java-symbol type="id" name="perm_icon" />
+  <java-symbol type="id" name="perm_name" />
   <java-symbol type="id" name="permission_group" />
   <java-symbol type="id" name="permission_list" />
   <java-symbol type="id" name="pickers" />
@@ -163,9 +162,6 @@
   <java-symbol type="id" name="sha256_fingerprint" />
   <java-symbol type="id" name="share" />
   <java-symbol type="id" name="shortcut" />
-  <java-symbol type="id" name="show_more" />
-  <java-symbol type="id" name="show_more_icon" />
-  <java-symbol type="id" name="show_more_text" />
   <java-symbol type="id" name="skip_button" />
   <java-symbol type="id" name="slider_group" />
   <java-symbol type="id" name="split_action_bar" />
@@ -1044,6 +1040,7 @@
   <java-symbol type="layout" name="alert_dialog_progress" />
   <java-symbol type="layout" name="always_use_checkbox" />
   <java-symbol type="layout" name="app_permission_item" />
+  <java-symbol type="layout" name="app_permission_item_old" />
   <java-symbol type="layout" name="app_perms_summary" />
   <java-symbol type="layout" name="calendar_view" />
   <java-symbol type="layout" name="character_picker" />
