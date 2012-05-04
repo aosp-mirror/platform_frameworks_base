@@ -763,6 +763,9 @@ public final class ViewRootImpl implements ViewParent,
             // preserve compatible window flag if exists.
             int compatibleWindowFlag =
                 mWindowAttributes.flags & WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
+            // transfer over system UI visibility values as they carry current state.
+            attrs.systemUiVisibility = mWindowAttributes.systemUiVisibility;
+            attrs.subtreeSystemUiVisibility = mWindowAttributes.subtreeSystemUiVisibility;
             mWindowAttributesChangesFlag = mWindowAttributes.copyFrom(attrs);
             mWindowAttributes.flags |= compatibleWindowFlag;
             
