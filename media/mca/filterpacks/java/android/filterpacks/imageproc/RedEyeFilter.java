@@ -115,14 +115,6 @@ public class RedEyeFilter extends Filter {
     }
 
     @Override
-    public void tearDown(FilterContext context) {
-        if (mRedEyeBitmap != null) {
-            mRedEyeBitmap.recycle();
-            mRedEyeBitmap = null;
-        }
-    }
-
-    @Override
     public void process(FilterContext context) {
         // Get input frame
         Frame input = pullInput("image");
@@ -140,10 +132,7 @@ public class RedEyeFilter extends Filter {
         if (inputFormat.getWidth() != mWidth || inputFormat.getHeight() != mHeight) {
             mWidth = inputFormat.getWidth();
             mHeight = inputFormat.getHeight();
-
-            createRedEyeBitmap();
         }
-
         createRedEyeFrame(context);
 
         // Process
@@ -168,29 +157,26 @@ public class RedEyeFilter extends Filter {
         }
     }
 
-    private void createRedEyeBitmap() {
-        if (mRedEyeBitmap != null) {
-            mRedEyeBitmap.recycle();
-        }
-
+    private void createRedEyeFrame(FilterContext context) {
         int bitmapWidth = mWidth / 2;
         int bitmapHeight = mHeight / 2;
 
-        mRedEyeBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
-        mCanvas.setBitmap(mRedEyeBitmap);
+        Bitmap redEyeBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+        mCanvas.setBitmap(redEyeBitmap);
         mPaint.setColor(Color.WHITE);
         mRadius = Math.max(MIN_RADIUS, RADIUS_RATIO * Math.min(bitmapWidth, bitmapHeight));
 
-        updateProgramParams();
-    }
+        for (int i = 0; i < mCenters.length; i += 2) {
+            mCanvas.drawCircle(mCenters[i] * bitmapWidth, mCenters[i + 1] * bitmapHeight,
+                               mRadius, mPaint);
+        }
 
-    private void createRedEyeFrame(FilterContext context) {
-        FrameFormat format = ImageFormat.create(mRedEyeBitmap.getWidth() ,
-                                                mRedEyeBitmap.getHeight(),
+        FrameFormat format = ImageFormat.create(bitmapWidth, bitmapHeight,
                                                 ImageFormat.COLORSPACE_RGBA,
                                                 FrameFormat.TARGET_GPU);
         mRedEyeFrame = context.getFrameManager().newFrame(format);
-        mRedEyeFrame.setBitmap(mRedEyeBitmap);
+        mRedEyeFrame.setBitmap(redEyeBitmap);
+        redEyeBitmap.recycle();
     }
 
     private void updateProgramParams() {
@@ -198,14 +184,6 @@ public class RedEyeFilter extends Filter {
 
         if ( mCenters.length % 2 == 1) {
             throw new RuntimeException("The size of center array must be even.");
-        }
-
-        if (mRedEyeBitmap != null) {
-            for (int i = 0; i < mCenters.length; i += 2) {
-                mCanvas.drawCircle(mCenters[i] * mRedEyeBitmap.getWidth(),
-                                   mCenters[i + 1] * mRedEyeBitmap.getHeight(),
-                                   mRadius, mPaint);
-            }
         }
     }
 }
