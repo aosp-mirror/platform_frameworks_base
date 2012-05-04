@@ -159,6 +159,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private PendingIntent mPollIntent;
 
     private static final String PREFIX_DEV = "dev";
+    private static final String PREFIX_XT = "xt";
     private static final String PREFIX_UID = "uid";
     private static final String PREFIX_UID_TAG = "uid_tag";
 
@@ -187,6 +188,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         public Config getDevConfig();
+        public Config getXtConfig();
         public Config getUidConfig();
         public Config getUidTagConfig();
     }
@@ -204,6 +206,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             new DropBoxNonMonotonicObserver();
 
     private NetworkStatsRecorder mDevRecorder;
+    private NetworkStatsRecorder mXtRecorder;
     private NetworkStatsRecorder mUidRecorder;
     private NetworkStatsRecorder mUidTagRecorder;
 
@@ -268,6 +271,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // create data recorders along with historical rotators
         mDevRecorder = buildRecorder(PREFIX_DEV, mSettings.getDevConfig(), false);
+        mXtRecorder = buildRecorder(PREFIX_XT, mSettings.getXtConfig(), false);
         mUidRecorder = buildRecorder(PREFIX_UID, mSettings.getUidConfig(), false);
         mUidTagRecorder = buildRecorder(PREFIX_UID_TAG, mSettings.getUidTagConfig(), true);
 
@@ -343,10 +347,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // persist any pending stats
         mDevRecorder.forcePersistLocked(currentTime);
+        mXtRecorder.forcePersistLocked(currentTime);
         mUidRecorder.forcePersistLocked(currentTime);
         mUidTagRecorder.forcePersistLocked(currentTime);
 
         mDevRecorder = null;
+        mXtRecorder = null;
         mUidRecorder = null;
         mUidTagRecorder = null;
 
@@ -772,9 +778,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // snapshot and record current counters; read UID stats first to
             // avoid overcounting dev stats.
             final NetworkStats uidSnapshot = getNetworkStatsUidDetail();
-            final NetworkStats devSnapshot = getNetworkStatsSummary();
+            final NetworkStats xtSnapshot = mNetworkManager.getNetworkStatsSummaryXt();
+            final NetworkStats devSnapshot = mNetworkManager.getNetworkStatsSummaryDev();
 
             mDevRecorder.recordSnapshotLocked(devSnapshot, mActiveIfaces, currentTime);
+            mXtRecorder.recordSnapshotLocked(xtSnapshot, mActiveIfaces, currentTime);
             mUidRecorder.recordSnapshotLocked(uidSnapshot, mActiveIfaces, currentTime);
             mUidTagRecorder.recordSnapshotLocked(uidSnapshot, mActiveIfaces, currentTime);
 
@@ -824,9 +832,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // snapshot and record current counters; read UID stats first to
             // avoid overcounting dev stats.
             final NetworkStats uidSnapshot = getNetworkStatsUidDetail();
-            final NetworkStats devSnapshot = getNetworkStatsSummary();
+            final NetworkStats xtSnapshot = mNetworkManager.getNetworkStatsSummaryXt();
+            final NetworkStats devSnapshot = mNetworkManager.getNetworkStatsSummaryDev();
 
             mDevRecorder.recordSnapshotLocked(devSnapshot, mActiveIfaces, currentTime);
+            mXtRecorder.recordSnapshotLocked(xtSnapshot, mActiveIfaces, currentTime);
             mUidRecorder.recordSnapshotLocked(uidSnapshot, mActiveIfaces, currentTime);
             mUidTagRecorder.recordSnapshotLocked(uidSnapshot, mActiveIfaces, currentTime);
 
@@ -841,11 +851,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // persist any pending data depending on requested flags
         if (persistForce) {
             mDevRecorder.forcePersistLocked(currentTime);
+            mXtRecorder.forcePersistLocked(currentTime);
             mUidRecorder.forcePersistLocked(currentTime);
             mUidTagRecorder.forcePersistLocked(currentTime);
         } else {
             if (persistNetwork) {
                 mDevRecorder.maybePersistLocked(currentTime);
+                mXtRecorder.maybePersistLocked(currentTime);
             }
             if (persistUid) {
                 mUidRecorder.maybePersistLocked(currentTime);
@@ -884,7 +896,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // collect mobile sample
         template = buildTemplateMobileWildcard();
         devTotal = mDevRecorder.getTotalSinceBootLocked(template);
-        xtTotal = new NetworkStats.Entry();
+        xtTotal = mXtRecorder.getTotalSinceBootLocked(template);
         uidTotal = mUidRecorder.getTotalSinceBootLocked(template);
 
         EventLogTags.writeNetstatsMobileSample(
@@ -896,7 +908,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // collect wifi sample
         template = buildTemplateWifiWildcard();
         devTotal = mDevRecorder.getTotalSinceBootLocked(template);
-        xtTotal = new NetworkStats.Entry();
+        xtTotal = mXtRecorder.getTotalSinceBootLocked(template);
         uidTotal = mUidRecorder.getTotalSinceBootLocked(template);
 
         EventLogTags.writeNetstatsWifiSample(
@@ -970,6 +982,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             mDevRecorder.dumpLocked(pw, fullHistory);
             pw.decreaseIndent();
 
+            pw.println("Xt stats:");
+            pw.increaseIndent();
+            mXtRecorder.dumpLocked(pw, fullHistory);
+            pw.decreaseIndent();
+
             if (includeUid) {
                 pw.println("UID stats:");
                 pw.increaseIndent();
@@ -984,10 +1001,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 pw.decreaseIndent();
             }
         }
-    }
-
-    private NetworkStats getNetworkStatsSummary() throws RemoteException {
-        return mNetworkManager.getNetworkStatsSummary();
     }
 
     /**
@@ -1123,6 +1136,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     getSecureLong(NETSTATS_DEV_PERSIST_BYTES, 2 * MB_IN_BYTES),
                     getSecureLong(NETSTATS_DEV_ROTATE_AGE, 15 * DAY_IN_MILLIS),
                     getSecureLong(NETSTATS_DEV_DELETE_AGE, 90 * DAY_IN_MILLIS));
+        }
+
+        @Override
+        public Config getXtConfig() {
+            return getDevConfig();
         }
 
         @Override

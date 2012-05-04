@@ -106,8 +106,9 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
     private static final long TEST_START = 1194220800000L;
     private static final String TEST_IFACE = "test0";
+    private static final String TEST_SSID = "AndroidAP";
 
-    private static NetworkTemplate sTemplateWifi = NetworkTemplate.buildTemplateWifi();
+    private static NetworkTemplate sTemplateWifi = NetworkTemplate.buildTemplateWifi(TEST_SSID);
 
     private BroadcastInterceptingContext mServiceContext;
     private File mPolicyDir;
@@ -860,7 +861,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         info.setDetailedState(DetailedState.CONNECTED, null, null);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
-        return new NetworkState(info, prop, null);
+        return new NetworkState(info, prop, null, null, TEST_SSID);
     }
 
     private void expectCurrentTime() throws Exception {

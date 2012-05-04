@@ -5719,7 +5719,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
                 if (SystemProperties.getBoolean(PROP_QTAGUID_ENABLED, false)) {
                     try {
-                        mNetworkSummaryCache = mNetworkStatsFactory.readNetworkStatsSummary();
+                        mNetworkSummaryCache = mNetworkStatsFactory.readNetworkStatsSummaryDev();
                     } catch (IllegalStateException e) {
                         Log.wtf(TAG, "problem reading network stats", e);
                     }

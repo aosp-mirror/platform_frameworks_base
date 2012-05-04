@@ -30,7 +30,7 @@ import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkStatsHistory.FIELD_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
-import static android.net.NetworkTemplate.buildTemplateWifi;
+import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.net.TrafficStats.UID_REMOVED;
 import static android.net.TrafficStats.UID_TETHERING;
@@ -94,7 +94,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     private static final String IMSI_1 = "310004";
     private static final String IMSI_2 = "310260";
 
-    private static NetworkTemplate sTemplateWifi = buildTemplateWifi();
+    private static NetworkTemplate sTemplateWifi = buildTemplateWifiWildcard();
     private static NetworkTemplate sTemplateImsi1 = buildTemplateMobileAll(IMSI_1);
     private static NetworkTemplate sTemplateImsi2 = buildTemplateMobileAll(IMSI_2);
 
@@ -136,7 +136,6 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mService = new NetworkStatsService(
                 mServiceContext, mNetManager, mAlarmManager, mTime, mStatsDir, mSettings);
         mService.bindConnectivityManager(mConnManager);
-        mSession = mService.openSession();
 
         mElapsedRealtime = 0L;
 
@@ -154,6 +153,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
         replay();
         mService.systemReady();
+        mSession = mService.openSession();
         verifyAndReset();
 
         mNetworkObserver = networkObserver.getValue();
@@ -820,7 +820,8 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     }
 
     private void expectNetworkStatsSummary(NetworkStats summary) throws Exception {
-        expect(mNetManager.getNetworkStatsSummary()).andReturn(summary).atLeastOnce();
+        expect(mNetManager.getNetworkStatsSummaryDev()).andReturn(summary).atLeastOnce();
+        expect(mNetManager.getNetworkStatsSummaryXt()).andReturn(summary).atLeastOnce();
     }
 
     private void expectNetworkStatsUidDetail(NetworkStats detail) throws Exception {
@@ -851,6 +852,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
         final Config config = new Config(bucketDuration, persistBytes, deleteAge, deleteAge);
         expect(mSettings.getDevConfig()).andReturn(config).anyTimes();
+        expect(mSettings.getXtConfig()).andReturn(config).anyTimes();
         expect(mSettings.getUidConfig()).andReturn(config).anyTimes();
         expect(mSettings.getUidTagConfig()).andReturn(config).anyTimes();
     }
@@ -912,7 +914,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         info.setDetailedState(DetailedState.CONNECTED, null, null);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
-        return new NetworkState(info, prop, null, subscriberId);
+        return new NetworkState(info, prop, null, subscriberId, null);
     }
 
     private static NetworkState buildMobile4gState(String iface) {
