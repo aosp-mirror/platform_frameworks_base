@@ -421,7 +421,7 @@
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"rašyti skambučių žurnalą"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Programai leidžiama skaityti planšetinio kompiuterio skambučių žurnalą, įskaitant duomenis apie gaunamus ir siunčiamus skambučius. Kenkėjiškos programos tai gali naudoti, kad ištrintų ar keistų jūsų skambučių žurnalą."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Programai leidžiama skaityti telefono skambučių žurnalą, įskaitant duomenis apie gaunamus ir siunčiamus skambučius. Kenkėjiškos programos tai gali naudoti, kad ištrintų ar keistų jūsų skambučių žurnalą."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"skaityti jūsų kontaktinę kortelę"</string>
+    <string name="permlab_readProfile" msgid="4701889852612716678">"skaityti jūsų kontakt. kortelę"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Leidžiama programai skaityti asmeninę profilio informaciją, saugomą jūsų įrenginyje, pvz., jūsų vardą, pavardę ir kontaktinę informaciją. Tai reiškia, kad programa gali nustatyti jūsų tapatybę ir siųsti profilio informaciją kitiems."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"keisti jūsų kontaktinę kortelę"</string>
     <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"Leidžiama programai pakeisti asmeninę profilio informaciją, saugomą jūsų įrenginyje, pvz., jūsų vardą, pavardę ir kontaktinę informaciją, arba jos pridėti. Tai reiškia, kad kitos programos gali nustatyti jūsų tapatybę ir siųsti profilio informaciją kitiems."</string>
@@ -464,7 +464,7 @@
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"pradėti telefono perkrovimą"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Leidžiama programai versti iš naujo paleisti planšetinio kompiuterio operacinę sistemą."</string>
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Leidžiama programai versti iš naujo paleisti telefono operacinę sistemą."</string>
-    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"pasiekti USB atminties failų sistemą"</string>
+    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"pasiekti USB atm. failų sist."</string>
     <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"pasiekti SD kortelės failų sistemą"</string>
     <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Leidžiama programai įrengti ir pašalinti keičiamos atmintinės failų sistemas."</string>
     <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"ištrinti USB atmintį"</string>
@@ -589,9 +589,9 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Leidžiama programai rašyti naujus žodžius į naudotojo žodyną."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"skaityti USB atminties turinį"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"skaityti SD kortelės turinį"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Programai leidžiama skaityti USB atminties turinį, į kurį gali įeiti nuotraukos ir medija."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Programai leidžiama skaityti SD kortelės turinį, į kurį gali įeiti nuotraukos ir medija."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"keisti arba trinti USB atminties turinį"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Programai leidžiama skaityti USB atminties turinį, kurį gali sudaryti nuotraukos ir medija."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Programai leidžiama skaityti SD kortelės turinį, kurį gali sudaryti nuotraukos ir medija."</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"keisti / trinti USB atm. turinį"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"keisti arba trinti SD kortelės turinį"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Leidž. progr. raš. į USB atm."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Leidžiama programai rašyti į SD kortelę."</string>
@@ -1113,7 +1113,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Nustatyti"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Baigta"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Numatytasis"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"NAUJAS: "</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NAUJAS: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"Nereikia leidimų"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Slėpti"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Rodyti viską"</b></string>

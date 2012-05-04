@@ -591,7 +591,7 @@
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"читати вміст карти SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Дозволяє програмі читати вміст носія USB, що може включати фотографії й медіа-файли."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Дозволяє програмі читати вміст карти SD, що може включати фотографії й медіа-файли."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"змін. або вид. вміст носія USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"змінювати чи видаляти вміст USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"змінювати чи видаляти зміст карти SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Дозволяє програмі писати на носій USB"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Дозволяє програмі записувати на карту SD."</string>
@@ -1113,7 +1113,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Застосувати"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Готово"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"За умовч."</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"НОВИЙ: "</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"НОВИЙ: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"Дозвіл не потрібний"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Сховати"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Показ. всі"</b></string>

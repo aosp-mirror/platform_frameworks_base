@@ -1113,7 +1113,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Nastavit"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Hotovo"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Výchozí"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"NOVÉ: "</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NOVÉ: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"Nejsou vyžadována žádná oprávnění"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Skrýt"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Zobrazit vše"</b></string>
