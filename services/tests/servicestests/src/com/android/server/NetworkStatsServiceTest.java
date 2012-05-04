@@ -93,6 +93,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
     private static final String IMSI_1 = "310004";
     private static final String IMSI_2 = "310260";
+    private static final String TEST_SSID = "AndroidAP";
 
     private static NetworkTemplate sTemplateWifi = buildTemplateWifiWildcard();
     private static NetworkTemplate sTemplateImsi1 = buildTemplateMobileAll(IMSI_1);
@@ -162,9 +163,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
     @Override
     public void tearDown() throws Exception {
-        for (File file : mStatsDir.listFiles()) {
-            file.delete();
-        }
+        IoUtils.deleteContents(mStatsDir);
 
         mServiceContext = null;
         mStatsDir = null;
@@ -847,14 +846,19 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
             throws Exception {
         expect(mSettings.getPollInterval()).andReturn(HOUR_IN_MILLIS).anyTimes();
         expect(mSettings.getTimeCacheMaxAge()).andReturn(DAY_IN_MILLIS).anyTimes();
-        expect(mSettings.getGlobalAlertBytes()).andReturn(MB_IN_BYTES).anyTimes();
         expect(mSettings.getSampleEnabled()).andReturn(true).anyTimes();
 
-        final Config config = new Config(bucketDuration, persistBytes, deleteAge, deleteAge);
+        final Config config = new Config(bucketDuration, deleteAge, deleteAge);
         expect(mSettings.getDevConfig()).andReturn(config).anyTimes();
         expect(mSettings.getXtConfig()).andReturn(config).anyTimes();
         expect(mSettings.getUidConfig()).andReturn(config).anyTimes();
         expect(mSettings.getUidTagConfig()).andReturn(config).anyTimes();
+
+        expect(mSettings.getGlobalAlertBytes(anyLong())).andReturn(MB_IN_BYTES).anyTimes();
+        expect(mSettings.getDevPersistBytes(anyLong())).andReturn(MB_IN_BYTES).anyTimes();
+        expect(mSettings.getXtPersistBytes(anyLong())).andReturn(MB_IN_BYTES).anyTimes();
+        expect(mSettings.getUidPersistBytes(anyLong())).andReturn(MB_IN_BYTES).anyTimes();
+        expect(mSettings.getUidTagPersistBytes(anyLong())).andReturn(MB_IN_BYTES).anyTimes();
     }
 
     private void expectCurrentTime() throws Exception {
@@ -905,7 +909,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         info.setDetailedState(DetailedState.CONNECTED, null, null);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
-        return new NetworkState(info, prop, null);
+        return new NetworkState(info, prop, null, null, TEST_SSID);
     }
 
     private static NetworkState buildMobile3gState(String subscriberId) {
