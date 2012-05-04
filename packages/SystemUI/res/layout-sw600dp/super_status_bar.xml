@@ -18,9 +18,11 @@
 -->
 
 <!-- This is the combined status bar / notification panel window. -->
-<FrameLayout
+<com.android.systemui.statusbar.phone.StatusBarWindowView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    android:focusable="true"
+    android:descendantFocusability="afterDescendants"
     android:fitsSystemWindows="true"
     >
 
@@ -35,4 +37,4 @@
         android:layout_height="@*android:dimen/status_bar_height"
         />
 
-</FrameLayout>
+</com.android.systemui.statusbar.phone.StatusBarWindowView>
