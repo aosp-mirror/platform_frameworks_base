@@ -52,7 +52,6 @@ public class SearchPanelView extends FrameLayout implements
     private boolean mShowing;
     private View mSearchTargetsContainer;
     private MultiWaveView mMultiWaveView;
-    private SearchManager mSearchManager;
 
     public SearchPanelView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -67,8 +66,28 @@ public class SearchPanelView extends FrameLayout implements
         }
     }
 
-    public boolean isSearchAvailable() {
+    private SearchManager mSearchManager;
+
+    public boolean isAssistantAvailable() {
         return mSearchManager != null && mSearchManager.getGlobalSearchActivity() != null;
+    }
+
+    private void startAssistActivity() {
+        if (mSearchManager != null) {
+            ComponentName globalSearchActivity = mSearchManager.getGlobalSearchActivity();
+            if (globalSearchActivity != null) {
+                Intent intent = new Intent(Intent.ACTION_ASSIST);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.setPackage(globalSearchActivity.getPackageName());
+                try {
+                    mContext.startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    Slog.w(TAG, "Activity not found for " + intent.getAction());
+                }
+            } else {
+                Slog.w(TAG, "No global search activity");
+            }
+        }
     }
 
     final MultiWaveView.OnTriggerListener mMultiWaveViewListener
@@ -90,28 +109,10 @@ public class SearchPanelView extends FrameLayout implements
             final int resId = mMultiWaveView.getResourceIdForTarget(target);
             switch (resId) {
                 case com.android.internal.R.drawable.ic_lockscreen_search:
-                    startGlobalSearch();
+                    startAssistActivity();
                 break;
             }
             mBar.hideSearchPanel();
-        }
-
-        private void startGlobalSearch() {
-            if (mSearchManager != null) {
-                ComponentName globalSearchActivity = mSearchManager.getGlobalSearchActivity();
-                if (globalSearchActivity != null) {
-                    Intent intent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.setComponent(globalSearchActivity);
-                    try {
-                        mContext.startActivity(intent);
-                    } catch (ActivityNotFoundException e) {
-                        Slog.w(TAG, "Application not found for action " + intent.getAction());
-                    }
-                } else {
-                    Slog.w(TAG, "No global search activity");
-                }
-            }
         }
     };
 
