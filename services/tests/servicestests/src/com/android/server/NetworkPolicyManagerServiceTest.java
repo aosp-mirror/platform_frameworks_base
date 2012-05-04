@@ -37,6 +37,7 @@ import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOOZED;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_WARNING;
 import static org.easymock.EasyMock.anyInt;
+import static org.easymock.EasyMock.anyLong;
 import static org.easymock.EasyMock.aryEq;
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.createMock;
@@ -229,6 +230,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // expect to answer screen status during systemReady()
         expect(mPowerManager.isScreenOn()).andReturn(true).atLeastOnce();
+        expect(mNetworkManager.isBandwidthControlEnabled()).andReturn(true).atLeastOnce();
         expectCurrentTime();
 
         replay();
@@ -613,6 +615,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
         expectCurrentTime();
         expectClearNotifications();
+        expectAdvisePersistThreshold();
         future = expectMeteredIfacesChanged();
 
         replay();
@@ -637,6 +640,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         expectSetInterfaceQuota(TEST_IFACE, (2 * MB_IN_BYTES) - 512);
 
         expectClearNotifications();
+        expectAdvisePersistThreshold();
         future = expectMeteredIfacesChanged(TEST_IFACE);
 
         replay();
@@ -704,6 +708,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             expectPolicyDataEnable(TYPE_WIFI, true);
 
             expectClearNotifications();
+            expectAdvisePersistThreshold();
             future = expectMeteredIfacesChanged();
 
             replay();
@@ -730,6 +735,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             expectSetInterfaceQuota(TEST_IFACE, 2 * MB_IN_BYTES);
 
             expectClearNotifications();
+            expectAdvisePersistThreshold();
             future = expectMeteredIfacesChanged(TEST_IFACE);
 
             replay();
@@ -794,6 +800,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             // still restricted.
             expectRemoveInterfaceQuota(TEST_IFACE);
             expectSetInterfaceQuota(TEST_IFACE, Long.MAX_VALUE);
+            expectAdvisePersistThreshold();
             expectMeteredIfacesChanged(TEST_IFACE);
 
             future = expectClearNotifications();
@@ -835,6 +842,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             expectSetInterfaceQuota(TEST_IFACE, Long.MAX_VALUE);
 
             expectClearNotifications();
+            expectAdvisePersistThreshold();
             future = expectMeteredIfacesChanged(TEST_IFACE);
 
             replay();
@@ -941,6 +949,11 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         mConnManager.setPolicyDataEnable(type, enabled);
         expectLastCall().andAnswer(future);
         return future;
+    }
+
+    private void expectAdvisePersistThreshold() throws Exception {
+        mStatsService.advisePersistThreshold(anyLong());
+        expectLastCall().anyTimes();
     }
 
     private static class TestAbstractFuture<T> extends AbstractFuture<T> {
