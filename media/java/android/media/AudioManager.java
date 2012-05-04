@@ -48,6 +48,7 @@ public class AudioManager {
     private final Context mContext;
     private long mVolumeKeyUpTime;
     private final boolean mUseMasterVolume;
+    private final boolean mUseVolumeKeySounds;
     private static String TAG = "AudioManager";
 
     /**
@@ -408,6 +409,8 @@ public class AudioManager {
         mContext = context;
         mUseMasterVolume = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useMasterVolume);
+        mUseVolumeKeySounds = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_useVolumeKeySounds);
     }
 
     private static IAudioService getService()
@@ -459,6 +462,9 @@ public class AudioManager {
                  * responsive to the user.
                  */
                 int flags = FLAG_SHOW_UI | FLAG_VIBRATE;
+                // if there is no volume key-up sound, apply the new volume immediately
+                if (!mUseVolumeKeySounds) flags |= FLAG_PLAY_SOUND;
+
                 if (mUseMasterVolume) {
                     adjustMasterVolume(
                             keyCode == KeyEvent.KEYCODE_VOLUME_UP
@@ -498,18 +504,19 @@ public class AudioManager {
                  * Play a sound. This is done on key up since we don't want the
                  * sound to play when a user holds down volume down to mute.
                  */
-                if (mUseMasterVolume) {
-                    if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-                        adjustMasterVolume(ADJUST_SAME, FLAG_PLAY_SOUND);
+                if (mUseVolumeKeySounds) {
+                    if (mUseMasterVolume) {
+                        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+                            adjustMasterVolume(ADJUST_SAME, FLAG_PLAY_SOUND);
+                        }
+                    } else {
+                        int flags = FLAG_PLAY_SOUND;
+                        adjustSuggestedStreamVolume(
+                                ADJUST_SAME,
+                                stream,
+                                flags);
                     }
-                } else {
-                    int flags = FLAG_PLAY_SOUND;
-                    adjustSuggestedStreamVolume(
-                            ADJUST_SAME,
-                            stream,
-                            flags);
                 }
-
                 mVolumeKeyUpTime = SystemClock.uptimeMillis();
                 break;
         }
