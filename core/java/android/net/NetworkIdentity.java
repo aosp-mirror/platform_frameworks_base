@@ -158,9 +158,14 @@ public class NetworkIdentity {
             }
 
         } else if (type == TYPE_WIFI) {
-            final WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-            final WifiInfo info = wifi.getConnectionInfo();
-            networkId = info != null ? info.getSSID() : null;
+            if (state.networkId != null) {
+                networkId = state.networkId;
+            } else {
+                final WifiManager wifi = (WifiManager) context.getSystemService(
+                        Context.WIFI_SERVICE);
+                final WifiInfo info = wifi.getConnectionInfo();
+                networkId = info != null ? info.getSSID() : null;
+            }
         }
 
         return new NetworkIdentity(type, subType, subscriberId, networkId, roaming);

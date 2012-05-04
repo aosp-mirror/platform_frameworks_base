@@ -128,6 +128,9 @@ public class NetworkStatsRecorder {
             Map<String, NetworkIdentitySet> ifaceIdent, long currentTimeMillis) {
         final HashSet<String> unknownIfaces = Sets.newHashSet();
 
+        // skip recording when snapshot missing
+        if (snapshot == null) return;
+
         // assume first snapshot is bootstrap and don't record
         if (mLastSnapshot == null) {
             mLastSnapshot = snapshot;
