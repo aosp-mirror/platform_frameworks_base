@@ -8242,6 +8242,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
         @Override
         public void run() {
+            if (mWebViewCore == null
+                    || getWebView().getWindowToken() == null
+                    || getWebView().getViewRootImpl() == null) {
+                // We've been detached and/or destroyed since this was posted
+                return;
+            }
             final ListView listView = (ListView) LayoutInflater.from(mContext)
                     .inflate(com.android.internal.R.layout.select_dialog, null);
             final MyArrayListAdapter adapter = new MyArrayListAdapter();
