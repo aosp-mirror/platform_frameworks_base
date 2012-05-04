@@ -1397,7 +1397,8 @@ public class Notification implements Parcelable
 
             if (mSubText != null) {
                 contentView.setTextViewText(R.id.text, mSubText);
-                contentView.setViewVisibility(R.id.text2, View.VISIBLE);
+                contentView.setViewVisibility(R.id.text2,
+                        mContentText != null ? View.VISIBLE : View.GONE);
             } else {
                 contentView.setViewVisibility(R.id.text2, View.GONE);
                 if (mProgressMax != 0 || mProgressIndeterminate) {
@@ -1428,12 +1429,12 @@ public class Notification implements Parcelable
 
             int N = mActions.size();
             if (N > 0) {
-                Log.d("Notification", "has actions: " + mContentText);
+                // Log.d("Notification", "has actions: " + mContentText);
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
                 if (N>3) N=3;
                 for (int i=0; i<N; i++) {
                     final RemoteViews button = generateActionButton(mActions.get(i));
-                    Log.d("Notification", "adding action " + i + ": " + mActions.get(i).title);
+                    //Log.d("Notification", "adding action " + i + ": " + mActions.get(i).title);
                     big.addView(R.id.actions, button);
                 }
             }
@@ -1549,8 +1550,27 @@ public class Notification implements Parcelable
      * An object that can apply a rich notification style to a {@link Notification.Builder}
      * object.
      */
-    public static class Style {
+    public static abstract class Style
+    {
+        private CharSequence mBigContentTitle;
+        private CharSequence mSummaryText = null;
+
         protected Builder mBuilder;
+
+        /**
+         * Overrides ContentTitle in the big form of the template.
+         * This defaults to the value passed to setContentTitle().
+         */
+        protected void internalSetBigContentTitle(CharSequence title) {
+            mBigContentTitle = title;
+        }
+
+        /**
+         * Set the first line of text after the detail section in the big form of the template.
+         */
+        protected void internalSetSummaryText(CharSequence cs) {
+            mSummaryText = cs;
+        }
 
         public void setBuilder(Builder builder) {
             if (mBuilder != builder) {
@@ -1559,12 +1579,42 @@ public class Notification implements Parcelable
             }
         }
 
-        public Notification build() {
+        protected void checkBuilder() {
             if (mBuilder == null) {
                 throw new IllegalArgumentException("Style requires a valid Builder object");
             }
-            return mBuilder.buildUnstyled();
         }
+
+        protected RemoteViews getStandardView(int layoutId) {
+            checkBuilder();
+
+            if (mBigContentTitle != null) {
+                mBuilder.setContentTitle(mBigContentTitle);
+            }
+
+            if (mBuilder.mSubText == null) {
+                mBuilder.setContentText(null);
+            }
+
+            RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(layoutId);
+
+            if (mBuilder.mSubText == null) {
+                contentView.setViewVisibility(R.id.line3, View.GONE);
+            }
+
+            if (mBigContentTitle != null && mBigContentTitle.equals("")) {
+                contentView.setViewVisibility(R.id.line1, View.GONE);
+            }
+
+            if (mSummaryText != null && !mSummaryText.equals("")) {
+                contentView.setViewVisibility(R.id.overflow_title, View.VISIBLE);
+                contentView.setTextViewText(R.id.overflow_title, mSummaryText);
+            }
+
+            return contentView;
+        }
+
+        public abstract Notification build();
     }
 
     /**
@@ -1594,13 +1644,30 @@ public class Notification implements Parcelable
             setBuilder(builder);
         }
 
+        /**
+         * Overrides ContentTitle in the big form of the template.
+         * This defaults to the value passed to setContentTitle().
+         */
+        public BigPictureStyle setBigContentTitle(CharSequence title) {
+            internalSetBigContentTitle(title);
+            return this;
+        }
+
+        /**
+         * Set the first line of text after the detail section in the big form of the template.
+         */
+        public BigPictureStyle setSummaryText(CharSequence cs) {
+            internalSetSummaryText(cs);
+            return this;
+        }
+
         public BigPictureStyle bigPicture(Bitmap b) {
             mPicture = b;
             return this;
         }
 
         private RemoteViews makeBigContentView() {
-            RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(R.layout.notification_template_big_picture);
+            RemoteViews contentView = getStandardView(R.layout.notification_template_big_picture);
 
             contentView.setImageViewBitmap(R.id.big_picture, mPicture);
 
@@ -1609,9 +1676,7 @@ public class Notification implements Parcelable
 
         @Override
         public Notification build() {
-            if (mBuilder == null) {
-                throw new IllegalArgumentException("Style requires a valid Builder object");
-            }
+            checkBuilder();
             Notification wip = mBuilder.buildUnstyled();
             wip.bigContentView = makeBigContentView();
             return wip;
@@ -1645,26 +1710,39 @@ public class Notification implements Parcelable
             setBuilder(builder);
         }
 
+        /**
+         * Overrides ContentTitle in the big form of the template.
+         * This defaults to the value passed to setContentTitle().
+         */
+        public BigTextStyle setBigContentTitle(CharSequence title) {
+            internalSetBigContentTitle(title);
+            return this;
+        }
+
+        /**
+         * Set the first line of text after the detail section in the big form of the template.
+         */
+        public BigTextStyle setSummaryText(CharSequence cs) {
+            internalSetSummaryText(cs);
+            return this;
+        }
+
         public BigTextStyle bigText(CharSequence cs) {
             mBigText = cs;
             return this;
         }
 
         private RemoteViews makeBigContentView() {
-            int bigTextId = R.layout.notification_template_big_text;
-            RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(bigTextId);
+            RemoteViews contentView = getStandardView(R.layout.notification_template_big_text);
             contentView.setTextViewText(R.id.big_text, mBigText);
             contentView.setViewVisibility(R.id.big_text, View.VISIBLE);
-            contentView.setViewVisibility(R.id.text2, View.GONE);
 
             return contentView;
         }
 
         @Override
         public Notification build() {
-            if (mBuilder == null) {
-                throw new IllegalArgumentException("Style requires a valid Builder object");
-            }
+            checkBuilder();
             Notification wip = mBuilder.buildUnstyled();
             wip.bigContentView = makeBigContentView();
             return wip;
@@ -1678,12 +1756,14 @@ public class Notification implements Parcelable
      * <pre class="prettyprint">
      * Notification noti = new Notification.InboxStyle(
      *      new Notification.Builder()
-     *         .setContentTitle(&quot;New mail from &quot; + sender.toString())
+     *         .setContentTitle(&quot;5 New mails from &quot; + sender.toString())
      *         .setContentText(subject)
      *         .setSmallIcon(R.drawable.new_mail)
      *         .setLargeIcon(aBitmap))
      *      .addLine(str1)
      *      .addLine(str2)
+     *      .setContentTitle("")
+     *      .setSummaryText(&quot;+3 more&quot;)
      *      .build();
      * </pre>
      * 
@@ -1699,16 +1779,35 @@ public class Notification implements Parcelable
             setBuilder(builder);
         }
 
+        /**
+         * Overrides ContentTitle in the big form of the template.
+         * This defaults to the value passed to setContentTitle().
+         */
+        public InboxStyle setBigContentTitle(CharSequence title) {
+            internalSetBigContentTitle(title);
+            return this;
+        }
+
+        /**
+         * Set the first line of text after the detail section in the big form of the template.
+         */
+        public InboxStyle setSummaryText(CharSequence cs) {
+            internalSetSummaryText(cs);
+            return this;
+        }
+
         public InboxStyle addLine(CharSequence cs) {
             mTexts.add(cs);
             return this;
         }
 
         private RemoteViews makeBigContentView() {
-            RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(R.layout.notification_template_inbox);
+            RemoteViews contentView = getStandardView(R.layout.notification_template_inbox);
+            contentView.setViewVisibility(R.id.text2, View.GONE);
 
-            int[] rowIds = {R.id.inbox_text0, R.id.inbox_text1, R.id.inbox_text2, R.id.inbox_text3, R.id.inbox_text4};
-            
+            int[] rowIds = {R.id.inbox_text0, R.id.inbox_text1, R.id.inbox_text2, R.id.inbox_text3,
+                    R.id.inbox_text4};
+
             int i=0;
             while (i < mTexts.size() && i < rowIds.length) {
                 CharSequence str = mTexts.get(i);
@@ -1724,9 +1823,7 @@ public class Notification implements Parcelable
 
         @Override
         public Notification build() {
-            if (mBuilder == null) {
-                throw new IllegalArgumentException("Style requires a valid Builder object");
-            }
+            checkBuilder();
             Notification wip = mBuilder.buildUnstyled();
             wip.bigContentView = makeBigContentView();
             return wip;

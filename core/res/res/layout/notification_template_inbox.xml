@@ -87,6 +87,8 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:ellipsize="end"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
             android:visibility="gone"
             />
         <TextView android:id="@+id/inbox_text1"
@@ -95,6 +97,8 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:ellipsize="end"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
             android:visibility="gone"
             />
         <TextView android:id="@+id/inbox_text2"
@@ -103,6 +107,8 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:ellipsize="end"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
             android:visibility="gone"
             />
         <TextView android:id="@+id/inbox_text3"
@@ -111,6 +117,8 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:ellipsize="end"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
             android:visibility="gone"
             />
         <TextView android:id="@+id/inbox_text4"
@@ -119,7 +127,28 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:ellipsize="end"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
             android:visibility="gone"
+            />
+        <LinearLayout
+            android:id="@+id/actions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+           >
+          <!-- actions will be added here -->
+        </LinearLayout>
+        <TextView android:id="@+id/overflow_title"
+            android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:fadingEdge="horizontal"
+            android:visibility="gone"
+            android:layout_weight="1"
             />
         <LinearLayout
             android:id="@+id/line3"
@@ -165,13 +194,5 @@
             android:visibility="gone"
             style="?android:attr/progressBarStyleHorizontal"
             />
-        <LinearLayout
-        	android:id="@+id/actions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-	        >
-	        <!-- actions will be added here -->
-        </LinearLayout>
     </LinearLayout>
 </FrameLayout>

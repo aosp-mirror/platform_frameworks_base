@@ -3770,12 +3770,18 @@ package android.app {
     ctor public Notification.BigPictureStyle();
     ctor public Notification.BigPictureStyle(android.app.Notification.Builder);
     method public android.app.Notification.BigPictureStyle bigPicture(android.graphics.Bitmap);
+    method public android.app.Notification build();
+    method public android.app.Notification.BigPictureStyle setBigContentTitle(java.lang.CharSequence);
+    method public android.app.Notification.BigPictureStyle setSummaryText(java.lang.CharSequence);
   }
 
   public static class Notification.BigTextStyle extends android.app.Notification.Style {
     ctor public Notification.BigTextStyle();
     ctor public Notification.BigTextStyle(android.app.Notification.Builder);
     method public android.app.Notification.BigTextStyle bigText(java.lang.CharSequence);
+    method public android.app.Notification build();
+    method public android.app.Notification.BigTextStyle setBigContentTitle(java.lang.CharSequence);
+    method public android.app.Notification.BigTextStyle setSummaryText(java.lang.CharSequence);
   }
 
   public static class Notification.Builder {
@@ -3817,11 +3823,18 @@ package android.app {
     ctor public Notification.InboxStyle();
     ctor public Notification.InboxStyle(android.app.Notification.Builder);
     method public android.app.Notification.InboxStyle addLine(java.lang.CharSequence);
+    method public android.app.Notification build();
+    method public android.app.Notification.InboxStyle setBigContentTitle(java.lang.CharSequence);
+    method public android.app.Notification.InboxStyle setSummaryText(java.lang.CharSequence);
   }
 
-  public static class Notification.Style {
+  public static abstract class Notification.Style {
     ctor public Notification.Style();
-    method public android.app.Notification build();
+    method public abstract android.app.Notification build();
+    method protected void checkBuilder();
+    method protected android.widget.RemoteViews getStandardView(int);
+    method protected void internalSetBigContentTitle(java.lang.CharSequence);
+    method protected void internalSetSummaryText(java.lang.CharSequence);
     method public void setBuilder(android.app.Notification.Builder);
     field protected android.app.Notification.Builder mBuilder;
   }
