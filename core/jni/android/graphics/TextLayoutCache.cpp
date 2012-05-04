@@ -30,7 +30,7 @@ extern "C" {
 namespace android {
 
 //--------------------------------------------------------------------------------------------------
-#define TYPEFACE_ARABIC "/system/fonts/DroidNaskh-Regular-Shift.ttf"
+#define TYPEFACE_ARABIC "/system/fonts/DroidNaskh-Regular-SystemUI.ttf"
 #define TYPE_FACE_HEBREW_REGULAR "/system/fonts/DroidSansHebrew-Regular.ttf"
 #define TYPE_FACE_HEBREW_BOLD "/system/fonts/DroidSansHebrew-Bold.ttf"
 #define TYPEFACE_BENGALI "/system/fonts/Lohit-Bengali.ttf"
