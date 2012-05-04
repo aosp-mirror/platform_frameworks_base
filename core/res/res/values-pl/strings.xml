@@ -566,7 +566,7 @@
     <string name="permdesc_accessWimaxState" msgid="5914958077555177749">"Pozwala aplikacji na wyświetlanie informacji o stanie połączenia WiMAX."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Zmień stan WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="3328853825006455912">"Zezwala aplikacji na łączenie się i rozłączanie z siecią WiMAX."</string>
-    <string name="permlab_bluetooth" msgid="6127769336339276828">"wiązanie z urządzeniami Bluetooth"</string>
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"parowanie z urządzeniami Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Pozwala aplikacji na wyświetlanie konfiguracji lokalnego tabletu z funkcją Bluetooth oraz na nawiązywanie i akceptowanie połączeń ze sparowanymi urządzeniami."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Pozwala aplikacji na wyświetlanie konfiguracji lokalnego telefonu z funkcją Bluetooth oraz na nawiązywanie i akceptowanie połączeń ze sparowanymi urządzeniami."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kontrolowanie łączności Near Field Communication"</string>
@@ -1113,7 +1113,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Ustaw"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Gotowe"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Domyślne"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"NOWE: "</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NOWE: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"Nie są wymagane żadne uprawnienia"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Ukryj"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Pokaż wszystko"</b></string>
