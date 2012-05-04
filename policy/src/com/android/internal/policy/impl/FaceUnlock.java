@@ -101,7 +101,6 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     public void initializeView(View biometricUnlockView) {
         Log.d(TAG, "initializeView()");
         mFaceUnlockView = biometricUnlockView;
-        show(0);
     }
 
     /**
