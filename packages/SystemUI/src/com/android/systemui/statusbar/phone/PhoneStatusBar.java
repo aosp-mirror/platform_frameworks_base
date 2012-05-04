@@ -147,7 +147,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     IWindowManager mWindowManager;
 
-    View mStatusBarWindow;
+    StatusBarWindowView mStatusBarWindow;
     PhoneStatusBarView mStatusBarView;
 
     int mPixelFormat;
@@ -280,11 +280,12 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
 
-        mStatusBarWindow = View.inflate(context,
+        mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
                 R.layout.super_status_bar, null);
         if (DEBUG) {
             mStatusBarWindow.setBackgroundColor(0x6000FF80);
         }
+        mStatusBarWindow.mService = this;
         mStatusBarWindow.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -1141,9 +1142,12 @@ public class PhoneStatusBar extends BaseStatusBar {
         // Expand the window to encompass the full screen in anticipation of the drag.
         // This is only possible to do atomically because the status bar is at the top of the screen!
         WindowManager.LayoutParams lp = (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
+        lp.flags &= (~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
         lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
         final WindowManager wm = WindowManagerImpl.getDefault();
         wm.updateViewLayout(mStatusBarWindow, lp);
+
+        mStatusBarWindow.requestFocus(View.FOCUS_FORWARD);
 
         visibilityChanged(true);
     }
@@ -1231,6 +1235,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         // Shrink the window to the size of the status bar only
         WindowManager.LayoutParams lp = (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
         lp.height = getStatusBarHeight();
+        lp.flags |= (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
         final WindowManager wm = WindowManagerImpl.getDefault();
         wm.updateViewLayout(mStatusBarWindow, lp);
 
