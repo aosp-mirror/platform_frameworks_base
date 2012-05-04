@@ -28,12 +28,15 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ListAdapter;
 import android.widget.ListPopupWindow;
+import android.widget.PopupWindow.OnDismissListener;
 
-class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
+class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener,
+        OnDismissListener{
     private static class AnchorView extends View {
         AnchorView(Context context) {
             super(context);
             setFocusable(false);
+            setVisibility(INVISIBLE);
         }
     }
     private static final int AUTOFILL_FORM = 100;
@@ -48,17 +51,10 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
     private WebViewClassic.WebViewInputConnection mInputConnection;
     private WebViewClassic mWebView;
 
-    public AutoCompletePopup(Context context,
-            WebViewClassic webView,
+    public AutoCompletePopup(WebViewClassic webView,
             WebViewClassic.WebViewInputConnection inputConnection) {
         mInputConnection = inputConnection;
         mWebView = webView;
-        mPopup = new ListPopupWindow(context);
-        mAnchor = new AnchorView(context);
-        mWebView.getWebView().addView(mAnchor);
-        mPopup.setOnItemClickListener(this);
-        mPopup.setAnchorView(mAnchor);
-        mPopup.setPromptPosition(ListPopupWindow.POSITION_PROMPT_BELOW);
         mHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
@@ -72,6 +68,9 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
     }
 
     public boolean onKeyPreIme(int keyCode, KeyEvent event) {
+        if (mPopup == null) {
+            return false;
+        }
         if (keyCode == KeyEvent.KEYCODE_BACK && mPopup.isShowing()) {
             // special case for the back key, we do not even try to send it
             // to the drop down list but instead, consume it immediately
@@ -112,11 +111,14 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
     public void clearAdapter() {
         mAdapter = null;
         mFilter = null;
-        mPopup.dismiss();
-        mPopup.setAdapter(null);
+        if (mPopup != null) {
+            mPopup.dismiss();
+            mPopup.setAdapter(null);
+        }
     }
 
     public <T extends ListAdapter & Filterable> void setAdapter(T adapter) {
+        ensurePopup();
         mPopup.setAdapter(adapter);
         mAdapter = adapter;
         if (adapter != null) {
@@ -129,6 +131,7 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
     }
 
     public void resetRect() {
+        ensurePopup();
         int left = mWebView.contentToViewX(mWebView.mEditTextContentBounds.left);
         int right = mWebView.contentToViewX(mWebView.mEditTextContentBounds.right);
         int width = right - left;
@@ -164,6 +167,9 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
     // AdapterView.OnItemClickListener implementation
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if (mPopup == null) {
+            return;
+        }
         if (id == 0 && position == 0 && mInputConnection.getIsAutoFillable()) {
             mText = "";
             pushTextToInputConnection();
@@ -206,6 +212,7 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
 
     @Override
     public void onFilterComplete(int count) {
+        ensurePopup();
         boolean showDropDown = (count > 0) &&
                 (mInputConnection.getIsAutoFillable() || mText.length() > 0);
         if (showDropDown) {
@@ -217,6 +224,24 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
             mPopup.getListView().setOverScrollMode(View.OVER_SCROLL_ALWAYS);
         } else {
             mPopup.dismiss();
+        }
+    }
+
+    @Override
+    public void onDismiss() {
+        mWebView.getWebView().removeView(mAnchor);
+    }
+
+    private void ensurePopup() {
+        if (mPopup == null) {
+            mPopup = new ListPopupWindow(mWebView.getContext());
+            mAnchor = new AnchorView(mWebView.getContext());
+            mWebView.getWebView().addView(mAnchor);
+            mPopup.setOnItemClickListener(this);
+            mPopup.setAnchorView(mAnchor);
+            mPopup.setPromptPosition(ListPopupWindow.POSITION_PROMPT_BELOW);
+        } else if (mWebView.getWebView().indexOfChild(mAnchor) < 0) {
+            mWebView.getWebView().addView(mAnchor);
         }
     }
 }
