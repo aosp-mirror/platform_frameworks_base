@@ -1055,6 +1055,7 @@ public class Paint {
      * Get the text Locale.
      *
      * @return the paint's Locale used for drawing text, never null.
+     * @hide
      */
     public Locale getTextLocale() {
         return mLocale;
@@ -1085,6 +1086,7 @@ public class Paint {
      * job in certain ambiguous cases
      *
      * @param locale the paint's locale value for drawing text, must not be null.
+     * @hide
      */
     public void setTextLocale(Locale locale) {
         if (locale == null) {
