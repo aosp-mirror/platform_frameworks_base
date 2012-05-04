@@ -83,6 +83,7 @@ public class NetworkController extends BroadcastReceiver {
     int mDataDirectionIconId; // data + data direction on phones
     int mDataSignalIconId;
     int mDataTypeIconId;
+    int mAirplaneIconId;
     boolean mDataActive;
     int mMobileActivityIconId; // overlay arrows for data direction
     int mLastSignalLevel;
@@ -161,7 +162,7 @@ public class NetworkController extends BroadcastReceiver {
                 String contentDescription);
         void setMobileDataIndicators(boolean visible, int strengthIcon, int activityIcon,
                 int typeIcon, String contentDescription, String typeContentDescription);
-        void setIsAirplaneMode(boolean is);
+        void setIsAirplaneMode(boolean is, int airplaneIcon);
     }
 
     /**
@@ -305,7 +306,7 @@ public class NetworkController extends BroadcastReceiver {
                     mContentDescriptionPhoneSignal,
                     mContentDescriptionDataType);
         }
-        cluster.setIsAirplaneMode(mAirplaneMode);
+        cluster.setIsAirplaneMode(mAirplaneMode, mAirplaneIconId);
     }
 
     public void setStackedMode(boolean stacked) {
@@ -997,7 +998,7 @@ public class NetworkController extends BroadcastReceiver {
             // look again; your radios are now airplanes
             mContentDescriptionPhoneSignal = mContext.getString(
                     R.string.accessibility_airplane_mode);
-            mPhoneSignalIconId = mDataSignalIconId = R.drawable.stat_sys_signal_flightmode;
+            mAirplaneIconId = R.drawable.stat_sys_signal_flightmode;
             mDataTypeIconId = 0;
 
             // combined values from connected wifi take precedence over airplane mode
