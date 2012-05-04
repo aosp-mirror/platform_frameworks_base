@@ -155,7 +155,7 @@ public class Camera {
     private boolean mOneShot;
     private boolean mWithBuffer;
     private boolean mFaceDetectionRunning = false;
-    private ReentrantLock mFocusLock = new ReentrantLock();
+    private Object mAutoFocusCallbackLock = new Object();
 
     /**
      * Broadcast Action:  A new picture is taken by the camera, and the entry of
@@ -513,7 +513,9 @@ public class Camera {
         mRawImageCallback = null;
         mPostviewCallback = null;
         mJpegCallback = null;
-        mAutoFocusCallback = null;
+        synchronized (mAutoFocusCallbackLock) {
+            mAutoFocusCallback = null;
+        }
         mAutoFocusMoveCallback = null;
     }
 
@@ -758,14 +760,13 @@ public class Camera {
                 return;
 
             case CAMERA_MSG_FOCUS:
-                mFocusLock.lock();
-                try {
-                    if (mAutoFocusCallback != null) {
-                        boolean success = msg.arg1 == 0 ? false : true;
-                        mAutoFocusCallback.onAutoFocus(success, mCamera);
-                    }
-                } finally {
-                    mFocusLock.unlock();
+                AutoFocusCallback cb = null;
+                synchronized (mAutoFocusCallbackLock) {
+                    cb = mAutoFocusCallback;
+                }
+                if (cb != null) {
+                    boolean success = msg.arg1 == 0 ? false : true;
+                    cb.onAutoFocus(success, mCamera);
                 }
                 return;
 
@@ -890,13 +891,10 @@ public class Camera {
      */
     public final void autoFocus(AutoFocusCallback cb)
     {
-        mFocusLock.lock();
-        try {
+        synchronized (mAutoFocusCallbackLock) {
             mAutoFocusCallback = cb;
-            native_autoFocus();
-        } finally {
-            mFocusLock.unlock();
         }
+        native_autoFocus();
     }
     private native final void native_autoFocus();
 
@@ -910,14 +908,26 @@ public class Camera {
      */
     public final void cancelAutoFocus()
     {
-        mFocusLock.lock();
-        try {
+        synchronized (mAutoFocusCallbackLock) {
             mAutoFocusCallback = null;
-            native_cancelAutoFocus();
-            removePendingAFCompletionMessages();
-        } finally {
-            mFocusLock.unlock();
         }
+        native_cancelAutoFocus();
+        // CAMERA_MSG_FOCUS should be removed here because the following
+        // scenario can happen:
+        // - An application uses the same thread for autoFocus, cancelAutoFocus
+        //   and looper thread.
+        // - The application calls autoFocus.
+        // - HAL sends CAMERA_MSG_FOCUS, which enters the looper message queue.
+        //   Before event handler's handleMessage() is invoked, the application
+        //   calls cancelAutoFocus and autoFocus.
+        // - The application gets the old CAMERA_MSG_FOCUS and thinks autofocus
+        //   has been completed. But in fact it is not.
+        //
+        // As documented in the beginning of the file, apps should not use
+        // multiple threads to call autoFocus and cancelAutoFocus at the same
+        // time. It is HAL's responsibility not to send a CAMERA_MSG_FOCUS
+        // message after native_cancelAutoFocus is called.
+        mEventHandler.removeMessages(CAMERA_MSG_FOCUS);
     }
     private native final void native_cancelAutoFocus();
 
@@ -3640,13 +3650,4 @@ public class Camera {
             return false;
         }
     };
-
-    /*
-     * At any time, there should be at most one pending auto focus completion
-     * message, but we simply remove all pending AF completion messages in
-     * the looper's queue.
-     */
-    private void removePendingAFCompletionMessages() {
-        mEventHandler.removeMessages(CAMERA_MSG_FOCUS);
-    }
 }
