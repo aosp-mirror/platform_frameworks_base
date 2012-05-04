@@ -867,7 +867,7 @@ public class LinearLayout extends ViewGroup {
 
             // We have no limit, so make all weighted views as tall as the largest child.
             // Children will have already been measured once.
-            if (useLargestChild && widthMode == MeasureSpec.UNSPECIFIED) {
+            if (useLargestChild && heightMode != MeasureSpec.EXACTLY) {
                 for (int i = 0; i < count; i++) {
                     final View child = getVirtualChildAt(i);
 
@@ -1283,7 +1283,7 @@ public class LinearLayout extends ViewGroup {
 
             // We have no limit, so make all weighted views as wide as the largest child.
             // Children will have already been measured once.
-            if (useLargestChild && widthMode == MeasureSpec.UNSPECIFIED) {
+            if (useLargestChild && widthMode != MeasureSpec.EXACTLY) {
                 for (int i = 0; i < count; i++) {
                     final View child = getVirtualChildAt(i);
 
