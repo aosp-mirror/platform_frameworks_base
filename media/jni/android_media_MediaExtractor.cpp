@@ -237,7 +237,7 @@ static void android_media_MediaExtractor_release(JNIEnv *env, jobject thiz) {
     setMediaExtractor(env, thiz, NULL);
 }
 
-static jint android_media_MediaExtractor_countTracks(
+static jint android_media_MediaExtractor_getTrackCount(
         JNIEnv *env, jobject thiz) {
     sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
 
@@ -249,7 +249,7 @@ static jint android_media_MediaExtractor_countTracks(
     return extractor->countTracks();
 }
 
-static jobject android_media_MediaExtractor_getTrackFormat(
+static jobject android_media_MediaExtractor_getTrackFormatNative(
         JNIEnv *env, jobject thiz, jint index) {
     sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
 
@@ -669,10 +669,10 @@ static void android_media_MediaExtractor_native_finalize(
 static JNINativeMethod gMethods[] = {
     { "release", "()V", (void *)android_media_MediaExtractor_release },
 
-    { "countTracks", "()I", (void *)android_media_MediaExtractor_countTracks },
+    { "getTrackCount", "()I", (void *)android_media_MediaExtractor_getTrackCount },
 
-    { "getTrackFormat", "(I)Ljava/util/Map;",
-        (void *)android_media_MediaExtractor_getTrackFormat },
+    { "getTrackFormatNative", "(I)Ljava/util/Map;",
+        (void *)android_media_MediaExtractor_getTrackFormatNative },
 
     { "selectTrack", "(I)V", (void *)android_media_MediaExtractor_selectTrack },
 
