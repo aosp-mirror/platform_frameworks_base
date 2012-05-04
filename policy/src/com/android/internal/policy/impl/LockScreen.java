@@ -29,6 +29,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -38,8 +39,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import android.speech.RecognizerIntent;
 import android.util.Log;
+import android.util.Slog;
 import android.media.AudioManager;
 import android.os.RemoteException;
 import android.provider.MediaStore;
@@ -80,6 +81,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
     private View mUnlockWidget;
     private boolean mCameraDisabled;
     private boolean mSearchDisabled;
+    private SearchManager mSearchManager;
 
     InfoCallbackImpl mInfoCallback = new InfoCallbackImpl() {
 
@@ -237,6 +239,25 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         }
     }
 
+    private Intent getAssistIntent() {
+        Intent intent = null;
+        if (mSearchManager == null) {
+            mSearchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
+        }
+        if (mSearchManager != null) {
+            ComponentName globalSearchActivity = mSearchManager.getGlobalSearchActivity();
+            if (globalSearchActivity != null) {
+                intent = new Intent(Intent.ACTION_ASSIST);
+                intent.setPackage(globalSearchActivity.getPackageName());
+            } else {
+                Slog.w(TAG, "No global search activity");
+            }
+        } else {
+            Slog.w(TAG, "No SearchManager");
+        }
+        return intent;
+    }
+
     class MultiWaveViewMethods implements MultiWaveView.OnTriggerListener,
             UnlockWidgetCommonMethods {
         private final MultiWaveView mMultiWaveView;
@@ -279,7 +300,12 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
             final int resId = mMultiWaveView.getResourceIdForTarget(target);
             switch (resId) {
                 case com.android.internal.R.drawable.ic_lockscreen_search:
-                    launchActivity(new Intent(RecognizerIntent.ACTION_WEB_SEARCH));
+                    Intent assistIntent = getAssistIntent();
+                    if (assistIntent != null) {
+                        launchActivity(assistIntent);
+                    } else {
+                        Log.w(TAG, "Failed to get intent for assist activity");
+                    }
                     mCallback.pokeWakelock();
                     break;
 
