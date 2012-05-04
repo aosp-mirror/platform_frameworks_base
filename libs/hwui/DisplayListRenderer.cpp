@@ -184,6 +184,11 @@ void DisplayList::clearResources() {
     }
     mPaths.clear();
 
+    for (size_t i = 0; i < mSourcePaths.size(); i++) {
+        caches.resourceCache.decrementRefcount(mSourcePaths.itemAt(i));
+    }
+    mSourcePaths.clear();
+
     for (size_t i = 0; i < mMatrices.size(); i++) {
         delete mMatrices.itemAt(i);
     }
@@ -240,6 +245,12 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
     const Vector<SkPath*> &paths = recorder.getPaths();
     for (size_t i = 0; i < paths.size(); i++) {
         mPaths.add(paths.itemAt(i));
+    }
+
+    const SortedVector<SkPath*> &sourcePaths = recorder.getSourcePaths();
+    for (size_t i = 0; i < sourcePaths.size(); i++) {
+        mSourcePaths.add(sourcePaths.itemAt(i));
+        caches.resourceCache.incrementRefcount(sourcePaths.itemAt(i));
     }
 
     const Vector<SkMatrix*> &matrices = recorder.getMatrices();
@@ -1272,6 +1283,11 @@ void DisplayListRenderer::reset() {
     }
     mShaders.clear();
     mShaderMap.clear();
+
+    for (size_t i = 0; i < mSourcePaths.size(); i++) {
+        caches.resourceCache.decrementRefcount(mSourcePaths.itemAt(i));
+    }
+    mSourcePaths.clear();
 
     mPaints.clear();
     mPaintMap.clear();

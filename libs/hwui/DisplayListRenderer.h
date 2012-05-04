@@ -487,6 +487,7 @@ private:
 
     Vector<SkPaint*> mPaints;
     Vector<SkPath*> mPaths;
+    SortedVector<SkPath*> mSourcePaths;
     Vector<SkMatrix*> mMatrices;
     Vector<SkiaShader*> mShaders;
 
@@ -634,6 +635,10 @@ public:
         return mPaths;
     }
 
+    const SortedVector<SkPath*>& getSourcePaths() const {
+        return mSourcePaths;
+    }
+
     const Vector<SkMatrix*>& getMatrices() const {
         return mMatrices;
     }
@@ -750,6 +755,10 @@ private:
             mPathMap.replaceValueFor(path, pathCopy);
             mPaths.add(pathCopy);
         }
+        if (mSourcePaths.indexOf(path) < 0) {
+            Caches::getInstance().resourceCache.incrementRefcount(path);
+            mSourcePaths.add(path);
+        }
 
         addInt((int) pathCopy);
     }
@@ -829,6 +838,8 @@ private:
 
     Vector<SkPath*> mPaths;
     DefaultKeyedVector<SkPath*, SkPath*> mPathMap;
+
+    SortedVector<SkPath*> mSourcePaths;
 
     Vector<SkiaShader*> mShaders;
     DefaultKeyedVector<SkiaShader*, SkiaShader*> mShaderMap;
