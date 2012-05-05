@@ -36,7 +36,6 @@ import com.android.internal.telephony.gsm.GSMPhone;
 import com.android.internal.telephony.gsm.NetworkInfo;
 import com.android.internal.telephony.gsm.GsmDataConnection;
 import com.android.internal.telephony.test.SimulatedRadioControl;
-import com.android.internal.telephony.CallManager;
 
 import java.util.List;
 
@@ -89,7 +88,6 @@ public class PhoneProxy extends Handler implements Phone {
 
             if(mOutgoingPhone.equals("GSM")) {
                 logd("Make a new CDMAPhone and destroy the old GSMPhone.");
-                CallManager.getInstance().unregisterPhone(mActivePhone);
 
                 ((GSMPhone)mActivePhone).dispose();
                 Phone oldPhone = mActivePhone;
@@ -102,11 +100,9 @@ public class PhoneProxy extends Handler implements Phone {
 
                 mActivePhone = PhoneFactory.getCdmaPhone();
                 ((GSMPhone)oldPhone).removeReferences();
-                CallManager.getInstance().registerPhone(mActivePhone);
                 oldPhone = null;
             } else {
                 logd("Make a new GSMPhone and destroy the old CDMAPhone.");
-                CallManager.getInstance().unregisterPhone(mActivePhone);
 
                 ((CDMAPhone)mActivePhone).dispose();
                 //mActivePhone = null;
@@ -120,7 +116,6 @@ public class PhoneProxy extends Handler implements Phone {
 
                 mActivePhone = PhoneFactory.getGsmPhone();
                 ((CDMAPhone)oldPhone).removeReferences();
-                CallManager.getInstance().registerPhone(mActivePhone);
                 oldPhone = null;
             }
 
