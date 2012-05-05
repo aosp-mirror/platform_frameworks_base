@@ -617,6 +617,8 @@ public class ActionBarImpl extends ActionBar {
             }
             anim.setInterpolator(AnimationUtils.loadInterpolator(mContext,
                     com.android.internal.R.interpolator.decelerate_quad));
+            anim.setDuration(mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_mediumAnimTime));
             anim.addListener(mShowListener);
             mCurrentShowAnim = anim;
             anim.start();
@@ -660,6 +662,8 @@ public class ActionBarImpl extends ActionBar {
             }
             anim.setInterpolator(AnimationUtils.loadInterpolator(mContext,
                     com.android.internal.R.interpolator.accelerate_quad));
+            anim.setDuration(mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_mediumAnimTime));
             anim.addListener(mHideListener);
             mCurrentShowAnim = anim;
             anim.start();
