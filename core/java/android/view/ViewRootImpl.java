@@ -230,6 +230,7 @@ public final class ViewRootImpl implements ViewParent,
     boolean mHasHadWindowFocus;
     boolean mLastWasImTarget;
     boolean mWindowsAnimating;
+    boolean mIsDrawing;
     int mLastSystemUiVisibility;
 
     // Pool of queued input events.
@@ -2037,10 +2038,12 @@ public final class ViewRootImpl implements ViewParent,
         final boolean fullRedrawNeeded = mFullRedrawNeeded;
         mFullRedrawNeeded = false;
 
+        mIsDrawing = true;
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
         try {
             draw(fullRedrawNeeded);
         } finally {
+            mIsDrawing = false;
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
 
@@ -3962,7 +3965,12 @@ public final class ViewRootImpl implements ViewParent,
         if (immediate) {
             doDie();
         } else {
-            destroyHardwareRenderer();
+            if (!mIsDrawing) {
+                destroyHardwareRenderer();
+            } else {
+                Log.e(TAG, "Attempting to destroy the window while drawing!\n" +
+                        "  window=" + this + ", title=" + mWindowAttributes.getTitle());
+            }
             mHandler.sendEmptyMessage(MSG_DIE);
         }
     }
