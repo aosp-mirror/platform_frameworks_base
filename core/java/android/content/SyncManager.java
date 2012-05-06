@@ -17,7 +17,6 @@
 package android.content;
 
 import com.android.internal.R;
-import com.android.internal.util.ArrayUtils;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
@@ -32,7 +31,6 @@ import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.DownloadManager.Request;
 import android.content.SyncStorageEngine.OnSyncRequestListener;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -1998,6 +1996,7 @@ public class SyncManager implements OnAccountsUpdateListener {
                 ActiveSyncContext conflict = null;
                 ActiveSyncContext longRunning = null;
                 ActiveSyncContext toReschedule = null;
+                ActiveSyncContext oldestNonExpeditedRegular = null;
 
                 for (ActiveSyncContext activeSyncContext : mActiveSyncContexts) {
                     final SyncOperation activeOp = activeSyncContext.mSyncOperation;
@@ -2005,6 +2004,13 @@ public class SyncManager implements OnAccountsUpdateListener {
                         numInit++;
                     } else {
                         numRegular++;
+                        if (!activeOp.isExpedited()) {
+                            if (oldestNonExpeditedRegular == null
+                                || (oldestNonExpeditedRegular.mStartTime
+                                    > activeSyncContext.mStartTime)) {
+                                oldestNonExpeditedRegular = activeSyncContext;
+                            }
+                        }
                     }
                     if (activeOp.account.type.equals(candidate.account.type)
                             && activeOp.authority.equals(candidate.authority)
@@ -2027,7 +2033,12 @@ public class SyncManager implements OnAccountsUpdateListener {
                     Log.v(TAG, "  numActiveInit=" + numInit + ", numActiveRegular=" + numRegular);
                     Log.v(TAG, "  longRunning: " + longRunning);
                     Log.v(TAG, "  conflict: " + conflict);
+                    Log.v(TAG, "  oldestNonExpeditedRegular: " + oldestNonExpeditedRegular);
                 }
+
+                final boolean roomAvailable = candidateIsInitialization
+                        ? numInit < MAX_SIMULTANEOUS_INITIALIZATION_SYNCS
+                        : numRegular < MAX_SIMULTANEOUS_REGULAR_SYNCS;
 
                 if (conflict != null) {
                     if (candidateIsInitialization && !conflict.mSyncOperation.isInitialization()
@@ -2048,23 +2059,32 @@ public class SyncManager implements OnAccountsUpdateListener {
                     } else {
                         continue;
                     }
-                } else {
-                    final boolean roomAvailable = candidateIsInitialization
-                            ? numInit < MAX_SIMULTANEOUS_INITIALIZATION_SYNCS
-                            : numRegular < MAX_SIMULTANEOUS_REGULAR_SYNCS;
-                    if (roomAvailable) {
-                        // dispatch candidate
-                    } else if (longRunning != null
-                            && (candidateIsInitialization
-                                == longRunning.mSyncOperation.isInitialization())) {
-                        toReschedule = longRunning;
-                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                            Log.v(TAG, "canceling and rescheduling sync since it ran roo long, "
-                                    + longRunning);
-                        }
-                    } else {
-                        continue;
+                } else if (roomAvailable) {
+                    // dispatch candidate
+                } else if (candidate.isExpedited() && oldestNonExpeditedRegular != null
+                           && !candidateIsInitialization) {
+                    // We found an active, non-expedited regular sync. We also know that the
+                    // candidate doesn't conflict with this active sync since conflict
+                    // is null. Reschedule the active sync and start the candidate.
+                    toReschedule = oldestNonExpeditedRegular;
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "canceling and rescheduling sync since an expedited is ready to run, "
+                                + oldestNonExpeditedRegular);
                     }
+                } else if (longRunning != null
+                        && (candidateIsInitialization
+                            == longRunning.mSyncOperation.isInitialization())) {
+                    // We found an active, long-running sync. Reschedule the active
+                    // sync and start the candidate.
+                    toReschedule = longRunning;
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "canceling and rescheduling sync since it ran roo long, "
+                              + longRunning);
+                    }
+                } else {
+                    // we were unable to find or make space to run this candidate, go on to
+                    // the next one
+                    continue;
                 }
 
                 if (toReschedule != null) {
@@ -2516,7 +2536,7 @@ public class SyncManager implements OnAccountsUpdateListener {
 
             return mSyncStorageEngine.insertStartSyncEvent(
                     syncOperation.account, syncOperation.userId, syncOperation.authority,
-                    now, source);
+                    now, source, syncOperation.isInitialization());
         }
 
         public void stopSyncEvent(long rowId, SyncOperation syncOperation, String resultMessage,
