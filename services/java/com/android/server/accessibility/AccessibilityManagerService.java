@@ -1701,17 +1701,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             | AccessibilityNodeInfo.ACTION_CLEAR_SELECTION
             | AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS
             | AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS
-            | AccessibilityNodeInfo.ACTION_NEXT_AT_GRANULARITY
-            | AccessibilityNodeInfo.ACTION_PREVIOUS_AT_GRANULARITY
+            | AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY
+            | AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY
             | AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT
             | AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT;
 
         private static final int VALID_GRANULARITIES =
-            AccessibilityNodeInfo.GRANULARITY_CHARACTER
-            | AccessibilityNodeInfo.GRANULARITY_WORD
-            | AccessibilityNodeInfo.GRANULARITY_LINE
-            | AccessibilityNodeInfo.GRANULARITY_PARAGRAPH
-            | AccessibilityNodeInfo.GRANULARITY_PAGE;
+            AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER
+            | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD
+            | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_LINE
+            | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PARAGRAPH
+            | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PAGE;
 
         private static final int RETRIEVAL_ALLOWING_EVENT_TYPES =
             AccessibilityEvent.TYPE_VIEW_CLICKED

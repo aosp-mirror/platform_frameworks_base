@@ -4715,10 +4715,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         }
 
         if (getContentDescription() != null) {
-            info.addAction(AccessibilityNodeInfo.ACTION_NEXT_AT_GRANULARITY);
-            info.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_GRANULARITY);
-            info.setGranularities(AccessibilityNodeInfo.GRANULARITY_CHARACTER
-                    | AccessibilityNodeInfo.GRANULARITY_WORD);
+            info.addAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
+            info.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
+            info.setMovementGranularities(AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER
+                    | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD);
         }
     }
 
