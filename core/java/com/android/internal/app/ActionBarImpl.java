@@ -39,8 +39,8 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Handler;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ContextThemeWrapper;
@@ -110,10 +110,14 @@ public class ActionBarImpl extends ActionBar {
 
     private int mCurWindowVisibility = View.VISIBLE;
 
+    private boolean mHiddenByApp;
+    private boolean mHiddenBySystem;
+    private boolean mShowingForMode;
+
+    private boolean mNowShowing = true;
+
     private Animator mCurrentShowAnim;
-    private Animator mCurrentModeAnim;
     private boolean mShowHideAnimationEnabled;
-    boolean mWasHiddenBeforeMode;
 
     final AnimatorListener mHideListener = new AnimatorListenerAdapter() {
         @Override
@@ -129,6 +133,9 @@ public class ActionBarImpl extends ActionBar {
             mContainerView.setTransitioning(false);
             mCurrentShowAnim = null;
             completeDeferredDestroyActionMode();
+            if (mOverlayLayout != null) {
+                mOverlayLayout.requestFitSystemWindows();
+            }
         }
     };
 
@@ -430,16 +437,13 @@ public class ActionBarImpl extends ActionBar {
     }
 
     public ActionMode startActionMode(ActionMode.Callback callback) {
-        boolean wasHidden = false;
         if (mActionMode != null) {
-            wasHidden = mWasHiddenBeforeMode;
             mActionMode.finish();
         }
 
         mContextView.killMode();
         ActionModeImpl mode = new ActionModeImpl(callback);
         if (mode.dispatchOnCreate()) {
-            mWasHiddenBeforeMode = !isShowing() || wasHidden;
             mode.invalidate();
             mContextView.initForMode(mode);
             animateToMode(true);
@@ -584,21 +588,91 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void show() {
-        show(true, false);
+        if (mHiddenByApp) {
+            mHiddenByApp = false;
+            updateVisibility(false);
+        }
     }
 
-    public void show(boolean markHiddenBeforeMode, boolean alwaysAnimate) {
+    private void showForActionMode() {
+        if (!mShowingForMode) {
+            mShowingForMode = true;
+            if (mOverlayLayout != null) {
+                mOverlayLayout.setShowingForActionMode(true);
+            }
+            updateVisibility(false);
+        }
+    }
+
+    public void showForSystem() {
+        if (mHiddenBySystem) {
+            mHiddenBySystem = false;
+            updateVisibility(true);
+        }
+    }
+
+    @Override
+    public void hide() {
+        if (!mHiddenByApp) {
+            mHiddenByApp = true;
+            updateVisibility(false);
+        }
+    }
+
+    private void hideForActionMode() {
+        if (mShowingForMode) {
+            mShowingForMode = false;
+            if (mOverlayLayout != null) {
+                mOverlayLayout.setShowingForActionMode(false);
+            }
+            updateVisibility(false);
+        }
+    }
+
+    public void hideForSystem() {
+        if (!mHiddenBySystem) {
+            mHiddenBySystem = true;
+            updateVisibility(true);
+        }
+    }
+
+    private static boolean checkShowingFlags(boolean hiddenByApp, boolean hiddenBySystem,
+            boolean showingForMode) {
+        if (showingForMode) {
+            return true;
+        } else if (hiddenByApp || hiddenBySystem) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private void updateVisibility(boolean fromSystem) {
+        // Based on the current state, should we be hidden or shown?
+        final boolean shown = checkShowingFlags(mHiddenByApp, mHiddenBySystem,
+                mShowingForMode);
+
+        if (shown) {
+            if (!mNowShowing) {
+                mNowShowing = true;
+                doShow(fromSystem);
+            }
+        } else {
+            if (mNowShowing) {
+                mNowShowing = false;
+                doHide(fromSystem);
+            }
+        }
+    }
+
+    public void doShow(boolean fromSystem) {
         if (mCurrentShowAnim != null) {
             mCurrentShowAnim.end();
-        }
-        if (mTopVisibilityView.getVisibility() == View.VISIBLE) {
-            if (markHiddenBeforeMode) mWasHiddenBeforeMode = false;
-            return;
         }
         mTopVisibilityView.setVisibility(View.VISIBLE);
 
         if (mCurWindowVisibility == View.VISIBLE && (mShowHideAnimationEnabled
-                || alwaysAnimate)) {
+                || fromSystem)) {
             mTopVisibilityView.setAlpha(0);
             mTopVisibilityView.setTranslationY(-mTopVisibilityView.getHeight());
             AnimatorSet anim = new AnimatorSet();
@@ -619,6 +693,16 @@ public class ActionBarImpl extends ActionBar {
                     com.android.internal.R.interpolator.decelerate_quad));
             anim.setDuration(mContext.getResources().getInteger(
                     com.android.internal.R.integer.config_mediumAnimTime));
+            // If this is being shown from the system, add a small delay.
+            // This is because we will also be animating in the status bar,
+            // and these two elements can't be done in lock-step.  So we give
+            // a little time for the status bar to start its animation before
+            // the action bar animates.  (This corresponds to the corresponding
+            // case when hiding, where the status bar has a small delay before
+            // starting.)
+            if (fromSystem) {
+                anim.setStartDelay(100);
+            }
             anim.addListener(mShowListener);
             mCurrentShowAnim = anim;
             anim.start();
@@ -627,23 +711,18 @@ public class ActionBarImpl extends ActionBar {
             mContainerView.setTranslationY(0);
             mShowListener.onAnimationEnd(null);
         }
+        if (mOverlayLayout != null) {
+            mOverlayLayout.requestFitSystemWindows();
+        }
     }
 
-    @Override
-    public void hide() {
-        hide(false);
-    }
-
-    public void hide(boolean alwaysAnimate) {
+    public void doHide(boolean fromSystem) {
         if (mCurrentShowAnim != null) {
             mCurrentShowAnim.end();
         }
-        if (mTopVisibilityView.getVisibility() == View.GONE) {
-            return;
-        }
 
         if (mCurWindowVisibility == View.VISIBLE && (mShowHideAnimationEnabled
-                || alwaysAnimate)) {
+                || fromSystem)) {
             mTopVisibilityView.setAlpha(1);
             mContainerView.setTransitioning(true);
             AnimatorSet anim = new AnimatorSet();
@@ -673,15 +752,18 @@ public class ActionBarImpl extends ActionBar {
     }
 
     public boolean isShowing() {
-        return mTopVisibilityView.getVisibility() == View.VISIBLE;
+        return mNowShowing;
+    }
+
+    public boolean isSystemShowing() {
+        return !mHiddenBySystem;
     }
 
     void animateToMode(boolean toActionMode) {
         if (toActionMode) {
-            show(false, false);
-        }
-        if (mCurrentModeAnim != null) {
-            mCurrentModeAnim.end();
+            showForActionMode();
+        } else {
+            hideForActionMode();
         }
 
         mActionView.animateToVisibility(toActionMode ? View.GONE : View.VISIBLE);
@@ -740,11 +822,13 @@ public class ActionBarImpl extends ActionBar {
                 return;
             }
 
-            // If we were hidden before the mode was shown, defer the onDestroy
-            // callback until the animation is finished and associated relayout
-            // is about to happen. This lets apps better anticipate visibility
-            // and layout behavior.
-            if (mWasHiddenBeforeMode) {
+            // If this change in state is going to cause the action bar
+            // to be hidden, defer the onDestroy callback until the animation
+            // is finished and associated relayout is about to happen. This lets
+            // apps better anticipate visibility and layout behavior.
+            if (!checkShowingFlags(mHiddenByApp, mHiddenBySystem, false)) {
+                // With the current state but the action bar hidden, our
+                // overall showing state is going to be false.
                 mDeferredDestroyActionMode = this;
                 mDeferredModeDestroyCallback = mCallback;
             } else {
@@ -758,10 +842,6 @@ public class ActionBarImpl extends ActionBar {
             mActionView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
 
             mActionMode = null;
-
-            if (mWasHiddenBeforeMode) {
-                hide();
-            }
         }
 
         @Override
