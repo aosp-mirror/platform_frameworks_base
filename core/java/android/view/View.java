@@ -9167,7 +9167,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     public final boolean getLocalVisibleRect(Rect r) {
-        Point offset = new Point();
+        final Point offset = mAttachInfo != null ? mAttachInfo.mPoint : new Point();
         if (getGlobalVisibleRect(r, offset)) {
             r.offset(-offset.x, -offset.y); // make r local
             return true;
@@ -16982,6 +16982,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
          * Show where the margins, bounds and layout bounds are for each view.
          */
         final boolean mDebugLayout = SystemProperties.getBoolean(DEBUG_LAYOUT_PROPERTY, false);
+
+        /**
+         * Point used to compute visible regions.
+         */
+        final Point mPoint = new Point();
 
         /**
          * Creates a new set of attachment information with the specified

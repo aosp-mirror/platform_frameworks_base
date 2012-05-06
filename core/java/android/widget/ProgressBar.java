@@ -211,6 +211,7 @@ public class ProgressBar extends View {
     private boolean mOnlyIndeterminate;
     private Transformation mTransformation;
     private AlphaAnimation mAnimation;
+    private boolean mHasAnimation;
     private Drawable mIndeterminateDrawable;
     private Drawable mProgressDrawable;
     private Drawable mCurrentDrawable;
@@ -670,18 +671,14 @@ public class ProgressBar extends View {
         if (mUiThreadId == Thread.currentThread().getId()) {
             doRefreshProgress(id, progress, fromUser, true);
         } else {
-            RefreshProgressRunnable r;
-            if (mRefreshProgressRunnable != null) {
-                // Use cached RefreshProgressRunnable if available
-                r = mRefreshProgressRunnable;
-            } else {
-                // Make a new one
-                r = new RefreshProgressRunnable();
+            if (mRefreshProgressRunnable == null) {
+                mRefreshProgressRunnable = new RefreshProgressRunnable();
             }
+
             final RefreshData rd = RefreshData.obtain(id, progress, fromUser);
             mRefreshData.add(rd);
             if (mAttached && !mRefreshIsPosted) {
-                post(r);
+                post(mRefreshProgressRunnable);
                 mRefreshIsPosted = true;
             }
         }
@@ -860,14 +857,26 @@ public class ProgressBar extends View {
 
         if (mIndeterminateDrawable instanceof Animatable) {
             mShouldStartAnimationDrawable = true;
-            mAnimation = null;
+            mHasAnimation = false;
         } else {
+            mHasAnimation = true;
+
             if (mInterpolator == null) {
                 mInterpolator = new LinearInterpolator();
             }
     
-            mTransformation = new Transformation();
-            mAnimation = new AlphaAnimation(0.0f, 1.0f);
+            if (mTransformation == null) {
+                mTransformation = new Transformation();
+            } else {
+                mTransformation.clear();
+            }
+            
+            if (mAnimation == null) {
+                mAnimation = new AlphaAnimation(0.0f, 1.0f);
+            } else {
+                mAnimation.reset();
+            }
+
             mAnimation.setRepeatMode(mBehavior);
             mAnimation.setRepeatCount(Animation.INFINITE);
             mAnimation.setDuration(mDuration);
@@ -881,8 +890,7 @@ public class ProgressBar extends View {
      * <p>Stop the indeterminate progress animation.</p>
      */
     void stopAnimation() {
-        mAnimation = null;
-        mTransformation = null;
+        mHasAnimation = false;
         if (mIndeterminateDrawable instanceof Animatable) {
             ((Animatable) mIndeterminateDrawable).stop();
             mShouldStartAnimationDrawable = false;
@@ -1027,7 +1035,7 @@ public class ProgressBar extends View {
             canvas.save();
             canvas.translate(mPaddingLeft, mPaddingTop);
             long time = getDrawingTime();
-            if (mAnimation != null) {
+            if (mHasAnimation) {
                 mAnimation.getTransformation(time, mTransformation);
                 float scale = mTransformation.getAlpha();
                 try {
