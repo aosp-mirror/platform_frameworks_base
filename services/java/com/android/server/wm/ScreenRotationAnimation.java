@@ -862,7 +862,6 @@ class ScreenRotationAnimation {
             } else {
                 mExitFrameFinalMatrix.setConcat(mExitTransformation.getMatrix(), mFrameInitialMatrix);
                 mExitingBlackFrame.setMatrix(mExitFrameFinalMatrix);
-                mExitingBlackFrame.setAlpha(mExitTransformation.getAlpha());
             }
         }
 
