@@ -97,8 +97,8 @@ public final class Message implements Parcelable {
     private static Message sPool;
     private static int sPoolSize = 0;
 
-    private static final int MAX_POOL_SIZE = 10;
-    
+    private static final int MAX_POOL_SIZE = 50;
+
     /**
      * Return a new Message instance from the global pool. Allows us to
      * avoid allocating new objects in many cases.
