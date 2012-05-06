@@ -42,6 +42,7 @@
     <TextView
         android:id="@+id/perm_name"
         android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="16sp"
         android:layout_marginLeft="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

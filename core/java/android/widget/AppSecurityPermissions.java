@@ -98,6 +98,20 @@ public class AppSecurityPermissions {
         MyPermissionGroupInfo(PermissionGroupInfo info) {
             super(info);
         }
+
+        public Drawable loadGroupIcon(PackageManager pm) {
+            if (icon != 0) {
+                return loadIcon(pm);
+            } else {
+                ApplicationInfo appInfo;
+                try {
+                    appInfo = pm.getApplicationInfo(packageName, 0);
+                    return appInfo.loadIcon(pm);
+                } catch (NameNotFoundException e) {
+                }
+            }
+            return null;
+        }
     }
 
     static class MyPermissionInfo extends PermissionInfo {
@@ -155,16 +169,7 @@ public class AppSecurityPermissions {
             PackageManager pm = getContext().getPackageManager();
             Drawable icon = null;
             if (first) {
-                if (grp.icon != 0) {
-                    icon = grp.loadIcon(pm);
-                } else {
-                    ApplicationInfo appInfo;
-                    try {
-                        appInfo = pm.getApplicationInfo(grp.packageName, 0);
-                        icon = appInfo.loadIcon(pm);
-                    } catch (NameNotFoundException e) {
-                    }
-                }
+                icon = grp.loadGroupIcon(pm);
             }
             CharSequence label = perm.mLabel;
             if (perm.mNew && newPermPrefix != null) {
@@ -191,10 +196,28 @@ public class AppSecurityPermissions {
                 if (mDialog != null) {
                     mDialog.dismiss();
                 }
+                PackageManager pm = getContext().getPackageManager();
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setTitle(mGroup.mLabel);
-                builder.setMessage(mPerm.loadDescription(getContext().getPackageManager()));
+                if (mPerm.descriptionRes != 0) {
+                    builder.setMessage(mPerm.loadDescription(pm));
+                } else {
+                    CharSequence appName;
+                    try {
+                        ApplicationInfo app = pm.getApplicationInfo(mPerm.packageName, 0);
+                        appName = app.loadLabel(pm);
+                    } catch (NameNotFoundException e) {
+                        appName = mPerm.packageName;
+                    }
+                    StringBuilder sbuilder = new StringBuilder(128);
+                    sbuilder.append(getContext().getString(
+                            R.string.perms_description_app, appName));
+                    sbuilder.append("\n\n");
+                    sbuilder.append(mPerm.name);
+                    builder.setMessage(sbuilder.toString());
+                }
                 builder.setCancelable(true);
+                builder.setIcon(mGroup.loadGroupIcon(pm));
                 mDialog = builder.show();
                 mDialog.setCanceledOnTouchOutside(true);
             }
@@ -611,9 +634,26 @@ public class AppSecurityPermissions {
         }
 
         for (MyPermissionGroupInfo pgrp : mPermGroups.values()) {
-            pgrp.mLabel = pgrp.loadLabel(mPm);
+            if (pgrp.labelRes != 0 || pgrp.nonLocalizedLabel != null) {
+                pgrp.mLabel = pgrp.loadLabel(mPm);
+            } else {
+                ApplicationInfo app;
+                try {
+                    app = mPm.getApplicationInfo(pgrp.packageName, 0);
+                    pgrp.mLabel = app.loadLabel(mPm);
+                } catch (NameNotFoundException e) {
+                    pgrp.mLabel = pgrp.loadLabel(mPm);
+                }
+            }
             mPermGroupsList.add(pgrp);
         }
         Collections.sort(mPermGroupsList, mPermGroupComparator);
+        if (false) {
+            for (MyPermissionGroupInfo grp : mPermGroupsList) {
+                Log.i("foo", "Group " + grp.name + " personal="
+                        + ((grp.flags&PermissionGroupInfo.FLAG_PERSONAL_INFO) != 0)
+                        + " priority=" + grp.priority);
+            }
+        }
     }
 }
