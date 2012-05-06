@@ -6433,12 +6433,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         switch (action) {
             case AccessibilityNodeInfo.ACTION_CLICK: {
                 if (isClickable()) {
-                    performClick();
+                    return performClick();
                 }
             } break;
             case AccessibilityNodeInfo.ACTION_LONG_CLICK: {
                 if (isLongClickable()) {
-                    performLongClick();
+                    return performLongClick();
                 }
             } break;
             case AccessibilityNodeInfo.ACTION_FOCUS: {
