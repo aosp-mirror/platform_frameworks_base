@@ -1242,7 +1242,7 @@ public class Activity extends ContextThemeWrapper
      * making sure nothing is lost if there are not enough resources to start
      * the new activity without first killing this one.  This is also a good
      * place to do things like stop animations and other things that consume a
-     * noticeable mount of CPU in order to make the switch to the next activity
+     * noticeable amount of CPU in order to make the switch to the next activity
      * as fast as possible, or to close resources that are exclusive access
      * such as the camera.
      * 
