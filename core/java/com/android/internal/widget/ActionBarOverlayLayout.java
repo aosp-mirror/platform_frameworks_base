@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -76,6 +77,26 @@ public class ActionBarOverlayLayout extends FrameLayout {
         }
     }
 
+    public void setShowingForActionMode(boolean showing) {
+        if (showing) {
+            // Here's a fun hack: if the status bar is currently being hidden,
+            // and the application has asked for stable content insets, then
+            // we will end up with the action mode action bar being shown
+            // without the status bar, but moved below where the status bar
+            // would be.  Not nice.  Trying to have this be positioned
+            // correctly is not easy (basically we need yet *another* content
+            // inset from the window manager to know where to put it), so
+            // instead we will just temporarily force the status bar to be shown.
+            if ((getWindowSystemUiVisibility() & (SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | SYSTEM_UI_FLAG_LAYOUT_STABLE))
+                    == (SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | SYSTEM_UI_FLAG_LAYOUT_STABLE)) {
+                setDisabledSystemUiVisibility(SYSTEM_UI_FLAG_FULLSCREEN);
+            }
+        } else {
+            setDisabledSystemUiVisibility(0);
+        }
+    }
+
     @Override
     public void onWindowSystemUiVisibilityChanged(int visible) {
         super.onWindowSystemUiVisibilityChanged(visible);
@@ -83,11 +104,13 @@ public class ActionBarOverlayLayout extends FrameLayout {
         final int diff = mLastSystemUiVisibility ^ visible;
         mLastSystemUiVisibility = visible;
         final boolean barVisible = (visible&SYSTEM_UI_FLAG_FULLSCREEN) == 0;
-        final boolean wasVisible = mActionBar != null ? mActionBar.isShowing() : true;
-        if (barVisible != wasVisible || (diff&SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0) {
+        final boolean wasVisible = mActionBar != null ? mActionBar.isSystemShowing() : true;
+        if (mActionBar != null) {
+            if (barVisible) mActionBar.showForSystem();
+            else mActionBar.hideForSystem();
+        }
+        if ((diff&SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0) {
             if (mActionBar != null) {
-                if (barVisible) mActionBar.show(true, true);
-                else mActionBar.hide(true);
                 requestFitSystemWindows();
             }
         }

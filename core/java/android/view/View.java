@@ -15212,6 +15212,18 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         }
     }
 
+    /** @hide */
+    public void setDisabledSystemUiVisibility(int flags) {
+        if (mAttachInfo != null) {
+            if (mAttachInfo.mDisabledSystemUiVisibility != flags) {
+                mAttachInfo.mDisabledSystemUiVisibility = flags;
+                if (mParent != null) {
+                    mParent.recomputeViewAttributes(this);
+                }
+            }
+        }
+    }
+
     /**
      * Creates an image that the system displays during the drag and drop
      * operation. This is called a &quot;drag shadow&quot;. The default implementation
@@ -16871,6 +16883,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
          * Bitwise-or of all of the values that views have passed to setSystemUiVisibility().
          */
         int mSystemUiVisibility;
+
+        /**
+         * Hack to force certain system UI visibility flags to be cleared.
+         */
+        int mDisabledSystemUiVisibility;
 
         /**
          * True if a view in this hierarchy has an OnSystemUiVisibilityChangeListener

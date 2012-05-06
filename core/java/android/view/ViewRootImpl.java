@@ -1025,6 +1025,7 @@ public final class ViewRootImpl implements ViewParent,
             attachInfo.mSystemUiVisibility = 0;
             attachInfo.mHasSystemUiListeners = false;
             mView.dispatchCollectViewAttributes(attachInfo, 0);
+            attachInfo.mSystemUiVisibility &= ~attachInfo.mDisabledSystemUiVisibility;
             if (attachInfo.mKeepScreenOn != oldScreenOn
                     || attachInfo.mSystemUiVisibility != oldVis
                     || attachInfo.mHasSystemUiListeners != oldHasSystemUiListeners) {
