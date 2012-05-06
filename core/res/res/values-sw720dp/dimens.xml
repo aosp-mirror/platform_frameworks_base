@@ -34,6 +34,10 @@
          (the screen is in landscape). This may be either a fraction or a dimension.-->
     <item type="dimen" name="dialog_fixed_height_minor">90%</item>
 
+    <!-- The width that is used when creating thumbnails of applications. -->
+    <dimen name="thumbnail_width">230dp</dimen>
+    <!-- The height that is used when creating thumbnails of applications. -->
+    <dimen name="thumbnail_height">135dp</dimen>
 </resources>
 
 
