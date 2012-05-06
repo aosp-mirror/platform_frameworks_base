@@ -116,6 +116,10 @@ public class SyncOperation implements Comparable {
         return extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false);
     }
 
+    public boolean isExpedited() {
+        return extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false);
+    }
+
     public boolean ignoreBackoff() {
         return extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, false);
     }

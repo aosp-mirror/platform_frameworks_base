@@ -221,6 +221,7 @@ public class SyncStorageEngine extends Handler {
         long upstreamActivity;
         long downstreamActivity;
         String mesg;
+        boolean initialization;
     }
 
     public static class DayStats {
@@ -1012,7 +1013,7 @@ public class SyncStorageEngine extends Handler {
      * Note that sync has started for the given account and authority.
      */
     public long insertStartSyncEvent(Account accountName, int userId, String authorityName,
-            long now, int source) {
+                                     long now, int source, boolean initialization) {
         long id;
         synchronized (mAuthorities) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -1025,6 +1026,7 @@ public class SyncStorageEngine extends Handler {
                 return -1;
             }
             SyncHistoryItem item = new SyncHistoryItem();
+            item.initialization = initialization;
             item.authorityId = authority.ident;
             item.historyId = mNextHistoryId++;
             if (mNextHistoryId < 0) mNextHistoryId = 0;
