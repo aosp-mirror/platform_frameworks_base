@@ -42,8 +42,17 @@ public class BlackFrame {
             this.layer = layer;
             int w = r-l;
             int h = b-t;
-            surface = new Surface(session, 0, "BlackSurface",
-                    -1, w, h, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM);
+            if (WindowManagerService.DEBUG_SURFACE_TRACE) {
+                surface = new WindowStateAnimator.SurfaceTrace(session, 0, "BlackSurface("
+                        + l + ", " + t + ")",
+                        -1, w, h, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM);
+            } else {
+                surface = new Surface(session, 0, "BlackSurface",
+                        -1, w, h, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM);
+            }
+            surface.setAlpha(1);
+            surface.setLayer(layer);
+            surface.show();
             if (WindowManagerService.SHOW_TRANSACTIONS ||
                     WindowManagerService.SHOW_SURFACE_ALLOC) Slog.i(WindowManagerService.TAG,
                             "  BLACK " + surface + ": CREATE layer=" + layer);
@@ -58,8 +67,6 @@ public class BlackFrame {
             surface.setMatrix(
                     mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
                     mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
-            surface.setAlpha(1.0f);
-            surface.setLayer(layer);
             if (false) {
                 Slog.i(WindowManagerService.TAG, "Black Surface @ (" + left + "," + top + "): ("
                         + mTmpFloats[Matrix.MTRANS_X] + ","
@@ -155,14 +162,6 @@ public class BlackFrame {
         for (int i=0; i<mBlackSurfaces.length; i++) {
             if (mBlackSurfaces[i] != null) {
                 mBlackSurfaces[i].setMatrix(matrix);
-            }
-        }
-    }
-
-    public void setAlpha(float alpha) {
-        for (int i=0; i<mBlackSurfaces.length; i++) {
-            if (mBlackSurfaces[i] != null) {
-                mBlackSurfaces[i].surface.setAlpha(alpha);
             }
         }
     }
