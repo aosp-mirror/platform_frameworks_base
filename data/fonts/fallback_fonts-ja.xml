@@ -65,7 +65,7 @@
     </family>
     <family>
         <fileset>
-            <file>Lohit-Devanagari.ttf</file>
+            <file>DroidSansDevanagari-Regular.ttf</file>
         </fileset>
     </family>
     <family>
@@ -75,7 +75,8 @@
     </family>
     <family>
         <fileset>
-            <file>Lohit-Tamil.ttf</file>
+            <file>DroidSansTamil-Regular.ttf</file>
+            <file>DroidSansTamil-Bold.ttf</file>
         </fileset>
     </family>
     <family>
