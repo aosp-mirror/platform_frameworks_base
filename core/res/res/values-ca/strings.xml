@@ -175,16 +175,28 @@
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Supervisa la teva ubicació física."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Comunicació de xarxa"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Accedeix a diverses funcions de xarxa."</string>
-    <string name="permgrouplab_shortRangeNetwork" msgid="4504840216096355984">"Bluetooth i NFC"</string>
-    <string name="permgroupdesc_shortRangeNetwork" msgid="8821013030346680806">"Accés a xarxes i dispositius Bluetooth o NFC."</string>
+    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
+    <skip />
+    <!-- no translation found for permgrouplab_shortrangeNetwork (130808676377486118) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
+    <skip />
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Configuració d\'àudio"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Canviar la configuració de l\'àudio."</string>
     <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Afectar la bateria"</string>
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Fer servir funcions que poden consumir bateria ràpidament."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendari"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Accés directe a calendaris i a esdeveniments."</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Diccionari de l\'usuari"</string>
-    <string name="permgroupdesc_dictionary" msgid="40926483968949978">"Accés directe al diccionari de l\'usuari."</string>
+    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
+    <skip />
+    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
+    <skip />
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Marcadors i historial"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Accés directe a l\'historial de marcadors i de navegació."</string>
     <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Alarma"</string>
@@ -192,7 +204,7 @@
     <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Bústia de veu"</string>
     <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Accés directe a la bústia de veu."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Micròfon"</string>
-    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Accés directe al micròfon per enregistrar l\'àudio."</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Accés directe al micròfon per enregistrar àudio."</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Càmera"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"Accés directe a la càmera per a la captura d\'imatges o de vídeos."</string>
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Informació de les aplicacions"</string>
@@ -557,7 +569,8 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Permet que l\'aplicació llegeixi el contingut de l\'emmagatzematge USB, incloses les fotos i els fitxers multimèdia."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Permet que l\'aplicació llegeixi el contingut de la targeta SD, incloses les fotos i els fitxers multimèdia."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modificació o supressió del contingut de l\'emmagatzematge USB"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"modificació o supressió del contingut de la targeta SD"</string>
+    <!-- no translation found for permlab_sdcardWrite (8805693630050458763) -->
+    <skip />
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permet que l\'aplicació escrigui a l\'emmagatzematge USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Permet a l\'aplicació escriure a la targeta SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"Canvia/esborra emmagatz. intern"</string>
@@ -1076,11 +1089,10 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Establiment de data"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Defineix"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Fet"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"Predeterminat"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NOU: "</font></string>
+    <!-- no translation found for perms_description_app (5139836143293299417) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"No cal cap permís"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Amaga"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Mostra\'ls tots"</b></string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Emmagatzematge massiu USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB connectat"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"T\'has connectat a l\'equip mitjançant USB. Toca el botó següent si vols copiar els fitxers entre l\'equip i l\'emmagatzematge USB d\'Android."</string>
@@ -1309,4 +1321,8 @@
     <string name="sending" msgid="3245653681008218030">"S\'està enviant…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Vols iniciar el navegador?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Vols acceptar la trucada?"</string>
+    <!-- no translation found for activity_resolver_use_always (4167356512478150080) -->
+    <skip />
+    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
+    <skip />
 </resources>

@@ -168,76 +168,55 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Omat viestit"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Tekstiviestien, sähköpostin ja muiden viestien lukeminen ja kirjoittaminen."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Henkilötietosi"</string>
-    <!-- no translation found for permgroupdesc_personalInfo (8426453129788861338) -->
-    <skip />
-    <!-- no translation found for permgrouplab_socialInfo (5799096623412043791) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_socialInfo (7129842457611643493) -->
-    <skip />
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Yhteystietokorttiisi tallennettujen tietojesi käyttöoikeus."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Sosiaaliset tietosi"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Kontaktiesi ja internet-kontaktiesi tietojen käyttöoikeus."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Oma sijainti"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Tarkkaile fyysistä sijaintiasi."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Verkkoviestintä"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Käyttää useita ​​verkon ominaisuuksia."</string>
-    <!-- no translation found for permgrouplab_shortRangeNetwork (4504840216096355984) -->
+    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
     <skip />
-    <!-- no translation found for permgroupdesc_shortRangeNetwork (8821013030346680806) -->
+    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
     <skip />
-    <!-- no translation found for permgrouplab_audioSettings (8329261670151871235) -->
+    <!-- no translation found for permgrouplab_shortrangeNetwork (130808676377486118) -->
     <skip />
-    <!-- no translation found for permgroupdesc_audioSettings (2641515403347568130) -->
+    <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
     <skip />
-    <!-- no translation found for permgrouplab_affectsBattery (6209246653424798033) -->
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Ääniasetukset"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Muuta ääniasetuksia."</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Vaikuttaa akun kestoon"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Käytä ominaisuuksia, jotka voivat tyhjentää akun nopeasti."</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalenteri"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Kalenterin ja tapahtumien käyttöoikeus."</string>
+    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
     <skip />
-    <!-- no translation found for permgroupdesc_affectsBattery (6441275320638916947) -->
+    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
     <skip />
-    <!-- no translation found for permgrouplab_calendar (5863508437783683902) -->
+    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
     <skip />
-    <!-- no translation found for permgroupdesc_calendar (5777534316982184416) -->
+    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
     <skip />
-    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (40926483968949978) -->
-    <skip />
-    <!-- no translation found for permgrouplab_bookmarks (1949519673103968229) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_bookmarks (4169771606257963028) -->
-    <skip />
-    <!-- no translation found for permgrouplab_deviceAlarms (6117704629728824101) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_deviceAlarms (4769356362251641175) -->
-    <skip />
-    <!-- no translation found for permgrouplab_voicemail (4162237145027592133) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_voicemail (2498403969862951393) -->
-    <skip />
-    <!-- no translation found for permgrouplab_microphone (171539900250043464) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_microphone (7106618286905738408) -->
-    <skip />
-    <!-- no translation found for permgrouplab_camera (4820372495894586615) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_camera (2933667372289567714) -->
-    <skip />
-    <!-- no translation found for permgrouplab_appInfo (8028789762634147725) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_appInfo (3950378538049625907) -->
-    <skip />
-    <!-- no translation found for permgrouplab_wallpaper (3850280158041175998) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_wallpaper (5630417854750540154) -->
-    <skip />
-    <!-- no translation found for permgrouplab_systemClock (406535759236612992) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_systemClock (3944359833624094992) -->
-    <skip />
-    <!-- no translation found for permgrouplab_statusBar (2095862568113945398) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_statusBar (6242593432226807171) -->
-    <skip />
-    <!-- no translation found for permgrouplab_syncSettings (3341990986147826541) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_syncSettings (7603195265129031797) -->
-    <skip />
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Kirjanmerkit ja historia"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Kirjanmerkkien ja selaimen historian käyttöoikeus."</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Herätys"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Aseta herätysaika."</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Vastaaja"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Vastaajan käyttöoikeus."</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoni"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Äänen tallentamiseen käytettävän mikrofonin käyttöoikeus."</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Kuvien tai videon tallentamiseen käytettävän kameran käyttöoikeus."</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Sovelluksiesi tiedot"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Mahdollisuus vaikuttaa muiden laitteen sovelluksien käytökseen."</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Taustakuva"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Muuta laitteen taustakuvan asetuksia."</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Kello"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Muuta laitteen aikaa tai aikavyöhykettä."</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Tilapalkki"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Muuta laitteen tilarivin asetuksia."</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Synkronointiasetukset"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Synkronointiasetuksien käyttöoikeus."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Omat tilit"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Käytä saatavilla olevia tilejä."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Laitteiston hallinta"</string>
@@ -248,10 +227,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Alemman tason käyttöoikeus ja järjestelmän hallintaoikeus."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Kehittäjätyökalut"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Vain sovelluskehittäjien tarvitsemat ominaisuudet."</string>
-    <!-- no translation found for permgrouplab_display (4279909676036402636) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_display (6051002031933013714) -->
-    <skip />
+    <string name="permgrouplab_display" msgid="4279909676036402636">"Muiden sovelluksien käyttöliittymät"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"Vaikuta muiden sovelluksien käyttöliittymään."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Tallennustila"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Käytä USB-tallennustilaa."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Käytä SD-korttia."</string>
@@ -592,7 +569,8 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Lue USB-muistin sisältöä (kuvia ja mediaa)."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Antaa sovelluksen lukea SD-kortin sisältöä. Kortti voi sisältää valokuvia ja muuta mediaa."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"muokkaa tai poista USB:n sis."</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"muokkaa tai poista SD-kortin sisältöä"</string>
+    <!-- no translation found for permlab_sdcardWrite (8805693630050458763) -->
+    <skip />
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Antaa sovelluksen kirjoittaa USB-tallennustilaan."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Antaa sovelluksen kirjoittaa SD-kortille."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"muokkaa/poista sisäisen säilytystilan sisältöä"</string>
@@ -770,8 +748,7 @@
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Puhelimessa ei ole SIM-korttia."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Aseta SIM-kortti."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-korttia ei löydy tai ei voi lukea. Kytke SIM-kortti."</string>
-    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (5096149665138916184) -->
-    <skip />
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"SIM-kortti ei kelpaa."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM-kortti on poistettu pysyvästi käytöstä."\n" Ota yhteyttä operaattoriisi ja hanki uusi SIM-kortti."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Edellinen kappale -painike"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Seuraava kappale -painike"</string>
@@ -1112,11 +1089,10 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Aseta päivämäärä"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Aseta"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Valmis"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"Oletus"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"UUTTA: "</font></string>
+    <!-- no translation found for perms_description_app (5139836143293299417) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Lupia ei tarvita"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Piilota"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Näytä kaikki"</b></string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB-massamuisti"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB yhdistetty"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Olet yhdistänyt laitteesi tietokoneeseen USB-kaapelin kautta. Kosketa alla olevaa painiketta, jos haluat kopioida tiedostoja tietokoneesi ja Androidin USB-tallennustilan välillä."</string>
@@ -1345,4 +1321,8 @@
     <string name="sending" msgid="3245653681008218030">"Lähetetään…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Käynnistetäänkö selain?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Vastataanko puheluun?"</string>
+    <!-- no translation found for activity_resolver_use_always (4167356512478150080) -->
+    <skip />
+    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
+    <skip />
 </resources>

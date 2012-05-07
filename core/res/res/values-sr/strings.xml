@@ -168,76 +168,55 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Поруке"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Читање и писање SMS порука, порука е-поште и осталих порука."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Личне информације"</string>
-    <!-- no translation found for permgroupdesc_personalInfo (8426453129788861338) -->
-    <skip />
-    <!-- no translation found for permgrouplab_socialInfo (5799096623412043791) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_socialInfo (7129842457611643493) -->
-    <skip />
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Директан приступ информацијама о вама, ускладиштеним на контакт картици."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Информације са друштвених мрежа"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Директан приступ информацијама о контактима и друштвеним везама."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Локација"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Надгледајте своју физичку локацију."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Комуникација преко мреже"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Приступајте разним функцијама мреже."</string>
-    <!-- no translation found for permgrouplab_shortRangeNetwork (4504840216096355984) -->
+    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
     <skip />
-    <!-- no translation found for permgroupdesc_shortRangeNetwork (8821013030346680806) -->
+    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
     <skip />
-    <!-- no translation found for permgrouplab_audioSettings (8329261670151871235) -->
+    <!-- no translation found for permgrouplab_shortrangeNetwork (130808676377486118) -->
     <skip />
-    <!-- no translation found for permgroupdesc_audioSettings (2641515403347568130) -->
+    <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
     <skip />
-    <!-- no translation found for permgrouplab_affectsBattery (6209246653424798033) -->
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Аудио подешавања"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Промена аудио подешавања."</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Утицај на батерију"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Коришћење функција које могу брзо да истроше батерију."</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календар"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Директан приступ календару и догађајима."</string>
+    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
     <skip />
-    <!-- no translation found for permgroupdesc_affectsBattery (6441275320638916947) -->
+    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
     <skip />
-    <!-- no translation found for permgrouplab_calendar (5863508437783683902) -->
+    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
     <skip />
-    <!-- no translation found for permgroupdesc_calendar (5777534316982184416) -->
+    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
     <skip />
-    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (40926483968949978) -->
-    <skip />
-    <!-- no translation found for permgrouplab_bookmarks (1949519673103968229) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_bookmarks (4169771606257963028) -->
-    <skip />
-    <!-- no translation found for permgrouplab_deviceAlarms (6117704629728824101) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_deviceAlarms (4769356362251641175) -->
-    <skip />
-    <!-- no translation found for permgrouplab_voicemail (4162237145027592133) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_voicemail (2498403969862951393) -->
-    <skip />
-    <!-- no translation found for permgrouplab_microphone (171539900250043464) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_microphone (7106618286905738408) -->
-    <skip />
-    <!-- no translation found for permgrouplab_camera (4820372495894586615) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_camera (2933667372289567714) -->
-    <skip />
-    <!-- no translation found for permgrouplab_appInfo (8028789762634147725) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_appInfo (3950378538049625907) -->
-    <skip />
-    <!-- no translation found for permgrouplab_wallpaper (3850280158041175998) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_wallpaper (5630417854750540154) -->
-    <skip />
-    <!-- no translation found for permgrouplab_systemClock (406535759236612992) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_systemClock (3944359833624094992) -->
-    <skip />
-    <!-- no translation found for permgrouplab_statusBar (2095862568113945398) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_statusBar (6242593432226807171) -->
-    <skip />
-    <!-- no translation found for permgrouplab_syncSettings (3341990986147826541) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_syncSettings (7603195265129031797) -->
-    <skip />
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Обележивачи и историја"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Директан приступ обележивачима и историји прегледача."</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Аларм"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Подешавање будилника."</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Говорна пошта"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Директан приступ говорној пошти."</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Директан приступ микрофону за снимање звука."</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Директан приступ камери за снимање слика или видео снимака."</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Информације о апликацијама"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Способност да се утиче на понашање других апликација на уређају."</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Позадина"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Промена подешавања позадине уређаја."</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Сат"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Промена времена или временске зоне уређаја."</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Статусна трака"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Промена подешавања статусне траке уређаја."</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Подешавања синхронизације"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Приступ подешавањима синхронизације."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Налози"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Приступ доступним налозима."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Контроле хардвера"</string>
@@ -248,10 +227,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Нижи нивои приступа и контроле система."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Алатке за програмирање"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Функције потребне само програмерима апликација."</string>
-    <!-- no translation found for permgrouplab_display (4279909676036402636) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_display (6051002031933013714) -->
-    <skip />
+    <string name="permgrouplab_display" msgid="4279909676036402636">"Кориснички интерфејс других апликација"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"Утицај на кориснички интерфејс других апликација."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Складиште"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Приступите USB меморији."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Приступ SD картици."</string>
@@ -589,10 +566,11 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Дозвољава апликацији да уписује нове речи у кориснички речник."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"читање садржаја USB меморије"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"читање садржаја SD картице"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Дозвољава апликацији читање садржаја USB меморије, што могу да буду слике и медији."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Дозвољава апликацији да чита садржај SD картице, који може да обухвата слике и медијуме."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Дозвољава апликацији читање садржаја USB меморије, што могу да буду слике и медиа датотеке."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Дозвољава апликацији да чита садржај SD картице, који може да обухвата слике и медиа датотеке."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"измена или брисање садржаја USB меморије"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"измена или брисање садржаја SD картице"</string>
+    <!-- no translation found for permlab_sdcardWrite (8805693630050458763) -->
+    <skip />
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Дозвољава апликацији да уписује податке на USB меморију."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Дозвољава апликацији да уписује податке на SD картицу."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"измена/брисање интерне меморије медија"</string>
@@ -770,8 +748,7 @@
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"У телефон није уметнута SIM картица."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Уметните SIM картицу."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM недостаје или не може да се прочита. Уметните SIM картицу."</string>
-    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (5096149665138916184) -->
-    <skip />
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"SIM картица је неупотребљива."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM картица је трајно онемогућена."\n" Обратите се добављачу услуге бежичне мреже да бисте добили другу SIM картицу."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Дугме за претходну песму"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Дугме за следећу песму"</string>
@@ -1112,11 +1089,10 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Подешавање датума"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Подеси"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Готово"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"Подразумевано"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"НОВО: "</font></string>
+    <!-- no translation found for perms_description_app (5139836143293299417) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Није потребна ниједна дозвола"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Сакриј"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Прикажи све"</b></string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB великог капацитета"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB је повезан"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Повезали сте рачунар преко USB-а. Додирните дугме испод ако желите да копирате датотеке са рачунара у Android USB меморију и обрнуто."</string>
@@ -1345,4 +1321,8 @@
     <string name="sending" msgid="3245653681008218030">"Слање..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Желите ли да покренете прегледач?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Желите ли да прихватите позив?"</string>
+    <!-- no translation found for activity_resolver_use_always (4167356512478150080) -->
+    <skip />
+    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
+    <skip />
 </resources>

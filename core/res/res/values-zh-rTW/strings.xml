@@ -168,76 +168,55 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"您的簡訊"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"讀取及寫入您的簡訊、電子郵件和其他訊息。"</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"您的個人資訊"</string>
-    <!-- no translation found for permgroupdesc_personalInfo (8426453129788861338) -->
-    <skip />
-    <!-- no translation found for permgrouplab_socialInfo (5799096623412043791) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_socialInfo (7129842457611643493) -->
-    <skip />
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"直接存取您儲存在聯絡人卡片中的個人資訊。"</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"您的社交資訊"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"直接存取您的聯絡人資訊與社交網站資訊。"</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"您的位置"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"監控您的實際位置。"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"網路通訊"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"存取各種網路功能。"</string>
-    <!-- no translation found for permgrouplab_shortRangeNetwork (4504840216096355984) -->
+    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
     <skip />
-    <!-- no translation found for permgroupdesc_shortRangeNetwork (8821013030346680806) -->
+    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
     <skip />
-    <!-- no translation found for permgrouplab_audioSettings (8329261670151871235) -->
+    <!-- no translation found for permgrouplab_shortrangeNetwork (130808676377486118) -->
     <skip />
-    <!-- no translation found for permgroupdesc_audioSettings (2641515403347568130) -->
+    <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
     <skip />
-    <!-- no translation found for permgrouplab_affectsBattery (6209246653424798033) -->
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"音效設定"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"變更音訊設定。"</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"影響電力"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"使用可能大量耗電的功能。"</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"日曆"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"直接存取日曆和活動。"</string>
+    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
     <skip />
-    <!-- no translation found for permgroupdesc_affectsBattery (6441275320638916947) -->
+    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
     <skip />
-    <!-- no translation found for permgrouplab_calendar (5863508437783683902) -->
+    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
     <skip />
-    <!-- no translation found for permgroupdesc_calendar (5777534316982184416) -->
+    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
     <skip />
-    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (40926483968949978) -->
-    <skip />
-    <!-- no translation found for permgrouplab_bookmarks (1949519673103968229) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_bookmarks (4169771606257963028) -->
-    <skip />
-    <!-- no translation found for permgrouplab_deviceAlarms (6117704629728824101) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_deviceAlarms (4769356362251641175) -->
-    <skip />
-    <!-- no translation found for permgrouplab_voicemail (4162237145027592133) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_voicemail (2498403969862951393) -->
-    <skip />
-    <!-- no translation found for permgrouplab_microphone (171539900250043464) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_microphone (7106618286905738408) -->
-    <skip />
-    <!-- no translation found for permgrouplab_camera (4820372495894586615) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_camera (2933667372289567714) -->
-    <skip />
-    <!-- no translation found for permgrouplab_appInfo (8028789762634147725) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_appInfo (3950378538049625907) -->
-    <skip />
-    <!-- no translation found for permgrouplab_wallpaper (3850280158041175998) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_wallpaper (5630417854750540154) -->
-    <skip />
-    <!-- no translation found for permgrouplab_systemClock (406535759236612992) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_systemClock (3944359833624094992) -->
-    <skip />
-    <!-- no translation found for permgrouplab_statusBar (2095862568113945398) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_statusBar (6242593432226807171) -->
-    <skip />
-    <!-- no translation found for permgrouplab_syncSettings (3341990986147826541) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_syncSettings (7603195265129031797) -->
-    <skip />
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"書籤與紀錄"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"直接存取書籤和瀏覽器紀錄。"</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"鬧鐘"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"設定鬧鐘。"</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"語音信箱"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"直接存取語音信箱。"</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"麥克風"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"直接使用麥克風錄音。"</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"相機"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"直接使用相機拍照或錄影。"</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"您的應用程式資訊"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"影響裝置上其他應用程式的行為。"</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"桌布"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"變更裝置桌布設定。"</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"時鐘"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"變更裝置時間或時區。"</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"狀態列"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"變更裝置狀態列設定。"</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"同步處理設定"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"存取同步處理設定。"</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"您的帳戶"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"存取可用帳戶。"</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"硬體控制"</string>
@@ -248,10 +227,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"系統低階存取與控制。"</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"開發工具"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"只有應用程式開發人員需要使用的功能。"</string>
-    <!-- no translation found for permgrouplab_display (4279909676036402636) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_display (6051002031933013714) -->
-    <skip />
+    <string name="permgrouplab_display" msgid="4279909676036402636">"其他應用程式使用者介面"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"影響其他應用程式的使用者介面。"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"儲存"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"存取 USB 儲存裝置。"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"存取 SD 卡。"</string>
@@ -592,7 +569,8 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"允許應用程式讀取 USB 儲存裝置的內容 (可能含有相片和媒體)。"</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"允許應用程式讀取 SD 卡的內容 (可能含有相片和媒體)。"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"修改或刪除 USB 儲存裝置的內容"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"修改或刪除 SD 卡的內容"</string>
+    <!-- no translation found for permlab_sdcardWrite (8805693630050458763) -->
+    <skip />
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"允許應用程式寫入 USB 儲存裝置。"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"允許應用程式寫入 SD 卡。"</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"修改/刪除內部媒體儲存裝置內容"</string>
@@ -770,8 +748,7 @@
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"手機未插入 SIM 卡。"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"插入 SIM 卡。"</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"找不到或無法讀取 SIM 卡。請插入 SIM 卡。"</string>
-    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (5096149665138916184) -->
-    <skip />
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"SIM 卡無法使用。"</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"您的 SIM 卡已遭永久停用。"\n"請與您的無線網路服務供應商聯絡，以取得其他 SIM 卡。"</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"[上一首曲目] 按鈕"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"[下一首曲目] 按鈕"</string>
@@ -1112,11 +1089,10 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"日期設定"</string>
     <string name="date_time_set" msgid="5777075614321087758">"設定"</string>
     <string name="date_time_done" msgid="2507683751759308828">"完成"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"預設值"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"新增："</font></string>
+    <!-- no translation found for perms_description_app (5139836143293299417) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"無須許可"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>" 隱藏"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"顯示全部"</b></string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB 大量儲存裝置"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB 已連接"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"您已透過 USB 與電腦建立連線。如要在電腦和 Android 的 USB 儲存裝置之間複製檔案，請輕觸下方按鈕。"</string>
@@ -1345,4 +1321,8 @@
     <string name="sending" msgid="3245653681008218030">"傳送中..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"啟動「瀏覽器」嗎？"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"接聽電話嗎？"</string>
+    <!-- no translation found for activity_resolver_use_always (4167356512478150080) -->
+    <skip />
+    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
+    <skip />
 </resources>
