@@ -623,6 +623,13 @@ class ServerThread extends Thread {
             } catch (Throwable e) {
                 reportWtf("starting CommonTimeManagementService service", e);
             }
+
+            try {
+                Slog.i(TAG, "CertBlacklister");
+                CertBlacklister blacklister = new CertBlacklister(context);
+            } catch (Throwable e) {
+                reportWtf("starting CertBlacklister", e);
+            }
             
             if (context.getResources().getBoolean(
                     com.android.internal.R.bool.config_enableDreams)) {
