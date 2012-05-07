@@ -34,8 +34,9 @@ namespace android {
 #define TYPE_FACE_HEBREW_REGULAR "/system/fonts/DroidSansHebrew-Regular.ttf"
 #define TYPE_FACE_HEBREW_BOLD "/system/fonts/DroidSansHebrew-Bold.ttf"
 #define TYPEFACE_BENGALI "/system/fonts/Lohit-Bengali.ttf"
-#define TYPEFACE_DEVANAGARI "/system/fonts/Lohit-Devanagari.ttf"
-#define TYPEFACE_TAMIL "/system/fonts/Lohit-Tamil.ttf"
+#define TYPEFACE_DEVANAGARI_REGULAR "/system/fonts/DroidSansDevanagari-Regular.ttf"
+#define TYPEFACE_TAMIL_REGULAR "/system/fonts/DroidSansTamil-Regular.ttf"
+#define TYPEFACE_TAMIL_BOLD "/system/fonts/DroidSansTamil-Bold.ttf"
 #define TYPEFACE_THAI "/system/fonts/DroidSansThai.ttf"
 
 ANDROID_SINGLETON_STATIC_INSTANCE(TextLayoutEngine);
@@ -337,8 +338,9 @@ TextLayoutShaper::TextLayoutShaper() : mShaperItemGlyphArraySize(0) {
     mHebrewBoldTypeface = NULL;
     mBengaliTypeface = NULL;
     mThaiTypeface = NULL;
-    mDevanagariTypeface = NULL;
-    mTamilTypeface = NULL;
+    mDevanagariRegularTypeface = NULL;
+    mTamilRegularTypeface = NULL;
+    mTamilBoldTypeface = NULL;
 
     mFontRec.klass = &harfbuzzSkiaClass;
     mFontRec.userData = 0;
@@ -364,8 +366,9 @@ TextLayoutShaper::~TextLayoutShaper() {
     SkSafeUnref(mHebrewBoldTypeface);
     SkSafeUnref(mBengaliTypeface);
     SkSafeUnref(mThaiTypeface);
-    SkSafeUnref(mDevanagariTypeface);
-    SkSafeUnref(mTamilTypeface);
+    SkSafeUnref(mDevanagariRegularTypeface);
+    SkSafeUnref(mTamilRegularTypeface);
+    SkSafeUnref(mTamilBoldTypeface);
     deleteShaperItemGlyphArrays();
 }
 
@@ -801,17 +804,38 @@ SkTypeface* TextLayoutShaper::typefaceForUnichar(const SkPaint* paint, SkTypefac
         break;
 
     case HB_Script_Devanagari:
-        typeface = getCachedTypeface(&mDevanagariTypeface, TYPEFACE_DEVANAGARI);
+       typeface = getCachedTypeface(&mDevanagariRegularTypeface, TYPEFACE_DEVANAGARI_REGULAR);
 #if DEBUG_GLYPHS
-        ALOGD("Using Devanagari Typeface");
+       ALOGD("Using Devanagari Regular Typeface");
 #endif
         break;
 
     case HB_Script_Tamil:
-        typeface = getCachedTypeface(&mTamilTypeface, TYPEFACE_TAMIL);
+        if (typeface) {
+            switch (typeface->style()) {
+            case SkTypeface::kBold:
+            case SkTypeface::kBoldItalic:
+                typeface = getCachedTypeface(&mTamilBoldTypeface, TYPEFACE_TAMIL_BOLD);
 #if DEBUG_GLYPHS
-        ALOGD("Using Tamil Typeface");
+                ALOGD("Using Tamil Bold Typeface");
 #endif
+                break;
+
+            case SkTypeface::kNormal:
+            case SkTypeface::kItalic:
+            default:
+                typeface = getCachedTypeface(&mTamilRegularTypeface, TYPEFACE_TAMIL_REGULAR);
+#if DEBUG_GLYPHS
+                ALOGD("Using Tamil Regular Typeface");
+#endif
+                break;
+            }
+        } else {
+            typeface = getCachedTypeface(&mTamilRegularTypeface, TYPEFACE_TAMIL_REGULAR);
+#if DEBUG_GLYPHS
+            ALOGD("Using Tamil Regular Typeface");
+#endif
+        }
         break;
 
     default:
