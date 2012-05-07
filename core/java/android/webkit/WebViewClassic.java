@@ -149,24 +149,6 @@ import java.util.regex.Pattern;
 @SuppressWarnings("deprecation")
 public final class WebViewClassic implements WebViewProvider, WebViewProvider.ScrollDelegate,
         WebViewProvider.ViewDelegate {
-    private class InnerGlobalLayoutListener implements ViewTreeObserver.OnGlobalLayoutListener {
-        @Override
-        public void onGlobalLayout() {
-            if (mWebView.isShown()) {
-                setInvScreenRect();
-            }
-        }
-    }
-
-    private class InnerScrollChangedListener implements ViewTreeObserver.OnScrollChangedListener {
-        @Override
-        public void onScrollChanged() {
-            if (mWebView.isShown()) {
-                setInvScreenRect();
-            }
-        }
-    }
-
     /**
      * InputConnection used for ContentEditable. This captures changes
      * to the text and sends them either as key strokes or text changes.
@@ -617,12 +599,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
     }
 
-    // The listener to capture global layout change event.
-    private InnerGlobalLayoutListener mGlobalLayoutListener = null;
-
-    // The listener to capture scroll event.
-    private InnerScrollChangedListener mScrollChangedListener = null;
-
     // if AUTO_REDRAW_HACK is true, then the CALL key will toggle redrawing
     // the screen all-the-time. Good for profiling our drawing code
     static private final boolean AUTO_REDRAW_HACK = false;
@@ -647,7 +623,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private final Rect mInvScreenRect = new Rect();
     private final Rect mScreenRect = new Rect();
     private final RectF mVisibleContentRect = new RectF();
-    private boolean mGLViewportEmpty = false;
+    private boolean mIsWebViewVisible = true;
     WebViewInputConnection mInputConnection = null;
     private int mFieldPointer;
     private PastePopupWindow mPasteWindow;
@@ -3050,21 +3026,14 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         r.bottom = viewToContentY(r.bottom);
     }
 
-    private Rect mContentVisibleRect = new Rect();
+    private final Rect mTempContentVisibleRect = new Rect();
     // Sets r to be our visible rectangle in content coordinates. We use this
     // method on the native side to compute the position of the fixed layers.
     // Uses floating coordinates (necessary to correctly place elements when
     // the scale factor is not 1)
     private void calcOurContentVisibleRectF(RectF r) {
-        calcOurVisibleRect(mContentVisibleRect);
-        r.left = viewToContentXf(mContentVisibleRect.left) / mWebView.getScaleX();
-        // viewToContentY will remove the total height of the title bar.  Add
-        // the visible height back in to account for the fact that if the title
-        // bar is partially visible, the part of the visible rect which is
-        // displaying our content is displaced by that amount.
-        r.top = viewToContentYf(mContentVisibleRect.top + getVisibleTitleHeightImpl()) / mWebView.getScaleY();
-        r.right = viewToContentXf(mContentVisibleRect.right) / mWebView.getScaleX();
-        r.bottom = viewToContentYf(mContentVisibleRect.bottom) / mWebView.getScaleY();
+        calcOurVisibleRect(mTempContentVisibleRect);
+        viewToContentVisibleRect(r, mTempContentVisibleRect);
     }
 
     static class ViewSizeData {
@@ -4224,8 +4193,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
         calcOurContentVisibleRectF(mVisibleContentRect);
         if (canvas.isHardwareAccelerated()) {
-            Rect invScreenRect = mGLViewportEmpty ? null : mInvScreenRect;
-            Rect screenRect = mGLViewportEmpty ? null : mScreenRect;
+            Rect invScreenRect = mIsWebViewVisible ? mInvScreenRect : null;
+            Rect screenRect = mIsWebViewVisible ? mScreenRect : null;
 
             int functor = nativeCreateDrawGLFunction(mNativeClass, invScreenRect,
                     screenRect, mVisibleContentRect, getScale(), extras);
@@ -5405,15 +5374,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     @Override
     public void onAttachedToWindow() {
         if (mWebView.hasWindowFocus()) setActive(true);
-        final ViewTreeObserver treeObserver = mWebView.getViewTreeObserver();
-        if (mGlobalLayoutListener == null) {
-            mGlobalLayoutListener = new InnerGlobalLayoutListener();
-            treeObserver.addOnGlobalLayoutListener(mGlobalLayoutListener);
-        }
-        if (mScrollChangedListener == null) {
-            mScrollChangedListener = new InnerScrollChangedListener();
-            treeObserver.addOnScrollChangedListener(mScrollChangedListener);
-        }
 
         addAccessibilityApisToJavaScript();
 
@@ -5425,16 +5385,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         clearHelpers();
         mZoomManager.dismissZoomPicker();
         if (mWebView.hasWindowFocus()) setActive(false);
-
-        final ViewTreeObserver treeObserver = mWebView.getViewTreeObserver();
-        if (mGlobalLayoutListener != null) {
-            treeObserver.removeGlobalOnLayoutListener(mGlobalLayoutListener);
-            mGlobalLayoutListener = null;
-        }
-        if (mScrollChangedListener != null) {
-            treeObserver.removeOnScrollChangedListener(mScrollChangedListener);
-            mScrollChangedListener = null;
-        }
 
         removeAccessibilityApisFromJavaScript();
         updateHwAccelerated();
@@ -5547,11 +5497,18 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
     }
 
-    void setInvScreenRect() {
+    // updateRectsForGL() happens almost every draw call, in order to avoid creating
+    // any object in this code path, we move the local variable out to be a private
+    // final member, and we marked them as mTemp*.
+    private final Point mTempVisibleRectOffset = new Point();
+    private final Rect mTempVisibleRect = new Rect();
+
+    void updateRectsForGL() {
         // Use the getGlobalVisibleRect() to get the intersection among the parents
         // visible == false means we're clipped - send a null rect down to indicate that
         // we should not draw
-        boolean visible = mWebView.getGlobalVisibleRect(mInvScreenRect);
+        boolean visible = mWebView.getGlobalVisibleRect(mTempVisibleRect, mTempVisibleRectOffset);
+        mInvScreenRect.set(mTempVisibleRect);
         if (visible) {
             // Then need to invert the Y axis, just for GL
             View rootView = mWebView.getRootView();
@@ -5560,14 +5517,31 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             int savedWebViewBottom = mInvScreenRect.bottom;
             mInvScreenRect.bottom = rootViewHeight - mInvScreenRect.top - getVisibleTitleHeightImpl();
             mInvScreenRect.top = rootViewHeight - savedWebViewBottom;
-            mGLViewportEmpty = false;
+            mIsWebViewVisible = true;
         } else {
-            mGLViewportEmpty = true;
+            mIsWebViewVisible = false;
         }
-        calcOurContentVisibleRectF(mVisibleContentRect);
-        nativeUpdateDrawGLFunction(mNativeClass, mGLViewportEmpty ? null : mInvScreenRect,
-                mGLViewportEmpty ? null : mScreenRect,
+
+        mTempVisibleRect.offset(-mTempVisibleRectOffset.x, -mTempVisibleRectOffset.y);
+        viewToContentVisibleRect(mVisibleContentRect, mTempVisibleRect);
+
+        nativeUpdateDrawGLFunction(mNativeClass, mIsWebViewVisible ? mInvScreenRect : null,
+                mIsWebViewVisible ? mScreenRect : null,
                 mVisibleContentRect, getScale());
+    }
+
+    // Input : viewRect, rect in view/screen coordinate.
+    // Output: contentRect, rect in content/document coordinate.
+    private void viewToContentVisibleRect(RectF contentRect, Rect viewRect) {
+        contentRect.left = viewToContentXf(viewRect.left) / mWebView.getScaleX();
+        // viewToContentY will remove the total height of the title bar.  Add
+        // the visible height back in to account for the fact that if the title
+        // bar is partially visible, the part of the visible rect which is
+        // displaying our content is displaced by that amount.
+        contentRect.top = viewToContentYf(viewRect.top + getVisibleTitleHeightImpl())
+                / mWebView.getScaleY();
+        contentRect.right = viewToContentXf(viewRect.right) / mWebView.getScaleX();
+        contentRect.bottom = viewToContentYf(viewRect.bottom) / mWebView.getScaleY();
     }
 
     @Override
@@ -5582,7 +5556,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             // notify the WebKit about the new dimensions.
             sendViewSizeZoom(false);
         }
-        setInvScreenRect();
+        updateRectsForGL();
         return changed;
     }
 
