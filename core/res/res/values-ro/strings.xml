@@ -168,76 +168,55 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Mesajele dvs."</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Citire şi scriere mesaje SMS, e-mailuri şi alte mesaje."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Informaţiile dvs. personale"</string>
-    <!-- no translation found for permgroupdesc_personalInfo (8426453129788861338) -->
-    <skip />
-    <!-- no translation found for permgrouplab_socialInfo (5799096623412043791) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_socialInfo (7129842457611643493) -->
-    <skip />
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Acces direct la informaţii despre dvs., stocate pe cartea de vizită."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informaţiile dvs. sociale"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Acces direct la informaţii despre persoanele de contact şi conexiunile dvs. sociale."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Locaţia dvs."</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Monitorizează locaţia dvs. fizică."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Comunicare în reţea"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Accesează diferite funcţii ale reţelei."</string>
-    <!-- no translation found for permgrouplab_shortRangeNetwork (4504840216096355984) -->
+    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
     <skip />
-    <!-- no translation found for permgroupdesc_shortRangeNetwork (8821013030346680806) -->
+    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
     <skip />
-    <!-- no translation found for permgrouplab_audioSettings (8329261670151871235) -->
+    <!-- no translation found for permgrouplab_shortrangeNetwork (130808676377486118) -->
     <skip />
-    <!-- no translation found for permgroupdesc_audioSettings (2641515403347568130) -->
+    <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
     <skip />
-    <!-- no translation found for permgrouplab_affectsBattery (6209246653424798033) -->
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Setările audio"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Modifică setările audio."</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Capacitatea de a afecta bateria"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Utilizează funcţii care pot consuma rapid bateria."</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendarul"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Acces direct la calendar şi la evenimente."</string>
+    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
     <skip />
-    <!-- no translation found for permgroupdesc_affectsBattery (6441275320638916947) -->
+    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
     <skip />
-    <!-- no translation found for permgrouplab_calendar (5863508437783683902) -->
+    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
     <skip />
-    <!-- no translation found for permgroupdesc_calendar (5777534316982184416) -->
+    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
     <skip />
-    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (40926483968949978) -->
-    <skip />
-    <!-- no translation found for permgrouplab_bookmarks (1949519673103968229) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_bookmarks (4169771606257963028) -->
-    <skip />
-    <!-- no translation found for permgrouplab_deviceAlarms (6117704629728824101) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_deviceAlarms (4769356362251641175) -->
-    <skip />
-    <!-- no translation found for permgrouplab_voicemail (4162237145027592133) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_voicemail (2498403969862951393) -->
-    <skip />
-    <!-- no translation found for permgrouplab_microphone (171539900250043464) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_microphone (7106618286905738408) -->
-    <skip />
-    <!-- no translation found for permgrouplab_camera (4820372495894586615) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_camera (2933667372289567714) -->
-    <skip />
-    <!-- no translation found for permgrouplab_appInfo (8028789762634147725) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_appInfo (3950378538049625907) -->
-    <skip />
-    <!-- no translation found for permgrouplab_wallpaper (3850280158041175998) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_wallpaper (5630417854750540154) -->
-    <skip />
-    <!-- no translation found for permgrouplab_systemClock (406535759236612992) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_systemClock (3944359833624094992) -->
-    <skip />
-    <!-- no translation found for permgrouplab_statusBar (2095862568113945398) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_statusBar (6242593432226807171) -->
-    <skip />
-    <!-- no translation found for permgrouplab_syncSettings (3341990986147826541) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_syncSettings (7603195265129031797) -->
-    <skip />
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Marcajele şi Istoricul"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Acces direct la marcaje şi la istoricul navigării."</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Alarma"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Setează ceasul cu alarmă."</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Mesageria vocală"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Acces direct la mesageria vocală."</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfonul"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Acces direct la microfon pentru înregistrări audio."</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera foto"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Acces direct la camera foto pentru a realiza fotografii şi videoclipuri."</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Informaţiile despre aplicaţiile dvs."</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Capacitatea de a influenţa comportamentul altor aplicaţii de pe dispozitiv."</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Imaginea de fundal"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Modifică setările pentru imaginea de fundal a dispozitivului."</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Ceasul"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Modifică ora sau fusul orar ale dispozitivului."</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Bara de stare"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Modifică setările pentru bara de stare a dispozitivului."</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Setările de sincronizare"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Acces la setările de sincronizare."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Conturile dvs."</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Accesează conturile disponibile."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Controale hardware"</string>
@@ -248,10 +227,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Acces şi control de nivel redus ale sistemului."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Instrumente de dezvoltare"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Funcţii necesare doar pentru dezvoltatorii de aplicaţii."</string>
-    <!-- no translation found for permgrouplab_display (4279909676036402636) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_display (6051002031933013714) -->
-    <skip />
+    <string name="permgrouplab_display" msgid="4279909676036402636">"Interfaţa de utilizare a altor aplicaţii"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"Influenţează interfaţa de utilizare a altor aplicaţii."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stocare"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Accesează stocarea USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Accesează cardul SD."</string>
@@ -592,7 +569,8 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Permite aplic. să citească conţin. stoc. USB, care poate include fotogr. şi media."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Permite aplicaţiei să citească conţinutul cardului SD, care poate include fotografii şi conţinut media."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modifică sau şterge conţinutul stocării USB"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"modifică sau şterge conţinutul cardului SD"</string>
+    <!-- no translation found for permlab_sdcardWrite (8805693630050458763) -->
+    <skip />
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permite scriere în stoc. USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Permite aplicaţiei să scrie pe cardul SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modif./şterg. conţinutul media stocat intern"</string>
@@ -770,8 +748,7 @@
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Telefonul nu are card SIM."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Introduceţi un card SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Cardul SIM lipseşte sau nu poate fi citit. Introduceţi un card SIM."</string>
-    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (5096149665138916184) -->
-    <skip />
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Card SIM inutilizabil."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Cardul dvs. SIM este dezactivat definitiv."\n" Contactaţi furnizorul de servicii wireless pentru a obţine un alt card SIM."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Butonul Melodia anterioară"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Butonul Melodia următoare"</string>
@@ -1112,11 +1089,10 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Setaţi data"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Setaţi"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Terminat"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"Prestabilit"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NOU: "</font></string>
+    <!-- no translation found for perms_description_app (5139836143293299417) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Nu se solicită nicio permisiune"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Ascundeţi"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Afişaţi-le pe toate"</b></string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Stocare masivă USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB conectat"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"V-aţi conectat la computer prin USB. Atingeţi butonul de mai jos dacă doriţi să copiaţi fişiere de pe computer pe stocarea USB Android sau invers."</string>
@@ -1345,4 +1321,8 @@
     <string name="sending" msgid="3245653681008218030">"Se trimite..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Lansaţi browserul?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Acceptaţi apelul?"</string>
+    <!-- no translation found for activity_resolver_use_always (4167356512478150080) -->
+    <skip />
+    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
+    <skip />
 </resources>

@@ -175,16 +175,28 @@
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Overvåg din fysiske placering."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Netværkskommunikation"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Få adgang til forskellige netværksfunktioner."</string>
-    <string name="permgrouplab_shortRangeNetwork" msgid="4504840216096355984">"Bluetooth og NFC"</string>
-    <string name="permgroupdesc_shortRangeNetwork" msgid="8821013030346680806">"Adgang til Bluetooth- eller NFC-netværk og -enheder."</string>
+    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
+    <skip />
+    <!-- no translation found for permgrouplab_shortrangeNetwork (130808676377486118) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
+    <skip />
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Lydindstillinger"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Skifte lydindstillinger."</string>
     <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Påvirker batteriet"</string>
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Bruge funktioner, der hurtigt kan dræne batteriet."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Direkte adgang til kalender og begivenheder."</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Brugerordbog"</string>
-    <string name="permgroupdesc_dictionary" msgid="40926483968949978">"Direkte adgang til brugerordbogen."</string>
+    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
+    <skip />
+    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
+    <skip />
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Bogmærker og historik"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Direkte adgang til bogmærker og browserhistorik."</string>
     <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Alarm"</string>
@@ -557,7 +569,8 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Tillader, at appen læser USB-lagerets indhold, herunder billeder og mediefiler."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Tillader, at appen læser SD-kortets indhold, som kan omfatte billeder og mediefiler."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"ændre eller slette indhold på USB-lager"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"ændre eller slette indholdet på dit SD-kort"</string>
+    <!-- no translation found for permlab_sdcardWrite (8805693630050458763) -->
+    <skip />
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Lader appen skrive til USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Tillader, at appen kan skrive til SD-kortet."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"Rediger/slet internt medielagringsindhold"</string>
@@ -1076,11 +1089,10 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Angiv dato"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Angiv"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Udført"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"Standard"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NYHED! "</font></string>
+    <!-- no translation found for perms_description_app (5139836143293299417) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Der kræves ingen tilladelser"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Skjul"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Vis alle"</b></string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB-masselager"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB er tilsluttet"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Du har fået forbindelse til din computer via USB. Tryk på knappen nedenfor, hvis du vil kopiere filer mellem din computer og din Androids USB-lager."</string>
@@ -1309,4 +1321,8 @@
     <string name="sending" msgid="3245653681008218030">"Sender..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Vil du starte browseren?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Vil du besvare opkaldet?"</string>
+    <!-- no translation found for activity_resolver_use_always (4167356512478150080) -->
+    <skip />
+    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
+    <skip />
 </resources>
