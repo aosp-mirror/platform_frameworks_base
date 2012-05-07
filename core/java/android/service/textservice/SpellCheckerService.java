@@ -397,14 +397,6 @@ public abstract class SpellCheckerService extends Service {
                 }
                 wordStart = wordIterator.getBeginning(wordEnd);
             }
-            if (originalText.length() >= SpellChecker.WORD_ITERATOR_INTERVAL
-                    && wordItems.size() >= 2) {
-                if (DBG) {
-                    Log.w(TAG, "Remove possibly divided word: "
-                            + wordItems.get(0).mTextInfo.getText());
-                }
-                wordItems.remove(0);
-            }
             return new SentenceTextInfoParams(originalTextInfo, wordItems);
         }
 
