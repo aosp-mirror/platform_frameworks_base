@@ -70,8 +70,7 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
     private Button mOnceButton;
     private int mIconDpi;
     private int mIconSize;
-
-    private static final int MAX_COLUMNS = 4;
+    private int mMaxColumns;
 
     private boolean mRegistered;
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
@@ -105,6 +104,7 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         mPm = getPackageManager();
         mAlwaysUseOption = alwaysUseOption;
+        mMaxColumns = getResources().getInteger(R.integer.config_maxResolverActivityColumns);
         intent.setComponent(null);
 
         AlertController.AlertParams ap = mAlertParams;
@@ -154,7 +154,7 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
 
     void resizeGrid() {
         final int itemCount = mAdapter.getCount();
-        mGrid.setNumColumns(Math.min(itemCount, MAX_COLUMNS));
+        mGrid.setNumColumns(Math.min(itemCount, mMaxColumns));
     }
 
     Drawable getIcon(Resources res, int resId) {
