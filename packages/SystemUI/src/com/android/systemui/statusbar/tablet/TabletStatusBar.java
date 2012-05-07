@@ -67,6 +67,7 @@ import com.android.systemui.R;
 import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.recent.RecentsPanelView;
 import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.DoNotDisturb;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -165,6 +166,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     BluetoothController mBluetoothController;
     LocationController mLocationController;
     NetworkController mNetworkController;
+    DoNotDisturb mDoNotDisturb;
 
     ViewGroup mBarContents;
 
@@ -519,6 +521,9 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         // The icons
         mLocationController = new LocationController(mContext); // will post a notification
+
+        // watch the PREF_DO_NOT_DISTURB and convert to appropriate disable() calls
+        mDoNotDisturb = new DoNotDisturb(mContext);
 
         mBatteryController = new BatteryController(mContext);
         mBatteryController.addIconView((ImageView)sb.findViewById(R.id.battery));
