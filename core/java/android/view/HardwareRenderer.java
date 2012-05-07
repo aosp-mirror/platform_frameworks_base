@@ -152,7 +152,7 @@ public abstract class HardwareRenderer {
     /**
      * Number of frames to profile.
      */
-    private static final int PROFILE_MAX_FRAMES = 64;
+    private static final int PROFILE_MAX_FRAMES = 128;
 
     /**
      * Number of floats per profiled frame.
