@@ -34,17 +34,18 @@
 
         <RelativeLayout
             android:id="@+id/search_panel_container"
-            android:layout_width="230dip"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true">
 
             <com.android.internal.widget.multiwaveview.MultiWaveView
                 android:id="@+id/multi_wave_view"
                 android:orientation="vertical"
-                android:layout_width="match_parent"
+                android:layout_width="@dimen/navbar_search_panel_height"
                 android:layout_height="match_parent"
                 android:layout_alignParentBottom="true"
                 android:background="@drawable/navbar_search_bg_scrim"
+                android:gravity="left"
 
                 prvandroid:targetDrawables="@array/navbar_search_targets"
                 prvandroid:targetDescriptions="@array/navbar_search_target_descriptions"
@@ -54,8 +55,6 @@
                 prvandroid:outerRadius="@dimen/navbar_search_target_placement_radius"
                 prvandroid:snapMargin="@dimen/navbar_search_snap_margin"
                 prvandroid:hitRadius="@dimen/navbar_search_hit_radius"
-                prvandroid:verticalOffset="0dip"
-                prvandroid:horizontalOffset="60dip"
                 prvandroid:feedbackCount="0"
                 prvandroid:vibrationDuration="0"
                 prvandroid:alwaysTrackFinger="true"/>

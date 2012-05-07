@@ -84,10 +84,11 @@
 
         <com.android.internal.widget.multiwaveview.MultiWaveView
             android:id="@+id/unlock_widget"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_rowSpan="7"
             android:layout_gravity="center_vertical|center_horizontal"
+            android:gravity="center"
 
             android:targetDrawables="@array/lockscreen_targets_with_camera"
             android:targetDescriptions="@array/lockscreen_target_descriptions_with_camera"
@@ -100,8 +101,6 @@
             android:rightChevronDrawable="@drawable/ic_lockscreen_chevron_right"
             android:feedbackCount="3"
             android:vibrationDuration="20"
-            android:horizontalOffset="0dip"
-            android:verticalOffset="0dip"
         />
 
         <!-- emergency call button shown when sim is PUKd and tab_selector is hidden -->

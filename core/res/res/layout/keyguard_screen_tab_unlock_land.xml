@@ -131,9 +131,10 @@
     <!-- Column 2 -->
     <com.android.internal.widget.multiwaveview.MultiWaveView
         android:id="@+id/unlock_widget"
-        android:layout_width="200dip"
+        android:layout_width="302dip"
         android:layout_height="match_parent"
         android:layout_rowSpan="7"
+        android:gravity="center"
 
         android:targetDrawables="@array/lockscreen_targets_with_camera"
         android:targetDescriptions="@array/lockscreen_target_descriptions_with_camera"
@@ -146,8 +147,6 @@
         android:topChevronDrawable="@drawable/ic_lockscreen_chevron_up"
         android:feedbackCount="3"
         android:vibrationDuration="20"
-        android:horizontalOffset="0dip"
-        android:verticalOffset="0dip"
         />
 
     <!-- Music transport control -->

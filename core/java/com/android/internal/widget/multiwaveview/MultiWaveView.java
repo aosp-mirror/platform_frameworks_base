@@ -32,6 +32,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
@@ -99,8 +100,11 @@ public class MultiWaveView extends View {
     private float mTapRadius;
     private float mWaveCenterX;
     private float mWaveCenterY;
-    private float mVerticalOffset;
+    private int mMaxTargetHeight;
+    private int mMaxTargetWidth;
     private float mHorizontalOffset;
+    private float mVerticalOffset;
+
     private float mOuterRadius = 0.0f;
     private float mHitRadius = 0.0f;
     private float mSnapMargin = 0.0f;
@@ -142,6 +146,9 @@ public class MultiWaveView extends View {
     private int mTargetDescriptionsResourceId;
     private int mDirectionDescriptionsResourceId;
     private boolean mAlwaysTrackFinger;
+    private int mHorizontalInset;
+    private int mVerticalInset;
+    private int mGravity = Gravity.TOP;
 
     public MultiWaveView(Context context) {
         this(context, null);
@@ -153,10 +160,9 @@ public class MultiWaveView extends View {
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MultiWaveView);
         mOuterRadius = a.getDimension(R.styleable.MultiWaveView_outerRadius, mOuterRadius);
-        mHorizontalOffset = a.getDimension(R.styleable.MultiWaveView_horizontalOffset,
-                mHorizontalOffset);
-        mVerticalOffset = a.getDimension(R.styleable.MultiWaveView_verticalOffset,
-                mVerticalOffset);
+//        mHorizontalOffset = a.getDimension(R.styleable.MultiWaveView_horizontalOffset,
+//                mHorizontalOffset);
+//        mVerticalOffset = a.getDimension(R.styleable.MultiWaveView_verticalOffset, mVerticalOffset);
         mHitRadius = a.getDimension(R.styleable.MultiWaveView_hitRadius, mHitRadius);
         mSnapMargin = a.getDimension(R.styleable.MultiWaveView_snapMargin, mSnapMargin);
         mVibrationDuration = a.getInt(R.styleable.MultiWaveView_vibrationDuration,
@@ -169,6 +175,7 @@ public class MultiWaveView extends View {
         mOuterRing = new TargetDrawable(res,
                 a.peekValue(R.styleable.MultiWaveView_waveDrawable).resourceId);
         mAlwaysTrackFinger = a.getBoolean(R.styleable.MultiWaveView_alwaysTrackFinger, false);
+        mGravity = a.getInt(R.styleable.MultiWaveView_gravity, Gravity.TOP);
 
         // Read chevron animation drawables
         final int chevrons[] = { R.styleable.MultiWaveView_leftChevronDrawable,
@@ -231,16 +238,16 @@ public class MultiWaveView extends View {
 
     @Override
     protected int getSuggestedMinimumWidth() {
-        // View should be large enough to contain the background + target drawable on either edge
-        return mOuterRing.getWidth()
-                + (mTargetDrawables.size() > 0 ? (mTargetDrawables.get(0).getWidth()/2) : 0);
+        // View should be large enough to contain the background + handle and
+        // target drawable on either edge.
+        return mOuterRing.getWidth() + mMaxTargetWidth;
     }
 
     @Override
     protected int getSuggestedMinimumHeight() {
-        // View should be large enough to contain the unlock ring + target drawable on either edge
-        return mOuterRing.getHeight()
-                + (mTargetDrawables.size() > 0 ? (mTargetDrawables.get(0).getHeight()/2) : 0);
+        // View should be large enough to contain the unlock ring + target and
+        // target drawable on either edge
+        return mOuterRing.getHeight() + mMaxTargetHeight;
     }
 
     private int resolveMeasured(int measureSpec, int desired)
@@ -265,9 +272,10 @@ public class MultiWaveView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int minimumWidth = getSuggestedMinimumWidth();
         final int minimumHeight = getSuggestedMinimumHeight();
-        int viewWidth = resolveMeasured(widthMeasureSpec, minimumWidth);
-        int viewHeight = resolveMeasured(heightMeasureSpec, minimumHeight);
-        setMeasuredDimension(viewWidth, viewHeight);
+        int computedWidth = resolveMeasured(widthMeasureSpec, minimumWidth);
+        int computedHeight = resolveMeasured(heightMeasureSpec, minimumHeight);
+        setupGravity((computedWidth - minimumWidth), (computedHeight - minimumHeight));
+        setMeasuredDimension(computedWidth, computedHeight);
     }
 
     private void switchToState(int state, float x, float y) {
@@ -521,14 +529,25 @@ public class MultiWaveView extends View {
         TypedArray array = res.obtainTypedArray(resourceId);
         int count = array.length();
         ArrayList<TargetDrawable> targetDrawables = new ArrayList<TargetDrawable>(count);
+        int maxWidth = mHandleDrawable.getWidth();
+        int maxHeight = mHandleDrawable.getHeight();
         for (int i = 0; i < count; i++) {
             TypedValue value = array.peekValue(i);
-            targetDrawables.add(new TargetDrawable(res, value != null ? value.resourceId : 0));
+            TargetDrawable target= new TargetDrawable(res, value != null ? value.resourceId : 0);
+            targetDrawables.add(target);
+            maxWidth = Math.max(maxWidth, target.getWidth());
+            maxHeight = Math.max(maxHeight, target.getHeight());
+        }
+        if (mMaxTargetWidth != maxWidth || mMaxTargetHeight != maxHeight) {
+            mMaxTargetWidth = maxWidth;
+            mMaxTargetHeight = maxHeight;
+            requestLayout(); // required to resize layout and call updateTargetPositions()
+        } else {
+            updateTargetPositions();
         }
         array.recycle();
         mTargetResourceId = resourceId;
         mTargetDrawables = targetDrawables;
-        updateTargetPositions();
     }
 
     /**
@@ -638,23 +657,27 @@ public class MultiWaveView extends View {
         boolean handled = false;
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+                if (DEBUG) Log.v(TAG, "*** DOWN ***");
                 handleDown(event);
                 handled = true;
                 break;
 
             case MotionEvent.ACTION_MOVE:
+                if (DEBUG) Log.v(TAG, "*** MOVE ***");
                 handleMove(event);
                 handled = true;
                 break;
 
             case MotionEvent.ACTION_UP:
+                if (DEBUG) Log.v(TAG, "*** UP ***");
                 handleMove(event);
                 handleUp(event);
                 handled = true;
                 break;
 
             case MotionEvent.ACTION_CANCEL:
-                handleMove(event);
+                if (DEBUG) Log.v(TAG, "*** CANCEL ***");
+                // handleMove(event);
                 handleCancel(event);
                 handled = true;
                 break;
@@ -795,6 +818,11 @@ public class MultiWaveView extends View {
             }
             mGrabbedState = newState;
             if (mOnTriggerListener != null) {
+                if (newState == OnTriggerListener.NO_HANDLE) {
+                    mOnTriggerListener.onReleased(this, OnTriggerListener.CENTER_HANDLE);
+                } else {
+                    mOnTriggerListener.onGrabbed(this, OnTriggerListener.CENTER_HANDLE);
+                }
                 mOnTriggerListener.onGrabbedStateChange(this, mGrabbedState);
             }
         }
@@ -832,13 +860,45 @@ public class MultiWaveView extends View {
         moveHandleTo(centerX, centerY, false);
     }
 
+    private void setupGravity(int dx, int dy) {
+        final int layoutDirection = getResolvedLayoutDirection();
+        final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
+
+        switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
+            case Gravity.LEFT:
+                mHorizontalInset = 0;
+                break;
+            case Gravity.RIGHT:
+                mHorizontalInset = dx;
+                break;
+            case Gravity.CENTER_HORIZONTAL:
+            default:
+                mHorizontalInset = dx / 2;
+                break;
+        }
+        switch (absoluteGravity & Gravity.VERTICAL_GRAVITY_MASK) {
+            case Gravity.TOP:
+                mVerticalInset = 0;
+                break;
+            case Gravity.BOTTOM:
+                mVerticalInset = dy;
+                break;
+            case Gravity.CENTER_VERTICAL:
+            default:
+                mVerticalInset = dy / 2;
+                break;
+        }
+    }
+
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         final int width = right - left;
         final int height = bottom - top;
-        float newWaveCenterX = mHorizontalOffset + Math.max(width, mOuterRing.getWidth() ) / 2;
-        float newWaveCenterY = mVerticalOffset + Math.max(height, mOuterRing.getHeight()) / 2;
+        float newWaveCenterX = mHorizontalOffset + mHorizontalInset
+                + Math.max(width, mMaxTargetWidth + mOuterRing.getWidth()) / 2;
+        float newWaveCenterY = mVerticalOffset + mVerticalInset
+                + Math.max(height, + mMaxTargetHeight + mOuterRing.getHeight()) / 2;
         if (newWaveCenterX != mWaveCenterX || newWaveCenterY != mWaveCenterY) {
             if (mWaveCenterX == 0 && mWaveCenterY == 0) {
                 performInitialLayout(newWaveCenterX, newWaveCenterY);
@@ -848,9 +908,8 @@ public class MultiWaveView extends View {
 
             mOuterRing.setX(mWaveCenterX);
             mOuterRing.setY(Math.max(mWaveCenterY, mWaveCenterY));
-
-            updateTargetPositions();
         }
+        updateTargetPositions();
         if (DEBUG) dump();
     }
 
