@@ -1607,7 +1607,7 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
     <string name="permlab_sdcardWrite" product="nosdcard">modify or delete the contents of your USB storage</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_sdcardWrite" product="default">modify or delete the contens of your SD card</string>
+    <string name="permlab_sdcardWrite" product="default">modify or delete the contents of your SD card</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
     <string name="permdesc_sdcardWrite" product="nosdcard">Allows the app to write to the USB storage.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
