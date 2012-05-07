@@ -140,4 +140,8 @@
     <string name="accessibility_clear_all" msgid="5235938559247164925">"محو جميع الإشعارات."</string>
     <string name="dreams_dock_launcher" msgid="3541196417659166245">"تنشيط شاشة التوقف"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"معلومات التطبيق"</string>
+    <!-- no translation found for notifications_off_title (8936620513608443224) -->
+    <skip />
+    <!-- no translation found for notifications_off_text (2529001315769385273) -->
+    <skip />
 </resources>
