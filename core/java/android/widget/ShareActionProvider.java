@@ -44,6 +44,7 @@ import com.android.internal.R;
  * <code>
  *  // In Activity#onCreateOptionsMenu
  *  public boolean onCreateOptionsMenu(Menu menu) {
+ *      getManuInflater().inflate(R.menu.my_menu, menu);
  *      // Get the menu item.
  *      MenuItem menuItem = menu.findItem(R.id.my_menu_item);
  *      // Get the provider and hold onto it to set/change the share intent.
@@ -239,7 +240,11 @@ public class ShareActionProvider extends ActionProvider {
      * <p>
      * <strong>Note:</strong> The history file name can be set any time, however
      * only the action views created by {@link #onCreateActionView()} after setting
-     * the file name will be backed by the provided file.
+     * the file name will be backed by the provided file. Hence, if you are using
+     * a share action provider on a menu item and want to change the history file
+     * based on the type of the currently selected item, you need to call
+     * {@link android.app.Activity#invalidateOptionsMenu()} to force the system
+     * to recreate the menu UI.
      * <p>
      *
      * @param shareHistoryFile The share history file name.

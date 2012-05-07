@@ -761,6 +761,16 @@ public class ActivityChooserModel extends DataSetObservable {
     }
 
     /**
+     * Gets whether the given observer is already registered.
+     *
+     * @param observer The observer.
+     * @return True if already registered.
+     */
+    public boolean isRegisteredObserver(DataSetObserver observer) {
+        return mObservers.contains(observer);
+    }
+
+    /**
      * Represents a record in the history.
      */
     public final static class HistoricalRecord {
