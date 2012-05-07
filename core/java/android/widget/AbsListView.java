@@ -3985,7 +3985,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     class PositionScroller implements Runnable {
-        private static final int SCROLL_DURATION = 400;
+        private static final int SCROLL_DURATION = 200;
 
         private static final int MOVE_DOWN_POS = 1;
         private static final int MOVE_UP_POS = 2;
@@ -4006,21 +4006,35 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mExtraScroll = ViewConfiguration.get(mContext).getScaledFadingEdgeLength();
         }
 
-        void start(int position) {
+        void start(final int position) {
             stop();
 
+            final int childCount = getChildCount();
+            if (childCount == 0) {
+                // Can't scroll without children.
+                if (mDataChanged) {
+                    // But we might have something in a minute.
+                    post(new Runnable() {
+                        @Override public void run() {
+                            start(position);
+                        }
+                    });
+                }
+                return;
+            }
+
             final int firstPos = mFirstPosition;
-            final int lastPos = firstPos + getChildCount() - 1;
+            final int lastPos = firstPos + childCount - 1;
 
             int viewTravelCount;
-            if (position <= firstPos) {
+            if (position < firstPos) {
                 viewTravelCount = firstPos - position + 1;
                 mMode = MOVE_UP_POS;
-            } else if (position >= lastPos) {
+            } else if (position > lastPos) {
                 viewTravelCount = position - lastPos + 1;
                 mMode = MOVE_DOWN_POS;
             } else {
-                // Already on screen, nothing to do
+                scrollToVisible(position, INVALID_POSITION, SCROLL_DURATION);
                 return;
             }
 
@@ -4036,7 +4050,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             postOnAnimation(this);
         }
 
-        void start(int position, int boundPosition) {
+        void start(final int position, final int boundPosition) {
             stop();
 
             if (boundPosition == INVALID_POSITION) {
@@ -4044,11 +4058,25 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 return;
             }
 
+            final int childCount = getChildCount();
+            if (childCount == 0) {
+                // Can't scroll without children.
+                if (mDataChanged) {
+                    // But we might have something in a minute.
+                    post(new Runnable() {
+                        @Override public void run() {
+                            start(position, boundPosition);
+                        }
+                    });
+                }
+                return;
+            }
+
             final int firstPos = mFirstPosition;
-            final int lastPos = firstPos + getChildCount() - 1;
+            final int lastPos = firstPos + childCount - 1;
 
             int viewTravelCount;
-            if (position <= firstPos) {
+            if (position < firstPos) {
                 final int boundPosFromLast = lastPos - boundPosition;
                 if (boundPosFromLast < 1) {
                     // Moving would shift our bound position off the screen. Abort.
@@ -4064,7 +4092,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     viewTravelCount = posTravel;
                     mMode = MOVE_UP_POS;
                 }
-            } else if (position >= lastPos) {
+            } else if (position > lastPos) {
                 final int boundPosFromFirst = boundPosition - firstPos;
                 if (boundPosFromFirst < 1) {
                     // Moving would shift our bound position off the screen. Abort.
@@ -4081,7 +4109,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     mMode = MOVE_DOWN_POS;
                 }
             } else {
-                // Already on screen, nothing to do
+                scrollToVisible(position, boundPosition, SCROLL_DURATION);
                 return;
             }
 
@@ -4135,6 +4163,60 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mLastSeenPos = INVALID_POSITION;
 
             postOnAnimation(this);
+        }
+
+        /**
+         * Scroll such that targetPos is in the visible padded region without scrolling
+         * boundPos out of view. Assumes targetPos is onscreen.
+         */
+        void scrollToVisible(int targetPos, int boundPos, int duration) {
+            final int firstPos = mFirstPosition;
+            final int childCount = getChildCount();
+            final int lastPos = firstPos + childCount - 1;
+            final int paddedTop = mListPadding.top;
+            final int paddedBottom = getHeight() - mListPadding.bottom;
+
+            if (targetPos < firstPos || targetPos > lastPos) {
+                Log.w(TAG, "scrollToVisible called with targetPos " + targetPos +
+                        " not visible [" + firstPos + ", " + lastPos + "]");
+            }
+            if (boundPos < firstPos || boundPos > lastPos) {
+                // boundPos doesn't matter, it's already offscreen.
+                boundPos = INVALID_POSITION;
+            }
+
+            final View targetChild = getChildAt(targetPos - firstPos);
+            final int targetTop = targetChild.getTop();
+            final int targetBottom = targetChild.getBottom();
+            int scrollBy = 0;
+
+            if (targetBottom > paddedBottom) {
+                scrollBy = targetBottom - paddedBottom;
+            }
+            if (targetTop < paddedTop) {
+                scrollBy = targetTop - paddedTop;
+            }
+
+            if (scrollBy == 0) {
+                return;
+            }
+
+            if (boundPos >= 0) {
+                final View boundChild = getChildAt(boundPos - firstPos);
+                final int boundTop = boundChild.getTop();
+                final int boundBottom = boundChild.getBottom();
+                final int absScroll = Math.abs(scrollBy);
+
+                if (scrollBy < 0 && boundBottom + absScroll > paddedBottom) {
+                    // Don't scroll the bound view off the bottom of the screen.
+                    scrollBy = Math.max(0, boundBottom - paddedBottom);
+                } else if (scrollBy > 0 && boundTop - absScroll < paddedTop) {
+                    // Don't scroll the bound view off the top of the screen.
+                    scrollBy = Math.min(0, boundTop - paddedTop);
+                }
+            }
+
+            smoothScrollBy(scrollBy, duration);
         }
 
         void stop() {
