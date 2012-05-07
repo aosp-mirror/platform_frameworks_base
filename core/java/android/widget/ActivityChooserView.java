@@ -20,8 +20,10 @@ import com.android.internal.R;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
@@ -174,6 +176,11 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
     private int mDefaultActionButtonContentDescription;
 
     /**
+     * Whether this view has a default activity affordance.
+     */
+    private boolean mHasDefaultActivity;
+
+    /**
      * Create a new instance.
      *
      * @param context The application environment.
@@ -245,6 +252,8 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         Resources resources = context.getResources();
         mListPopupMaxWidth = Math.max(resources.getDisplayMetrics().widthPixels / 2,
               resources.getDimensionPixelSize(com.android.internal.R.dimen.config_prefDialogWidth));
+
+        updateHasDefaultActivity();
     }
 
     /**
@@ -256,6 +265,21 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
             dismissPopup();
             showPopup();
         }
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        Configuration oldConfig = mContext.getResources().getConfiguration();
+        final int changed = oldConfig.diff(newConfig);
+        if ((changed & ActivityInfo.CONFIG_SCREEN_SIZE) != 0
+                || (changed & ActivityInfo.CONFIG_ORIENTATION) != 0) {
+            updateHasDefaultActivity();
+        }
+    }
+
+    private void updateHasDefaultActivity() {
+        mHasDefaultActivity = mContext.getResources().getBoolean(
+                R.bool.activity_chooser_view_has_default_activity);
     }
 
     /**
@@ -383,7 +407,8 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         ActivityChooserModel dataModel = mAdapter.getDataModel();
-        if (dataModel != null) {
+        if (dataModel != null
+                && !dataModel.isRegisteredObserver(mModelDataSetOberver)) {
             dataModel.registerObserver(mModelDataSetOberver);
         }
         mIsAttachedToWindow = true;
@@ -393,7 +418,8 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         ActivityChooserModel dataModel = mAdapter.getDataModel();
-        if (dataModel != null) {
+        if (dataModel != null
+                && dataModel.isRegisteredObserver(mModelDataSetOberver)) {
             dataModel.unregisterObserver(mModelDataSetOberver);
         }
         ViewTreeObserver viewTreeObserver = getViewTreeObserver();
@@ -496,7 +522,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         // Default activity button.
         final int activityCount = mAdapter.getActivityCount();
         final int historySize = mAdapter.getHistorySize();
-        if (activityCount > 0 && historySize > 0) {
+        if (mHasDefaultActivity && activityCount > 0 && historySize > 0) {
             mDefaultActivityButton.setVisibility(VISIBLE);
             ResolveInfo activity = mAdapter.getDefaultActivity();
             PackageManager packageManager = mContext.getPackageManager();
@@ -512,9 +538,9 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         }
         // Activity chooser content.
         if (mDefaultActivityButton.getVisibility() == VISIBLE) {
-            mActivityChooserContent.setBackgroundDrawable(mActivityChooserContentBackground);
+            mActivityChooserContent.setBackground(mActivityChooserContentBackground);
         } else {
-            mActivityChooserContent.setBackgroundDrawable(null);
+            mActivityChooserContent.setBackground(null);
         }
     }
 
@@ -577,7 +603,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         // OnLongClickListener#onLongClick
         @Override
         public boolean onLongClick(View view) {
-            if (view == mDefaultActivityButton) {
+            if (mHasDefaultActivity && view == mDefaultActivityButton) {
                 if (mAdapter.getCount() > 0) {
                     mIsSelectingDefaultActivity = true;
                     showPopupUnchecked(mInitialActivityCount);
@@ -630,14 +656,16 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
 
         public void setDataModel(ActivityChooserModel dataModel) {
             ActivityChooserModel oldDataModel = mAdapter.getDataModel();
-            if (oldDataModel != null && isShown()) {
+            if (oldDataModel != null) {
                 oldDataModel.unregisterObserver(mModelDataSetOberver);
             }
             mDataModel = dataModel;
-            if (dataModel != null && isShown()) {
+            if (dataModel != null) {
                 dataModel.registerObserver(mModelDataSetOberver);
+                notifyDataSetChanged();
+            } else {
+                notifyDataSetInvalidated();
             }
-            notifyDataSetChanged();
         }
 
         @Override
