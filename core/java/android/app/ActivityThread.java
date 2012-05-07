@@ -136,7 +136,7 @@ public final class ActivityThread {
     /** @hide */
     public static final boolean DEBUG_BROADCAST = false;
     private static final boolean DEBUG_RESULTS = false;
-    private static final boolean DEBUG_BACKUP = true;
+    private static final boolean DEBUG_BACKUP = false;
     private static final boolean DEBUG_CONFIGURATION = false;
     private static final boolean DEBUG_SERVICE = false;
     private static final boolean DEBUG_MEMORY_TRIM = false;
@@ -1172,10 +1172,10 @@ public final class ActivityThread {
                     case DUMP_PROVIDER: return "DUMP_PROVIDER";
                 }
             }
-            return "(unknown)";
+            return Integer.toString(code);
         }
         public void handleMessage(Message msg) {
-            if (DEBUG_MESSAGES) Slog.v(TAG, ">>> handling: " + msg.what);
+            if (DEBUG_MESSAGES) Slog.v(TAG, ">>> handling: " + codeToString(msg.what));
             switch (msg.what) {
                 case LAUNCH_ACTIVITY: {
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityStart");
@@ -1378,7 +1378,7 @@ public final class ActivityThread {
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
             }
-            if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + msg.what);
+            if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + codeToString(msg.what));
         }
 
         private void maybeSnapshot() {
