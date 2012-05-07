@@ -1077,8 +1077,8 @@ public class TabletStatusBar extends BaseStatusBar implements
                 mTicker.halt();
             }
         }
-        if ((diff & (StatusBarManager.DISABLE_RECENT 
-                        | StatusBarManager.DISABLE_BACK 
+        if ((diff & (StatusBarManager.DISABLE_RECENT
+                        | StatusBarManager.DISABLE_BACK
                         | StatusBarManager.DISABLE_HOME)) != 0) {
             setNavigationVisibility(state);
 

@@ -181,6 +181,7 @@ public class KeyguardViewManager implements KeyguardWindowController {
                 ( View.STATUS_BAR_DISABLE_BACK
                 | View.STATUS_BAR_DISABLE_HOME
                 );
+        Log.v(TAG, "KGVM: Set visibility on " + mKeyguardHost + " to " + visFlags);
         mKeyguardHost.setSystemUiVisibility(visFlags);
 
         mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);

@@ -717,9 +717,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
         @Override
         public void onClockVisibilityChanged() {
-            int visFlags = getSystemUiVisibility() & ~View.STATUS_BAR_DISABLE_CLOCK;
-            setSystemUiVisibility(visFlags
-                    | (mUpdateMonitor.isClockVisible() ? View.STATUS_BAR_DISABLE_CLOCK : 0));
+            int visFlags = (getSystemUiVisibility() & ~View.STATUS_BAR_DISABLE_CLOCK)
+                    | (mUpdateMonitor.isClockVisible() ? View.STATUS_BAR_DISABLE_CLOCK : 0);
+            Log.v(TAG, "Set visibility on " + this + " to " + visFlags);
+            setSystemUiVisibility(visFlags);
         }
 
         // We need to stop the biometric unlock when a phone call comes in
