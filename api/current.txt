@@ -143,6 +143,7 @@ package android {
     field public static final java.lang.String ACCOUNTS = "android.permission-group.ACCOUNTS";
     field public static final java.lang.String APP_INFO = "android.permission-group.APP_INFO";
     field public static final java.lang.String AUDIO_SETTINGS = "android.permission-group.AUDIO_SETTINGS";
+    field public static final java.lang.String BLUETOOTH_NETWORK = "android.permission-group.BLUETOOTH_NETWORK";
     field public static final java.lang.String BOOKMARKS = "android.permission-group.BOOKMARKS";
     field public static final java.lang.String CALENDAR = "android.permission-group.CALENDAR";
     field public static final java.lang.String CAMERA = "android.permission-group.CAMERA";
@@ -169,6 +170,7 @@ package android {
     field public static final java.lang.String USER_DICTIONARY = "android.permission-group.USER_DICTIONARY";
     field public static final java.lang.String VOICEMAIL = "android.permission-group.VOICEMAIL";
     field public static final java.lang.String WALLPAPER = "android.permission-group.WALLPAPER";
+    field public static final java.lang.String WRITE_USER_DICTIONARY = "android.permission-group.WRITE_USER_DICTIONARY";
   }
 
   public final class R {
