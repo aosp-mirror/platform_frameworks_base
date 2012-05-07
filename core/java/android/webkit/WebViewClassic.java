@@ -6022,10 +6022,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     }
                     if (deltaX * deltaX + deltaY * deltaY > mTouchSlopSquare) {
                         mHeldMotionless = MOTIONLESS_FALSE;
-                        nativeSetIsScrolling(true);
                     } else {
                         mHeldMotionless = MOTIONLESS_TRUE;
-                        nativeSetIsScrolling(false);
                         keepScrollBarsVisible = true;
                     }
 
