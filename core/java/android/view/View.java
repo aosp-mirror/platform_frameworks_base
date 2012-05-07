@@ -4657,6 +4657,51 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
+     * Gets the location of this view in screen coordintates.
+     *
+     * @param outRect The output location
+     */
+    private void getBoundsOnScreen(Rect outRect) {
+        if (mAttachInfo == null) {
+            return;
+        }
+
+        RectF position = mAttachInfo.mTmpTransformRect;
+        position.setEmpty();
+
+        if (!hasIdentityMatrix()) {
+            getMatrix().mapRect(position);
+        }
+
+        position.offset(mLeft, mRight);
+
+        ViewParent parent = mParent;
+        while (parent instanceof View) {
+            View parentView = (View) parent;
+
+            position.offset(-parentView.mScrollX, -parentView.mScrollY);
+
+            if (!parentView.hasIdentityMatrix()) {
+                parentView.getMatrix().mapRect(position);
+            }
+
+            position.offset(parentView.mLeft, parentView.mTop);
+
+            parent = parentView.mParent;
+        }
+
+        if (parent instanceof ViewRootImpl) {
+            ViewRootImpl viewRootImpl = (ViewRootImpl) parent;
+            position.offset(0, -viewRootImpl.mCurScrollY);
+        }
+
+        position.offset(mAttachInfo.mWindowLeft, mAttachInfo.mWindowTop);
+
+        outRect.set((int) (position.left + 0.5f), (int) (position.top + 0.5f),
+                (int) (position.right + 0.5f), (int) (position.bottom + 0.5f));
+    }
+
+    /**
      * @see #onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)
      *
      * Note: Called from the default {@link AccessibilityDelegate}.
@@ -4666,8 +4711,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         getDrawingRect(bounds);
         info.setBoundsInParent(bounds);
 
-        getGlobalVisibleRect(bounds);
-        bounds.offset(mAttachInfo.mWindowLeft, mAttachInfo.mWindowTop);
+        getBoundsOnScreen(bounds);
         info.setBoundsInScreen(bounds);
 
         if ((mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
@@ -4676,6 +4720,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 info.setParent((View) parent);
             }
         }
+
+        info.setVisibleToUser(isVisibleToUser());
 
         info.setPackageName(mContext.getPackageName());
         info.setClassName(View.class.getName());
@@ -4723,11 +4769,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * Computes whether this view is visible on the screen.
+     * Computes whether this view is visible to the user. Such a view is
+     * attached, visible, all its predecessors are visible, it is not clipped
+     * entirely by its predecessors, and has an alpha greater than zero.
      *
      * @return Whether the view is visible on the screen.
      */
-    boolean isDisplayedOnScreen() {
+    private boolean isVisibleToUser() {
         // The first two checks are made also made by isShown() which
         // however traverses the tree up to the parent to catch that.
         // Therefore, we do some fail fast check to minimize the up
@@ -6377,9 +6425,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     boolean includeForAccessibility() {
         if (mAttachInfo != null) {
             if (!mAttachInfo.mIncludeNotImportantViews) {
-                return isImportantForAccessibility() && isDisplayedOnScreen();
+                return isImportantForAccessibility();
             } else {
-                return isDisplayedOnScreen();
+                return true;
             }
         }
         return false;
