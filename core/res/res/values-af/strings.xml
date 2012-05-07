@@ -178,9 +178,13 @@
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Monitor jou fisiese ligging."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Netwerkkommunikasie"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Kry toegang tot verskeie netwerkfunksies."</string>
-    <!-- no translation found for permgrouplab_shortRangeNetwork (4504840216096355984) -->
+    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
     <skip />
-    <!-- no translation found for permgroupdesc_shortRangeNetwork (8821013030346680806) -->
+    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
+    <skip />
+    <!-- no translation found for permgrouplab_shortrangeNetwork (130808676377486118) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
     <skip />
     <!-- no translation found for permgrouplab_audioSettings (8329261670151871235) -->
     <skip />
@@ -194,9 +198,13 @@
     <skip />
     <!-- no translation found for permgroupdesc_calendar (5777534316982184416) -->
     <skip />
-    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
+    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
     <skip />
-    <!-- no translation found for permgroupdesc_dictionary (40926483968949978) -->
+    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
+    <skip />
+    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
     <skip />
     <!-- no translation found for permgrouplab_bookmarks (1949519673103968229) -->
     <skip />
@@ -592,7 +600,8 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Laat die program toe om die USB-berging se inhoud te lees, wat foto\'s en media kan insluit."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Laat die program toe om die SD-kaart se inhoud te lees, wat foto\'s en media kan insluit."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"verander of vee die inhoud van jou USB-berging uit"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"verander of vee die inhoud van jou SD-kaart uit"</string>
+    <!-- no translation found for permlab_sdcardWrite (8805693630050458763) -->
+    <skip />
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Laat die program toe om die USB-geheue te skryf."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Laat die program toe om na die SD-kaart te skryf."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"verander/vee uit interne mediabergingsinhoud"</string>
@@ -1112,11 +1121,10 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Stel datum"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Stel"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Klaar"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"Verstek"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NUUT: "</font></string>
+    <!-- no translation found for perms_description_app (5139836143293299417) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Geen toestemmings benodig nie"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Versteek"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Wys alle"</b></string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB-geheue"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB gekoppel"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Jy het via USB aan jou rekenaar gekoppel. Raak die knoppie hier onder as jy lêers tussen jou rekenaar en jou Android se USB-geheue wil kopieer."</string>
@@ -1345,4 +1353,8 @@
     <string name="sending" msgid="3245653681008218030">"Stuur tans…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Begin webblaaier?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Aanvaar oproep?"</string>
+    <!-- no translation found for activity_resolver_use_always (4167356512478150080) -->
+    <skip />
+    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
+    <skip />
 </resources>
