@@ -462,7 +462,6 @@
   <java-symbol type="string" name="db_default_sync_mode" />
   <java-symbol type="string" name="db_wal_sync_mode" />
   <java-symbol type="string" name="decline" />
-  <java-symbol type="string" name="default_permission_group" />
   <java-symbol type="string" name="default_text_encoding" />
   <java-symbol type="string" name="description_target_unlock_tablet" />
   <java-symbol type="string" name="double_tap_toast" />
@@ -652,10 +651,8 @@
   <java-symbol type="string" name="orgTypeOther" />
   <java-symbol type="string" name="orgTypeWork" />
   <java-symbol type="string" name="passwordIncorrect" />
-  <java-symbol type="string" name="permissions_format" />
+  <java-symbol type="string" name="perms_description_app" />
   <java-symbol type="string" name="perms_new_perm_prefix" />
-  <java-symbol type="string" name="perms_hide" />
-  <java-symbol type="string" name="perms_show_all" />
   <java-symbol type="string" name="petabyteShort" />
   <java-symbol type="string" name="phoneTypeAssistant" />
   <java-symbol type="string" name="phoneTypeCallback" />

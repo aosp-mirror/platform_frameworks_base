@@ -155,9 +155,10 @@
          receiving or reading an MMS. -->
     <permission-group android:name="android.permission-group.MESSAGES"
         android:label="@string/permgrouplab_messages"
+        android:icon="@drawable/perm_group_messages"
         android:description="@string/permgroupdesc_messages"
         android:permissionGroupFlags="personalInfo"
-        android:priority="2"/>
+        android:priority="360"/>
 
   <!-- Allows an application to send SMS messages. -->
     <permission android:name="android.permission.SEND_SMS"
@@ -250,9 +251,10 @@
 
     <permission-group android:name="android.permission-group.SOCIAL_INFO"
         android:label="@string/permgrouplab_socialInfo"
+        android:icon="@drawable/perm_group_social_info"
         android:description="@string/permgroupdesc_socialInfo"
         android:permissionGroupFlags="personalInfo"
-        android:priority="6" />
+        android:priority="320" />
 
     <!-- Allows an application to read the user's contacts data. -->
     <permission android:name="android.permission.READ_CONTACTS"
@@ -310,9 +312,10 @@
          distinct permissions). -->
     <permission-group android:name="android.permission-group.PERSONAL_INFO"
         android:label="@string/permgrouplab_personalInfo"
+        android:icon="@drawable/perm_group_personal_info"
         android:description="@string/permgroupdesc_personalInfo"
         android:permissionGroupFlags="personalInfo"
-        android:priority="7" />
+        android:priority="310" />
 
     <!-- Allows an application to read the user's personal profile data. -->
     <permission android:name="android.permission.READ_PROFILE"
@@ -338,9 +341,10 @@
          calendar to create / view events.-->
     <permission-group android:name="android.permission-group.CALENDAR"
         android:label="@string/permgrouplab_calendar"
+        android:icon="@drawable/perm_group_calendar"
         android:description="@string/permgroupdesc_calendar"
         android:permissionGroupFlags="personalInfo"
-        android:priority="9" />
+        android:priority="290" />
 
     <!-- Allows an application to read the user's calendar data. -->
     <permission android:name="android.permission.READ_CALENDAR"
@@ -366,9 +370,10 @@
          calendar to create / view events.-->
     <permission-group android:name="android.permission-group.USER_DICTIONARY"
         android:label="@string/permgrouplab_dictionary"
+        android:icon="@drawable/perm_group_user_dictionary"
         android:description="@string/permgroupdesc_dictionary"
         android:permissionGroupFlags="personalInfo"
-        android:priority="20" />
+        android:priority="170" />
 
     <!-- Allows an application to read the user dictionary. This should
          really only be required by an IME, or a dictionary editor like
@@ -379,9 +384,18 @@
         android:label="@string/permlab_readDictionary"
         android:description="@string/permdesc_readDictionary" />
 
+    <!-- Used for permissions that provide access to the user
+         calendar to create / view events.-->
+    <permission-group android:name="android.permission-group.WRITE_USER_DICTIONARY"
+        android:label="@string/permgrouplab_writeDictionary"
+        android:icon="@drawable/perm_group_user_dictionary_write"
+        android:description="@string/permgroupdesc_writeDictionary"
+        android:permissionGroupFlags="personalInfo"
+        android:priority="160" />
+
     <!-- Allows an application to write to the user dictionary. -->
     <permission android:name="android.permission.WRITE_USER_DICTIONARY"
-        android:permissionGroup="android.permission-group.USER_DICTIONARY"
+        android:permissionGroup="android.permission-group.WRITE_USER_DICTIONARY"
         android:protectionLevel="normal"
         android:label="@string/permlab_writeDictionary"
         android:description="@string/permdesc_writeDictionary" />
@@ -395,9 +409,10 @@
          bookmarks and browser history.-->
     <permission-group android:name="android.permission-group.BOOKMARKS"
         android:label="@string/permgrouplab_bookmarks"
+        android:icon="@drawable/perm_group_bookmarks"
         android:description="@string/permgroupdesc_bookmarks"
         android:permissionGroupFlags="personalInfo"
-        android:priority="8" />
+        android:priority="300" />
 
     <!-- Allows an application to read (but not write) the user's
         browsing history and bookmarks. -->
@@ -423,9 +438,10 @@
     <!-- Used for permissions that provide access to the user voicemail box. -->
     <permission-group android:name="android.permission-group.DEVICE_ALARMS"
         android:label="@string/permgrouplab_deviceAlarms"
+        android:icon="@drawable/perm_group_device_alarms"
         android:description="@string/permgroupdesc_deviceAlarms"
         android:permissionGroupFlags="personalInfo"
-        android:priority="16"/>
+        android:priority="210" />
 
     <!-- Allows an application to broadcast an Intent to set an alarm for the
          user. -->
@@ -443,9 +459,10 @@
     <!-- Used for permissions that provide access to the user voicemail box. -->
     <permission-group android:name="android.permission-group.VOICEMAIL"
         android:label="@string/permgrouplab_voicemail"
+        android:icon="@drawable/perm_group_voicemail"
         android:description="@string/permgroupdesc_voicemail"
         android:permissionGroupFlags="personalInfo"
-        android:priority="10" />
+        android:priority="280" />
 
    <!-- Allows an application to add voicemails into the system. -->
     <permission android:name="com.android.voicemail.permission.ADD_VOICEMAIL"
@@ -463,9 +480,10 @@
          location. -->
     <permission-group android:name="android.permission-group.LOCATION"
         android:label="@string/permgrouplab_location"
+        android:icon="@drawable/perm_group_location"
         android:description="@string/permgroupdesc_location"
         android:permissionGroupFlags="personalInfo"
-        android:priority="5" />
+        android:priority="330" />
 
     <!-- Allows an application to access fine (e.g., GPS) location -->
     <permission android:name="android.permission.ACCESS_FINE_LOCATION"
@@ -512,8 +530,9 @@
          or other related network operations. -->
     <permission-group android:name="android.permission-group.NETWORK"
         android:label="@string/permgrouplab_network"
+        android:icon="@drawable/perm_group_network"
         android:description="@string/permgroupdesc_network"
-        android:priority="11" />
+        android:priority="270" />
 
     <!-- Allows applications to open network sockets. -->
     <permission android:name="android.permission.INTERNET"
@@ -562,28 +581,36 @@
     <!-- ======================================= -->
     <eat-comment />
 
-    <!-- Used for permissions that provide access to network services that
-         are for peripherals and other nearby devices.  These networks
-         generally do not provide IP based networking or internet access.-->
-    <permission-group android:name="android.permission-group.SHORTRANGE_NETWORK"
-        android:label="@string/permgrouplab_shortRangeNetwork"
-        android:description="@string/permgroupdesc_shortRangeNetwork"
-        android:priority="12" />
+    <!-- Used for permissions that provide access to other devices through Bluetooth.-->
+    <permission-group android:name="android.permission-group.BLUETOOTH_NETWORK"
+        android:label="@string/permgrouplab_bluetoothNetwork"
+        android:icon="@drawable/perm_group_bluetooth"
+        android:description="@string/permgroupdesc_bluetoothNetwork"
+        android:priority="260" />
 
     <!-- Allows applications to connect to paired bluetooth devices -->
     <permission android:name="android.permission.BLUETOOTH"
-        android:permissionGroup="android.permission-group.SHORTRANGE_NETWORK"
+        android:permissionGroup="android.permission-group.BLUETOOTH_NETWORK"
         android:protectionLevel="dangerous"
         android:description="@string/permdesc_bluetooth"
         android:label="@string/permlab_bluetooth" />
         
     <!-- Allows applications to discover and pair bluetooth devices -->
     <permission android:name="android.permission.BLUETOOTH_ADMIN"
-        android:permissionGroup="android.permission-group.SHORTRANGE_NETWORK"
+        android:permissionGroup="android.permission-group.BLUETOOTH_NETWORK"
         android:protectionLevel="dangerous"
         android:description="@string/permdesc_bluetoothAdmin"
         android:label="@string/permlab_bluetoothAdmin" />
    
+    <!-- Used for permissions that provide access to network services that
+         are for peripherals and other nearby devices.  These networks
+         generally do not provide IP based networking or internet access.-->
+    <permission-group android:name="android.permission-group.SHORTRANGE_NETWORK"
+        android:label="@string/permgrouplab_shortrangeNetwork"
+        android:icon="@drawable/perm_group_shortrange_network"
+        android:description="@string/permgroupdesc_shortrangeNetwork"
+        android:priority="250" />
+
     <!-- Allows applications to perform I/O operations over NFC -->
     <permission android:name="android.permission.NFC"
         android:permissionGroup="android.permission-group.SHORTRANGE_NETWORK"
@@ -607,9 +634,10 @@
          by the Account Manager. -->
     <permission-group android:name="android.permission-group.ACCOUNTS"
         android:label="@string/permgrouplab_accounts"
+        android:icon="@drawable/perm_group_accounts"
         android:description="@string/permgroupdesc_accounts"
         android:permissionGroupFlags="personalInfo"
-        android:priority="17" />
+        android:priority="200" />
 
     <!-- Allows access to the list of accounts in the Accounts Service -->
     <permission android:name="android.permission.GET_ACCOUNTS"
@@ -659,8 +687,9 @@
 
     <permission-group android:name="android.permission-group.AFFECTS_BATTERY"
         android:label="@string/permgrouplab_affectsBattery"
+        android:icon="@drawable/perm_group_affects_battery"
         android:description="@string/permgroupdesc_affectsBattery"
-        android:priority="19" />
+        android:priority="180" />
 
     <!-- Allows applications to enter Wi-Fi Multicast mode -->
     <permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"
@@ -699,8 +728,9 @@
          the device. -->
     <permission-group android:name="android.permission-group.AUDIO_SETTINGS"
         android:label="@string/permgrouplab_audioSettings"
+        android:icon="@drawable/perm_group_audio_settings"
         android:description="@string/permgroupdesc_audioSettings"
-        android:priority="25" />
+        android:priority="130" />
 
     <!-- Allows an application to modify global audio settings -->
     <permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"
@@ -719,7 +749,7 @@
     <permission-group android:name="android.permission-group.HARDWARE_CONTROLS"
         android:label="@string/permgrouplab_hardwareControls"
         android:description="@string/permgroupdesc_hardwareControls"
-        android:priority="26"/>
+        android:priority="260"/>
 
     <!-- Allows an application to manage preferences and permissions for USB devices
          @hide -->
@@ -766,9 +796,10 @@
          but are in a separate (more visible) permission group. -->
     <permission-group android:name="android.permission-group.MICROPHONE"
         android:label="@string/permgrouplab_microphone"
+        android:icon="@drawable/perm_group_microphone"
         android:description="@string/permgroupdesc_microphone"
         android:permissionGroupFlags="personalInfo"
-        android:priority="4" />
+        android:priority="340" />
 
     <!-- Allows an application to record audio -->
     <permission android:name="android.permission.RECORD_AUDIO"
@@ -786,9 +817,10 @@
          camera or capturing images/video from the device. -->
     <permission-group android:name="android.permission-group.CAMERA"
         android:label="@string/permgrouplab_camera"
+        android:icon="@drawable/perm_group_camera"
         android:description="@string/permgroupdesc_camera"
         android:permissionGroupFlags="personalInfo"
-        android:priority="3" />
+        android:priority="350" />
 
     <!-- Required to be able to access the camera device.
          <p>This will automatically enforce the <a
@@ -813,9 +845,10 @@
          and modifying the phone state. -->
     <permission-group android:name="android.permission-group.PHONE_CALLS"
         android:label="@string/permgrouplab_phoneCalls"
+        android:icon="@drawable/perm_group_phone_calls"
         android:description="@string/permgroupdesc_phoneCalls"
         android:permissionGroupFlags="personalInfo"
-        android:priority="1" />
+        android:priority="370" />
 
     <!-- Allows an application to monitor, modify, or abort outgoing
          calls. -->
@@ -870,9 +903,10 @@
     <!-- Group of permissions that are related to SD card access. -->
     <permission-group android:name="android.permission-group.STORAGE"
         android:label="@string/permgrouplab_storage"
+        android:icon="@drawable/perm_group_storage"
         android:description="@string/permgroupdesc_storage"
         android:permissionGroupFlags="personalInfo"
-        android:priority="13" />
+        android:priority="240" />
 
     <!-- Allows an application to read from external storage -->
     <permission android:name="android.permission.READ_EXTERNAL_STORAGE"
@@ -904,8 +938,10 @@
     <!-- Group of permissions that are related to the screenlock. -->
     <permission-group android:name="android.permission-group.SCREENLOCK"
         android:label="@string/permgrouplab_storage"
+        android:icon="@drawable/perm_group_screenlock"
         android:permissionGroupFlags="personalInfo"
-        android:description="@string/permgroupdesc_storage" />
+        android:description="@string/permgroupdesc_storage"
+        android:priority="230" />
 
     <!-- Allows applications to disable the keyguard -->
     <permission android:name="android.permission.DISABLE_KEYGUARD"
@@ -924,7 +960,9 @@
          running apps, or killing background processes. -->
     <permission-group android:name="android.permission-group.APP_INFO"
         android:label="@string/permgrouplab_appInfo"
-        android:description="@string/permgroupdesc_appInfo" />
+        android:icon="@drawable/perm_group_app_info"
+        android:description="@string/permgroupdesc_appInfo"
+        android:priority="220" />
 
     <!-- Allows an application to get information about the currently
          or recently running tasks. -->
@@ -990,8 +1028,9 @@
          another application displays UI to the user. -->
     <permission-group android:name="android.permission-group.DISPLAY"
         android:label="@string/permgrouplab_display"
+        android:icon="@drawable/perm_group_display"
         android:description="@string/permgroupdesc_display"
-        android:priority="18"/>
+        android:priority="190"/>
 
     <!-- Allows an application to open windows using the type
          {@link android.view.WindowManager.LayoutParams#TYPE_SYSTEM_ALERT},
@@ -1013,8 +1052,9 @@
          another application displays UI to the user. -->
     <permission-group android:name="android.permission-group.WALLPAPER"
         android:label="@string/permgrouplab_wallpaper"
+        android:icon="@drawable/perm_group_wallpaper"
         android:description="@string/permgroupdesc_wallpaper"
-        android:priority="22" />
+        android:priority="150" />
 
     <!-- Allows applications to set the wallpaper -->
     <permission android:name="android.permission.SET_WALLPAPER"
@@ -1038,8 +1078,9 @@
     <!-- Group of permissions that are related to system clock. -->
     <permission-group android:name="android.permission-group.SYSTEM_CLOCK"
         android:label="@string/permgrouplab_systemClock"
+        android:icon="@drawable/perm_group_system_clock"
         android:description="@string/permgroupdesc_systemClock"
-        android:priority="23" />
+        android:priority="140" />
 
     <!-- Allows applications to set the system time -->
     <permission android:name="android.permission.SET_TIME"
@@ -1061,7 +1102,9 @@
     <!-- Used for permissions that change the status bar -->
     <permission-group android:name="android.permission-group.STATUS_BAR"
         android:label="@string/permgrouplab_statusBar"
-        android:description="@string/permgroupdesc_statusBar" />
+        android:icon="@drawable/perm_group_status_bar"
+        android:description="@string/permgroupdesc_statusBar"
+        android:priority="110" />
 
     <!-- Allows an application to expand or collapse the status bar. -->
     <permission android:name="android.permission.EXPAND_STATUS_BAR"
@@ -1078,8 +1121,9 @@
          related information. -->
     <permission-group android:name="android.permission-group.SYNC_SETTINGS"
         android:label="@string/permgrouplab_syncSettings"
+        android:icon="@drawable/perm_group_sync_settings"
         android:description="@string/permgroupdesc_syncSettings"
-        android:priority="29" />
+        android:priority="120" />
 
     <!-- Allows applications to read the sync settings -->
     <permission android:name="android.permission.READ_SYNC_SETTINGS"
@@ -1116,8 +1160,9 @@
          such as writing the global system settings. -->
     <permission-group android:name="android.permission-group.SYSTEM_TOOLS"
         android:label="@string/permgrouplab_systemTools"
+        android:icon="@drawable/perm_group_system_tools"
         android:description="@string/permgroupdesc_systemTools"
-        android:priority="30" />
+        android:priority="100" />
 
     <!-- @hide Change the screen compatibility mode of applications -->
     <permission android:name="android.permission.SET_SCREEN_COMPATIBILITY"
@@ -1345,7 +1390,7 @@
     <permission-group android:name="android.permission-group.DEVELOPMENT_TOOLS"
         android:label="@string/permgrouplab_developmentTools"
         android:description="@string/permgroupdesc_developmentTools"
-        android:priority="31" />
+        android:priority="310" />
 
     <!-- Allows an application to read or write the secure system settings. -->
     <permission android:name="android.permission.WRITE_SECURE_SETTINGS"

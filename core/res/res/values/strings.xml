@@ -408,16 +408,21 @@
     <string name="permgroupdesc_network">Access various network features.</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_shortRangeNetwork">Bluetooth and NFC</string>
+    <string name="permgrouplab_bluetoothNetwork">Bluetooth</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_shortRangeNetwork">Access Bluetooth or NFC networks and devices.</string>
+    <string name="permgroupdesc_bluetoothNetwork">Access devices and networks through Bluetooth.</string>
 
-  <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgrouplab_shortrangeNetwork">Short-range Networks</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgroupdesc_shortrangeNetwork">Access devices through short-range networks such as NFC.</string>
+
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_audioSettings">Audio Settings</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_audioSettings">Change audio settings.</string>
 
-  <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_affectsBattery">Affects Battery</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_affectsBattery">Use features that can quickly drain battery.</string>
@@ -428,9 +433,14 @@
     <string name="permgroupdesc_calendar">Direct access to calendar and events.</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_dictionary">User Dictionary</string>
+    <string name="permgrouplab_dictionary">Read User Dictionary</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_dictionary">Direct access to the user dictionary.</string>
+    <string name="permgroupdesc_dictionary">Read words in user dictionary.</string>
+
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgrouplab_writeDictionary">Write User Dictionary</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgroupdesc_writeDictionary">Add words to the user dictionary.</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_bookmarks">Bookmarks and History</string>
@@ -2976,18 +2986,12 @@
     <string name="date_time_done">Done</string>
 
     <!-- Security Permissions strings-->
-    <!-- The default permission group for any permissions that have not explicitly set a group. -->
-    <string name="default_permission_group">Default</string>
-    <!-- Do not translate. -->
-    <string name="permissions_format"><xliff:g id="perm_line1">%1$s</xliff:g>, <xliff:g id="perm_line2">%2$s</xliff:g></string>
     <!-- Text that is placed at the front of a permission name that is being added to an app [CHAR LIMIT=NONE] -->
     <string name="perms_new_perm_prefix"><font size="12" fgcolor="#ff900000">NEW: </font></string>
+    <!-- Text that is placed at the front of a permission name that is being added to an app [CHAR LIMIT=NONE] -->
+    <string name="perms_description_app">Provided by <xliff:g id="app_name">%1$s</xliff:g>.</string>
     <!-- Shown for an application when it doesn't require any permission grants. -->
     <string name="no_permissions">No permissions required</string>
-    <!-- When installing an application, the less-dangerous permissions are hidden.  If the user showed those, this is the text to hide them again.  -->
-    <string name="perms_hide"><b>Hide</b></string>
-    <!-- When installing an application, the less-dangerous permissions are hidden.  This is the text to show those. -->
-    <string name="perms_show_all"><b>Show all</b></string>
 
     <!-- USB storage dialog strings -->
     <!-- This is the title for the activity's window. -->
