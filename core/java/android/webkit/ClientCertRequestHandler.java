@@ -21,6 +21,8 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import org.apache.harmony.xnet.provider.jsse.NativeCrypto;
+import org.apache.harmony.xnet.provider.jsse.OpenSSLDSAPrivateKey;
+import org.apache.harmony.xnet.provider.jsse.OpenSSLRSAPrivateKey;
 
 /**
  * ClientCertRequestHandler: class responsible for handling client
@@ -50,24 +52,49 @@ public final class ClientCertRequestHandler extends Handler {
      * Proceed with the specified private key and client certificate chain.
      */
     public void proceed(PrivateKey privateKey, X509Certificate[] chain) {
-        final byte[] privateKeyBytes = privateKey.getEncoded();
-        final byte[][] chainBytes;
         try {
-            chainBytes = NativeCrypto.encodeCertificates(chain);
-            mTable.Allow(mHostAndPort, privateKeyBytes, chainBytes);
-            post(new Runnable() {
-                    public void run() {
-                        mBrowserFrame.nativeSslClientCert(mHandle, privateKeyBytes, chainBytes);
-                    }
-                });
+            byte[][] chainBytes = NativeCrypto.encodeCertificates(chain);
+            mTable.Allow(mHostAndPort, privateKey, chainBytes);
+
+            if (privateKey instanceof OpenSSLRSAPrivateKey) {
+                setSslClientCertFromCtx(((OpenSSLRSAPrivateKey)privateKey).getPkeyContext(),
+                           chainBytes);
+            } else if (privateKey instanceof OpenSSLDSAPrivateKey) {
+                setSslClientCertFromCtx(((OpenSSLDSAPrivateKey)privateKey).getPkeyContext(),
+                           chainBytes);
+            } else {
+                setSslClientCertFromPKCS8(privateKey.getEncoded(),chainBytes);
+            }
         } catch (CertificateEncodingException e) {
             post(new Runnable() {
                     public void run() {
-                        mBrowserFrame.nativeSslClientCert(mHandle, null, null);
+                        mBrowserFrame.nativeSslClientCert(mHandle, 0, null);
                         return;
                     }
                 });
         }
+    }
+
+    /**
+     * Proceed with the specified private key bytes and client certificate chain.
+     */
+    private void setSslClientCertFromCtx(final int ctx, final byte[][] chainBytes) {
+        post(new Runnable() {
+                public void run() {
+                    mBrowserFrame.nativeSslClientCert(mHandle, ctx, chainBytes);
+                }
+            });
+    }
+
+    /**
+     * Proceed with the specified private key context and client certificate chain.
+     */
+    private void setSslClientCertFromPKCS8(final byte[] key, final byte[][] chainBytes) {
+        post(new Runnable() {
+                public void run() {
+                    mBrowserFrame.nativeSslClientCert(mHandle, key, chainBytes);
+                }
+            });
     }
 
     /**
@@ -76,7 +103,7 @@ public final class ClientCertRequestHandler extends Handler {
     public void ignore() {
         post(new Runnable() {
                 public void run() {
-                    mBrowserFrame.nativeSslClientCert(mHandle, null, null);
+                    mBrowserFrame.nativeSslClientCert(mHandle, 0, null);
                 }
             });
     }
@@ -88,7 +115,7 @@ public final class ClientCertRequestHandler extends Handler {
         mTable.Deny(mHostAndPort);
         post(new Runnable() {
                 public void run() {
-                    mBrowserFrame.nativeSslClientCert(mHandle, null, null);
+                    mBrowserFrame.nativeSslClientCert(mHandle, 0, null);
                 }
             });
     }

@@ -56,6 +56,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.harmony.security.provider.cert.X509CertImpl;
+import org.apache.harmony.xnet.provider.jsse.OpenSSLDSAPrivateKey;
+import org.apache.harmony.xnet.provider.jsse.OpenSSLRSAPrivateKey;
 
 class BrowserFrame extends Handler {
 
@@ -1104,12 +1106,23 @@ class BrowserFrame extends Handler {
         SslClientCertLookupTable table = SslClientCertLookupTable.getInstance();
         if (table.IsAllowed(hostAndPort)) {
             // previously allowed
-            nativeSslClientCert(handle,
-                                table.PrivateKey(hostAndPort),
-                                table.CertificateChain(hostAndPort));
+            PrivateKey pkey = table.PrivateKey(hostAndPort);
+            if (pkey instanceof OpenSSLRSAPrivateKey) {
+                nativeSslClientCert(handle,
+                                    ((OpenSSLRSAPrivateKey)pkey).getPkeyContext(),
+                                    table.CertificateChain(hostAndPort));
+            } else if (pkey instanceof OpenSSLDSAPrivateKey) {
+                nativeSslClientCert(handle,
+                                    ((OpenSSLDSAPrivateKey)pkey).getPkeyContext(),
+                                    table.CertificateChain(hostAndPort));
+            } else {
+                nativeSslClientCert(handle,
+                                    pkey.getEncoded(),
+                                    table.CertificateChain(hostAndPort));
+            }
         } else if (table.IsDenied(hostAndPort)) {
             // previously denied
-            nativeSslClientCert(handle, null, null);
+            nativeSslClientCert(handle, 0, null);
         } else {
             // previously ignored or new
             mCallbackProxy.onReceivedClientCertRequest(
@@ -1296,7 +1309,11 @@ class BrowserFrame extends Handler {
     private native void nativeSslCertErrorCancel(int handle, int certError);
 
     native void nativeSslClientCert(int handle,
-                                    byte[] pkcs8EncodedPrivateKey,
+                                    int ctx,
+                                    byte[][] asn1DerEncodedCertificateChain);
+
+    native void nativeSslClientCert(int handle,
+                                    byte[] pkey,
                                     byte[][] asn1DerEncodedCertificateChain);
 
     /**
