@@ -32,6 +32,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 
 import com.android.systemui.ExpandHelper;
@@ -106,6 +107,14 @@ public class NotificationRowLayout
 
     public void setLongPressListener(View.OnLongClickListener listener) {
         mSwipeHelper.setLongPressListener(listener);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        if (!hasWindowFocus) {
+            mSwipeHelper.removeLongPressCallback();
+        }
     }
 
     public void setAnimateBounds(boolean anim) {

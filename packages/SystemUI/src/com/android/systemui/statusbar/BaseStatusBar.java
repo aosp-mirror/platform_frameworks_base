@@ -91,6 +91,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected RecentsPanelView mRecentsPanel;
     protected RecentTasksLoader mRecentTasksLoader;
 
+    protected PopupMenu mNotificationBlamePopup;
+
     // UI-specific methods
 
     /**
@@ -238,9 +240,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                 final String packageNameF = (String) v.getTag();
                 if (packageNameF == null) return false;
                 if (v.getWindowToken() == null) return false;
-                PopupMenu popup = new PopupMenu(mContext, v);
-                popup.getMenuInflater().inflate(R.menu.notification_popup_menu, popup.getMenu());
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                mNotificationBlamePopup = new PopupMenu(mContext, v);
+                mNotificationBlamePopup.getMenuInflater().inflate(
+                        R.menu.notification_popup_menu,
+                        mNotificationBlamePopup.getMenu());
+                mNotificationBlamePopup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(MenuItem item) {
                         if (item.getItemId() == R.id.notification_inspect_item) {
                             startApplicationDetailsActivity(packageNameF);
@@ -251,11 +255,18 @@ public abstract class BaseStatusBar extends SystemUI implements
                         return true;
                     }
                 });
-                popup.show();
+                mNotificationBlamePopup.show();
 
                 return true;
             }
         };
+    }
+
+    public void dismissPopups() {
+        if (mNotificationBlamePopup != null) {
+            mNotificationBlamePopup.dismiss();
+            mNotificationBlamePopup = null;
+        }
     }
 
     public void dismissIntruder() {
