@@ -26,6 +26,7 @@ PRODUCT_PACKAGES := \
     Roboto-BoldItalic.ttf \
     DroidNaskh-Regular.ttf \
     DroidNaskh-Regular-SystemUI.ttf \
+    DroidSansDevanagari-Regular.ttf \
     DroidSansHebrew-Regular.ttf \
     DroidSansHebrew-Bold.ttf \
     DroidSansThai.ttf \
