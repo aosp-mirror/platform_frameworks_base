@@ -616,10 +616,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // persist if beyond new thresholds
         final long currentTime = mTime.hasCache() ? mTime.currentTimeMillis()
                 : System.currentTimeMillis();
-        mDevRecorder.maybePersistLocked(currentTime);
-        mXtRecorder.maybePersistLocked(currentTime);
-        mUidRecorder.maybePersistLocked(currentTime);
-        mUidTagRecorder.maybePersistLocked(currentTime);
+        synchronized (mStatsLock) {
+            mDevRecorder.maybePersistLocked(currentTime);
+            mXtRecorder.maybePersistLocked(currentTime);
+            mUidRecorder.maybePersistLocked(currentTime);
+            mUidTagRecorder.maybePersistLocked(currentTime);
+        }
 
         // re-arm global alert
         registerGlobalAlert();
