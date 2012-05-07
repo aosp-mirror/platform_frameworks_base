@@ -1509,6 +1509,11 @@
   <java-symbol type="bool" name="config_enableDreams" />
   <java-symbol type="string" name="config_defaultDreamComponent" />
 
+  <java-symbol type="layout" name="resolver_grid" />
+  <java-symbol type="id" name="resolver_grid" />
+  <java-symbol type="id" name="button_once" />
+  <java-symbol type="id" name="button_always" />
+
   <!-- From SystemUI -->
   <java-symbol type="anim" name="push_down_in" />
   <java-symbol type="anim" name="push_down_out" />

@@ -18,39 +18,40 @@
 */
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:minHeight="?android:attr/listPreferredItemHeight"
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
-    android:paddingLeft="16dip"
-    android:paddingRight="16dip">
+              android:gravity="center"
+              android:orientation="vertical"
+              android:layout_height="wrap_content"
+              android:layout_width="match_parent"
+              android:background="?android:attr/activatedBackgroundIndicator"
+              android:padding="16dp">
 
-    <!-- Activity icon when presenting dialog -->
+    <!-- Extended activity info to distinguish between duplicate activity names -->
+    <TextView android:id="@android:id/text2"
+              android:textAppearance="?android:attr/textAppearance"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:gravity="center"
+              android:minLines="2"
+              android:maxLines="2"
+              android:paddingLeft="8dip"
+              android:paddingRight="8dip" />
+
+    <!-- Activity icon when presenting dialog
+         Size will be filled in by ResolverActivity -->
     <ImageView android:id="@+id/icon"
-        android:layout_width="@android:dimen/app_icon_size"
-        android:layout_height="@android:dimen/app_icon_size"
-        android:scaleType="fitCenter" />
+               android:layout_width="0dp"
+               android:layout_height="0dp"
+               android:scaleType="fitCenter" />
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:gravity="center_vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
-        <!-- Activity name -->
-        <TextView android:id="@android:id/text1"
-            android:textAppearance="?android:attr/textAppearanceListItemSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:maxLines="2"
-            android:paddingLeft="16dip" />
-        <!-- Extended activity info to distinguish between duplicate activity names -->
-        <TextView android:id="@android:id/text2"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:maxLines="2"
-            android:paddingLeft="16dip" />
-    </LinearLayout>
+    <!-- Activity name -->
+    <TextView android:id="@android:id/text1"
+              android:textAppearance="?android:attr/textAppearanceSmall"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:gravity="center"
+              android:minLines="2"
+              android:maxLines="2"
+              android:paddingLeft="8dip"
+              android:paddingRight="8dip" />
 </LinearLayout>
 
