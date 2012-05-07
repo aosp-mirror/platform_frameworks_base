@@ -360,6 +360,9 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         // already have a pixelref installed.
         pr = bitmap->pixelRef();
     }
+    if (pr == NULL) {
+        return nullObjectReturn("Got null SkPixelRef");
+    }
 
     if (!isMutable) {
         // promise we will never change our pixels (great for sharing and pictures)
