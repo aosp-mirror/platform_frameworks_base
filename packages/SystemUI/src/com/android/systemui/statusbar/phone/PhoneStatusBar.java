@@ -1247,6 +1247,10 @@ public class PhoneStatusBar extends BaseStatusBar {
             return;
         }
         mExpanded = false;
+
+        // Close any "App info" popups that might have snuck on-screen
+        dismissPopups();
+
         if (mPostCollapseCleanup != null) {
             mPostCollapseCleanup.run();
             mPostCollapseCleanup = null;

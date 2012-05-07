@@ -74,6 +74,7 @@ public class SwipeHelper implements Gefingerpoken {
     private boolean mLongPressSent;
     private View.OnLongClickListener mLongPressListener;
     private Runnable mWatchLongPress;
+    private long mLongPressTimeout;
 
     public SwipeHelper(int swipeDirection, Callback callback, float densityScale,
             float pagingTouchSlop) {
@@ -83,6 +84,8 @@ public class SwipeHelper implements Gefingerpoken {
         mVelocityTracker = VelocityTracker.obtain();
         mDensityScale = densityScale;
         mPagingTouchSlop = pagingTouchSlop;
+
+        mLongPressTimeout = (long) (ViewConfiguration.getLongPressTimeout() * 1.5f); // extra long-press!
     }
 
     public void setLongPressListener(View.OnLongClickListener listener) {
@@ -180,7 +183,7 @@ public class SwipeHelper implements Gefingerpoken {
         }
     }
 
-    private void removeLongPressCallback() {
+    public void removeLongPressCallback() {
         if (mWatchLongPress != null) {
             mHandler.removeCallbacks(mWatchLongPress);
         }
@@ -214,7 +217,7 @@ public class SwipeHelper implements Gefingerpoken {
                                 }
                             };
                         }
-                        mHandler.postDelayed(mWatchLongPress, ViewConfiguration.getLongPressTimeout());
+                        mHandler.postDelayed(mWatchLongPress, mLongPressTimeout);
                     }
 
                 }
