@@ -14508,9 +14508,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                             // activities causes more harm than good.
                             if (curLevel >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE
                                     && app != mHomeProcess && app != mPreviousProcess) {
+                                // Need to do this on its own message because the stack may not
+                                // be in a consistent state at this point.
                                 // For these apps we will also finish their activities
                                 // to help them free memory.
-                                mMainStack.destroyActivitiesLocked(app, false, "trim");
+                                mMainStack.scheduleDestroyActivities(app, false, "trim");
                             }
                         }
                     }
@@ -14582,7 +14584,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (mAlwaysFinishActivities) {
-            mMainStack.destroyActivitiesLocked(null, false, "always-finish");
+            // Need to do this on its own message because the stack may not
+            // be in a consistent state at this point.
+            mMainStack.scheduleDestroyActivities(null, false, "always-finish");
         }
     }
 
