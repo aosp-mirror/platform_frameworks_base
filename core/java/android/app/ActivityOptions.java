@@ -147,12 +147,17 @@ public class ActivityOptions {
      * activity is scaled from a small originating area of the screen to
      * its final full representation.
      *
+     * <p>If the Intent this is being used with has not set its
+     * {@link android.content.Intent#setSourceBounds Intent.setSourceBounds},
+     * those bounds will be filled in for you based on the initial
+     * bounds passed in here.
+     *
      * @param source The View that the new activity is animating from.  This
      * defines the coordinate space for <var>startX</var> and <var>startY</var>.
      * @param startX The x starting location of the new activity, relative to <var>source</var>.
      * @param startY The y starting location of the activity, relative to <var>source</var>.
      * @param startWidth The initial width of the new activity.
-     * @param startWidth The initial height of the new activity.
+     * @param startHeight The initial height of the new activity.
      * @return Returns a new ActivityOptions object that you can use to
      * supply these options as the options Bundle when starting an activity.
      */
@@ -174,6 +179,11 @@ public class ActivityOptions {
      * Create an ActivityOptions specifying an animation where a thumbnail
      * is scaled from a given position to the new activity window that is
      * being started.
+     *
+     * <p>If the Intent this is being used with has not set its
+     * {@link android.content.Intent#setSourceBounds Intent.setSourceBounds},
+     * those bounds will be filled in for you based on the initial
+     * thumbnail location and size provided here.
      *
      * @param source The View that this thumbnail is animating from.  This
      * defines the coordinate space for <var>startX</var> and <var>startY</var>.
