@@ -128,13 +128,16 @@ public class Ringtone {
                                     actualTitle);
                 }
             } else {
-                
-                if (DrmStore.AUTHORITY.equals(authority)) {
-                    cursor = res.query(uri, DRM_COLUMNS, null, null, null);
-                } else if (MediaStore.AUTHORITY.equals(authority)) {
-                    cursor = res.query(uri, MEDIA_COLUMNS, null, null, null);
+                try {
+                    if (DrmStore.AUTHORITY.equals(authority)) {
+                        cursor = res.query(uri, DRM_COLUMNS, null, null, null);
+                    } else if (MediaStore.AUTHORITY.equals(authority)) {
+                        cursor = res.query(uri, MEDIA_COLUMNS, null, null, null);
+                    }
+                } catch (SecurityException e) {
+                    // missing cursor is handled below
                 }
-                
+
                 try {
                     if (cursor != null && cursor.getCount() == 1) {
                         cursor.moveToFirst();
@@ -188,12 +191,12 @@ public class Ringtone {
         } catch (SecurityException e) {
             destroyLocalPlayer();
             if (!mAllowRemote) {
-                throw new IllegalStateException("Remote playback not allowed", e);
+                Log.w(TAG, "Remote playback not allowed: " + e);
             }
         } catch (IOException e) {
             destroyLocalPlayer();
             if (!mAllowRemote) {
-                throw new IllegalStateException("Remote playback not allowed", e);
+                Log.w(TAG, "Remote playback not allowed: " + e);
             }
         }
 
@@ -228,7 +231,7 @@ public class Ringtone {
                 Log.w(TAG, "Problem playing ringtone: " + e);
             }
         } else {
-            throw new IllegalStateException("Neither local nor remote playback available");
+            Log.w(TAG, "Neither local nor remote playback available");
         }
     }
 
@@ -271,7 +274,8 @@ public class Ringtone {
                 return false;
             }
         } else {
-            throw new IllegalStateException("Neither local nor remote playback available");
+            Log.w(TAG, "Neither local nor remote playback available");
+            return false;
         }
     }
 
