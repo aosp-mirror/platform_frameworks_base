@@ -70,8 +70,13 @@ public class ActionMenuItemView extends TextView
         setOnClickListener(this);
         setOnLongClickListener(this);
 
-        // Save the inflated padding for later, we'll need it.
-        mSavedPaddingLeft = getPaddingLeft();
+        mSavedPaddingLeft = -1;
+    }
+
+    @Override
+    public void setPadding(int l, int t, int r, int b) {
+        mSavedPaddingLeft = l;
+        super.setPadding(l, t, r, b);
     }
 
     public MenuItemImpl getItemData() {
@@ -217,8 +222,9 @@ public class ActionMenuItemView extends TextView
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final boolean textVisible = hasText();
-        if (textVisible) {
-            setPadding(mSavedPaddingLeft, getPaddingTop(), getPaddingRight(), getPaddingBottom());
+        if (textVisible && mSavedPaddingLeft >= 0) {
+            super.setPadding(mSavedPaddingLeft, getPaddingTop(),
+                    getPaddingRight(), getPaddingBottom());
         }
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -240,7 +246,7 @@ public class ActionMenuItemView extends TextView
             // a little coercion. Pad in to center the icon after we've measured.
             final int w = getMeasuredWidth();
             final int dw = mIcon.getIntrinsicWidth();
-            setPadding((w - dw) / 2, getPaddingTop(), getPaddingRight(), getPaddingBottom());
+            super.setPadding((w - dw) / 2, getPaddingTop(), getPaddingRight(), getPaddingBottom());
         }
     }
 }

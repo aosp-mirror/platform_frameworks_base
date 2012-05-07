@@ -17,6 +17,7 @@ package com.android.internal.view.menu;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -24,6 +25,8 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.LinearLayout;
+
+import com.android.internal.R;
 
 /**
  * @hide
@@ -43,6 +46,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     private int mMinCellSize;
     private int mGeneratedItemPadding;
     private int mMeasuredExtraWidth;
+    private int mMaxItemHeight;
 
     public ActionMenuView(Context context) {
         this(context, null);
@@ -54,6 +58,11 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         final float density = context.getResources().getDisplayMetrics().density;
         mMinCellSize = (int) (MIN_CELL_SIZE * density);
         mGeneratedItemPadding = (int) (GENERATED_ITEM_PADDING * density);
+
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ActionBar,
+                R.attr.actionBarStyle, 0);
+        mMaxItemHeight = a.getDimensionPixelSize(R.styleable.ActionBar_height, 0);
+        a.recycle();
     }
 
     public void setPresenter(ActionMenuPresenter presenter) {
@@ -116,6 +125,11 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         final int widthPadding = getPaddingLeft() + getPaddingRight();
         final int heightPadding = getPaddingTop() + getPaddingBottom();
 
+        final int itemHeightSpec = heightMode == MeasureSpec.EXACTLY
+                ? MeasureSpec.makeMeasureSpec(heightSize - heightPadding, MeasureSpec.EXACTLY)
+                : MeasureSpec.makeMeasureSpec(
+                    Math.min(mMaxItemHeight, heightSize - heightPadding), MeasureSpec.AT_MOST);
+
         widthSize -= widthPadding;
 
         // Divide the view into cells.
@@ -167,7 +181,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             final int cellsAvailable = lp.isOverflowButton ? 1 : cellsRemaining;
 
             final int cellsUsed = measureChildForCells(child, cellSize, cellsAvailable,
-                    heightMeasureSpec, heightPadding);
+                    itemHeightSpec, heightPadding);
 
             maxCellsUsed = Math.max(maxCellsUsed, cellsUsed);
             if (lp.expandable) expandableItemCount++;
@@ -298,7 +312,6 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
         // Remeasure any items that have had extra space allocated to them.
         if (needsExpansion) {
-            int heightSpec = MeasureSpec.makeMeasureSpec(heightSize - heightPadding, heightMode);
             for (int i = 0; i < childCount; i++) {
                 final View child = getChildAt(i);
                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
@@ -306,7 +319,8 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
                 if (!lp.expanded) continue;
 
                 final int width = lp.cellsUsed * cellSize + lp.extraPixels;
-                child.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), heightSpec);
+                child.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                        itemHeightSpec);
             }
         }
 
