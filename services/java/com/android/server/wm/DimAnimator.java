@@ -68,8 +68,10 @@ class DimAnimator {
      * {@link #updateSurface} after all windows are examined.
      */
     void updateParameters(final Resources res, final Parameters params, final long currentTime) {
-        final int dw = params.mDimWidth;
-        final int dh = params.mDimHeight;
+        // Multiply by 1.5 so that rotating a frozen surface that includes this does not expose a
+        // corner.
+        final int dw = (int) (params.mDimWidth * 1.5);
+        final int dh = (int) (params.mDimHeight * 1.5);
         final WindowStateAnimator winAnimator = params.mDimWinAnimator;
         final float target = params.mDimTarget;
         if (!mDimShown) {
@@ -79,7 +81,8 @@ class DimAnimator {
             try {
                 mLastDimWidth = dw;
                 mLastDimHeight = dh;
-                mDimSurface.setPosition(0, 0);
+                // back off position so mDimXXX/4 is before and mDimXXX/4 is after
+                mDimSurface.setPosition(-1 * dw / 6, -1 * dh /6);
                 mDimSurface.setSize(dw, dh);
                 mDimSurface.show();
             } catch (RuntimeException e) {
@@ -89,6 +92,8 @@ class DimAnimator {
             mLastDimWidth = dw;
             mLastDimHeight = dh;
             mDimSurface.setSize(dw, dh);
+            // back off position so mDimXXX/4 is before and mDimXXX/4 is after
+            mDimSurface.setPosition(-1 * dw / 6, -1 * dh /6);
         }
 
         mDimSurface.setLayer(winAnimator.mAnimLayer - WindowManagerService.LAYER_OFFSET_DIM);
