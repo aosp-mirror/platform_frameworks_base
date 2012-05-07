@@ -242,8 +242,10 @@ public final class BluetoothSocket implements Closeable {
         // abortNative(), so this lock should immediately acquire
         mLock.writeLock().lock();
         try {
-            mSocketState = SocketState.CLOSED;
-            destroyNative();
+            if (mSocketState != SocketState.CLOSED) {
+                mSocketState = SocketState.CLOSED;
+                destroyNative();
+            }
         } finally {
             mLock.writeLock().unlock();
         }
