@@ -1512,6 +1512,7 @@
   <java-symbol type="id" name="resolver_grid" />
   <java-symbol type="id" name="button_once" />
   <java-symbol type="id" name="button_always" />
+  <java-symbol type="integer" name="config_maxResolverActivityColumns" />
 
   <!-- From SystemUI -->
   <java-symbol type="anim" name="push_down_in" />

@@ -35,5 +35,10 @@
     <!-- If true, the screen can be rotated via the accelerometer in all 4
          rotations as the default behavior. -->
     <bool name="config_allowAllRotations">true</bool>
+
+    <!-- Maximum number of grid columns permitted in the ResolverActivity
+         used for picking activities to handle an intent. -->
+    <integer name="config_maxResolverActivityColumns">3</integer>
+
 </resources>
 
