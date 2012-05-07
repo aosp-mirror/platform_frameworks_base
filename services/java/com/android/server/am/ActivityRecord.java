@@ -29,6 +29,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -562,12 +563,26 @@ final class ActivityRecord {
                     service.mWindowManager.overridePendingAppTransitionScaleUp(
                             pendingOptions.getStartX(), pendingOptions.getStartY(),
                             pendingOptions.getStartWidth(), pendingOptions.getStartHeight());
+                    if (intent.getSourceBounds() == null) {
+                        intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
+                                pendingOptions.getStartY(),
+                                pendingOptions.getStartX()+pendingOptions.getStartWidth(),
+                                pendingOptions.getStartY()+pendingOptions.getStartHeight()));
+                    }
                     break;
                 case ActivityOptions.ANIM_THUMBNAIL:
                     service.mWindowManager.overridePendingAppTransitionThumb(
                             pendingOptions.getThumbnail(),
                             pendingOptions.getStartX(), pendingOptions.getStartY(),
                             pendingOptions.getOnAnimationStartListener());
+                    if (intent.getSourceBounds() == null) {
+                        intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
+                                pendingOptions.getStartY(),
+                                pendingOptions.getStartX()
+                                        + pendingOptions.getThumbnail().getWidth(),
+                                pendingOptions.getStartY()
+                                        + pendingOptions.getThumbnail().getHeight()));
+                    }
                     break;
             }
             pendingOptions = null;
