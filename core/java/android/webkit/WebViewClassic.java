@@ -5753,6 +5753,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
         if (mInputDispatcher.postPointerEvent(ev, getScrollX(),
                 getScrollY() - getTitleHeight(), mZoomManager.getInvScale())) {
+            mInputDispatcher.dispatchUiEvents();
             return true;
         } else {
             Log.w(LOGTAG, "mInputDispatcher rejected the event!");
