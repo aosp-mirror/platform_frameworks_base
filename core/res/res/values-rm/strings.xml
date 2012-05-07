@@ -221,9 +221,13 @@
     <string name="permgrouplab_network" msgid="5808983377727109831">"Communicaziun rait"</string>
     <!-- no translation found for permgroupdesc_network (4478299413241861987) -->
     <skip />
-    <!-- no translation found for permgrouplab_shortRangeNetwork (4504840216096355984) -->
+    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
     <skip />
-    <!-- no translation found for permgroupdesc_shortRangeNetwork (8821013030346680806) -->
+    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
+    <skip />
+    <!-- no translation found for permgrouplab_shortrangeNetwork (130808676377486118) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
     <skip />
     <!-- no translation found for permgrouplab_audioSettings (8329261670151871235) -->
     <skip />
@@ -237,9 +241,13 @@
     <skip />
     <!-- no translation found for permgroupdesc_calendar (5777534316982184416) -->
     <skip />
-    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
+    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
     <skip />
-    <!-- no translation found for permgroupdesc_dictionary (40926483968949978) -->
+    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
+    <skip />
+    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
     <skip />
     <!-- no translation found for permgrouplab_bookmarks (1949519673103968229) -->
     <skip />
@@ -909,7 +917,7 @@
     <skip />
     <!-- no translation found for permlab_sdcardWrite (8485979062254666748) -->
     <skip />
-    <!-- no translation found for permlab_sdcardWrite (9084476432661578751) -->
+    <!-- no translation found for permlab_sdcardWrite (8805693630050458763) -->
     <skip />
     <!-- no translation found for permdesc_sdcardWrite (6175406299445710888) -->
     <skip />
@@ -1657,12 +1665,11 @@
     <string name="date_time_set" msgid="5777075614321087758">"Definir"</string>
     <!-- no translation found for date_time_done (2507683751759308828) -->
     <skip />
-    <string name="default_permission_group" msgid="2690160991405646128">"Standard"</string>
     <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
     <skip />
+    <!-- no translation found for perms_description_app (5139836143293299417) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Naginas permissiuns obligatoricas"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Zuppentar"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Mussar tut"</b></string>
     <!-- no translation found for usb_storage_activity_title (4465055157209648641) -->
     <skip />
     <string name="usb_storage_title" msgid="5901459041398751495">"Connectà cun agid d\'in cabel USB"</string>
@@ -2061,5 +2068,9 @@
     <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
     <skip />
     <!-- no translation found for SetupCallDefault (5834948469253758575) -->
+    <skip />
+    <!-- no translation found for activity_resolver_use_always (4167356512478150080) -->
+    <skip />
+    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
     <skip />
 </resources>

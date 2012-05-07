@@ -175,16 +175,28 @@
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Παρακολούθηση της φυσικής τοποθεσίας σας."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Επικοινωνία δικτύου"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Πρόσβαση σε διάφορες λειτουργίες δικτύου."</string>
-    <string name="permgrouplab_shortRangeNetwork" msgid="4504840216096355984">"Bluetooth και NFC"</string>
-    <string name="permgroupdesc_shortRangeNetwork" msgid="8821013030346680806">"Πρόσβαση δικτύων και συσκευών Bluetooth ή NFC."</string>
+    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
+    <skip />
+    <!-- no translation found for permgrouplab_shortrangeNetwork (130808676377486118) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
+    <skip />
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Ρυθμίσεις ήχου"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Αλλαγή ρυθμίσεων ήχου."</string>
     <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Επηρεάζει την μπαταρία"</string>
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Χρήση λειτουργιών που μπορούν να εξαντλήσουν γρήγορα την μπαταρία."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Ημερολόγιο"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Άμεση πρόσβαση σε ημερολόγιο και συμβάντα."</string>
-    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Λεξικό χρήστη"</string>
-    <string name="permgroupdesc_dictionary" msgid="40926483968949978">"Άμεση πρόσβαση στο λεξικό χρήστη."</string>
+    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
+    <skip />
+    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
+    <skip />
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Σελιδοδείκτες και ιστορικό"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Άμεση πρόσβαση σε σελιδοδείκτες και ιστορικού προγράμματος περιήγησης."</string>
     <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Ξυπνητήρι"</string>
@@ -557,7 +569,8 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Επιτρ. η ανάγν. περ. αποθ. χώρ. USB, με φωτ. και μέσα"</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Επιτρέπει στην εφαρμογή την ανάγνωση του περιεχομένου της κάρτας SD, το οποίο μπορεί να περιλαμβάνει φωτογραφίες και μέσα."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"τροπ. ή διαγρ. περιεχ. αποθ. χώρ. USB"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="9084476432661578751">"τροποποίηση ή διαγραφή του περιεχομένου της κάρτας SD"</string>
+    <!-- no translation found for permlab_sdcardWrite (8805693630050458763) -->
+    <skip />
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Επιτρέπει στην εφαρμογή την εγγραφή στον αποθηκευτικό χώρο USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Επιτρέπει στην εφαρμογή την εγγραφή στην κάρτα SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"τροπ./διαγ. περ. απ. εσ. μνήμ."</string>
@@ -1076,11 +1089,10 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Ορισμός ημερομηνίας"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Ορισμός"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Τέλος"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"Προεπιλεγμένο"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"ΝΕΟ: "</font></string>
+    <!-- no translation found for perms_description_app (5139836143293299417) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Δεν απαιτούνται άδειες"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Απόκρυψη"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Εμφάνιση όλων"</b></string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Μαζική αποθήκευση USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Το USB είναι συνδεδεμένο"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Συνδεθήκατε στον υπολογιστή σας μέσω USB. Αγγίξτε το παρακάτω κουμπί, αν θέλετε να κάνετε αντιγραφή αρχείων μεταξύ του υπολογιστή και του χώρου αποθήκευσης USB του Android."</string>
@@ -1309,4 +1321,8 @@
     <string name="sending" msgid="3245653681008218030">"Γίνεται αποστολή…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Εκκίνηση προγράμματος περιήγησης;"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Αποδοχή κλήσης;"</string>
+    <!-- no translation found for activity_resolver_use_always (4167356512478150080) -->
+    <skip />
+    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
+    <skip />
 </resources>
