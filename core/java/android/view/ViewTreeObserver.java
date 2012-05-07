@@ -20,7 +20,6 @@ import android.graphics.Rect;
 import android.graphics.Region;
 
 import java.util.ArrayList;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A view tree observer is used to register listeners that can be notified of global
@@ -32,12 +31,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * for more information.
  */
 public final class ViewTreeObserver {
-    private CopyOnWriteArrayList<OnGlobalFocusChangeListener> mOnGlobalFocusListeners;
-    private CopyOnWriteArrayList<OnGlobalLayoutListener> mOnGlobalLayoutListeners;
-    private CopyOnWriteArrayList<OnTouchModeChangeListener> mOnTouchModeChangeListeners;
-    private CopyOnWriteArrayList<OnComputeInternalInsetsListener> mOnComputeInternalInsetsListeners;
-    private CopyOnWriteArrayList<OnScrollChangedListener> mOnScrollChangedListeners;
-    private ArrayList<OnPreDrawListener> mOnPreDrawListeners;
+    private CopyOnWriteArray<OnGlobalFocusChangeListener> mOnGlobalFocusListeners;
+    private CopyOnWriteArray<OnGlobalLayoutListener> mOnGlobalLayoutListeners;
+    private CopyOnWriteArray<OnTouchModeChangeListener> mOnTouchModeChangeListeners;
+    private CopyOnWriteArray<OnComputeInternalInsetsListener> mOnComputeInternalInsetsListeners;
+    private CopyOnWriteArray<OnScrollChangedListener> mOnScrollChangedListeners;
+    private CopyOnWriteArray<OnPreDrawListener> mOnPreDrawListeners;
     private ArrayList<OnDrawListener> mOnDrawListeners;
 
     private boolean mAlive = true;
@@ -147,7 +146,7 @@ public final class ViewTreeObserver {
          * windows behind it should be placed.
          */
         public final Rect contentInsets = new Rect();
-        
+
         /**
          * Offsets from the frame of the window at which windows behind it
          * are visible.
@@ -166,13 +165,13 @@ public final class ViewTreeObserver {
          * can be touched.
          */
         public static final int TOUCHABLE_INSETS_FRAME = 0;
-        
+
         /**
          * Option for {@link #setTouchableInsets(int)}: the area inside of
          * the content insets can be touched.
          */
         public static final int TOUCHABLE_INSETS_CONTENT = 1;
-        
+
         /**
          * Option for {@link #setTouchableInsets(int)}: the area inside of
          * the visible insets can be touched.
@@ -195,7 +194,7 @@ public final class ViewTreeObserver {
         }
 
         int mTouchableInsets;
-        
+
         void reset() {
             contentInsets.setEmpty();
             visibleInsets.setEmpty();
@@ -231,7 +230,7 @@ public final class ViewTreeObserver {
             mTouchableInsets = other.mTouchableInsets;
         }
     }
-    
+
     /**
      * Interface definition for a callback to be invoked when layout has
      * completed and the client can compute its interior insets.
@@ -328,7 +327,7 @@ public final class ViewTreeObserver {
         checkIsAlive();
 
         if (mOnGlobalFocusListeners == null) {
-            mOnGlobalFocusListeners = new CopyOnWriteArrayList<OnGlobalFocusChangeListener>();
+            mOnGlobalFocusListeners = new CopyOnWriteArray<OnGlobalFocusChangeListener>();
         }
 
         mOnGlobalFocusListeners.add(listener);
@@ -363,7 +362,7 @@ public final class ViewTreeObserver {
         checkIsAlive();
 
         if (mOnGlobalLayoutListeners == null) {
-            mOnGlobalLayoutListeners = new CopyOnWriteArrayList<OnGlobalLayoutListener>();
+            mOnGlobalLayoutListeners = new CopyOnWriteArray<OnGlobalLayoutListener>();
         }
 
         mOnGlobalLayoutListeners.add(listener);
@@ -413,7 +412,7 @@ public final class ViewTreeObserver {
         checkIsAlive();
 
         if (mOnPreDrawListeners == null) {
-            mOnPreDrawListeners = new ArrayList<OnPreDrawListener>();
+            mOnPreDrawListeners = new CopyOnWriteArray<OnPreDrawListener>();
         }
 
         mOnPreDrawListeners.add(listener);
@@ -485,7 +484,7 @@ public final class ViewTreeObserver {
         checkIsAlive();
 
         if (mOnScrollChangedListeners == null) {
-            mOnScrollChangedListeners = new CopyOnWriteArrayList<OnScrollChangedListener>();
+            mOnScrollChangedListeners = new CopyOnWriteArray<OnScrollChangedListener>();
         }
 
         mOnScrollChangedListeners.add(listener);
@@ -519,7 +518,7 @@ public final class ViewTreeObserver {
         checkIsAlive();
 
         if (mOnTouchModeChangeListeners == null) {
-            mOnTouchModeChangeListeners = new CopyOnWriteArrayList<OnTouchModeChangeListener>();
+            mOnTouchModeChangeListeners = new CopyOnWriteArray<OnTouchModeChangeListener>();
         }
 
         mOnTouchModeChangeListeners.add(listener);
@@ -558,7 +557,7 @@ public final class ViewTreeObserver {
 
         if (mOnComputeInternalInsetsListeners == null) {
             mOnComputeInternalInsetsListeners =
-                    new CopyOnWriteArrayList<OnComputeInternalInsetsListener>();
+                    new CopyOnWriteArray<OnComputeInternalInsetsListener>();
         }
 
         mOnComputeInternalInsetsListeners.add(listener);
@@ -622,10 +621,16 @@ public final class ViewTreeObserver {
         // perform the dispatching. The iterator is a safe guard against listeners that
         // could mutate the list by calling the various add/remove methods. This prevents
         // the array from being modified while we iterate it.
-        final CopyOnWriteArrayList<OnGlobalFocusChangeListener> listeners = mOnGlobalFocusListeners;
+        final CopyOnWriteArray<OnGlobalFocusChangeListener> listeners = mOnGlobalFocusListeners;
         if (listeners != null && listeners.size() > 0) {
-            for (OnGlobalFocusChangeListener listener : listeners) {
-                listener.onGlobalFocusChanged(oldFocus, newFocus);
+            CopyOnWriteArray.Access<OnGlobalFocusChangeListener> access = listeners.start();
+            try {
+                int count = access.size();
+                for (int i = 0; i < count; i++) {
+                    access.get(i).onGlobalFocusChanged(oldFocus, newFocus);
+                }
+            } finally {
+                listeners.end();
             }
         }
     }
@@ -640,10 +645,16 @@ public final class ViewTreeObserver {
         // perform the dispatching. The iterator is a safe guard against listeners that
         // could mutate the list by calling the various add/remove methods. This prevents
         // the array from being modified while we iterate it.
-        final CopyOnWriteArrayList<OnGlobalLayoutListener> listeners = mOnGlobalLayoutListeners;
+        final CopyOnWriteArray<OnGlobalLayoutListener> listeners = mOnGlobalLayoutListeners;
         if (listeners != null && listeners.size() > 0) {
-            for (OnGlobalLayoutListener listener : listeners) {
-                listener.onGlobalLayout();
+            CopyOnWriteArray.Access<OnGlobalLayoutListener> access = listeners.start();
+            try {
+                int count = access.size();
+                for (int i = 0; i < count; i++) {
+                    access.get(i).onGlobalLayout();
+                }
+            } finally {
+                listeners.end();
             }
         }
     }
@@ -658,17 +669,17 @@ public final class ViewTreeObserver {
      */
     @SuppressWarnings("unchecked")
     public final boolean dispatchOnPreDraw() {
-        // NOTE: we *must* clone the listener list to perform the dispatching.
-        // The clone is a safe guard against listeners that
-        // could mutate the list by calling the various add/remove methods. This prevents
-        // the array from being modified while we process it.
         boolean cancelDraw = false;
-        if (mOnPreDrawListeners != null && mOnPreDrawListeners.size() > 0) {
-            final ArrayList<OnPreDrawListener> listeners =
-                    (ArrayList<OnPreDrawListener>) mOnPreDrawListeners.clone();
-            int numListeners = listeners.size();
-            for (int i = 0; i < numListeners; ++i) {
-                cancelDraw |= !(listeners.get(i).onPreDraw());
+        final CopyOnWriteArray<OnPreDrawListener> listeners = mOnPreDrawListeners;
+        if (listeners != null && listeners.size() > 0) {
+            CopyOnWriteArray.Access<OnPreDrawListener> access = listeners.start();
+            try {
+                int count = access.size();
+                for (int i = 0; i < count; i++) {
+                    cancelDraw |= !(access.get(i).onPreDraw());
+                }
+            } finally {
+                listeners.end();
             }
         }
         return cancelDraw;
@@ -693,11 +704,17 @@ public final class ViewTreeObserver {
      * @param inTouchMode True if the touch mode is now enabled, false otherwise.
      */
     final void dispatchOnTouchModeChanged(boolean inTouchMode) {
-        final CopyOnWriteArrayList<OnTouchModeChangeListener> listeners =
+        final CopyOnWriteArray<OnTouchModeChangeListener> listeners =
                 mOnTouchModeChangeListeners;
         if (listeners != null && listeners.size() > 0) {
-            for (OnTouchModeChangeListener listener : listeners) {
-                listener.onTouchModeChanged(inTouchMode);
+            CopyOnWriteArray.Access<OnTouchModeChangeListener> access = listeners.start();
+            try {
+                int count = access.size();
+                for (int i = 0; i < count; i++) {
+                    access.get(i).onTouchModeChanged(inTouchMode);
+                }
+            } finally {
+                listeners.end();
             }
         }
     }
@@ -710,10 +727,16 @@ public final class ViewTreeObserver {
         // perform the dispatching. The iterator is a safe guard against listeners that
         // could mutate the list by calling the various add/remove methods. This prevents
         // the array from being modified while we iterate it.
-        final CopyOnWriteArrayList<OnScrollChangedListener> listeners = mOnScrollChangedListeners;
+        final CopyOnWriteArray<OnScrollChangedListener> listeners = mOnScrollChangedListeners;
         if (listeners != null && listeners.size() > 0) {
-            for (OnScrollChangedListener listener : listeners) {
-                listener.onScrollChanged();
+            CopyOnWriteArray.Access<OnScrollChangedListener> access = listeners.start();
+            try {
+                int count = access.size();
+                for (int i = 0; i < count; i++) {
+                    access.get(i).onScrollChanged();
+                }
+            } finally {
+                listeners.end();
             }
         }
     }
@@ -722,11 +745,11 @@ public final class ViewTreeObserver {
      * Returns whether there are listeners for computing internal insets.
      */
     final boolean hasComputeInternalInsetsListeners() {
-        final CopyOnWriteArrayList<OnComputeInternalInsetsListener> listeners =
+        final CopyOnWriteArray<OnComputeInternalInsetsListener> listeners =
                 mOnComputeInternalInsetsListeners;
         return (listeners != null && listeners.size() > 0);
     }
-    
+
     /**
      * Calls all listeners to compute the current insets.
      */
@@ -735,12 +758,105 @@ public final class ViewTreeObserver {
         // perform the dispatching. The iterator is a safe guard against listeners that
         // could mutate the list by calling the various add/remove methods. This prevents
         // the array from being modified while we iterate it.
-        final CopyOnWriteArrayList<OnComputeInternalInsetsListener> listeners =
+        final CopyOnWriteArray<OnComputeInternalInsetsListener> listeners =
                 mOnComputeInternalInsetsListeners;
         if (listeners != null && listeners.size() > 0) {
-            for (OnComputeInternalInsetsListener listener : listeners) {
-                listener.onComputeInternalInsets(inoutInfo);
+            CopyOnWriteArray.Access<OnComputeInternalInsetsListener> access = listeners.start();
+            try {
+                int count = access.size();
+                for (int i = 0; i < count; i++) {
+                    access.get(i).onComputeInternalInsets(inoutInfo);
+                }
+            } finally {
+                listeners.end();
             }
+        }
+    }
+
+    /**
+     * Copy on write array. This array is not thread safe, and only one loop can
+     * iterate over this array at any given time. This class avoids allocations
+     * until a concurrent modification happens.
+     * 
+     * Usage:
+     * 
+     * CopyOnWriteArray.Access<MyData> access = array.start();
+     * try {
+     *     for (int i = 0; i < access.size(); i++) {
+     *         MyData d = access.get(i);
+     *     }
+     * } finally {
+     *     access.end();
+     * }
+     */
+    static class CopyOnWriteArray<T> {
+        private ArrayList<T> mData = new ArrayList<T>();
+        private ArrayList<T> mDataCopy;
+
+        private final Access<T> mAccess = new Access<T>();
+
+        private boolean mStart;
+
+        static class Access<T> {
+            private ArrayList<T> mData;
+            private int mSize;
+
+            T get(int index) {
+                return mData.get(index);
+            }
+
+            int size() {
+                return mSize;
+            }
+        }
+
+        CopyOnWriteArray() {
+        }
+
+        private ArrayList<T> getArray() {
+            if (mStart) {
+                if (mDataCopy == null) mDataCopy = new ArrayList<T>(mData);
+                return mDataCopy;
+            }
+            return mData;
+        }
+
+        Access<T> start() {
+            if (mStart) throw new IllegalStateException("Iteration already started");
+            mStart = true;
+            mDataCopy = null;
+            mAccess.mData = mData;
+            mAccess.mSize = mData.size();
+            return mAccess;
+        }
+
+        void end() {
+            if (!mStart) throw new IllegalStateException("Iteration not started");
+            mStart = false;
+            if (mDataCopy != null) {
+                mData = mDataCopy;
+            }
+            mDataCopy = null;
+        }
+
+        int size() {
+            return getArray().size();
+        }
+
+        void add(T item) {
+            getArray().add(item);
+        }
+
+        void addAll(CopyOnWriteArray<T> array) {
+            getArray().addAll(array.mData);
+        }
+
+        void remove(T item) {
+            getArray().remove(item);
+        }
+
+        void clear() {
+            getArray().clear();
         }
     }
 }
