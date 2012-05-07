@@ -20,7 +20,7 @@ package android.renderscript;
 import android.util.Log;
 
 
-/** @deprecated renderscript is deprecated in J
+/**
  * <p>ProgramStore contains a set of parameters that control how
  * the graphics hardware handles writes to the framebuffer.
  * It could be used to:</p>
@@ -35,7 +35,7 @@ import android.util.Log;
  *
  **/
 public class ProgramStore extends BaseObj {
-    /** @deprecated renderscript is deprecated in J
+    /**
     * Specifies the function used to determine whether a fragment
     * will be drawn during the depth testing stage in the rendering
     * pipeline by comparing its value with that already in the depth
@@ -44,36 +44,36 @@ public class ProgramStore extends BaseObj {
     */
     public enum DepthFunc {
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Always drawn
         */
         ALWAYS (0),
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Drawn if the incoming depth value is less than that in the
         * depth buffer
         */
         LESS (1),
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Drawn if the incoming depth value is less or equal to that in
         * the depth buffer
         */
         LESS_OR_EQUAL (2),
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Drawn if the incoming depth value is greater than that in the
         * depth buffer
         */
         GREATER (3),
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Drawn if the incoming depth value is greater or equal to that
         * in the depth buffer
         */
         GREATER_OR_EQUAL (4),
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Drawn if the incoming depth value is equal to that in the
         * depth buffer
         */
         EQUAL (5),
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Drawn if the incoming depth value is not equal to that in the
         * depth buffer
         */
@@ -85,7 +85,7 @@ public class ProgramStore extends BaseObj {
         }
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
     * Specifies the functions used to combine incoming pixels with
     * those already in the frame buffer.
     *
@@ -94,32 +94,14 @@ public class ProgramStore extends BaseObj {
     *
     */
     public enum BlendSrcFunc {
-        /** @deprecated renderscript is deprecated in J
-        */
         ZERO (0),
-        /** @deprecated renderscript is deprecated in J
-        */
         ONE (1),
-        /** @deprecated renderscript is deprecated in J
-        */
         DST_COLOR (2),
-        /** @deprecated renderscript is deprecated in J
-        */
         ONE_MINUS_DST_COLOR (3),
-        /** @deprecated renderscript is deprecated in J
-        */
         SRC_ALPHA (4),
-        /** @deprecated renderscript is deprecated in J
-        */
         ONE_MINUS_SRC_ALPHA (5),
-        /** @deprecated renderscript is deprecated in J
-        */
         DST_ALPHA (6),
-        /** @deprecated renderscript is deprecated in J
-        */
         ONE_MINUS_DST_ALPHA (7),
-        /** @deprecated renderscript is deprecated in J
-        */
         SRC_ALPHA_SATURATE (8);
 
         int mID;
@@ -128,7 +110,7 @@ public class ProgramStore extends BaseObj {
         }
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
     * Specifies the functions used to combine incoming pixels with
     * those already in the frame buffer.
     *
@@ -138,29 +120,13 @@ public class ProgramStore extends BaseObj {
     *
     */
     public enum BlendDstFunc {
-        /** @deprecated renderscript is deprecated in J
-        */
         ZERO (0),
-        /** @deprecated renderscript is deprecated in J
-        */
         ONE (1),
-        /** @deprecated renderscript is deprecated in J
-        */
         SRC_COLOR (2),
-        /** @deprecated renderscript is deprecated in J
-        */
         ONE_MINUS_SRC_COLOR (3),
-        /** @deprecated renderscript is deprecated in J
-        */
         SRC_ALPHA (4),
-        /** @deprecated renderscript is deprecated in J
-        */
         ONE_MINUS_SRC_ALPHA (5),
-        /** @deprecated renderscript is deprecated in J
-        */
         DST_ALPHA (6),
-        /** @deprecated renderscript is deprecated in J
-        */
         ONE_MINUS_DST_ALPHA (7);
 
         int mID;
@@ -183,7 +149,7 @@ public class ProgramStore extends BaseObj {
         super(id, rs);
     }
 
-    /** @hide renderscript is deprecated in J
+    /**
     * Returns the function used to test writing into the depth
     * buffer
     * @return depth function
@@ -192,7 +158,7 @@ public class ProgramStore extends BaseObj {
         return mDepthFunc;
     }
 
-    /** @hide renderscript is deprecated in J
+    /**
     * Queries whether writes are enabled into the depth buffer
     * @return depth mask
     */
@@ -200,7 +166,7 @@ public class ProgramStore extends BaseObj {
         return mDepthMask;
     }
 
-    /** @hide renderscript is deprecated in J
+    /**
     * Queries whether red channel is written
     * @return red color channel mask
     */
@@ -208,7 +174,7 @@ public class ProgramStore extends BaseObj {
         return mColorMaskR;
     }
 
-    /** @hide renderscript is deprecated in J
+    /**
     * Queries whether green channel is written
     * @return green color channel mask
     */
@@ -216,7 +182,7 @@ public class ProgramStore extends BaseObj {
         return mColorMaskG;
     }
 
-    /** @hide renderscript is deprecated in J
+    /**
     * Queries whether blue channel is written
     * @return blue color channel mask
     */
@@ -224,7 +190,7 @@ public class ProgramStore extends BaseObj {
         return mColorMaskB;
     }
 
-    /** @hide renderscript is deprecated in J
+    /**
     * Queries whether alpha channel is written
     * @return alpha channel mask
     */
@@ -232,7 +198,7 @@ public class ProgramStore extends BaseObj {
         return mColorMaskA;
     }
 
-    /** @hide renderscript is deprecated in J
+    /**
     * Specifies how the source blending factor is computed
     * @return source blend function
     */
@@ -240,7 +206,7 @@ public class ProgramStore extends BaseObj {
         return mBlendSrc;
     }
 
-    /** @hide renderscript is deprecated in J
+    /**
     * Specifies how the destination blending factor is computed
     * @return destination blend function
     */
@@ -248,7 +214,7 @@ public class ProgramStore extends BaseObj {
         return mBlendDst;
     }
 
-    /** @hide renderscript is deprecated in J
+    /**
     * Specifies whether colors are dithered before writing into the
     * framebuffer
     * @return whether dither is enabled
@@ -257,7 +223,7 @@ public class ProgramStore extends BaseObj {
         return mDither;
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
     * Returns a pre-defined program store object with the following
     * characteristics:
     *  - incoming pixels are drawn if their depth value is less than
@@ -279,7 +245,7 @@ public class ProgramStore extends BaseObj {
         }
         return rs.mProgramStore_BLEND_NONE_DEPTH_TEST;
     }
-    /** @deprecated renderscript is deprecated in J
+    /**
     * Returns a pre-defined program store object with the following
     * characteristics:
     *  - incoming pixels always pass the depth test and their value
@@ -300,7 +266,7 @@ public class ProgramStore extends BaseObj {
         }
         return rs.mProgramStore_BLEND_NONE_DEPTH_NO_DEPTH;
     }
-    /** @deprecated renderscript is deprecated in J
+    /**
     * Returns a pre-defined program store object with the following
     * characteristics:
     *  - incoming pixels are drawn if their depth value is less than
@@ -324,7 +290,7 @@ public class ProgramStore extends BaseObj {
         }
         return rs.mProgramStore_BLEND_ALPHA_DEPTH_TEST;
     }
-    /** @deprecated renderscript is deprecated in J
+    /**
     * Returns a pre-defined program store object with the following
     * characteristics:
     *  - incoming pixels always pass the depth test and their value
@@ -347,7 +313,7 @@ public class ProgramStore extends BaseObj {
         return rs.mProgramStore_BLEND_ALPHA_DEPTH_NO_DEPTH;
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
     * Builder class for ProgramStore object. If the builder is left
     * empty, the equivalent of BLEND_NONE_DEPTH_NONE would be
     * returned
@@ -376,7 +342,7 @@ public class ProgramStore extends BaseObj {
             mBlendDst = BlendDstFunc.ZERO;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Specifies the depth testing behavior
         *
         * @param func function used for depth testing
@@ -388,7 +354,7 @@ public class ProgramStore extends BaseObj {
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Enables writes into the depth buffer
         *
         * @param enable specifies whether depth writes are
@@ -401,7 +367,7 @@ public class ProgramStore extends BaseObj {
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Enables writes into the color buffer
         *
         * @param r specifies whether red channel is written
@@ -419,7 +385,7 @@ public class ProgramStore extends BaseObj {
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Specifies how incoming pixels are combined with the pixels
         * stored in the framebuffer
         *
@@ -436,7 +402,7 @@ public class ProgramStore extends BaseObj {
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Enables dithering
         *
         * @param enable specifies whether dithering is enabled or
@@ -449,7 +415,7 @@ public class ProgramStore extends BaseObj {
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Creates a program store from the current state of the builder
         */
         public ProgramStore create() {

@@ -17,7 +17,7 @@
 package android.renderscript;
 
 
-/** @deprecated renderscript is deprecated in J
+/**
  * Utility class for packing arguments and structures from Android system objects to
  * Renderscript objects.
  *

@@ -20,23 +20,15 @@ package android.renderscript;
 import android.util.Log;
 
 
-/** @deprecated renderscript is deprecated in J
+/**
  * Program raster is primarily used to specify whether point sprites are enabled and to control
  * the culling mode. By default, back faces are culled.
  **/
 public class ProgramRaster extends BaseObj {
 
-    /** @deprecated renderscript is deprecated in J
-     */
     public enum CullMode {
-        /** @deprecated renderscript is deprecated in J
-        */
         BACK (0),
-        /** @deprecated renderscript is deprecated in J
-        */
         FRONT (1),
-        /** @deprecated renderscript is deprecated in J
-        */
         NONE (2);
 
         int mID;
@@ -55,7 +47,7 @@ public class ProgramRaster extends BaseObj {
         mCullMode = CullMode.BACK;
     }
 
-    /** @hide renderscript is deprecated in J
+    /**
      * Specifies whether vertices are rendered as screen aligned
      * elements of a specified size
      * @return whether point sprites are enabled
@@ -64,7 +56,7 @@ public class ProgramRaster extends BaseObj {
         return mPointSprite;
     }
 
-    /** @hide renderscript is deprecated in J
+    /**
      * Specifies how triangles are culled based on their orientation
      * @return cull mode
      */
@@ -72,8 +64,6 @@ public class ProgramRaster extends BaseObj {
         return mCullMode;
     }
 
-    /** @deprecated renderscript is deprecated in J
-     */
     public static ProgramRaster CULL_BACK(RenderScript rs) {
         if(rs.mProgramRaster_CULL_BACK == null) {
             ProgramRaster.Builder builder = new ProgramRaster.Builder(rs);
@@ -83,8 +73,6 @@ public class ProgramRaster extends BaseObj {
         return rs.mProgramRaster_CULL_BACK;
     }
 
-    /** @deprecated renderscript is deprecated in J
-     */
     public static ProgramRaster CULL_FRONT(RenderScript rs) {
         if(rs.mProgramRaster_CULL_FRONT == null) {
             ProgramRaster.Builder builder = new ProgramRaster.Builder(rs);
@@ -94,8 +82,6 @@ public class ProgramRaster extends BaseObj {
         return rs.mProgramRaster_CULL_FRONT;
     }
 
-    /** @deprecated renderscript is deprecated in J
-     */
     public static ProgramRaster CULL_NONE(RenderScript rs) {
         if(rs.mProgramRaster_CULL_NONE == null) {
             ProgramRaster.Builder builder = new ProgramRaster.Builder(rs);
@@ -105,37 +91,27 @@ public class ProgramRaster extends BaseObj {
         return rs.mProgramRaster_CULL_NONE;
     }
 
-    /** @deprecated renderscript is deprecated in J
-     */
     public static class Builder {
         RenderScript mRS;
         boolean mPointSprite;
         CullMode mCullMode;
 
-        /** @deprecated renderscript is deprecated in J
-        */
         public Builder(RenderScript rs) {
             mRS = rs;
             mPointSprite = false;
             mCullMode = CullMode.BACK;
         }
 
-        /** @deprecated renderscript is deprecated in J
-        */
         public Builder setPointSpriteEnabled(boolean enable) {
             mPointSprite = enable;
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
-        */
         public Builder setCullMode(CullMode m) {
             mCullMode = m;
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
-        */
         public ProgramRaster create() {
             mRS.validate();
             int id = mRS.nProgramRasterCreate(mPointSprite, mCullMode.mID);
