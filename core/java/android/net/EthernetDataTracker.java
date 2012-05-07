@@ -59,6 +59,8 @@ public class EthernetDataTracker implements NetworkStateTracker {
     private static String sIfaceMatch = "";
     private static String mIface = "";
 
+    private INetworkManagementService mNMService;
+
     private static class InterfaceObserver extends INetworkManagementEventObserver.Stub {
         private EthernetDataTracker mTracker;
 
@@ -115,6 +117,13 @@ public class EthernetDataTracker implements NetworkStateTracker {
             if(!mIface.isEmpty())
                 return;
             mIface = iface;
+        }
+
+        // we don't get link status indications unless the iface is up - bring it up
+        try {
+            mNMService.setInterfaceUp(iface);
+        } catch (Exception e) {
+            Log.e(TAG, "Error upping interface " + iface + ": " + e);
         }
 
         mNetworkInfo.setIsAvailable(true);
@@ -199,7 +208,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
 
         // register for notifications from NetworkManagement Service
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-        INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
+        mNMService = INetworkManagementService.Stub.asInterface(b);
 
         mInterfaceObserver = new InterfaceObserver(this);
 
@@ -208,12 +217,12 @@ public class EthernetDataTracker implements NetworkStateTracker {
         sIfaceMatch = context.getResources().getString(
             com.android.internal.R.string.config_ethernet_iface_regex);
         try {
-            final String[] ifaces = service.listInterfaces();
+            final String[] ifaces = mNMService.listInterfaces();
             for (String iface : ifaces) {
                 if (iface.matches(sIfaceMatch)) {
                     mIface = iface;
-                    service.setInterfaceUp(iface);
-                    InterfaceConfiguration config = service.getInterfaceConfig(iface);
+                    mNMService.setInterfaceUp(iface);
+                    InterfaceConfiguration config = mNMService.getInterfaceConfig(iface);
                     mLinkUp = config.isActive();
                     if (config != null && mHwAddr == null) {
                         mHwAddr = config.getHardwareAddress();
@@ -230,7 +239,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
         }
 
         try {
-            service.registerObserver(mInterfaceObserver);
+            mNMService.registerObserver(mInterfaceObserver);
         } catch (RemoteException e) {
             Log.e(TAG, "Could not register InterfaceObserver " + e);
         }
