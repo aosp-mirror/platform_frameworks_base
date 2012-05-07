@@ -255,7 +255,7 @@ public:
         if (scaleY != mScaleY) {
             mScaleY = scaleY;
             mMatrixDirty = true;
-            if (ALMOST_EQUAL(mScaleX, 1) && ALMOST_EQUAL(mScaleY, 1)) {
+            if (mScaleX == 1.0f && mScaleY == 1.0f) {
                 mMatrixFlags &= ~SCALE;
             } else {
                 mMatrixFlags |= SCALE;
