@@ -526,6 +526,12 @@ public class BluetoothService extends IBluetooth.Stub {
             return false;
         }
         switchConnectable(false);
+
+        // Bluetooth stack needs a small delay here before adding
+        // SDP records, otherwise dbus stalls for over 30 seconds 1 out of 50 runs
+        try {
+            Thread.sleep(20);
+        } catch (InterruptedException e) {}
         updateSdpRecords();
         return true;
     }
@@ -592,6 +598,12 @@ public class BluetoothService extends IBluetooth.Stub {
 
         // Add SDP records for profiles maintained by Android userspace
         addReservedSdpRecords(uuids);
+
+        // Bluetooth stack need some a small delay here before adding more
+        // SDP records, otherwise dbus stalls for over 30 seconds 1 out of 50 runs
+        try {
+            Thread.sleep(20);
+        } catch (InterruptedException e) {}
 
         if (R.getBoolean(com.android.internal.R.bool.config_bluetooth_default_profiles)) {
             // Enable profiles maintained by Bluez userspace.
