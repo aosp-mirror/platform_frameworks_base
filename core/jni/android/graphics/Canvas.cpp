@@ -69,7 +69,11 @@ public:
         SkImageRef_GlobalPool::SetRAMUsed(0);
         SkGraphics::PurgeFontCache();
     }
-    
+
+    static void freeTextLayoutCaches(JNIEnv* env, jobject) {
+        TextLayoutEngine::getInstance().purgeCaches();
+    }
+
     static jboolean isOpaque(JNIEnv* env, jobject jcanvas) {
         NPE_CHECK_RETURN_ZERO(env, jcanvas);
         SkCanvas* canvas = GraphicsJNI::getNativeCanvas(env, jcanvas);
@@ -986,7 +990,9 @@ static JNINativeMethod gCanvasMethods[] = {
         (void*) SkCanvasGlue::drawTextOnPath__StringPathFFPaint},
     {"native_drawPicture", "(II)V", (void*) SkCanvasGlue::drawPicture},
 
-    {"freeCaches", "()V", (void*) SkCanvasGlue::freeCaches}
+    {"freeCaches", "()V", (void*) SkCanvasGlue::freeCaches},
+
+    {"freeTextLayoutCaches", "()V", (void*) SkCanvasGlue::freeTextLayoutCaches}
 };
 
 ///////////////////////////////////////////////////////////////////////////////
