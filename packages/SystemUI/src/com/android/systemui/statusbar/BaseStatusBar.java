@@ -34,6 +34,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
@@ -46,6 +47,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.PopupMenu;
@@ -61,6 +63,7 @@ import com.android.systemui.recent.RecentsPanelView;
 import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.recent.TaskDescription;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
 
 import com.android.systemui.R;
@@ -76,10 +79,23 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 1023;
     protected static final int MSG_OPEN_SEARCH_PANEL = 1024;
     protected static final int MSG_CLOSE_SEARCH_PANEL = 1025;
+    protected static final int MSG_SHOW_INTRUDER = 1026;
+    protected static final int MSG_HIDE_INTRUDER = 1027;
+
+    protected static final boolean ENABLE_INTRUDERS = false;
+
+    public static final int EXPANDED_LEAVE_ALONE = -10000;
+    public static final int EXPANDED_FULL_OPEN = -10001;
 
     protected CommandQueue mCommandQueue;
     protected IStatusBarService mBarService;
     protected H mHandler = createHandler();
+
+    // all notifications
+    protected NotificationData mNotificationData = new NotificationData();
+    protected NotificationRowLayout mPile;
+
+    protected StatusBarNotification mCurrentlyIntrudingNotification;
 
     // used to notify status bar for suppressing notification LED
     protected boolean mPanelSlightlyVisible;
@@ -633,4 +649,190 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
+    /**
+     * Cancel this notification and tell the StatusBarManagerService / NotificationManagerService
+     * about the failure.
+     *
+     * WARNING: this will call back into us.  Don't hold any locks.
+     */
+    void handleNotificationError(IBinder key, StatusBarNotification n, String message) {
+        removeNotification(key);
+        try {
+            mBarService.onNotificationError(n.pkg, n.tag, n.id, n.uid, n.initialPid, message);
+        } catch (RemoteException ex) {
+            // The end is nigh.
+        }
+    }
+
+    protected StatusBarNotification removeNotificationViews(IBinder key) {
+        NotificationData.Entry entry = mNotificationData.remove(key);
+        if (entry == null) {
+            Slog.w(TAG, "removeNotification for unknown key: " + key);
+            return null;
+        }
+        // Remove the expanded view.
+        ViewGroup rowParent = (ViewGroup)entry.row.getParent();
+        if (rowParent != null) rowParent.removeView(entry.row);
+        updateNotificationIcons();
+
+        return entry.notification;
+    }
+
+    protected StatusBarIconView addNotificationViews(IBinder key,
+            StatusBarNotification notification) {
+        if (DEBUG) {
+            Slog.d(TAG, "addNotificationViews(key=" + key + ", notification=" + notification);
+        }
+        // Construct the icon.
+        final StatusBarIconView iconView = new StatusBarIconView(mContext,
+                notification.pkg + "/0x" + Integer.toHexString(notification.id),
+                notification.notification);
+        iconView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+
+        final StatusBarIcon ic = new StatusBarIcon(notification.pkg,
+                    notification.notification.icon,
+                    notification.notification.iconLevel,
+                    notification.notification.number,
+                    notification.notification.tickerText);
+        if (!iconView.set(ic)) {
+            handleNotificationError(key, notification, "Couldn't create icon: " + ic);
+            return null;
+        }
+        // Construct the expanded view.
+        NotificationData.Entry entry = new NotificationData.Entry(key, notification, iconView);
+        if (!inflateViews(entry, mPile)) {
+            handleNotificationError(key, notification, "Couldn't expand RemoteViews for: "
+                    + notification);
+            return null;
+        }
+
+        // Add the expanded view and icon.
+        int pos = mNotificationData.add(entry);
+        if (DEBUG) {
+            Slog.d(TAG, "addNotificationViews: added at " + pos);
+        }
+        updateNotificationIcons();
+
+        return iconView;
+    }
+
+    protected abstract void haltTicker();
+    protected abstract void setAreThereNotifications();
+    protected abstract void updateNotificationIcons();
+    protected abstract void tick(IBinder key, StatusBarNotification n, boolean firstTime);
+    protected abstract void updateExpandedViewPos(int expandedPosition);
+
+    protected boolean isTopNotification(ViewGroup parent, NotificationData.Entry entry) {
+        return parent.indexOfChild(entry.row) == 0;
+    }
+
+    public void updateNotification(IBinder key, StatusBarNotification notification) {
+        if (DEBUG) Slog.d(TAG, "updateNotification(" + key + " -> " + notification + ")");
+
+        final NotificationData.Entry oldEntry = mNotificationData.findByKey(key);
+        if (oldEntry == null) {
+            Slog.w(TAG, "updateNotification for unknown key: " + key);
+            return;
+        }
+
+        final StatusBarNotification oldNotification = oldEntry.notification;
+
+        // XXX: modify when we do something more intelligent with the two content views
+        final RemoteViews oldContentView = (oldNotification.notification.bigContentView != null)
+                ? oldNotification.notification.bigContentView
+                : oldNotification.notification.contentView;
+        final RemoteViews contentView = (notification.notification.bigContentView != null)
+                ? notification.notification.bigContentView
+                : notification.notification.contentView;
+
+        if (DEBUG) {
+            Slog.d(TAG, "old notification: when=" + oldNotification.notification.when
+                    + " ongoing=" + oldNotification.isOngoing()
+                    + " expanded=" + oldEntry.expanded
+                    + " contentView=" + oldContentView
+                    + " rowParent=" + oldEntry.row.getParent());
+            Slog.d(TAG, "new notification: when=" + notification.notification.when
+                    + " ongoing=" + oldNotification.isOngoing()
+                    + " contentView=" + contentView);
+        }
+
+        // Can we just reapply the RemoteViews in place?  If when didn't change, the order
+        // didn't change.
+        boolean contentsUnchanged = oldEntry.expanded != null
+                && contentView != null && oldContentView != null
+                && contentView.getPackage() != null
+                && oldContentView.getPackage() != null
+                && oldContentView.getPackage().equals(contentView.getPackage())
+                && oldContentView.getLayoutId() == contentView.getLayoutId();
+        ViewGroup rowParent = (ViewGroup) oldEntry.row.getParent();
+        boolean orderUnchanged = notification.notification.when==oldNotification.notification.when
+                && notification.score == oldNotification.score;
+                // score now encompasses/supersedes isOngoing()
+
+        boolean updateTicker = notification.notification.tickerText != null
+                && !TextUtils.equals(notification.notification.tickerText,
+                        oldEntry.notification.notification.tickerText);
+        boolean isTopAnyway = isTopNotification(rowParent, oldEntry);
+        if (contentsUnchanged && (orderUnchanged || isTopAnyway)) {
+            if (DEBUG) Slog.d(TAG, "reusing notification for key: " + key);
+            oldEntry.notification = notification;
+            try {
+                // Reapply the RemoteViews
+                contentView.reapply(mContext, oldEntry.content);
+                // update the contentIntent
+                final PendingIntent contentIntent = notification.notification.contentIntent;
+                if (contentIntent != null) {
+                    final View.OnClickListener listener = makeClicker(contentIntent,
+                            notification.pkg, notification.tag, notification.id);
+                    oldEntry.content.setOnClickListener(listener);
+                } else {
+                    oldEntry.content.setOnClickListener(null);
+                }
+                // Update the icon.
+                final StatusBarIcon ic = new StatusBarIcon(notification.pkg,
+                        notification.notification.icon, notification.notification.iconLevel,
+                        notification.notification.number,
+                        notification.notification.tickerText);
+                if (!oldEntry.icon.set(ic)) {
+                    handleNotificationError(key, notification, "Couldn't update icon: " + ic);
+                    return;
+                }
+            }
+            catch (RuntimeException e) {
+                // It failed to add cleanly.  Log, and remove the view from the panel.
+                Slog.w(TAG, "Couldn't reapply views for package " + contentView.getPackage(), e);
+                removeNotificationViews(key);
+                addNotificationViews(key, notification);
+            }
+        } else {
+            if (DEBUG) Slog.d(TAG, "not reusing notification for key: " + key);
+            removeNotificationViews(key);
+            addNotificationViews(key, notification);
+        }
+
+        // Update the veto button accordingly (and as a result, whether this row is
+        // swipe-dismissable)
+        updateNotificationVetoButton(oldEntry.row, notification);
+
+        // Restart the ticker if it's still running
+        if (updateTicker) {
+            haltTicker();
+            tick(key, notification, false);
+        }
+
+        // Recalculate the position of the sliding windows and the titles.
+        setAreThereNotifications();
+        updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+
+        // See if we need to update the intruder.
+        if (ENABLE_INTRUDERS && oldNotification == mCurrentlyIntrudingNotification) {
+            if (DEBUG) Slog.d(TAG, "updating the current intruder:" + notification);
+            // XXX: this is a hack for Alarms. The real implementation will need to *update*
+            // the intruder.
+            if (notification.notification.fullScreenIntent == null) { // TODO(dsandler): consistent logic with add()
+                if (DEBUG) Slog.d(TAG, "no longer intrudes!");
+                mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
+            }
+        }
+    }
 }
