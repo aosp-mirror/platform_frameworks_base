@@ -910,7 +910,7 @@ public class ValueAnimator extends Animator {
         animationHandler.mPendingAnimations.add(this);
         if (mStartDelay == 0) {
             // This sets the initial value of the animation, prior to actually starting it running
-            setCurrentPlayTime(getCurrentPlayTime());
+            setCurrentPlayTime(0);
             mPlayingState = STOPPED;
             mRunning = true;
             notifyStartListeners();

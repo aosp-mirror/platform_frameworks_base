@@ -92,6 +92,7 @@ public final class Choreographer {
     private boolean mFrameScheduled;
     private boolean mCallbacksRunning;
     private long mLastFrameTimeNanos;
+    private long mFrameIntervalNanos;
 
     /**
      * Callback type: Input callback.  Runs first.
@@ -116,6 +117,8 @@ public final class Choreographer {
         mHandler = new FrameHandler(looper);
         mDisplayEventReceiver = USE_VSYNC ? new FrameDisplayEventReceiver(looper) : null;
         mLastFrameTimeNanos = Long.MIN_VALUE;
+        mFrameIntervalNanos = (long)(1000000000 /
+                new Display(Display.DEFAULT_DISPLAY, null).getRefreshRate());
 
         mCallbackQueues = new CallbackQueue[CALLBACK_LAST + 1];
         for (int i = 0; i <= CALLBACK_LAST; i++) {
@@ -343,17 +346,37 @@ public final class Choreographer {
     }
 
     void doFrame(long timestampNanos, int frame) {
+        final long startNanos;
         synchronized (mLock) {
             if (!mFrameScheduled) {
                 return; // no work to do
             }
+
+            startNanos = System.nanoTime();
+            final long jitterNanos = startNanos - timestampNanos;
+            if (jitterNanos >= mFrameIntervalNanos) {
+                final long lastFrameOffset = jitterNanos % mFrameIntervalNanos;
+                if (DEBUG) {
+                    Log.d(TAG, "Missed vsync by " + (jitterNanos * 0.000001f) + " ms "
+                            + "which is more than the frame interval of "
+                            + (mFrameIntervalNanos * 0.000001f) + " ms!  "
+                            + "Setting frame time to " + (lastFrameOffset * 0.000001f)
+                            + " ms in the past.");
+                }
+                timestampNanos = startNanos - lastFrameOffset;
+            }
+
+            if (timestampNanos < mLastFrameTimeNanos) {
+                if (DEBUG) {
+                    Log.d(TAG, "Frame time appears to be going backwards.  May be due to a "
+                            + "previously skipped frame.  Waiting for next vsync");
+                }
+                scheduleVsyncLocked();
+                return;
+            }
+
             mFrameScheduled = false;
             mLastFrameTimeNanos = timestampNanos;
-        }
-
-        final long startNanos;
-        if (DEBUG) {
-            startNanos = System.nanoTime();
         }
 
         doCallbacks(Choreographer.CALLBACK_INPUT);
