@@ -55,6 +55,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.System;
 import android.telephony.PhoneStateListener;
@@ -119,19 +120,18 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private static final int MSG_PERSIST_VOLUME = 1;
     private static final int MSG_PERSIST_MASTER_VOLUME = 2;
     private static final int MSG_PERSIST_RINGER_MODE = 3;
-    private static final int MSG_PERSIST_VIBRATE_SETTING = 4;
-    private static final int MSG_MEDIA_SERVER_DIED = 5;
-    private static final int MSG_MEDIA_SERVER_STARTED = 6;
-    private static final int MSG_PLAY_SOUND_EFFECT = 7;
-    private static final int MSG_BTA2DP_DOCK_TIMEOUT = 8;
-    private static final int MSG_LOAD_SOUND_EFFECTS = 9;
-    private static final int MSG_SET_FORCE_USE = 10;
-    private static final int MSG_PERSIST_MEDIABUTTONRECEIVER = 11;
-    private static final int MSG_BT_HEADSET_CNCT_FAILED = 12;
-    private static final int MSG_RCDISPLAY_CLEAR = 13;
-    private static final int MSG_RCDISPLAY_UPDATE = 14;
-    private static final int MSG_SET_ALL_VOLUMES = 15;
-    private static final int MSG_PERSIST_MASTER_VOLUME_MUTE = 16;
+    private static final int MSG_MEDIA_SERVER_DIED = 4;
+    private static final int MSG_MEDIA_SERVER_STARTED = 5;
+    private static final int MSG_PLAY_SOUND_EFFECT = 6;
+    private static final int MSG_BTA2DP_DOCK_TIMEOUT = 7;
+    private static final int MSG_LOAD_SOUND_EFFECTS = 8;
+    private static final int MSG_SET_FORCE_USE = 9;
+    private static final int MSG_PERSIST_MEDIABUTTONRECEIVER = 10;
+    private static final int MSG_BT_HEADSET_CNCT_FAILED = 11;
+    private static final int MSG_RCDISPLAY_CLEAR = 12;
+    private static final int MSG_RCDISPLAY_UPDATE = 13;
+    private static final int MSG_SET_ALL_VOLUMES = 14;
+    private static final int MSG_PERSIST_MASTER_VOLUME_MUTE = 15;
 
 
     // flags for MSG_PERSIST_VOLUME indicating if current and/or last audible volume should be
@@ -241,6 +241,20 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     };
     private int[] mStreamVolumeAlias;
 
+    // stream names used by dumpStreamStates()
+    private final String[] STREAM_NAMES = new String[] {
+            "STREAM_VOICE_CALL",
+            "STREAM_SYSTEM",
+            "STREAM_RING",
+            "STREAM_MUSIC",
+            "STREAM_ALARM",
+            "STREAM_NOTIFICATION",
+            "STREAM_BLUETOOTH_SCO",
+            "STREAM_SYSTEM_ENFORCED",
+            "STREAM_DTMF",
+            "STREAM_TTS"
+    };
+
     private final AudioSystem.ErrorCallback mAudioSystemCallback = new AudioSystem.ErrorCallback() {
         public void onError(int error) {
             switch (error) {
@@ -282,13 +296,14 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private int mMuteAffectedStreams;
 
     /**
-     * Has multiple bits per vibrate type to indicate the type's vibrate
-     * setting. See {@link #setVibrateSetting(int, int)}.
-     * <p>
-     * NOTE: This is not the final decision of whether vibrate is on/off for the
-     * type since it depends on the ringer mode. See {@link #shouldVibrate(int)}.
+     * NOTE: setVibrateSetting(), getVibrateSetting(), shouldVibrate() are deprecated.
+     * mVibrateSetting is just maintained during deprecation period but vibration policy is
+     * now only controlled by mHasVibrator and mRingerMode
      */
     private int mVibrateSetting;
+
+    // Is there a vibrator
+    private final boolean mHasVibrator;
 
     // Broadcast receiver for device connections intent broadcasts
     private final BroadcastReceiver mReceiver = new AudioServiceBroadcastReceiver();
@@ -387,6 +402,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mMediaEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "mediaKeyEvent");
+
+        Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        mHasVibrator = vibrator == null ? false : vibrator.hasVibrator();
 
        // Intialized volume
         MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = SystemProperties.getInt(
@@ -507,6 +525,16 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     }
 
+    private void dumpStreamStates(PrintWriter pw) {
+        pw.println("\nStream volumes (device: index)");
+        int numStreamTypes = AudioSystem.getNumStreamTypes();
+        for (int i = 0; i < numStreamTypes; i++) {
+            pw.println("- "+STREAM_NAMES[i]+":");
+            mStreamStates[i].dump(pw);
+            pw.println("");
+        }
+    }
+
 
     private void updateStreamVolumeAlias(boolean updateVolumes) {
         int dtmfStreamAlias;
@@ -538,18 +566,34 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private void readPersistedSettings() {
         final ContentResolver cr = mContentResolver;
 
-        int ringerMode = System.getInt(cr, System.MODE_RINGER, AudioManager.RINGER_MODE_NORMAL);
+        int ringerModeFromSettings =
+                System.getInt(cr, System.MODE_RINGER, AudioManager.RINGER_MODE_NORMAL);
+        int ringerMode = ringerModeFromSettings;
         // sanity check in case the settings are restored from a device with incompatible
         // ringer modes
         if (!AudioManager.isValidRingerMode(ringerMode)) {
             ringerMode = AudioManager.RINGER_MODE_NORMAL;
+        }
+        if ((ringerMode == AudioManager.RINGER_MODE_VIBRATE) && !mHasVibrator) {
+            ringerMode = AudioManager.RINGER_MODE_SILENT;
+        }
+        if (ringerMode != ringerModeFromSettings) {
             System.putInt(cr, System.MODE_RINGER, ringerMode);
         }
         synchronized(mSettingsLock) {
             mRingerMode = ringerMode;
         }
 
-        mVibrateSetting = System.getInt(cr, System.VIBRATE_ON, 0);
+        // System.VIBRATE_ON is not used any more but defaults for mVibrateSetting
+        // are still needed while setVibrateSetting() and getVibrateSetting() are being deprecated.
+        mVibrateSetting = getValueForVibrateSetting(0,
+                                        AudioManager.VIBRATE_TYPE_NOTIFICATION,
+                                        mHasVibrator ? AudioManager.VIBRATE_SETTING_ONLY_SILENT
+                                                        : AudioManager.VIBRATE_SETTING_OFF);
+        mVibrateSetting = getValueForVibrateSetting(mVibrateSetting,
+                                        AudioManager.VIBRATE_TYPE_RINGER,
+                                        mHasVibrator ? AudioManager.VIBRATE_SETTING_ONLY_SILENT
+                                                        : AudioManager.VIBRATE_SETTING_OFF);
 
         // make sure settings for ringer mode are consistent with device type: non voice capable
         // devices (tablets) include media stream in silent mode whereas phones don't.
@@ -639,8 +683,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         // If either the client forces allowing ringer modes for this adjustment,
         // or the stream type is one that is affected by ringer modes
         if (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
-                streamTypeAlias == AudioSystem.STREAM_RING ||
-                (!mVoiceCapable && streamTypeAlias == AudioSystem.STREAM_MUSIC)) {
+                (streamTypeAlias == getMasterStreamType())) {
             int ringerMode = getRingerMode();
             // do not vibrate if already in vibrate mode
             if (ringerMode == AudioManager.RINGER_MODE_VIBRATE) {
@@ -648,7 +691,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             }
             // Check if the ringer mode changes with this volume adjustment. If
             // it does, it will handle adjusting the volume, so we won't below
-            adjustVolume = checkForRingerModeChange(oldIndex, direction, streamTypeAlias);
+            adjustVolume = checkForRingerModeChange(oldIndex, direction);
         }
 
         // If stream is muted, adjust last audible index only
@@ -724,9 +767,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 (mStreamVolumeAlias[streamType] == getMasterStreamType())) {
             int newRingerMode;
             if (index == 0) {
-                newRingerMode = System.getInt(mContentResolver, System.VIBRATE_IN_SILENT, 1) == 1
-                    ? AudioManager.RINGER_MODE_VIBRATE
-                    : AudioManager.RINGER_MODE_SILENT;
+                newRingerMode = mHasVibrator ? AudioManager.RINGER_MODE_VIBRATE
+                                              : AudioManager.RINGER_MODE_SILENT;
                 setStreamVolumeInt(mStreamVolumeAlias[streamType],
                                    index,
                                    device,
@@ -1070,7 +1112,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     // on voice capable devices
                     if (mVoiceCapable &&
                             mStreamVolumeAlias[streamType] == AudioSystem.STREAM_RING) {
-
                         Set set = mStreamStates[streamType].mLastAudibleIndex.entrySet();
                         Iterator i = set.iterator();
                         while (i.hasNext()) {
@@ -1111,6 +1152,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /** @see AudioManager#shouldVibrate(int) */
     public boolean shouldVibrate(int vibrateType) {
+        if (!mHasVibrator) return false;
 
         switch (getVibrateSetting(vibrateType)) {
 
@@ -1131,21 +1173,20 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /** @see AudioManager#getVibrateSetting(int) */
     public int getVibrateSetting(int vibrateType) {
+        if (!mHasVibrator) return AudioManager.VIBRATE_SETTING_OFF;
         return (mVibrateSetting >> (vibrateType * 2)) & 3;
     }
 
     /** @see AudioManager#setVibrateSetting(int, int) */
     public void setVibrateSetting(int vibrateType, int vibrateSetting) {
 
+        if (!mHasVibrator) return;
+
         mVibrateSetting = getValueForVibrateSetting(mVibrateSetting, vibrateType, vibrateSetting);
 
         // Broadcast change
         broadcastVibrateSetting(vibrateType);
 
-        // Post message to set ringer mode (it in turn will post a message
-        // to persist)
-        sendMsg(mAudioHandler, MSG_PERSIST_VIBRATE_SETTING, SENDMSG_NOOP, 0, 0,
-                null, 0);
     }
 
     /**
@@ -1967,48 +2008,56 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      * adjusting volume. If so, this will set the proper ringer mode and volume
      * indices on the stream states.
      */
-    private boolean checkForRingerModeChange(int oldIndex, int direction, int streamType) {
+    private boolean checkForRingerModeChange(int oldIndex, int direction) {
         boolean adjustVolumeIndex = true;
         int ringerMode = getRingerMode();
-        int newRingerMode = ringerMode;
         int uiIndex = (oldIndex + 5) / 10;
-        boolean vibeInSilent = System.getInt(mContentResolver, System.VIBRATE_IN_SILENT, 1) == 1;
 
-        if (ringerMode == RINGER_MODE_NORMAL) {
-            if ((direction == AudioManager.ADJUST_LOWER) && (uiIndex <= 1)) {
-                // enter silent mode if current index is the last audible one and not repeating a
-                // volume key down
-                if (vibeInSilent || mPrevVolDirection != AudioManager.ADJUST_LOWER) {
-                    // "silent mode", but which one?
-                    newRingerMode = vibeInSilent ? RINGER_MODE_VIBRATE : RINGER_MODE_SILENT;
-                }
-                if (uiIndex == 0 ||
-                        (!vibeInSilent &&
-                         mPrevVolDirection == AudioManager.ADJUST_LOWER &&
-                         mVoiceCapable && streamType == AudioSystem.STREAM_RING)) {
-                    adjustVolumeIndex = false;
+        switch (ringerMode) {
+        case RINGER_MODE_NORMAL:
+            if (direction == AudioManager.ADJUST_LOWER) {
+                if (mHasVibrator) {
+                    if (uiIndex == 1) {
+                        ringerMode = RINGER_MODE_VIBRATE;
+                    }
+                } else {
+                    if (uiIndex == 0 && mPrevVolDirection != AudioManager.ADJUST_LOWER) {
+                        ringerMode = RINGER_MODE_SILENT;
+                    }
                 }
             }
-        } else if (ringerMode == RINGER_MODE_VIBRATE) {
+            break;
+        case RINGER_MODE_VIBRATE:
+            if (!mHasVibrator) {
+                Log.e(TAG, "checkForRingerModeChange() current ringer mode is vibrate" +
+                        "but no vibrator is present");
+                break;
+            }
             if ((direction == AudioManager.ADJUST_LOWER)) {
-                // Set it to silent, if it wasn't a long-press
                 if (mPrevVolDirection != AudioManager.ADJUST_LOWER) {
-                    newRingerMode = RINGER_MODE_SILENT;
+                    ringerMode = RINGER_MODE_SILENT;
                 }
             } else if (direction == AudioManager.ADJUST_RAISE) {
-                newRingerMode = RINGER_MODE_NORMAL;
+                ringerMode = RINGER_MODE_NORMAL;
             }
             adjustVolumeIndex = false;
-        } else {
+            break;
+        case RINGER_MODE_SILENT:
             if (direction == AudioManager.ADJUST_RAISE) {
-                // exiting silent mode
-                // If VIBRATE_IN_SILENT, then go into vibrate mode
-                newRingerMode = vibeInSilent ? RINGER_MODE_VIBRATE : RINGER_MODE_NORMAL;
+                if (mHasVibrator) {
+                    ringerMode = RINGER_MODE_VIBRATE;
+                } else {
+                    ringerMode = RINGER_MODE_NORMAL;
+                }
             }
             adjustVolumeIndex = false;
+            break;
+        default:
+            Log.e(TAG, "checkForRingerModeChange() wrong ringer mode: "+ringerMode);
+            break;
         }
 
-        setRingerMode(newRingerMode);
+        setRingerMode(ringerMode);
 
         mPrevVolDirection = direction;
 
@@ -2217,9 +2266,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
 
         public void readSettings() {
-            boolean checkSilentVolume = (mRingerMode == AudioManager.RINGER_MODE_NORMAL) &&
-                                            isStreamAffectedByRingerMode(mStreamType);
-
             int remainingDevices = AudioSystem.DEVICE_OUT_ALL;
 
             for (int i = 0; remainingDevices != 0; i++) {
@@ -2248,12 +2294,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                                     index : AudioManager.DEFAULT_STREAM_VOLUME[mStreamType];
                 int lastAudibleIndex = Settings.System.getInt(mContentResolver, name, defaultIndex);
 
-                // a last audible index of 0 is never stored, except on non-voice capable devices
-                // (e.g. tablets) for the music stream type, where the music stream volume can reach
-                // 0 without the device being in silent mode
+                // a last audible index of 0 should never be stored for ring and notification
+                // streams on phones (voice capable devices).
+                // same for system stream on phones and tablets
                 if ((lastAudibleIndex == 0) &&
-                        (mVoiceCapable ||
-                         (mStreamVolumeAlias[mStreamType] != AudioSystem.STREAM_MUSIC))) {
+                        ((mVoiceCapable &&
+                                (mStreamVolumeAlias[mStreamType] == AudioSystem.STREAM_RING)) ||
+                         (mStreamVolumeAlias[mStreamType] == AudioSystem.STREAM_SYSTEM))) {
                     lastAudibleIndex = AudioManager.DEFAULT_STREAM_VOLUME[mStreamType];
                     // Correct the data base
                     sendMsg(mAudioHandler,
@@ -2265,12 +2312,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                             PERSIST_DELAY);
                 }
                 mLastAudibleIndex.put(device, getValidIndex(10 * lastAudibleIndex));
-                // the initial index should never be 0 for a stream affected by ringer mode if not
-                // in silent or vibrate mode.
-                // this is permitted on tablets for music stream type.
-                if (checkSilentVolume && (index == 0) &&
-                        (mVoiceCapable ||
-                         (mStreamVolumeAlias[mStreamType] != AudioSystem.STREAM_MUSIC))) {
+                // the initial index should never be 0 for ring and notification streams on phones
+                // (voice capable devices) if not in silent or vibrate mode.
+                // same for system stream on phones and tablets
+                if ((index == 0) && (mRingerMode == AudioManager.RINGER_MODE_NORMAL) &&
+                        ((mVoiceCapable &&
+                                (mStreamVolumeAlias[mStreamType] == AudioSystem.STREAM_RING)) ||
+                         (mStreamVolumeAlias[mStreamType] == AudioSystem.STREAM_SYSTEM))) {
                     index = lastAudibleIndex;
                     // Correct the data base
                     sendMsg(mAudioHandler,
@@ -2328,14 +2376,22 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     mLastAudibleIndex.put(device, index);
                 }
                 // Apply change to all streams using this one as alias
+                // if changing volume of current device, also change volume of current
+                // device on aliased stream
+                boolean currentDevice = (device == getDeviceForStream(mStreamType));
                 int numStreamTypes = AudioSystem.getNumStreamTypes();
                 for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
-                    if (streamType != mStreamType && mStreamVolumeAlias[streamType] == mStreamType) {
-                        mStreamStates[streamType].setIndex(rescaleIndex(index,
-                                                                        mStreamType,
-                                                                        streamType),
-                                                           getDeviceForStream(streamType),
+                    if (streamType != mStreamType &&
+                            mStreamVolumeAlias[streamType] == mStreamType) {
+                        int scaledIndex = rescaleIndex(index, mStreamType, streamType);
+                        mStreamStates[streamType].setIndex(scaledIndex,
+                                                           device,
                                                            lastAudible);
+                        if (currentDevice) {
+                            mStreamStates[streamType].setIndex(scaledIndex,
+                                                               getDeviceForStream(streamType),
+                                                               lastAudible);
+                        }
                     }
                 }
                 return true;
@@ -2544,6 +2600,25 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 return handler;
             }
         }
+
+        private void dump(PrintWriter pw) {
+            pw.print("   Current: ");
+            Set set = mIndex.entrySet();
+            Iterator i = set.iterator();
+            while (i.hasNext()) {
+                Map.Entry entry = (Map.Entry)i.next();
+                pw.print(Integer.toHexString(((Integer)entry.getKey()).intValue())
+                             + ": " + ((((Integer)entry.getValue()).intValue() + 5) / 10)+", ");
+            }
+            pw.print("\n   Last audible: ");
+            set = mLastAudibleIndex.entrySet();
+            i = set.iterator();
+            while (i.hasNext()) {
+                Map.Entry entry = (Map.Entry)i.next();
+                pw.print(Integer.toHexString(((Integer)entry.getKey()).intValue())
+                             + ": " + ((((Integer)entry.getValue()).intValue() + 5) / 10)+", ");
+            }
+        }
     }
 
     /** Thread that handles native AudioSystem control. */
@@ -2629,10 +2704,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
         private void persistRingerMode(int ringerMode) {
             System.putInt(mContentResolver, System.MODE_RINGER, ringerMode);
-        }
-
-        private void persistVibrateSetting() {
-            System.putInt(mContentResolver, System.VIBRATE_ON, mVibrateSetting);
         }
 
         private void playSoundEffect(int effectType, int volume) {
@@ -2732,10 +2803,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     // note that the value persisted is the current ringer mode, not the
                     // value of ringer mode as of the time the request was made to persist
                     persistRingerMode(getRingerMode());
-                    break;
-
-                case MSG_PERSIST_VIBRATE_SETTING:
-                    persistVibrateSetting();
                     break;
 
                 case MSG_MEDIA_SERVER_DIED:
@@ -4366,5 +4433,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         // TODO probably a lot more to do here than just the audio focus and remote control stacks
         dumpFocusStack(pw);
         dumpRCStack(pw);
+        dumpStreamStates(pw);
     }
 }
