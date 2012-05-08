@@ -1,0 +1,331 @@
+page.title=Android 4.1 for Developers
+@jd:body
+
+
+<!--<style type="text/css">
+#jd-content {
+  max-width:1024px;
+}
+#jd-content div.screenshot {
+  float:left;
+  clear:left;
+  padding:15px 30px 15px 0;
+}
+
+</style>
+
+<p></p>
+
+
+<div style="float:right;width:230px;padding:0px 0px 60px 34px;margin-top:-40px">
+<div>
+<img src="{@docRoot}images/android-jellybean-sm.png" xheight="402" width="280">
+</div>
+<p class="image-caption">Find out more about the Jelly Bean features for users at <a href="http://www.android.com">android.com</a></p>
+</div>-->
+
+<div style="float:right;width:320px;padding:0px 0px 0px 34px;clear:both">
+<div>
+<img src="{@docRoot}images/jb-android-4.1.png" height="426" width="390">
+</div>
+</div>
+<p>Welcome to Android 4.1, Jelly Bean!</p>
+
+<p>Android 4.1 is the fastest and smoothest version of Android yet. We’ve made 
+improvements throughout the platform and added great new features for users and developers. This document provides a glimpse of some of the new features and technologies
+
+<p>See the <a href="{@docRoot}about/versions/android-4.1.html">Android 4.1 APIs</a> document for a detailed look at the new developer APIs,</p>
+
+<!--
+<ul>
+  <li><a href="#performance">Fast, Smooth, Responsive</a></li>
+  <li><a href="#accessibility">Enhanced Accessibility</a></li>
+  <li><a href="#intl">Support for International Users</a></li>
+  <li><a href="#ui">Capabilities for Creating Beautiful UI</a></li>
+  <li><a href="#input">New Input Types and Capabilities</a></li>
+  <li><a href="#graphics">Animation and Graphics</a></li>
+  <li><a href="#connectivity">New Types of Connectivity</a></li>
+  <li><a href="#media">Media Capabilities</a></li>
+  <li><a href="#google">Google APIs and services</a></li>
+  </ul>
+-->
+
+<p>Find out more about the Jelly Bean features for users at <a href="http://www.android.com/whatsnew">www.android.com</a></p>
+
+
+<h2 id="performance">Faster, Smoother, More Responsive</h2>
+
+<p>Android 4.1 is optimized to deliver Android's best performance and lowest touch latency, in an effortless, intuitive UI.</p>
+
+<p>To ensure a consistent framerate, Android 4.1 extends <strong>vsync timing</strong> across all drawing and animation done by the Android framework. Everything runs in lockstep against a 16 millisecond vsync heartbeat &mdash; application rendering, touch events, screen composition, and display refresh &mdash; so frames don’t get ahead or behind.</p>
+
+<p>Android 4.1 also adds <strong>triple buffering</strong> in the graphics pipeline, for more consistent rendering that makes everything feel smoother, from scrolling to paging and animations.</p>
+
+<p>Android 4.1 reduces touch latency not only by <strong>synchronizing touch</strong> to vsync timing, but also by actually <strong>anticipating</strong> where your finger will be at the time of the screen refresh. This results in a more reactive and uniform touch response. In addition, after periods of inactivity, Android applies a <strong>CPU input boost</strong> at the next touch event, to make sure there’s no latency.</p>
+
+<p><strong>Tooling</strong> can help you get the absolute best performance out of your apps. Android 4.1 is designed to work with a new tool called <strong>systrace</strong>, which collects data directly from the Linux kernel to produce an overall picture of system activities. The data is represented as a group of vertically stacked time series graphs, to help isolate rendering interruptions and other issues. The tool is available now in the <a href="{@docRoot}tools/index.html">Android SDK</a> (Tools R20 or higher)</p>
+
+
+<div style="float:left;margin:12px 24px 0px 0px;">
+<img src="{@docRoot}images/jb-accessibility-focus-250.png" style="width:240px">
+</div>
+
+<div style="width:85%;padding-top:16px;">
+<h2 id="accessibility">Enhanced Accessibility</h2>
+
+<p>New APIs for accessibility services let you handle gestures and manage <strong>accessibility focus</strong> as the user moves through the on-screen elements and navigation buttons using accessibility gestures, accessories, and other input. The Talkback system and explore-by-touch are redesigned to use accessibility focus for easier use and offer a complete set of APIs for developers.</p>
+
+<p>Accessibility services can link their own <strong>tutorials</strong> into the Accessibility settings, to help users configure and use their services.</p>
+
+<p>Apps that use standard View components <strong>inherit support</strong> for the new accessibility features automatically, without any changes in their code. Apps that use custom Views can use new accessibility node APIs to indicate the parts of the View that are of interest to accessibility services. </p>
+
+</div>
+
+<div style="clear:both;padding-top:1px;">
+
+<h2 id="intl">Support for International Users</h2>
+
+<div style="clear:both;padding-top:16px;float:right;">
+
+<div style="float:right;margin-left:18px;fpadding-top:90px;padding-bottom:60px">
+<img src="{@docRoot}images/jb-r2l.png" width="280">
+</div>
+</div>
+
+<h3>Bi-Directional Text Support</h3>
+
+<p>Android 4.1 helps you to reach more users through support for <strong>bi-directional text</strong> in TextView and EditText elements. Apps can display text or handle text editing in left-to-right or right-to-left scripts. Apps can make use of new Arabic and Hebrew locales and associated fonts.</p>
+
+<h3>User-installable keymaps</h3>
+
+<p>The platform now supports <strong>user-installable keyboard maps</strong>, such as for additional international keyboards and special layout types. By default, Android 4.1 includes 27 international keymaps for keyboards, including Dvorak. When users connect a keyboard, they can go to the Settings app and select one or more keymaps that they want to use for that keyboard. When typing, users can switch between keymaps using a shortcut (ctrl-space).</p>
+
+<p>You can create an app to <strong>publish additional keymaps</strong> to the system. The APK would include the keyboard layout resources in it, based on standard Android keymap format. The application can offer additional keyboard layouts to the user by declaring a suitable broadcast receiver for ACTION_QUERY_KEYBOARD_LAYOUTS in its manifest. </p>
+
+</div>
+
+
+<h2 id="ui">New Ways to Create Beautiful UI</h2>
+
+
+<div style="float:right;margin:22px 0px 0px 24px;width:280px;">
+<div>
+<!-- <img src="{@docRoot}images/jd-notif-cd.png" style="width:200px"> -->
+<img src="{@docRoot}images/jb-notif-ex.png" width="280" height="548">
+</div>
+<p class="image-caption" style="padding:.5em"><span
+style="font-weight:500;">Expandable notifications</span> let you dsplay more types of content in your notifications. Users can expand them with a simple gesture.</p>
+</div>
+
+<h3>Expandable notifications</h3>
+
+<p>Notifications have long been a unique and popular feature on Android. Developers can use them to place important or time-based information in front of users in the notification bar, outside of the app’s normal UI.</p>
+
+<p>Android 4.1 brings a major update to the Android notifications framework. Apps can now display <strong>larger, richer notifications</strong> to users that can be expanded and collapsed with a pinch. Notifications support <strong>new types of content</strong>, including photos, have configurable priority, and can even include multiple actions.</p>
+
+<p>Through an improved <strong>notification builder</strong>, apps can create notifications that use a larger area, up to 256 dp in height. Three <strong>templated notification styles</strong> are available:</p>
+
+<ul>
+<li>BigTextStyle &mdash; a notification that includes a multiline TextView object.</li>
+<li>BigInboxStyle &mdash; a notification the shows any kind of list such as messages, headlines, and so on.</li>
+<li>BigPictureStyle &mdash; a notification that showcases visual content such as a bitmap.</li>
+</ul>
+
+<p>In addition to the templated styles, you can create you own notification styles <strong>using any remote View</strong>.</p>
+
+<p>Apps can add up to three <strong>actions</strong> to a notification, which are displayed below the notification content. The actions let the users respond directly to the information in the notification in alternative ways. such as by email or by phone call, without visiting the app.</p>
+
+<p>With expandable notifications, apps can give more information to the user, effortlessly and on demand. Users remain in control and can long-press any notification to get information about the sender and optionally  disable further notifications from the app.</p>
+
+</div>
+
+<div style="float:left;margin:52px 30px 0px 0px;width:280px;">
+<div>
+<img src="{@docRoot}images/jb-appwidgets.png" width="280" height="548">
+</div>
+<p class="image-caption" style="padding:.5em"><span
+style="font-weight:500;">App Widgets</span> can resize automatically to fit the home screen and load different content as their sizes change.</p>
+</div>
+
+<div style="padding-top:34px;clear:right;">
+
+
+<h3>Resizable app widgets</h3>
+
+<p>Android 4.1 introduces improved App Widgets that can <strong>automatically resize</strong>, based on where the user drops them on the home screen, the size to which the user expands them, and the amount of room available on the home screen. New App Widget APIs let you take advantage of this to <strong>optimize your app widget content</strong> as the size of widgets changes.</p>
+
+<p>When a widget changes size, the system notifies the host app’s widget provider, which can reload the content in the widget as needed. For example, a widget could display larger, richer graphics or additional functionality or options. Developers can still maintain control over maximum and minimum sizes and can update other widget options whenever needed. </p>
+
+<p>You can also supply separate landscape and portrait layouts for your widgets, which the system inflates as appropriate when the screen orientation changes.</p>
+
+<p>App widgets can now be displayed in third party launchers and other host apps through a new bind Intent (AppWidgetManager.ACTION_APPWIDGET_BIND).</p>
+
+</div>
+
+<h3>Simplified task navigation</h3>
+
+<p>Android 4.1 makes it easy for you to manage the “Up” navigation that’s available to users from inside of your apps and helps ensure a consistent experience for users.</p>
+
+<p>You can <strong>define the intended Up navigation</strong> for individual Activity components of your UI by adding a new <strong>XML attribute</strong> in the app’s manifest file. At run time, as Activities are launched, the system extracts the Up navigation tree from the manifest file and automatically creates the Up affordance navigation in the action bar. Developers who declare Up navigation in the manifest no longer need to manage navigation by callback at run time, although they can also do so if needed.</p>
+
+<p>Also available is a new <strong>TaskStackBuilder</strong> class that lets you quickly put together a synthetic task stack to start immediately or to use when an Activity is launched from a PendingIntent. Creating a synthetic task stack is especially useful when users launch Activities from remote views, such as from Home screen widgets and notifications, because it lets the developer provide a managed, consistent experience on Back navigation.</p>
+
+<h3>Easy animations for Activity launch</h3>
+
+<p>You can use a new helper class, <strong>ActivityOptions</strong>, to create and control the animation displayed when you launch your Activities. Through the helper class, you can specify custom animation resources to be used when the activity is launched, or request new zoom animations that start from any rectangle you specify on screen and that optionally include a thumbnail bitmap.</p>
+
+<h3>Transitions to Lights Out and Full Screen Modes</h3>
+
+<p>New system UI flags in View let you to cleanly transition from a normal application UI (with action bar, navigation bar, and system bar visible), to "lights out mode" (with status bar and action bar hidden and navigation bar dimmed) or "full screen mode" (with status bar, action bar, and navigation bar all hidden). </p>
+
+<h3>New types of remoteable Views</h3>
+
+<p>Developers can now use <strong>GridLayout</strong> and <strong>ViewStub</strong> views in Home screen widgets and notifications. GridLayout lets you structure the content of your remote views and manage child views alignments with a shallower UI hierarchy. ViewStub is an invisible, zero-sized View that can be used to lazily inflate layout resources at runtime.</p>
+
+<h3>Live wallpaper preview</h3>
+
+<p>Android 4.1 makes it easier for users to <strong>find and install Live Wallpapers</strong> from apps that include them. If your app includes Live Wallpapers, you can now start an Activity (ACTION_CHANGE_LIVE_WALLPAPER) that shows the user a preview of the Live Wallpaper from your own app. From the preview, users can directly load the Live Wallpaper.</p>
+
+<h3>Higher-resolution contact photos</h3>
+
+<p>With Android 4.1, you can store <strong>contact photos</strong> that are as large as <strong>720 x 720</strong>, making contacts even richer and more personal. Apps can store and retrieve contact photos at that size or use any other size needed. The maximum photo size supported on specific devices may vary, so apps should <strong>query the built-in contacts provider</strong> at run time to obtain the max size for the current device. </p>
+
+
+<h2 id="input">New Input Types and Capabilities</h2>
+
+<h3>Find out about devices being added and removed</h3>
+
+<p>Apps can <strong>register to be notified</strong> when any new input devices are attached, by USB, Bluetooth, or any other connection type. They can use this information to change state or capabilities as needed. For example, a game could receive notification that a new keyboard or joystick is attached, indicating the presence of a new player.</p>
+
+<h3>Query the capabilities of input devices</h3>
+
+<p>Android 4.1 includes APIs that let apps and games take full advantage of all input devices that are connected and available.</p>
+
+<p>Apps can query the device manager to enumerate all of the input devices currently attached and learn about the capabilities of each.</p>
+
+<h3>Control vibrator on input devices</h3>
+
+<p>Among other capabilities, apps can now make use of any <strong>vibrator service</strong> associated with an attached input device, such as for <strong>Rumble Pak</strong> controllers.</p>
+
+
+<h2 id="graphics">Animation and Graphics</h2>
+
+<h3>Vsync for apps</h3>
+
+<p>Extending vsync across the Android framework leads to a more consistent framerate and a smooth, steady UI. So that apps also benefit, Android 4.1 <strong>extends vsync timing</strong> to all drawing and animations initiated by apps. This lets them optimize operations on the UI thread and provides a stable timebase for synchronization.</p>
+
+<p>Apps can take advantage of vsync timing for free, through Android’s <strong>animation framework</strong>. The animation framework now uses vsync timing to automatically handle synchronization across animators.</p>
+
+<p>For specialized uses, apps can access vsync timing through APIs exposed by a new Choreographer class. Apps can request invalidation on the next vsync frame &mdash; a good way to schedule animation when the app is not using the animation framework. For more advanced uses, apps can post a calllback that the Choreographer class will run on the next frame. </p>
+
+<h3>New animation actions and transition types</h3>
+
+<p>The animation framework now lets you define start and end actions to take when running ViewPropertyAnimator animations, to help synchronize them with other animations or actions in the application. The action can run any runnable object. For example, the runnable might specify another animation to start when the previous one finishes.</p>
+
+<p>You can also now specify that a ViewPropertyAnimator use a layer during the course of its animation. Previously, it was a best practice to animate complicated views by setting up a layer prior to starting an animation and then handling an onAnimationEnd() event to remove the layer when the animation finishes. Now, the withLayer() method on ViewPropertyAnimator simplifies this process with a single method call.</p>
+
+<p>A new transition type in LayoutTransition enables you to automate animations in response to all layout changes in a ViewGroup.</p>
+
+
+<h2 id="connectivity">New Types of Connectivity</h2>
+
+<h3>Android Beam</h3>
+
+<p>Android Beam is a popular NFC-based technology that lets users instantly share, just by touching two NFC-enabled phones together.</p>
+
+<p>In Android 4.1, Android Beam makes it easier to share images, videos, or other payloads by <strong>leveraging Bluetooth for the data transfer</strong>. When the user triggers a transfer, Android Beam hands over from NFC to Bluetooth, making it really easy to manage the transfer of a file from one device to another.</p>
+
+<h3>Wi-fi Network Service Discovery</h3>
+
+<p>Android 4.1 introduces support for multicast <strong>DNS-based service discovery</strong>, which lets applications find and connect to services offered by peer devices over Wi-Fi networks &mdash; including mobile devices, printers, cameras, media players, and others. Developers can take advantage of Wi-Fi network service discovery to build cross-platform or multiplayer games and application experiences.</p>
+
+<p>Using the service discovery API, apps can create and register any kind of service, for any other NSD-enabled device to discover. The service is advertised by multicast across the network using a human-readable string identifier, which lets user more easily identify the type of service.  </p>
+
+<p>Consumer devices can use the API to scan and discover services available from devices connected to the local Wi-Fi network. After discovery, apps can use the API to resolve the service to an IP adress and port through which it can establish a socket connection.</p>
+
+<p>You can take advantage of this API to build new features into your apps. For example, you could let users connect to a webcam, a printer, or an app on another mobile device that supports Wi-Fi peer-to-peer connections.  </p>
+
+<h3>Wifi-Direct Service Discovery</h3>
+
+<p>Ice Cream Sandwich introduced support for Wi-Fi Direct, a technology that lets apps <strong>discover and pair directly</strong>, over a high-bandwidth peer-to-peer connection. Wi-Fi Direct is an ideal way to share media, photos, files and other types of data and sessions, even where there is no cell network or Wi-Fi available.</p>
+
+<p>With Jelly Bean, Android takes Wi-Fi Direct further, adding API support for <strong>pre-associated service discovery</strong>. Pre-associated service discovery lets your apps get more useful information from nearby devices about the services they support, before they attempt to connect.  Apps can initiate discovery for a specific service and filter the list of discovered devices to those that actually support the target service or application.</p>
+
+<p>For example, this means that your app could discover only devices that are “printers” or that have a specific game available, instead of discovering all nearby Wi-Fi Direct devices. On the other hand, your app can advertise the service it provides to other devices, which can discover it and then negotiate a connection. This greatly simplifies discovery and pairing for users and lets apps take advantage of Wi-Fi Direct more effectively.</p>
+
+<p>With Wi-Fi Direct service discovery, you can create apps and <strong>multiplayer games</strong> that can share photos, videos, gameplay, scores, or almost anything else &mdash; all without requiring any Internet or mobile network. Your users can connect using only a direct p2p connection, which avoids using mobile bandwidth.</p>
+
+<h3>Network Bandwidth Management</h3>
+
+<p>Android 4.1 helps apps <strong>manage data usage</strong> appropriately when the device is <strong>connected to a metered network</strong>, including tethering to a mobile hotspot. Apps can query whether the current network is metered before beginning a large download that might otherwise be relatively expensive to the user. Through the API, you can now get a clear picture of which networks are sensitive to data usage and manage your network activity accordingly.</p>
+
+
+<h2 id="media">New Media Capabilities</h2>
+
+<h3>Media codec access</h3>
+
+<p>Android 4.1 provides low-level access to platform hardware and software codecs. Apps can query the system to discover what <strong>low-level media codecs</strong> are available on the device and then and use them in the ways they need. For example, you can now create multiple instances of a media codec, queue input buffers, and receive output buffers in return. In addition, the media codec framework supports protected content. Apps can query for an available codec that is able to play protected content with a DRM solution available on the the device.</p>
+
+<h3>USB Audio</h3>
+
+<p>USB audio output support allows hardware vendors to build hardware such as <strong>audio docks</strong> that interface with Android devices. This functionality is also exposed with the Android <strong>Open Accessory Development Kit</strong> (ADK) to give all developers the chance to create their own hardware.</p>
+
+<h3>Audio record triggering</h3>
+
+<p>Android now lets you <strong>trigger audio recording</strong> based on the completion of an audio playback track. This is useful for  situations such as playing back a tone to cue your users to begin speaking to record their voices. This feature helps you sync up recording so you don’t record audio that is currently being played back and prevents recordings from beginning too late.</p>
+
+<h3>Multichannel audio</h3>
+
+<p>Android 4.1 supports <strong>multichannel audio</strong> on devices that have hardware multichannel audio out through the <strong>HDMI port</strong>. Multichannel audio lets you deliver rich media experiences to users for applications such as games, music apps, and video players. For devices that do not have the supported hardware, Android automatically downmixes the audio to the number of channels that are supported by the device (usually stereo).</p>
+
+<p>4ndroid 4.1 also adds built-in support for encoding/decoding AAC 5.1 audio.</p>
+
+<h3>Audio preprocessing</h3>
+
+<p>Developers can apply <strong>preprocessing effects</strong> to audio being recorded, such as to apply noise suppression for improving speech recording quality, echo cancellation for acoustic echo, and auto gain control for audio with inconsistent volume levels. Apps that require high quality and clean audio recording will benefit from these preprocessors.</p>
+
+<h3>Audio chaining</h3>
+
+<p>MediaPlayer supports <strong>chaining audio streams together</strong> to play audio files without pauses. This is useful for apps that require seamless transitions between audio files such as music players to play albums with continuous tracks or games.</p>
+
+<h3 id="media-router">Media Router</h3>
+
+<p>The new APIs MediaRouter, MediaRouteActionProvider, and MediaRouteButton provide standard mechanisms and UI for <strong>choosing where to play media</strong>. Support is built-in for wired headsets and a2dp bluetooth headsets and speakers, and you can add your own routing options within your own app.</p>
+
+<h2 id="renderscript">Renderscript Computation</h2>
+
+<p>Android 4.1 extends Renderscript computation to give you more flexibility. You can now <strong>sample textures</strong> in your Renderscript compute scripts, and <strong>new pragmas</strong> are available to define the floating point precision required by your scripts. This lets you enable <strong>NEON instructions</strong> such as fast vector math operations on the CPU path, that wouldn’t otherwise be possible with the full IEEE 754-2008 standard.</p>
+
+<p>You can now <strong>debug</strong> your Renderscript compute scripts on <strong>x86-based emulator and hardware devices</strong>. You can also define multiple root-style kernels in a single Renderscript source file.</p>
+
+
+<h2 id="google">Google APIs and services</h2>
+
+<p>To extend the capabilities of Android even further, several new services for Android are available.</p>
+
+
+<h3 id="gcm">Google Cloud Messaging for Android</h3>
+
+<p>Google Cloud Messaging (GCM) is a service that lets developers send <strong>short message data</strong> to their users on Android devices, without needing a proprietary sync solution. </p>
+
+<p>GCM handles all the details of <strong>queuing messages and delivering them</strong> efficiently to the targeted Android devices. It supports message <strong>multicasting</strong> and can reach up to 1000 connected devices simultaneously with a single request. It also supports message <strong>payloads</strong>, which means that in addition to sending tickle messages to an app on the device, developers can send up to 4K of data. </p>
+
+<p>Google Cloud Messaging is completely <strong>free for all developers</strong> and sign-up is easy. See the <a href="http://developers.google.com/android/gcm/index.html">Google Cloud Messaging</a> page for registration, downloads, and documentation.</p>
+
+<h3>App Encryption</h3>
+
+<p>Starting with Android 4.1, Google Play will help protect application assets by encrypting all paid apps with a device-specific key before they are delivered and stored on a device.</p>
+
+<h3>Smart App Updates</h3>
+
+<p>Smart app updates is a new feature of Google Play that introduces a better way of delivering <strong>app updates</strong> to devices. When developers publish an update, Google Play now delivers only the <strong>bits that have changed</strong> to devices, rather than the entire APK. This makes the updates much lighter-weight in most cases, so they are faster to download, save the device’s battery, and conserve bandwidth usage on users’ mobile data plan. On average, a smart app update is about <strong>1/3 the size</strong> of a full APK update.</p>
+
+<h3 id="gps">Google Play services (coming soon)</h3>
+
+<p>Google Play services helps developers to <strong>integrate Google services</strong> such as authentication and Google+ into their apps delivered through Google Play.</p> 
+
+<p>Google Play services will be automatically provisioned to end user devices by Google Play, so all you need is a <strong>thin client library</strong> in your apps.</p>
+
+<p>Because your app only contains the small client library, you can take advantage of these services without a big increase in download size and storage footprint. Also, Google Play will <strong>deliver regular updates</strong> to the services, without developers needing to publish app updates to take advantage of them.</p>
+
+<p>For more information about the APIs included in Google Play Services, see the <a href="http://developers.google.com/android/google-play-services/index.html">Google Play Services</a> developer page.</p>

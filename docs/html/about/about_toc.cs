@@ -6,7 +6,6 @@
       <li><a href="<?cs var:toroot?>about/start.html">Get Started</a></li>
     </ul>
   </li> 
-
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>about/versions/jelly-bean.html">
       <span class="en">Jelly Bean</span></a></div>
