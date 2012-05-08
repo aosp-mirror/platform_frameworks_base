@@ -309,6 +309,9 @@ public:
 
     sp<TextLayoutValue> getValue(const SkPaint* paint, const jchar* text, jint start,
             jint count, jint contextCount, jint dirFlags);
+
+    void purgeCaches();
+
 private:
     TextLayoutCache* mTextLayoutCache;
     TextLayoutShaper* mShaper;

@@ -991,4 +991,11 @@ sp<TextLayoutValue> TextLayoutEngine::getValue(const SkPaint* paint, const jchar
     return value;
 }
 
+void TextLayoutEngine::purgeCaches() {
+#if USE_TEXT_LAYOUT_CACHE
+    mTextLayoutCache->clear();
+#endif
+}
+
+
 } // namespace android

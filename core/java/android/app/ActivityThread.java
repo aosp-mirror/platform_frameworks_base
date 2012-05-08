@@ -2639,6 +2639,7 @@ public final class ActivityThread {
                     if (DEBUG_CONFIGURATION) Slog.v(TAG, "Resuming activity "
                             + r.activityInfo.name + " with newConfig " + r.newConfig);
                     performConfigurationChanged(r.activity, r.newConfig);
+                    freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(r.newConfig));
                     r.newConfig = null;
                 }
                 if (localLOGV) Slog.v(TAG, "Resuming " + r + " with isForward="
@@ -2955,6 +2956,7 @@ public final class ActivityThread {
                     if (DEBUG_CONFIGURATION) Slog.v(TAG, "Updating activity vis "
                             + r.activityInfo.name + " with new config " + r.newConfig);
                     performConfigurationChanged(r.activity, r.newConfig);
+                    freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(r.newConfig));
                     r.newConfig = null;
                 }
             } else {
@@ -3669,6 +3671,7 @@ public final class ActivityThread {
     final void handleConfigurationChanged(Configuration config, CompatibilityInfo compat) {
 
         ArrayList<ComponentCallbacks2> callbacks = null;
+        int configDiff = 0;
 
         synchronized (mPackages) {
             if (mPendingConfiguration != null) {
@@ -3693,6 +3696,7 @@ public final class ActivityThread {
             if (!mConfiguration.isOtherSeqNewer(config) && compat == null) {
                 return;
             }
+            configDiff = mConfiguration.diff(config);
             mConfiguration.updateFrom(config);
             config = applyCompatConfiguration();
             callbacks = collectComponentCallbacksLocked(false, config);
@@ -3701,10 +3705,23 @@ public final class ActivityThread {
         // Cleanup hardware accelerated stuff
         WindowManagerImpl.getDefault().trimLocalMemory();
 
+        freeTextLayoutCachesIfNeeded(configDiff);
+
         if (callbacks != null) {
             final int N = callbacks.size();
             for (int i=0; i<N; i++) {
                 performConfigurationChanged(callbacks.get(i), config);
+            }
+        }
+    }
+
+    final void freeTextLayoutCachesIfNeeded(int configDiff) {
+        if (configDiff != 0) {
+            // Ask text layout engine to free its caches if there is a locale change
+            boolean hasLocaleConfigChange = ((configDiff & ActivityInfo.CONFIG_LOCALE) != 0);
+            if (hasLocaleConfigChange) {
+                Canvas.freeTextLayoutCaches();
+                if (DEBUG_CONFIGURATION) Slog.v(TAG, "Cleared TextLayout Caches");
             }
         }
     }
@@ -3719,6 +3736,8 @@ public final class ActivityThread {
                 + r.activityInfo.name);
         
         performConfigurationChanged(r.activity, mCompatConfiguration);
+
+        freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(mCompatConfiguration));
     }
 
     final void handleProfilerControl(boolean start, ProfilerControlData pcd, int profileType) {
@@ -3820,6 +3839,9 @@ public final class ActivityThread {
 
         // Ask graphics to free up as much as possible (font/image caches)
         Canvas.freeCaches();
+
+        // Ask text layout engine to free also as much as possible
+        Canvas.freeTextLayoutCaches();
 
         BinderInternal.forceGc("mem");
     }
