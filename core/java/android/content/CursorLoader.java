@@ -19,6 +19,8 @@ package android.content;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.CancellationSignal;
+import android.os.OperationCanceledException;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

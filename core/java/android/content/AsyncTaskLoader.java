@@ -18,6 +18,7 @@ package android.content;
 
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.OperationCanceledException;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.util.TimeUtils;
