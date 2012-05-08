@@ -47,7 +47,6 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.LocaleUtil;
@@ -60,6 +59,10 @@ import android.util.Property;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.AccessibilityIterators.TextSegmentIterator;
+import android.view.AccessibilityIterators.CharacterTextSegmentIterator;
+import android.view.AccessibilityIterators.WordTextSegmentIterator;
+import android.view.AccessibilityIterators.ParagraphTextSegmentIterator;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
@@ -1524,7 +1527,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             | AccessibilityEvent.TYPE_VIEW_HOVER_EXIT
             | AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED
             | AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED
-            | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED;
+            | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED
+            | AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY;
 
     /**
      * Temporary Rect currently for use in setBackground().  This will probably
@@ -1588,6 +1592,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * The stable ID of this view for accessibility purposes.
      */
     int mAccessibilityViewId = NO_ID;
+
+    /**
+     * @hide
+     */
+    private int mAccessibilityCursorPosition = -1;
 
     /**
      * The view's tag.
@@ -4714,11 +4723,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
         }
 
-        if (getContentDescription() != null) {
+        if (mContentDescription != null && mContentDescription.length() > 0) {
             info.addAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
             info.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
             info.setMovementGranularities(AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER
-                    | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD);
+                    | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD
+                    | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PARAGRAPH);
         }
     }
 
@@ -5949,7 +5959,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 outViews.add(this);
             }
         } else if ((flags & FIND_VIEWS_WITH_CONTENT_DESCRIPTION) != 0
-                && !TextUtils.isEmpty(searched) && !TextUtils.isEmpty(mContentDescription)) {
+                && (searched != null && searched.length() > 0)
+                && (mContentDescription != null && mContentDescription.length() > 0)) {
             String searchedLowerCase = searched.toString().toLowerCase();
             String contentDescriptionLowerCase = mContentDescription.toString().toLowerCase();
             if (contentDescriptionLowerCase.contains(searchedLowerCase)) {
@@ -6050,6 +6061,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             invalidate();
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
             notifyAccessibilityStateChanged();
+
+            // Clear the text navigation state.
+            setAccessibilityCursorPosition(-1);
+
             // Try to move accessibility focus to the input focus.
             View rootView = getRootView();
             if (rootView != null) {
@@ -6447,9 +6462,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * possible accessibility actions look at {@link AccessibilityNodeInfo}.
      *
      * @param action The action to perform.
+     * @param arguments Optional action arguments.
      * @return Whether the action was performed.
      */
-    public boolean performAccessibilityAction(int action, Bundle args) {
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
         switch (action) {
             case AccessibilityNodeInfo.ACTION_CLICK: {
                 if (isClickable()) {
@@ -6498,8 +6514,148 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     return true;
                 }
             } break;
+            case AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY: {
+                if (arguments != null) {
+                    final int granularity = arguments.getInt(
+                            AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT);
+                    return nextAtGranularity(granularity);
+                }
+            } break;
+            case AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY: {
+                if (arguments != null) {
+                    final int granularity = arguments.getInt(
+                            AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT);
+                    return previousAtGranularity(granularity);
+                }
+            } break;
         }
         return false;
+    }
+
+    private boolean nextAtGranularity(int granularity) {
+        CharSequence text = getIterableTextForAccessibility();
+        if (text != null && text.length() > 0) {
+            return false;
+        }
+        TextSegmentIterator iterator = getIteratorForGranularity(granularity);
+        if (iterator == null) {
+            return false;
+        }
+        final int current = getAccessibilityCursorPosition();
+        final int[] range = iterator.following(current);
+        if (range == null) {
+            setAccessibilityCursorPosition(-1);
+            return false;
+        }
+        final int start = range[0];
+        final int end = range[1];
+        setAccessibilityCursorPosition(start);
+        sendViewTextTraversedAtGranularityEvent(
+                AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY,
+                granularity, start, end);
+        return true;
+    }
+
+    private boolean previousAtGranularity(int granularity) {
+        CharSequence text = getIterableTextForAccessibility();
+        if (text != null && text.length() > 0) {
+            return false;
+        }
+        TextSegmentIterator iterator = getIteratorForGranularity(granularity);
+        if (iterator == null) {
+            return false;
+        }
+        final int selectionStart = getAccessibilityCursorPosition();
+        final int current = selectionStart >= 0 ? selectionStart : text.length() + 1;
+        final int[] range = iterator.preceding(current);
+        if (range == null) {
+            setAccessibilityCursorPosition(-1);
+            return false;
+        }
+        final int start = range[0];
+        final int end = range[1];
+        setAccessibilityCursorPosition(end);
+        sendViewTextTraversedAtGranularityEvent(
+                AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY,
+                granularity, start, end);
+        return true;
+    }
+
+    /**
+     * Gets the text reported for accessibility purposes.
+     *
+     * @return The accessibility text.
+     *
+     * @hide
+     */
+    public CharSequence getIterableTextForAccessibility() {
+        return mContentDescription;
+    }
+
+    /**
+     * @hide
+     */
+    public int getAccessibilityCursorPosition() {
+        return mAccessibilityCursorPosition;
+    }
+
+    /**
+     * @hide
+     */
+    public void setAccessibilityCursorPosition(int position) {
+        mAccessibilityCursorPosition = position;
+    }
+
+    private void sendViewTextTraversedAtGranularityEvent(int action, int granularity,
+            int fromIndex, int toIndex) {
+        if (mParent == null) {
+            return;
+        }
+        AccessibilityEvent event = AccessibilityEvent.obtain(
+                AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY);
+        onInitializeAccessibilityEvent(event);
+        onPopulateAccessibilityEvent(event);
+        event.setFromIndex(fromIndex);
+        event.setToIndex(toIndex);
+        event.setAction(action);
+        event.setMovementGranularity(granularity);
+        mParent.requestSendAccessibilityEvent(this, event);
+    }
+
+    /**
+     * @hide
+     */
+    public TextSegmentIterator getIteratorForGranularity(int granularity) {
+        switch (granularity) {
+            case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER: {
+                CharSequence text = getIterableTextForAccessibility();
+                if (text != null && text.length() > 0) {
+                    CharacterTextSegmentIterator iterator =
+                        CharacterTextSegmentIterator.getInstance(mContext);
+                    iterator.initialize(text.toString());
+                    return iterator;
+                }
+            } break;
+            case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD: {
+                CharSequence text = getIterableTextForAccessibility();
+                if (text != null && text.length() > 0) {
+                    WordTextSegmentIterator iterator =
+                        WordTextSegmentIterator.getInstance(mContext);
+                    iterator.initialize(text.toString());
+                    return iterator;
+                }
+            } break;
+            case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PARAGRAPH: {
+                CharSequence text = getIterableTextForAccessibility();
+                if (text != null && text.length() > 0) {
+                    ParagraphTextSegmentIterator iterator =
+                        ParagraphTextSegmentIterator.getInstance();
+                    iterator.initialize(text.toString());
+                    return iterator;
+                }
+            } break;
+        }
+        return null;
     }
 
     /**

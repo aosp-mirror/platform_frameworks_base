@@ -236,12 +236,19 @@ import java.util.List;
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the current text at the movement granularity.</li>
+ *   <li>{@link #getMovementGranularity()} - Sets the granularity at which a view's text
+ *       was traversed.</li>
+ *   <li>{@link #getText()} -  The text of the source's sub-tree.</li>
+ *   <li>{@link #getFromIndex()} - The start of the next/previous text at the specified granularity
+ *           - inclusive.</li>
+ *   <li>{@link #getToIndex()} - The end of the next/previous text at the specified granularity
+ *           - exclusive.</li>
  *   <li>{@link #isPassword()} - Whether the source is password.</li>
  *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
  *   <li>{@link #getContentDescription()} - The content description of the source.</li>
  *   <li>{@link #getMovementGranularity()} - Sets the granularity at which a view's text
  *       was traversed.</li>
+ *   <li>{@link #getAction()} - Gets traversal action which specifies the direction.</li>
  * </ul>
  * </p>
  * <p>
@@ -635,6 +642,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     private CharSequence mPackageName;
     private long mEventTime;
     int mMovementGranularity;
+    int mAction;
 
     private final ArrayList<AccessibilityRecord> mRecords = new ArrayList<AccessibilityRecord>();
 
@@ -653,6 +661,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         super.init(event);
         mEventType = event.mEventType;
         mMovementGranularity = event.mMovementGranularity;
+        mAction = event.mAction;
         mEventTime = event.mEventTime;
         mPackageName = event.mPackageName;
     }
@@ -791,6 +800,27 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     }
 
     /**
+     * Sets the performed action that triggered this event.
+     *
+     * @param action The action.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setAction(int action) {
+        enforceNotSealed();
+        mAction = action;
+    }
+
+    /**
+     * Gets the performed action that triggered this event.
+     *
+     * @return The action.
+     */
+    public int getAction() {
+        return mAction;
+    }
+
+    /**
      * Returns a cached instance if such is available or a new one is
      * instantiated with its type property set.
      *
@@ -879,6 +909,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         super.clear();
         mEventType = 0;
         mMovementGranularity = 0;
+        mAction = 0;
         mPackageName = null;
         mEventTime = 0;
         while (!mRecords.isEmpty()) {
@@ -896,6 +927,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mSealed = (parcel.readInt() == 1);
         mEventType = parcel.readInt();
         mMovementGranularity = parcel.readInt();
+        mAction = parcel.readInt();
         mPackageName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
         mEventTime = parcel.readLong();
         mConnectionId = parcel.readInt();
@@ -947,6 +979,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         parcel.writeInt(isSealed() ? 1 : 0);
         parcel.writeInt(mEventType);
         parcel.writeInt(mMovementGranularity);
+        parcel.writeInt(mAction);
         TextUtils.writeToParcel(mPackageName, parcel, 0);
         parcel.writeLong(mEventTime);
         parcel.writeInt(mConnectionId);
@@ -1004,6 +1037,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         builder.append("; EventTime: ").append(mEventTime);
         builder.append("; PackageName: ").append(mPackageName);
         builder.append("; MovementGranularity: ").append(mMovementGranularity);
+        builder.append("; Action: ").append(mAction);
         builder.append(super.toString());
         if (DEBUG) {
             builder.append("\n");

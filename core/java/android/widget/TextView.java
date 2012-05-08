@@ -26,7 +26,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -91,6 +90,7 @@ import android.util.AttributeSet;
 import android.util.FloatMath;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.AccessibilityIterators.TextSegmentIterator;
 import android.view.ActionMode;
 import android.view.DragEvent;
 import android.view.Gravity;
@@ -7712,6 +7712,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (!isPassword) {
             info.setText(getTextForAccessibility());
         }
+
+        if (TextUtils.isEmpty(getContentDescription())
+                && !TextUtils.isEmpty(mText)) {
+            info.addAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
+            info.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
+            info.setMovementGranularities(AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER
+                    | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD
+                    | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_LINE
+                    | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PARAGRAPH
+                    | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PAGE);
+        }
     }
 
     @Override
@@ -7726,12 +7737,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Gets the text reported for accessibility purposes. It is the
-     * text if not empty or the hint.
+     * Gets the text reported for accessibility purposes.
      *
      * @return The accessibility text.
+     *
+     * @hide
      */
-    private CharSequence getTextForAccessibility() {
+    public CharSequence getTextForAccessibility() {
         CharSequence text = getText();
         if (TextUtils.isEmpty(text)) {
             text = getHint();
@@ -8283,6 +8295,79 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (!(this instanceof EditText)) {
                 Log.d(LOG_TAG + " EDITOR", "Redundant Editor creation. " + reason);
             }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public CharSequence getIterableTextForAccessibility() {
+        if (getContentDescription() == null) {
+            if (!(mText instanceof Spannable)) {
+                setText(mText, BufferType.SPANNABLE);
+            }
+            return mText;
+        }
+        return super.getIterableTextForAccessibility();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public TextSegmentIterator getIteratorForGranularity(int granularity) {
+        switch (granularity) {
+            case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_LINE: {
+                Spannable text = (Spannable) getIterableTextForAccessibility();
+                if (!TextUtils.isEmpty(text) && getLayout() != null) {
+                    AccessibilityIterators.LineTextSegmentIterator iterator =
+                        AccessibilityIterators.LineTextSegmentIterator.getInstance();
+                    iterator.initialize(text, getLayout());
+                    return iterator;
+                }
+            } break;
+            case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PAGE: {
+                Spannable text = (Spannable) getIterableTextForAccessibility();
+                if (!TextUtils.isEmpty(text) && getLayout() != null) {
+                    AccessibilityIterators.PageTextSegmentIterator iterator =
+                        AccessibilityIterators.PageTextSegmentIterator.getInstance();
+                    iterator.initialize(this);
+                    return iterator;
+                }
+            } break;
+        }
+        return super.getIteratorForGranularity(granularity);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public int getAccessibilityCursorPosition() {
+        if (TextUtils.isEmpty(getContentDescription())) {
+            return getSelectionEnd();
+        } else {
+            return super.getAccessibilityCursorPosition();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void setAccessibilityCursorPosition(int index) {
+        if (getAccessibilityCursorPosition() == index) {
+            return;
+        }
+        if (TextUtils.isEmpty(getContentDescription())) {
+            if (index >= 0) {
+                Selection.setSelection((Spannable) mText, index);
+            } else {
+                Selection.removeSelection((Spannable) mText);
+            }
+        } else {
+            super.setAccessibilityCursorPosition(index);
         }
     }
 
