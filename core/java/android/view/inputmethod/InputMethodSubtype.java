@@ -58,7 +58,7 @@ public final class InputMethodSubtype implements Parcelable {
     private final String mSubtypeLocale;
     private final String mSubtypeMode;
     private final String mSubtypeExtraValue;
-    private HashMap<String, String> mExtraValueHashMapCache;
+    private volatile HashMap<String, String> mExtraValueHashMapCache;
 
     /**
      * Constructor.
@@ -237,18 +237,22 @@ public final class InputMethodSubtype implements Parcelable {
 
     private HashMap<String, String> getExtraValueHashMap() {
         if (mExtraValueHashMapCache == null) {
-            mExtraValueHashMapCache = new HashMap<String, String>();
-            final String[] pairs = mSubtypeExtraValue.split(EXTRA_VALUE_PAIR_SEPARATOR);
-            final int N = pairs.length;
-            for (int i = 0; i < N; ++i) {
-                final String[] pair = pairs[i].split(EXTRA_VALUE_KEY_VALUE_SEPARATOR);
-                if (pair.length == 1) {
-                    mExtraValueHashMapCache.put(pair[0], null);
-                } else if (pair.length > 1) {
-                    if (pair.length > 2) {
-                        Slog.w(TAG, "ExtraValue has two or more '='s");
+            synchronized(this) {
+                if (mExtraValueHashMapCache == null) {
+                    mExtraValueHashMapCache = new HashMap<String, String>();
+                    final String[] pairs = mSubtypeExtraValue.split(EXTRA_VALUE_PAIR_SEPARATOR);
+                    final int N = pairs.length;
+                    for (int i = 0; i < N; ++i) {
+                        final String[] pair = pairs[i].split(EXTRA_VALUE_KEY_VALUE_SEPARATOR);
+                        if (pair.length == 1) {
+                            mExtraValueHashMapCache.put(pair[0], null);
+                        } else if (pair.length > 1) {
+                            if (pair.length > 2) {
+                                Slog.w(TAG, "ExtraValue has two or more '='s");
+                            }
+                            mExtraValueHashMapCache.put(pair[0], pair[1]);
+                        }
                     }
-                    mExtraValueHashMapCache.put(pair[0], pair[1]);
                 }
             }
         }
