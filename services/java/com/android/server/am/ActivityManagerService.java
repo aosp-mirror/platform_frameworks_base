@@ -13484,7 +13484,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TASK ||
                         parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TOP ||
                         (destIntentFlags & Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
-                    parent.deliverNewIntentLocked(srec.app.uid, destIntent);
+                    parent.deliverNewIntentLocked(srec.info.applicationInfo.uid, destIntent);
                 } else {
                     try {
                         ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
