@@ -210,12 +210,29 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
     }
 
     @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (mAlwaysUseOption) {
+            final int checkedPos = mGrid.getCheckedItemPosition();
+            final boolean enabled = checkedPos != GridView.INVALID_POSITION;
+            mAlwaysButton.setEnabled(enabled);
+            mOnceButton.setEnabled(enabled);
+            if (enabled) {
+                mGrid.setSelection(checkedPos);
+            }
+        }
+    }
+
+    @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (mAlwaysUseOption) {
             final int checkedPos = mGrid.getCheckedItemPosition();
             final boolean enabled = checkedPos != GridView.INVALID_POSITION;
             mAlwaysButton.setEnabled(enabled);
             mOnceButton.setEnabled(enabled);
+            if (enabled) {
+                mGrid.smoothScrollToPosition(checkedPos);
+            }
         } else {
             startSelected(position, false);
         }
