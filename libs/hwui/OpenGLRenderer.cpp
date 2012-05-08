@@ -247,7 +247,6 @@ void OpenGLRenderer::resume() {
 }
 
 void OpenGLRenderer::detachFunctor(Functor* functor) {
-    ALOGD("OGLR %p detachFunctor %p", this, functor);
     mFunctors.remove(functor);
 }
 
