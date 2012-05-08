@@ -6665,6 +6665,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @hide
      */
     public void dispatchStartTemporaryDetach() {
+        clearAccessibilityFocus();
         onStartTemporaryDetach();
     }
 
@@ -11279,7 +11280,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         resetResolvedLayoutDirection();
         resetResolvedTextAlignment();
         resetAccessibilityStateChanged();
-        clearAccessibilityFocus();
     }
 
     /**
