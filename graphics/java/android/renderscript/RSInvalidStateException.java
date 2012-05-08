@@ -17,13 +17,11 @@
 package android.renderscript;
 
 
-/** @deprecated renderscript is deprecated in J
+/**
  * Base class for all exceptions thrown by the Android
  * Renderscript
  */
 public class RSInvalidStateException extends RSRuntimeException {
-    /** @deprecated renderscript is deprecated in J
-    */
     public RSInvalidStateException(String string) {
         super(string);
     }
