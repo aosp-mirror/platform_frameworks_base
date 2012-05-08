@@ -47,12 +47,6 @@
     <!-- Size of status line font in LockScreen. -->
     <dimen name="keyguard_pattern_unlock_status_line_font_size">14sp</dimen>
 
-    <!-- Preference activity, vertical padding for the header list -->
-    <dimen name="preference_screen_header_vertical_padding">32dp</dimen>
-    <dimen name="preference_screen_side_margin">0dp</dimen>
-    <!-- Compensate for double margin : preference_screen_side_margin + 4 (frame background shadow) = -preference_screen_side_margin_negative -->
-    <dimen name="preference_screen_side_margin_negative">-4dp</dimen>
-
     <!-- Default padding to apply to AppWidgetHostViews containing widgets targeting API level 14 and up. -->
     <dimen name="default_app_widget_padding_left">12dp</dimen>
     <dimen name="default_app_widget_padding_top">4dp</dimen>
@@ -78,5 +72,9 @@
     <!-- Height of the bottom navigation bar in portrait; on sw600dp devices
          this is a bit taller -->
     <dimen name="navigation_bar_height_portrait">56dp</dimen>
+
+    <!-- Preference fragment padding, sides -->
+    <dimen name="preference_fragment_padding_side">24dp</dimen>
+    <dimen name="preference_screen_header_padding_side">24dip</dimen>
 </resources>
 

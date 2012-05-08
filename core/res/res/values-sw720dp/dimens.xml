@@ -38,6 +38,32 @@
     <dimen name="thumbnail_width">230dp</dimen>
     <!-- The height that is used when creating thumbnails of applications. -->
     <dimen name="thumbnail_height">135dp</dimen>
+
+    <!-- Preference activity, vertical padding for the header list -->
+    <dimen name="preference_screen_header_vertical_padding">32dp</dimen>
+    <dimen name="preference_screen_side_margin">0dp</dimen>
+    <!-- Compensate for double margin : preference_screen_side_margin + 4 (frame background shadow) = -preference_screen_side_margin_negative -->
+    <dimen name="preference_screen_side_margin_negative">-4dp</dimen>
+
+    <!-- Preference fragment padding, bottom -->
+    <dimen name="preference_fragment_padding_bottom">16dp</dimen>
+    <dimen name="preference_screen_header_padding_side">0dip</dimen>
+    <integer name="preference_screen_header_scrollbarStyle">0x0</integer> <!-- insideOverlay -->
+
+    <!-- Preference fragment padding, sides -->
+    <dimen name="preference_fragment_padding_side">32dp</dimen>
+    <!-- Padding to the left of the preference panel breadcrumb -->
+    <dimen name="preference_breadcrumb_paddingLeft">32dp</dimen>
+    <!-- Padding to the right of the preference panel breadcrumb -->
+    <dimen name="preference_breadcrumb_paddingRight">32dp</dimen>
+    <!-- Weight of the left pane in a multi-pane preference layout. -->
+    <integer name="preferences_left_pane_weight">1</integer>
+    <!-- Weight of the right pane in a multi-pane preference layout. So the split is 1:2 -->
+    <integer name="preferences_right_pane_weight">2</integer>
+    <!-- Minimum space to allocate to the left of a preference item for an icon.
+        This helps in aligning titles when some items have icons and some don't. When space is
+        at a premium, we don't pre-allocate any space. -->
+    <dimen name="preference_icon_minWidth">56dp</dimen>
 </resources>
 
 
