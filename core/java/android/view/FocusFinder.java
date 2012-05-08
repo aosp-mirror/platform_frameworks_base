@@ -276,7 +276,10 @@ public class FocusFinder {
                 return focusables.get(position + 1);
             }
         }
-        return focusables.get(0);
+        if (!focusables.isEmpty()) {
+            return focusables.get(0);
+        }
+        return null;
     }
 
     private static View getBackwardFocusable(ViewGroup root, View focused,
@@ -293,7 +296,10 @@ public class FocusFinder {
                 return focusables.get(position - 1);
             }
         }
-        return focusables.get(count - 1);
+        if (!focusables.isEmpty()) {
+            return focusables.get(count - 1);
+        }
+        return null;
     }
 
     /**
