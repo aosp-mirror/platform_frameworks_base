@@ -576,6 +576,8 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     /**
      * Returns the default iconified state of the search field.
      * @return
+     *
+     * @attr ref android.R.styleable#SearchView_iconifiedByDefault
      */
     public boolean isIconfiedByDefault() {
         return mIconifiedByDefault;
@@ -696,6 +698,8 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
      * Gets the specified maximum width in pixels, if set. Returns zero if
      * no maximum width was specified.
      * @return the maximum width of the view
+     *
+     * @attr ref android.R.styleable#SearchView_maxWidth
      */
     public int getMaxWidth() {
         return mMaxWidth;
