@@ -15,9 +15,13 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true"
+         android:drawable="@drawable/ic_notify_rotation_on_normal" />
+    <item android:state_checked="true" android:state_pressed="true"
+         android:drawable="@drawable/ic_notify_rotation_on_pressed" />
     <item android:state_pressed="true"
-         android:drawable="@drawable/ic_notify_quicksettings_pressed" />
+         android:drawable="@drawable/ic_notify_rotation_off_pressed" />
     <item
-         android:drawable="@drawable/ic_notify_quicksettings_normal" />
+         android:drawable="@drawable/ic_notify_rotation_off_normal" />
 </selector>
 
