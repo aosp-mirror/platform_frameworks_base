@@ -16,15 +16,15 @@ USAGE
 The tool works by scaping the debug log output from WindowOrientationListener
 for interesting data and then plotting it.
 
-1. Enable the Window Orientation Listener debugging data log using the
-   Development Settings in the Dev Tools application (Development.apk).
-
-2. Plug in the device.  Ensure that it is the only device plugged in
+1. Plug in the device.  Ensure that it is the only device plugged in
    since this script is of very little brain and will get confused otherwise.
 
-3. Run "orientationplot.py".
+2. Enable the Window Orientation Listener debugging data log.
+   adb shell setprop debug.orientation.log true
+   adb shell stop
+   adb shell start
 
-4. When finished, remember to disable the debug log output since it is quite verbose!
+3. Run "orientationplot.py".
 
 
 WHAT IT ALL MEANS
