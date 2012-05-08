@@ -3298,7 +3298,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     public int getPageBackgroundColor() {
-        return nativeGetBackgroundColor();
+        if (mNativeClass == 0) return Color.WHITE;
+        return nativeGetBackgroundColor(mNativeClass);
     }
 
     /**
@@ -4455,7 +4456,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (mNativeClass == 0) {
             return 0;
         }
-        return nativeGetBaseLayer();
+        return nativeGetBaseLayer(mNativeClass);
     }
 
     private void onZoomAnimationStart() {
@@ -8657,7 +8658,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private native void     nativeSetHeightCanMeasure(boolean measure);
     private native boolean  nativeSetBaseLayer(int nativeInstance,
             int layer, boolean showVisualIndicator, boolean isPictureAfterFirstLayout);
-    private native int      nativeGetBaseLayer();
+    private native int      nativeGetBaseLayer(int nativeInstance);
     private native void     nativeCopyBaseContentToPicture(Picture pict);
     private native boolean  nativeHasContent();
     private native void     nativeStopGL();
@@ -8685,7 +8686,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     private native boolean  nativeScrollLayer(int nativeInstance, int layer, int newX, int newY);
     private native void     nativeSetIsScrolling(boolean isScrolling);
-    private native int      nativeGetBackgroundColor();
+    private native int      nativeGetBackgroundColor(int nativeInstance);
     native boolean  nativeSetProperty(String key, String value);
     native String   nativeGetProperty(String key);
     /**
