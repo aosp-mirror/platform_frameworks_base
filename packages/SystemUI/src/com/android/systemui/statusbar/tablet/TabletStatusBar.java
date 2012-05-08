@@ -109,7 +109,6 @@ public class TabletStatusBar extends BaseStatusBar implements
     private static final boolean FAKE_SPACE_BAR = true;
 
     // Notification "peeking" (flyover preview of individual notifications)
-    final static boolean NOTIFICATION_PEEK_ENABLED = false;
     final static int NOTIFICATION_PEEK_HOLD_THRESH = 200; // ms
     final static int NOTIFICATION_PEEK_FADE_DELAY = 3000; // ms
 
@@ -126,9 +125,6 @@ public class TabletStatusBar extends BaseStatusBar implements
     private int mMaxNotificationIcons = 5;
 
     IWindowManager mWindowManager;
-
-    // tracking all current notifications
-    private NotificationData mNotificationData = new NotificationData();
 
     TabletStatusBarView mStatusBarView;
     View mNotificationArea;
@@ -159,8 +155,6 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     int mNotificationPeekTapDuration;
     int mNotificationFlingVelocity;
-
-    NotificationRowLayout mPile;
 
     BatteryController mBatteryController;
     BluetoothController mBluetoothController;
@@ -289,47 +283,6 @@ public class TabletStatusBar extends BaseStatusBar implements
 //        lp.windowAnimations = com.android.internal.R.style.Animation_ZoomButtons; // simple fade
 
         WindowManagerImpl.getDefault().addView(mNotificationPanel, lp);
-
-        // Notification preview window
-        if (NOTIFICATION_PEEK_ENABLED) {
-            mNotificationPeekWindow = (NotificationPeekPanel) View.inflate(context,
-                    R.layout.system_bar_notification_peek, null);
-            mNotificationPeekWindow.setBar(this);
-
-            mNotificationPeekRow = (ViewGroup) mNotificationPeekWindow.findViewById(R.id.content);
-            mNotificationPeekWindow.setVisibility(View.GONE);
-            mNotificationPeekWindow.setOnTouchListener(
-                    new TouchOutsideListener(MSG_CLOSE_NOTIFICATION_PEEK, mNotificationPeekWindow));
-            mNotificationPeekScrubRight = new LayoutTransition();
-            mNotificationPeekScrubRight.setAnimator(LayoutTransition.APPEARING,
-                    ObjectAnimator.ofInt(null, "left", -512, 0));
-            mNotificationPeekScrubRight.setAnimator(LayoutTransition.DISAPPEARING,
-                    ObjectAnimator.ofInt(null, "left", -512, 0));
-            mNotificationPeekScrubRight.setDuration(500);
-
-            mNotificationPeekScrubLeft = new LayoutTransition();
-            mNotificationPeekScrubLeft.setAnimator(LayoutTransition.APPEARING,
-                    ObjectAnimator.ofInt(null, "left", 512, 0));
-            mNotificationPeekScrubLeft.setAnimator(LayoutTransition.DISAPPEARING,
-                    ObjectAnimator.ofInt(null, "left", 512, 0));
-            mNotificationPeekScrubLeft.setDuration(500);
-
-            // XXX: setIgnoreChildren?
-            lp = new WindowManager.LayoutParams(
-                    512, // ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-                        | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                    PixelFormat.TRANSLUCENT);
-            lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
-            lp.y = res.getDimensionPixelOffset(R.dimen.peek_window_y_offset);
-            lp.setTitle("NotificationPeekWindow");
-            lp.windowAnimations = com.android.internal.R.style.Animation_Toast;
-
-            WindowManagerImpl.getDefault().addView(mNotificationPeekWindow, lp);
-        }
 
         // Recents Panel
         mRecentTasksLoader = new RecentTasksLoader(context);
@@ -494,24 +447,16 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         // the whole right-hand side of the bar
         mNotificationArea = sb.findViewById(R.id.notificationArea);
-        if (!NOTIFICATION_PEEK_ENABLED) {
-            mNotificationArea.setOnTouchListener(new NotificationTriggerTouchListener());
-        }
+        mNotificationArea.setOnTouchListener(new NotificationTriggerTouchListener());
 
         // the button to open the notification area
         mNotificationTrigger = sb.findViewById(R.id.notificationTrigger);
-        if (NOTIFICATION_PEEK_ENABLED) {
-            mNotificationTrigger.setOnTouchListener(new NotificationTriggerTouchListener());
-        }
 
         // the more notifications icon
         mNotificationIconArea = (NotificationIconArea)sb.findViewById(R.id.notificationIcons);
 
         // where the icons go
         mIconLayout = (NotificationIconArea.IconLayout) sb.findViewById(R.id.icons);
-        if (NOTIFICATION_PEEK_ENABLED) {
-            mIconLayout.setOnTouchListener(new NotificationIconTouchListener());
-        }
 
         ViewConfiguration vc = ViewConfiguration.get(context);
         mNotificationPeekTapDuration = vc.getTapTimeout();
@@ -827,9 +772,6 @@ public class TabletStatusBar extends BaseStatusBar implements
                 case MSG_OPEN_NOTIFICATION_PANEL:
                     if (DEBUG) Slog.d(TAG, "opening notifications panel");
                     if (!mNotificationPanel.isShowing()) {
-                        if (NOTIFICATION_PEEK_ENABLED) {
-                            mNotificationPeekWindow.setVisibility(View.GONE);
-                        }
                         mNotificationPanel.show(true, true);
                         mNotificationArea.setVisibility(View.INVISIBLE);
                         mTicker.halt();
@@ -911,106 +853,6 @@ public class TabletStatusBar extends BaseStatusBar implements
             }
         } else {
             tick(key, notification, true);
-        }
-
-        setAreThereNotifications();
-    }
-
-    public void updateNotification(IBinder key, StatusBarNotification notification) {
-        if (DEBUG) Slog.d(TAG, "updateNotification(" + key + " -> " + notification + ")");
-
-        final NotificationData.Entry oldEntry = mNotificationData.findByKey(key);
-        if (oldEntry == null) {
-            Slog.w(TAG, "updateNotification for unknown key: " + key);
-            return;
-        }
-
-        final StatusBarNotification oldNotification = oldEntry.notification;
-
-        // XXX: modify when we do something more intelligent with the two content views
-        final RemoteViews oldContentView = (oldNotification.notification.bigContentView != null) 
-                ? oldNotification.notification.bigContentView
-                : oldNotification.notification.contentView;
-        final RemoteViews contentView = (notification.notification.bigContentView != null) 
-                ? notification.notification.bigContentView
-                : notification.notification.contentView;
-
-        if (DEBUG) {
-            Slog.d(TAG, "old notification: when=" + oldNotification.notification.when
-                    + " ongoing=" + oldNotification.isOngoing()
-                    + " expanded=" + oldEntry.expanded
-                    + " contentView=" + oldContentView
-                    + " rowParent=" + oldEntry.row.getParent());
-            Slog.d(TAG, "new notification: when=" + notification.notification.when
-                    + " ongoing=" + oldNotification.isOngoing()
-                    + " contentView=" + contentView);
-        }
-
-        // Can we just reapply the RemoteViews in place?  If when didn't change, the order
-        // didn't change.
-        boolean contentsUnchanged = oldEntry.expanded != null
-                && contentView != null && oldContentView != null
-                && contentView.getPackage() != null
-                && oldContentView.getPackage() != null
-                && oldContentView.getPackage().equals(contentView.getPackage())
-                && oldContentView.getLayoutId() == contentView.getLayoutId();
-        ViewGroup rowParent = (ViewGroup) oldEntry.row.getParent();
-        boolean orderUnchanged = notification.notification.when==oldNotification.notification.when
-                && notification.score == oldNotification.score;
-                // score now encompasses/supersedes isOngoing()
-        boolean updateTicker = notification.notification.tickerText != null
-                && !TextUtils.equals(notification.notification.tickerText,
-                        oldEntry.notification.notification.tickerText);
-        boolean isLastAnyway = rowParent.indexOfChild(oldEntry.row) == rowParent.getChildCount()-1;
-        if (contentsUnchanged && (orderUnchanged || isLastAnyway)) {
-            if (DEBUG) Slog.d(TAG, "reusing notification for key: " + key);
-            oldEntry.notification = notification;
-            try {
-                // Reapply the RemoteViews
-                contentView.reapply(mContext, oldEntry.content);
-                // update the contentIntent
-                final PendingIntent contentIntent = notification.notification.contentIntent;
-                if (contentIntent != null) {
-                    final View.OnClickListener listener = makeClicker(contentIntent,
-                            notification.pkg, notification.tag, notification.id);
-                    oldEntry.content.setOnClickListener(listener);
-                } else {
-                    oldEntry.content.setOnClickListener(null);
-                }
-                // Update the icon.
-                final StatusBarIcon ic = new StatusBarIcon(notification.pkg,
-                        notification.notification.icon, notification.notification.iconLevel,
-                        notification.notification.number,
-                        notification.notification.tickerText);
-                if (!oldEntry.icon.set(ic)) {
-                    handleNotificationError(key, notification, "Couldn't update icon: " + ic);
-                    return;
-                }
-
-                if (NOTIFICATION_PEEK_ENABLED && key == mNotificationPeekKey) {
-                    // must update the peek window
-                    Message peekMsg = mHandler.obtainMessage(MSG_OPEN_NOTIFICATION_PEEK);
-                    peekMsg.arg1 = mNotificationPeekIndex;
-                    mHandler.removeMessages(MSG_OPEN_NOTIFICATION_PEEK);
-                    mHandler.sendMessage(peekMsg);
-                }
-            }
-            catch (RuntimeException e) {
-                // It failed to add cleanly.  Log, and remove the view from the panel.
-                Slog.w(TAG, "Couldn't reapply views for package " + contentView.getPackage(), e);
-                removeNotificationViews(key);
-                addNotificationViews(key, notification);
-            }
-        } else {
-            if (DEBUG) Slog.d(TAG, "not reusing notification for key: " + key);
-            removeNotificationViews(key);
-            addNotificationViews(key, notification);
-        }
-
-        // Restart the ticker if it's still running
-        if (updateTicker) {
-            mTicker.halt();
-            tick(key, notification, false);
         }
 
         setAreThereNotifications();
@@ -1105,7 +947,8 @@ public class TabletStatusBar extends BaseStatusBar implements
         return n.tickerView != null || !TextUtils.isEmpty(n.tickerText);
     }
 
-    private void tick(IBinder key, StatusBarNotification n, boolean firstTime) {
+    @Override
+    protected void tick(IBinder key, StatusBarNotification n, boolean firstTime) {
         // Don't show the ticker when the windowshade is open.
         if (mNotificationPanel.isShowing()) {
             return;
@@ -1134,11 +977,6 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     public void animateExpand() {
-        if (NOTIFICATION_PEEK_ENABLED) {
-            mHandler.removeMessages(MSG_CLOSE_NOTIFICATION_PEEK);
-            mHandler.removeMessages(MSG_OPEN_NOTIFICATION_PEEK);
-            mHandler.sendEmptyMessage(MSG_CLOSE_NOTIFICATION_PEEK);
-        }
         mHandler.removeMessages(MSG_OPEN_NOTIFICATION_PANEL);
         mHandler.sendEmptyMessage(MSG_OPEN_NOTIFICATION_PANEL);
     }
@@ -1158,10 +996,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         mHandler.sendEmptyMessage(MSG_CLOSE_INPUT_METHODS_PANEL);
         mHandler.removeMessages(MSG_CLOSE_COMPAT_MODE_PANEL);
         mHandler.sendEmptyMessage(MSG_CLOSE_COMPAT_MODE_PANEL);
-        if (NOTIFICATION_PEEK_ENABLED) {
-            mHandler.removeMessages(MSG_CLOSE_NOTIFICATION_PEEK);
-            mHandler.sendEmptyMessage(MSG_CLOSE_NOTIFICATION_PEEK);
-        }
     }
 
     @Override // CommandQueue
@@ -1350,21 +1184,10 @@ public class TabletStatusBar extends BaseStatusBar implements
         }
     }
 
-    private void setAreThereNotifications() {
+    @Override
+    protected void setAreThereNotifications() {
         if (mNotificationPanel != null) {
             mNotificationPanel.setClearable(mNotificationData.hasClearableItems());
-        }
-    }
-
-    /**
-     * Cancel this notification and tell the status bar service about the failure. Hold no locks.
-     */
-    void handleNotificationError(IBinder key, StatusBarNotification n, String message) {
-        removeNotification(key);
-        try {
-            mBarService.onNotificationError(n.pkg, n.tag, n.id, n.uid, n.initialPid, message);
-        } catch (RemoteException ex) {
-            // The end is nigh.
         }
     }
 
@@ -1403,28 +1226,6 @@ public class TabletStatusBar extends BaseStatusBar implements
                 MSG_OPEN_COMPAT_MODE_PANEL : MSG_CLOSE_COMPAT_MODE_PANEL;
         mHandler.removeMessages(msg);
         mHandler.sendEmptyMessage(msg);
-    }
-
-    StatusBarNotification removeNotificationViews(IBinder key) {
-        NotificationData.Entry entry = mNotificationData.remove(key);
-        if (entry == null) {
-            Slog.w(TAG, "removeNotification for unknown key: " + key);
-            return null;
-        }
-        // Remove the expanded view.
-        ViewGroup rowParent = (ViewGroup)entry.row.getParent();
-        if (rowParent != null) rowParent.removeView(entry.row);
-
-        if (NOTIFICATION_PEEK_ENABLED && key == mNotificationPeekKey) {
-            // must close the peek as well, since it's gone
-            mHandler.sendEmptyMessage(MSG_CLOSE_NOTIFICATION_PEEK);
-        }
-        // Remove the icon.
-//        ViewGroup iconParent = (ViewGroup)entry.icon.getParent();
-//        if (iconParent != null) iconParent.removeView(entry.icon);
-        updateNotificationIcons();
-
-        return entry.notification;
     }
 
     private class NotificationTriggerTouchListener implements View.OnTouchListener {
@@ -1619,50 +1420,14 @@ public class TabletStatusBar extends BaseStatusBar implements
         }
     }
 
-    StatusBarIconView addNotificationViews(IBinder key, StatusBarNotification notification) {
-        if (DEBUG) {
-            Slog.d(TAG, "addNotificationViews(key=" + key + ", notification=" + notification);
-        }
-        // Construct the icon.
-        final StatusBarIconView iconView = new StatusBarIconView(mContext,
-                notification.pkg + "/0x" + Integer.toHexString(notification.id),
-                notification.notification);
-        iconView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-
-        final StatusBarIcon ic = new StatusBarIcon(notification.pkg,
-                    notification.notification.icon,
-                    notification.notification.iconLevel,
-                    notification.notification.number,
-                    notification.notification.tickerText);
-        if (!iconView.set(ic)) {
-            handleNotificationError(key, notification, "Couldn't attach StatusBarIcon: " + ic);
-            return null;
-        }
-        // Construct the expanded view.
-        NotificationData.Entry entry = new NotificationData.Entry(key, notification, iconView);
-        if (!inflateViews(entry, mPile)) {
-            handleNotificationError(key, notification, "Couldn't expand RemoteViews for: "
-                    + notification);
-            return null;
-        }
-
-        // Add the icon.
-        int pos = mNotificationData.add(entry);
-        if (DEBUG) {
-            Slog.d(TAG, "addNotificationViews: added at " + pos);
-        }
-        updateNotificationIcons();
-
-        return iconView;
-    }
-
     private void reloadAllNotificationIcons() {
         if (mIconLayout == null) return;
         mIconLayout.removeAllViews();
         updateNotificationIcons();
     }
 
-    private void updateNotificationIcons() {
+    @Override
+    protected void updateNotificationIcons() {
         // XXX: need to implement a new limited linear layout class
         // to avoid removing & readding everything
 
@@ -1835,6 +1600,19 @@ public class TabletStatusBar extends BaseStatusBar implements
         mNetworkController.dump(fd, pw, args);
     }
 
+    @Override
+    protected boolean isTopNotification(ViewGroup parent, NotificationData.Entry entry) {
+        return parent.indexOfChild(entry.row) == parent.getChildCount()-1;
+    }
+
+    @Override
+    protected void haltTicker() {
+        mTicker.halt();
+    }
+
+    @Override
+    protected void updateExpandedViewPos(int expandedPosition) {
+    }
 }
 
 
