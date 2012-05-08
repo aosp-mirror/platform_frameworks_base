@@ -16,22 +16,28 @@
 
 package com.android.systemui.statusbar;
 
+import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.Surface;
-import android.view.VelocityTracker;
 import android.view.View;
 
+import com.android.systemui.R;
+
 public class DelegateViewHelper {
-    private static final int VELOCITY_THRESHOLD = 1000;
-    private VelocityTracker mVelocityTracker;
     private View mDelegateView;
     private View mSourceView;
     private BaseStatusBar mBar;
     private int[] mTempPoint = new int[2];
+    private float[] mDownPoint = new float[2];
     private int mOrientation;
+    private float mTriggerThreshhold;
 
     public DelegateViewHelper(View sourceView) {
         mSourceView = sourceView;
+        if (mSourceView != null) {
+            mTriggerThreshhold = mSourceView.getContext().getResources()
+                    .getDimension(R.dimen.navbar_search_up_threshhold);
+        }
     }
 
     public void setDelegateView(View view) {
@@ -49,30 +55,25 @@ public class DelegateViewHelper {
     public boolean onInterceptTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                mVelocityTracker = VelocityTracker.obtain();
-                break;
-            case MotionEvent.ACTION_CANCEL:
-            case MotionEvent.ACTION_UP:
-                mVelocityTracker.recycle();
-                mVelocityTracker = null;
+                mDownPoint[0] = event.getX();
+                mDownPoint[1] = event.getY();
                 break;
         }
-        if (mVelocityTracker != null) {
-            if (mDelegateView != null && mDelegateView.getVisibility() != View.VISIBLE) {
-                mVelocityTracker.addMovement(event);
-                mVelocityTracker.computeCurrentVelocity(1000);
+        if (mDelegateView != null) {
+            if (mDelegateView.getVisibility() != View.VISIBLE && event.getAction() != MotionEvent.ACTION_CANCEL) {
                 final boolean isVertical = (mOrientation == Surface.ROTATION_90
                         || mOrientation == Surface.ROTATION_270);
-                float velocity = isVertical ? - mVelocityTracker.getXVelocity()
-                        : - mVelocityTracker.getYVelocity();
-                if (velocity > VELOCITY_THRESHOLD) {
-                    if (mDelegateView != null && mDelegateView.getVisibility() != View.VISIBLE) {
+                final int historySize = event.getHistorySize();
+                for (int k = 0; k < historySize + 1; k++) {
+                    float x = k < historySize ? event.getHistoricalX(k) : event.getX();
+                    float y = k < historySize ? event.getHistoricalY(k) : event.getY();
+                    final float distance = isVertical ? (mDownPoint[0] - x) : (mDownPoint[1] - y);
+                    if (distance > mTriggerThreshhold) {
                         mBar.showSearchPanel();
+                        break;
                     }
                 }
             }
-        }
-        if (mDelegateView != null) {
             mSourceView.getLocationOnScreen(mTempPoint);
             float deltaX = mTempPoint[0];
             float deltaY = mTempPoint[1];
