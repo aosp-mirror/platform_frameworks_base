@@ -177,6 +177,13 @@ class WindowStateAnimator {
                                 || atoken.inPendingTransaction));
     }
 
+    /** Is the window animating the DummyAnimation? */
+    boolean isDummyAnimation() {
+        final AppWindowToken atoken = mWin.mAppToken;
+        return atoken != null
+                && atoken.mAppAnimator.animation == AppWindowAnimator.sDummyAnimation;
+    }
+
     /** Is this window currently animating? */
     boolean isWindowAnimating() {
         return mAnimation != null;
@@ -363,18 +370,32 @@ class WindowStateAnimator {
             mWin.mDestroying = true;
             if (WindowState.SHOW_TRANSACTIONS) WindowManagerService.logSurface(
                 mWin, "HIDE (finishExit)", null);
-            mSurfaceShown = false;
-            try {
-                mSurface.hide();
-            } catch (RuntimeException e) {
-                Slog.w(TAG, "Error hiding surface in " + this, e);
-            }
-            mLastHidden = true;
+            hide();
         }
         mWin.mExiting = false;
         if (mWin.mRemoveOnExit) {
             mService.mPendingRemove.add(mWin);
             mWin.mRemoveOnExit = false;
+        }
+        if (mService.mWallpaperTarget == mWin) {
+            mAnimator.hideWallpapersLocked();
+        }
+    }
+
+    void hide() {
+        if (!mLastHidden) {
+            //dump();
+            mLastHidden = true;
+            if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin,
+                    "HIDE (performLayout)", null);
+            if (mSurface != null) {
+                mSurfaceShown = false;
+                try {
+                    mSurface.hide();
+                } catch (RuntimeException e) {
+                    Slog.w(TAG, "Exception hiding surface in " + mWin);
+                }
+            }
         }
     }
 
@@ -983,20 +1004,7 @@ class WindowStateAnimator {
         setSurfaceBoundaries(recoveringMemory);
 
         if (w.mAttachedHidden || !w.isReadyForDisplay()) {
-            if (!mLastHidden) {
-                //dump();
-                mLastHidden = true;
-                if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
-                        "HIDE (performLayout)", null);
-                if (mSurface != null) {
-                    mSurfaceShown = false;
-                    try {
-                        mSurface.hide();
-                    } catch (RuntimeException e) {
-                        Slog.w(TAG, "Exception hiding surface in " + w);
-                    }
-                }
-            }
+            hide();
             // If we are waiting for this window to handle an
             // orientation change, well, it is hidden, so
             // doesn't really matter.  Note that this does
