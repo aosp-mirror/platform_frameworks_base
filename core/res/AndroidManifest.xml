@@ -1594,7 +1594,8 @@
         android:protectionLevel="signature" />
 
     <!-- Allows low-level access to setting the keyboard layout.
-         Not for use by normal applications. -->
+         Not for use by normal applications.
+         @hide -->
     <permission android:name="android.permission.SET_KEYBOARD_LAYOUT"
         android:label="@string/permlab_setKeyboardLayout"
         android:description="@string/permdesc_setKeyboardLayout"
