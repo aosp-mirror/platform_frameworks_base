@@ -37,6 +37,7 @@ public final class Trace {
     public static final long TRACE_TAG_WINDOW_MANAGER = 1L << 5;
     public static final long TRACE_TAG_ACTIVITY_MANAGER = 1L << 6;
     public static final long TRACE_TAG_SYNC_MANAGER = 1L << 7;
+    public static final long TRACE_TAG_AUDIO = 1L << 8;
 
     private static final long sEnabledTags = nativeGetEnabledTags();
 
