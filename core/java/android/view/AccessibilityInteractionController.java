@@ -126,6 +126,16 @@ final class AccessibilityInteractionController {
         }
     }
 
+    private boolean isShown(View view) {
+        // The first two checks are made also made by isShown() which
+        // however traverses the tree up to the parent to catch that.
+        // Therefore, we do some fail fast check to minimize the up
+        // tree traversal.
+        return (view.mAttachInfo != null
+                && view.mAttachInfo.mWindowVisibility == View.VISIBLE
+                && view.isShown());
+    }
+
     public void findAccessibilityNodeInfoByAccessibilityIdClientThread(
             long accessibilityNodeId, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
@@ -174,7 +184,7 @@ final class AccessibilityInteractionController {
             } else {
                 root = findViewByAccessibilityId(accessibilityViewId);
             }
-            if (root != null && root.isDisplayedOnScreen()) {
+            if (root != null && isShown(root)) {
                 mPrefetcher.prefetchAccessibilityNodeInfos(root, virtualDescendantId, flags, infos);
             }
         } finally {
@@ -236,7 +246,7 @@ final class AccessibilityInteractionController {
             }
             if (root != null) {
                 View target = root.findViewById(viewId);
-                if (target != null && target.isDisplayedOnScreen()) {
+                if (target != null && isShown(target)) {
                     info = target.createAccessibilityNodeInfo();
                 }
             }
@@ -298,7 +308,7 @@ final class AccessibilityInteractionController {
             } else {
                 root = mViewRootImpl.mView;
             }
-            if (root != null && root.isDisplayedOnScreen()) {
+            if (root != null && isShown(root)) {
                 AccessibilityNodeProvider provider = root.getAccessibilityNodeProvider();
                 if (provider != null) {
                     infos = provider.findAccessibilityNodeInfosByText(text,
@@ -315,7 +325,7 @@ final class AccessibilityInteractionController {
                         final int viewCount = foundViews.size();
                         for (int i = 0; i < viewCount; i++) {
                             View foundView = foundViews.get(i);
-                            if (foundView.isDisplayedOnScreen()) {
+                            if (isShown(foundView)) {
                                 provider = foundView.getAccessibilityNodeProvider();
                                 if (provider != null) {
                                     List<AccessibilityNodeInfo> infosFromProvider =
@@ -390,7 +400,7 @@ final class AccessibilityInteractionController {
             } else {
                 root = mViewRootImpl.mView;
             }
-            if (root != null && root.isDisplayedOnScreen()) {
+            if (root != null && isShown(root)) {
                 switch (focusType) {
                     case AccessibilityNodeInfo.FOCUS_ACCESSIBILITY: {
                         View host = mViewRootImpl.mAccessibilityFocusedHost;
@@ -411,7 +421,7 @@ final class AccessibilityInteractionController {
                     case AccessibilityNodeInfo.FOCUS_INPUT: {
                         // Input focus cannot go to virtual views.
                         View target = root.findFocus();
-                        if (target != null && target.isDisplayedOnScreen()) {
+                        if (target != null && isShown(target)) {
                             focused = target.createAccessibilityNodeInfo();
                         }
                     } break;
@@ -477,7 +487,7 @@ final class AccessibilityInteractionController {
             } else {
                 root = mViewRootImpl.mView;
             }
-            if (root != null && root.isDisplayedOnScreen()) {
+            if (root != null && isShown(root)) {
                 if ((direction & View.FOCUS_ACCESSIBILITY) ==  View.FOCUS_ACCESSIBILITY) {
                     AccessibilityNodeProvider provider = root.getAccessibilityNodeProvider();
                     if (provider != null) {
@@ -565,7 +575,7 @@ final class AccessibilityInteractionController {
             } else {
                 target = mViewRootImpl.mView;
             }
-            if (target != null && target.isDisplayedOnScreen()) {
+            if (target != null && isShown(target)) {
                 AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
                 if (provider != null) {
                     succeeded = provider.performAction(virtualDescendantId, action,
@@ -590,7 +600,7 @@ final class AccessibilityInteractionController {
             return null;
         }
         View foundView = root.findViewByAccessibilityId(accessibilityId);
-        if (foundView != null && !foundView.isDisplayedOnScreen()) {
+        if (foundView != null && !isShown(foundView)) {
             return null;
         }
         return foundView;
@@ -670,7 +680,7 @@ final class AccessibilityInteractionController {
                         }
                         View child = children.getChildAt(i);
                         if (child.getAccessibilityViewId() != current.getAccessibilityViewId()
-                                &&  child.isDisplayedOnScreen()) {
+                                &&  isShown(child)) {
                             AccessibilityNodeInfo info = null;
                             AccessibilityNodeProvider provider = child.getAccessibilityNodeProvider();
                             if (provider == null) {
@@ -706,7 +716,7 @@ final class AccessibilityInteractionController {
                         return;
                     }
                     View child = children.getChildAt(i);
-                    if (child.isDisplayedOnScreen()) {
+                    if (isShown(child)) {
                         AccessibilityNodeProvider provider = child.getAccessibilityNodeProvider();
                         if (provider == null) {
                             AccessibilityNodeInfo info = child.createAccessibilityNodeInfo();
