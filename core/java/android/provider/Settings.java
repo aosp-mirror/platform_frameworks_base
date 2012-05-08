@@ -1749,6 +1749,20 @@ public final class Settings {
         public static final String USER_ROTATION = "user_rotation";
 
         /**
+         * Whether the phone vibrates when it is ringing due to an incoming call. This will
+         * be used by Phone and Setting apps; it shouldn't affect other apps.
+         * The value is boolean (1 or 0).
+         *
+         * Note: this is not same as "vibrate on ring", which had been available until ICS.
+         * It was about AudioManager's setting and thus affected all the applications which
+         * relied on the setting, while this is purely about the vibration setting for incoming
+         * calls.
+         *
+         * @hide
+         */
+        public static final String VIBRATE_WHEN_RINGING = "vibrate_when_ringing";
+
+        /**
          * Whether the audible DTMF tones are played by the dialer when dialing. The value is
          * boolean (1 or 0).
          */
@@ -2030,6 +2044,7 @@ public final class Settings {
             SIP_CALL_OPTIONS,
             SIP_RECEIVE_CALLS,
             POINTER_SPEED,
+            VIBRATE_WHEN_RINGING
         };
 
         // Settings moved to Settings.Secure
