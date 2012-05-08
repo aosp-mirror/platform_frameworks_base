@@ -538,6 +538,8 @@ public class MultiWaveView extends View {
             maxWidth = Math.max(maxWidth, target.getWidth());
             maxHeight = Math.max(maxHeight, target.getHeight());
         }
+        mTargetResourceId = resourceId;
+        mTargetDrawables = targetDrawables;
         if (mMaxTargetWidth != maxWidth || mMaxTargetHeight != maxHeight) {
             mMaxTargetWidth = maxWidth;
             mMaxTargetHeight = maxHeight;
@@ -546,8 +548,6 @@ public class MultiWaveView extends View {
             updateTargetPositions();
         }
         array.recycle();
-        mTargetResourceId = resourceId;
-        mTargetDrawables = targetDrawables;
     }
 
     /**
