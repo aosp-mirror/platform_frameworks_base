@@ -6299,6 +6299,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     removeDetachedView(scrapPile.remove(size--), false);
                 }
             }
+
+            if (mTransientStateViews != null) {
+                for (int i = 0; i < mTransientStateViews.size(); i++) {
+                    final View v = mTransientStateViews.valueAt(i);
+                    if (!v.hasTransientState()) {
+                        mTransientStateViews.removeAt(i);
+                        i--;
+                    }
+                }
+            }
         }
 
         /**
