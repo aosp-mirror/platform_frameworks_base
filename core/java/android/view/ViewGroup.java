@@ -348,6 +348,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * This constant is a {@link #setLayoutMode(int) layoutMode}.
      * Clip bounds are the raw values of {@link #getLeft() left}, {@link #getTop() top},
      * {@link #getRight() right} and {@link #getBottom() bottom}.
+     *
+     * @hide
      */
     public static final int CLIP_BOUNDS = 0;
 
@@ -356,6 +358,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Optical bounds describe where a widget appears to be. They sit inside the clip
      * bounds which need to cover a larger area to allow other effects,
      * such as shadows and glows, to be drawn.
+     *
+     * @hide
      */
     public static final int OPTICAL_BOUNDS = 1;
 
@@ -4539,6 +4543,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @return the layout mode to use during layout operations
      *
      * @see #setLayoutMode(int)
+     *
+     * @hide
      */
     public int getLayoutMode() {
         return mLayoutMode;
@@ -4553,6 +4559,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @param layoutMode the layout mode to use during layout operations
      *
      * @see #getLayoutMode()
+     *
+     * @hide
      */
     public void setLayoutMode(int layoutMode) {
         if (mLayoutMode != layoutMode) {
