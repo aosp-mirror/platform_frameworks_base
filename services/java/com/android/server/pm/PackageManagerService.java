@@ -1050,7 +1050,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             mSystemInstallObserver.startWatching();
             scanDirLI(mSystemAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode, 0);
-            
+
             // Collect all vendor packages.
             mVendorAppDir = new File("/vendor/app");
             mVendorInstallObserver = new AppDirObserver(
@@ -1068,8 +1068,30 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Iterator<PackageSetting> psit = mSettings.mPackages.values().iterator();
                 while (psit.hasNext()) {
                     PackageSetting ps = psit.next();
-                    if ((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0
-                            || mPackages.containsKey(ps.name)) {
+
+                    /*
+                     * If this is not a system app, it can't be a
+                     * disable system app.
+                     */
+                    if ((ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                        continue;
+                    }
+
+                    /*
+                     * If the package is scanned, it's not erased.
+                     */
+                    if (mPackages.containsKey(ps.name)) {
+                        /*
+                         * If the system app is both scanned and in the
+                         * disabled packages list, then it must have been
+                         * added via OTA. Remove it from the currently
+                         * scanned package so the previously user-installed
+                         * application can be scanned.
+                         */
+                        if (mSettings.isDisabledSystemPackageLPr(ps.name)) {
+                            mPackages.remove(ps.name);
+                        }
+
                         continue;
                     }
 
@@ -3096,15 +3118,21 @@ public class PackageManagerService extends IPackageManager.Stub {
                             + "reverting from " + ps.codePathString
                             + ": new version " + pkg.mVersionCode
                             + " better than installed " + ps.versionCode);
-                    InstallArgs args = new FileInstallArgs(ps.codePathString,
+                    InstallArgs args = createInstallArgs(ps.pkgFlags, ps.codePathString,
                             ps.resourcePathString, ps.nativeLibraryPathString);
-                    args.cleanUpResourcesLI();
-                    mSettings.enableSystemPackageLPw(ps.name);
+                    synchronized (mInstaller) {
+                        args.cleanUpResourcesLI();
+                    }
+                    synchronized (mPackages) {
+                        mSettings.enableSystemPackageLPw(ps.name);
+                    }
                 }
             }
         }
+
         if (updatedPkg != null) {
-            // An updated system app will not have the PARSE_IS_SYSTEM flag set initially
+            // An updated system app will not have the PARSE_IS_SYSTEM flag set
+            // initially
             parseFlags |= PackageParser.PARSE_IS_SYSTEM;
         }
         // Verify certificates against what was last scanned
@@ -3112,6 +3140,49 @@ public class PackageManagerService extends IPackageManager.Stub {
             Slog.w(TAG, "Failed verifying certificates for package:" + pkg.packageName);
             return null;
         }
+
+        /*
+         * A new system app appeared, but we already had a non-system one of the
+         * same name installed earlier.
+         */
+        boolean shouldHideSystemApp = false;
+        if (updatedPkg == null && ps != null
+                && (parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0 && !isSystemApp(ps)) {
+            /*
+             * Check to make sure the signatures match first. If they don't,
+             * wipe the installed application and its data.
+             */
+            if (compareSignatures(ps.signatures.mSignatures, pkg.mSignatures)
+                    != PackageManager.SIGNATURE_MATCH) {
+                deletePackageLI(pkg.packageName, true, 0, null, false);
+                ps = null;
+            } else {
+                /*
+                 * If the newly-added system app is an older version than the
+                 * already installed version, hide it. It will be scanned later
+                 * and re-added like an update.
+                 */
+                if (pkg.mVersionCode < ps.versionCode) {
+                    shouldHideSystemApp = true;
+                } else {
+                    /*
+                     * The newly found system app is a newer version that the
+                     * one previously installed. Simply remove the
+                     * already-installed application and replace it with our own
+                     * while keeping the application data.
+                     */
+                    Slog.w(TAG, "Package " + ps.name + " at " + scanFile + "reverting from "
+                            + ps.codePathString + ": new version " + pkg.mVersionCode
+                            + " better than installed " + ps.versionCode);
+                    InstallArgs args = createInstallArgs(ps.pkgFlags, ps.codePathString,
+                            ps.resourcePathString, ps.nativeLibraryPathString);
+                    synchronized (mInstaller) {
+                        args.cleanUpResourcesLI();
+                    }
+                }
+            }
+        }
+
         // The apk is forward locked (not public) if its code and resources
         // are kept in different files.
         // TODO grab this value from PackageSettings
@@ -3135,7 +3206,27 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Set application objects path explicitly.
         setApplicationInfoPaths(pkg, codePath, resPath);
         // Note that we invoke the following method only if we are about to unpack an application
-        return scanPackageLI(pkg, parseFlags, scanMode | SCAN_UPDATE_SIGNATURE, currentTime);
+        PackageParser.Package scannedPkg = scanPackageLI(pkg, parseFlags, scanMode
+                | SCAN_UPDATE_SIGNATURE, currentTime);
+
+        /*
+         * If the system app should be overridden by a previously installed
+         * data, hide the system app now and let the /data/app scan pick it up
+         * again.
+         */
+        if (shouldHideSystemApp) {
+            synchronized (mPackages) {
+                /*
+                 * We have to grant systems permissions before we hide, because
+                 * grantPermissions will assume the package update is trying to
+                 * expand its permissions.
+                 */
+                grantPermissionsLPw(pkg, true);
+                mSettings.disableSystemPackageLPw(pkg.packageName);
+            }
+        }
+
+        return scannedPkg;
     }
 
     private static void setApplicationInfoPaths(PackageParser.Package pkg, String destCodePath,
@@ -7175,6 +7266,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private static boolean isSystemApp(ApplicationInfo info) {
         return (info.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    private static boolean isSystemApp(PackageSetting ps) {
+        return (ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
     private static boolean isUpdatedSystemApp(PackageParser.Package pkg) {
