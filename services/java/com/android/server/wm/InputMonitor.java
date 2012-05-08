@@ -41,7 +41,9 @@ final class InputMonitor implements InputManagerService.Callbacks {
     private boolean mInputDispatchFrozen;
     
     // When true, input dispatch proceeds normally.  Otherwise all events are dropped.
-    private boolean mInputDispatchEnabled = true;
+    // Initially false, so that input does not get dispatched until boot is finished at
+    // which point the ActivityManager will enable dispatching.
+    private boolean mInputDispatchEnabled;
 
     // When true, need to call updateInputWindowsLw().
     private boolean mUpdateInputWindowsNeeded = true;

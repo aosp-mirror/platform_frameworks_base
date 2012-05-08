@@ -4098,6 +4098,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_ENABLE_SCREEN,
                 SystemClock.uptimeMillis());
         mWindowManager.enableScreenAfterBoot();
+
+        synchronized (this) {
+            updateEventDispatchingLocked();
+        }
     }
 
     public void showBootMessage(final CharSequence msg, final boolean always) {
@@ -6686,7 +6690,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         synchronized(this) {
             mWentToSleep = true;
-            mWindowManager.setEventDispatching(false);
+            updateEventDispatchingLocked();
 
             if (!mSleeping) {
                 mSleeping = true;
@@ -6712,7 +6716,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         synchronized(this) {
             mShuttingDown = true;
-            mWindowManager.setEventDispatching(false);
+            updateEventDispatchingLocked();
 
             if (mMainStack.mResumedActivity != null) {
                 mMainStack.stopIfSleepingLocked();
@@ -6776,9 +6780,13 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         synchronized(this) {
             mWentToSleep = false;
-            mWindowManager.setEventDispatching(true);
+            updateEventDispatchingLocked();
             comeOutOfSleepIfNeededLocked();
         }
+    }
+
+    private void updateEventDispatchingLocked() {
+        mWindowManager.setEventDispatching(mBooted && !mWentToSleep && !mShuttingDown);
     }
 
     public void setLockScreenShown(boolean shown) {
