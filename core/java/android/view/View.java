@@ -4676,13 +4676,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         }
 
         RectF position = mAttachInfo.mTmpTransformRect;
-        position.setEmpty();
+        position.set(0, 0, mRight - mLeft, mBottom - mTop);
 
         if (!hasIdentityMatrix()) {
             getMatrix().mapRect(position);
         }
 
-        position.offset(mLeft, mRight);
+        position.offset(mLeft, mTop);
 
         ViewParent parent = mParent;
         while (parent instanceof View) {
