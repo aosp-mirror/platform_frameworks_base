@@ -2979,7 +2979,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             // updated when we get out of that mode.
             if (!mDrawHistory) {
                 // repin our scroll, taking into account the new content size
-                updateScrollCoordinates(pinLocX(getScrollX()), pinLocY(getScrollY()));
+                if (updateScrollCoordinates(pinLocX(getScrollX()),
+                        pinLocY(getScrollY()))) {
+                    invalidate();
+                }
                 if (!mScroller.isFinished()) {
                     // We are in the middle of a scroll.  Repin the final scroll
                     // position.
