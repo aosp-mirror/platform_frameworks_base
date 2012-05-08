@@ -2493,7 +2493,7 @@ public class Activity extends ContextThemeWrapper
         if (featureId == Window.FEATURE_OPTIONS_PANEL && menu != null) {
             boolean goforit = onPrepareOptionsMenu(menu);
             goforit |= mFragments.dispatchPrepareOptionsMenu(menu);
-            return goforit && menu.hasVisibleItems();
+            return goforit;
         }
         return true;
     }
