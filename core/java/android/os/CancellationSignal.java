@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package android.content;
+package android.os;
 
-import android.os.RemoteException;
+import android.os.ICancellationSignal;
+import android.os.ICancellationSignal.Stub;
 
 /**
  * Provides the ability to cancel an operation in progress.

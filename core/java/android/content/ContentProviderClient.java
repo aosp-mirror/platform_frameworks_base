@@ -19,6 +19,8 @@ package android.content;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CancellationSignal;
+import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.os.ParcelFileDescriptor;
 import android.content.res.AssetFileDescriptor;

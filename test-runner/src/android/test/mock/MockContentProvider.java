@@ -21,7 +21,6 @@ import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.ICancellationSignal;
 import android.content.IContentProvider;
 import android.content.OperationApplicationException;
 import android.content.pm.PathPermission;
@@ -31,6 +30,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 

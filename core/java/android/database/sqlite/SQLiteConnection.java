@@ -19,12 +19,12 @@ package android.database.sqlite;
 import dalvik.system.BlockGuard;
 import dalvik.system.CloseGuard;
 
-import android.content.CancellationSignal;
-import android.content.OperationCanceledException;
 import android.database.Cursor;
 import android.database.CursorWindow;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDebug.DbStats;
+import android.os.CancellationSignal;
+import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.util.LruCache;
