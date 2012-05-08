@@ -1063,23 +1063,29 @@ public class PackageManagerService extends IPackageManager.Stub {
             mInstaller.moveFiles();
 
             // Prune any system packages that no longer exist.
+            final List<String> possiblyDeletedSystemApps = new ArrayList<String>();
             if (!mOnlyCore) {
                 Iterator<PackageSetting> psit = mSettings.mPackages.values().iterator();
                 while (psit.hasNext()) {
                     PackageSetting ps = psit.next();
-                    if ((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0
-                            && !mPackages.containsKey(ps.name)
-                            && !mSettings.mDisabledSysPackages.containsKey(ps.name)) {
+                    if ((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0
+                            || mPackages.containsKey(ps.name)) {
+                        continue;
+                    }
+
+                    if (!mSettings.isDisabledSystemPackageLPr(ps.name)) {
                         psit.remove();
                         String msg = "System package " + ps.name
                                 + " no longer exists; wiping its data";
                         reportSettingsProblem(Log.WARN, msg);
                         mInstaller.remove(ps.name, 0);
                         sUserManager.removePackageForAllUsers(ps.name);
+                    } else {
+                        possiblyDeletedSystemApps.add(ps.name);
                     }
                 }
             }
-            
+
             mAppInstallDir = new File(dataDir, "app");
             //look for any incomplete package installations
             ArrayList<PackageSetting> deletePkgsList = mSettings.getListOfIncompleteInstallPackagesLPr();
@@ -1104,6 +1110,21 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mDrmAppInstallObserver.startWatching();
                 scanDirLI(mDrmAppPrivateInstallDir, PackageParser.PARSE_FORWARD_LOCK,
                         scanMode, 0);
+
+                /**
+                 * Remove disable package settings for any system apps
+                 * that were removed via an OTA.
+                 */
+                for (String deletedAppName : possiblyDeletedSystemApps) {
+                    PackageParser.Package deletedPkg = mPackages.get(deletedAppName);
+                    if (deletedPkg != null) {
+                        mSettings.removeDisabledSystemPackageLPw(deletedAppName);
+                        deletedPkg.applicationInfo.flags &= ~ApplicationInfo.FLAG_SYSTEM;
+
+                        PackageSetting deletedPs = mSettings.mPackages.get(deletedAppName);
+                        deletedPs.pkgFlags &= ~ApplicationInfo.FLAG_SYSTEM;
+                    }
+                }
             } else {
                 mAppInstallObserver = null;
                 mDrmAppInstallObserver = null;
@@ -3043,8 +3064,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Check to see if this package could be hiding/updating a system
             // package.  Must look for it either under the original or real
             // package name depending on our state.
-            updatedPkg = mSettings.mDisabledSysPackages.get(
-                    ps != null ? ps.name : pkg.packageName);
+            updatedPkg = mSettings.getDisabledSystemPkgLPr(ps != null ? ps.name : pkg.packageName);
         }
         // First check if this is a system package that may involve an update
         if (updatedPkg != null && (parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0) {
@@ -3523,7 +3543,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mTransferedPackages.add(pkg.packageName);
             }
             
-            if (mSettings.mDisabledSysPackages.get(pkg.packageName) != null) {
+            if (mSettings.isDisabledSystemPackageLPr(pkg.packageName)) {
                 pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
             }
 
