@@ -308,6 +308,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
             resizeFor(mText.length + nbNewChars - mGapLength);
         }
 
+        final boolean textIsRemoved = replacementLength == 0;
         // The removal pass needs to be done before the gap is updated in order to broadcast the
         // correct previous positions to the correct intersecting SpanWatchers
         if (replacedLength > 0) { // no need for span fixup on pure insertion
@@ -319,12 +320,15 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
             while (i < mSpanCount) {
                 if ((mSpanFlags[i] & Spanned.SPAN_EXCLUSIVE_EXCLUSIVE) ==
                         Spanned.SPAN_EXCLUSIVE_EXCLUSIVE &&
-                mSpanStarts[i] >= start && mSpanStarts[i] < mGapStart + mGapLength &&
-                mSpanEnds[i] >= start && mSpanEnds[i] < mGapStart + mGapLength) {
+                        mSpanStarts[i] >= start && mSpanStarts[i] < mGapStart + mGapLength &&
+                        mSpanEnds[i] >= start && mSpanEnds[i] < mGapStart + mGapLength &&
+                        // This condition indicates that the span would become empty
+                        (textIsRemoved || mSpanStarts[i] > start || mSpanEnds[i] < mGapStart)) {
                     removeSpan(i);
-                } else {
-                    i++;
+                    continue; // do not increment i, spans will be shifted left in the array
                 }
+
+                i++;
             }
         }
 
@@ -338,7 +342,6 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
         if (replacedLength > 0) { // no need for span fixup on pure insertion
             final boolean atEnd = (mGapStart + mGapLength == mText.length);
-            final boolean textIsRemoved = replacementLength == 0;
 
             for (int i = 0; i < mSpanCount; i++) {
                 final int startFlag = (mSpanFlags[i] & START_MASK) >> START_SHIFT;
@@ -390,9 +393,9 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                         return mGapStart + mGapLength;
                     }
                 } else { // MARK
-                    // MARKs should be moved to the start, with the exception of a mark located at the
-                    // end of the range (which will be < mGapStart + mGapLength since mGapLength > 0)
-                    // which should stay 'unchanged' at the end of the replaced text.
+                    // MARKs should be moved to the start, with the exception of a mark located at
+                    // the end of the range (which will be < mGapStart + mGapLength since mGapLength
+                    // is > 0, which should stay 'unchanged' at the end of the replaced text.
                     if (textIsRemoved || offset < mGapStart - nbNewChars) {
                         return start;
                     } else {
