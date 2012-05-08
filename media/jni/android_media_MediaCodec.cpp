@@ -212,6 +212,25 @@ status_t JMediaCodec::getBuffers(
     }
 
     jclass byteBufferClass = env->FindClass("java/nio/ByteBuffer");
+    CHECK(byteBufferClass != NULL);
+
+    jmethodID orderID = env->GetMethodID(
+            byteBufferClass,
+            "order",
+            "(Ljava/nio/ByteOrder;)Ljava/nio/ByteBuffer;");
+
+    CHECK(orderID != NULL);
+
+    jclass byteOrderClass = env->FindClass("java/nio/ByteOrder");
+    CHECK(byteOrderClass != NULL);
+
+    jmethodID nativeOrderID = env->GetStaticMethodID(
+            byteOrderClass, "nativeOrder", "()Ljava/nio/ByteOrder;");
+    CHECK(nativeOrderID != NULL);
+
+    jobject nativeByteOrderObj =
+        env->CallStaticObjectMethod(byteOrderClass, nativeOrderID);
+    CHECK(nativeByteOrderObj != NULL);
 
     *bufArray = (jobjectArray)env->NewObjectArray(
             buffers.size(), byteBufferClass, NULL);
@@ -224,12 +243,20 @@ status_t JMediaCodec::getBuffers(
                 buffer->base(),
                 buffer->capacity());
 
+        jobject me = env->CallObjectMethod(
+                byteBuffer, orderID, nativeByteOrderObj);
+        env->DeleteLocalRef(me);
+        me = NULL;
+
         env->SetObjectArrayElement(
                 *bufArray, i, byteBuffer);
 
         env->DeleteLocalRef(byteBuffer);
         byteBuffer = NULL;
     }
+
+    env->DeleteLocalRef(nativeByteOrderObj);
+    nativeByteOrderObj = NULL;
 
     return OK;
 }
