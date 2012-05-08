@@ -16,9 +16,12 @@
 
 package com.android.commands.pm;
 
+import com.android.internal.content.PackageHelper;
+
 import android.app.ActivityManagerNative;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
@@ -40,16 +43,19 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
-import com.android.internal.content.PackageHelper;
-
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.security.InvalidAlgorithmParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.WeakHashMap;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public final class Pm {
     IPackageManager mPm;
@@ -763,6 +769,15 @@ public final class Pm {
         String installerPackageName = null;
 
         String opt;
+
+        String algo = null;
+        byte[] iv = null;
+        byte[] key = null;
+
+        String macAlgo = null;
+        byte[] macKey = null;
+        byte[] tag = null;
+
         while ((opt=nextOption()) != null) {
             if (opt.equals("-l")) {
                 installFlags |= PackageManager.INSTALL_FORWARD_LOCK;
@@ -783,11 +798,91 @@ public final class Pm {
             } else if (opt.equals("-f")) {
                 // Override if -s option is specified.
                 installFlags |= PackageManager.INSTALL_INTERNAL;
+            } else if (opt.equals("--algo")) {
+                algo = nextOptionData();
+                if (algo == null) {
+                    System.err.println("Error: must supply argument for --algo");
+                    showUsage();
+                    return;
+                }
+            } else if (opt.equals("--iv")) {
+                iv = hexToBytes(nextOptionData());
+                if (iv == null) {
+                    System.err.println("Error: must supply argument for --iv");
+                    showUsage();
+                    return;
+                }
+            } else if (opt.equals("--key")) {
+                key = hexToBytes(nextOptionData());
+                if (key == null) {
+                    System.err.println("Error: must supply argument for --key");
+                    showUsage();
+                    return;
+                }
+            } else if (opt.equals("--macalgo")) {
+                macAlgo = nextOptionData();
+                if (macAlgo == null) {
+                    System.err.println("Error: must supply argument for --macalgo");
+                    showUsage();
+                    return;
+                }
+            } else if (opt.equals("--mackey")) {
+                macKey = hexToBytes(nextOptionData());
+                if (macKey == null) {
+                    System.err.println("Error: must supply argument for --mackey");
+                    showUsage();
+                    return;
+                }
+            } else if (opt.equals("--tag")) {
+                tag = hexToBytes(nextOptionData());
+                if (tag == null) {
+                    System.err.println("Error: must supply argument for --tag");
+                    showUsage();
+                    return;
+                }
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 showUsage();
                 return;
             }
+        }
+
+        final ContainerEncryptionParams encryptionParams;
+        if (algo != null || iv != null || key != null || macAlgo != null || macKey != null
+                || tag != null) {
+            if (algo == null || iv == null || key == null) {
+                System.err.println("Error: all of --algo, --iv, and --key must be specified");
+                showUsage();
+                return;
+            }
+
+            if (macAlgo != null || macKey != null || tag != null) {
+                if (macAlgo == null || macKey == null || tag == null) {
+                    System.err.println("Error: all of --macalgo, --mackey, and --tag must "
+                            + "be specified");
+                    showUsage();
+                    return;
+                }
+            }
+
+            try {
+                final SecretKey encKey = new SecretKeySpec(key, "RAW");
+
+                final SecretKey macSecretKey;
+                if (macKey == null || macKey.length == 0) {
+                    macSecretKey = null;
+                } else {
+                    macSecretKey = new SecretKeySpec(macKey, "RAW");
+                }
+
+                encryptionParams = new ContainerEncryptionParams(algo, new IvParameterSpec(iv),
+                        encKey, macAlgo, null, macSecretKey, tag, -1, -1, -1);
+            } catch (InvalidAlgorithmParameterException e) {
+                e.printStackTrace();
+                return;
+            }
+        } else {
+            encryptionParams = null;
         }
 
         final Uri apkURI;
@@ -816,7 +911,7 @@ public final class Pm {
         PackageInstallObserver obs = new PackageInstallObserver();
         try {
             mPm.installPackageWithVerification(apkURI, obs, installFlags, installerPackageName,
-                    verificationURI, null);
+                    verificationURI, null, encryptionParams);
 
             synchronized (obs) {
                 while (!obs.finished) {
@@ -837,6 +932,37 @@ public final class Pm {
             System.err.println(e.toString());
             System.err.println(PM_NOT_RUNNING_ERR);
         }
+    }
+
+    /**
+     * Convert a string containing hex-encoded bytes to a byte array.
+     *
+     * @param input String containing hex-encoded bytes
+     * @return input as an array of bytes
+     */
+    private byte[] hexToBytes(String input) {
+        if (input == null) {
+            return null;
+        }
+
+        final int inputLength = input.length();
+        if ((inputLength % 2) != 0) {
+            System.err.print("Invalid length; must be multiple of 2");
+            return null;
+        }
+
+        final int byteLength = inputLength / 2;
+        final byte[] output = new byte[byteLength];
+
+        int inputIndex = 0;
+        int byteIndex = 0;
+        while (inputIndex < inputLength) {
+            output[byteIndex++] = (byte) Integer.parseInt(
+                    input.substring(inputIndex, inputIndex + 2), 16);
+            inputIndex += 2;
+        }
+
+        return output;
     }
 
     public void runCreateUser() {
@@ -1236,7 +1362,8 @@ public final class Pm {
         System.err.println("       pm list libraries");
         System.err.println("       pm list users");
         System.err.println("       pm path PACKAGE");
-        System.err.println("       pm install [-l] [-r] [-t] [-i INSTALLER_PACKAGE_NAME] [-s] [-f] PATH");
+        System.err.println("       pm install [-l] [-r] [-t] [-i INSTALLER_PACKAGE_NAME] [-s] [-f]");
+        System.err.println("                  [--algo <algorithm name> --key <key-in-hex> --iv <IV-in-hex>] PATH");
         System.err.println("       pm uninstall [-k] PACKAGE");
         System.err.println("       pm clear PACKAGE");
         System.err.println("       pm enable [--user USER_ID] PACKAGE_OR_COMPONENT");

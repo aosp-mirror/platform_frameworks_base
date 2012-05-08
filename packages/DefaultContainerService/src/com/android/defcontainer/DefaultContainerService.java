@@ -22,7 +22,10 @@ import com.android.internal.content.PackageHelper;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.content.pm.MacAuthenticatedInputStream;
+import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.IPackageManager;
+import android.content.pm.LimitedLengthInputStream;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
@@ -49,9 +52,21 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.DigestException;
+import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.Mac;
+import javax.crypto.NoSuchPaddingException;
 
 import libcore.io.ErrnoException;
+import libcore.io.IoUtils;
 import libcore.io.Libcore;
+import libcore.io.Streams;
 import libcore.io.StructStatFs;
 
 /*
@@ -68,7 +83,7 @@ public class DefaultContainerService extends IntentService {
     private static final String LIB_DIR_NAME = "lib";
 
     private IMediaContainerService.Stub mBinder = new IMediaContainerService.Stub() {
-        /*
+        /**
          * Creates a new container and copies resource there.
          * @param paackageURI the uri of resource to be copied. Can be either
          * a content uri or a file uri
@@ -92,15 +107,19 @@ public class DefaultContainerService extends IntentService {
                     isExternal, isForwardLocked);
         }
 
-        /*
+        /**
          * Copy specified resource to output stream
+         *
          * @param packageURI the uri of resource to be copied. Should be a file
-         * uri
+         *            uri
+         * @param encryptionParams parameters describing the encryption used for
+         *            this file
          * @param outStream Remote file descriptor to be used for copying
-         * @return returns status code according to those in {@link
-         * PackageManager}
+         * @return returns status code according to those in
+         *         {@link PackageManager}
          */
-        public int copyResource(final Uri packageURI, ParcelFileDescriptor outStream) {
+        public int copyResource(final Uri packageURI, ContainerEncryptionParams encryptionParams,
+                ParcelFileDescriptor outStream) {
             if (packageURI == null || outStream == null) {
                 return PackageManager.INSTALL_FAILED_INVALID_URI;
             }
@@ -109,7 +128,7 @@ public class DefaultContainerService extends IntentService {
                     = new ParcelFileDescriptor.AutoCloseOutputStream(outStream);
 
             try {
-                copyFile(packageURI, autoOut);
+                copyFile(packageURI, autoOut, encryptionParams);
                 return PackageManager.INSTALL_SUCCEEDED;
             } catch (FileNotFoundException e) {
                 Slog.e(TAG, "Could not copy URI " + packageURI.toString() + " FNF: "
@@ -119,10 +138,14 @@ public class DefaultContainerService extends IntentService {
                 Slog.e(TAG, "Could not copy URI " + packageURI.toString() + " IO: "
                         + e.getMessage());
                 return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+            } catch (DigestException e) {
+                Slog.e(TAG, "Could not copy URI " + packageURI.toString() + " Security: "
+                                + e.getMessage());
+                return PackageManager.INSTALL_FAILED_INVALID_APK;
             }
         }
 
-        /*
+        /**
          * Determine the recommended install location for package
          * specified by file uri location.
          * @param fileUri the uri of resource to be copied. Should be a
@@ -130,28 +153,24 @@ public class DefaultContainerService extends IntentService {
          * @return Returns PackageInfoLite object containing
          * the package info and recommended app location.
          */
-        public PackageInfoLite getMinimalPackageInfo(final Uri fileUri, int flags, long threshold) {
+        public PackageInfoLite getMinimalPackageInfo(final String packagePath, int flags,
+                long threshold) {
             PackageInfoLite ret = new PackageInfoLite();
-            if (fileUri == null) {
-                Slog.i(TAG, "Invalid package uri " + fileUri);
+
+            if (packagePath == null) {
+                Slog.i(TAG, "Invalid package file " + packagePath);
                 ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
                 return ret;
             }
-            String scheme = fileUri.getScheme();
-            if (scheme != null && !scheme.equals("file")) {
-                Slog.w(TAG, "Falling back to installing on internal storage only");
-                ret.recommendedInstallLocation = PackageHelper.RECOMMEND_INSTALL_INTERNAL;
-                return ret;
-            }
-            String archiveFilePath = fileUri.getPath();
+
             DisplayMetrics metrics = new DisplayMetrics();
             metrics.setToDefaults();
 
-            PackageParser.PackageLite pkg = PackageParser.parsePackageLite(archiveFilePath, 0);
+            PackageParser.PackageLite pkg = PackageParser.parsePackageLite(packagePath, 0);
             if (pkg == null) {
                 Slog.w(TAG, "Failed to parse package");
 
-                final File apkFile = new File(archiveFilePath);
+                final File apkFile = new File(packagePath);
                 if (!apkFile.exists()) {
                     ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_URI;
                 } else {
@@ -160,12 +179,13 @@ public class DefaultContainerService extends IntentService {
 
                 return ret;
             }
+
             ret.packageName = pkg.packageName;
             ret.installLocation = pkg.installLocation;
             ret.verifiers = pkg.verifiers;
 
             ret.recommendedInstallLocation = recommendAppInstallLocation(pkg.installLocation,
-                    archiveFilePath, flags, threshold);
+                    packagePath, flags, threshold);
 
             return ret;
         }
@@ -392,55 +412,195 @@ public class DefaultContainerService extends IntentService {
         }
     }
 
-    private static void copyToFile(File srcFile, OutputStream out)
-            throws FileNotFoundException, IOException {
-        InputStream inputStream = new BufferedInputStream(new FileInputStream(srcFile));
+    private void copyFile(Uri pPackageURI, OutputStream outStream,
+            ContainerEncryptionParams encryptionParams) throws FileNotFoundException, IOException,
+            DigestException {
+        String scheme = pPackageURI.getScheme();
+        InputStream inStream = null;
         try {
-            copyToFile(inputStream, out);
+            if (scheme == null || scheme.equals("file")) {
+                final InputStream is = new FileInputStream(new File(pPackageURI.getPath()));
+                inStream = new BufferedInputStream(is);
+            } else if (scheme.equals("content")) {
+                final ParcelFileDescriptor fd;
+                try {
+                    fd = getContentResolver().openFileDescriptor(pPackageURI, "r");
+                } catch (FileNotFoundException e) {
+                    Slog.e(TAG, "Couldn't open file descriptor from download service. "
+                            + "Failed with exception " + e);
+                    throw e;
+                }
+
+                if (fd == null) {
+                    Slog.e(TAG, "Provider returned no file descriptor for " +
+                            pPackageURI.toString());
+                    throw new FileNotFoundException("provider returned no file descriptor");
+                } else {
+                    if (localLOGV) {
+                        Slog.i(TAG, "Opened file descriptor from download service.");
+                    }
+                    inStream = new ParcelFileDescriptor.AutoCloseInputStream(fd);
+                }
+            } else {
+                Slog.e(TAG, "Package URI is not 'file:' or 'content:' - " + pPackageURI);
+                throw new FileNotFoundException("Package URI is not 'file:' or 'content:'");
+            }
+
+            /*
+             * If this resource is encrypted, get the decrypted stream version
+             * of it.
+             */
+            ApkContainer container = new ApkContainer(inStream, encryptionParams);
+
+            try {
+                /*
+                 * We copy the source package file to a temp file and then
+                 * rename it to the destination file in order to eliminate a
+                 * window where the package directory scanner notices the new
+                 * package file but it's not completely copied yet.
+                 */
+                copyToFile(container.getInputStream(), outStream);
+
+                if (!container.isAuthenticated()) {
+                    throw new DigestException();
+                }
+            } catch (GeneralSecurityException e) {
+                throw new DigestException("A problem occured copying the file.");
+            }
         } finally {
-            try { inputStream.close(); } catch (IOException e) {}
+            IoUtils.closeQuietly(inStream);
         }
     }
 
-    private void copyFile(Uri pPackageURI, OutputStream outStream) throws FileNotFoundException,
-            IOException {
-        String scheme = pPackageURI.getScheme();
-        if (scheme == null || scheme.equals("file")) {
-            final File srcPackageFile = new File(pPackageURI.getPath());
-            // We copy the source package file to a temp file and then rename it to the
-            // destination file in order to eliminate a window where the package directory
-            // scanner notices the new package file but it's not completely copied yet.
-            copyToFile(srcPackageFile, outStream);
-        } else if (scheme.equals("content")) {
-            ParcelFileDescriptor fd = null;
-            try {
-                fd = getContentResolver().openFileDescriptor(pPackageURI, "r");
-            } catch (FileNotFoundException e) {
-                Slog.e(TAG, "Couldn't open file descriptor from download service. "
-                        + "Failed with exception " + e);
-                throw e;
-            }
+    private static class ApkContainer {
+        private final InputStream mInStream;
 
-            if (fd == null) {
-                Slog.e(TAG, "Provider returned no file descriptor for " + pPackageURI.toString());
-                throw new FileNotFoundException("provider returned no file descriptor");
+        private MacAuthenticatedInputStream mAuthenticatedStream;
+
+        private byte[] mTag;
+
+        public ApkContainer(InputStream inStream, ContainerEncryptionParams encryptionParams)
+                throws IOException {
+            if (encryptionParams == null) {
+                mInStream = inStream;
             } else {
-                if (localLOGV) {
-                    Slog.i(TAG, "Opened file descriptor from download service.");
-                }
-                ParcelFileDescriptor.AutoCloseInputStream dlStream
-                        = new ParcelFileDescriptor.AutoCloseInputStream(fd);
-
-                // We copy the source package file to a temp file and then rename it to the
-                // destination file in order to eliminate a window where the package directory
-                // scanner notices the new package file but it's not completely
-                // copied
-                copyToFile(dlStream, outStream);
+                mInStream = getDecryptedStream(inStream, encryptionParams);
+                mTag = encryptionParams.getMacTag();
             }
-        } else {
-            Slog.e(TAG, "Package URI is not 'file:' or 'content:' - " + pPackageURI);
-            throw new FileNotFoundException("Package URI is not 'file:' or 'content:'");
         }
+
+        public boolean isAuthenticated() {
+            if (mAuthenticatedStream == null) {
+                return true;
+            }
+
+            return mAuthenticatedStream.isTagEqual(mTag);
+        }
+
+        private Mac getMacInstance(ContainerEncryptionParams encryptionParams) throws IOException {
+            final Mac m;
+            try {
+                final String macAlgo = encryptionParams.getMacAlgorithm();
+
+                if (macAlgo != null) {
+                    m = Mac.getInstance(macAlgo);
+                    m.init(encryptionParams.getMacKey(), encryptionParams.getMacSpec());
+                } else {
+                    m = null;
+                }
+
+                return m;
+            } catch (NoSuchAlgorithmException e) {
+                throw new IOException(e);
+            } catch (InvalidKeyException e) {
+                throw new IOException(e);
+            } catch (InvalidAlgorithmParameterException e) {
+                throw new IOException(e);
+            }
+        }
+
+        public InputStream getInputStream() {
+            return mInStream;
+        }
+
+        private InputStream getDecryptedStream(InputStream inStream,
+                ContainerEncryptionParams encryptionParams) throws IOException {
+            final Cipher c;
+            try {
+                c = Cipher.getInstance(encryptionParams.getEncryptionAlgorithm());
+                c.init(Cipher.DECRYPT_MODE, encryptionParams.getEncryptionKey(),
+                        encryptionParams.getEncryptionSpec());
+            } catch (NoSuchAlgorithmException e) {
+                throw new IOException(e);
+            } catch (NoSuchPaddingException e) {
+                throw new IOException(e);
+            } catch (InvalidKeyException e) {
+                throw new IOException(e);
+            } catch (InvalidAlgorithmParameterException e) {
+                throw new IOException(e);
+            }
+
+            final int encStart = encryptionParams.getEncryptedDataStart();
+            final int end = encryptionParams.getDataEnd();
+            if (end < encStart) {
+                throw new IOException("end <= encStart");
+            }
+
+            final Mac mac = getMacInstance(encryptionParams);
+            if (mac != null) {
+                final int macStart = encryptionParams.getAuthenticatedDataStart();
+
+                final int furtherOffset;
+                if (macStart >= 0 && encStart >= 0 && macStart < encStart) {
+                    /*
+                     * If there is authenticated data at the beginning, read
+                     * that into our MAC first.
+                     */
+                    final int authenticatedLength = encStart - macStart;
+                    final byte[] authenticatedData = new byte[authenticatedLength];
+
+                    Streams.readFully(inStream, authenticatedData, macStart, authenticatedLength);
+                    mac.update(authenticatedData, 0, authenticatedLength);
+
+                    furtherOffset = 0;
+                } else {
+                    /*
+                     * No authenticated data at the beginning. Just skip the
+                     * required number of bytes to the beginning of the stream.
+                     */
+                    if (encStart > 0) {
+                        furtherOffset = encStart;
+                    } else {
+                        furtherOffset = 0;
+                    }
+                }
+
+                /*
+                 * If there is data at the end of the stream we want to ignore,
+                 * wrap this in a LimitedLengthInputStream.
+                 */
+                if (furtherOffset >= 0 && end > furtherOffset) {
+                    inStream = new LimitedLengthInputStream(inStream, furtherOffset, end - encStart);
+                } else if (furtherOffset > 0) {
+                    inStream.skip(furtherOffset);
+                }
+
+                mAuthenticatedStream = new MacAuthenticatedInputStream(inStream, mac);
+
+                inStream = mAuthenticatedStream;
+            } else {
+                if (encStart >= 0) {
+                    if (end > encStart) {
+                        inStream = new LimitedLengthInputStream(inStream, encStart, end - encStart);
+                    } else {
+                        inStream.skip(encStart);
+                    }
+                }
+            }
+
+            return new CipherInputStream(inStream, c);
+        }
+
     }
 
     private static final int PREFER_INTERNAL = 1;
