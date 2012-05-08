@@ -1557,6 +1557,9 @@ public final class Settings {
          * will likely be removed in a future release with support for
          * audio/vibe feedback profiles.
          *
+         * Not used anymore. On devices with vibrator, the user explicitly selects
+         * silent or vibrate mode.
+         * Kept for use by legacy database upgrade code in DatabaseHelper.
          * @hide
          */
         public static final String VIBRATE_IN_SILENT = "vibrate_in_silent";
@@ -1983,7 +1986,6 @@ public final class Settings {
             SCREEN_BRIGHTNESS,
             SCREEN_BRIGHTNESS_MODE,
             SCREEN_AUTO_BRIGHTNESS_ADJ,
-            VIBRATE_ON,
             VIBRATE_INPUT_DEVICES,
             MODE_RINGER,
             MODE_RINGER_STREAMS_AFFECTED,
@@ -2002,7 +2004,6 @@ public final class Settings {
             VOLUME_ALARM + APPEND_FOR_LAST_AUDIBLE,
             VOLUME_NOTIFICATION + APPEND_FOR_LAST_AUDIBLE,
             VOLUME_BLUETOOTH_SCO + APPEND_FOR_LAST_AUDIBLE,
-            VIBRATE_IN_SILENT,
             TEXT_AUTO_REPLACE,
             TEXT_AUTO_CAPS,
             TEXT_AUTO_PUNCTUATE,

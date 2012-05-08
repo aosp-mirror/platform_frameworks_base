@@ -260,6 +260,8 @@ public class AudioSystem
     public static final String DEVICE_OUT_AUX_DIGITAL_NAME = "aux_digital";
     public static final String DEVICE_OUT_ANLG_DOCK_HEADSET_NAME = "analog_dock";
     public static final String DEVICE_OUT_DGTL_DOCK_HEADSET_NAME = "digital_dock";
+    public static final String DEVICE_OUT_USB_ACCESSORY_NAME = "usb_accessory";
+    public static final String DEVICE_OUT_USB_DEVICE_NAME = "usb_device";
 
     public static String getDeviceName(int device)
     {
@@ -290,6 +292,10 @@ public class AudioSystem
             return DEVICE_OUT_ANLG_DOCK_HEADSET_NAME;
         case DEVICE_OUT_DGTL_DOCK_HEADSET:
             return DEVICE_OUT_DGTL_DOCK_HEADSET_NAME;
+        case DEVICE_OUT_USB_ACCESSORY:
+            return DEVICE_OUT_USB_ACCESSORY_NAME;
+        case DEVICE_OUT_USB_DEVICE:
+            return DEVICE_OUT_USB_DEVICE_NAME;
         case DEVICE_IN_DEFAULT:
         default:
             return "";
