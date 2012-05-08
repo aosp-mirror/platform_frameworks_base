@@ -461,7 +461,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         WindowManager.LayoutParams lp =
             (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
         lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        lp.flags &= ~WindowManager.LayoutParams.FLAG_SLIPPERY;
         WindowManagerImpl.getDefault().updateViewLayout(mNavigationBarView, lp);
     }
 
@@ -471,7 +470,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         WindowManager.LayoutParams lp =
             (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
         lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        lp.flags |= WindowManager.LayoutParams.FLAG_SLIPPERY;
         WindowManagerImpl.getDefault().updateViewLayout(mNavigationBarView, lp);
     }
 
@@ -552,8 +550,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                     | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
-                    | WindowManager.LayoutParams.FLAG_SLIPPERY,
+                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.OPAQUE);
         // this will allow the navbar to run in an overlay on devices that support this
         if (ActivityManager.isHighEndGfx(mDisplay)) {

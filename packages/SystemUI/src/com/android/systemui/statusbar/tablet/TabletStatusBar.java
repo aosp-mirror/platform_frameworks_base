@@ -704,7 +704,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         WindowManager.LayoutParams lp =
             (android.view.WindowManager.LayoutParams) mStatusBarView.getLayoutParams();
         lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        lp.flags &= ~WindowManager.LayoutParams.FLAG_SLIPPERY;
         WindowManagerImpl.getDefault().updateViewLayout(mStatusBarView, lp);
     }
 
@@ -714,7 +713,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         WindowManager.LayoutParams lp =
             (android.view.WindowManager.LayoutParams) mStatusBarView.getLayoutParams();
         lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        lp.flags |= WindowManager.LayoutParams.FLAG_SLIPPERY;
         WindowManagerImpl.getDefault().updateViewLayout(mStatusBarView, lp);
     }
 
