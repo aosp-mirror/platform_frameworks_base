@@ -23,15 +23,20 @@
               android:divider="?android:attr/dividerHorizontal"
               android:showDividers="middle"
               android:dividerPadding="0dip">
-    <GridView
-        android:layout_gravity="center"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:id="@+id/resolver_grid"
-        android:numColumns="4"
-        android:columnWidth="128dp"
-        android:padding="16dp"
-        android:clipToPadding="false" />
+    <FrameLayout android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:layout_weight="1">
+        <GridView
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/resolver_grid"
+            android:numColumns="4"
+            android:columnWidth="128dp"
+            android:padding="16dp"
+            android:clipToPadding="false"
+            android:scrollbarStyle="outsideOverlay" />
+    </FrameLayout>
     <LinearLayout
         android:id="@+id/button_bar"
         android:visibility="gone"
