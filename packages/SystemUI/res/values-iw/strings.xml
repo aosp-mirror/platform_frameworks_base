@@ -140,8 +140,6 @@
     <string name="accessibility_clear_all" msgid="5235938559247164925">"נקה את כל ההתראות."</string>
     <string name="dreams_dock_launcher" msgid="3541196417659166245">"הפעלת שומר מסך"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"פרטי יישום"</string>
-    <!-- no translation found for notifications_off_title (8936620513608443224) -->
-    <skip />
-    <!-- no translation found for notifications_off_text (2529001315769385273) -->
-    <skip />
+    <string name="notifications_off_title" msgid="8936620513608443224">"מצב התראות כבוי"</string>
+    <string name="notifications_off_text" msgid="2529001315769385273">"הקש כאן כדי להפעיל מחדש את ההתראות."</string>
 </resources>
