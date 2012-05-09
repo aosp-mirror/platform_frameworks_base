@@ -206,6 +206,7 @@ public class RenderScriptGL extends RenderScript {
     }
 
     /**
+     * @deprecated in API 16
      * Bind an os surface
      *
      * @param w
