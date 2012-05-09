@@ -6511,12 +6511,31 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * Performs the specified accessibility action on the view. For
      * possible accessibility actions look at {@link AccessibilityNodeInfo}.
+    * <p>
+    * If an {@link AccessibilityDelegate} has been specified via calling
+    * {@link #setAccessibilityDelegate(AccessibilityDelegate)} its
+    * {@link AccessibilityDelegate#performAccessibilityAction(View, int, Bundle)}
+    * is responsible for handling this call.
+    * </p>
      *
      * @param action The action to perform.
      * @param arguments Optional action arguments.
      * @return Whether the action was performed.
      */
     public boolean performAccessibilityAction(int action, Bundle arguments) {
+      if (mAccessibilityDelegate != null) {
+          return mAccessibilityDelegate.performAccessibilityAction(this, action, arguments);
+      } else {
+          return performAccessibilityActionInternal(action, arguments);
+      }
+    }
+
+   /**
+    * @see #performAccessibilityAction(int, Bundle)
+    *
+    * Note: Called from the default {@link AccessibilityDelegate}.
+    */
+    boolean performAccessibilityActionInternal(int action, Bundle arguments) {
         switch (action) {
             case AccessibilityNodeInfo.ACTION_CLICK: {
                 if (isClickable()) {
@@ -17457,6 +17476,26 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
          */
         public void sendAccessibilityEvent(View host, int eventType) {
             host.sendAccessibilityEventInternal(eventType);
+        }
+
+        /**
+         * Performs the specified accessibility action on the view. For
+         * possible accessibility actions look at {@link AccessibilityNodeInfo}.
+         * <p>
+         * The default implementation behaves as
+         * {@link View#performAccessibilityAction(int, Bundle)
+         *  View#performAccessibilityAction(int, Bundle)} for the case of
+         *  no accessibility delegate been set.
+         * </p>
+         *
+         * @param action The action to perform.
+         * @return Whether the action was performed.
+         *
+         * @see View#performAccessibilityAction(int, Bundle)
+         *      View#performAccessibilityAction(int, Bundle)
+         */
+        public boolean performAccessibilityAction(View host, int action, Bundle args) {
+            return host.performAccessibilityActionInternal(action, args);
         }
 
         /**
