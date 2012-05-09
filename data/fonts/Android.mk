@@ -142,6 +142,8 @@ font_src_files := \
     Roboto-Bold.ttf \
     Roboto-Italic.ttf \
     Roboto-BoldItalic.ttf \
+    Roboto-Light.ttf \
+    Roboto-LightItalic.ttf \
     DroidNaskh-Regular.ttf \
     DroidNaskh-Regular-SystemUI.ttf \
     DroidSansDevanagari-Regular.ttf \
