@@ -146,7 +146,7 @@ public class SearchPanelView extends FrameLayout implements
         }
     }
 
-    public void show(boolean show, boolean animate) {
+    public void show(final boolean show, boolean animate) {
         if (animate) {
             if (mShowing != show) {
                 mShowing = show;
@@ -156,21 +156,24 @@ public class SearchPanelView extends FrameLayout implements
             mShowing = show;
             onAnimationEnd(null);
         }
-        setVisibility(show ? View.VISIBLE : View.GONE);
-        if (show) {
-            setFocusable(true);
-            setFocusableInTouchMode(true);
-            requestFocus();
-        }
+        postDelayed(new Runnable() {
+            public void run() {
+                setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+                if (show) {
+                    setFocusable(true);
+                    setFocusableInTouchMode(true);
+                    requestFocus();
+                }
+            }
+        }, show ? 0 : 100);
     }
 
     public void hide(boolean animate) {
-        if (!animate) {
-            setVisibility(View.GONE);
-        }
         if (mBar != null) {
             // This will indirectly cause show(false, ...) to get called
             mBar.animateCollapse();
+        } else {
+            setVisibility(View.INVISIBLE);
         }
     }
 
