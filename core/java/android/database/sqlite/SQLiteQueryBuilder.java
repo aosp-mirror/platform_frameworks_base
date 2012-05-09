@@ -16,10 +16,10 @@
 
 package android.database.sqlite;
 
-import android.content.CancellationSignal;
-import android.content.OperationCanceledException;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.os.CancellationSignal;
+import android.os.OperationCanceledException;
 import android.provider.BaseColumns;
 import android.text.TextUtils;
 import android.util.Log;

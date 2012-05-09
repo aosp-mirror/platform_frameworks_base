@@ -16,9 +16,9 @@
 
 package android.database.sqlite;
 
-import android.content.CancellationSignal;
-import android.content.OperationCanceledException;
 import android.database.CursorWindow;
+import android.os.CancellationSignal;
+import android.os.OperationCanceledException;
 import android.util.Log;
 
 /**
