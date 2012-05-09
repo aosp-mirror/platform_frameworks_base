@@ -464,12 +464,15 @@ public final class BluetoothAdapter {
             synchronized(mManagerCallback) {
                 if (mService != null)
                 {
-                    return mService.getState();
+                    int state=  mService.getState();
+                    if (DBG) Log.d(TAG, "" + hashCode() + ": getState(). Returning " + state);
+                    return state;
                 }
                 // TODO(BT) there might be a small gap during STATE_TURNING_ON that
                 //          mService is null, handle that case
             }
         } catch (RemoteException e) {Log.e(TAG, "", e);}
+        if (DBG) Log.d(TAG, "" + hashCode() + ": getState() :  mService = null. Returning STATE_OFF");
         return STATE_OFF;
     }
 
@@ -1208,7 +1211,7 @@ public final class BluetoothAdapter {
                 if (DBG) Log.d(TAG, "onBluetoothServiceUp: " + bluetoothService);
                 synchronized (mManagerCallback) {
                     mService = bluetoothService;
-                    for (IBluetoothManagerCallback cb : mBluetoothManagerCallbackList ){
+                    for (IBluetoothManagerCallback cb : mProxyServiceStateCallbacks ){
                         try {
                             if (cb != null) {
                                 cb.onBluetoothServiceUp(bluetoothService);
@@ -1224,7 +1227,7 @@ public final class BluetoothAdapter {
                 if (DBG) Log.d(TAG, "onBluetoothServiceDown: " + mService);
                 synchronized (mManagerCallback) {
                     mService = null;
-                    for (IBluetoothManagerCallback cb : mBluetoothManagerCallbackList ){
+                    for (IBluetoothManagerCallback cb : mProxyServiceStateCallbacks ){
                         try {
                             if (cb != null) {
                                 cb.onBluetoothServiceDown();
@@ -1368,14 +1371,14 @@ public final class BluetoothAdapter {
             return mManagerService;
     }
 
-    private ArrayList<IBluetoothManagerCallback> mBluetoothManagerCallbackList = new ArrayList<IBluetoothManagerCallback>();
+    private ArrayList<IBluetoothManagerCallback> mProxyServiceStateCallbacks = new ArrayList<IBluetoothManagerCallback>();
 
     /*package*/ IBluetooth getBluetoothService(IBluetoothManagerCallback cb) {
         synchronized (mManagerCallback) {
             if (cb == null) {
-                Log.w(TAG, "Unable to register null state change callback", new Exception());
-            } else if (!mBluetoothManagerCallbackList.contains(cb)) {
-                mBluetoothManagerCallbackList.add(cb);
+                Log.w(TAG, "getBluetoothService() called with no BluetoothManagerCallback");
+            } else if (!mProxyServiceStateCallbacks.contains(cb)) {
+                mProxyServiceStateCallbacks.add(cb);
             }
         }
         return mService;
@@ -1383,7 +1386,7 @@ public final class BluetoothAdapter {
 
     /*package*/ void removeServiceStateCallback(IBluetoothManagerCallback cb) {
         synchronized (mManagerCallback) {
-            mBluetoothManagerCallbackList.remove(cb);
+            mProxyServiceStateCallbacks.remove(cb);
         }
     }
 }
