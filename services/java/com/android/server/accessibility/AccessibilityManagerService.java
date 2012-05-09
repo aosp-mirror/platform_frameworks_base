@@ -1251,7 +1251,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         mContext, 0, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), 0));
             } else {
                 mCanRetrieveScreenContent = true;
-                mIncludeNotImportantViews = true;
                 mCanHandleGestures = true;
             }
             setDynamicallyConfigurableProperties(accessibilityServiceInfo);
