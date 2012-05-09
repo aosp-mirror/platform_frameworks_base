@@ -743,9 +743,14 @@ public class MediaPlayer
         }
         Parcel request = Parcel.obtain();
         Parcel reply = Parcel.obtain();
-        request.writeInterfaceToken(IMEDIA_PLAYER);
-        request.writeInt(INVOKE_ID_SET_VIDEO_SCALE_MODE);
-        invoke(request, reply);
+        try {
+            request.writeInterfaceToken(IMEDIA_PLAYER);
+            request.writeInt(INVOKE_ID_SET_VIDEO_SCALE_MODE);
+            invoke(request, reply);
+        } finally {
+            request.recycle();
+            reply.recycle();
+        }
     }
 
     /**
@@ -1642,11 +1647,16 @@ public class MediaPlayer
     public TrackInfo[] getTrackInfo() throws IllegalStateException {
         Parcel request = Parcel.obtain();
         Parcel reply = Parcel.obtain();
-        request.writeInterfaceToken(IMEDIA_PLAYER);
-        request.writeInt(INVOKE_ID_GET_TRACK_INFO);
-        invoke(request, reply);
-        TrackInfo trackInfo[] = reply.createTypedArray(TrackInfo.CREATOR);
-        return trackInfo;
+        try {
+            request.writeInterfaceToken(IMEDIA_PLAYER);
+            request.writeInt(INVOKE_ID_GET_TRACK_INFO);
+            invoke(request, reply);
+            TrackInfo trackInfo[] = reply.createTypedArray(TrackInfo.CREATOR);
+            return trackInfo;
+        } finally {
+            request.recycle();
+            reply.recycle();
+        }
     }
 
     /* Do not change these values without updating their counterparts
@@ -1791,13 +1801,18 @@ public class MediaPlayer
 
         Parcel request = Parcel.obtain();
         Parcel reply = Parcel.obtain();
-        request.writeInterfaceToken(IMEDIA_PLAYER);
-        request.writeInt(INVOKE_ID_ADD_EXTERNAL_SOURCE_FD);
-        request.writeFileDescriptor(fd);
-        request.writeLong(offset);
-        request.writeLong(length);
-        request.writeString(mimeType);
-        invoke(request, reply);
+        try {
+            request.writeInterfaceToken(IMEDIA_PLAYER);
+            request.writeInt(INVOKE_ID_ADD_EXTERNAL_SOURCE_FD);
+            request.writeFileDescriptor(fd);
+            request.writeLong(offset);
+            request.writeLong(length);
+            request.writeString(mimeType);
+            invoke(request, reply);
+        } finally {
+            request.recycle();
+            reply.recycle();
+        }
     }
 
     /**
@@ -1854,10 +1869,15 @@ public class MediaPlayer
             throws IllegalStateException {
         Parcel request = Parcel.obtain();
         Parcel reply = Parcel.obtain();
-        request.writeInterfaceToken(IMEDIA_PLAYER);
-        request.writeInt(select? INVOKE_ID_SELECT_TRACK: INVOKE_ID_DESELECT_TRACK);
-        request.writeInt(index);
-        invoke(request, reply);
+        try {
+            request.writeInterfaceToken(IMEDIA_PLAYER);
+            request.writeInt(select? INVOKE_ID_SELECT_TRACK: INVOKE_ID_DESELECT_TRACK);
+            request.writeInt(index);
+            invoke(request, reply);
+        } finally {
+            request.recycle();
+            reply.recycle();
+        }
     }
 
 
