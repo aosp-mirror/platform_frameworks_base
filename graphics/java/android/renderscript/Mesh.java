@@ -20,7 +20,7 @@ import java.util.Vector;
 
 import android.util.Log;
 
-/** @deprecated renderscript is deprecated in J
+/**
  * <p>This class is a container for geometric data displayed with
  * Renderscript. Internally, a mesh is a collection of allocations that
  * represent vertex data (positions, normals, texture
@@ -39,34 +39,34 @@ import android.util.Log;
  **/
 public class Mesh extends BaseObj {
 
-    /** @deprecated renderscript is deprecated in J
+    /**
     * Describes the way mesh vertex data is interpreted when rendering
     *
     **/
     public enum Primitive {
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Vertex data will be rendered as a series of points
         */
         POINT (0),
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Vertex pairs will be rendered as lines
         */
         LINE (1),
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Vertex data will be rendered as a connected line strip
         */
         LINE_STRIP (2),
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Vertices will be rendered as individual triangles
         */
         TRIANGLE (3),
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Vertices will be rendered as a connected triangle strip
         * defined by the first three vertices with each additional
         * triangle defined by a new vertex
         */
         TRIANGLE_STRIP (4),
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Vertices will be rendered as a sequence of triangles that all
         * share first vertex as the origin
         */
@@ -86,7 +86,7 @@ public class Mesh extends BaseObj {
         super(id, rs);
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
     * @return number of allocations containing vertex data
     *
     **/
@@ -96,7 +96,7 @@ public class Mesh extends BaseObj {
         }
         return mVertexBuffers.length;
     }
-    /** @deprecated renderscript is deprecated in J
+    /**
     * @param slot index in the list of allocations to return
     * @return vertex data allocation at the given index
     *
@@ -105,7 +105,7 @@ public class Mesh extends BaseObj {
         return mVertexBuffers[slot];
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
     * @return number of primitives or index sets in the mesh
     *
     **/
@@ -116,7 +116,7 @@ public class Mesh extends BaseObj {
         return mIndexBuffers.length;
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
     * @param slot locaton within the list of index set allocation
     * @return allocation containing primtive index data or null if
     *         the index data is not specified explicitly
@@ -125,7 +125,7 @@ public class Mesh extends BaseObj {
     public Allocation getIndexSetAllocation(int slot) {
         return mIndexBuffers[slot];
     }
-    /** @deprecated renderscript is deprecated in J
+    /**
     * @param slot locaiton within the list of index set primitives
     * @return index set primitive type
     *
@@ -167,7 +167,7 @@ public class Mesh extends BaseObj {
         }
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
     * Mesh builder object. It starts empty and requires you to
     * add the types necessary to create vertex and index
     * allocations.
@@ -189,7 +189,7 @@ public class Mesh extends BaseObj {
         Entry[] mVertexTypes;
         Vector mIndexTypes;
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Creates builder object
         * @param rs Context to which the mesh will belong.
         * @param usage specifies how the mesh allocations are to be
@@ -204,7 +204,7 @@ public class Mesh extends BaseObj {
             mIndexTypes = new Vector();
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * @return internal index of the last vertex buffer type added to
         *         builder
         **/
@@ -212,7 +212,7 @@ public class Mesh extends BaseObj {
             return mVertexTypeCount - 1;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * @return internal index of the last index set added to the
         *         builder
         **/
@@ -220,7 +220,7 @@ public class Mesh extends BaseObj {
             return mIndexTypes.size() - 1;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Adds a vertex data type to the builder object
         *
         * @param t type of the vertex data allocation to be created
@@ -239,7 +239,7 @@ public class Mesh extends BaseObj {
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Adds a vertex data type to the builder object
         *
         * @param e element describing the vertex data layout
@@ -260,7 +260,7 @@ public class Mesh extends BaseObj {
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Adds an index set data type to the builder object
         *
         * @param t type of the index set data, could be null
@@ -278,7 +278,7 @@ public class Mesh extends BaseObj {
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Adds an index set primitive type to the builder object
         *
         * @param p primitive type
@@ -295,7 +295,7 @@ public class Mesh extends BaseObj {
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Adds an index set data type to the builder object
         *
         * @param e element describing the index set data layout
@@ -320,7 +320,7 @@ public class Mesh extends BaseObj {
             return tb.create();
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Create a Mesh object from the current state of the builder
         *
         **/
@@ -372,7 +372,7 @@ public class Mesh extends BaseObj {
         }
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
     * Mesh builder object. It starts empty and requires the user to
     * add all the vertex and index allocations that comprise the
     * mesh
@@ -391,8 +391,6 @@ public class Mesh extends BaseObj {
 
         Vector mIndexTypes;
 
-        /** @deprecated renderscript is deprecated in J
-        */
         public AllocationBuilder(RenderScript rs) {
             mRS = rs;
             mVertexTypeCount = 0;
@@ -400,7 +398,7 @@ public class Mesh extends BaseObj {
             mIndexTypes = new Vector();
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * @return internal index of the last vertex buffer type added to
         *         builder
         **/
@@ -408,7 +406,7 @@ public class Mesh extends BaseObj {
             return mVertexTypeCount - 1;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * @return internal index of the last index set added to the
         *         builder
         **/
@@ -416,7 +414,7 @@ public class Mesh extends BaseObj {
             return mIndexTypes.size() - 1;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Adds an allocation containing vertex buffer data to the
         * builder
         *
@@ -435,7 +433,7 @@ public class Mesh extends BaseObj {
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Adds an allocation containing index buffer data and index type
         * to the builder
         *
@@ -452,7 +450,7 @@ public class Mesh extends BaseObj {
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Adds an index set type to the builder
         *
         * @param p index set primitive type
@@ -467,7 +465,7 @@ public class Mesh extends BaseObj {
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Create a Mesh object from the current state of the builder
         *
         **/
@@ -508,7 +506,7 @@ public class Mesh extends BaseObj {
         }
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
     * Builder that allows creation of a mesh object point by point
     * and triangle by triangle
     *
@@ -535,17 +533,11 @@ public class Mesh extends BaseObj {
         int mVtxSize;
         int mFlags;
 
-        /** @deprecated renderscript is deprecated in J
-        */
         public static final int COLOR = 0x0001;
-        /** @deprecated renderscript is deprecated in J
-        */
         public static final int NORMAL = 0x0002;
-        /** @deprecated renderscript is deprecated in J
-        */
         public static final int TEXTURE_0 = 0x0100;
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * @param rs Context to which the mesh will belong.
         * @param vtxSize specifies whether the vertex is a float2 or
         *                float3
@@ -600,7 +592,7 @@ public class Mesh extends BaseObj {
             mMaxIndex ++;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Adds a float2 vertex to the mesh
         *
         * @param x position x
@@ -620,7 +612,7 @@ public class Mesh extends BaseObj {
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Adds a float3 vertex to the mesh
         *
         * @param x position x
@@ -643,7 +635,7 @@ public class Mesh extends BaseObj {
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Sets the texture coordinate for the vertices that are added after this method call.
         *
         * @param s texture coordinate s
@@ -660,7 +652,7 @@ public class Mesh extends BaseObj {
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Sets the normal vector for the vertices that are added after this method call.
         *
         * @param x normal vector x
@@ -679,7 +671,7 @@ public class Mesh extends BaseObj {
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Sets the color for the vertices that are added after this method call.
         *
         * @param r red component
@@ -700,7 +692,7 @@ public class Mesh extends BaseObj {
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Adds a new triangle to the mesh builder
         *
         * @param idx1 index of the first vertex in the triangle
@@ -726,7 +718,7 @@ public class Mesh extends BaseObj {
             return this;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
         * Creates the mesh object from the current state of the builder
         *
         * @param uploadToBufferObject specifies whether the vertex data

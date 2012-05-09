@@ -28,7 +28,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-/** @deprecated renderscript is deprecated in J
+/**
  * The Graphics derivitive of Renderscript.  Extends the basic context to add a
  * root script which is the display window for graphical output.  When the
  * system needs to update the display the currently bound root script will be
@@ -45,7 +45,7 @@ public class RenderScriptGL extends RenderScript {
     int mWidth;
     int mHeight;
 
-    /** @deprecated renderscript is deprecated in J
+    /**
      * Class which is used to describe a pixel format for a graphical buffer.
      * This is used to describe the intended format of the display surface.
      *
@@ -92,7 +92,7 @@ public class RenderScriptGL extends RenderScript {
             }
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
          * Set the per-component bit depth for color (red, green, blue).  This
          * configures the surface for an unsigned integer buffer type.
          *
@@ -105,7 +105,7 @@ public class RenderScriptGL extends RenderScript {
             mColorPref = preferred;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
          * Set the bit depth for alpha. This configures the surface for
          * an unsigned integer buffer type.
          *
@@ -118,7 +118,7 @@ public class RenderScriptGL extends RenderScript {
             mAlphaPref = preferred;
         }
 
-         /** @deprecated renderscript is deprecated in J
+         /**
          * Set the bit depth for the depth buffer. This configures the
          * surface for an unsigned integer buffer type.  If a minimum of 0
          * is specified then its possible no depth buffer will be
@@ -133,7 +133,7 @@ public class RenderScriptGL extends RenderScript {
             mDepthPref = preferred;
         }
 
-        /** @deprecated renderscript is deprecated in J
+        /**
          * Configure the multisample rendering.
          *
          * @param minimum The required number of samples, must be at least 1.
@@ -156,7 +156,7 @@ public class RenderScriptGL extends RenderScript {
 
     SurfaceConfig mSurfaceConfig;
 
-    /** @deprecated renderscript is deprecated in J
+    /**
      * Construct a new RenderScriptGL context.
      *
      * @param ctx The context.
@@ -186,7 +186,7 @@ public class RenderScriptGL extends RenderScript {
         mMessageThread.start();
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
      * Bind an os surface
      *
      *
@@ -205,7 +205,7 @@ public class RenderScriptGL extends RenderScript {
         nContextSetSurface(w, h, s);
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
      * Bind an os surface
      *
      * @param w
@@ -221,7 +221,7 @@ public class RenderScriptGL extends RenderScript {
         nContextSetSurfaceTexture(w, h, sur);
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
      * return the height of the last set surface.
      *
      * @return int
@@ -230,7 +230,7 @@ public class RenderScriptGL extends RenderScript {
         return mHeight;
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
      * return the width of the last set surface.
      *
      * @return int
@@ -239,7 +239,7 @@ public class RenderScriptGL extends RenderScript {
         return mWidth;
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
      * Temporarly halt calls to the root rendering script.
      *
      */
@@ -248,7 +248,7 @@ public class RenderScriptGL extends RenderScript {
         nContextPause();
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
      * Resume calls to the root rendering script.
      *
      */
@@ -258,7 +258,7 @@ public class RenderScriptGL extends RenderScript {
     }
 
 
-    /** @deprecated renderscript is deprecated in J
+    /**
      * Set the script to handle calls to render the primary surface.
      *
      * @param s Graphics script to process rendering requests.
@@ -268,7 +268,7 @@ public class RenderScriptGL extends RenderScript {
         nContextBindRootScript(safeID(s));
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
      * Set the default ProgramStore object seen as the parent state by the root
      * rendering script.
      *
@@ -279,7 +279,7 @@ public class RenderScriptGL extends RenderScript {
         nContextBindProgramStore(safeID(p));
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
      * Set the default ProgramFragment object seen as the parent state by the
      * root rendering script.
      *
@@ -290,7 +290,7 @@ public class RenderScriptGL extends RenderScript {
         nContextBindProgramFragment(safeID(p));
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
      * Set the default ProgramRaster object seen as the parent state by the
      * root rendering script.
      *
@@ -301,7 +301,7 @@ public class RenderScriptGL extends RenderScript {
         nContextBindProgramRaster(safeID(p));
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
      * Set the default ProgramVertex object seen as the parent state by the
      * root rendering script.
      *
