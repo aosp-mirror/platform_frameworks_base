@@ -19073,12 +19073,12 @@ package android.renderscript {
     method public void transpose();
   }
 
-  public class Mesh extends android.renderscript.BaseObj {
-    method public android.renderscript.Allocation getIndexSetAllocation(int);
-    method public android.renderscript.Mesh.Primitive getPrimitive(int);
-    method public int getPrimitiveCount();
-    method public android.renderscript.Allocation getVertexAllocation(int);
-    method public int getVertexAllocationCount();
+  public deprecated class Mesh extends android.renderscript.BaseObj {
+    method public deprecated android.renderscript.Allocation getIndexSetAllocation(int);
+    method public deprecated android.renderscript.Mesh.Primitive getPrimitive(int);
+    method public deprecated int getPrimitiveCount();
+    method public deprecated android.renderscript.Allocation getVertexAllocation(int);
+    method public deprecated int getVertexAllocationCount();
   }
 
   public static deprecated class Mesh.AllocationBuilder {
@@ -19091,27 +19091,27 @@ package android.renderscript {
     method public deprecated int getCurrentVertexTypeIndex();
   }
 
-  public static class Mesh.Builder {
-    ctor public Mesh.Builder(android.renderscript.RenderScript, int);
-    method public android.renderscript.Mesh.Builder addIndexSetType(android.renderscript.Type, android.renderscript.Mesh.Primitive);
-    method public android.renderscript.Mesh.Builder addIndexSetType(android.renderscript.Mesh.Primitive);
-    method public android.renderscript.Mesh.Builder addIndexSetType(android.renderscript.Element, int, android.renderscript.Mesh.Primitive);
-    method public android.renderscript.Mesh.Builder addVertexType(android.renderscript.Type) throws java.lang.IllegalStateException;
-    method public android.renderscript.Mesh.Builder addVertexType(android.renderscript.Element, int) throws java.lang.IllegalStateException;
-    method public android.renderscript.Mesh create();
-    method public int getCurrentIndexSetIndex();
-    method public int getCurrentVertexTypeIndex();
+  public static deprecated class Mesh.Builder {
+    ctor public deprecated Mesh.Builder(android.renderscript.RenderScript, int);
+    method public deprecated android.renderscript.Mesh.Builder addIndexSetType(android.renderscript.Type, android.renderscript.Mesh.Primitive);
+    method public deprecated android.renderscript.Mesh.Builder addIndexSetType(android.renderscript.Mesh.Primitive);
+    method public deprecated android.renderscript.Mesh.Builder addIndexSetType(android.renderscript.Element, int, android.renderscript.Mesh.Primitive);
+    method public deprecated android.renderscript.Mesh.Builder addVertexType(android.renderscript.Type) throws java.lang.IllegalStateException;
+    method public deprecated android.renderscript.Mesh.Builder addVertexType(android.renderscript.Element, int) throws java.lang.IllegalStateException;
+    method public deprecated android.renderscript.Mesh create();
+    method public deprecated int getCurrentIndexSetIndex();
+    method public deprecated int getCurrentVertexTypeIndex();
   }
 
-  public static final class Mesh.Primitive extends java.lang.Enum {
+  public static final deprecated class Mesh.Primitive extends java.lang.Enum {
     method public static android.renderscript.Mesh.Primitive valueOf(java.lang.String);
     method public static final android.renderscript.Mesh.Primitive[] values();
-    enum_constant public static final android.renderscript.Mesh.Primitive LINE;
-    enum_constant public static final android.renderscript.Mesh.Primitive LINE_STRIP;
-    enum_constant public static final android.renderscript.Mesh.Primitive POINT;
-    enum_constant public static final android.renderscript.Mesh.Primitive TRIANGLE;
-    enum_constant public static final android.renderscript.Mesh.Primitive TRIANGLE_FAN;
-    enum_constant public static final android.renderscript.Mesh.Primitive TRIANGLE_STRIP;
+    enum_constant public static final deprecated android.renderscript.Mesh.Primitive LINE;
+    enum_constant public static final deprecated android.renderscript.Mesh.Primitive LINE_STRIP;
+    enum_constant public static final deprecated android.renderscript.Mesh.Primitive POINT;
+    enum_constant public static final deprecated android.renderscript.Mesh.Primitive TRIANGLE;
+    enum_constant public static final deprecated android.renderscript.Mesh.Primitive TRIANGLE_FAN;
+    enum_constant public static final deprecated android.renderscript.Mesh.Primitive TRIANGLE_STRIP;
   }
 
   public static deprecated class Mesh.TriangleMeshBuilder {
@@ -19158,12 +19158,12 @@ package android.renderscript {
     enum_constant public static final android.renderscript.Program.TextureType TEXTURE_CUBE;
   }
 
-  public class ProgramFragment extends android.renderscript.Program {
+  public deprecated class ProgramFragment extends android.renderscript.Program {
   }
 
-  public static class ProgramFragment.Builder extends android.renderscript.Program.BaseProgramBuilder {
-    ctor public ProgramFragment.Builder(android.renderscript.RenderScript);
-    method public android.renderscript.ProgramFragment create();
+  public static deprecated class ProgramFragment.Builder extends android.renderscript.Program.BaseProgramBuilder {
+    ctor public deprecated ProgramFragment.Builder(android.renderscript.RenderScript);
+    method public deprecated android.renderscript.ProgramFragment create();
   }
 
   public deprecated class ProgramFragmentFixedFunction extends android.renderscript.ProgramFragment {
@@ -19195,27 +19195,27 @@ package android.renderscript {
     enum_constant public static final deprecated android.renderscript.ProgramFragmentFixedFunction.Builder.Format RGBA;
   }
 
-  public class ProgramRaster extends android.renderscript.BaseObj {
-    method public static android.renderscript.ProgramRaster CULL_BACK(android.renderscript.RenderScript);
-    method public static android.renderscript.ProgramRaster CULL_FRONT(android.renderscript.RenderScript);
-    method public static android.renderscript.ProgramRaster CULL_NONE(android.renderscript.RenderScript);
-    method public android.renderscript.ProgramRaster.CullMode getCullMode();
-    method public boolean isPointSpriteEnabled();
+  public deprecated class ProgramRaster extends android.renderscript.BaseObj {
+    method public static deprecated android.renderscript.ProgramRaster CULL_BACK(android.renderscript.RenderScript);
+    method public static deprecated android.renderscript.ProgramRaster CULL_FRONT(android.renderscript.RenderScript);
+    method public static deprecated android.renderscript.ProgramRaster CULL_NONE(android.renderscript.RenderScript);
+    method public deprecated android.renderscript.ProgramRaster.CullMode getCullMode();
+    method public deprecated boolean isPointSpriteEnabled();
   }
 
-  public static class ProgramRaster.Builder {
-    ctor public ProgramRaster.Builder(android.renderscript.RenderScript);
-    method public android.renderscript.ProgramRaster create();
-    method public android.renderscript.ProgramRaster.Builder setCullMode(android.renderscript.ProgramRaster.CullMode);
-    method public android.renderscript.ProgramRaster.Builder setPointSpriteEnabled(boolean);
+  public static deprecated class ProgramRaster.Builder {
+    ctor public deprecated ProgramRaster.Builder(android.renderscript.RenderScript);
+    method public deprecated android.renderscript.ProgramRaster create();
+    method public deprecated android.renderscript.ProgramRaster.Builder setCullMode(android.renderscript.ProgramRaster.CullMode);
+    method public deprecated android.renderscript.ProgramRaster.Builder setPointSpriteEnabled(boolean);
   }
 
-  public static final class ProgramRaster.CullMode extends java.lang.Enum {
+  public static final deprecated class ProgramRaster.CullMode extends java.lang.Enum {
     method public static android.renderscript.ProgramRaster.CullMode valueOf(java.lang.String);
     method public static final android.renderscript.ProgramRaster.CullMode[] values();
-    enum_constant public static final android.renderscript.ProgramRaster.CullMode BACK;
-    enum_constant public static final android.renderscript.ProgramRaster.CullMode FRONT;
-    enum_constant public static final android.renderscript.ProgramRaster.CullMode NONE;
+    enum_constant public static final deprecated android.renderscript.ProgramRaster.CullMode BACK;
+    enum_constant public static final deprecated android.renderscript.ProgramRaster.CullMode FRONT;
+    enum_constant public static final deprecated android.renderscript.ProgramRaster.CullMode NONE;
   }
 
   public class ProgramStore extends android.renderscript.BaseObj {
@@ -19283,15 +19283,15 @@ package android.renderscript {
     enum_constant public static final android.renderscript.ProgramStore.DepthFunc NOT_EQUAL;
   }
 
-  public class ProgramVertex extends android.renderscript.Program {
-    method public android.renderscript.Element getInput(int);
-    method public int getInputCount();
+  public deprecated class ProgramVertex extends android.renderscript.Program {
+    method public deprecated android.renderscript.Element getInput(int);
+    method public deprecated int getInputCount();
   }
 
-  public static class ProgramVertex.Builder extends android.renderscript.Program.BaseProgramBuilder {
-    ctor public ProgramVertex.Builder(android.renderscript.RenderScript);
-    method public android.renderscript.ProgramVertex.Builder addInput(android.renderscript.Element) throws java.lang.IllegalStateException;
-    method public android.renderscript.ProgramVertex create();
+  public static deprecated class ProgramVertex.Builder extends android.renderscript.Program.BaseProgramBuilder {
+    ctor public deprecated ProgramVertex.Builder(android.renderscript.RenderScript);
+    method public deprecated android.renderscript.ProgramVertex.Builder addInput(android.renderscript.Element) throws java.lang.IllegalStateException;
+    method public deprecated android.renderscript.ProgramVertex create();
   }
 
   public deprecated class ProgramVertexFixedFunction extends android.renderscript.ProgramVertex {
@@ -19342,19 +19342,19 @@ package android.renderscript {
     method public deprecated void surfaceDestroyed(android.view.SurfaceHolder);
   }
 
-  public class RSTextureView extends android.view.TextureView implements android.view.TextureView.SurfaceTextureListener {
-    ctor public RSTextureView(android.content.Context);
-    ctor public RSTextureView(android.content.Context, android.util.AttributeSet);
-    method public android.renderscript.RenderScriptGL createRenderScriptGL(android.renderscript.RenderScriptGL.SurfaceConfig);
-    method public void destroyRenderScriptGL();
-    method public android.renderscript.RenderScriptGL getRenderScriptGL();
-    method public void onSurfaceTextureAvailable(android.graphics.SurfaceTexture, int, int);
-    method public boolean onSurfaceTextureDestroyed(android.graphics.SurfaceTexture);
-    method public void onSurfaceTextureSizeChanged(android.graphics.SurfaceTexture, int, int);
-    method public void onSurfaceTextureUpdated(android.graphics.SurfaceTexture);
-    method public void pause();
-    method public void resume();
-    method public void setRenderScriptGL(android.renderscript.RenderScriptGL);
+  public deprecated class RSTextureView extends android.view.TextureView implements android.view.TextureView.SurfaceTextureListener {
+    ctor public deprecated RSTextureView(android.content.Context);
+    ctor public deprecated RSTextureView(android.content.Context, android.util.AttributeSet);
+    method public deprecated android.renderscript.RenderScriptGL createRenderScriptGL(android.renderscript.RenderScriptGL.SurfaceConfig);
+    method public deprecated void destroyRenderScriptGL();
+    method public deprecated android.renderscript.RenderScriptGL getRenderScriptGL();
+    method public deprecated void onSurfaceTextureAvailable(android.graphics.SurfaceTexture, int, int);
+    method public deprecated boolean onSurfaceTextureDestroyed(android.graphics.SurfaceTexture);
+    method public deprecated void onSurfaceTextureSizeChanged(android.graphics.SurfaceTexture, int, int);
+    method public deprecated void onSurfaceTextureUpdated(android.graphics.SurfaceTexture);
+    method public deprecated void pause();
+    method public deprecated void resume();
+    method public deprecated void setRenderScriptGL(android.renderscript.RenderScriptGL);
   }
 
   public class RenderScript {
@@ -19392,28 +19392,28 @@ package android.renderscript {
     field protected int mLength;
   }
 
-  public class RenderScriptGL extends android.renderscript.RenderScript {
-    ctor public RenderScriptGL(android.content.Context, android.renderscript.RenderScriptGL.SurfaceConfig);
-    method public void bindProgramFragment(android.renderscript.ProgramFragment);
-    method public void bindProgramRaster(android.renderscript.ProgramRaster);
-    method public void bindProgramStore(android.renderscript.ProgramStore);
-    method public void bindProgramVertex(android.renderscript.ProgramVertex);
-    method public void bindRootScript(android.renderscript.Script);
-    method public int getHeight();
-    method public int getWidth();
-    method public void pause();
-    method public void resume();
-    method public void setSurface(android.view.SurfaceHolder, int, int);
+  public deprecated class RenderScriptGL extends android.renderscript.RenderScript {
+    ctor public deprecated RenderScriptGL(android.content.Context, android.renderscript.RenderScriptGL.SurfaceConfig);
+    method public deprecated void bindProgramFragment(android.renderscript.ProgramFragment);
+    method public deprecated void bindProgramRaster(android.renderscript.ProgramRaster);
+    method public deprecated void bindProgramStore(android.renderscript.ProgramStore);
+    method public deprecated void bindProgramVertex(android.renderscript.ProgramVertex);
+    method public deprecated void bindRootScript(android.renderscript.Script);
+    method public deprecated int getHeight();
+    method public deprecated int getWidth();
+    method public deprecated void pause();
+    method public deprecated void resume();
+    method public deprecated void setSurface(android.view.SurfaceHolder, int, int);
     method public deprecated void setSurfaceTexture(android.graphics.SurfaceTexture, int, int);
   }
 
-  public static class RenderScriptGL.SurfaceConfig {
-    ctor public RenderScriptGL.SurfaceConfig();
-    ctor public RenderScriptGL.SurfaceConfig(android.renderscript.RenderScriptGL.SurfaceConfig);
-    method public void setAlpha(int, int);
-    method public void setColor(int, int);
-    method public void setDepth(int, int);
-    method public void setSamples(int, int, float);
+  public static deprecated class RenderScriptGL.SurfaceConfig {
+    ctor public deprecated RenderScriptGL.SurfaceConfig();
+    ctor public deprecated RenderScriptGL.SurfaceConfig(android.renderscript.RenderScriptGL.SurfaceConfig);
+    method public deprecated void setAlpha(int, int);
+    method public deprecated void setColor(int, int);
+    method public deprecated void setDepth(int, int);
+    method public deprecated void setSamples(int, int, float);
   }
 
   public class Sampler extends android.renderscript.BaseObj {
