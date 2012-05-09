@@ -16,7 +16,6 @@
 
 package android.net.wifi.p2p.nsd;
 
-import android.net.nsd.DnsSdTxtRecord;
 import android.net.wifi.p2p.WifiP2pDevice;
 
 import java.io.ByteArrayInputStream;
@@ -68,7 +67,7 @@ public class WifiP2pDnsSdServiceResponse extends WifiP2pServiceResponse {
      * This field is only used when the dns type equals to
      * {@link WifiP2pDnsSdServiceInfo#DNS_TYPE_TXT}.
      */
-    private DnsSdTxtRecord mTxtRecord;
+    private final HashMap<String, String> mTxtRecord = new HashMap<String, String>();
 
     /**
      * Virtual memory packet.
@@ -121,7 +120,7 @@ public class WifiP2pDnsSdServiceResponse extends WifiP2pServiceResponse {
      * Return TXT record data.
      * @return TXT record data.
      */
-    public DnsSdTxtRecord getTxtRecord() {
+    public Map<String, String> getTxtRecord() {
         return mTxtRecord;
     }
 
@@ -133,8 +132,9 @@ public class WifiP2pDnsSdServiceResponse extends WifiP2pServiceResponse {
         sbuf.append(" srcAddr:").append(mDevice.deviceAddress);
         sbuf.append(" version:").append(String.format("%02x", mVersion));
         sbuf.append(" dnsName:").append(mDnsQueryName);
-        if (mTxtRecord != null) {
-            sbuf.append(" TxtRecord:").append(mTxtRecord);
+        sbuf.append(" TxtRecord:");
+        for (String key : mTxtRecord.keySet()) {
+            sbuf.append(" key:").append(key).append(" value:").append(mTxtRecord.get(key));
         }
         if (mInstanceName != null) {
             sbuf.append(" InsName:").append(mInstanceName);
@@ -205,10 +205,7 @@ public class WifiP2pDnsSdServiceResponse extends WifiP2pServiceResponse {
             mInstanceName = rData.substring(0,
                     rData.length() - mDnsQueryName.length() -1);
         } else if (mDnsType == WifiP2pDnsSdServiceInfo.DNS_TYPE_TXT) {
-            mTxtRecord = readTxtData(dis);
-            if (mTxtRecord == null) {
-                return false;
-            }
+            return readTxtData(dis);
         } else {
             return false;
         }
@@ -261,10 +258,9 @@ public class WifiP2pDnsSdServiceResponse extends WifiP2pServiceResponse {
      * Read TXT record data.
      *
      * @param dis
-     * @return TXT record data
+     * @return true if TXT data is valid
      */
-    private DnsSdTxtRecord readTxtData(DataInputStream dis) {
-        DnsSdTxtRecord txtRecord = new DnsSdTxtRecord();
+    private boolean readTxtData(DataInputStream dis) {
         try {
             while (dis.available() > 0) {
                 int len = dis.readUnsignedByte();
@@ -275,15 +271,15 @@ public class WifiP2pDnsSdServiceResponse extends WifiP2pServiceResponse {
                 dis.readFully(data);
                 String[] keyVal = new String(data).split("=");
                 if (keyVal.length != 2) {
-                    return null;
+                    return false;
                 }
-                txtRecord.set(keyVal[0], keyVal[1]);
+                mTxtRecord.put(keyVal[0], keyVal[1]);
             }
-            return txtRecord;
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return false;
     }
 
     /**
