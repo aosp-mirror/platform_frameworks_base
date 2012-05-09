@@ -25,6 +25,7 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
+import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Parcel;
@@ -57,6 +58,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
@@ -647,6 +649,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     private int mGlowPaddingLeft;
     private int mGlowPaddingRight;
+
+    /**
+     * Used for interacting with list items from an accessibility service.
+     */
+    private ListItemAccessibilityDelegate mAccessibilityDelegate;
 
     private int mLastAccessibilityScrollEventFromIndex;
     private int mLastAccessibilityScrollEventToIndex;
@@ -2121,7 +2128,75 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             child.setLayoutParams(lp);
         }
 
+        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            if (mAccessibilityDelegate == null) {
+                mAccessibilityDelegate = new ListItemAccessibilityDelegate();
+            }
+            child.setAccessibilityDelegate(mAccessibilityDelegate);
+        }
+
         return child;
+    }
+
+    class ListItemAccessibilityDelegate extends AccessibilityDelegate {
+        @Override
+        public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+            super.onInitializeAccessibilityNodeInfo(host, info);
+
+            final int position = getPositionForView(host);
+
+            if (position == INVALID_POSITION) {
+                return;
+            }
+
+            if (isClickable()) {
+                info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
+                info.setClickable(true);
+            }
+
+            if (isLongClickable()) {
+                info.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
+                info.setLongClickable(true);
+            }
+
+            info.addAction(AccessibilityNodeInfo.ACTION_SELECT);
+
+            if (position == getSelectedItemPosition()) {
+                info.setSelected(true);
+            }
+        }
+
+        @Override
+        public boolean performAccessibilityAction(View host, int action, Bundle arguments) {
+            final int position = getPositionForView(host);
+
+            if (position == INVALID_POSITION) {
+                return false;
+            }
+
+            final long id = getItemIdAtPosition(position);
+
+            switch (action) {
+                case AccessibilityNodeInfo.ACTION_SELECT:
+                    setSelection(position);
+                    return true;
+                case AccessibilityNodeInfo.ACTION_CLICK:
+                    if (!super.performAccessibilityAction(host, action, arguments)) {
+                        return performItemClick(host, position, id);
+                    }
+                    return true;
+                case AccessibilityNodeInfo.ACTION_LONG_CLICK:
+                    if (!super.performAccessibilityAction(host, action, arguments)) {
+                        return performLongPress(host, position, id);
+                    }
+                    return true;
+                case AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS:
+                    smoothScrollToPosition(position);
+                    break;
+            }
+
+            return super.performAccessibilityAction(host, action, arguments);
+        }
     }
 
     void positionSelector(int position, View sel) {
@@ -5671,6 +5746,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             // Don't reclaim header or footer views, or views that should be ignored
             if (lp != null && mRecycler.shouldRecycleViewType(lp.viewType)) {
                 views.add(child);
+                child.setAccessibilityDelegate(null);
                 if (listener != null) {
                     // Pretend they went through the scrap heap
                     listener.onMovedToScrapHeap(child);
@@ -6226,6 +6302,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mScrapViews[viewType].add(scrap);
             }
 
+            scrap.setAccessibilityDelegate(null);
             if (mRecyclerListener != null) {
                 mRecyclerListener.onMovedToScrapHeap(scrap);
             }
@@ -6287,6 +6364,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     lp.scrappedFromPosition = mFirstActivePosition + i;
                     scrapViews.add(victim);
 
+                    victim.setAccessibilityDelegate(null);
                     if (hasListener) {
                         mRecyclerListener.onMovedToScrapHeap(victim);
                     }
