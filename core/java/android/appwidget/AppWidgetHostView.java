@@ -208,8 +208,10 @@ public class AppWidgetHostView extends FrameLayout {
     }
 
     /**
-     * Provide guidance about the size of this widget to the AppWidgetManager. This information
-     * gets embedded into the AppWidgetExtras and causes a callback to the AppWidgetProvider.
+     * Provide guidance about the size of this widget to the AppWidgetManager. The widths and
+     * heights should correspond to the full area the AppWidgetHostView is given. Padding added by
+     * the framework will be accounted for automatically. This information gets embedded into the
+     * AppWidget options and causes a callback to the AppWidgetProvider.
      * @see AppWidgetProvider#onAppWidgetOptionsChanged(Context, AppWidgetManager, int, Bundle)
      *
      * @param options The bundle of options, in addition to the size information,
@@ -225,10 +227,19 @@ public class AppWidgetHostView extends FrameLayout {
         if (options == null) {
             options = new Bundle();
         }
-        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, minWidth);
-        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, minHeight);
-        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, maxWidth);
-        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, maxHeight);
+
+        Rect padding = new Rect();
+        if (mInfo != null) {
+            padding = getDefaultPaddingForWidget(mContext, mInfo.provider, padding);
+        }
+
+        int xPadding = padding.left + padding.right;
+        int yPadding = padding.top + padding.bottom;
+
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, minWidth - xPadding);
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, minHeight - yPadding);
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, maxWidth - xPadding);
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, maxHeight - yPadding);
         updateAppWidgetOptions(options);
     }
 
