@@ -201,16 +201,16 @@
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"ወደ ዕልባቶችና የአሳሽ ታሪክ ቀጥተኛ መዳረሻ።"</string>
     <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"ማንቂያ"</string>
     <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"የማንቂያ ሰዓቱን አዘጋጅ።"</string>
-    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"የድምፅ ፖስታ"</string>
-    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"ወደ የድምጽ ፖስታ ቀጥተኛ መዳረሻ።"</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"የድምጽ መልዕክት"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"ወደ የድምጽ መልዕክት ቀጥተኛ መዳረሻ።"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ማይክሮፎን"</string>
     <string name="permgroupdesc_microphone" msgid="7106618286905738408">"ድምጽ ለመቅረጽ ወደ ማይክሮፎኑ ቀጥተኛ መዳረሻ።"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ካሜራ"</string>
-    <string name="permgroupdesc_camera" msgid="2933667372289567714">"ለምስል ወይም ቪዲዮ ለመቅረጽ ቀጥተና መዳረሻ ለካሜራ።"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"ለካሜራ ምስል ወይም ቪዲዮ ለመቅረጽ ቀጥተኛ መዳረሻ።"</string>
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"የመተግበሪያዎችህ መረጃ"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"በመሣሪያህ ላይ ያሉ የሌሎች መተግበሪያዎች ባህሪዎች ላይ ተፅዕኖ የማሳረፍ ችሎታ።"</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"ልጣፍ"</string>
-    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"የመሣሪያው ልጣፍ ቅንብሮቹን ቀይር።"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"የመሣሪያውን ልጣፍ ቅንብሮች ቀይር።"</string>
     <string name="permgrouplab_systemClock" msgid="406535759236612992">"ሰዓት"</string>
     <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"የመሣሪያውን ሰዓት ወይም የሰዓት ሰቁን ቀይር።"</string>
     <string name="permgrouplab_statusBar" msgid="2095862568113945398">"የሁኔታ አሞሌ"</string>

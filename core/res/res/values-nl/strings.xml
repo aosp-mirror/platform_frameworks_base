@@ -175,28 +175,20 @@
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Uw fysieke locatie bijhouden."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Netwerkcommunicatie"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Toegang tot verschillende netwerkfuncties."</string>
-    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
-    <skip />
-    <!-- no translation found for permgrouplab_shortrangeNetwork (130808676377486118) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
-    <skip />
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Toegang tot apparaten en netwerken via Bluetooth."</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Netwerken op korte afstand"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Toegang tot apparaten via netwerken op korte afstand zoals NFC."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Audio-instellingen"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Audio-instellingen wijzigen."</string>
     <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"De accu beïnvloeden"</string>
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Functies gebruiken waardoor de accu snel leeg kan raken."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Rechtstreeks toegang krijgen tot agenda en afspraken."</string>
-    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
-    <skip />
-    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
-    <skip />
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Gebruikerswoordenboek lezen"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Woorden lezen in het gebruikerswoordenboek."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Gebruikerswoordenboek schrijven"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Woorden toevoegen aan het gebruikerswoordenboek."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Bladwijzers en geschiedenis"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Rechtstreeks toegang krijgen tot bladwijzers en browsergeschiedenis."</string>
     <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Alarm"</string>
@@ -569,8 +561,7 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Toestaan dat de app inhoud in de USB-opslag, waaronder foto\'s en media, leest."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Toestaan dat de app inhoud op de SD-kaart, waaronder foto\'s en media, leest."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"de inhoud van uw USB-opslag aanpassen of verwijderen"</string>
-    <!-- no translation found for permlab_sdcardWrite (8805693630050458763) -->
-    <skip />
+    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"de inhoud van uw SD-kaart aanpassen of verwijderen"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Hiermee kan de app schrijven naar de USB-opslag."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Hiermee kan de app schrijven naar de SD-kaart."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"inh. mediaopsl. wijz./verw."</string>
@@ -1090,8 +1081,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Instellen"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Gereed"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NIEUW: "</font></string>
-    <!-- no translation found for perms_description_app (5139836143293299417) -->
-    <skip />
+    <string name="perms_description_app" msgid="5139836143293299417">"Geleverd door <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Geen machtigingen vereist"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB-massaopslag"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB-verbinding"</string>
@@ -1321,8 +1311,6 @@
     <string name="sending" msgid="3245653681008218030">"Verzenden..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Browser starten?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Oproep accepteren?"</string>
-    <!-- no translation found for activity_resolver_use_always (4167356512478150080) -->
-    <skip />
-    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
-    <skip />
+    <string name="activity_resolver_use_always" msgid="4167356512478150080">"Altijd gebruiken"</string>
+    <string name="activity_resolver_use_once" msgid="405646673463328329">"Alleen nu gebruiken"</string>
 </resources>
