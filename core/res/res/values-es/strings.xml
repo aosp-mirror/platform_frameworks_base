@@ -175,28 +175,20 @@
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Controlar tu ubicación física"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Comunicación de red"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Acceder a distintas funciones de red"</string>
-    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
-    <skip />
-    <!-- no translation found for permgrouplab_shortrangeNetwork (130808676377486118) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
-    <skip />
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Acceder a dispositivos y redes a través de Bluetooth"</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Redes de corto alcance"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Acceder a dispositivos a través de redes de corto alcance, como NFC"</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Ajustes de audio"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Modificar ajustes de audio"</string>
     <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Afectar a la batería"</string>
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Usar funciones que agotan la batería rápidamente"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendario"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Acceder directamente al calendario y a los eventos"</string>
-    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
-    <skip />
-    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
-    <skip />
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Leer el diccionario del usuario"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Leer palabras del diccionario del usuario"</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Escribir en el diccionario del usuario"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Añadir palabras al diccionario del usuario"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Marcadores e historial"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Acceder directamente a los marcadores y al historial del navegador"</string>
     <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Alarma"</string>
@@ -569,8 +561,7 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Permite que la aplicación lea el contenido del almacenamiento USB que puede incluir fotos y archivos multimedia."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Permite que la aplicación lea el contenido de la tarjeta SD que puede incluir fotos y archivos multimedia."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"editar o borrar contenido de USB"</string>
-    <!-- no translation found for permlab_sdcardWrite (8805693630050458763) -->
-    <skip />
+    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modificar o eliminar el contenido de la tarjeta SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permite escribir en el almacenamiento USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Permite que la aplicación escriba en la tarjeta SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modificar o eliminar el contenido del almacenamiento de medios interno"</string>
@@ -1090,8 +1081,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Establecer"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Listo"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NUEVO:"</font></string>
-    <!-- no translation found for perms_description_app (5139836143293299417) -->
-    <skip />
+    <string name="perms_description_app" msgid="5139836143293299417">"Proporcionado por <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="no_permissions" msgid="7283357728219338112">"No es necesario ningún permiso"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Almacenamiento USB masivo"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Conexión por USB"</string>
@@ -1321,8 +1311,6 @@
     <string name="sending" msgid="3245653681008218030">"Enviando..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"¿Iniciar el navegador?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"¿Aceptar la llamada?"</string>
-    <!-- no translation found for activity_resolver_use_always (4167356512478150080) -->
-    <skip />
-    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
-    <skip />
+    <string name="activity_resolver_use_always" msgid="4167356512478150080">"Usar siempre"</string>
+    <string name="activity_resolver_use_once" msgid="405646673463328329">"Solo una vez"</string>
 </resources>

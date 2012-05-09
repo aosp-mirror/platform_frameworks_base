@@ -168,12 +168,9 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Jou boodskappe"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Lees en skryf jou SMS, e-pos en ander boodskappe."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Jou persoonlike inligting"</string>
-    <!-- no translation found for permgroupdesc_personalInfo (8426453129788861338) -->
-    <skip />
-    <!-- no translation found for permgrouplab_socialInfo (5799096623412043791) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_socialInfo (7129842457611643493) -->
-    <skip />
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Direkte toegang tot inligting oor jou, gestoor in jou kontakkaart."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Jou sosiale inligting"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Direkte toegang tot inligting oor jou kontakte en sosiale verbindings."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Jou ligging"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Monitor jou fisiese ligging."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Netwerkkommunikasie"</string>
@@ -186,18 +183,12 @@
     <skip />
     <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
     <skip />
-    <!-- no translation found for permgrouplab_audioSettings (8329261670151871235) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_audioSettings (2641515403347568130) -->
-    <skip />
-    <!-- no translation found for permgrouplab_affectsBattery (6209246653424798033) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_affectsBattery (6441275320638916947) -->
-    <skip />
-    <!-- no translation found for permgrouplab_calendar (5863508437783683902) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calendar (5777534316982184416) -->
-    <skip />
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Oudio-instellings"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Verander oudio-instellings."</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Affekteer battery"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Gebruik kenmerke wat vinnig die battery opgebruik."</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Direkte toegang tot kalender en gebeurtenisse."</string>
     <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
     <skip />
     <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
@@ -206,46 +197,26 @@
     <skip />
     <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
     <skip />
-    <!-- no translation found for permgrouplab_bookmarks (1949519673103968229) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_bookmarks (4169771606257963028) -->
-    <skip />
-    <!-- no translation found for permgrouplab_deviceAlarms (6117704629728824101) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_deviceAlarms (4769356362251641175) -->
-    <skip />
-    <!-- no translation found for permgrouplab_voicemail (4162237145027592133) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_voicemail (2498403969862951393) -->
-    <skip />
-    <!-- no translation found for permgrouplab_microphone (171539900250043464) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_microphone (7106618286905738408) -->
-    <skip />
-    <!-- no translation found for permgrouplab_camera (4820372495894586615) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_camera (2933667372289567714) -->
-    <skip />
-    <!-- no translation found for permgrouplab_appInfo (8028789762634147725) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_appInfo (3950378538049625907) -->
-    <skip />
-    <!-- no translation found for permgrouplab_wallpaper (3850280158041175998) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_wallpaper (5630417854750540154) -->
-    <skip />
-    <!-- no translation found for permgrouplab_systemClock (406535759236612992) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_systemClock (3944359833624094992) -->
-    <skip />
-    <!-- no translation found for permgrouplab_statusBar (2095862568113945398) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_statusBar (6242593432226807171) -->
-    <skip />
-    <!-- no translation found for permgrouplab_syncSettings (3341990986147826541) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_syncSettings (7603195265129031797) -->
-    <skip />
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Boekmerke en geskiedenis"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Direkte toegang tot boekmerke en blaaiergeskiedenis."</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Wekker"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Stel die wekker."</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Stemboodskapdiens"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Direkte toegang tot stemboodskapdiens."</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoon"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Direkte toegang tot die mikrofoon om oudio op te neem."</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Direkte toegang tot kamera vir die neem van foto of video."</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Jou programme-inligting"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Vermoë om die gedrag van ander programme op jou toestel te beïnvloed."</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Muurpapier"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Verander die toestel se muurpapier-instellings."</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Klok"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Verander die toestel se tyd of tydsone."</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Statusbalk"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Verander die toestel se statusbalk-instellings."</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Sinkronisasie-instellings"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Gaan in by die sinkronisasie-instellings."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Jou rekeninge"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Kry toegang tot beskikbare rekeninge."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Hardewarekontroles"</string>
@@ -256,10 +227,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Laervlak-toegang en -beheer van die stelsel."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Ontwikkelingshulpmiddels"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Kenmerke net nodig vir programontwikkelaars."</string>
-    <!-- no translation found for permgrouplab_display (4279909676036402636) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_display (6051002031933013714) -->
-    <skip />
+    <string name="permgrouplab_display" msgid="4279909676036402636">"Ander program-UI"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"Affekteer ander programme se UI"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stoor"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Gebruik die USB-berging."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Lees die SD-kaart."</string>
@@ -779,8 +748,7 @@
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Geen SIM-kaart in foon nie."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Steek \'n SIM-kaart in."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Die SIM-kaart is weg of nie leesbaar nie. Steek \'n SIM-kaart in."</string>
-    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (5096149665138916184) -->
-    <skip />
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Onbruikbare SIM-kaart."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Jou SIM-kaart is permanent gedeaktiveer."\n" Kontak jou draadlose diensverskaffer vir \'n ander SIM-kaart."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Vorigesnit-knoppie"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Volgendesnit-knoppie"</string>
