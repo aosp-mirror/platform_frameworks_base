@@ -57,25 +57,25 @@ public class PackageHelper {
     public static final int APP_INSTALL_INTERNAL = 1;
     public static final int APP_INSTALL_EXTERNAL = 2;
 
-    public static IMountService getMountService() {
+    public static IMountService getMountService() throws RemoteException {
         IBinder service = ServiceManager.getService("mount");
         if (service != null) {
             return IMountService.Stub.asInterface(service);
         } else {
             Log.e(TAG, "Can't get mount service");
+            throw new RemoteException("Could not contact mount service");
         }
-        return null;
     }
 
     public static String createSdDir(int sizeMb, String cid, String sdEncKey, int uid,
             boolean isExternal) {
         // Create mount point via MountService
-        IMountService mountService = getMountService();
-
-        if (localLOGV)
-            Log.i(TAG, "Size of container " + sizeMb + " MB");
-
         try {
+            IMountService mountService = getMountService();
+
+            if (localLOGV)
+                Log.i(TAG, "Size of container " + sizeMb + " MB");
+
             int rc = mountService.createSecureContainer(cid, sizeMb, "ext4", sdEncKey, uid,
                     isExternal);
             if (rc != StorageResultCode.OperationSucceeded) {
