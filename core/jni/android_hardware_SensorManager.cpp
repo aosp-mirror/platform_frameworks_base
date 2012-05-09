@@ -130,10 +130,13 @@ sensors_data_poll(JNIEnv *env, jclass clazz, jint nativeQueue,
         res = queue->waitForEvent();
         if (res != NO_ERROR)
             return -1;
+        // here we're guaranteed to have an event
         res = queue->read(&event, 1);
+        ALOGE_IF(res==0, "sensors_data_poll: nothing to read after waitForEvent()");
     }
-    if (res < 0)
+    if (res <= 0) {
         return -1;
+    }
 
     jint accuracy = event.vector.status;
     env->SetFloatArrayRegion(values, 0, 3, event.vector.v);
