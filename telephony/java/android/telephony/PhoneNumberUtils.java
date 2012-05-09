@@ -1711,12 +1711,8 @@ public class PhoneNumberUtils
             return false;
         }
 
-        // STOPSHIP: remove this after figuring out issue 5914560, 6383850.
         Log.d(LOG_TAG, "System property doesn't provide any emergency numbers."
-                + " Use embedded logic for determining emergency numbers."
-                + " number: " + toLogSafePhoneNumber(number)
-                + ", Iso: " + defaultCountryIso
-                + ", useExactMatch: " + useExactMatch);
+                + " Use embedded logic for determining ones.");
 
         // No ecclist system property, so use our own list.
         if (defaultCountryIso != null) {
@@ -1733,21 +1729,6 @@ public class PhoneNumberUtils
                 return (number.startsWith("112") || number.startsWith("911"));
             }
         }
-    }
-
-    private static String toLogSafePhoneNumber(String number) {
-        // Do exactly same thing as Uri#toSafeString() does, which will enable us to compare
-        // sanitized phone numbers.
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < number.length(); i++) {
-            char c = number.charAt(i);
-            if (c == '-' || c == '@' || c == '.') {
-                builder.append(c);
-            } else {
-                builder.append('x');
-            }
-        }
-        return builder.toString();
     }
 
     /**
