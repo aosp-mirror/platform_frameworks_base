@@ -25168,6 +25168,7 @@ package android.view.accessibility {
     method public void appendRecord(android.view.accessibility.AccessibilityRecord);
     method public int describeContents();
     method public static java.lang.String eventTypeToString(int);
+    method public int getAction();
     method public long getEventTime();
     method public int getEventType();
     method public int getMovementGranularity();
@@ -25178,6 +25179,7 @@ package android.view.accessibility {
     method public static android.view.accessibility.AccessibilityEvent obtain(int);
     method public static android.view.accessibility.AccessibilityEvent obtain(android.view.accessibility.AccessibilityEvent);
     method public static android.view.accessibility.AccessibilityEvent obtain();
+    method public void setAction(int);
     method public void setEventTime(long);
     method public void setEventType(int);
     method public void setMovementGranularity(int);

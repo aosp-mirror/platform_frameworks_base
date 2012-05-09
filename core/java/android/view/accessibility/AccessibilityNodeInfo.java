@@ -102,12 +102,12 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final int ACTION_CLEAR_SELECTION = 0x00000008;
 
     /**
-     * Action that long clicks on the node info.
+     * Action that clicks on the node info.
      */
     public static final int ACTION_CLICK = 0x00000010;
 
     /**
-     * Action that clicks on the node.
+     * Action that long clicks on the node.
      */
     public static final int ACTION_LONG_CLICK = 0x00000020;
 
