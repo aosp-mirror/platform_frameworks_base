@@ -611,6 +611,9 @@ public class SpellChecker implements SpellCheckerSessionListener {
                     if (spellCheckEnd < start) {
                         break;
                     }
+                    if (spellCheckEnd <= spellCheckStart) {
+                        break;
+                    }
                     if (createSpellCheckSpan) {
                         addSpellCheckSpan(editable, spellCheckStart, spellCheckEnd);
                     }
