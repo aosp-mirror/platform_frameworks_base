@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2011 The Android Open Source Project
+<!-- Copyright (C) 2012 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
 -->
 
 <resources>
-    <!-- Increase size (used to be 0 for dual pane -->
-    <!-- Preference activity side margins -->
-    <dimen name="preference_screen_side_margin">48dp</dimen>
-    <!-- Preference activity side margins negative-->
-    <dimen name="preference_screen_side_margin_negative">-52dp</dimen>
+    <style name="PreferencePanel">
+        <item name="android:layout_marginLeft">@dimen/preference_screen_side_margin</item>
+        <item name="android:layout_marginRight">@dimen/preference_screen_side_margin</item>
+        <item name="android:layout_marginTop">@dimen/preference_screen_top_margin</item>
+        <item name="android:layout_marginBottom">@dimen/preference_screen_bottom_margin</item>
+        <item name="android:background">?attr/detailsElementBackground</item>
+    </style>
 </resources>

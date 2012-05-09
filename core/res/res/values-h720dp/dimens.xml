@@ -19,12 +19,4 @@
 <resources>
     <!-- Dialog button bar height -->
     <dimen name="alert_dialog_button_bar_height">54dip</dimen>
-    <!-- Preference fragment padding, bottom -->
-    <dimen name="preference_fragment_padding_bottom">16dp</dimen>
-
-    <dimen name="preference_screen_header_padding_side">0dip</dimen>
-
-    <integer name="preference_screen_header_scrollbarStyle">0x0</integer> <!-- insideOverlay -->
-    <integer name="preference_fragment_scrollbarStyle">0x02000000</integer> <!-- outsideOverlay -->
-
 </resources>
