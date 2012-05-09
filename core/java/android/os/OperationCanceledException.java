@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-package android.content;
+package android.os;
+
 
 /**
- * @hide
+ * An exception type that is thrown when an operation in progress is canceled.
+ *
+ * @see CancellationSignal
  */
-interface ICancellationSignal {
-    oneway void cancel();
+public class OperationCanceledException extends RuntimeException {
+    public OperationCanceledException() {
+        this(null);
+    }
+
+    public OperationCanceledException(String message) {
+        super(message != null ? message : "The operation has been canceled.");
+    }
 }

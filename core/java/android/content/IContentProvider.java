@@ -21,6 +21,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
 import android.os.IInterface;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;

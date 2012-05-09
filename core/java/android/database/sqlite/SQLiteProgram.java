@@ -16,8 +16,8 @@
 
 package android.database.sqlite;
 
-import android.content.CancellationSignal;
 import android.database.DatabaseUtils;
+import android.os.CancellationSignal;
 
 import java.util.Arrays;
 
