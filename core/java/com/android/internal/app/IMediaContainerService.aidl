@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.PackageInfoLite;
 import android.content.res.ObbInfo;
 
@@ -25,9 +26,9 @@ interface IMediaContainerService {
     String copyResourceToContainer(in Uri packageURI, String containerId, String key,
             String resFileName, String publicResFileName, boolean isExternal,
             boolean isForwardLocked);
-    int copyResource(in Uri packageURI,
-                in ParcelFileDescriptor outStream);
-    PackageInfoLite getMinimalPackageInfo(in Uri fileUri, in int flags, in long threshold);
+    int copyResource(in Uri packageURI, in ContainerEncryptionParams encryptionParams,
+            in ParcelFileDescriptor outStream);
+    PackageInfoLite getMinimalPackageInfo(in String packagePath, in int flags, in long threshold);
     boolean checkInternalFreeStorage(in Uri fileUri, boolean isForwardLocked, in long threshold);
     boolean checkExternalFreeStorage(in Uri fileUri, boolean isForwardLocked);
     ObbInfo getObbInfo(in String filename);

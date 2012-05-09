@@ -28,7 +28,6 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.util.AndroidException;
 import android.util.DisplayMetrics;
@@ -2199,12 +2198,19 @@ public abstract class PackageManager {
      *            is performing the installation. This identifies which market
      *            the package came from.
      * @param verificationURI The location of the supplementary verification
-     *            file. This can be a 'file:' or a 'content:' URI.
+     *            file. This can be a 'file:' or a 'content:' URI. May be
+     *            {@code null}.
+     * @param manifestDigest an object that holds the digest of the package
+     *            which can be used to verify ownership. May be {@code null}.
+     * @param encryptionParams if the package to be installed is encrypted,
+     *            these parameters describing the encryption and authentication
+     *            used. May be {@code null}.
      * @hide
      */
     public abstract void installPackageWithVerification(Uri packageURI,
             IPackageInstallObserver observer, int flags, String installerPackageName,
-            Uri verificationURI, ManifestDigest manifestDigest);
+            Uri verificationURI, ManifestDigest manifestDigest,
+            ContainerEncryptionParams encryptionParams);
 
     /**
      * Allows a package listening to the

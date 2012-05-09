@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageDeleteObserver;
@@ -362,7 +363,7 @@ interface IPackageManager {
 
     void installPackageWithVerification(in Uri packageURI, in IPackageInstallObserver observer,
             int flags, in String installerPackageName, in Uri verificationURI,
-            in ManifestDigest manifestDigest);
+            in ManifestDigest manifestDigest, in ContainerEncryptionParams encryptionParams);
 
     void verifyPendingInstall(int id, int verificationCode);
 

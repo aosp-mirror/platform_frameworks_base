@@ -24,6 +24,7 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
+import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
@@ -973,10 +974,10 @@ final class ApplicationPackageManager extends PackageManager {
     @Override
     public void installPackageWithVerification(Uri packageURI, IPackageInstallObserver observer,
             int flags, String installerPackageName, Uri verificationURI,
-            ManifestDigest manifestDigest) {
+            ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
         try {
             mPM.installPackageWithVerification(packageURI, observer, flags, installerPackageName,
-                    verificationURI, manifestDigest);
+                    verificationURI, manifestDigest, encryptionParams);
         } catch (RemoteException e) {
             // Should never happen!
         }
