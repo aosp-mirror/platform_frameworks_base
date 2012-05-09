@@ -328,8 +328,6 @@ public final class ViewRootImpl implements ViewParent,
 
     private final int mDensity;
 
-    final KeyCharacterMap.FallbackAction mFallbackAction = new KeyCharacterMap.FallbackAction();
-
     /**
      * Consistency verifier for debugging purposes.
      */
@@ -4446,20 +4444,19 @@ public final class ViewRootImpl implements ViewParent,
             final int keyCode = event.getKeyCode();
             final int metaState = event.getMetaState();
 
-            KeyEvent fallbackEvent = null;
-            synchronized (mFallbackAction) {
-                // Check for fallback actions specified by the key character map.
-                if (kcm.getFallbackAction(keyCode, metaState, mFallbackAction)) {
-                    int flags = event.getFlags() | KeyEvent.FLAG_FALLBACK;
-                    fallbackEvent = KeyEvent.obtain(
-                            event.getDownTime(), event.getEventTime(),
-                            event.getAction(), mFallbackAction.keyCode,
-                            event.getRepeatCount(), mFallbackAction.metaState,
-                            event.getDeviceId(), event.getScanCode(),
-                            flags, event.getSource(), null);
-                }
-            }
-            if (fallbackEvent != null) {
+            // Check for fallback actions specified by the key character map.
+            KeyCharacterMap.FallbackAction fallbackAction =
+                    kcm.getFallbackAction(keyCode, metaState);
+            if (fallbackAction != null) {
+                final int flags = event.getFlags() | KeyEvent.FLAG_FALLBACK;
+                KeyEvent fallbackEvent = KeyEvent.obtain(
+                        event.getDownTime(), event.getEventTime(),
+                        event.getAction(), fallbackAction.keyCode,
+                        event.getRepeatCount(), fallbackAction.metaState,
+                        event.getDeviceId(), event.getScanCode(),
+                        flags, event.getSource(), null);
+                fallbackAction.recycle();
+
                 dispatchKey(fallbackEvent);
             }
         }

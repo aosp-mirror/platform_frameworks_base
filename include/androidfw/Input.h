@@ -262,6 +262,8 @@ public:
 
     inline int32_t getFlags() const { return mFlags; }
 
+    inline void setFlags(int32_t flags) { mFlags = flags; }
+
     inline int32_t getKeyCode() const { return mKeyCode; }
 
     inline int32_t getScanCode() const { return mScanCode; }

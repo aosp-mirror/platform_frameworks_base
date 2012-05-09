@@ -463,8 +463,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Intent mHomeIntent;
     Intent mCarDockIntent;
     Intent mDeskDockIntent;
-    int mShortcutKeyPressed = -1;
-    boolean mConsumeShortcutKeyUp;
+    boolean mSearchKeyShortcutPending;
+    boolean mConsumeSearchKeyUp;
 
     // support for activating the lock screen while the screen is on
     boolean mAllowLockscreenWhenOn;
@@ -509,7 +509,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     ShortcutManager mShortcutManager;
     PowerManager.WakeLock mBroadcastWakeLock;
 
-    final KeyCharacterMap.FallbackAction mFallbackAction = new KeyCharacterMap.FallbackAction();
+    // Fallback actions by key code.
+    private final SparseArray<KeyCharacterMap.FallbackAction> mFallbackActions =
+            new SparseArray<KeyCharacterMap.FallbackAction>();
 
     private static final int MSG_ENABLE_POINTER_LOCATION = 1;
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
@@ -1709,7 +1711,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (false) {
             Log.d(TAG, "interceptKeyTi keyCode=" + keyCode + " down=" + down + " repeatCount="
-                    + repeatCount + " keyguardOn=" + keyguardOn + " mHomePressed=" + mHomePressed);
+                    + repeatCount + " keyguardOn=" + keyguardOn + " mHomePressed=" + mHomePressed
+                    + " canceled=" + canceled);
         }
 
         // If we think we might have a volume down & power key chord on the way
@@ -1842,13 +1845,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else if (keyCode == KeyEvent.KEYCODE_SEARCH) {
             if (down) {
                 if (repeatCount == 0) {
-                    mShortcutKeyPressed = keyCode;
-                    mConsumeShortcutKeyUp = false;
+                    mSearchKeyShortcutPending = true;
+                    mConsumeSearchKeyUp = false;
                 }
-            } else if (keyCode == mShortcutKeyPressed) {
-                mShortcutKeyPressed = -1;
-                if (mConsumeShortcutKeyUp) {
-                    mConsumeShortcutKeyUp = false;
+            } else {
+                mSearchKeyShortcutPending = false;
+                if (mConsumeSearchKeyUp) {
+                    mConsumeSearchKeyUp = false;
                     return -1;
                 }
             }
@@ -1865,10 +1868,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // even if no shortcut was invoked.  This prevents text from being
         // inadvertently inserted when using a keyboard that has built-in macro
         // shortcut keys (that emit Search+x) and some of them are not registered.
-        if (mShortcutKeyPressed != -1) {
+        if (mSearchKeyShortcutPending) {
             final KeyCharacterMap kcm = event.getKeyCharacterMap();
             if (kcm.isPrintingKey(keyCode)) {
-                mConsumeShortcutKeyUp = true;
+                mConsumeSearchKeyUp = true;
+                mSearchKeyShortcutPending = false;
                 if (down && repeatCount == 0 && !keyguardOn) {
                     Intent shortcutIntent = mShortcutManager.getIntent(kcm, keyCode, metaState);
                     if (shortcutIntent != null) {
@@ -1878,13 +1882,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         } catch (ActivityNotFoundException ex) {
                             Slog.w(TAG, "Dropping shortcut key combination because "
                                     + "the activity to which it is registered was not found: "
-                                    + KeyEvent.keyCodeToString(mShortcutKeyPressed)
-                                    + "+" + KeyEvent.keyCodeToString(keyCode), ex);
+                                    + "SEARCH+" + KeyEvent.keyCodeToString(keyCode), ex);
                         }
                     } else {
                         Slog.i(TAG, "Dropping unregistered shortcut key combination: "
-                                + KeyEvent.keyCodeToString(mShortcutKeyPressed)
-                                + "+" + KeyEvent.keyCodeToString(keyCode));
+                                + "SEARCH+" + KeyEvent.keyCodeToString(keyCode));
                     }
                 }
                 return -1;
@@ -1964,51 +1966,70 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     + ", policyFlags=" + policyFlags);
         }
 
+        KeyEvent fallbackEvent = null;
         if ((event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
             final KeyCharacterMap kcm = event.getKeyCharacterMap();
             final int keyCode = event.getKeyCode();
             final int metaState = event.getMetaState();
+            final boolean initialDown = event.getAction() == KeyEvent.ACTION_DOWN
+                    && event.getRepeatCount() == 0;
 
             // Check for fallback actions specified by the key character map.
-            if (getFallbackAction(kcm, keyCode, metaState, mFallbackAction)) {
+            final FallbackAction fallbackAction;
+            if (initialDown) {
+                fallbackAction = kcm.getFallbackAction(keyCode, metaState);
+            } else {
+                fallbackAction = mFallbackActions.get(keyCode);
+            }
+
+            if (fallbackAction != null) {
                 if (DEBUG_FALLBACK) {
-                    Slog.d(TAG, "Fallback: keyCode=" + mFallbackAction.keyCode
-                            + " metaState=" + Integer.toHexString(mFallbackAction.metaState));
+                    Slog.d(TAG, "Fallback: keyCode=" + fallbackAction.keyCode
+                            + " metaState=" + Integer.toHexString(fallbackAction.metaState));
                 }
 
-                int flags = event.getFlags() | KeyEvent.FLAG_FALLBACK;
-                KeyEvent fallbackEvent = KeyEvent.obtain(
+                final int flags = event.getFlags() | KeyEvent.FLAG_FALLBACK;
+                fallbackEvent = KeyEvent.obtain(
                         event.getDownTime(), event.getEventTime(),
-                        event.getAction(), mFallbackAction.keyCode,
-                        event.getRepeatCount(), mFallbackAction.metaState,
+                        event.getAction(), fallbackAction.keyCode,
+                        event.getRepeatCount(), fallbackAction.metaState,
                         event.getDeviceId(), event.getScanCode(),
                         flags, event.getSource(), null);
-                int actions = interceptKeyBeforeQueueing(fallbackEvent, policyFlags, true);
-                if ((actions & ACTION_PASS_TO_USER) != 0) {
-                    long delayMillis = interceptKeyBeforeDispatching(
-                            win, fallbackEvent, policyFlags);
-                    if (delayMillis == 0) {
-                        if (DEBUG_FALLBACK) {
-                            Slog.d(TAG, "Performing fallback.");
-                        }
-                        return fallbackEvent;
-                    }
+
+                if (!interceptFallback(win, fallbackEvent, policyFlags)) {
+                    fallbackEvent.recycle();
+                    fallbackEvent = null;
                 }
-                fallbackEvent.recycle();
+
+                if (initialDown) {
+                    mFallbackActions.put(keyCode, fallbackAction);
+                } else if (event.getAction() == KeyEvent.ACTION_UP) {
+                    mFallbackActions.remove(keyCode);
+                    fallbackAction.recycle();
+                }
             }
         }
 
         if (DEBUG_FALLBACK) {
-            Slog.d(TAG, "No fallback.");
+            if (fallbackEvent == null) {
+                Slog.d(TAG, "No fallback.");
+            } else {
+                Slog.d(TAG, "Performing fallback: " + fallbackEvent);
+            }
         }
-        return null;
+        return fallbackEvent;
     }
 
-    private boolean getFallbackAction(KeyCharacterMap kcm, int keyCode, int metaState,
-            FallbackAction outFallbackAction) {
-        // Consult the key character map for specific fallback actions.
-        // For example, map NUMPAD_1 to MOVE_HOME when NUMLOCK is not pressed.
-        return kcm.getFallbackAction(keyCode, metaState, outFallbackAction);
+    private boolean interceptFallback(WindowState win, KeyEvent fallbackEvent, int policyFlags) {
+        int actions = interceptKeyBeforeQueueing(fallbackEvent, policyFlags, true);
+        if ((actions & ACTION_PASS_TO_USER) != 0) {
+            long delayMillis = interceptKeyBeforeDispatching(
+                    win, fallbackEvent, policyFlags);
+            if (delayMillis == 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
