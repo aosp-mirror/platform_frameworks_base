@@ -12705,22 +12705,6 @@ package android.net.http {
 
 package android.net.nsd {
 
-  public class DnsSdTxtRecord implements android.os.Parcelable {
-    ctor public DnsSdTxtRecord();
-    ctor public DnsSdTxtRecord(byte[]);
-    ctor public DnsSdTxtRecord(android.net.nsd.DnsSdTxtRecord);
-    method public boolean contains(java.lang.String);
-    method public int describeContents();
-    method public java.lang.String get(java.lang.String);
-    method public byte[] getRawData();
-    method public int keyCount();
-    method public int remove(java.lang.String);
-    method public void set(java.lang.String, java.lang.String);
-    method public int size();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
   public final class NsdManager {
     method public void discoverServices(java.lang.String, int, android.net.nsd.NsdManager.DiscoveryListener);
     method public void registerService(android.net.nsd.NsdServiceInfo, int, android.net.nsd.NsdManager.RegistrationListener);
@@ -13342,7 +13326,7 @@ package android.net.wifi.p2p {
   }
 
   public static abstract interface WifiP2pManager.DnsSdTxtRecordListener {
-    method public abstract void onDnsSdTxtRecordAvailable(java.lang.String, android.net.nsd.DnsSdTxtRecord, android.net.wifi.p2p.WifiP2pDevice);
+    method public abstract void onDnsSdTxtRecordAvailable(java.lang.String, java.util.Map<java.lang.String, java.lang.String>, android.net.wifi.p2p.WifiP2pDevice);
   }
 
   public static abstract interface WifiP2pManager.GroupInfoListener {
@@ -13366,7 +13350,7 @@ package android.net.wifi.p2p {
 package android.net.wifi.p2p.nsd {
 
   public class WifiP2pDnsSdServiceInfo extends android.net.wifi.p2p.nsd.WifiP2pServiceInfo {
-    method public static android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo newInstance(java.lang.String, java.lang.String, android.net.nsd.DnsSdTxtRecord);
+    method public static android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo newInstance(java.lang.String, java.lang.String, java.util.Map<java.lang.String, java.lang.String>);
   }
 
   public class WifiP2pDnsSdServiceRequest extends android.net.wifi.p2p.nsd.WifiP2pServiceRequest {
