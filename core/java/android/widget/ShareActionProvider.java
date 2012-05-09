@@ -240,12 +240,25 @@ public class ShareActionProvider extends ActionProvider {
      * <p>
      * <strong>Note:</strong> The history file name can be set any time, however
      * only the action views created by {@link #onCreateActionView()} after setting
-     * the file name will be backed by the provided file. Hence, if you are using
-     * a share action provider on a menu item and want to change the history file
-     * based on the type of the currently selected item, you need to call
-     * {@link android.app.Activity#invalidateOptionsMenu()} to force the system
-     * to recreate the menu UI.
+     * the file name will be backed by the provided file. Therefore, if you want to
+     * use different history files for sharing specific types of content, every time
+     * you change the history file {@link #setShareHistoryFileName(String)} you must
+     * call {@link android.app.Activity#invalidateOptionsMenu()} to recreate the
+     * action view. You should <strong>not</strong> call
+     * {@link android.app.Activity#invalidateOptionsMenu()} from
+     * {@link android.app.Activity#onCreateOptionsMenu(Menu)}.
      * <p>
+     * <code>
+     * private void doShare(Intent intent) {
+     *     if (IMAGE.equals(intent.getMimeType())) {
+     *         mShareActionProvider.setHistoryFileName(SHARE_IMAGE_HISTORY_FILE_NAME);
+     *     } else if (TEXT.equals(intent.getMimeType())) {
+     *         mShareActionProvider.setHistoryFileName(SHARE_TEXT_HISTORY_FILE_NAME);
+     *     }
+     *     mShareActionProvider.setIntent(intent);
+     *     invalidateOptionsMenu();
+     * }
+     * <code>
      *
      * @param shareHistoryFile The share history file name.
      */
