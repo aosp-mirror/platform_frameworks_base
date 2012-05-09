@@ -15,5 +15,7 @@
 -->
 
 <resources>
-    <bool name="target_honeycomb_needs_options_menu">false</bool>
+    <dimen name="preference_screen_header_padding_side">48dp</dimen>
+    <!-- Preference fragment padding, sides -->
+    <dimen name="preference_fragment_padding_side">48dp</dimen>
 </resources>
