@@ -1617,6 +1617,13 @@ public class Canvas {
      */
     public static native void freeCaches();
 
+    /**
+     * Free up text layout caches
+     *
+     * @hide
+     */
+    public static native void freeTextLayoutCaches();
+
     private static native int initRaster(int nativeBitmapOrZero);
     private static native void native_setBitmap(int nativeCanvas, int bitmap);
     private static native int native_saveLayer(int nativeCanvas, RectF bounds,
