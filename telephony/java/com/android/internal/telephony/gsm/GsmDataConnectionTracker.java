@@ -1970,19 +1970,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 handleError = true;
             } else {
                 DataConnection dc = apnContext.getDataConnection();
-
-                if (DBG) {
-                    // TODO We may use apnContext.getApnSetting() directly
-                    // instead of getWaitingApns().get(0)
-                    String apnStr = "<unknown>";
-                    if (apnContext.getWaitingApns() != null
-                            && !apnContext.getWaitingApns().isEmpty()){
-                        apnStr = apnContext.getWaitingApns().get(0).apn;
-                    }
-                    log("onDataSetupComplete: success apn=" + apnStr);
-                }
                 ApnSetting apn = apnContext.getApnSetting();
-                if (apn.proxy != null && apn.proxy.length() != 0) {
+                if (DBG) {
+                    log("onDataSetupComplete: success apn=" + (apn == null ? "unknown" : apn.apn));
+                }
+                if (apn != null && apn.proxy != null && apn.proxy.length() != 0) {
                     try {
                         String port = apn.port;
                         if (TextUtils.isEmpty(port)) port = "8080";
@@ -2000,7 +1992,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     SystemProperties.set("gsm.defaultpdpcontext.active", "true");
                     if (canSetPreferApn && mPreferredApn == null) {
                         if (DBG) log("onDataSetupComplete: PREFERED APN is null");
-                        mPreferredApn = apnContext.getApnSetting();
+                        mPreferredApn = apn;
                         if (mPreferredApn != null) {
                             setPreferredApn(mPreferredApn.id);
                         }
@@ -2011,16 +2003,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 notifyDefaultData(apnContext);
             }
         } else {
-            String apnString;
-
             cause = (DataConnection.FailCause) (ar.result);
             if (DBG) {
-                try {
-                    apnString = apnContext.getWaitingApns().get(0).apn;
-                } catch (Exception e) {
-                    apnString = "<unknown>";
-                }
-                log(String.format("onDataSetupComplete: error apn=%s cause=%s", apnString, cause));
+                ApnSetting apn = apnContext.getApnSetting();
+                log(String.format("onDataSetupComplete: error apn=%s cause=%s",
+                        (apn == null ? "unknown" : apn.apn), cause));
             }
             if (cause.isEventLoggable()) {
                 // Log this failure to the Event Logs.
@@ -2032,7 +2019,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             // Count permanent failures and remove the APN we just tried
             if (cause.isPermanentFail()) apnContext.decWaitingApnsPermFailCount();
 
-            apnContext.removeNextWaitingApn();
+            apnContext.removeWaitingApn(apnContext.getApnSetting());
             if (DBG) {
                 log(String.format("onDataSetupComplete: WaitingApns.size=%d" +
                         " WaitingApnsPermFailureCountDown=%d",
