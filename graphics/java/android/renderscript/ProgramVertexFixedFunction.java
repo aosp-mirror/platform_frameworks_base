@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2008-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import android.util.Log;
 
 
 /**
+ * @deprecated in API 16
  * ProgramVertexFixedFunction is a helper class that provides a
  * simple way to create a fixed function emulation vertex shader
  * without writing any GLSL code.
@@ -34,6 +35,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
     }
 
     /**
+     * @deprecated in API 16
      * Binds the constant buffer containing fixed function emulation
      * matrices
      *
@@ -45,10 +47,16 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
     }
 
     static class InternalBuilder extends BaseProgramBuilder {
+        /**
+         * @deprecated in API 16
+         */
         public InternalBuilder(RenderScript rs) {
             super(rs);
         }
 
+        /**
+         * @deprecated in API 16
+         */
         public InternalBuilder addInput(Element e) throws IllegalStateException {
             // Should check for consistant and non-conflicting names...
             if(mInputCount >= MAX_INPUT) {
@@ -62,6 +70,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         }
 
         /**
+         * @deprecated in API 16
          * Creates ProgramVertexFixedFunction from the current state of
          * the builder
          *
@@ -98,12 +107,16 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         }
     }
 
+    /**
+     * @deprecated in API 16
+     */
     public static class Builder {
         boolean mTextureMatrixEnable;
         String mShader;
         RenderScript mRS;
 
         /**
+         * @deprecated in API 16
          * Creates a builder for fixed function vertex program
          *
          * @param rs Context to which the program will belong.
@@ -113,6 +126,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         }
 
         /**
+         * @deprecated in API 16
          * Specifies whether texture matrix calculations are to be added
          * to the shader
          *
@@ -153,6 +167,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         }
 
         /**
+         * @deprecated in API 16
          * Creates ProgramVertexFixedFunction from the current state of
          * the builder
          *
@@ -177,6 +192,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
     }
 
     /**
+     * @deprecated in API 16
      * Helper class to store modelview, projection and texture
      * matrices for ProgramVertexFixedFunction
      *
@@ -197,6 +213,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         private FieldPacker mIOBuffer;
 
         /**
+        * @deprecated in API 16
         * Creates a buffer to store fixed function emulation matrices
         *
         * @param rs Context to which the allocation will belong.
@@ -216,6 +233,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         }
 
         /**
+        * @deprecated in API 16
         * Forces deallocation of memory backing the contant matrices.
         * Normally, this is unnecessary and will be garbage collected
         *
@@ -234,6 +252,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         }
 
         /**
+        * @deprecated in API 16
         * Sets the modelview matrix in the fixed function matrix buffer
         *
         * @param m modelview matrix
@@ -244,6 +263,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         }
 
         /**
+        * @deprecated in API 16
         * Sets the projection matrix in the fixed function matrix buffer
         *
         * @param m projection matrix
@@ -254,6 +274,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         }
 
         /**
+        * @deprecated in API 16
         * Sets the texture matrix in the fixed function matrix buffer.
         * Texture matrix must be enabled in the
         * ProgramVertexFixedFunction builder for the shader to utilize
