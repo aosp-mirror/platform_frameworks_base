@@ -1017,7 +1017,7 @@ public interface WindowManagerPolicy {
 
     /**
      * Called when we have finished booting and can now display the home
-     * screen to the user.  This wilWl happen after systemReady(), and at
+     * screen to the user.  This will happen after systemReady(), and at
      * this point the display is active.
      */
     public void enableScreenAfterBoot();
