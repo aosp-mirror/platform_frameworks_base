@@ -3603,4 +3603,6 @@
 
   <public type="attr" name="permissionGroupFlags"/>
 
+  <public type="attr" name="fontFamily" />
+
 </resources>

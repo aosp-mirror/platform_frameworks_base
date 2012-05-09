@@ -857,6 +857,9 @@
         -->
     <attr name="textSize" format="dimension" />
 
+    <!-- Default font family. -->
+    <attr name="fontFamily" format="string" />
+
     <!-- Default text typeface. -->
     <attr name="typeface">
         <enum name="normal" value="0" />
@@ -2999,6 +3002,8 @@
         <attr name="textStyle" />
         <!-- Typeface (normal, sans, serif, monospace) for the text. -->
         <attr name="typeface" />
+        <!-- Font family (named by string) for the text. -->
+        <attr name="fontFamily" />
         <!-- Color of the text selection highlight. -->
         <attr name="textColorHighlight" />
         <!-- Color of the hint text. -->
@@ -3044,6 +3049,8 @@
         <attr name="typeface" />
         <!-- Style (bold, italic, bolditalic) for the text. -->
         <attr name="textStyle" />
+        <!-- Font family (named by string) for the text. -->
+        <attr name="fontFamily" />
         <!-- Text color for links. -->
         <attr name="textColorLink" />
         <!-- Makes the cursor visible (the default) or invisible. -->
