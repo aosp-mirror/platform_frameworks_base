@@ -287,6 +287,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int PROPERTY_ACCESSIBILITY_FOCUSED = 0x00000400;
 
+    private static final int PROPERTY_VISIBLE_TO_USER = 0x00000800;
+
     /**
      * Bits that provide the id of a virtual descendant of a view.
      */
@@ -907,6 +909,31 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setFocused(boolean focused) {
         setBooleanProperty(PROPERTY_FOCUSED, focused);
+    }
+
+    /**
+     * Sets whether this node is visible to the user.
+     *
+     * @return Whether the node is visible to the user.
+     */
+    public boolean isVisibleToUser() {
+        return getBooleanProperty(PROPERTY_VISIBLE_TO_USER);
+    }
+
+    /**
+     * Sets whether this node is visible to the user.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param visibleToUser Whether the node is visible to the user.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setVisibleToUser(boolean visibleToUser) {
+        setBooleanProperty(PROPERTY_VISIBLE_TO_USER, visibleToUser);
     }
 
     /**
