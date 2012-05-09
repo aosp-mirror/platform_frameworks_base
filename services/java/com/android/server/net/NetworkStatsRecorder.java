@@ -26,6 +26,7 @@ import android.net.NetworkStats.NonMonotonicObserver;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TrafficStats;
+import android.os.DropBoxManager;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
@@ -34,6 +35,7 @@ import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
 import com.google.android.collect.Sets;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +44,8 @@ import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.util.HashSet;
 import java.util.Map;
+
+import libcore.io.IoUtils;
 
 /**
  * Logic to record deltas between periodic {@link NetworkStats} snapshots into
@@ -56,8 +60,14 @@ public class NetworkStatsRecorder {
     private static final boolean LOGD = false;
     private static final boolean LOGV = false;
 
+    private static final String TAG_NETSTATS_DUMP = "netstats_dump";
+
+    /** Dump before deleting in {@link #recoverFromWtf()}. */
+    private static final boolean DUMP_BEFORE_DELETE = true;
+
     private final FileRotator mRotator;
     private final NonMonotonicObserver<String> mObserver;
+    private final DropBoxManager mDropBox;
     private final String mCookie;
 
     private final long mBucketDuration;
@@ -74,9 +84,10 @@ public class NetworkStatsRecorder {
     private WeakReference<NetworkStatsCollection> mComplete;
 
     public NetworkStatsRecorder(FileRotator rotator, NonMonotonicObserver<String> observer,
-            String cookie, long bucketDuration, boolean onlyTags) {
+            DropBoxManager dropBox, String cookie, long bucketDuration, boolean onlyTags) {
         mRotator = checkNotNull(rotator, "missing FileRotator");
         mObserver = checkNotNull(observer, "missing NonMonotonicObserver");
+        mDropBox = checkNotNull(dropBox, "missing DropBoxManager");
         mCookie = cookie;
 
         mBucketDuration = bucketDuration;
@@ -122,6 +133,7 @@ public class NetworkStatsRecorder {
                 mComplete = new WeakReference<NetworkStatsCollection>(complete);
             } catch (IOException e) {
                 Log.wtf(TAG, "problem completely reading network stats", e);
+                recoverFromWtf();
             }
         }
         return complete;
@@ -212,6 +224,7 @@ public class NetworkStatsRecorder {
                 mPending.reset();
             } catch (IOException e) {
                 Log.wtf(TAG, "problem persisting pending stats", e);
+                recoverFromWtf();
             }
         }
     }
@@ -226,6 +239,7 @@ public class NetworkStatsRecorder {
             mRotator.rewriteAll(new RemoveUidRewriter(mBucketDuration, uid));
         } catch (IOException e) {
             Log.wtf(TAG, "problem removing UID " + uid, e);
+            recoverFromWtf();
         }
 
         // clear UID from current stats snapshot
@@ -354,5 +368,26 @@ public class NetworkStatsRecorder {
             pw.println("History since boot:");
             mSinceBoot.dump(pw);
         }
+    }
+
+    /**
+     * Recover from {@link FileRotator} failure by dumping state to
+     * {@link DropBoxManager} and deleting contents.
+     */
+    private void recoverFromWtf() {
+        if (DUMP_BEFORE_DELETE) {
+            final ByteArrayOutputStream os = new ByteArrayOutputStream();
+            try {
+                mRotator.dumpAll(os);
+            } catch (IOException e) {
+                // ignore partial contents
+                os.reset();
+            } finally {
+                IoUtils.closeQuietly(os);
+            }
+            mDropBox.addData(TAG_NETSTATS_DUMP, os.toByteArray(), 0);
+        }
+
+        mRotator.deleteAll();
     }
 }
