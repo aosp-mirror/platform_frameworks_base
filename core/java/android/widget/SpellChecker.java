@@ -427,12 +427,6 @@ public class SpellChecker implements SpellCheckerSessionListener {
         if (spellCheckSpanStart < 0 || spellCheckSpanEnd <= spellCheckSpanStart)
             return; // span was removed in the meantime
 
-        final int suggestionsCount = suggestionsInfo.getSuggestionsCount();
-        if (suggestionsCount <= 0) {
-            // A negative suggestion count is possible
-            return;
-        }
-
         final int start;
         final int end;
         if (offset != USE_SPAN_RANGE && length != USE_SPAN_RANGE) {
@@ -443,9 +437,15 @@ public class SpellChecker implements SpellCheckerSessionListener {
             end = spellCheckSpanEnd;
         }
 
-        String[] suggestions = new String[suggestionsCount];
-        for (int i = 0; i < suggestionsCount; i++) {
-            suggestions[i] = suggestionsInfo.getSuggestionAt(i);
+        final int suggestionsCount = suggestionsInfo.getSuggestionsCount();
+        String[] suggestions;
+        if (suggestionsCount > 0) {
+            suggestions = new String[suggestionsCount];
+            for (int i = 0; i < suggestionsCount; i++) {
+                suggestions[i] = suggestionsInfo.getSuggestionAt(i);
+            }
+        } else {
+            suggestions = ArrayUtils.emptyArray(String.class);
         }
 
         SuggestionSpan suggestionSpan = new SuggestionSpan(mTextView.getContext(), suggestions,
@@ -453,7 +453,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
         // TODO: Remove mIsSentenceSpellCheckSupported by extracting an interface
         // to share the logic of word level spell checker and sentence level spell checker
         if (mIsSentenceSpellCheckSupported) {
-            final long key = TextUtils.packRangeInLong(start, end);
+            final Long key = Long.valueOf(TextUtils.packRangeInLong(start, end));
             final SuggestionSpan tempSuggestionSpan = mSuggestionSpanCache.get(key);
             if (tempSuggestionSpan != null) {
                 if (DBG) {
