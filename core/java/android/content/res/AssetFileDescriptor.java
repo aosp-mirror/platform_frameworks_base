@@ -52,6 +52,9 @@ public class AssetFileDescriptor implements Parcelable {
      */
     public AssetFileDescriptor(ParcelFileDescriptor fd, long startOffset,
             long length) {
+        if (fd == null) {
+            throw new IllegalArgumentException("fd must not be null");
+        }
         if (length < 0 && startOffset != 0) {
             throw new IllegalArgumentException(
                     "startOffset must be 0 when using UNKNOWN_LENGTH");
