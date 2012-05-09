@@ -609,6 +609,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     // The presumed scroll rate for the first scroll of edit text
     static private final long TEXT_SCROLL_FIRST_SCROLL_MS = 16;
 
+    // Buffer pixels of the caret rectangle when moving edit text into view
+    // after resize.
+    static private final int EDIT_RECT_BUFFER = 10;
+
     // true means redraw the screen all-the-time. Only with AUTO_REDRAW_HACK
     private boolean mAutoRedraw;
 
@@ -5574,7 +5578,74 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             // However, do not update the base layer as that hasn't changed
             setNewPicture(mLoadedPicture, false);
         }
+        if (mIsEditingText) {
+            scrollEditIntoView();
+        }
         relocateAutoCompletePopup();
+    }
+
+    /**
+     * Scrolls the edit field into view using the minimum scrolling necessary.
+     * If the edit field is too large to fit in the visible window, the caret
+     * dimensions are used so that at least the caret is visible.
+     * A buffer of EDIT_RECT_BUFFER in view pixels is used to offset the
+     * edit rectangle to ensure a margin with the edge of the screen.
+     */
+    private void scrollEditIntoView() {
+        Rect visibleRect = new Rect(viewToContentX(getScrollX()),
+                viewToContentY(getScrollY()),
+                viewToContentX(getScrollX() + getWidth()),
+                viewToContentY(getScrollY() + getViewHeightWithTitle()));
+        if (visibleRect.contains(mEditTextContentBounds)) {
+            return; // no need to scroll
+        }
+        syncSelectionCursors();
+        final int buffer = Math.max(1, viewToContentDimension(EDIT_RECT_BUFFER));
+        Rect showRect = new Rect(
+                Math.max(0, mEditTextContentBounds.left - buffer),
+                Math.max(0, mEditTextContentBounds.top - buffer),
+                mEditTextContentBounds.right + buffer,
+                mEditTextContentBounds.bottom + buffer);
+        Point caretTop = calculateCaretTop();
+        if (visibleRect.width() < mEditTextContentBounds.width()) {
+            // The whole edit won't fit in the width, so use the caret rect
+            if (mSelectCursorBase.x < caretTop.x) {
+                showRect.left = Math.max(0, mSelectCursorBase.x - buffer);
+                showRect.right = caretTop.x + buffer;
+            } else {
+                showRect.left = Math.max(0, caretTop.x - buffer);
+                showRect.right = mSelectCursorBase.x + buffer;
+            }
+        }
+        if (visibleRect.height() < mEditTextContentBounds.height()) {
+            // The whole edit won't fit in the height, so use the caret rect
+            if (mSelectCursorBase.y > caretTop.y) {
+                showRect.top = Math.max(0, caretTop.y - buffer);
+                showRect.bottom = mSelectCursorBase.y + buffer;
+            } else {
+                showRect.top = Math.max(0, mSelectCursorBase.y - buffer);
+                showRect.bottom = caretTop.y + buffer;
+            }
+        }
+
+        if (visibleRect.contains(showRect)) {
+            return; // no need to scroll
+        }
+
+        int scrollX = visibleRect.left;
+        if (visibleRect.left > showRect.left) {
+            scrollX = showRect.left;
+        } else if (visibleRect.right < showRect.right) {
+            scrollX = Math.max(0, showRect.right - visibleRect.width());
+        }
+        int scrollY = visibleRect.top;
+        if (visibleRect.top > showRect.top) {
+            scrollY = showRect.top;
+        } else if (visibleRect.bottom < showRect.bottom) {
+            scrollY = Math.max(0, showRect.bottom - visibleRect.height());
+        }
+
+        contentScrollTo(scrollX, scrollY, false);
     }
 
     @Override
