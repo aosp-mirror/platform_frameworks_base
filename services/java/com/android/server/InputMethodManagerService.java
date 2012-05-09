@@ -2410,17 +2410,63 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private static class ImeSubtypeListItem {
+    private static class ImeSubtypeListItem implements Comparable<ImeSubtypeListItem> {
         public final CharSequence mImeName;
         public final CharSequence mSubtypeName;
         public final InputMethodInfo mImi;
         public final int mSubtypeId;
+        private final boolean mIsSystemLocale;
+        private final boolean mIsSystemLanguage;
+
         public ImeSubtypeListItem(CharSequence imeName, CharSequence subtypeName,
-                InputMethodInfo imi, int subtypeId) {
+                InputMethodInfo imi, int subtypeId, String subtypeLocale, String systemLocale) {
             mImeName = imeName;
             mSubtypeName = subtypeName;
             mImi = imi;
             mSubtypeId = subtypeId;
+            if (TextUtils.isEmpty(subtypeLocale)) {
+                mIsSystemLocale = false;
+                mIsSystemLanguage = false;
+            } else {
+                mIsSystemLocale = subtypeLocale.equals(systemLocale);
+                mIsSystemLanguage = mIsSystemLocale
+                        || subtypeLocale.startsWith(systemLocale.substring(0, 2));
+            }
+        }
+
+        @Override
+        public int compareTo(ImeSubtypeListItem other) {
+            if (TextUtils.isEmpty(mImeName)) {
+                return 1;
+            }
+            if (TextUtils.isEmpty(other.mImeName)) {
+                return -1;
+            }
+            if (!TextUtils.equals(mImeName, other.mImeName)) {
+                return mImeName.toString().compareTo(other.mImeName.toString());
+            }
+            if (TextUtils.equals(mSubtypeName, other.mSubtypeName)) {
+                return 0;
+            }
+            if (mIsSystemLocale) {
+                return -1;
+            }
+            if (other.mIsSystemLocale) {
+                return 1;
+            }
+            if (mIsSystemLanguage) {
+                return -1;
+            }
+            if (other.mIsSystemLanguage) {
+                return 1;
+            }
+            if (TextUtils.isEmpty(mSubtypeName)) {
+                return 1;
+            }
+            if (TextUtils.isEmpty(other.mSubtypeName)) {
+                return -1;
+            }
+            return mSubtypeName.toString().compareTo(other.mSubtypeName.toString());
         }
     }
 
@@ -2952,10 +2998,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         private final Context mContext;
         private final PackageManager mPm;
         private final InputMethodManagerService mImms;
+        private final String mSystemLocaleStr;
         public InputMethodAndSubtypeListManager(Context context, InputMethodManagerService imms) {
             mContext = context;
             mPm = context.getPackageManager();
             mImms = imms;
+            mSystemLocaleStr =
+                    imms.mLastSystemLocale != null ? imms.mLastSystemLocale.toString() : "";
         }
 
         private final TreeMap<InputMethodInfo, List<InputMethodSubtype>> mSortedImmis =
@@ -3043,7 +3092,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                     subtype.overridesImplicitlyEnabledSubtype() ? null
                                             : subtype.getDisplayName(mContext, imi.getPackageName(),
                                                     imi.getServiceInfo().applicationInfo);
-                            imList.add(new ImeSubtypeListItem(imeLabel, subtypeLabel, imi, j));
+                            imList.add(new ImeSubtypeListItem(imeLabel, subtypeLabel, imi, j,
+                                    subtype.getLocale(), mSystemLocaleStr));
 
                             // Removing this subtype from enabledSubtypeSet because we no longer
                             // need to add an entry of this subtype to imList to avoid duplicated
@@ -3052,9 +3102,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         }
                     }
                 } else {
-                    imList.add(new ImeSubtypeListItem(imeLabel, null, imi, NOT_A_SUBTYPE_ID));
+                    imList.add(new ImeSubtypeListItem(imeLabel, null, imi, NOT_A_SUBTYPE_ID,
+                            null, mSystemLocaleStr));
                 }
             }
+            Collections.sort(imList);
             return imList;
         }
     }
