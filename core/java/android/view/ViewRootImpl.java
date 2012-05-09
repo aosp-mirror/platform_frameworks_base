@@ -4412,14 +4412,23 @@ public final class ViewRootImpl implements ViewParent,
         mInvalidateOnAnimationRunnable.addViewRect(info);
     }
 
-    public void invalidateDisplayList(DisplayList displayList) {
+    public void enqueueDisplayList(DisplayList displayList) {
         mDisplayLists.add(displayList);
 
         mHandler.removeMessages(MSG_INVALIDATE_DISPLAY_LIST);
         Message msg = mHandler.obtainMessage(MSG_INVALIDATE_DISPLAY_LIST);
         mHandler.sendMessage(msg);
     }
-    
+
+    public void dequeueDisplayList(DisplayList displayList) {
+        if (mDisplayLists.remove(displayList)) {
+            displayList.invalidate();
+            if (mDisplayLists.size() == 0) {
+                mHandler.removeMessages(MSG_INVALIDATE_DISPLAY_LIST);
+            }
+        }
+    }
+
     public void cancelInvalidate(View view) {
         mHandler.removeMessages(MSG_INVALIDATE, view);
         // fixme: might leak the AttachInfo.InvalidateInfo objects instead of returning
