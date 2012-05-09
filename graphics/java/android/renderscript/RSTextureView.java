@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.TextureView;
 
 /**
+ * @deprecated in API 16
  * The Texture View for a graphics renderscript (RenderScriptGL)
  * to draw on.
  *
@@ -38,6 +39,7 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
     private SurfaceTexture mSurfaceTexture;
 
     /**
+     * @deprecated in API 16
      * Standard View constructor. In order to render something, you
      * must call {@link android.opengl.GLSurfaceView#setRenderer} to
      * register a renderer.
@@ -49,6 +51,7 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
     }
 
     /**
+     * @deprecated in API 16
      * Standard View constructor. In order to render something, you
      * must call {@link android.opengl.GLSurfaceView#setRenderer} to
      * register a renderer.
@@ -64,6 +67,9 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
         //android.util.Log.e("rs", "getSurfaceTextureListerner " + getSurfaceTextureListener());
     }
 
+    /**
+     * @deprecated in API 16
+     */
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         //Log.e(RenderScript.LOG_TAG, "onSurfaceTextureAvailable");
@@ -74,6 +80,9 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
         }
     }
 
+    /**
+     * @deprecated in API 16
+     */
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
         //Log.e(RenderScript.LOG_TAG, "onSurfaceTextureSizeChanged");
@@ -84,6 +93,9 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
         }
     }
 
+    /**
+     * @deprecated in API 16
+     */
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
         //Log.e(RenderScript.LOG_TAG, "onSurfaceTextureDestroyed");
@@ -96,6 +108,9 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
         return true;
     }
 
+    /**
+     * @deprecated in API 16
+     */
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
         //Log.e(RenderScript.LOG_TAG, "onSurfaceTextureUpdated");
@@ -103,6 +118,7 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
     }
 
    /**
+     * @deprecated in API 16
      * Inform the view that the activity is paused. The owner of this view must
      * call this method when the activity is paused. Calling this method will
      * pause the rendering thread.
@@ -115,6 +131,7 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
     }
 
     /**
+     * @deprecated in API 16
      * Inform the view that the activity is resumed. The owner of this view must
      * call this method when the activity is resumed. Calling this method will
      * recreate the OpenGL display and resume the rendering
@@ -128,6 +145,7 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
     }
 
     /**
+     * @deprecated in API 16
      * Create a new RenderScriptGL object and attach it to the
      * TextureView if present.
      *
@@ -146,6 +164,7 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
     }
 
     /**
+     * @deprecated in API 16
      * Destroy the RenderScriptGL object associated with this
      * TextureView.
      */
@@ -155,6 +174,7 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
     }
 
     /**
+     * @deprecated in API 16
      * Set a new RenderScriptGL object.  This also will attach the
      * new object to the TextureView if present.
      *
@@ -168,6 +188,7 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
     }
 
     /**
+     * @deprecated in API 16
      * Returns the previously set RenderScriptGL object.
      *
      * @return RenderScriptGL

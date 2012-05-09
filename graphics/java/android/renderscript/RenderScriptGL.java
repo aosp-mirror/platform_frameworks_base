@@ -29,6 +29,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 /**
+ * @deprecated in API 16
  * The Graphics derivitive of Renderscript.  Extends the basic context to add a
  * root script which is the display window for graphical output.  When the
  * system needs to update the display the currently bound root script will be
@@ -46,6 +47,7 @@ public class RenderScriptGL extends RenderScript {
     int mHeight;
 
     /**
+     * @deprecated in API 16
      * Class which is used to describe a pixel format for a graphical buffer.
      * This is used to describe the intended format of the display surface.
      *
@@ -66,9 +68,15 @@ public class RenderScriptGL extends RenderScript {
         int mSamplesPref    = 1;
         float mSamplesQ     = 1.f;
 
+        /**
+         * @deprecated in API 16
+         */
         public SurfaceConfig() {
         }
 
+        /**
+         * @deprecated in API 16
+         */
         public SurfaceConfig(SurfaceConfig sc) {
             mDepthMin = sc.mDepthMin;
             mDepthPref = sc.mDepthPref;
@@ -93,6 +101,7 @@ public class RenderScriptGL extends RenderScript {
         }
 
         /**
+         * @deprecated in API 16
          * Set the per-component bit depth for color (red, green, blue).  This
          * configures the surface for an unsigned integer buffer type.
          *
@@ -106,6 +115,7 @@ public class RenderScriptGL extends RenderScript {
         }
 
         /**
+         * @deprecated in API 16
          * Set the bit depth for alpha. This configures the surface for
          * an unsigned integer buffer type.
          *
@@ -119,6 +129,7 @@ public class RenderScriptGL extends RenderScript {
         }
 
          /**
+         * @deprecated in API 16
          * Set the bit depth for the depth buffer. This configures the
          * surface for an unsigned integer buffer type.  If a minimum of 0
          * is specified then its possible no depth buffer will be
@@ -134,6 +145,7 @@ public class RenderScriptGL extends RenderScript {
         }
 
         /**
+         * @deprecated in API 16
          * Configure the multisample rendering.
          *
          * @param minimum The required number of samples, must be at least 1.
@@ -157,6 +169,7 @@ public class RenderScriptGL extends RenderScript {
     SurfaceConfig mSurfaceConfig;
 
     /**
+     * @deprecated in API 16
      * Construct a new RenderScriptGL context.
      *
      * @param ctx The context.
@@ -187,6 +200,7 @@ public class RenderScriptGL extends RenderScript {
     }
 
     /**
+     * @deprecated in API 16
      * Bind an os surface
      *
      *
@@ -223,6 +237,7 @@ public class RenderScriptGL extends RenderScript {
     }
 
     /**
+     * @deprecated in API 16
      * return the height of the last set surface.
      *
      * @return int
@@ -232,6 +247,7 @@ public class RenderScriptGL extends RenderScript {
     }
 
     /**
+     * @deprecated in API 16
      * return the width of the last set surface.
      *
      * @return int
@@ -241,6 +257,7 @@ public class RenderScriptGL extends RenderScript {
     }
 
     /**
+     * @deprecated in API 16
      * Temporarly halt calls to the root rendering script.
      *
      */
@@ -250,6 +267,7 @@ public class RenderScriptGL extends RenderScript {
     }
 
     /**
+     * @deprecated in API 16
      * Resume calls to the root rendering script.
      *
      */
@@ -260,6 +278,7 @@ public class RenderScriptGL extends RenderScript {
 
 
     /**
+     * @deprecated in API 16
      * Set the script to handle calls to render the primary surface.
      *
      * @param s Graphics script to process rendering requests.
@@ -270,6 +289,7 @@ public class RenderScriptGL extends RenderScript {
     }
 
     /**
+     * @deprecated in API 16
      * Set the default ProgramStore object seen as the parent state by the root
      * rendering script.
      *
@@ -281,6 +301,7 @@ public class RenderScriptGL extends RenderScript {
     }
 
     /**
+     * @deprecated in API 16
      * Set the default ProgramFragment object seen as the parent state by the
      * root rendering script.
      *
@@ -292,6 +313,7 @@ public class RenderScriptGL extends RenderScript {
     }
 
     /**
+     * @deprecated in API 16
      * Set the default ProgramRaster object seen as the parent state by the
      * root rendering script.
      *
@@ -303,6 +325,7 @@ public class RenderScriptGL extends RenderScript {
     }
 
     /**
+     * @deprecated in API 16
      * Set the default ProgramVertex object seen as the parent state by the
      * root rendering script.
      *

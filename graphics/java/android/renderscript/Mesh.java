@@ -21,6 +21,7 @@ import java.util.Vector;
 import android.util.Log;
 
 /**
+ * @deprecated in API 16
  * <p>This class is a container for geometric data displayed with
  * Renderscript. Internally, a mesh is a collection of allocations that
  * represent vertex data (positions, normals, texture
@@ -40,33 +41,40 @@ import android.util.Log;
 public class Mesh extends BaseObj {
 
     /**
+    * @deprecated in API 16
     * Describes the way mesh vertex data is interpreted when rendering
     *
     **/
     public enum Primitive {
         /**
+        * @deprecated in API 16
         * Vertex data will be rendered as a series of points
         */
         POINT (0),
         /**
+        * @deprecated in API 16
         * Vertex pairs will be rendered as lines
         */
         LINE (1),
         /**
+        * @deprecated in API 16
         * Vertex data will be rendered as a connected line strip
         */
         LINE_STRIP (2),
         /**
+        * @deprecated in API 16
         * Vertices will be rendered as individual triangles
         */
         TRIANGLE (3),
         /**
+        * @deprecated in API 16
         * Vertices will be rendered as a connected triangle strip
         * defined by the first three vertices with each additional
         * triangle defined by a new vertex
         */
         TRIANGLE_STRIP (4),
         /**
+        * @deprecated in API 16
         * Vertices will be rendered as a sequence of triangles that all
         * share first vertex as the origin
         */
@@ -87,6 +95,7 @@ public class Mesh extends BaseObj {
     }
 
     /**
+    * @deprecated in API 16
     * @return number of allocations containing vertex data
     *
     **/
@@ -97,6 +106,7 @@ public class Mesh extends BaseObj {
         return mVertexBuffers.length;
     }
     /**
+    * @deprecated in API 16
     * @param slot index in the list of allocations to return
     * @return vertex data allocation at the given index
     *
@@ -106,6 +116,7 @@ public class Mesh extends BaseObj {
     }
 
     /**
+    * @deprecated in API 16
     * @return number of primitives or index sets in the mesh
     *
     **/
@@ -117,6 +128,7 @@ public class Mesh extends BaseObj {
     }
 
     /**
+    * @deprecated in API 16
     * @param slot locaton within the list of index set allocation
     * @return allocation containing primtive index data or null if
     *         the index data is not specified explicitly
@@ -126,6 +138,7 @@ public class Mesh extends BaseObj {
         return mIndexBuffers[slot];
     }
     /**
+    * @deprecated in API 16
     * @param slot locaiton within the list of index set primitives
     * @return index set primitive type
     *
@@ -168,6 +181,7 @@ public class Mesh extends BaseObj {
     }
 
     /**
+    * @deprecated in API 16
     * Mesh builder object. It starts empty and requires you to
     * add the types necessary to create vertex and index
     * allocations.
@@ -190,6 +204,7 @@ public class Mesh extends BaseObj {
         Vector mIndexTypes;
 
         /**
+        * @deprecated in API 16
         * Creates builder object
         * @param rs Context to which the mesh will belong.
         * @param usage specifies how the mesh allocations are to be
@@ -205,6 +220,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * @return internal index of the last vertex buffer type added to
         *         builder
         **/
@@ -213,6 +229,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * @return internal index of the last index set added to the
         *         builder
         **/
@@ -221,6 +238,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Adds a vertex data type to the builder object
         *
         * @param t type of the vertex data allocation to be created
@@ -240,6 +258,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Adds a vertex data type to the builder object
         *
         * @param e element describing the vertex data layout
@@ -261,6 +280,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Adds an index set data type to the builder object
         *
         * @param t type of the index set data, could be null
@@ -279,6 +299,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Adds an index set primitive type to the builder object
         *
         * @param p primitive type
@@ -296,6 +317,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Adds an index set data type to the builder object
         *
         * @param e element describing the index set data layout
@@ -321,6 +343,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Create a Mesh object from the current state of the builder
         *
         **/

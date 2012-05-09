@@ -43,6 +43,7 @@ import android.util.Log;
 
 
 /**
+ * @deprecated in API 16
  * ProgramVertex, also know as a vertex shader, describes a
  * stage in the graphics pipeline responsible for manipulating
  * geometric data in a user-defined way.
@@ -55,6 +56,7 @@ public class ProgramVertex extends Program {
     }
 
     /**
+     * @deprecated in API 16
      * @return number of input attribute elements
      */
     public int getInputCount() {
@@ -62,6 +64,7 @@ public class ProgramVertex extends Program {
     }
 
     /**
+     * @deprecated in API 16
      * @param slot location of the input to return
      * @return input attribute element
      */
@@ -73,6 +76,7 @@ public class ProgramVertex extends Program {
     }
 
     /**
+    * @deprecated in API 16
     * Builder class for creating ProgramVertex objects.
     * The builder starts empty and the user must minimally provide
     * the GLSL shader code, and the varying inputs. Constant, or
@@ -82,6 +86,7 @@ public class ProgramVertex extends Program {
     **/
     public static class Builder extends BaseProgramBuilder {
         /**
+         * @deprecated in API 16
          * Create a builder object.
          *
          * @param rs Context to which the program will belong.
@@ -91,6 +96,7 @@ public class ProgramVertex extends Program {
         }
 
         /**
+         * @deprecated in API 16
          * Add varying inputs to the program
          *
          * @param e element describing the layout of the varying input
@@ -110,6 +116,7 @@ public class ProgramVertex extends Program {
         }
 
         /**
+         * @deprecated in API 16
          * Creates ProgramVertex from the current state of the builder
          *
          * @return  ProgramVertex
