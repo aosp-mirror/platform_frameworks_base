@@ -36,6 +36,16 @@
 
     <family>
         <nameset>
+            <name>sans-serif-light</name>
+        </nameset>
+        <fileset>
+            <file>Roboto-Light.ttf</file>
+            <file>Roboto-LightItalic.ttf</file>
+        </fileset>
+    </family>
+
+    <family>
+        <nameset>
             <name>serif</name>
             <name>times</name>
             <name>times new roman</name>
