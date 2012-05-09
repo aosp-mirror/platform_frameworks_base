@@ -25180,6 +25180,7 @@ package android.view.accessibility {
     method public boolean isPassword();
     method public boolean isScrollable();
     method public boolean isSelected();
+    method public boolean isVisibleToUser();
     method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View);
     method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View, int);
     method public static android.view.accessibility.AccessibilityNodeInfo obtain();
@@ -25209,6 +25210,7 @@ package android.view.accessibility {
     method public void setSource(android.view.View);
     method public void setSource(android.view.View, int);
     method public void setText(java.lang.CharSequence);
+    method public void setVisibleToUser(boolean);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ACTION_ACCESSIBILITY_FOCUS = 64; // 0x40
     field public static final java.lang.String ACTION_ARGUMENT_HTML_ELEMENT_STRING = "ACTION_ARGUMENT_HTML_ELEMENT_STRING";
