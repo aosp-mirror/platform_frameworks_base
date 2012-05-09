@@ -63,7 +63,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 76;
+    private static final int DATABASE_VERSION = 77;
 
     private Context mContext;
 
@@ -1031,6 +1031,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 76;
         }
 
+        /************* The following are Jelly Bean changes ************/
+
+        if (upgradeVersion == 76) {
+            // Removed VIBRATE_IN_SILENT setting
+            db.beginTransaction();
+            try {
+                db.execSQL("DELETE FROM system WHERE name='"
+                                + Settings.System.VIBRATE_IN_SILENT + "'");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+
+            upgradeVersion = 77;
+        }
+
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -1311,8 +1328,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadSetting(stmt, Settings.System.MODE_RINGER,
                     AudioManager.RINGER_MODE_NORMAL);
     
-            loadVibrateSetting(db, false);
-    
             // By default:
             // - ringtones, notification, system and music streams are affected by ringer mode
             // on non voice capable devices (tablets)
@@ -1432,9 +1447,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     PackageHelper.APP_INSTALL_AUTO);
 
             loadUISoundEffectsSettings(stmt);
-
-            loadBooleanSetting(stmt, Settings.System.VIBRATE_IN_SILENT,
-                    R.bool.def_vibrate_in_silent);
 
             loadIntegerSetting(stmt, Settings.System.POINTER_SPEED,
                     R.integer.def_pointer_speed);
