@@ -102,7 +102,7 @@ final class Settings {
     final HashMap<String, PackageSetting> mPackages =
             new HashMap<String, PackageSetting>();
     // List of replaced system applications
-    final HashMap<String, PackageSetting> mDisabledSysPackages =
+    private final HashMap<String, PackageSetting> mDisabledSysPackages =
         new HashMap<String, PackageSetting>();
 
     // These are the last platform API version we were using for
@@ -278,6 +278,14 @@ final class Settings {
                 p.nativeLibraryPathString, p.appId, p.versionCode, p.pkgFlags);
         mDisabledSysPackages.remove(name);
         return ret;
+    }
+
+    boolean isDisabledSystemPackageLPr(String name) {
+        return mDisabledSysPackages.containsKey(name);
+    }
+
+    void removeDisabledSystemPackageLPw(String name) {
+        mDisabledSysPackages.remove(name);
     }
 
     PackageSetting addPackageLPw(String name, String realName, File codePath, File resourcePath,
