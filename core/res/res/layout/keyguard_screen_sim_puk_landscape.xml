@@ -122,14 +122,16 @@
                       android:background="@android:drawable/edit_text">
 
                       <!-- displays dots as user enters new pin -->
-                      <TextView android:id="@+id/pinDisplay"
+                      <EditText android:id="@+id/pinDisplay"
                           android:layout_width="0dip"
                           android:layout_height="wrap_content"
                           android:layout_weight="1"
                           android:maxLines="1"
                           android:textAppearance="?android:attr/textAppearanceLargeInverse"
+                          android:textColor="@android:color/primary_text_holo_light"
                           android:textStyle="bold"
                           android:inputType="textPassword"
+                          android:hint="@android:string/keyguard_password_enter_pin_prompt"
                       />
 
                       <ImageButton android:id="@+id/pinDel"
