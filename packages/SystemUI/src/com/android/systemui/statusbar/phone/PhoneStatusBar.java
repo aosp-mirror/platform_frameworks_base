@@ -106,6 +106,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             = "com.android.internal.policy.statusbar.START";
 
     private static final boolean ENABLE_INTRUDERS = false;
+    private static final boolean DIM_BEHIND_EXPANDED_PANEL = false;
 
     static final int EXPANDED_LEAVE_ALONE = -10000;
     static final int EXPANDED_FULL_OPEN = -10001;
@@ -1333,6 +1334,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mPile.setLayerType(View.LAYER_TYPE_NONE, null);
         mVelocityTracker.recycle();
         mVelocityTracker = null;
+        mCloseView.setPressed(false);
     }
 
     void incrementAnim(long frameTimeNanos) {
@@ -1370,6 +1372,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (CHATTY) {
             Slog.d(TAG, "panel: beginning to track the user's touch, y=" + y + " opening=" + opening);
         }
+
+        mCloseView.setPressed(true);
 
         mTracking = true;
         mPile.setLayerType(View.LAYER_TYPE_HARDWARE, null);
@@ -1497,8 +1501,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             if (!mExpanded) {
                 mViewDelta = statusBarSize - y;
             } else {
-//                mCloseView.getLocationOnScreen(mAbsPos)...?
-//                mViewDelta = mAbsPos[1] + mTrackingView.getHeight() - y;
+                mCloseView.getLocationOnScreen(mAbsPos);
+                mViewDelta = mAbsPos[1] + statusBarSize + getCloseViewHeight() - y; // XXX: not closeViewHeight, but paddingBottom from the 9patch
             }
             if ((!mExpanded && y < hitSize) ||
                     // @@ add taps outside the panel if it's not full-screen
@@ -2011,7 +2015,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
         mNotificationPanel.setLayoutParams(lp);
 
-        if (ActivityManager.isHighEndGfx(mDisplay)) {
+        if (DIM_BEHIND_EXPANDED_PANEL && ActivityManager.isHighEndGfx(mDisplay)) {
             // woo, special effects
             final int barh = getCloseViewHeight() + getStatusBarHeight();
             final float frac = saturate((float)(panelh - barh) / (disph - barh));
