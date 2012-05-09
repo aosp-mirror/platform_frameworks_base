@@ -197,6 +197,29 @@ public class SyncStorageEngine extends Handler {
         long delayUntil;
         final ArrayList<Pair<Bundle, Long>> periodicSyncs;
 
+        /**
+         * Copy constructor for making deep-ish copies. Only the bundles stored
+         * in periodic syncs can make unexpected changes.
+         *
+         * @param toCopy AuthorityInfo to be copied.
+         */
+        AuthorityInfo(AuthorityInfo toCopy) {
+            account = toCopy.account;
+            userId = toCopy.userId;
+            authority = toCopy.authority;
+            ident = toCopy.ident;
+            enabled = toCopy.enabled;
+            syncable = toCopy.syncable;
+            backoffTime = toCopy.backoffTime;
+            backoffDelay = toCopy.backoffDelay;
+            delayUntil = toCopy.delayUntil;
+            periodicSyncs = new ArrayList<Pair<Bundle, Long>>();
+            for (Pair<Bundle, Long> sync : toCopy.periodicSyncs) {
+                // Still not a perfect copy, because we are just copying the mappings.
+                periodicSyncs.add(Pair.create(new Bundle(sync.first), sync.second));
+            }
+        }
+
         AuthorityInfo(Account account, int userId, String authority, int ident) {
             this.account = account;
             this.userId = userId;
@@ -1212,7 +1235,8 @@ public class SyncStorageEngine extends Handler {
             final int N = mAuthorities.size();
             ArrayList<AuthorityInfo> infos = new ArrayList<AuthorityInfo>(N);
             for (int i=0; i<N; i++) {
-                infos.add(mAuthorities.valueAt(i));
+                // Make deep copy because AuthorityInfo syncs are liable to change.
+                infos.add(new AuthorityInfo(mAuthorities.valueAt(i)));
             }
             return infos;
         }
