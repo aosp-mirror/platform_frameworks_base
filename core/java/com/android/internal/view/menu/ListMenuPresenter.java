@@ -220,7 +220,6 @@ public class ListMenuPresenter implements MenuPresenter, AdapterView.OnItemClick
         private int mExpandedIndex = -1;
 
         public MenuAdapter() {
-            registerDataSetObserver(new ExpandedIndexObserver());
             findExpandedIndex();
         }
 
@@ -273,12 +272,11 @@ public class ListMenuPresenter implements MenuPresenter, AdapterView.OnItemClick
             }
             mExpandedIndex = -1;
         }
-    }
 
-    private class ExpandedIndexObserver extends DataSetObserver {
         @Override
-        public void onChanged() {
-            mAdapter.findExpandedIndex();
+        public void notifyDataSetChanged() {
+            findExpandedIndex();
+            super.notifyDataSetChanged();
         }
     }
 }
