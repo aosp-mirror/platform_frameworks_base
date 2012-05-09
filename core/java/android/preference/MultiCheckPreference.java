@@ -136,8 +136,22 @@ public class MultiCheckPreference extends DialogPreference {
      * 
      * @return The array of values.
      */
-    public CharSequence[] getEntryValues() {
+    public String[] getEntryValues() {
         return mEntryValues;
+    }
+
+    /**
+     * Get the boolean state of a given value.
+     */
+    public boolean getValue(int index) {
+        return mSetValues[index];
+    }
+
+    /**
+     * Set the boolean state of a given value.
+     */
+    public void setValue(int index, boolean state) {
+        mSetValues[index] = state;
     }
 
     /**

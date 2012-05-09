@@ -65,6 +65,7 @@ static jint SystemProperties_get_int(JNIEnv *env, jobject clazz,
     int len;
     const char* key;
     char buf[PROPERTY_VALUE_MAX];
+    char* end;
     jint result = defJ;
 
     if (keyJ == NULL) {
@@ -76,9 +77,10 @@ static jint SystemProperties_get_int(JNIEnv *env, jobject clazz,
 
     len = property_get(key, buf, "");
     if (len > 0) {
-        jint temp;
-        if (sscanf(buf, "%d", &temp) == 1)
-            result = temp;
+        result = strtol(buf, &end, 0);
+        if (end == buf) {
+            result = defJ;
+        }
     }
 
     env->ReleaseStringUTFChars(keyJ, key);
@@ -93,6 +95,7 @@ static jlong SystemProperties_get_long(JNIEnv *env, jobject clazz,
     int len;
     const char* key;
     char buf[PROPERTY_VALUE_MAX];
+    char* end;
     jlong result = defJ;
 
     if (keyJ == NULL) {
@@ -104,9 +107,10 @@ static jlong SystemProperties_get_long(JNIEnv *env, jobject clazz,
 
     len = property_get(key, buf, "");
     if (len > 0) {
-        jlong temp;
-        if (sscanf(buf, "%lld", &temp) == 1)
-            result = temp;
+        result = strtoll(buf, &end, 0);
+        if (end == buf) {
+            result = defJ;
+        }
     }
 
     env->ReleaseStringUTFChars(keyJ, key);
