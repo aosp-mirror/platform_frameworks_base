@@ -125,7 +125,19 @@
     <dimen name="navbar_search_panel_height">230dip</dimen>
 
     <!-- Height of the draggable handle at the bottom of the phone notification panel -->
-    <dimen name="close_handle_height">34dp</dimen>
+    <dimen name="close_handle_height">32dp</dimen>
+
+    <!-- Amount of close_handle that will not overlap the notification list -->
+    <dimen name="close_handle_underlap">18dp</dimen>
+
+    <!-- Height of the notification panel header bar -->
+    <dimen name="notification_panel_header_height">48dp</dimen>
+
+    <!-- Height of the notification panel header bar -->
+    <dimen name="notification_panel_padding_top">@*android:dimen/status_bar_height</dimen>
+
+    <!-- Extra space above the clock in the panel; half of (notification_panel_header_height - 32) -->
+    <dimen name="notification_panel_header_padding_top">0dp</dimen>
 
     <!-- Layout parameters for the notification panel -->
     <dimen name="notification_panel_margin_bottom">0dp</dimen>

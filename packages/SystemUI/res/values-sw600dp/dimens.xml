@@ -16,8 +16,8 @@
 */
 -->
 <resources>
-    <!-- The width of the notification panel window -->
-    <dimen name="notification_panel_width">446dp</dimen>
+    <!-- The width of the notification panel window: 446 + 16 + 16 (padding in the bg drawable) -->
+    <dimen name="notification_panel_width">478dp</dimen>
 
     <!-- Layout parameters for the notification panel -->
     <dimen name="notification_panel_margin_bottom">192dp</dimen>
@@ -35,5 +35,8 @@
 
     <!-- Height of search panel including navigation bar height -->
     <dimen name="navbar_search_panel_height">300dip</dimen>
+
+    <!-- Extra space above the clock in the panel; on this device, zero -->
+    <dimen name="notification_panel_header_padding_top">0dp</dimen>
 
 </resources>
