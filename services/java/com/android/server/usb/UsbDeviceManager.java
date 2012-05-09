@@ -322,8 +322,6 @@ public class UsbDeviceManager {
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
                 updateState(state);
                 mAdbEnabled = containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_ADB);
-                mAudioSourceEnabled = containsFunction(mCurrentFunctions,
-                        UsbManager.USB_FUNCTION_AUDIO_SOURCE);
 
                 // Upgrade step for previous versions that used persist.service.adb.enable
                 String value = SystemProperties.get("persist.service.adb.enable", "");
@@ -537,26 +535,29 @@ public class UsbDeviceManager {
             mContext.sendStickyBroadcast(intent);
         }
 
-        private void updateAudioSourceFunction(boolean enabled) {
-            // send a sticky broadcast containing current USB state
-            Intent intent = new Intent(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG);
-            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-            intent.putExtra("state", (enabled ? 1 : 0));
-            if (enabled) {
-                try {
-                    Scanner scanner = new Scanner(new File(AUDIO_SOURCE_PCM_PATH));
-                    int card = scanner.nextInt();
-                    int device = scanner.nextInt();
-                    intent.putExtra("card", card);
-                    intent.putExtra("device", device);
-                } catch (FileNotFoundException e) {
-                    Slog.e(TAG, "could not open audio source PCM file", e);
+        private void updateAudioSourceFunction() {
+            boolean enabled = containsFunction(mCurrentFunctions,
+                    UsbManager.USB_FUNCTION_AUDIO_SOURCE);
+            if (enabled != mAudioSourceEnabled) {
+                // send a sticky broadcast containing current USB state
+                Intent intent = new Intent(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG);
+                intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                intent.putExtra("state", (enabled ? 1 : 0));
+                if (enabled) {
+                    try {
+                        Scanner scanner = new Scanner(new File(AUDIO_SOURCE_PCM_PATH));
+                        int card = scanner.nextInt();
+                        int device = scanner.nextInt();
+                        intent.putExtra("card", card);
+                        intent.putExtra("device", device);
+                    } catch (FileNotFoundException e) {
+                        Slog.e(TAG, "could not open audio source PCM file", e);
+                    }
                 }
+                mContext.sendStickyBroadcast(intent);
+                mAudioSourceEnabled = enabled;
             }
-
-            mContext.sendStickyBroadcast(intent);
-            mAudioSourceEnabled = enabled;
         }
 
         @Override
@@ -578,11 +579,7 @@ public class UsbDeviceManager {
                     }
                     if (mBootCompleted) {
                         updateUsbState();
-                        boolean audioSourceEnabled = containsFunction(mCurrentFunctions,
-                                UsbManager.USB_FUNCTION_AUDIO_SOURCE);
-                        if (audioSourceEnabled != mAudioSourceEnabled) {
-                            updateAudioSourceFunction(audioSourceEnabled);
-                        }
+                        updateAudioSourceFunction();
                     }
                     break;
                 case MSG_ENABLE_ADB:
@@ -597,13 +594,13 @@ public class UsbDeviceManager {
                     updateUsbNotification();
                     updateAdbNotification();
                     updateUsbState();
+                    updateAudioSourceFunction();
                     break;
                 case MSG_BOOT_COMPLETED:
                     mBootCompleted = true;
                     if (mCurrentAccessory != null) {
                         mSettingsManager.accessoryAttached(mCurrentAccessory);
                     }
-                    updateAudioSourceFunction(mAudioSourceEnabled);
                     break;
             }
         }
