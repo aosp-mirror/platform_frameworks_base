@@ -4697,8 +4697,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             }
         }
 
-        info.addAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
-        info.addAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
+        if (!isAccessibilityFocused()) {
+            info.addAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+        } else {
+            info.addAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
+        }
 
         if (isClickable()) {
             info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
