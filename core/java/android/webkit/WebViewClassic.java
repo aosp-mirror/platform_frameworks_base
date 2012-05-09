@@ -88,7 +88,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewRootImpl;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -888,20 +887,18 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private Point mSelectHandleLeftOffset;
     private Point mSelectHandleRightOffset;
     private Point mSelectHandleCenterOffset;
-    private Point mSelectCursorBase = new Point();
-    private int mSelectCursorBaseLayerId;
-    private QuadF mSelectCursorBaseTextQuad = new QuadF();
-    private Point mSelectCursorExtent = new Point();
-    private int mSelectCursorExtentLayerId;
-    private QuadF mSelectCursorExtentTextQuad = new QuadF();
+    private Point mSelectCursorLeft = new Point();
+    private int mSelectCursorLeftLayerId;
+    private QuadF mSelectCursorLeftTextQuad = new QuadF();
+    private Point mSelectCursorRight = new Point();
+    private int mSelectCursorRightLayerId;
+    private QuadF mSelectCursorRightTextQuad = new QuadF();
     private Point mSelectDraggingCursor;
     private Point mSelectDraggingOffset;
     private QuadF mSelectDraggingTextQuad;
     private boolean mIsCaretSelection;
-    static final int HANDLE_ID_START = 0;
-    static final int HANDLE_ID_END = 1;
-    static final int HANDLE_ID_BASE = 2;
-    static final int HANDLE_ID_EXTENT = 3;
+    static final int HANDLE_ID_LEFT = 0;
+    static final int HANDLE_ID_RIGHT = 1;
 
     // the color used to highlight the touch rectangles
     static final int HIGHLIGHT_COLOR = 0x6633b5e5;
@@ -3722,13 +3719,13 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             return;
         }
         if (mSelectingText) {
-            if (mSelectCursorBaseLayerId == mCurrentScrollingLayerId) {
-                mSelectCursorBase.offset(dx, dy);
-                mSelectCursorBaseTextQuad.offset(dx, dy);
+            if (mSelectCursorLeftLayerId == mCurrentScrollingLayerId) {
+                mSelectCursorLeft.offset(dx, dy);
+                mSelectCursorLeftTextQuad.offset(dx, dy);
             }
-            if (mSelectCursorExtentLayerId == mCurrentScrollingLayerId) {
-                mSelectCursorExtent.offset(dx, dy);
-                mSelectCursorExtentTextQuad.offset(dx, dy);
+            if (mSelectCursorRightLayerId == mCurrentScrollingLayerId) {
+                mSelectCursorRight.offset(dx, dy);
+                mSelectCursorRightTextQuad.offset(dx, dy);
             }
         } else if (mHandleAlpha.getAlpha() > 0) {
             // stop fading as we're not going to move with the layer.
@@ -3829,6 +3826,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         // reset the flag since we set to true in if need after
         // loading is see onPageFinished(Url)
         mAccessibilityScriptInjected = false;
+
+        // Don't start out editing.
+        mIsEditingText = false;
     }
 
     /**
@@ -4589,18 +4589,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * startX, startY, endX, endY
      */
     private void getSelectionHandles(int[] handles) {
-        handles[0] = mSelectCursorBase.x;
-        handles[1] = mSelectCursorBase.y;
-        handles[2] = mSelectCursorExtent.x;
-        handles[3] = mSelectCursorExtent.y;
-        if (!nativeIsBaseFirst(mNativeClass)) {
-            int swap = handles[0];
-            handles[0] = handles[2];
-            handles[2] = swap;
-            swap = handles[1];
-            handles[1] = handles[3];
-            handles[3] = swap;
-        }
+        handles[0] = mSelectCursorLeft.x;
+        handles[1] = mSelectCursorLeft.y;
+        handles[2] = mSelectCursorRight.x;
+        handles[3] = mSelectCursorRight.y;
     }
 
     // draw history
@@ -5107,8 +5099,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         ClipboardManager cm = (ClipboardManager)(mContext
                 .getSystemService(Context.CLIPBOARD_SERVICE));
         if (cm.hasPrimaryClip()) {
-            Point cursorPoint = new Point(contentToViewX(mSelectCursorBase.x),
-                    contentToViewY(mSelectCursorBase.y));
+            Point cursorPoint = new Point(contentToViewX(mSelectCursorLeft.x),
+                    contentToViewY(mSelectCursorLeft.y));
             Point cursorTop = calculateCaretTop();
             cursorTop.set(contentToViewX(cursorTop.x),
                     contentToViewY(cursorTop.y));
@@ -5158,12 +5150,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * calculates the top of a caret.
      */
     private Point calculateCaretTop() {
-        float scale = scaleAlongSegment(mSelectCursorBase.x, mSelectCursorBase.y,
-                mSelectCursorBaseTextQuad.p4, mSelectCursorBaseTextQuad.p3);
+        float scale = scaleAlongSegment(mSelectCursorLeft.x, mSelectCursorLeft.y,
+                mSelectCursorLeftTextQuad.p4, mSelectCursorLeftTextQuad.p3);
         int x = Math.round(scaleCoordinate(scale,
-                mSelectCursorBaseTextQuad.p1.x, mSelectCursorBaseTextQuad.p2.x));
+                mSelectCursorLeftTextQuad.p1.x, mSelectCursorLeftTextQuad.p2.x));
         int y = Math.round(scaleCoordinate(scale,
-                mSelectCursorBaseTextQuad.p1.y, mSelectCursorBaseTextQuad.p2.y));
+                mSelectCursorLeftTextQuad.p1.y, mSelectCursorLeftTextQuad.p2.y));
         return new Point(x, y);
     }
 
@@ -5174,46 +5166,40 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     private void syncSelectionCursors() {
-        mSelectCursorBaseLayerId =
-                nativeGetHandleLayerId(mNativeClass, HANDLE_ID_BASE,
-                        mSelectCursorBase, mSelectCursorBaseTextQuad);
-        mSelectCursorExtentLayerId =
-                nativeGetHandleLayerId(mNativeClass, HANDLE_ID_EXTENT,
-                        mSelectCursorExtent, mSelectCursorExtentTextQuad);
+        mSelectCursorLeftLayerId =
+                nativeGetHandleLayerId(mNativeClass, HANDLE_ID_LEFT,
+                        mSelectCursorLeft, mSelectCursorLeftTextQuad);
+        mSelectCursorRightLayerId =
+                nativeGetHandleLayerId(mNativeClass, HANDLE_ID_RIGHT,
+                        mSelectCursorRight, mSelectCursorRightTextQuad);
     }
 
     private void adjustSelectionCursors() {
-        boolean wasDraggingStart = (mSelectDraggingCursor == mSelectCursorBase);
+        if (mIsCaretSelection) {
+            return; // no need to swap left and right handles.
+        }
+
+        boolean wasDraggingLeft = (mSelectDraggingCursor == mSelectCursorLeft);
         int oldX = mSelectDraggingCursor.x;
         int oldY = mSelectDraggingCursor.y;
-        int oldStartX = mSelectCursorBase.x;
-        int oldStartY = mSelectCursorBase.y;
-        int oldEndX = mSelectCursorExtent.x;
-        int oldEndY = mSelectCursorExtent.y;
-
+        int oldLeftX = mSelectCursorLeft.x;
+        int oldLeftY = mSelectCursorLeft.y;
+        int oldRightX = mSelectCursorRight.x;
+        int oldRightY = mSelectCursorRight.y;
         syncSelectionCursors();
-        boolean dragChanged = oldX != mSelectDraggingCursor.x ||
-                oldY != mSelectDraggingCursor.y;
-        if (dragChanged && !mIsCaretSelection) {
-            boolean draggingStart;
-            if (wasDraggingStart) {
-                float endStart = distanceSquared(oldEndX, oldEndY,
-                        mSelectCursorBase);
-                float endEnd = distanceSquared(oldEndX, oldEndY,
-                        mSelectCursorExtent);
-                draggingStart = endStart > endEnd;
-            } else {
-                float startStart = distanceSquared(oldStartX, oldStartY,
-                        mSelectCursorBase);
-                float startEnd = distanceSquared(oldStartX, oldStartY,
-                        mSelectCursorExtent);
-                draggingStart = startStart > startEnd;
-            }
-            mSelectDraggingCursor = (draggingStart
-                    ? mSelectCursorBase : mSelectCursorExtent);
-            mSelectDraggingTextQuad = (draggingStart
-                    ? mSelectCursorBaseTextQuad : mSelectCursorExtentTextQuad);
-            mSelectDraggingOffset = (draggingStart
+
+        boolean rightChanged = (oldRightX != mSelectCursorRight.x
+                || oldRightY != mSelectCursorRight.y);
+        boolean leftChanged = (oldLeftX != mSelectCursorLeft.x
+                || oldLeftY != mSelectCursorLeft.y);
+        if (leftChanged && rightChanged) {
+            // Left and right switched places, so swap dragging cursor
+            boolean draggingLeft = !wasDraggingLeft;
+            mSelectDraggingCursor = (draggingLeft
+                    ? mSelectCursorLeft : mSelectCursorRight);
+            mSelectDraggingTextQuad = (draggingLeft
+                    ? mSelectCursorLeftTextQuad : mSelectCursorRightTextQuad);
+            mSelectDraggingOffset = (draggingLeft
                     ? mSelectHandleLeftOffset : mSelectHandleRightOffset);
         }
         mSelectDraggingCursor.set(oldX, oldY);
@@ -5239,14 +5225,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private void updateWebkitSelection() {
         int[] handles = null;
         if (mIsCaretSelection) {
-            mSelectCursorExtent.set(mSelectCursorBase.x, mSelectCursorBase.y);
+            mSelectCursorRight.set(mSelectCursorLeft.x, mSelectCursorLeft.y);
         }
         if (mSelectingText) {
             handles = new int[4];
-            handles[0] = mSelectCursorBase.x;
-            handles[1] = mSelectCursorBase.y;
-            handles[2] = mSelectCursorExtent.x;
-            handles[3] = mSelectCursorExtent.y;
+            getSelectionHandles(handles);
         } else {
             nativeSetTextSelection(mNativeClass, 0);
         }
@@ -5610,21 +5593,21 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         Point caretTop = calculateCaretTop();
         if (visibleRect.width() < mEditTextContentBounds.width()) {
             // The whole edit won't fit in the width, so use the caret rect
-            if (mSelectCursorBase.x < caretTop.x) {
-                showRect.left = Math.max(0, mSelectCursorBase.x - buffer);
+            if (mSelectCursorLeft.x < caretTop.x) {
+                showRect.left = Math.max(0, mSelectCursorLeft.x - buffer);
                 showRect.right = caretTop.x + buffer;
             } else {
                 showRect.left = Math.max(0, caretTop.x - buffer);
-                showRect.right = mSelectCursorBase.x + buffer;
+                showRect.right = mSelectCursorLeft.x + buffer;
             }
         }
         if (visibleRect.height() < mEditTextContentBounds.height()) {
             // The whole edit won't fit in the height, so use the caret rect
-            if (mSelectCursorBase.y > caretTop.y) {
+            if (mSelectCursorLeft.y > caretTop.y) {
                 showRect.top = Math.max(0, caretTop.y - buffer);
-                showRect.bottom = mSelectCursorBase.y + buffer;
+                showRect.bottom = mSelectCursorLeft.y + buffer;
             } else {
-                showRect.top = Math.max(0, mSelectCursorBase.y - buffer);
+                showRect.top = Math.max(0, mSelectCursorLeft.y - buffer);
                 showRect.bottom = caretTop.y + buffer;
             }
         }
@@ -5885,25 +5868,25 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         if (mSelectHandleCenter != null && mSelectHandleCenter.getBounds()
                                 .contains(shiftedX, shiftedY)) {
                             mSelectionStarted = true;
-                            mSelectDraggingCursor = mSelectCursorBase;
+                            mSelectDraggingCursor = mSelectCursorLeft;
                             mSelectDraggingOffset = mSelectHandleCenterOffset;
-                            mSelectDraggingTextQuad = mSelectCursorBaseTextQuad;
+                            mSelectDraggingTextQuad = mSelectCursorLeftTextQuad;
                             mPrivateHandler.removeMessages(CLEAR_CARET_HANDLE);
                             hidePasteButton();
                         } else if (mSelectHandleLeft != null
                                 && mSelectHandleLeft.getBounds()
                                     .contains(shiftedX, shiftedY)) {
-                                mSelectionStarted = true;
-                                mSelectDraggingCursor = mSelectCursorBase;
-                                mSelectDraggingOffset = mSelectHandleLeftOffset;
-                                mSelectDraggingTextQuad = mSelectCursorBaseTextQuad;
+                            mSelectionStarted = true;
+                            mSelectDraggingOffset = mSelectHandleLeftOffset;
+                            mSelectDraggingCursor = mSelectCursorLeft;
+                            mSelectDraggingTextQuad = mSelectCursorLeftTextQuad;
                         } else if (mSelectHandleRight != null
                                 && mSelectHandleRight.getBounds()
                                 .contains(shiftedX, shiftedY)) {
                             mSelectionStarted = true;
-                            mSelectDraggingCursor = mSelectCursorExtent;
                             mSelectDraggingOffset = mSelectHandleRightOffset;
-                            mSelectDraggingTextQuad = mSelectCursorExtentTextQuad;
+                            mSelectDraggingCursor = mSelectCursorRight;
+                            mSelectDraggingTextQuad = mSelectCursorRightTextQuad;
                         } else if (mIsCaretSelection) {
                             selectionDone();
                         }
@@ -8691,7 +8674,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private static native void nativeSetTextSelection(int instance, int selection);
     private static native int nativeGetHandleLayerId(int instance, int handle,
             Point cursorLocation, QuadF textQuad);
-    private static native boolean nativeIsBaseFirst(int instance);
     private static native void nativeMapLayerRect(int instance, int layerId,
             Rect rect);
     // Returns 1 if a layer sync is needed, else 0
