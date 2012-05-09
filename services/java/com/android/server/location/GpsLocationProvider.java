@@ -192,6 +192,11 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // stop trying if we do not receive a fix within 60 seconds
     private static final int NO_FIX_TIMEOUT = 60 * 1000;
 
+    // if the fix interval is below this we leave GPS on,
+    // if above then we cycle the GPS driver.
+    // Typical hot TTTF is ~5 seconds, so 10 seconds seems sane.
+    private static final int GPS_POLLING_THRESHOLD_INTERVAL = 10 * 1000;
+
     // true if we are enabled
     private volatile boolean mEnabled;
     
@@ -842,7 +847,18 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     public String getInternalState() {
-        return native_get_internal_state();
+        StringBuilder s = new StringBuilder();
+        s.append("  mFixInterval=").append(mFixInterval).append("\n");
+        s.append("  mEngineCapabilities=0x").append(Integer.toHexString(mEngineCapabilities)).append(" (");
+        if (hasCapability(GPS_CAPABILITY_SCHEDULING)) s.append("SCHED ");
+        if (hasCapability(GPS_CAPABILITY_MSB)) s.append("MSB ");
+        if (hasCapability(GPS_CAPABILITY_MSA)) s.append("MSA ");
+        if (hasCapability(GPS_CAPABILITY_SINGLE_SHOT)) s.append("SINGLE_SHOT ");
+        if (hasCapability(GPS_CAPABILITY_ON_DEMAND_TIME)) s.append("ON_DEMAND_TIME ");
+        s.append(")\n");
+
+        s.append(native_get_internal_state());
+        return s.toString();
     }
 
     private final class Listener implements IBinder.DeathRecipient {
@@ -1131,7 +1147,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
             updateStatus(LocationProvider.AVAILABLE, mSvCount);
         }
 
-       if (!hasCapability(GPS_CAPABILITY_SCHEDULING) && mStarted && mFixInterval > 1000) {
+       if (!hasCapability(GPS_CAPABILITY_SCHEDULING) && mStarted &&
+               mFixInterval > GPS_POLLING_THRESHOLD_INTERVAL) {
             if (DEBUG) Log.d(TAG, "got fix, hibernating");
             hibernate();
         }
