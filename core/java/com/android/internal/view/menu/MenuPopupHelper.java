@@ -307,7 +307,6 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
 
         public MenuAdapter(MenuBuilder menu) {
             mAdapterMenu = menu;
-            registerDataSetObserver(new ExpandedIndexObserver());
             findExpandedIndex();
         }
 
@@ -363,12 +362,11 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
             }
             mExpandedIndex = -1;
         }
-    }
 
-    private class ExpandedIndexObserver extends DataSetObserver {
         @Override
-        public void onChanged() {
-            mAdapter.findExpandedIndex();
+        public void notifyDataSetChanged() {
+            findExpandedIndex();
+            super.notifyDataSetChanged();
         }
     }
 }
