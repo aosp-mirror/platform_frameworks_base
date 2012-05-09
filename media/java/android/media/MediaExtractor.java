@@ -225,11 +225,6 @@ final public class MediaExtractor {
      * If possible, seek to the sync sample closest to the specified time
      */
     public static final int SEEK_TO_CLOSEST_SYNC        = 2;
-    /**
-     * If possible, seek to a sample closest to the specified time, which may
-     * NOT be a sync sample!
-     */
-    public static final int SEEK_TO_CLOSEST             = 3;
 
     /**
      * All selected tracks seek near the requested time according to the
