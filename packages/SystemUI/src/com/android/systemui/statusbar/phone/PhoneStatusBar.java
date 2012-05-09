@@ -311,6 +311,12 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         });
 
+        if (!ActivityManager.isHighEndGfx(mDisplay)) {
+            mStatusBarWindow.setBackground(null);
+            mNotificationPanel.setBackgroundColor(context.getResources().getColor(
+                    R.color.notification_panel_solid_background));
+        }
+
         if (ENABLE_INTRUDERS) {
             mIntruderAlertView = (IntruderAlertView) View.inflate(context, R.layout.intruder_alert, null);
             mIntruderAlertView.setVisibility(View.GONE);
@@ -1987,11 +1993,14 @@ public class PhoneStatusBar extends BaseStatusBar {
             Slog.v(TAG, "updated cropView height=" + panelh + " grav=" + lp.gravity);
         }
         mNotificationPanel.setLayoutParams(lp);
-        // woo, special effects
-        final int barh = getCloseViewHeight() + getStatusBarHeight();
-        final float frac = saturate((float)(panelh - barh) / (disph - barh));
-        final int color = ((int)(0xB0 * Math.sin(frac * 1.57f))) << 24;
-        mStatusBarWindow.setBackgroundColor(color);
+
+        if (ActivityManager.isHighEndGfx(mDisplay)) {
+            // woo, special effects
+            final int barh = getCloseViewHeight() + getStatusBarHeight();
+            final float frac = saturate((float)(panelh - barh) / (disph - barh));
+            final int color = ((int)(0xB0 * Math.sin(frac * 1.57f))) << 24;
+            mStatusBarWindow.setBackgroundColor(color);
+        }
     }
 
     void updateDisplaySize() {
