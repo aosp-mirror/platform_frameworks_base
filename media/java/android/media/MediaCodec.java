@@ -94,6 +94,11 @@ import java.util.Map;
  * be codec specific data marked as such using the flag {@link #BUFFER_FLAG_CODEC_CONFIG}
  * in a call to {@link #queueInputBuffer}.
  *
+ * Codec specific data included in the format passed to {@link #configure}
+ * (in ByteBuffer entries with keys "csd-0", "csd-1", ...) is automatically
+ * submitted to the codec, this data MUST NOT be submitted explicitly by the
+ * client.
+ *
  * Once the client reaches the end of the input data it signals the end of
  * the input stream by specifying a flag of {@link #BUFFER_FLAG_END_OF_STREAM} in the call to
  * {@link #queueInputBuffer}. The codec will continue to return output buffers
