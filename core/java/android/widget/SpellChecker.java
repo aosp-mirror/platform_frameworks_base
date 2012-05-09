@@ -132,8 +132,6 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         // Restore SpellCheckSpans in pool
         for (int i = 0; i < mLength; i++) {
-            // Resets id and progress to invalidate spell check span
-            mSpellCheckSpans[i].setSpellCheckInProgress(false);
             mIds[i] = -1;
         }
         mLength = 0;
@@ -200,15 +198,16 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
     private void addSpellCheckSpan(Editable editable, int start, int end) {
         final int index = nextSpellCheckSpanIndex();
-        editable.setSpan(mSpellCheckSpans[index], start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        SpellCheckSpan spellCheckSpan = mSpellCheckSpans[index];
+        editable.setSpan(spellCheckSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spellCheckSpan.setSpellCheckInProgress(false);
         mIds[index] = mSpanSequenceCounter++;
     }
 
-    public void removeSpellCheckSpan(SpellCheckSpan spellCheckSpan) {
+    public void onSpellCheckSpanRemoved(SpellCheckSpan spellCheckSpan) {
+        // Recycle any removed SpellCheckSpan (from this code or during text edition)
         for (int i = 0; i < mLength; i++) {
             if (mSpellCheckSpans[i] == spellCheckSpan) {
-                // Resets id and progress to invalidate spell check span
-                mSpellCheckSpans[i].setSpellCheckInProgress(false);
                 mIds[i] = -1;
                 return;
             }
@@ -357,6 +356,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
             final SpellCheckSpan spellCheckSpan =
                     onGetSuggestionsInternal(results[i], USE_SPAN_RANGE, USE_SPAN_RANGE);
             if (spellCheckSpan != null) {
+                // onSpellCheckSpanRemoved will recycle this span in the pool
                 editable.removeSpan(spellCheckSpan);
             }
         }
@@ -384,11 +384,12 @@ public class SpellChecker implements SpellCheckerSessionListener {
                         suggestionsInfo, offset, length);
                 if (spellCheckSpan == null && scs != null) {
                     // the spellCheckSpan is shared by all the "SuggestionsInfo"s in the same
-                    // SentenceSuggestionsInfo
+                    // SentenceSuggestionsInfo. Removal is deferred after this loop.
                     spellCheckSpan = scs;
                 }
             }
             if (spellCheckSpan != null) {
+                // onSpellCheckSpanRemoved will recycle this span in the pool
                 editable.removeSpan(spellCheckSpan);
             }
         }
@@ -595,7 +596,8 @@ public class SpellChecker implements SpellCheckerSessionListener {
                             }
                             break;
                         }
-                        removeSpellCheckSpan(spellCheckSpan);
+                        // This spellCheckSpan is replaced by the one we are creating
+                        editable.removeSpan(spellCheckSpan);
                         spellCheckStart = Math.min(spanStart, spellCheckStart);
                         spellCheckEnd = Math.max(spanEnd, spellCheckEnd);
                     }
