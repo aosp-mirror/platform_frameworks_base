@@ -21,7 +21,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.TypedValue;
 
-/** @deprecated renderscript is deprecated in J
+/**
  *
  **/
 public class AllocationAdapter extends Allocation {
@@ -129,7 +129,7 @@ public class AllocationAdapter extends Allocation {
         mSelectedZ = 0;
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
      * Set the active LOD.  The LOD must be within the range for the
      * type being adapted.  The base allocation must have mipmaps.
      *
@@ -149,7 +149,7 @@ public class AllocationAdapter extends Allocation {
         initLOD(lod);
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
      * Set the active Face.  The base allocation must be of a type
      * that includes faces.
      *
@@ -169,7 +169,7 @@ public class AllocationAdapter extends Allocation {
         mSelectedFace = cf;
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
      * Set the active Y.  The y value must be within the range for
      * the allocation being adapted.  The base allocation must
      * contain the Y dimension.
@@ -190,7 +190,7 @@ public class AllocationAdapter extends Allocation {
         mSelectedY = y;
     }
 
-    /** @deprecated renderscript is deprecated in J
+    /**
      * Set the active Z.  The z value must be within the range for
      * the allocation being adapted.  The base allocation must
      * contain the Z dimension.
@@ -211,8 +211,6 @@ public class AllocationAdapter extends Allocation {
         mSelectedZ = z;
     }
 
-    /** @deprecated renderscript is deprecated in J
-     */
     static public AllocationAdapter create1D(RenderScript rs, Allocation a) {
         rs.validate();
         AllocationAdapter aa = new AllocationAdapter(0, rs, a);
@@ -224,8 +222,6 @@ public class AllocationAdapter extends Allocation {
         return aa;
     }
 
-    /** @deprecated renderscript is deprecated in J
-     */
     static public AllocationAdapter create2D(RenderScript rs, Allocation a) {
         android.util.Log.e("rs", "create2d " + a);
         rs.validate();
@@ -239,7 +235,7 @@ public class AllocationAdapter extends Allocation {
     }
 
 
-    /** @deprecated renderscript is deprecated in J
+    /**
      * Override the Allocation resize.  Resizing adapters is not
      * allowed and will throw a RSInvalidStateException.
      *
