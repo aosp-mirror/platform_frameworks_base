@@ -724,6 +724,9 @@ public class Element extends BaseObj {
         }
         return rs.mElement_MATRIX_4X4;
     }
+
+    /** @deprecated use MATRIX_4X4
+    */
     public static Element MATRIX4X4(RenderScript rs) {
         return MATRIX_4X4(rs);
     }
