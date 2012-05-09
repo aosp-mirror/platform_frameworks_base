@@ -343,10 +343,16 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 // new ERI text
                 if (ss.getState() == ServiceState.STATE_IN_SERVICE) {
                     eriText = phone.getCdmaEriText();
+                } else if (ss.getState() == ServiceState.STATE_POWER_OFF) {
+                    eriText = phone.mIccRecords.getServiceProviderName();
+                    if (TextUtils.isEmpty(eriText)) {
+                        // Sets operator alpha property by retrieving from
+                        // build-time system property
+                        eriText = SystemProperties.get("ro.cdma.home.operator.alpha");
+                    }
                 } else {
                     // Note that ServiceState.STATE_OUT_OF_SERVICE is valid used
-                    // for
-                    // mRegistrationState 0,2,3 and 4
+                    // for mRegistrationState 0,2,3 and 4
                     eriText = phone.getContext()
                             .getText(com.android.internal.R.string.roamingTextSearching).toString();
                 }
