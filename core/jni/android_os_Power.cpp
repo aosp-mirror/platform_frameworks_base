@@ -24,6 +24,7 @@
 #include <hardware/power.h>
 #include <hardware_legacy/power.h>
 #include <cutils/android_reboot.h>
+#include <suspend/autosuspend.h>
 
 static struct power_module *sPowerModule;
 
@@ -70,8 +71,14 @@ setLastUserActivityTimeout(JNIEnv *env, jobject clazz, jlong timeMS)
 static int
 setScreenState(JNIEnv *env, jobject clazz, jboolean on)
 {
-    if (sPowerModule)
-        sPowerModule->setInteractive(sPowerModule, on);
+    if (on) {
+	autosuspend_disable();
+	sPowerModule->setInteractive(sPowerModule, true);
+    } else {
+	sPowerModule->setInteractive(sPowerModule, false);
+	autosuspend_enable();
+    }
+
     return 0;
 }
 
