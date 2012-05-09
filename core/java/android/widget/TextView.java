@@ -397,7 +397,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * EditText specific data, created on demand when one of the Editor fields is used.
-     * See {@link #createEditorIfNeeded(String)}.
+     * See {@link #createEditorIfNeeded()}.
      */
     private Editor mEditor;
 
@@ -798,20 +798,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 break;
 
             case com.android.internal.R.styleable.TextView_imeOptions:
-                createEditorIfNeeded("IME options specified in constructor");
+                createEditorIfNeeded();
                 mEditor.createInputContentTypeIfNeeded();
                 mEditor.mInputContentType.imeOptions = a.getInt(attr,
                         mEditor.mInputContentType.imeOptions);
                 break;
 
             case com.android.internal.R.styleable.TextView_imeActionLabel:
-                createEditorIfNeeded("IME action label specified in constructor");
+                createEditorIfNeeded();
                 mEditor.createInputContentTypeIfNeeded();
                 mEditor.mInputContentType.imeActionLabel = a.getText(attr);
                 break;
 
             case com.android.internal.R.styleable.TextView_imeActionId:
-                createEditorIfNeeded("IME action id specified in constructor");
+                createEditorIfNeeded();
                 mEditor.createInputContentTypeIfNeeded();
                 mEditor.mInputContentType.imeActionId = a.getInt(attr,
                         mEditor.mInputContentType.imeActionId);
@@ -883,7 +883,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             try {
-                createEditorIfNeeded("inputMethod in ctor");
+                createEditorIfNeeded();
                 mEditor.mKeyListener = (KeyListener) c.newInstance();
             } catch (InstantiationException ex) {
                 throw new RuntimeException(ex);
@@ -898,7 +898,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mEditor.mInputType = EditorInfo.TYPE_CLASS_TEXT;
             }
         } else if (digits != null) {
-            createEditorIfNeeded("digits in ctor");
+            createEditorIfNeeded();
             mEditor.mKeyListener = DigitsKeyListener.getInstance(digits.toString());
             // If no input type was specified, we will default to generic
             // text, since we can't tell the IME about the set of digits
@@ -910,11 +910,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // If set, the input type overrides what was set using the deprecated singleLine flag.
             singleLine = !isMultilineInputType(inputType);
         } else if (phone) {
-            createEditorIfNeeded("dialer in ctor");
+            createEditorIfNeeded();
             mEditor.mKeyListener = DialerKeyListener.getInstance();
             mEditor.mInputType = inputType = EditorInfo.TYPE_CLASS_PHONE;
         } else if (numeric != 0) {
-            createEditorIfNeeded("numeric in ctor");
+            createEditorIfNeeded();
             mEditor.mKeyListener = DigitsKeyListener.getInstance((numeric & SIGNED) != 0,
                                                    (numeric & DECIMAL) != 0);
             inputType = EditorInfo.TYPE_CLASS_NUMBER;
@@ -951,7 +951,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 break;
             }
 
-            createEditorIfNeeded("text input in ctor");
+            createEditorIfNeeded();
             mEditor.mKeyListener = TextKeyListener.getInstance(autotext, cap);
             mEditor.mInputType = inputType;
         } else if (isTextSelectable()) {
@@ -964,7 +964,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // So that selection can be changed using arrow keys and touch is handled.
             setMovementMethod(ArrowKeyMovementMethod.getInstance());
         } else if (editable) {
-            createEditorIfNeeded("editable input in ctor");
+            createEditorIfNeeded();
             mEditor.mKeyListener = TextKeyListener.getInstance();
             mEditor.mInputType = EditorInfo.TYPE_CLASS_TEXT;
         } else {
@@ -987,7 +987,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 webPasswordInputType, numberPasswordInputType);
 
         if (selectallonfocus) {
-            createEditorIfNeeded("selectallonfocus in constructor");
+            createEditorIfNeeded();
             mEditor.mSelectAllOnFocus = true;
 
             if (bufferType == BufferType.NORMAL)
@@ -1335,7 +1335,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         fixFocusableAndClickableSettings();
 
         if (input != null) {
-            createEditorIfNeeded("input is not null");
+            createEditorIfNeeded();
             try {
                 mEditor.mInputType = mEditor.mKeyListener.getInputType();
             } catch (IncompatibleClassChangeError e) {
@@ -1355,7 +1355,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private void setKeyListenerOnly(KeyListener input) {
         if (mEditor == null && input == null) return; // null is the default value
 
-        createEditorIfNeeded("setKeyListenerOnly");
+        createEditorIfNeeded();
         if (mEditor.mKeyListener != input) {
             mEditor.mKeyListener = input;
             if (input != null && !(mText instanceof Editable)) {
@@ -2375,7 +2375,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @android.view.RemotableViewMethod
     public final void setShowSoftInputOnFocus(boolean show) {
-        createEditorIfNeeded("setShowSoftInputOnFocus");
+        createEditorIfNeeded();
         mEditor.mShowSoftInputOnFocus = show;
     }
 
@@ -3255,7 +3255,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     Selection.setSelection((Spannable) mText, ss.selStart, ss.selEnd);
 
                     if (ss.frozenWithFocus) {
-                        createEditorIfNeeded("restore instance with focus");
+                        createEditorIfNeeded();
                         mEditor.mFrozenWithFocus = true;
                     }
                 }
@@ -3416,7 +3416,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (type == BufferType.EDITABLE || getKeyListener() != null ||
                 needEditableForNotification) {
-            createEditorIfNeeded("setText with BufferType.EDITABLE or non null mInput");
+            createEditorIfNeeded();
             Editable t = mEditableFactory.newEditable(text);
             text = t;
             setFilters(t, mFilters);
@@ -3760,7 +3760,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public void setRawInputType(int type) {
         if (type == InputType.TYPE_NULL && mEditor == null) return; //TYPE_NULL is the default value
-        createEditorIfNeeded("non null input type");
+        createEditorIfNeeded();
         mEditor.mInputType = type;
     }
 
@@ -3803,7 +3803,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         setRawInputType(type);
         if (direct) {
-            createEditorIfNeeded("setInputType");
+            createEditorIfNeeded();
             mEditor.mKeyListener = input;
         } else {
             setKeyListenerOnly(input);
@@ -3829,7 +3829,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_imeOptions
      */
     public void setImeOptions(int imeOptions) {
-        createEditorIfNeeded("IME options specified");
+        createEditorIfNeeded();
         mEditor.createInputContentTypeIfNeeded();
         mEditor.mInputContentType.imeOptions = imeOptions;
     }
@@ -3856,7 +3856,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_imeActionId
      */
     public void setImeActionLabel(CharSequence label, int actionId) {
-        createEditorIfNeeded("IME action label specified");
+        createEditorIfNeeded();
         mEditor.createInputContentTypeIfNeeded();
         mEditor.mInputContentType.imeActionLabel = label;
         mEditor.mInputContentType.imeActionId = actionId;
@@ -3893,7 +3893,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * modifier will, however, allow the user to insert a newline character.
      */
     public void setOnEditorActionListener(OnEditorActionListener l) {
-        createEditorIfNeeded("Editor action listener set");
+        createEditorIfNeeded();
         mEditor.createInputContentTypeIfNeeded();
         mEditor.mInputContentType.onEditorActionListener = l;
     }
@@ -3990,7 +3990,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_privateImeOptions
      */
     public void setPrivateImeOptions(String type) {
-        createEditorIfNeeded("Private IME option set");
+        createEditorIfNeeded();
         mEditor.createInputContentTypeIfNeeded();
         mEditor.mInputContentType.privateImeOptions = type;
     }
@@ -4018,7 +4018,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_editorExtras
      */
     public void setInputExtras(int xmlResId) throws XmlPullParserException, IOException {
-        createEditorIfNeeded("Input extra set");
+        createEditorIfNeeded();
         XmlResourceParser parser = getResources().getXml(xmlResId);
         mEditor.createInputContentTypeIfNeeded();
         mEditor.mInputContentType.extras = new Bundle();
@@ -4037,7 +4037,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public Bundle getInputExtras(boolean create) {
         if (mEditor == null && !create) return null;
-        createEditorIfNeeded("get Input extra");
+        createEditorIfNeeded();
         if (mEditor.mInputContentType == null) {
             if (!create) return null;
             mEditor.createInputContentTypeIfNeeded();
@@ -4089,7 +4089,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * be cleared (and you should provide a <code>null</code> icon as well).
      */
     public void setError(CharSequence error, Drawable icon) {
-        createEditorIfNeeded("setError");
+        createEditorIfNeeded();
         mEditor.setError(error, icon);
     }
 
@@ -4598,7 +4598,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void setTextIsSelectable(boolean selectable) {
         if (!selectable && mEditor == null) return; // false is default value with no edit data
 
-        createEditorIfNeeded("setTextIsSelectable");
+        createEditorIfNeeded();
         if (mEditor.mTextIsSelectable == selectable) return;
 
         mEditor.mTextIsSelectable = selectable;
@@ -5411,7 +5411,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @return Returns true if the text was successfully extracted, else false.
      */
     public boolean extractText(ExtractedTextRequest request, ExtractedText outText) {
-        createEditorIfNeeded("extractText");
+        createEditorIfNeeded();
         return mEditor.extractText(request, outText);
     }
 
@@ -6825,7 +6825,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @android.view.RemotableViewMethod
     public void setSelectAllOnFocus(boolean selectAllOnFocus) {
-        createEditorIfNeeded("setSelectAllOnFocus");
+        createEditorIfNeeded();
         mEditor.mSelectAllOnFocus = selectAllOnFocus;
 
         if (selectAllOnFocus && !(mText instanceof Spannable)) {
@@ -6844,7 +6844,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @android.view.RemotableViewMethod
     public void setCursorVisible(boolean visible) {
         if (visible && mEditor == null) return; // visible is the default value with no edit data
-        createEditorIfNeeded("setCursorVisible");
+        createEditorIfNeeded();
         if (mEditor.mCursorVisible != visible) {
             mEditor.mCursorVisible = visible;
             invalidate();
@@ -7903,7 +7903,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * that case, to allow for quick replacement.
      */
     public void setCustomSelectionActionModeCallback(ActionMode.Callback actionModeCallback) {
-        createEditorIfNeeded("custom selection action mode set");
+        createEditorIfNeeded();
         mEditor.mCustomSelectionActionModeCallback = actionModeCallback;
     }
 
@@ -8274,16 +8274,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Also note that for performance reasons, the mEditor is created when needed, but not
      * reset when no more edit-specific fields are needed.
      */
-    private void createEditorIfNeeded(String reason) {
+    private void createEditorIfNeeded() {
         if (mEditor == null) {
-            if (!(this instanceof EditText)) {
-                Log.e(LOG_TAG + " EDITOR", "Creating an Editor on a regular TextView. " + reason);
-            }
             mEditor = new Editor(this);
-        } else {
-            if (!(this instanceof EditText)) {
-                Log.d(LOG_TAG + " EDITOR", "Redundant Editor creation. " + reason);
-            }
         }
     }
 
