@@ -453,13 +453,27 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
      * Tells the Face Unlock service to start displaying its UI and start processing.
      */
     private void startUi(IBinder windowToken, int x, int y, int w, int h) {
-        if (DEBUG) Log.d(TAG, "startUi()");
+        Log.d(TAG, "startUi()");
         synchronized (mServiceRunningLock) {
             if (!mServiceRunning) {
                 if (DEBUG) Log.d(TAG, "Starting Face Unlock");
                 try {
+                    // TODO: these checks and logs are for tracking down bug 6409767 and can be
+                    // removed when that bug is fixed.
+                    if (mService == null) {
+                        Log.d(TAG, "mService is null");
+                    }
+                    if (windowToken == null) {
+                        Log.d(TAG, "windowToken is null");
+                    }
+                    if (mLockPatternUtils == null) {
+                        Log.d(TAG, "mLockPatternUtils is null");
+                    }
+                    Log.d(TAG, "x,y,w,h,live: " + x + "," + y + "," + w + "," + h + "," +
+                            (mLockPatternUtils.isBiometricWeakLivelinessEnabled()?"yes":"no"));
                     mService.startUi(windowToken, x, y, w, h,
                             mLockPatternUtils.isBiometricWeakLivelinessEnabled());
+                    Log.d(TAG, "mService.startUi() called");
                 } catch (RemoteException e) {
                     Log.e(TAG, "Caught exception starting Face Unlock: " + e.toString());
                     return;
