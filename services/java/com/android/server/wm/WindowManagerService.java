@@ -6671,8 +6671,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int SET_TRANSPARENT_REGION = ANIMATOR_WHAT_OFFSET + 1;
         public static final int SET_WALLPAPER_OFFSET = ANIMATOR_WHAT_OFFSET + 2;
         public static final int SET_DIM_PARAMETERS = ANIMATOR_WHAT_OFFSET + 3;
-        public static final int SET_MOVE_ANIMATION = ANIMATOR_WHAT_OFFSET + 4;
-        public static final int CLEAR_PENDING_ACTIONS = ANIMATOR_WHAT_OFFSET + 5;
+        public static final int CLEAR_PENDING_ACTIONS = ANIMATOR_WHAT_OFFSET + 4;
 
         private Session mLastReportedHold;
 
@@ -7151,18 +7150,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case SET_DIM_PARAMETERS: {
                     mAnimator.mDimParams = (DimAnimator.Parameters) msg.obj;
-
-                    scheduleAnimationLocked();
-                    break;
-                }
-
-                case SET_MOVE_ANIMATION: {
-                    WindowAnimator.SetAnimationParams params =
-                            (WindowAnimator.SetAnimationParams) msg.obj;
-                    WindowStateAnimator winAnimator = params.mWinAnimator;
-                    winAnimator.setAnimation(params.mAnimation);
-                    winAnimator.mAnimDw = params.mAnimDw;
-                    winAnimator.mAnimDh = params.mAnimDh;
 
                     scheduleAnimationLocked();
                     break;
@@ -8415,9 +8402,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     winAnimator.setAnimation(a);
                     winAnimator.mAnimDw = w.mLastFrame.left - w.mFrame.left;
                     winAnimator.mAnimDh = w.mLastFrame.top - w.mFrame.top;
-                } else {
-                    winAnimator.mAnimDw = innerDw;
-                    winAnimator.mAnimDh = innerDh;
                 }
 
                 //Slog.i(TAG, "Window " + this + " clearing mContentChanged - done placing");
