@@ -72,11 +72,15 @@ static int
 setScreenState(JNIEnv *env, jobject clazz, jboolean on)
 {
     if (on) {
-	autosuspend_disable();
-	sPowerModule->setInteractive(sPowerModule, true);
+        autosuspend_disable();
+        if (sPowerModule) {
+            sPowerModule->setInteractive(sPowerModule, true);
+        }
     } else {
-	sPowerModule->setInteractive(sPowerModule, false);
-	autosuspend_enable();
+        if (sPowerModule) {
+            sPowerModule->setInteractive(sPowerModule, false);
+        }
+        autosuspend_enable();
     }
 
     return 0;
