@@ -24454,6 +24454,7 @@ package android.view {
     method public void onInitializeAccessibilityNodeInfo(android.view.View, android.view.accessibility.AccessibilityNodeInfo);
     method public void onPopulateAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
     method public boolean onRequestSendAccessibilityEvent(android.view.ViewGroup, android.view.View, android.view.accessibility.AccessibilityEvent);
+    method public boolean performAccessibilityAction(android.view.View, int, android.os.Bundle);
     method public void sendAccessibilityEvent(android.view.View, int);
     method public void sendAccessibilityEventUnchecked(android.view.View, android.view.accessibility.AccessibilityEvent);
   }
