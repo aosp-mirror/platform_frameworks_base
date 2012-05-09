@@ -85,6 +85,15 @@ public class WindowAnimator {
         mPolicy = policy;
     }
 
+    void hideWallpapersLocked() {
+        for (final WindowToken token : mService.mWallpaperTokens) {
+            for (final WindowState wallpaper : token.windows) {
+                wallpaper.mWinAnimator.hide();
+            }
+            token.hidden = true;
+        }
+    }
+
     private void testWallpaperAndBackgroundLocked() {
         if (mWindowDetachedWallpaper != mDetachedWallpaper) {
             if (WindowManagerService.DEBUG_WALLPAPER) Slog.v(TAG,
