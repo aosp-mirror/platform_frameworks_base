@@ -3825,7 +3825,8 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             if (DEBUG_APP_TRANSITIONS) Slog.v(
                     TAG, "Prepare app transition: transit=" + transit
-                    + " mNextAppTransition=" + mNextAppTransition);
+                    + " mNextAppTransition=" + mNextAppTransition
+                    + "\nCallers=" + Debug.getCallers(3));
             if (okToDisplay()) {
                 if (mNextAppTransition == WindowManagerPolicy.TRANSIT_UNSET
                         || mNextAppTransition == WindowManagerPolicy.TRANSIT_NONE) {
@@ -4237,7 +4238,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     e = new RuntimeException();
                     e.fillInStackTrace();
                 }
-                Slog.v(TAG, "setAppVisibility(" + token + ", " + visible
+                Slog.v(TAG, "setAppVisibility(" + token + ", visible=" + visible
                         + "): mNextAppTransition=" + mNextAppTransition
                         + " hidden=" + wtoken.hidden
                         + " hiddenRequested=" + wtoken.hiddenRequested, e);
@@ -7866,8 +7867,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 mToTopApps.clear();
             }
 
+            // if wallpaper is animating in or out set oldWallpaper to null else to wallpaper
             WindowState oldWallpaper =
                     mWallpaperTarget != null && mWallpaperTarget.mWinAnimator.isAnimating()
+                        && !mWallpaperTarget.mWinAnimator.isDummyAnimation()
                     ? null : mWallpaperTarget;
 
             adjustWallpaperWindowsLocked();
