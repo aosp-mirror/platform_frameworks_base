@@ -307,6 +307,11 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static void freeTextLayoutCaches() {
+        // nothing to be done here yet.
+    }
+
+    @LayoutlibDelegate
     /*package*/ static int initRaster(int nativeBitmapOrZero) {
         if (nativeBitmapOrZero > 0) {
             // get the Bitmap from the int
