@@ -212,6 +212,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     Choreographer mChoreographer;
     boolean mAnimating;
+    boolean mClosing; // only valid when mAnimating; indicates the initial acceleration
     float mAnimY;
     float mAnimVel;
     float mAnimAccel;
@@ -1276,14 +1277,26 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
+    void resetLastAnimTime() {
+        mAnimLastTimeNanos = System.nanoTime();
+        if (SPEW) {
+            Throwable t = new Throwable();
+            t.fillInStackTrace();
+            Slog.d(TAG, "resetting last anim time=" + mAnimLastTimeNanos, t);
+        }
+    }
+
     void doAnimation(long frameTimeNanos) {
         if (mAnimating) {
-            if (SPEW) Slog.d(TAG, "doAnimation");
+            if (SPEW) Slog.d(TAG, "doAnimation dt=" + (frameTimeNanos - mAnimLastTimeNanos));
             if (SPEW) Slog.d(TAG, "doAnimation before mAnimY=" + mAnimY);
             incrementAnim(frameTimeNanos);
-            if (SPEW) Slog.d(TAG, "doAnimation after  mAnimY=" + mAnimY);
+            if (SPEW) {
+                Slog.d(TAG, "doAnimation after  mAnimY=" + mAnimY);
+                Slog.d(TAG, "doAnimation expandedViewMax=" + getExpandedViewMaxHeight());
+            }
 
-            if (mAnimY >= getExpandedViewMaxHeight()-1) {
+            if (mAnimY >= getExpandedViewMaxHeight()-1 && !mClosing) {
                 if (SPEW) Slog.d(TAG, "Animation completed to expanded state.");
                 mAnimating = false;
                 updateExpandedViewPos(EXPANDED_FULL_OPEN);
@@ -1291,14 +1304,14 @@ public class PhoneStatusBar extends BaseStatusBar {
                 return;
             }
 
-            if (mAnimY == 0 && mAnimAccel == 0 && mAnimVel == 0) {
+            if (mAnimY == 0 && mAnimAccel == 0 && mClosing) {
                 if (SPEW) Slog.d(TAG, "Animation completed to collapsed state.");
                 mAnimating = false;
                 performCollapse();
                 return;
             }
 
-            if (mAnimY < getStatusBarHeight()) {
+            if (mAnimY < getStatusBarHeight() && mClosing) {
                 // Draw one more frame with the bar positioned at the top of the screen
                 // before ending the animation so that the user sees the bar in
                 // its final position.  The call to performCollapse() causes a window
@@ -1336,6 +1349,9 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
     
     void doRevealAnimation(long frameTimeNanos) {
+        if (SPEW) {
+            Slog.d(TAG, "doRevealAnimation: dt=" + (frameTimeNanos - mAnimLastTimeNanos));
+        }
         final int h = getCloseViewHeight() + getStatusBarHeight();
         if (mAnimatingReveal && mAnimating && mAnimY < h) {
             incrementAnim(frameTimeNanos);
@@ -1365,7 +1381,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             updateExpandedViewPos((int)mAnimY);
             mAnimating = true;
             mAnimatingReveal = true;
-            mAnimLastTimeNanos = System.nanoTime();
+            resetLastAnimTime();
             mChoreographer.removeCallbacks(Choreographer.CALLBACK_ANIMATION,
                     mAnimationCallback, null);
             mChoreographer.removeCallbacks(Choreographer.CALLBACK_ANIMATION,
@@ -1439,8 +1455,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         //Slog.d(TAG, "mAnimY=" + mAnimY + " mAnimVel=" + mAnimVel
         //        + " mAnimAccel=" + mAnimAccel);
 
-        mAnimLastTimeNanos = System.nanoTime();
+        resetLastAnimTime();
         mAnimating = true;
+        mClosing = mAnimAccel < 0;
 
         mChoreographer.removeCallbacks(Choreographer.CALLBACK_ANIMATION,
                 mAnimationCallback, null);
