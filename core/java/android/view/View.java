@@ -11076,21 +11076,29 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         if ((mPrivateFlags & REQUEST_TRANSPARENT_REGIONS) != 0) {
             mParent.requestTransparentRegion(this);
         }
+
         if ((mPrivateFlags & AWAKEN_SCROLL_BARS_ON_ATTACH) != 0) {
             initialAwakenScrollBars();
             mPrivateFlags &= ~AWAKEN_SCROLL_BARS_ON_ATTACH;
         }
+
         jumpDrawablesToCurrentState();
+
         // Order is important here: LayoutDirection MUST be resolved before Padding
         // and TextDirection
         resolveLayoutDirection();
         resolvePadding();
         resolveTextDirection();
         resolveTextAlignment();
+
         clearAccessibilityFocus();
         if (isFocused()) {
             InputMethodManager imm = InputMethodManager.peekInstance();
             imm.focusIn(this);
+        }
+
+        if (mAttachInfo != null && mDisplayList != null) {
+            mAttachInfo.mViewRootImpl.dequeueDisplayList(mDisplayList);
         }
     }
 
@@ -11304,7 +11312,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
         if (mAttachInfo != null) {
             if (mDisplayList != null) {
-                mAttachInfo.mViewRootImpl.invalidateDisplayList(mDisplayList);
+                mAttachInfo.mViewRootImpl.enqueueDisplayList(mDisplayList);
             }
             mAttachInfo.mViewRootImpl.cancelInvalidate(this);
         } else {
@@ -11998,7 +12006,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             boolean caching = false;
             final HardwareCanvas canvas = displayList.start();
-            int restoreCount = 0;
             int width = mRight - mLeft;
             int height = mBottom - mTop;
 
@@ -12629,10 +12636,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             }
         }
         return more;
-    }
-
-    void setDisplayListProperties() {
-        setDisplayListProperties(mDisplayList);
     }
 
     /**
