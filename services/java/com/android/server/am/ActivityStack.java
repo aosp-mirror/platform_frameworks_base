@@ -1794,10 +1794,6 @@ final class ActivityStack {
                 mService.mWindowManager.prepareAppTransition(
                         WindowManagerPolicy.TRANSIT_NONE, keepCurTransition);
                 mNoAnimActivities.add(r);
-            } else if ((r.intent.getFlags()&Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0) {
-                mService.mWindowManager.prepareAppTransition(
-                        WindowManagerPolicy.TRANSIT_TASK_OPEN, keepCurTransition);
-                mNoAnimActivities.remove(r);
             } else {
                 mService.mWindowManager.prepareAppTransition(newTask
                         ? WindowManagerPolicy.TRANSIT_TASK_OPEN
