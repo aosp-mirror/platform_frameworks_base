@@ -152,6 +152,7 @@ class Plotter:
     self.time_until_settled = self._make_timeseries()
     self.time_until_flat_delay_expired = self._make_timeseries()
     self.time_until_swing_delay_expired = self._make_timeseries()
+    self.time_until_acceleration_delay_expired = self._make_timeseries()
     self.stability_axes = self._add_timeseries_axes(
         6, 'Proposal Stability', 'ms', [-10, 600],
         sharex=shared_axis,
@@ -162,6 +163,8 @@ class Plotter:
         self.stability_axes, 'time until flat delay expired', 'green')
     self.time_until_swing_delay_expired_line = self._add_timeseries_line(
         self.stability_axes, 'time until swing delay expired', 'blue')
+    self.time_until_acceleration_delay_expired_line = self._add_timeseries_line(
+        self.stability_axes, 'time until acceleration delay expired', 'red')
     self._add_timeseries_legend(self.stability_axes)
 
     self.sample_latency = self._make_timeseries()
@@ -253,6 +256,7 @@ class Plotter:
     self.parse_time_until_settled = None
     self.parse_time_until_flat_delay_expired = None
     self.parse_time_until_swing_delay_expired = None
+    self.parse_time_until_acceleration_delay_expired = None
     self.parse_sample_latency = None
 
   # Update samples.
@@ -303,6 +307,7 @@ class Plotter:
         self.parse_time_until_settled = self._get_following_number(line, 'timeUntilSettledMS=')
         self.parse_time_until_flat_delay_expired = self._get_following_number(line, 'timeUntilFlatDelayExpiredMS=')
         self.parse_time_until_swing_delay_expired = self._get_following_number(line, 'timeUntilSwingDelayExpiredMS=')
+        self.parse_time_until_acceleration_delay_expired = self._get_following_number(line, 'timeUntilAccelerationDelayExpiredMS=')
 
         self._append(self.raw_acceleration_x, timeindex, self.parse_raw_acceleration_x)
         self._append(self.raw_acceleration_y, timeindex, self.parse_raw_acceleration_y)
@@ -326,6 +331,7 @@ class Plotter:
         self._append(self.time_until_settled, timeindex, self.parse_time_until_settled)
         self._append(self.time_until_flat_delay_expired, timeindex, self.parse_time_until_flat_delay_expired)
         self._append(self.time_until_swing_delay_expired, timeindex, self.parse_time_until_swing_delay_expired)
+        self._append(self.time_until_acceleration_delay_expired, timeindex, self.parse_time_until_acceleration_delay_expired)
         self._append(self.sample_latency, timeindex, self.parse_sample_latency)
         self._reset_parse_state()
 
@@ -349,6 +355,7 @@ class Plotter:
       self._scroll(self.time_until_settled, bottom)
       self._scroll(self.time_until_flat_delay_expired, bottom)
       self._scroll(self.time_until_swing_delay_expired, bottom)
+      self._scroll(self.time_until_acceleration_delay_expired, bottom)
       self._scroll(self.sample_latency, bottom)
 
     # Redraw the plots.
@@ -368,6 +375,7 @@ class Plotter:
     self.time_until_settled_line.set_data(self.time_until_settled)
     self.time_until_flat_delay_expired_line.set_data(self.time_until_flat_delay_expired)
     self.time_until_swing_delay_expired_line.set_data(self.time_until_swing_delay_expired)
+    self.time_until_acceleration_delay_expired_line.set_data(self.time_until_acceleration_delay_expired)
     self.sample_latency_line.set_data(self.sample_latency)
 
     self.fig.canvas.draw_idle()
