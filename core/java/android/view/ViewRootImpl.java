@@ -408,6 +408,7 @@ public final class ViewRootImpl implements ViewParent,
 
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mAttachInfo.mScreenOn = powerManager.isScreenOn();
+        loadSystemProperties();
     }
 
     /**
@@ -844,6 +845,16 @@ public final class ViewRootImpl implements ViewParent,
     void invalidate() {
         mDirty.set(0, 0, mWidth, mHeight);
         scheduleTraversals();
+    }
+
+    void invalidateWorld(View view) {
+        view.invalidate();
+        if (view instanceof ViewGroup) {
+            ViewGroup parent = (ViewGroup)view;
+            for (int i=0; i<parent.getChildCount(); i++) {
+                invalidateWorld(parent.getChildAt(i));
+            }
+        }
     }
 
     public void invalidateChild(View child, Rect dirty) {
@@ -2730,6 +2741,7 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_INVALIDATE_DISPLAY_LIST = 21;
     private final static int MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST = 22;
     private final static int MSG_DISPATCH_DONE_ANIMATING = 23;
+    private final static int MSG_INVALIDATE_WORLD = 24;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -2996,6 +3008,9 @@ public final class ViewRootImpl implements ViewParent,
             } break;
             case MSG_DISPATCH_DONE_ANIMATING: {
                 handleDispatchDoneAnimating();
+            } break;
+            case MSG_INVALIDATE_WORLD: {
+                invalidateWorld(mView);
             } break;
             }
         }
@@ -4014,6 +4029,17 @@ public final class ViewRootImpl implements ViewParent,
     public void requestUpdateConfiguration(Configuration config) {
         Message msg = mHandler.obtainMessage(MSG_UPDATE_CONFIGURATION, config);
         mHandler.sendMessage(msg);
+    }
+
+    public void loadSystemProperties() {
+        boolean layout = SystemProperties.getBoolean(
+                View.DEBUG_LAYOUT_PROPERTY, false);
+        if (layout != mAttachInfo.mDebugLayout) {
+            mAttachInfo.mDebugLayout = layout;
+            if (!mHandler.hasMessages(MSG_INVALIDATE_WORLD)) {
+                mHandler.sendEmptyMessageDelayed(MSG_INVALIDATE_WORLD, 200);
+            }
+        }
     }
 
     private void destroyHardwareRenderer() {

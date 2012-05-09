@@ -47,12 +47,20 @@ public final class Trace {
 
     public static final String PROPERTY_TRACE_TAG_ENABLEFLAGS = "debug.atrace.tags.enableflags";
 
-    private static final long sEnabledTags = nativeGetEnabledTags();
+    private static long sEnabledTags = nativeGetEnabledTags();
 
     private static native long nativeGetEnabledTags();
     private static native void nativeTraceCounter(long tag, String name, int value);
     private static native void nativeTraceBegin(long tag, String name);
     private static native void nativeTraceEnd(long tag);
+
+    static {
+        SystemProperties.addChangeCallback(new Runnable() {
+            @Override public void run() {
+                sEnabledTags = nativeGetEnabledTags();
+            }
+        });
+    }
 
     private Trace() {
     }
