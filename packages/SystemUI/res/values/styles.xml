@@ -53,6 +53,21 @@
         <item name="android:textColor">@android:color/holo_blue_light</item>
     </style>
 
+    <style name="TextAppearance.StatusBar.Expanded" parent="@*android:style/TextAppearance.StatusBar" />
+
+    <style name="TextAppearance.StatusBar.Expanded.Clock">
+        <item name="android:textSize">32dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">#ffffff</item>
+    </style>
+
+    <style name="TextAppearance.StatusBar.Expanded.Date">
+        <item name="android:textSize">12dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">#666666</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
     <style name="Animation" />
 
     <style name="Animation.ShirtPocketPanel">
