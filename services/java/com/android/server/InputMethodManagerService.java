@@ -1142,6 +1142,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (mCurToken != null) {
             try {
                 if (DEBUG) Slog.v(TAG, "Removing window token: " + mCurToken);
+                if ((mImeWindowVis & InputMethodService.IME_ACTIVE) != 0) {
+                    // The current IME is shown. Hence an IME switch (transition) is happening.
+                    mWindowManagerService.saveLastInputMethodWindowForTransition();
+                }
                 mIWindowManager.removeWindowToken(mCurToken);
             } catch (RemoteException e) {
             }

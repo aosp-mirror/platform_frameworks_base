@@ -3430,9 +3430,6 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             WindowToken wtoken = mTokenMap.remove(token);
             if (wtoken != null) {
-                if (wtoken.windowType == TYPE_INPUT_METHOD && mInputMethodWindow != null) {
-                    mPolicy.setLastInputMethodWindowLw(mInputMethodWindow, mInputMethodTarget);
-                }
                 boolean delayed = false;
                 if (!wtoken.hidden) {
                     wtoken.hidden = true;
@@ -9266,6 +9263,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 return true;
             }
             return false;
+        }
+    }
+
+    // It is assumed that this method is called only by InputMethodManagerService.
+    public void saveLastInputMethodWindowForTransition() {
+        synchronized (mWindowMap) {
+            if (mInputMethodWindow != null) {
+                mPolicy.setLastInputMethodWindowLw(mInputMethodWindow, mInputMethodTarget);
+            }
         }
     }
 
