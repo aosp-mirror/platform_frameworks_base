@@ -402,7 +402,7 @@ public class InputMethodService extends AbstractInputMethodService {
             mShowInputFlags = 0;
             mShowInputRequested = false;
             mShowInputForced = false;
-            hideWindow();
+            doHideWindow();
             if (resultReceiver != null) {
                 resultReceiver.send(wasVis != isInputViewShown()
                         ? InputMethodManager.RESULT_HIDDEN
@@ -737,7 +737,7 @@ public class InputMethodService extends AbstractInputMethodService {
                         onDisplayCompletions(completions);
                     }
                 } else {
-                    hideWindow();
+                    doHideWindow();
                 }
             } else if (mCandidatesVisibility == View.VISIBLE) {
                 // If the candidates are currently visible, make sure the
@@ -745,7 +745,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 showWindow(false);
             } else {
                 // Otherwise hide the window.
-                hideWindow();
+                doHideWindow();
             }
             // If user uses hard keyboard, IME button should always be shown.
             boolean showing = onEvaluateInputViewShown();
@@ -1096,7 +1096,7 @@ public class InputMethodService extends AbstractInputMethodService {
             if (shown) {
                 showWindow(false);
             } else {
-                hideWindow();
+                doHideWindow();
             }
         }
     }
@@ -1449,9 +1449,13 @@ public class InputMethodService extends AbstractInputMethodService {
         mCandidatesViewStarted = false;
     }
 
+    private void doHideWindow() {
+        mImm.setImeWindowStatus(mToken, 0, mBackDisposition);
+        hideWindow();
+    }
+
     public void hideWindow() {
         finishViews();
-        mImm.setImeWindowStatus(mToken, 0, mBackDisposition);
         if (mWindowVisible) {
             mWindow.hide();
             mWindowVisible = false;
@@ -1703,7 +1707,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 // If we have the window visible for some other reason --
                 // most likely to show candidates -- then just get rid
                 // of it.  This really shouldn't happen, but just in case...
-                if (doIt) hideWindow();
+                if (doIt) doHideWindow();
             }
             return true;
         }
