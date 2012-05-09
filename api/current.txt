@@ -18753,7 +18753,7 @@ package android.renderscript {
     method public static android.renderscript.Element I8_2(android.renderscript.RenderScript);
     method public static android.renderscript.Element I8_3(android.renderscript.RenderScript);
     method public static android.renderscript.Element I8_4(android.renderscript.RenderScript);
-    method public static android.renderscript.Element MATRIX4X4(android.renderscript.RenderScript);
+    method public static deprecated android.renderscript.Element MATRIX4X4(android.renderscript.RenderScript);
     method public static android.renderscript.Element MATRIX_2X2(android.renderscript.RenderScript);
     method public static android.renderscript.Element MATRIX_3X3(android.renderscript.RenderScript);
     method public static android.renderscript.Element MATRIX_4X4(android.renderscript.RenderScript);
@@ -18908,27 +18908,27 @@ package android.renderscript {
     method public void skip(int);
   }
 
-  public class FileA3D extends android.renderscript.BaseObj {
-    method public static android.renderscript.FileA3D createFromAsset(android.renderscript.RenderScript, android.content.res.AssetManager, java.lang.String);
-    method public static android.renderscript.FileA3D createFromFile(android.renderscript.RenderScript, java.lang.String);
-    method public static android.renderscript.FileA3D createFromFile(android.renderscript.RenderScript, java.io.File);
-    method public static android.renderscript.FileA3D createFromResource(android.renderscript.RenderScript, android.content.res.Resources, int);
-    method public android.renderscript.FileA3D.IndexEntry getIndexEntry(int);
-    method public int getIndexEntryCount();
+  public deprecated class FileA3D extends android.renderscript.BaseObj {
+    method public static deprecated android.renderscript.FileA3D createFromAsset(android.renderscript.RenderScript, android.content.res.AssetManager, java.lang.String);
+    method public static deprecated android.renderscript.FileA3D createFromFile(android.renderscript.RenderScript, java.lang.String);
+    method public static deprecated android.renderscript.FileA3D createFromFile(android.renderscript.RenderScript, java.io.File);
+    method public static deprecated android.renderscript.FileA3D createFromResource(android.renderscript.RenderScript, android.content.res.Resources, int);
+    method public deprecated android.renderscript.FileA3D.IndexEntry getIndexEntry(int);
+    method public deprecated int getIndexEntryCount();
   }
 
-  public static final class FileA3D.EntryType extends java.lang.Enum {
+  public static final deprecated class FileA3D.EntryType extends java.lang.Enum {
     method public static android.renderscript.FileA3D.EntryType valueOf(java.lang.String);
     method public static final android.renderscript.FileA3D.EntryType[] values();
-    enum_constant public static final android.renderscript.FileA3D.EntryType MESH;
-    enum_constant public static final android.renderscript.FileA3D.EntryType UNKNOWN;
+    enum_constant public static final deprecated android.renderscript.FileA3D.EntryType MESH;
+    enum_constant public static final deprecated android.renderscript.FileA3D.EntryType UNKNOWN;
   }
 
-  public static class FileA3D.IndexEntry {
-    method public android.renderscript.FileA3D.EntryType getEntryType();
-    method public android.renderscript.Mesh getMesh();
-    method public java.lang.String getName();
-    method public android.renderscript.BaseObj getObject();
+  public static deprecated class FileA3D.IndexEntry {
+    method public deprecated android.renderscript.FileA3D.EntryType getEntryType();
+    method public deprecated android.renderscript.Mesh getMesh();
+    method public deprecated java.lang.String getName();
+    method public deprecated android.renderscript.BaseObj getObject();
   }
 
   public class Float2 {
@@ -18955,21 +18955,21 @@ package android.renderscript {
     field public float z;
   }
 
-  public class Font extends android.renderscript.BaseObj {
-    method public static android.renderscript.Font create(android.renderscript.RenderScript, android.content.res.Resources, java.lang.String, android.renderscript.Font.Style, float);
-    method public static android.renderscript.Font createFromAsset(android.renderscript.RenderScript, android.content.res.Resources, java.lang.String, float);
-    method public static android.renderscript.Font createFromFile(android.renderscript.RenderScript, android.content.res.Resources, java.lang.String, float);
-    method public static android.renderscript.Font createFromFile(android.renderscript.RenderScript, android.content.res.Resources, java.io.File, float);
-    method public static android.renderscript.Font createFromResource(android.renderscript.RenderScript, android.content.res.Resources, int, float);
+  public deprecated class Font extends android.renderscript.BaseObj {
+    method public static deprecated android.renderscript.Font create(android.renderscript.RenderScript, android.content.res.Resources, java.lang.String, android.renderscript.Font.Style, float);
+    method public static deprecated android.renderscript.Font createFromAsset(android.renderscript.RenderScript, android.content.res.Resources, java.lang.String, float);
+    method public static deprecated android.renderscript.Font createFromFile(android.renderscript.RenderScript, android.content.res.Resources, java.lang.String, float);
+    method public static deprecated android.renderscript.Font createFromFile(android.renderscript.RenderScript, android.content.res.Resources, java.io.File, float);
+    method public static deprecated android.renderscript.Font createFromResource(android.renderscript.RenderScript, android.content.res.Resources, int, float);
   }
 
-  public static final class Font.Style extends java.lang.Enum {
+  public static final deprecated class Font.Style extends java.lang.Enum {
     method public static android.renderscript.Font.Style valueOf(java.lang.String);
     method public static final android.renderscript.Font.Style[] values();
-    enum_constant public static final android.renderscript.Font.Style BOLD;
-    enum_constant public static final android.renderscript.Font.Style BOLD_ITALIC;
-    enum_constant public static final android.renderscript.Font.Style ITALIC;
-    enum_constant public static final android.renderscript.Font.Style NORMAL;
+    enum_constant public static final deprecated android.renderscript.Font.Style BOLD;
+    enum_constant public static final deprecated android.renderscript.Font.Style BOLD_ITALIC;
+    enum_constant public static final deprecated android.renderscript.Font.Style ITALIC;
+    enum_constant public static final deprecated android.renderscript.Font.Style NORMAL;
   }
 
   public class Int2 {
@@ -19179,33 +19179,33 @@ package android.renderscript {
     method public android.renderscript.ProgramFragment create();
   }
 
-  public class ProgramFragmentFixedFunction extends android.renderscript.ProgramFragment {
+  public deprecated class ProgramFragmentFixedFunction extends android.renderscript.ProgramFragment {
   }
 
-  public static class ProgramFragmentFixedFunction.Builder {
-    ctor public ProgramFragmentFixedFunction.Builder(android.renderscript.RenderScript);
-    method public android.renderscript.ProgramFragmentFixedFunction create();
-    method public android.renderscript.ProgramFragmentFixedFunction.Builder setPointSpriteTexCoordinateReplacement(boolean);
-    method public android.renderscript.ProgramFragmentFixedFunction.Builder setTexture(android.renderscript.ProgramFragmentFixedFunction.Builder.EnvMode, android.renderscript.ProgramFragmentFixedFunction.Builder.Format, int) throws java.lang.IllegalArgumentException;
-    method public android.renderscript.ProgramFragmentFixedFunction.Builder setVaryingColor(boolean);
-    field public static final int MAX_TEXTURE = 2; // 0x2
+  public static deprecated class ProgramFragmentFixedFunction.Builder {
+    ctor public deprecated ProgramFragmentFixedFunction.Builder(android.renderscript.RenderScript);
+    method public deprecated android.renderscript.ProgramFragmentFixedFunction create();
+    method public deprecated android.renderscript.ProgramFragmentFixedFunction.Builder setPointSpriteTexCoordinateReplacement(boolean);
+    method public deprecated android.renderscript.ProgramFragmentFixedFunction.Builder setTexture(android.renderscript.ProgramFragmentFixedFunction.Builder.EnvMode, android.renderscript.ProgramFragmentFixedFunction.Builder.Format, int) throws java.lang.IllegalArgumentException;
+    method public deprecated android.renderscript.ProgramFragmentFixedFunction.Builder setVaryingColor(boolean);
+    field public static final deprecated int MAX_TEXTURE = 2; // 0x2
   }
 
-  public static final class ProgramFragmentFixedFunction.Builder.EnvMode extends java.lang.Enum {
+  public static final deprecated class ProgramFragmentFixedFunction.Builder.EnvMode extends java.lang.Enum {
     method public static android.renderscript.ProgramFragmentFixedFunction.Builder.EnvMode valueOf(java.lang.String);
     method public static final android.renderscript.ProgramFragmentFixedFunction.Builder.EnvMode[] values();
-    enum_constant public static final android.renderscript.ProgramFragmentFixedFunction.Builder.EnvMode DECAL;
-    enum_constant public static final android.renderscript.ProgramFragmentFixedFunction.Builder.EnvMode MODULATE;
-    enum_constant public static final android.renderscript.ProgramFragmentFixedFunction.Builder.EnvMode REPLACE;
+    enum_constant public static final deprecated android.renderscript.ProgramFragmentFixedFunction.Builder.EnvMode DECAL;
+    enum_constant public static final deprecated android.renderscript.ProgramFragmentFixedFunction.Builder.EnvMode MODULATE;
+    enum_constant public static final deprecated android.renderscript.ProgramFragmentFixedFunction.Builder.EnvMode REPLACE;
   }
 
-  public static final class ProgramFragmentFixedFunction.Builder.Format extends java.lang.Enum {
+  public static final deprecated class ProgramFragmentFixedFunction.Builder.Format extends java.lang.Enum {
     method public static android.renderscript.ProgramFragmentFixedFunction.Builder.Format valueOf(java.lang.String);
     method public static final android.renderscript.ProgramFragmentFixedFunction.Builder.Format[] values();
-    enum_constant public static final android.renderscript.ProgramFragmentFixedFunction.Builder.Format ALPHA;
-    enum_constant public static final android.renderscript.ProgramFragmentFixedFunction.Builder.Format LUMINANCE_ALPHA;
-    enum_constant public static final android.renderscript.ProgramFragmentFixedFunction.Builder.Format RGB;
-    enum_constant public static final android.renderscript.ProgramFragmentFixedFunction.Builder.Format RGBA;
+    enum_constant public static final deprecated android.renderscript.ProgramFragmentFixedFunction.Builder.Format ALPHA;
+    enum_constant public static final deprecated android.renderscript.ProgramFragmentFixedFunction.Builder.Format LUMINANCE_ALPHA;
+    enum_constant public static final deprecated android.renderscript.ProgramFragmentFixedFunction.Builder.Format RGB;
+    enum_constant public static final deprecated android.renderscript.ProgramFragmentFixedFunction.Builder.Format RGBA;
   }
 
   public class ProgramRaster extends android.renderscript.BaseObj {
@@ -19307,22 +19307,22 @@ package android.renderscript {
     method public android.renderscript.ProgramVertex create();
   }
 
-  public class ProgramVertexFixedFunction extends android.renderscript.ProgramVertex {
-    method public void bindConstants(android.renderscript.ProgramVertexFixedFunction.Constants);
+  public deprecated class ProgramVertexFixedFunction extends android.renderscript.ProgramVertex {
+    method public deprecated void bindConstants(android.renderscript.ProgramVertexFixedFunction.Constants);
   }
 
-  public static class ProgramVertexFixedFunction.Builder {
-    ctor public ProgramVertexFixedFunction.Builder(android.renderscript.RenderScript);
-    method public android.renderscript.ProgramVertexFixedFunction create();
-    method public android.renderscript.ProgramVertexFixedFunction.Builder setTextureMatrixEnable(boolean);
+  public static deprecated class ProgramVertexFixedFunction.Builder {
+    ctor public deprecated ProgramVertexFixedFunction.Builder(android.renderscript.RenderScript);
+    method public deprecated android.renderscript.ProgramVertexFixedFunction create();
+    method public deprecated android.renderscript.ProgramVertexFixedFunction.Builder setTextureMatrixEnable(boolean);
   }
 
-  public static class ProgramVertexFixedFunction.Constants {
-    ctor public ProgramVertexFixedFunction.Constants(android.renderscript.RenderScript);
-    method public void destroy();
-    method public void setModelview(android.renderscript.Matrix4f);
-    method public void setProjection(android.renderscript.Matrix4f);
-    method public void setTexture(android.renderscript.Matrix4f);
+  public static deprecated class ProgramVertexFixedFunction.Constants {
+    ctor public deprecated ProgramVertexFixedFunction.Constants(android.renderscript.RenderScript);
+    method public deprecated void destroy();
+    method public deprecated void setModelview(android.renderscript.Matrix4f);
+    method public deprecated void setProjection(android.renderscript.Matrix4f);
+    method public deprecated void setTexture(android.renderscript.Matrix4f);
   }
 
   public class RSDriverException extends android.renderscript.RSRuntimeException {

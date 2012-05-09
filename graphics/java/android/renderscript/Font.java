@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2008-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import android.util.Log;
 import android.util.TypedValue;
 
 /**
+ * @deprecated in API 16
  * <p>This class gives users a simple way to draw hardware accelerated text. 
  * Internally, the glyphs are rendered using the Freetype library and an internal cache of
  * rendered glyph bitmaps is maintained. Each font object represents a combination of a typeface,
@@ -71,10 +72,25 @@ public class Font extends BaseObj {
 
     private static Map<String, FontFamily> sFontFamilyMap;
 
+    /**
+     * @deprecated in API 16
+     */
     public enum Style {
+        /**
+         * @deprecated in API 16
+         */
         NORMAL,
+        /**
+         * @deprecated in API 16
+         */
         BOLD,
+        /**
+         * @deprecated in API 16
+         */
         ITALIC,
+        /**
+         * @deprecated in API 16
+         */
         BOLD_ITALIC;
     }
 
@@ -139,6 +155,7 @@ public class Font extends BaseObj {
     }
 
     /**
+     * @deprecated in API 16
      * Takes a specific file name as an argument
      */
     static public Font createFromFile(RenderScript rs, Resources res, String path, float pointSize) {
@@ -154,10 +171,16 @@ public class Font extends BaseObj {
         return rsFont;
     }
 
+    /**
+     * @deprecated in API 16
+     */
     static public Font createFromFile(RenderScript rs, Resources res, File path, float pointSize) {
         return createFromFile(rs, res, path.getAbsolutePath(), pointSize);
     }
 
+    /**
+     * @deprecated in API 16
+     */
     static public Font createFromAsset(RenderScript rs, Resources res, String path, float pointSize) {
         rs.validate();
         AssetManager mgr = res.getAssets();
@@ -171,6 +194,9 @@ public class Font extends BaseObj {
         return rsFont;
     }
 
+    /**
+     * @deprecated in API 16
+     */
     static public Font createFromResource(RenderScript rs, Resources res, int id, float pointSize) {
         String name = "R." + Integer.toString(id);
 
@@ -200,6 +226,7 @@ public class Font extends BaseObj {
     }
 
     /**
+     * @deprecated in API 16
      * Accepts one of the following family names as an argument
      * and will attempt to produce the best match with a system font:
      *

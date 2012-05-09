@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2008-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import android.util.Log;
 import android.util.TypedValue;
 
 /**
+ * @deprecated in API 16
  * FileA3D allows users to load Renderscript objects from files
  * or resources stored on disk. It could be used to load items
  * such as 3D geometry data converted to a Renderscript format from
@@ -41,16 +42,19 @@ import android.util.TypedValue;
 public class FileA3D extends BaseObj {
 
     /**
+    * @deprecated in API 16
     * Specifies what renderscript object type is contained within
     * the FileA3D IndexEntry
     **/
     public enum EntryType {
 
         /**
+        * @deprecated in API 16
         * Unknown or or invalid object, nothing will be loaded
         **/
         UNKNOWN (0),
         /**
+        * @deprecated in API 16
         * Renderscript Mesh object
         **/
         MESH (1);
@@ -66,6 +70,7 @@ public class FileA3D extends BaseObj {
     }
 
     /**
+    * @deprecated in API 16
     * IndexEntry contains information about one of the Renderscript
     * objects inside the file's index. It could be used to query the
     * object's type and also name and load the object itself if
@@ -80,6 +85,7 @@ public class FileA3D extends BaseObj {
         BaseObj mLoadedObj;
 
         /**
+        * @deprecated in API 16
         * Returns the name of a renderscript object the index entry
         * describes
         *
@@ -92,6 +98,7 @@ public class FileA3D extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Returns the type of a renderscript object the index entry
         * describes
         * @return type of a renderscript object the index entry
@@ -102,6 +109,7 @@ public class FileA3D extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Used to load the object described by the index entry
         * @return base renderscript object described by the entry
         */
@@ -112,6 +120,7 @@ public class FileA3D extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Used to load the mesh described by the index entry, object
         * described by the index entry must be a renderscript mesh
         *
@@ -182,6 +191,7 @@ public class FileA3D extends BaseObj {
     }
 
     /**
+    * @deprecated in API 16
     * Returns the number of objects stored inside the a3d file
     *
     * @return the number of objects stored inside the a3d file
@@ -194,6 +204,7 @@ public class FileA3D extends BaseObj {
     }
 
     /**
+    * @deprecated in API 16
     * Returns an index entry from the list of all objects inside
     * FileA3D
     *
@@ -209,6 +220,7 @@ public class FileA3D extends BaseObj {
     }
 
     /**
+    * @deprecated in API 16
     * Creates a FileA3D object from an asset stored on disk
     *
     * @param rs Context to which the object will belong.
@@ -230,6 +242,7 @@ public class FileA3D extends BaseObj {
     }
 
     /**
+    * @deprecated in API 16
     * Creates a FileA3D object from a file stored on disk
     *
     * @param rs Context to which the object will belong.
@@ -249,6 +262,7 @@ public class FileA3D extends BaseObj {
     }
 
     /**
+    * @deprecated in API 16
     * Creates a FileA3D object from a file stored on disk
     *
     * @param rs Context to which the object will belong.
@@ -261,6 +275,7 @@ public class FileA3D extends BaseObj {
     }
 
     /**
+    * @deprecated in API 16
     * Creates a FileA3D object from an application resource
     *
     * @param rs Context to which the object will belong.
