@@ -246,9 +246,7 @@ public class ConnectivityManagerTestActivity extends Activity {
 
         initializeNetworkStates();
 
-        mWifiManager.setWifiEnabled(true);
         log("Clear Wifi before we start the test.");
-        sleep(SHORT_TIMEOUT);
         removeConfiguredNetworksAndDisableWifi();
         mWifiRegexs = mCM.getTetherableWifiRegexs();
      }
@@ -645,6 +643,11 @@ public class ConnectivityManagerTestActivity extends Activity {
      */
     public boolean disconnectAP() {
         // remove saved networks
+        if (!mWifiManager.isWifiEnabled()) {
+            log("Enabled wifi before remove configured networks");
+            mWifiManager.setWifiEnabled(true);
+            sleep(SHORT_TIMEOUT);
+        }
         List<WifiConfiguration> wifiConfigList = mWifiManager.getConfiguredNetworks();
         log("size of wifiConfigList: " + wifiConfigList.size());
         for (WifiConfiguration wifiConfig: wifiConfigList) {
