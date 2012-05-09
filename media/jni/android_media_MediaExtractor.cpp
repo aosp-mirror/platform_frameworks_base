@@ -313,7 +313,7 @@ static void android_media_MediaExtractor_seekTo(
     }
 
     if (mode < MediaSource::ReadOptions::SEEK_PREVIOUS_SYNC
-            || mode > MediaSource::ReadOptions::SEEK_CLOSEST) {
+            || mode >= MediaSource::ReadOptions::SEEK_CLOSEST) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return;
     }

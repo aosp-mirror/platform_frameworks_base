@@ -11236,7 +11236,6 @@ package android.media {
     method public void unselectTrack(int);
     field public static final int SAMPLE_FLAG_ENCRYPTED = 2; // 0x2
     field public static final int SAMPLE_FLAG_SYNC = 1; // 0x1
-    field public static final int SEEK_TO_CLOSEST = 3; // 0x3
     field public static final int SEEK_TO_CLOSEST_SYNC = 2; // 0x2
     field public static final int SEEK_TO_NEXT_SYNC = 1; // 0x1
     field public static final int SEEK_TO_PREVIOUS_SYNC = 0; // 0x0
