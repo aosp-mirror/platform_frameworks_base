@@ -2461,8 +2461,10 @@
         <attr name="accessibilityFlags">
             <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#DEFAULT} -->
             <flag name="flagDefault" value="0x00000001" />
-            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#INCLUDE_NOT_IMPORTANT_VIEWS} -->
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_INCLUDE_NOT_IMPORTANT_VIEWS} -->
             <flag name="flagIncludeNotImportantViews" value="0x00000002" />
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE} -->
+            <flag name="flagRequestTouchExplorationMode" value="0x00000004" />
         </attr>
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. This setting cannot be changed at runtime. -->
@@ -2470,8 +2472,6 @@
         <!-- Flag whether the accessibility service wants to be able to retrieve the
              active window content. This setting cannot be changed at runtime. -->
         <attr name="canRetrieveWindowContent" format="boolean" />
-        <!-- Flag whether the accessibility service can handle gesrures and wants such. -->
-        <attr name="canHandleGestures" format="boolean" />
         <!-- Short description of the accessibility serivce purpose or behavior.-->
         <attr name="description" />
     </declare-styleable>

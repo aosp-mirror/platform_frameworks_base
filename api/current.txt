@@ -315,7 +315,6 @@ package android {
     field public static final int cacheColorHint = 16843009; // 0x1010101
     field public static final int calendarViewShown = 16843596; // 0x101034c
     field public static final int calendarViewStyle = 16843613; // 0x101035d
-    field public static final int canHandleGestures = 16843699; // 0x10103b3
     field public static final int canRetrieveWindowContent = 16843653; // 0x1010385
     field public static final int candidatesTextStyleSpans = 16843312; // 0x1010230
     field public static final deprecated int capitalize = 16843113; // 0x1010169
@@ -759,7 +758,7 @@ package android {
     field public static final int pathPrefix = 16842795; // 0x101002b
     field public static final int permission = 16842758; // 0x1010006
     field public static final int permissionGroup = 16842762; // 0x101000a
-    field public static final int permissionGroupFlags = 16843700; // 0x10103b4
+    field public static final int permissionGroupFlags = 16843691; // 0x10103ab
     field public static final int persistent = 16842765; // 0x101000d
     field public static final int persistentDrawingCache = 16842990; // 0x10100ee
     field public static final deprecated int phoneNumber = 16843111; // 0x1010167
@@ -2025,7 +2024,6 @@ package android.accessibilityservice {
     method protected void onServiceConnected();
     method public final boolean performGlobalAction(int);
     method public final void setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo);
-    field public static final int GESTURE_DOUBLE_TAP = 17; // 0x11
     field public static final int GESTURE_SWIPE_DOWN = 2; // 0x2
     field public static final int GESTURE_SWIPE_DOWN_AND_LEFT = 15; // 0xf
     field public static final int GESTURE_SWIPE_DOWN_AND_RIGHT = 16; // 0x10
@@ -2042,7 +2040,6 @@ package android.accessibilityservice {
     field public static final int GESTURE_SWIPE_UP_AND_DOWN = 7; // 0x7
     field public static final int GESTURE_SWIPE_UP_AND_LEFT = 13; // 0xd
     field public static final int GESTURE_SWIPE_UP_AND_RIGHT = 14; // 0xe
-    field public static final int GESTURE_TAP_AND_HOLD = 18; // 0x12
     field public static final int GLOBAL_ACTION_BACK = 1; // 0x1
     field public static final int GLOBAL_ACTION_HOME = 2; // 0x2
     field public static final int GLOBAL_ACTION_NOTIFICATIONS = 4; // 0x4
@@ -2056,7 +2053,6 @@ package android.accessibilityservice {
     method public int describeContents();
     method public static java.lang.String feedbackTypeToString(int);
     method public static java.lang.String flagToString(int);
-    method public boolean getCanHandleGestures();
     method public boolean getCanRetrieveWindowContent();
     method public deprecated java.lang.String getDescription();
     method public java.lang.String getId();
@@ -2072,7 +2068,8 @@ package android.accessibilityservice {
     field public static final int FEEDBACK_HAPTIC = 2; // 0x2
     field public static final int FEEDBACK_SPOKEN = 1; // 0x1
     field public static final int FEEDBACK_VISUAL = 8; // 0x8
-    field public static final int INCLUDE_NOT_IMPORTANT_VIEWS = 2; // 0x2
+    field public static final int FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 2; // 0x2
+    field public static final int FLAG_REQUEST_TOUCH_EXPLORATION_MODE = 4; // 0x4
     field public int eventTypes;
     field public int feedbackType;
     field public int flags;

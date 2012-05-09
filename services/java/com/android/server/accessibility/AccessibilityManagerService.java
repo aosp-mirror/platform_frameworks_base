@@ -17,7 +17,7 @@
 package com.android.server.accessibility;
 
 import static android.accessibilityservice.AccessibilityServiceInfo.DEFAULT;
-import static android.accessibilityservice.AccessibilityServiceInfo.INCLUDE_NOT_IMPORTANT_VIEWS;
+import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -531,12 +531,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         //       last record in the enabled services setting. Ideally,
         //       the user should make the call which service handles
         //       gestures. However, only one service should handle
-        //       gestrues to avoid user frustration when different
-        //       bahiour is observed from different combinations of
+        //       gestures to avoid user frustration when different
+        //       behavior is observed from different combinations of
         //       enabled accessibility services.
         for (int i = mServices.size() - 1; i >= 0; i--) {
             Service service = mServices.get(i);
-            if (service.mCanHandleGestures && service.mIsDefault == isDefault) {
+            if (service.mReqeustTouchExplorationMode && service.mIsDefault == isDefault) {
                 mGestureHandler.scheduleHandleGesture(gestureId, service.mServiceInterface);
                 return true;
             }
@@ -1225,7 +1225,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         boolean mCanRetrieveScreenContent;
 
-        boolean mCanHandleGestures;
+        boolean mReqeustTouchExplorationMode;
 
         boolean mIsAutomation;
 
@@ -1243,7 +1243,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mIsAutomation = isAutomation;
             if (!isAutomation) {
                 mCanRetrieveScreenContent = accessibilityServiceInfo.getCanRetrieveWindowContent();
-                mCanHandleGestures = accessibilityServiceInfo.getCanHandleGestures();
+                mReqeustTouchExplorationMode =
+                    (accessibilityServiceInfo.flags
+                            & AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE) != 0;
                 mIntent = new Intent().setComponent(mComponentName);
                 mIntent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                         com.android.internal.R.string.accessibility_binding_label);
@@ -1251,7 +1253,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         mContext, 0, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), 0));
             } else {
                 mCanRetrieveScreenContent = true;
-                mCanHandleGestures = true;
             }
             setDynamicallyConfigurableProperties(accessibilityServiceInfo);
         }
@@ -1272,7 +1273,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     // >= Build.VERSION_CODES.JELLY_BEAN) {
                     > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
                 mIncludeNotImportantViews =
-                    (info.flags & INCLUDE_NOT_IMPORTANT_VIEWS) != 0;
+                    (info.flags & FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0;
             }
 
             synchronized (mLock) {
