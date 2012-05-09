@@ -2540,11 +2540,10 @@ public class Activity extends ContextThemeWrapper
                 if (item.getItemId() == android.R.id.home && mActionBar != null &&
                         (mActionBar.getDisplayOptions() & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
                     if (mParent == null) {
-                        onNavigateUp();
+                        return onNavigateUp();
                     } else {
-                        mParent.onNavigateUpFromChild(this);
+                        return mParent.onNavigateUpFromChild(this);
                     }
-                    return true;
                 }
                 return false;
                 
