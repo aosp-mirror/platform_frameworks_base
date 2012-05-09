@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.TelephonyManager;
@@ -112,10 +113,14 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
 
     /**
      * Sets the Face Unlock view to visible, hiding it after the specified amount of time.  If
-     * timeoutMillis is 0, no hide is performed.
+     * timeoutMillis is 0, no hide is performed.  Called on the UI thread.
      */
     public void show(long timeoutMillis) {
         if (DEBUG) Log.d(TAG, "show()");
+        if (mHandler.getLooper() != Looper.myLooper()) {
+            Log.e(TAG, "show() called off of the UI thread");
+        }
+
         removeDisplayMessages();
         if (mFaceUnlockView != null) {
             mFaceUnlockView.setVisibility(View.VISIBLE);
@@ -138,9 +143,14 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     /**
      * Binds to the Face Unlock service.  Face Unlock will be started when the bind completes.  The
      * Face Unlock view is displayed to hide the backup lock while the service is starting up.
+     * Called on the UI thread.
      */
     public boolean start() {
         if (DEBUG) Log.d(TAG, "start()");
+        if (mHandler.getLooper() != Looper.myLooper()) {
+            Log.e(TAG, "start() called off of the UI thread");
+        }
+
         if (mIsRunning) {
             Log.w(TAG, "start() called when already running");
         }
@@ -170,10 +180,14 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     }
 
     /**
-     * Stops Face Unlock and unbinds from the service.
+     * Stops Face Unlock and unbinds from the service.  Called on the UI thread.
      */
     public boolean stop() {
         if (DEBUG) Log.d(TAG, "stop()");
+        if (mHandler.getLooper() != Looper.myLooper()) {
+            Log.e(TAG, "stop() called off of the UI thread");
+        }
+
         boolean mWasRunning = mIsRunning;
         stopUi();
 
