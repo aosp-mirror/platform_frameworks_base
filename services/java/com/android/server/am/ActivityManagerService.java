@@ -11057,7 +11057,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     updateOomAdjLocked(r.app);
                 }
                 int flags = 0;
-                if (si.deliveryCount > 0) {
+                if (si.deliveryCount > 1) {
                     flags |= Service.START_FLAG_RETRY;
                 }
                 if (si.doneExecutingCount > 0) {
