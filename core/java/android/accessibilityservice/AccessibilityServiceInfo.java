@@ -131,7 +131,19 @@ public class AccessibilityServiceInfo implements Parcelable {
      * elements.
      * </p>
      */
-    public static final int INCLUDE_NOT_IMPORTANT_VIEWS = 0x0000002;
+    public static final int FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 0x0000002;
+
+    /**
+     * This flag requests that the system gets into touch exploration mode.
+     * In this mode a single finger moving on the screen behaves as a mouse
+     * pointer hovering over the user interface. The system will also detect
+     * certain gestures performed on the touch screen and notify this service.
+     * The system will enable touch exploration mode if there is at least one
+     * accessibility service that has this flag set. Hence, clearing this
+     * flag does not guarantee that the device will not be in touch exploration
+     * mode since there may be another enabled service that requested it.
+     */
+    public static final int FLAG_REQUEST_TOUCH_EXPLORATION_MODE= 0x0000004;
 
     /**
      * The event types an {@link AccessibilityService} is interested in.
@@ -198,7 +210,8 @@ public class AccessibilityServiceInfo implements Parcelable {
      *   <strong>Can be dynamically set at runtime.</strong>
      * </p>
      * @see #DEFAULT
-     * @see #INCLUDE_NOT_IMPORTANT_VIEWS
+     * @see #FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
+     * @see #FLAG_REQUEST_TOUCH_EXPLORATION_MODE
      */
     public int flags;
 
@@ -222,11 +235,6 @@ public class AccessibilityServiceInfo implements Parcelable {
      * Flag whether this accessibility service can retrieve window content.
      */
     private boolean mCanRetrieveWindowContent;
-
-    /**
-     * Flag whether this accessibility service can handle gestures.
-     */
-    private boolean mCanHandleGestures;
 
     /**
      * Resource id of the description of the accessibility service.
@@ -308,8 +316,6 @@ public class AccessibilityServiceInfo implements Parcelable {
             mCanRetrieveWindowContent = asAttributes.getBoolean(
                     com.android.internal.R.styleable.AccessibilityService_canRetrieveWindowContent,
                     false);
-            mCanHandleGestures = asAttributes.getBoolean(
-                    com.android.internal.R.styleable.AccessibilityService_canHandleGestures, false);
             TypedValue peekedValue = asAttributes.peekValue(
                     com.android.internal.R.styleable.AccessibilityService_description);
             if (peekedValue != null) {
@@ -389,18 +395,6 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public boolean getCanRetrieveWindowContent() {
         return mCanRetrieveWindowContent;
-    }
-
-    /**
-     * Whether this service can handle gestures.
-     * <p>
-     *    <strong>Statically set from
-     *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
-     * </p>
-     * @return True if the service can handle gestures.
-     */
-    public boolean getCanHandleGestures() {
-        return mCanHandleGestures;
     }
 
     /**
@@ -614,8 +608,10 @@ public class AccessibilityServiceInfo implements Parcelable {
         switch (flag) {
             case DEFAULT:
                 return "DEFAULT";
-            case INCLUDE_NOT_IMPORTANT_VIEWS:
-                return "REGARD_VIEWS_NOT_IMPORTANT_FOR_ACCESSIBILITY";
+            case FLAG_INCLUDE_NOT_IMPORTANT_VIEWS:
+                return "FLAG_INCLUDE_NOT_IMPORTANT_VIEWS";
+            case FLAG_REQUEST_TOUCH_EXPLORATION_MODE:
+                return "FLAG_REQUEST_TOUCH_EXPLORATION_MODE";
             default:
                 return null;
         }
