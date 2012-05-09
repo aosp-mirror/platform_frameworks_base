@@ -242,6 +242,7 @@ public class DrmManagerClient {
     public DrmManagerClient(Context context) {
         mContext = context;
         mReleased = false;
+        createEventThreads();
 
         // save the unique id
         mUniqueId = _initialize();
@@ -282,21 +283,6 @@ public class DrmManagerClient {
         mOnErrorListener = null;
         _release(mUniqueId);
     }
-
-
-    private void createListeners() {
-        if (mEventHandler == null && mInfoHandler == null) {
-            mInfoThread = new HandlerThread("DrmManagerClient.InfoHandler");
-            mInfoThread.start();
-            mInfoHandler = new InfoHandler(mInfoThread.getLooper());
-
-            mEventThread = new HandlerThread("DrmManagerClient.EventHandler");
-            mEventThread.start();
-            mEventHandler = new EventHandler(mEventThread.getLooper());
-            _setListeners(mUniqueId, new WeakReference<DrmManagerClient>(this));
-        }
-    }
-
 
     /**
      * Registers an {@link DrmManagerClient.OnInfoListener} callback, which is invoked when the 
@@ -878,5 +864,21 @@ public class DrmManagerClient {
     private native DrmConvertedStatus _closeConvertSession(int uniqueId, int convertId);
 
     private native DrmSupportInfo[] _getAllSupportInfo(int uniqueId);
+
+    private void createEventThreads() {
+        if (mEventHandler == null && mInfoHandler == null) {
+            mInfoThread = new HandlerThread("DrmManagerClient.InfoHandler");
+            mInfoThread.start();
+            mInfoHandler = new InfoHandler(mInfoThread.getLooper());
+
+            mEventThread = new HandlerThread("DrmManagerClient.EventHandler");
+            mEventThread.start();
+            mEventHandler = new EventHandler(mEventThread.getLooper());
+        }
+    }
+
+    private void createListeners() {
+        _setListeners(mUniqueId, new WeakReference<DrmManagerClient>(this));
+    }
 }
 
