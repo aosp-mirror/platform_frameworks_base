@@ -2017,6 +2017,7 @@ package android.accessibilityservice {
     method protected void onServiceConnected();
     method public final boolean performGlobalAction(int);
     method public final void setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo);
+    field public static final int GESTURE_DOUBLE_TAP = 17; // 0x11
     field public static final int GESTURE_SWIPE_DOWN = 2; // 0x2
     field public static final int GESTURE_SWIPE_DOWN_AND_LEFT = 15; // 0xf
     field public static final int GESTURE_SWIPE_DOWN_AND_RIGHT = 16; // 0x10
@@ -2033,8 +2034,7 @@ package android.accessibilityservice {
     field public static final int GESTURE_SWIPE_UP_AND_DOWN = 7; // 0x7
     field public static final int GESTURE_SWIPE_UP_AND_LEFT = 13; // 0xd
     field public static final int GESTURE_SWIPE_UP_AND_RIGHT = 14; // 0xe
-    field public static final int GESTURE_TWO_FINGER_LONG_PRESS = 18; // 0x12
-    field public static final int GESTURE_TWO_FINGER_TAP = 17; // 0x11
+    field public static final int GESTURE_TAP_AND_HOLD = 18; // 0x12
     field public static final int GLOBAL_ACTION_BACK = 1; // 0x1
     field public static final int GLOBAL_ACTION_HOME = 2; // 0x2
     field public static final int GLOBAL_ACTION_NOTIFICATIONS = 4; // 0x4

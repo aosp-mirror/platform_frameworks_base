@@ -284,14 +284,14 @@ public abstract class AccessibilityService extends Service {
     public static final int GESTURE_SWIPE_DOWN_AND_RIGHT = 16;
 
     /**
-     * The user has performed a two finger tap gesture on the touch screen.
+     * The user has performed a double tap gesture on the touch screen.
      */
-    public static final int GESTURE_TWO_FINGER_TAP = 17;
+    public static final int GESTURE_DOUBLE_TAP = 17;
 
     /**
-     * The user has performed a two finger long press gesture on the touch screen.
+     * The user has performed a tap and hold gesture on the touch screen.
      */
-    public static final int GESTURE_TWO_FINGER_LONG_PRESS = 18;
+    public static final int GESTURE_TAP_AND_HOLD = 18;
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -408,8 +408,8 @@ public abstract class AccessibilityService extends Service {
      * @see #GESTURE_SWIPE_RIGHT_AND_DOWN
      * @see #GESTURE_CLOCKWISE_CIRCLE
      * @see #GESTURE_COUNTER_CLOCKWISE_CIRCLE
-     * @see #GESTURE_TWO_FINGER_TAP
-     * @see #GESTURE_TWO_FINGER_LONG_PRESS
+     * @see #GESTURE_DOUBLE_TAP
+     * @see #GESTURE_TAP_AND_HOLD
      */
     protected boolean onGesture(int gestureId) {
         // TODO: Describe the default gesture processing in the javaDoc once it is finalized.
