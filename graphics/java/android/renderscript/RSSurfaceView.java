@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2008-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 /**
+ * @deprecated in API 16
  * The Surface View for a graphics renderscript (RenderScriptGL) to draw on.
  *
  * <div class="special reference">
@@ -43,6 +44,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     private RenderScriptGL mRS;
 
     /**
+     * @deprecated in API 16
      * Standard View constructor. In order to render something, you
      * must call {@link android.opengl.GLSurfaceView#setRenderer} to
      * register a renderer.
@@ -54,6 +56,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     /**
+     * @deprecated in API 16
      * Standard View constructor. In order to render something, you
      * must call {@link android.opengl.GLSurfaceView#setRenderer} to
      * register a renderer.
@@ -72,6 +75,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     /**
+     * @deprecated in API 16
      * This method is part of the SurfaceHolder.Callback interface, and is
      * not normally called or subclassed by clients of RSSurfaceView.
      */
@@ -80,6 +84,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     /**
+     * @deprecated in API 16
      * This method is part of the SurfaceHolder.Callback interface, and is
      * not normally called or subclassed by clients of RSSurfaceView.
      */
@@ -93,6 +98,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     /**
+     * @deprecated in API 16
      * This method is part of the SurfaceHolder.Callback interface, and is
      * not normally called or subclassed by clients of RSSurfaceView.
      */
@@ -105,6 +111,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
 
    /**
+     * @deprecated in API 16
      * Inform the view that the activity is paused. The owner of this view must
      * call this method when the activity is paused. Calling this method will
      * pause the rendering thread.
@@ -117,6 +124,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     /**
+     * @deprecated in API 16
      * Inform the view that the activity is resumed. The owner of this view must
      * call this method when the activity is resumed. Calling this method will
      * recreate the OpenGL display and resume the rendering
@@ -129,12 +137,18 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
+    /**
+     * @deprecated in API 16
+     **/
     public RenderScriptGL createRenderScriptGL(RenderScriptGL.SurfaceConfig sc) {
       RenderScriptGL rs = new RenderScriptGL(this.getContext(), sc);
         setRenderScriptGL(rs);
         return rs;
     }
 
+    /**
+     * @deprecated in API 16
+     **/
     public void destroyRenderScriptGL() {
         synchronized (this) {
             mRS.destroy();
@@ -142,10 +156,16 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
+    /**
+     * @deprecated in API 16
+     **/
     public void setRenderScriptGL(RenderScriptGL rs) {
         mRS = rs;
     }
 
+    /**
+     * @deprecated in API 16
+     **/
     public RenderScriptGL getRenderScriptGL() {
         return mRS;
     }
