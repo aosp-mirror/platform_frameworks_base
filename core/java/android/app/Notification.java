@@ -1436,6 +1436,7 @@ public class Notification implements Parcelable
                 // Log.d("Notification", "has actions: " + mContentText);
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
                 if (N>3) N=3;
+                big.removeAllViews(R.id.actions);
                 for (int i=0; i<N; i++) {
                     final RemoteViews button = generateActionButton(mActions.get(i));
                     //Log.d("Notification", "adding action " + i + ": " + mActions.get(i).title);
