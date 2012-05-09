@@ -3586,6 +3586,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             clearChildFocus = true;
         }
 
+        view.clearAccessibilityFocus();
+
         cancelTouchTarget(view);
         cancelHoverTarget(view);
 
@@ -3669,6 +3671,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 clearChildFocus = view;
             }
 
+            view.clearAccessibilityFocus();
+
             cancelTouchTarget(view);
             cancelHoverTarget(view);
 
@@ -3742,6 +3746,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 clearChildFocus = view;
             }
 
+            view.clearAccessibilityFocus();
+
             cancelTouchTarget(view);
             cancelHoverTarget(view);
 
@@ -3789,6 +3795,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (child == mFocused) {
             child.clearFocus();
         }
+
+        child.clearAccessibilityFocus();
 
         cancelTouchTarget(child);
         cancelHoverTarget(child);
