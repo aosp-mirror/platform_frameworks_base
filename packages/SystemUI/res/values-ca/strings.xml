@@ -142,8 +142,9 @@
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Esborra totes les notificacions."</string>
     <string name="dreams_dock_launcher" msgid="3541196417659166245">"Activa el protector de pantalla"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Informació de l\'aplicació"</string>
-    <!-- no translation found for notifications_off_title (8936620513608443224) -->
-    <skip />
-    <!-- no translation found for notifications_off_text (2529001315769385273) -->
-    <skip />
+    <string name="notifications_off_title" msgid="8936620513608443224">"Notificacions desactivades"</string>
+    <string name="notifications_off_text" msgid="2529001315769385273">"Pica aquí per tornar a activar les notificacions."</string>
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"La pantalla girarà automàticament."</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"La pantalla està bloquejada en orientació horitzontal."</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"La pantalla està bloquejada en orientació vertical."</string>
 </resources>
