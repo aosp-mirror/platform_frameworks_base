@@ -4009,17 +4009,19 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         void start(final int position) {
             stop();
 
+            if (mDataChanged) {
+                // Wait until we're back in a stable state to try this.
+                post(new Runnable() {
+                    @Override public void run() {
+                        start(position);
+                    }
+                });
+                return;
+            }
+
             final int childCount = getChildCount();
             if (childCount == 0) {
                 // Can't scroll without children.
-                if (mDataChanged) {
-                    // But we might have something in a minute.
-                    post(new Runnable() {
-                        @Override public void run() {
-                            start(position);
-                        }
-                    });
-                }
                 return;
             }
 
@@ -4058,17 +4060,19 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 return;
             }
 
+            if (mDataChanged) {
+                // Wait until we're back in a stable state to try this.
+                post(new Runnable() {
+                    @Override public void run() {
+                        start(position, boundPosition);
+                    }
+                });
+                return;
+            }
+
             final int childCount = getChildCount();
             if (childCount == 0) {
                 // Can't scroll without children.
-                if (mDataChanged) {
-                    // But we might have something in a minute.
-                    post(new Runnable() {
-                        @Override public void run() {
-                            start(position, boundPosition);
-                        }
-                    });
-                }
                 return;
             }
 
@@ -4129,8 +4133,25 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             startWithOffset(position, offset, SCROLL_DURATION);
         }
 
-        void startWithOffset(int position, int offset, int duration) {
+        void startWithOffset(final int position, int offset, final int duration) {
             stop();
+
+            if (mDataChanged) {
+                // Wait until we're back in a stable state to try this.
+                final int postOffset = offset;
+                post(new Runnable() {
+                    @Override public void run() {
+                        startWithOffset(position, postOffset, duration);
+                    }
+                });
+                return;
+            }
+
+            final int childCount = getChildCount();
+            if (childCount == 0) {
+                // Can't scroll without children.
+                return;
+            }
 
             offset += getPaddingTop();
 
@@ -4141,7 +4162,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mMode = MOVE_OFFSET;
 
             final int firstPos = mFirstPosition;
-            final int childCount = getChildCount();
             final int lastPos = firstPos + childCount - 1;
 
             int viewTravelCount;
@@ -4514,7 +4534,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         if (distance == 0 || mItemCount == 0 || childCount == 0 ||
                 (firstPos == 0 && getChildAt(0).getTop() == topLimit && distance < 0) ||
-                (lastPos == mItemCount - 1 &&
+                (lastPos == mItemCount &&
                         getChildAt(childCount - 1).getBottom() == bottomLimit && distance > 0)) {
             mFlingRunnable.endFling();
             if (mPositionScroller != null) {
