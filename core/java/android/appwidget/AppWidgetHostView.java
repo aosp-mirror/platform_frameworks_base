@@ -232,14 +232,15 @@ public class AppWidgetHostView extends FrameLayout {
         if (mInfo != null) {
             padding = getDefaultPaddingForWidget(mContext, mInfo.provider, padding);
         }
+        float density = getResources().getDisplayMetrics().density;
 
-        int xPadding = padding.left + padding.right;
-        int yPadding = padding.top + padding.bottom;
+        int xPaddingDips = (int) ((padding.left + padding.right) / density);
+        int yPaddingDips = (int) ((padding.top + padding.bottom) / density);
 
-        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, minWidth - xPadding);
-        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, minHeight - yPadding);
-        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, maxWidth - xPadding);
-        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, maxHeight - yPadding);
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, minWidth - xPaddingDips);
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, minHeight - yPaddingDips);
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, maxWidth - xPaddingDips);
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, maxHeight - yPaddingDips);
         updateAppWidgetOptions(options);
     }
 
