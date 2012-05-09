@@ -34,6 +34,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Vibrator;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -82,6 +83,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
     private boolean mCameraDisabled;
     private boolean mSearchDisabled;
     private SearchManager mSearchManager;
+    // Is there a vibrator
+    private final boolean mHasVibrator;
 
     InfoCallbackImpl mInfoCallback = new InfoCallbackImpl() {
 
@@ -385,11 +388,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         // toggle silent mode
         mSilentMode = !mSilentMode;
         if (mSilentMode) {
-            final boolean vibe = (Settings.System.getInt(
-                mContext.getContentResolver(),
-                Settings.System.VIBRATE_IN_SILENT, 1) == 1);
-
-            mAudioManager.setRingerMode(vibe
+            mAudioManager.setRingerMode(mHasVibrator
                 ? AudioManager.RINGER_MODE_VIBRATE
                 : AudioManager.RINGER_MODE_SILENT);
         } else {
@@ -451,6 +450,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         setFocusableInTouchMode(true);
         setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
 
+        Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        mHasVibrator = vibrator == null ? false : vibrator.hasVibrator();
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mSilentMode = isSilentMode();
         mUnlockWidget = findViewById(R.id.unlock_widget);

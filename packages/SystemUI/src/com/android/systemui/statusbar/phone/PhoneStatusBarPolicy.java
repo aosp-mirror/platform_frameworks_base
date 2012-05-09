@@ -122,8 +122,7 @@ public class PhoneStatusBarPolicy {
                     action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
                 updateBluetooth(intent);
             }
-            else if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION) ||
-                    action.equals(AudioManager.VIBRATE_SETTING_CHANGED_ACTION)) {
+            else if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
                 updateVolume();
             }
             else if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
@@ -144,7 +143,6 @@ public class PhoneStatusBarPolicy {
         filter.addAction(Intent.ACTION_ALARM_CHANGED);
         filter.addAction(Intent.ACTION_SYNC_STATE_CHANGED);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
-        filter.addAction(AudioManager.VIBRATE_SETTING_CHANGED_ACTION);
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
@@ -238,7 +236,7 @@ public class PhoneStatusBarPolicy {
 
         final int iconId;
         String contentDescription = null;
-        if (audioManager.shouldVibrate(AudioManager.VIBRATE_TYPE_RINGER)) {
+        if (ringerMode == AudioManager.RINGER_MODE_VIBRATE) {
             iconId = R.drawable.stat_sys_ringer_vibrate;
             contentDescription = mContext.getString(R.string.accessibility_ringer_vibrate);
         } else {
