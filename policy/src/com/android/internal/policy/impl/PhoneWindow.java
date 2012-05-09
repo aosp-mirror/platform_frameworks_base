@@ -2098,7 +2098,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (widthMode == AT_MOST) {
                 final TypedValue tvw = isPortrait ? mFixedWidthMinor : mFixedWidthMajor;
                 if (tvw != null && tvw.type != TypedValue.TYPE_NULL) {
-                    fixedWidth = true;
                     final int w;
                     if (tvw.type == TypedValue.TYPE_DIMENSION) {
                         w = (int) tvw.getDimension(metrics);
@@ -2112,6 +2111,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
                         widthMeasureSpec = MeasureSpec.makeMeasureSpec(
                                 Math.min(w, widthSize), EXACTLY);
+                        fixedWidth = true;
                     }
                 }
             }
