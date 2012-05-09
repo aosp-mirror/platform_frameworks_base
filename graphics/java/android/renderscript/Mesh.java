@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2008-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -373,6 +373,7 @@ public class Mesh extends BaseObj {
     }
 
     /**
+    * @deprecated in API 16
     * Mesh builder object. It starts empty and requires the user to
     * add all the vertex and index allocations that comprise the
     * mesh
@@ -391,6 +392,9 @@ public class Mesh extends BaseObj {
 
         Vector mIndexTypes;
 
+        /**
+        * @deprecated in API 16
+        **/
         public AllocationBuilder(RenderScript rs) {
             mRS = rs;
             mVertexTypeCount = 0;
@@ -399,6 +403,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * @return internal index of the last vertex buffer type added to
         *         builder
         **/
@@ -407,6 +412,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * @return internal index of the last index set added to the
         *         builder
         **/
@@ -415,6 +421,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Adds an allocation containing vertex buffer data to the
         * builder
         *
@@ -434,6 +441,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Adds an allocation containing index buffer data and index type
         * to the builder
         *
@@ -451,6 +459,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Adds an index set type to the builder
         *
         * @param p index set primitive type
@@ -466,6 +475,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Create a Mesh object from the current state of the builder
         *
         **/
@@ -507,6 +517,7 @@ public class Mesh extends BaseObj {
     }
 
     /**
+    * @deprecated in API 16
     * Builder that allows creation of a mesh object point by point
     * and triangle by triangle
     *
@@ -533,11 +544,21 @@ public class Mesh extends BaseObj {
         int mVtxSize;
         int mFlags;
 
+        /**
+        * @deprecated in API 16
+        **/
         public static final int COLOR = 0x0001;
+        /**
+        * @deprecated in API 16
+        **/
         public static final int NORMAL = 0x0002;
+        /**
+        * @deprecated in API 16
+        **/
         public static final int TEXTURE_0 = 0x0100;
 
         /**
+        * @deprecated in API 16
         * @param rs Context to which the mesh will belong.
         * @param vtxSize specifies whether the vertex is a float2 or
         *                float3
@@ -593,6 +614,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Adds a float2 vertex to the mesh
         *
         * @param x position x
@@ -613,6 +635,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Adds a float3 vertex to the mesh
         *
         * @param x position x
@@ -636,6 +659,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Sets the texture coordinate for the vertices that are added after this method call.
         *
         * @param s texture coordinate s
@@ -653,6 +677,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Sets the normal vector for the vertices that are added after this method call.
         *
         * @param x normal vector x
@@ -672,6 +697,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Sets the color for the vertices that are added after this method call.
         *
         * @param r red component
@@ -693,6 +719,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Adds a new triangle to the mesh builder
         *
         * @param idx1 index of the first vertex in the triangle
@@ -719,6 +746,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
+        * @deprecated in API 16
         * Creates the mesh object from the current state of the builder
         *
         * @param uploadToBufferObject specifies whether the vertex data

@@ -19109,14 +19109,14 @@ package android.renderscript {
     method public int getVertexAllocationCount();
   }
 
-  public static class Mesh.AllocationBuilder {
-    ctor public Mesh.AllocationBuilder(android.renderscript.RenderScript);
-    method public android.renderscript.Mesh.AllocationBuilder addIndexSetAllocation(android.renderscript.Allocation, android.renderscript.Mesh.Primitive);
-    method public android.renderscript.Mesh.AllocationBuilder addIndexSetType(android.renderscript.Mesh.Primitive);
-    method public android.renderscript.Mesh.AllocationBuilder addVertexAllocation(android.renderscript.Allocation) throws java.lang.IllegalStateException;
-    method public android.renderscript.Mesh create();
-    method public int getCurrentIndexSetIndex();
-    method public int getCurrentVertexTypeIndex();
+  public static deprecated class Mesh.AllocationBuilder {
+    ctor public deprecated Mesh.AllocationBuilder(android.renderscript.RenderScript);
+    method public deprecated android.renderscript.Mesh.AllocationBuilder addIndexSetAllocation(android.renderscript.Allocation, android.renderscript.Mesh.Primitive);
+    method public deprecated android.renderscript.Mesh.AllocationBuilder addIndexSetType(android.renderscript.Mesh.Primitive);
+    method public deprecated android.renderscript.Mesh.AllocationBuilder addVertexAllocation(android.renderscript.Allocation) throws java.lang.IllegalStateException;
+    method public deprecated android.renderscript.Mesh create();
+    method public deprecated int getCurrentIndexSetIndex();
+    method public deprecated int getCurrentVertexTypeIndex();
   }
 
   public static class Mesh.Builder {
@@ -19142,18 +19142,18 @@ package android.renderscript {
     enum_constant public static final android.renderscript.Mesh.Primitive TRIANGLE_STRIP;
   }
 
-  public static class Mesh.TriangleMeshBuilder {
-    ctor public Mesh.TriangleMeshBuilder(android.renderscript.RenderScript, int, int);
-    method public android.renderscript.Mesh.TriangleMeshBuilder addTriangle(int, int, int);
-    method public android.renderscript.Mesh.TriangleMeshBuilder addVertex(float, float);
-    method public android.renderscript.Mesh.TriangleMeshBuilder addVertex(float, float, float);
-    method public android.renderscript.Mesh create(boolean);
-    method public android.renderscript.Mesh.TriangleMeshBuilder setColor(float, float, float, float);
-    method public android.renderscript.Mesh.TriangleMeshBuilder setNormal(float, float, float);
-    method public android.renderscript.Mesh.TriangleMeshBuilder setTexture(float, float);
-    field public static final int COLOR = 1; // 0x1
-    field public static final int NORMAL = 2; // 0x2
-    field public static final int TEXTURE_0 = 256; // 0x100
+  public static deprecated class Mesh.TriangleMeshBuilder {
+    ctor public deprecated Mesh.TriangleMeshBuilder(android.renderscript.RenderScript, int, int);
+    method public deprecated android.renderscript.Mesh.TriangleMeshBuilder addTriangle(int, int, int);
+    method public deprecated android.renderscript.Mesh.TriangleMeshBuilder addVertex(float, float);
+    method public deprecated android.renderscript.Mesh.TriangleMeshBuilder addVertex(float, float, float);
+    method public deprecated android.renderscript.Mesh create(boolean);
+    method public deprecated android.renderscript.Mesh.TriangleMeshBuilder setColor(float, float, float, float);
+    method public deprecated android.renderscript.Mesh.TriangleMeshBuilder setNormal(float, float, float);
+    method public deprecated android.renderscript.Mesh.TriangleMeshBuilder setTexture(float, float);
+    field public static final deprecated int COLOR = 1; // 0x1
+    field public static final deprecated int NORMAL = 2; // 0x2
+    field public static final deprecated int TEXTURE_0 = 256; // 0x100
   }
 
   public class Program extends android.renderscript.BaseObj {
@@ -19356,18 +19356,18 @@ package android.renderscript {
     ctor public RSRuntimeException(java.lang.String);
   }
 
-  public class RSSurfaceView extends android.view.SurfaceView implements android.view.SurfaceHolder.Callback {
-    ctor public RSSurfaceView(android.content.Context);
-    ctor public RSSurfaceView(android.content.Context, android.util.AttributeSet);
-    method public android.renderscript.RenderScriptGL createRenderScriptGL(android.renderscript.RenderScriptGL.SurfaceConfig);
-    method public void destroyRenderScriptGL();
-    method public android.renderscript.RenderScriptGL getRenderScriptGL();
-    method public void pause();
-    method public void resume();
-    method public void setRenderScriptGL(android.renderscript.RenderScriptGL);
-    method public void surfaceChanged(android.view.SurfaceHolder, int, int, int);
-    method public void surfaceCreated(android.view.SurfaceHolder);
-    method public void surfaceDestroyed(android.view.SurfaceHolder);
+  public deprecated class RSSurfaceView extends android.view.SurfaceView implements android.view.SurfaceHolder.Callback {
+    ctor public deprecated RSSurfaceView(android.content.Context);
+    ctor public deprecated RSSurfaceView(android.content.Context, android.util.AttributeSet);
+    method public deprecated android.renderscript.RenderScriptGL createRenderScriptGL(android.renderscript.RenderScriptGL.SurfaceConfig);
+    method public deprecated void destroyRenderScriptGL();
+    method public deprecated android.renderscript.RenderScriptGL getRenderScriptGL();
+    method public deprecated void pause();
+    method public deprecated void resume();
+    method public deprecated void setRenderScriptGL(android.renderscript.RenderScriptGL);
+    method public deprecated void surfaceChanged(android.view.SurfaceHolder, int, int, int);
+    method public deprecated void surfaceCreated(android.view.SurfaceHolder);
+    method public deprecated void surfaceDestroyed(android.view.SurfaceHolder);
   }
 
   public class RSTextureView extends android.view.TextureView implements android.view.TextureView.SurfaceTextureListener {
@@ -19432,7 +19432,7 @@ package android.renderscript {
     method public void pause();
     method public void resume();
     method public void setSurface(android.view.SurfaceHolder, int, int);
-    method public void setSurfaceTexture(android.graphics.SurfaceTexture, int, int);
+    method public deprecated void setSurfaceTexture(android.graphics.SurfaceTexture, int, int);
   }
 
   public static class RenderScriptGL.SurfaceConfig {
