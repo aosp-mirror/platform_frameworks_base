@@ -205,6 +205,16 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final int ACTION_PREVIOUS_HTML_ELEMENT = 0x00000800;
 
     /**
+     * Action to scroll the node content forward.
+     */
+    public static final int ACTION_SCROLL_FORWARD = 0x00001000;
+
+    /**
+     * Action to scroll the node content backward.
+     */
+    public static final int ACTION_SCROLL_BACKWARD = 0x00002000;
+
+    /**
      * Argument for which movement granularity to be used when traversing the node text.
      * <p>
      * <strong>Type:</strong> int<br>
@@ -569,6 +579,16 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see AccessibilityNodeInfo#ACTION_CLEAR_FOCUS
      * @see AccessibilityNodeInfo#ACTION_SELECT
      * @see AccessibilityNodeInfo#ACTION_CLEAR_SELECTION
+     * @see AccessibilityNodeInfo#ACTION_ACCESSIBILITY_FOCUS
+     * @see AccessibilityNodeInfo#ACTION_CLEAR_ACCESSIBILITY_FOCUS
+     * @see AccessibilityNodeInfo#ACTION_CLICK
+     * @see AccessibilityNodeInfo#ACTION_LONG_CLICK
+     * @see AccessibilityNodeInfo#ACTION_NEXT_AT_MOVEMENT_GRANULARITY
+     * @see AccessibilityNodeInfo#ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY
+     * @see AccessibilityNodeInfo#ACTION_NEXT_HTML_ELEMENT
+     * @see AccessibilityNodeInfo#ACTION_PREVIOUS_HTML_ELEMENT
+     * @see AccessibilityNodeInfo#ACTION_SCROLL_FORWARD
+     * @see AccessibilityNodeInfo#ACTION_SCROLL_BACKWARD
      */
     public int getActions() {
         return mActions;
@@ -1578,6 +1598,10 @@ public class AccessibilityNodeInfo implements Parcelable {
                 return "ACTION_NEXT_HTML_ELEMENT";
             case ACTION_PREVIOUS_HTML_ELEMENT:
                 return "ACTION_PREVIOUS_HTML_ELEMENT";
+            case ACTION_SCROLL_FORWARD:
+                return "ACTION_SCROLL_FORWARD";
+            case ACTION_SCROLL_BACKWARD:
+                return "ACTION_SCROLL_BACKWARD";
             default:
                 throw new IllegalArgumentException("Unknown action: " + action);
         }
