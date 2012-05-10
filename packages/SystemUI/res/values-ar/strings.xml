@@ -142,4 +142,7 @@
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"معلومات التطبيق"</string>
     <string name="notifications_off_title" msgid="8936620513608443224">"التنبيهات معطّلة"</string>
     <string name="notifications_off_text" msgid="2529001315769385273">"انقر هنا لإعادة تشغيل الإشعارات."</string>
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"سيتم تدوير الشاشة تلقائيًا."</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"تم تأمين الشاشة في الاتجاه الأفقي."</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"تم تأمين الشاشة في الاتجاه العمودي."</string>
 </resources>

@@ -254,4 +254,10 @@
     <skip />
     <!-- no translation found for notifications_off_text (2529001315769385273) -->
     <skip />
+    <!-- no translation found for accessibility_rotation_lock_off (4062780228931590069) -->
+    <skip />
+    <!-- no translation found for accessibility_rotation_lock_on_landscape (6731197337665366273) -->
+    <skip />
+    <!-- no translation found for accessibility_rotation_lock_on_portrait (5809367521644012115) -->
+    <skip />
 </resources>
