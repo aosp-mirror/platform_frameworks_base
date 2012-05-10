@@ -3118,8 +3118,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                             + "reverting from " + ps.codePathString
                             + ": new version " + pkg.mVersionCode
                             + " better than installed " + ps.versionCode);
-                    InstallArgs args = createInstallArgs(ps.pkgFlags, ps.codePathString,
-                            ps.resourcePathString, ps.nativeLibraryPathString);
+
+                    InstallArgs args = createInstallArgs(packageFlagsToInstallFlags(ps),
+                            ps.codePathString, ps.resourcePathString, ps.nativeLibraryPathString);
                     synchronized (mInstaller) {
                         args.cleanUpResourcesLI();
                     }
@@ -3174,8 +3175,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     Slog.w(TAG, "Package " + ps.name + " at " + scanFile + "reverting from "
                             + ps.codePathString + ": new version " + pkg.mVersionCode
                             + " better than installed " + ps.versionCode);
-                    InstallArgs args = createInstallArgs(ps.pkgFlags, ps.codePathString,
-                            ps.resourcePathString, ps.nativeLibraryPathString);
+                    InstallArgs args = createInstallArgs(packageFlagsToInstallFlags(ps),
+                            ps.codePathString, ps.resourcePathString, ps.nativeLibraryPathString);
                     synchronized (mInstaller) {
                         args.cleanUpResourcesLI();
                     }
@@ -7252,6 +7253,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0;
     }
 
+
+    private boolean isForwardLocked(PackageSetting ps) {
+        return (ps.pkgFlags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0;
+    }
+
     private static boolean isExternal(PackageParser.Package pkg) {
         return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
     }
@@ -7274,6 +7280,17 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private static boolean isUpdatedSystemApp(PackageParser.Package pkg) {
         return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
+    }
+
+    private int packageFlagsToInstallFlags(PackageSetting ps) {
+        int installFlags = 0;
+        if (isExternal(ps)) {
+            installFlags |= PackageManager.INSTALL_EXTERNAL;
+        }
+        if (isForwardLocked(ps)) {
+            installFlags |= PackageManager.INSTALL_FORWARD_LOCK;
+        }
+        return installFlags;
     }
 
     private void deleteTempPackageFiles() {
