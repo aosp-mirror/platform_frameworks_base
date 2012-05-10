@@ -21,7 +21,6 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
-import android.net.nsd.DnsSdTxtRecord;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceResponse;
 import android.net.wifi.p2p.nsd.WifiP2pServiceInfo;
@@ -46,6 +45,7 @@ import com.android.internal.util.Protocol;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class provides the API for managing Wi-Fi peer-to-peer connectivity. This lets an
@@ -585,11 +585,11 @@ public class WifiP2pManager {
          *
          * @param fullDomainName full domain name. <br>
          * e.g) "MyPrinter._ipp._tcp.local.".
-         * @param record txt record.
+         * @param txtRecordMap TXT record data as a map of key/value pairs
          * @param srcDevice source device.
          */
         public void onDnsSdTxtRecordAvailable(String fullDomainName,
-                DnsSdTxtRecord record,
+                Map<String, String> txtRecordMap,
                 WifiP2pDevice srcDevice);
    }
 
