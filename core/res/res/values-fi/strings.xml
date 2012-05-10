@@ -175,28 +175,20 @@
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Tarkkaile fyysistä sijaintiasi."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Verkkoviestintä"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Käyttää useita ​​verkon ominaisuuksia."</string>
-    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
-    <skip />
-    <!-- no translation found for permgrouplab_shortrangeNetwork (130808676377486118) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
-    <skip />
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Käytä laitteita ja verkkoja Bluetooth-yhteyden kautta."</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Lyhyen kantaman verkot"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Käytä laitteita lyhyen kantaman verkkojen kuten NFC:n kautta."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Ääniasetukset"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Muuta ääniasetuksia."</string>
     <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Vaikuttaa akun kestoon"</string>
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Käytä ominaisuuksia, jotka voivat tyhjentää akun nopeasti."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalenteri"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Kalenterin ja tapahtumien käyttöoikeus."</string>
-    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
-    <skip />
-    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
-    <skip />
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Lue käyttäjän sanakirjaa"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Lue sanoja käyttäjän sanakirjasta."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Kirjoita käyttäjän sanakirjaan"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Lisää sanoja käyttäjän sanakirjaan."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Kirjanmerkit ja historia"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Kirjanmerkkien ja selaimen historian käyttöoikeus."</string>
     <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Herätys"</string>
@@ -569,8 +561,7 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Lue USB-muistin sisältöä (kuvia ja mediaa)."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Antaa sovelluksen lukea SD-kortin sisältöä. Kortti voi sisältää valokuvia ja muuta mediaa."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"muokkaa tai poista USB:n sis."</string>
-    <!-- no translation found for permlab_sdcardWrite (8805693630050458763) -->
-    <skip />
+    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"muokkaa tai poista SD-kortin sisältöä"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Antaa sovelluksen kirjoittaa USB-tallennustilaan."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Antaa sovelluksen kirjoittaa SD-kortille."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"muokkaa/poista sisäisen säilytystilan sisältöä"</string>
@@ -1090,8 +1081,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Aseta"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Valmis"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"UUTTA: "</font></string>
-    <!-- no translation found for perms_description_app (5139836143293299417) -->
-    <skip />
+    <string name="perms_description_app" msgid="5139836143293299417">"Palvelun tarjoaa <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Lupia ei tarvita"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB-massamuisti"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB yhdistetty"</string>
@@ -1321,8 +1311,6 @@
     <string name="sending" msgid="3245653681008218030">"Lähetetään…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Käynnistetäänkö selain?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Vastataanko puheluun?"</string>
-    <!-- no translation found for activity_resolver_use_always (8017770747801494933) -->
-    <skip />
-    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
-    <skip />
+    <string name="activity_resolver_use_always" msgid="8017770747801494933">"Aina"</string>
+    <string name="activity_resolver_use_once" msgid="405646673463328329">"Vain kerran"</string>
 </resources>
