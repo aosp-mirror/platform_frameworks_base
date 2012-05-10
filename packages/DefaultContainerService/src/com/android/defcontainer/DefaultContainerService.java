@@ -473,6 +473,8 @@ public class DefaultContainerService extends IntentService {
     }
 
     private static class ApkContainer {
+        private static final int MAX_AUTHENTICATED_DATA_SIZE = 16384;
+
         private final InputStream mInStream;
 
         private MacAuthenticatedInputStream mAuthenticatedStream;
@@ -540,26 +542,35 @@ public class DefaultContainerService extends IntentService {
                 throw new IOException(e);
             }
 
-            final int encStart = encryptionParams.getEncryptedDataStart();
-            final int end = encryptionParams.getDataEnd();
+            final long encStart = encryptionParams.getEncryptedDataStart();
+            final long end = encryptionParams.getDataEnd();
             if (end < encStart) {
                 throw new IOException("end <= encStart");
             }
 
             final Mac mac = getMacInstance(encryptionParams);
             if (mac != null) {
-                final int macStart = encryptionParams.getAuthenticatedDataStart();
+                final long macStart = encryptionParams.getAuthenticatedDataStart();
+                if (macStart >= Integer.MAX_VALUE) {
+                    throw new IOException("macStart >= Integer.MAX_VALUE");
+                }
 
-                final int furtherOffset;
+                final long furtherOffset;
                 if (macStart >= 0 && encStart >= 0 && macStart < encStart) {
                     /*
                      * If there is authenticated data at the beginning, read
                      * that into our MAC first.
                      */
-                    final int authenticatedLength = encStart - macStart;
-                    final byte[] authenticatedData = new byte[authenticatedLength];
+                    final long authenticatedLengthLong = encStart - macStart;
+                    if (authenticatedLengthLong > MAX_AUTHENTICATED_DATA_SIZE) {
+                        throw new IOException("authenticated data is too long");
+                    }
+                    final int authenticatedLength = (int) authenticatedLengthLong;
 
-                    Streams.readFully(inStream, authenticatedData, macStart, authenticatedLength);
+                    final byte[] authenticatedData = new byte[(int) authenticatedLength];
+
+                    Streams.readFully(inStream, authenticatedData, (int) macStart,
+                            authenticatedLength);
                     mac.update(authenticatedData, 0, authenticatedLength);
 
                     furtherOffset = 0;
