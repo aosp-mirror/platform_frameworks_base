@@ -25234,6 +25234,8 @@ package android.view.accessibility {
     field public static final int ACTION_NEXT_HTML_ELEMENT = 1024; // 0x400
     field public static final int ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY = 512; // 0x200
     field public static final int ACTION_PREVIOUS_HTML_ELEMENT = 2048; // 0x800
+    field public static final int ACTION_SCROLL_BACKWARD = 8192; // 0x2000
+    field public static final int ACTION_SCROLL_FORWARD = 4096; // 0x1000
     field public static final int ACTION_SELECT = 4; // 0x4
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int FOCUS_ACCESSIBILITY = 2; // 0x2

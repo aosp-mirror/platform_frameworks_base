@@ -1355,6 +1355,33 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(AbsListView.class.getName());
+        if (getFirstVisiblePosition() > 0) {
+            info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+        }
+        if (getLastVisiblePosition() < getCount() - 1) {
+            info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+        }
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+                if (getLastVisiblePosition() < getCount() - 1) {
+                    final int viewportHeight = getHeight() - mListPadding.top - mListPadding.bottom;
+                    smoothScrollBy(viewportHeight, PositionScroller.SCROLL_DURATION);
+                    return true;
+                }
+            } return false;
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+                if (mFirstPosition > 0) {
+                    final int viewportHeight = getHeight() - mListPadding.top - mListPadding.bottom;
+                    smoothScrollBy(-viewportHeight, PositionScroller.SCROLL_DURATION);
+                    return true;
+                }
+            } return false;
+        }
+        return super.performAccessibilityAction(action, arguments);
     }
 
     /**

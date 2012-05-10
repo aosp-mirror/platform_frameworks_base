@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.FocusFinder;
 import android.view.InputDevice;
@@ -737,10 +738,42 @@ public class HorizontalScrollView extends FrameLayout {
     }
 
     @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+                final int viewportWidth = getWidth() - mPaddingLeft - mPaddingRight;
+                final int targetScrollX = Math.min(mScrollX + viewportWidth, getScrollRange());
+                if (targetScrollX != mScrollX) {
+                    smoothScrollTo(targetScrollX, 0);
+                    return true;
+                }
+            } return false;
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+                final int viewportWidth = getWidth() - mPaddingLeft - mPaddingRight;
+                final int targetScrollX = Math.max(0, mScrollX - viewportWidth);
+                if (targetScrollX != mScrollX) {
+                    smoothScrollTo(targetScrollX, 0);
+                    return true;
+                }
+            } return false;
+        }
+        return super.performAccessibilityAction(action, arguments);
+    }
+
+    @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(HorizontalScrollView.class.getName());
-        info.setScrollable(getScrollRange() > 0);
+        final int scrollRange = getScrollRange();
+        if (scrollRange > 0) {
+            info.setScrollable(true);
+            if (mScrollX > 0) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+            }
+            if (mScrollX < scrollRange) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+            }
+        }
     }
 
     @Override

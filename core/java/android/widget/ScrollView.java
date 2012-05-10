@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.AttributeSet;
 import android.view.FocusFinder;
@@ -740,10 +741,42 @@ public class ScrollView extends FrameLayout {
     }
 
     @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+                final int viewportHeight = getHeight() - mPaddingBottom - mPaddingTop;
+                final int targetScrollY = Math.min(mScrollY + viewportHeight, getScrollRange());
+                if (targetScrollY != mScrollY) {
+                    smoothScrollTo(0, targetScrollY);
+                    return true;
+                }
+            } return false;
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+                final int viewportHeight = getHeight() - mPaddingBottom - mPaddingTop;
+                final int targetScrollY = Math.max(mScrollY - viewportHeight, 0);
+                if (targetScrollY != mScrollY) {
+                    smoothScrollTo(0, targetScrollY);
+                    return true;
+                }
+            } return false;
+        }
+        return super.performAccessibilityAction(action, arguments);
+    }
+
+    @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(ScrollView.class.getName());
-        info.setScrollable(getScrollRange() > 0);
+        final int scrollRange = getScrollRange();
+        if (scrollRange > 0) {
+            info.setScrollable(true);
+            if (mScrollY > 0) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+            }
+            if (mScrollY < scrollRange) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+            }
+        }
     }
 
     @Override
