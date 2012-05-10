@@ -185,7 +185,7 @@
     <skip />
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"오디오 설정"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"오디오 설정을 변경합니다."</string>
-    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"배터리에 영향"</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"배터리 소모"</string>
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"배터리를 빨리 소모시킬 수 있는 기능을 사용합니다."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"캘린더"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"캘린더 및 일정에 직접 액세스합니다."</string>
@@ -208,7 +208,7 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"카메라"</string>
     <string name="permgroupdesc_camera" msgid="2933667372289567714">"이미지 및 동영상을 캡처하기 위해 카메라에 직접 액세스합니다."</string>
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"애플리케이션 정보"</string>
-    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"기기의 다른 애플리케이션의 작동에 영향을 줄 수 있습니다."</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"기기의 다른 애플리케이션의 작동에 영향을 줍니다."</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"배경화면"</string>
     <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"기기 배경화면 설정을 변경합니다."</string>
     <string name="permgrouplab_systemClock" msgid="406535759236612992">"시계"</string>
