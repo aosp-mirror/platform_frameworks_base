@@ -21,6 +21,7 @@ import android.util.Log;
 
 
 /**
+ * @deprecated in API 16
  * <p>The Renderscript fragment program, also known as fragment shader is responsible
  * for manipulating pixel data in a user defined way. It's constructed from a GLSL
  * shader string containing the program body, textures inputs, and a Type object
@@ -41,8 +42,12 @@ public class ProgramFragment extends Program {
         super(id, rs);
     }
 
+    /**
+     * @deprecated in API 16
+     */
     public static class Builder extends BaseProgramBuilder {
         /**
+         * @deprecated in API 16
          * Create a builder object.
          *
          * @param rs Context to which the program will belong.
@@ -52,6 +57,7 @@ public class ProgramFragment extends Program {
         }
 
         /**
+         * @deprecated in API 16
          * Creates ProgramFragment from the current state of the builder
          *
          * @return  ProgramFragment
