@@ -70,6 +70,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -515,12 +516,14 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 int index = rescaleIndex(streams[i].getIndex(device, false  /* lastAudible */),
                                 mStreamVolumeAlias[i],
                                 i);
-                streams[i].mIndex.put(device, streams[i].getValidIndex(index));
-                streams[i].applyDeviceVolume(device);
-                index = rescaleIndex(streams[i].getIndex(device, true  /* lastAudible */),
-                            mStreamVolumeAlias[i],
-                            i);
-                streams[i].mLastAudibleIndex.put(device, streams[i].getValidIndex(index));
+                synchronized (streams[i]) {
+                    streams[i].mIndex.put(device, streams[i].getValidIndex(index));
+                    streams[i].applyDeviceVolume(device);
+                    index = rescaleIndex(streams[i].getIndex(device, true  /* lastAudible */),
+                                mStreamVolumeAlias[i],
+                                i);
+                    streams[i].mLastAudibleIndex.put(device, streams[i].getValidIndex(index));
+                }
             }
         }
     }
@@ -1112,12 +1115,14 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     // on voice capable devices
                     if (mVoiceCapable &&
                             mStreamVolumeAlias[streamType] == AudioSystem.STREAM_RING) {
-                        Set set = mStreamStates[streamType].mLastAudibleIndex.entrySet();
-                        Iterator i = set.iterator();
-                        while (i.hasNext()) {
-                            Map.Entry entry = (Map.Entry)i.next();
-                            if ((Integer)entry.getValue() == 0) {
-                                entry.setValue(10);
+                        synchronized (mStreamStates[streamType]) {
+                            Set set = mStreamStates[streamType].mLastAudibleIndex.entrySet();
+                            Iterator i = set.iterator();
+                            while (i.hasNext()) {
+                                Map.Entry entry = (Map.Entry)i.next();
+                                if ((Integer)entry.getValue() == 0) {
+                                    entry.setValue(10);
+                                }
                             }
                         }
                     }
@@ -1583,19 +1588,21 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         for (int streamType = 0; streamType < numStreamTypes; streamType++) {
             VolumeStreamState streamState = mStreamStates[streamType];
 
-            streamState.readSettings();
+            synchronized (streamState) {
+                streamState.readSettings();
 
-            // unmute stream that was muted but is not affect by mute anymore
-            if (streamState.muteCount() != 0 && !isStreamAffectedByMute(streamType)) {
-                int size = streamState.mDeathHandlers.size();
-                for (int i = 0; i < size; i++) {
-                    streamState.mDeathHandlers.get(i).mMuteCount = 1;
-                    streamState.mDeathHandlers.get(i).mute(false);
+                // unmute stream that was muted but is not affect by mute anymore
+                if (streamState.muteCount() != 0 && !isStreamAffectedByMute(streamType)) {
+                    int size = streamState.mDeathHandlers.size();
+                    for (int i = 0; i < size; i++) {
+                        streamState.mDeathHandlers.get(i).mMuteCount = 1;
+                        streamState.mDeathHandlers.get(i).mute(false);
+                    }
                 }
-            }
-            // apply stream volume
-            if (streamState.muteCount() == 0) {
-                streamState.applyAllVolumes();
+                // apply stream volume
+                if (streamState.muteCount() == 0) {
+                    streamState.applyAllVolumes();
+                }
             }
         }
 
@@ -2232,9 +2239,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         private String mVolumeIndexSettingName;
         private String mLastAudibleVolumeIndexSettingName;
         private int mIndexMax;
-        private final HashMap <Integer, Integer> mIndex = new HashMap <Integer, Integer>();
-        private final HashMap <Integer, Integer> mLastAudibleIndex =
-                                                                new HashMap <Integer, Integer>();
+        private final ConcurrentHashMap<Integer, Integer> mIndex =
+                                            new ConcurrentHashMap<Integer, Integer>(8, 0.75f, 4);
+        private final ConcurrentHashMap<Integer, Integer> mLastAudibleIndex =
+                                            new ConcurrentHashMap<Integer, Integer>(8, 0.75f, 4);
         private ArrayList<VolumeDeathHandler> mDeathHandlers; //handles mute/solo clients death
 
         private VolumeStreamState(String settingName, int streamType) {
@@ -2265,7 +2273,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             return name + "_" + suffix;
         }
 
-        public void readSettings() {
+        public synchronized void readSettings() {
             int remainingDevices = AudioSystem.DEVICE_OUT_ALL;
 
             for (int i = 0; remainingDevices != 0; i++) {
@@ -2339,7 +2347,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                                              device);
         }
 
-        public void applyAllVolumes() {
+        public synchronized void applyAllVolumes() {
             // apply default volume first: by convention this will reset all
             // devices volumes in audio policy manager to the supplied value
             AudioSystem.setStreamVolumeIndex(mStreamType,
@@ -2366,7 +2374,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                             true  /* lastAudible */);
         }
 
-        public boolean setIndex(int index, int device, boolean lastAudible) {
+        public synchronized boolean setIndex(int index, int device, boolean lastAudible) {
             int oldIndex = getIndex(device, false  /* lastAudible */);
             index = getValidIndex(index);
             mIndex.put(device, getValidIndex(index));
@@ -2400,8 +2408,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             }
         }
 
-        public int getIndex(int device, boolean lastAudible) {
-            HashMap <Integer, Integer> indexes;
+        public synchronized int getIndex(int device, boolean lastAudible) {
+            ConcurrentHashMap <Integer, Integer> indexes;
             if (lastAudible) {
                 indexes = mLastAudibleIndex;
             } else {
@@ -2415,11 +2423,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             return index.intValue();
         }
 
-        public void setLastAudibleIndex(int index, int device) {
+        public synchronized void setLastAudibleIndex(int index, int device) {
             mLastAudibleIndex.put(device, getValidIndex(index));
         }
 
-        public void adjustLastAudibleIndex(int deltaIndex, int device) {
+        public synchronized void adjustLastAudibleIndex(int deltaIndex, int device) {
             setLastAudibleIndex(getIndex(device,
                                          true  /* lastAudible */) + deltaIndex * 10,
                                 device);
@@ -2429,7 +2437,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             return mIndexMax;
         }
 
-        public HashMap <Integer, Integer> getAllIndexes(boolean lastAudible) {
+        // only called by setAllIndexes() which is already synchronized
+        public ConcurrentHashMap <Integer, Integer> getAllIndexes(boolean lastAudible) {
             if (lastAudible) {
                 return mLastAudibleIndex;
             } else {
@@ -2437,8 +2446,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             }
         }
 
-        public void setAllIndexes(VolumeStreamState srcStream, boolean lastAudible) {
-            HashMap <Integer, Integer> indexes = srcStream.getAllIndexes(lastAudible);
+        public synchronized void setAllIndexes(VolumeStreamState srcStream, boolean lastAudible) {
+            ConcurrentHashMap <Integer, Integer> indexes = srcStream.getAllIndexes(lastAudible);
             Set set = indexes.entrySet();
             Iterator i = set.iterator();
             while (i.hasNext()) {
@@ -2450,7 +2459,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             }
         }
 
-        public void mute(IBinder cb, boolean state) {
+        public synchronized void mute(IBinder cb, boolean state) {
             VolumeDeathHandler handler = getDeathHandler(cb, state);
             if (handler == null) {
                 Log.e(TAG, "Could not get client death handler for stream: "+mStreamType);
@@ -2481,25 +2490,68 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 mICallback = cb;
             }
 
+            // must be called while synchronized on parent VolumeStreamState
             public void mute(boolean state) {
-                synchronized(mDeathHandlers) {
-                    if (state) {
-                        if (mMuteCount == 0) {
-                            // Register for client death notification
-                            try {
-                                // mICallback can be 0 if muted by AudioService
-                                if (mICallback != null) {
-                                    mICallback.linkToDeath(this, 0);
+                if (state) {
+                    if (mMuteCount == 0) {
+                        // Register for client death notification
+                        try {
+                            // mICallback can be 0 if muted by AudioService
+                            if (mICallback != null) {
+                                mICallback.linkToDeath(this, 0);
+                            }
+                            mDeathHandlers.add(this);
+                            // If the stream is not yet muted by any client, set level to 0
+                            if (muteCount() == 0) {
+                                Set set = mIndex.entrySet();
+                                Iterator i = set.iterator();
+                                while (i.hasNext()) {
+                                    Map.Entry entry = (Map.Entry)i.next();
+                                    int device = ((Integer)entry.getKey()).intValue();
+                                    setIndex(0, device, false /* lastAudible */);
                                 }
-                                mDeathHandlers.add(this);
-                                // If the stream is not yet muted by any client, set level to 0
-                                if (muteCount() == 0) {
+                                sendMsg(mAudioHandler,
+                                        MSG_SET_ALL_VOLUMES,
+                                        SENDMSG_QUEUE,
+                                        0,
+                                        0,
+                                        VolumeStreamState.this, 0);
+                            }
+                        } catch (RemoteException e) {
+                            // Client has died!
+                            binderDied();
+                            return;
+                        }
+                    } else {
+                        Log.w(TAG, "stream: "+mStreamType+" was already muted by this client");
+                    }
+                    mMuteCount++;
+                } else {
+                    if (mMuteCount == 0) {
+                        Log.e(TAG, "unexpected unmute for stream: "+mStreamType);
+                    } else {
+                        mMuteCount--;
+                        if (mMuteCount == 0) {
+                            // Unregister from client death notification
+                            mDeathHandlers.remove(this);
+                            // mICallback can be 0 if muted by AudioService
+                            if (mICallback != null) {
+                                mICallback.unlinkToDeath(this, 0);
+                            }
+                            if (muteCount() == 0) {
+                                // If the stream is not muted any more, restore its volume if
+                                // ringer mode allows it
+                                if (!isStreamAffectedByRingerMode(mStreamType) ||
+                                        mRingerMode == AudioManager.RINGER_MODE_NORMAL) {
                                     Set set = mIndex.entrySet();
                                     Iterator i = set.iterator();
                                     while (i.hasNext()) {
                                         Map.Entry entry = (Map.Entry)i.next();
                                         int device = ((Integer)entry.getKey()).intValue();
-                                        setIndex(0, device, false /* lastAudible */);
+                                        setIndex(getIndex(device,
+                                                          true  /* lastAudible */),
+                                                 device,
+                                                 false  /* lastAudible */);
                                     }
                                     sendMsg(mAudioHandler,
                                             MSG_SET_ALL_VOLUMES,
@@ -2508,55 +2560,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                                             0,
                                             VolumeStreamState.this, 0);
                                 }
-                            } catch (RemoteException e) {
-                                // Client has died!
-                                binderDied();
-                                mDeathHandlers.notify();
-                                return;
-                            }
-                        } else {
-                            Log.w(TAG, "stream: "+mStreamType+" was already muted by this client");
-                        }
-                        mMuteCount++;
-                    } else {
-                        if (mMuteCount == 0) {
-                            Log.e(TAG, "unexpected unmute for stream: "+mStreamType);
-                        } else {
-                            mMuteCount--;
-                            if (mMuteCount == 0) {
-                                // Unregistr from client death notification
-                                mDeathHandlers.remove(this);
-                                // mICallback can be 0 if muted by AudioService
-                                if (mICallback != null) {
-                                    mICallback.unlinkToDeath(this, 0);
-                                }
-                                if (muteCount() == 0) {
-                                    // If the stream is not muted any more, restore it's volume if
-                                    // ringer mode allows it
-                                    if (!isStreamAffectedByRingerMode(mStreamType) ||
-                                            mRingerMode == AudioManager.RINGER_MODE_NORMAL) {
-                                        Set set = mIndex.entrySet();
-                                        Iterator i = set.iterator();
-                                        while (i.hasNext()) {
-                                            Map.Entry entry = (Map.Entry)i.next();
-                                            int device = ((Integer)entry.getKey()).intValue();
-                                            setIndex(getIndex(device,
-                                                              true  /* lastAudible */),
-                                                     device,
-                                                     false  /* lastAudible */);
-                                        }
-                                        sendMsg(mAudioHandler,
-                                                MSG_SET_ALL_VOLUMES,
-                                                SENDMSG_QUEUE,
-                                                0,
-                                                0,
-                                                VolumeStreamState.this, 0);
-                                    }
-                                }
                             }
                         }
                     }
-                    mDeathHandlers.notify();
                 }
             }
 
@@ -2570,7 +2576,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             }
         }
 
-        private int muteCount() {
+        private synchronized int muteCount() {
             int count = 0;
             int size = mDeathHandlers.size();
             for (int i = 0; i < size; i++) {
@@ -2579,26 +2585,25 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             return count;
         }
 
+        // only called by mute() which is already synchronized
         private VolumeDeathHandler getDeathHandler(IBinder cb, boolean state) {
-            synchronized(mDeathHandlers) {
-                VolumeDeathHandler handler;
-                int size = mDeathHandlers.size();
-                for (int i = 0; i < size; i++) {
-                    handler = mDeathHandlers.get(i);
-                    if (cb == handler.mICallback) {
-                        return handler;
-                    }
+            VolumeDeathHandler handler;
+            int size = mDeathHandlers.size();
+            for (int i = 0; i < size; i++) {
+                handler = mDeathHandlers.get(i);
+                if (cb == handler.mICallback) {
+                    return handler;
                 }
-                // If this is the first mute request for this client, create a new
-                // client death handler. Otherwise, it is an out of sequence unmute request.
-                if (state) {
-                    handler = new VolumeDeathHandler(cb);
-                } else {
-                    Log.w(TAG, "stream was not muted by this client");
-                    handler = null;
-                }
-                return handler;
             }
+            // If this is the first mute request for this client, create a new
+            // client death handler. Otherwise, it is an out of sequence unmute request.
+            if (state) {
+                handler = new VolumeDeathHandler(cb);
+            } else {
+                Log.w(TAG, "stream was not muted by this client");
+                handler = null;
+            }
+            return handler;
         }
 
         private void dump(PrintWriter pw) {
