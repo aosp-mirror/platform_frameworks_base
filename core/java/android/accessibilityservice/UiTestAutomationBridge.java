@@ -83,7 +83,7 @@ public class UiTestAutomationBridge {
      * @return The event.
      */
     public AccessibilityEvent getLastAccessibilityEvent() {
-        return mLastEvent; 
+        return mLastEvent;
     }
 
     /**
@@ -142,7 +142,7 @@ public class UiTestAutomationBridge {
 
             @Override
             public void onInterrupt() {
-                UiTestAutomationBridge.this.onInterrupt();  
+                UiTestAutomationBridge.this.onInterrupt();
             }
 
             @Override
@@ -189,7 +189,7 @@ public class UiTestAutomationBridge {
         final AccessibilityServiceInfo info = new AccessibilityServiceInfo();
         info.eventTypes = AccessibilityEvent.TYPES_ALL_MASK;
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
-        info.flags |= AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS;
+        info.flags |= AccessibilityServiceInfo.INCLUDE_NOT_IMPORTANT_VIEWS;
 
         try {
             manager.registerUiTestAutomationService(mListener, info);
