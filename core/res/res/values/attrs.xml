@@ -3685,8 +3685,8 @@
         <attr name="internalMaxWidth" format="dimension" />
         <!-- @hide The layout of the number picker. -->
         <attr name="internalLayout" />
-        <!-- @hide The minimal move distance of a swipe to be considered a fling. -->
-       <attr name="minFlingDistance" format="dimension" />
+        <!-- @hide The drawable for pressed virtual (increment/decrement) buttons. -->
+        <attr name="virtualButtonPressedDrawable" format="reference"/>
     </declare-styleable>
 
     <declare-styleable name="TimePicker">

@@ -1649,9 +1649,9 @@ please see styles_device_defaults.xml.
         <item name="android:selectionDivider">@android:drawable/numberpicker_selection_divider</item>
         <item name="android:selectionDividerHeight">2dip</item>
         <item name="android:selectionDividersDistance">48dip</item>
-        <item name="android:internalMinWidth">48dip</item>
+        <item name="android:internalMinWidth">64dip</item>
         <item name="android:internalMaxHeight">180dip</item>
-        <item name="android:minFlingDistance">150dip</item>
+        <item name="virtualButtonPressedDrawable">?android:attr/selectableItemBackground</item>
     </style>
 
     <style name="Widget.Holo.TimePicker" parent="Widget.TimePicker">
