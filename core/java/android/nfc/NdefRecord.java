@@ -321,7 +321,7 @@ public final class NdefRecord implements Parcelable {
      * and {@link #RTD_URI}. This is the most efficient encoding
      * of a URI into NDEF.<p>
      * The uri parameter will be normalized with
-     * {@link Uri#normalize} to set the scheme to lower case to
+     * {@link Uri#normalizeScheme} to set the scheme to lower case to
      * follow Android best practices for intent filtering.
      * However the unchecked exception
      * {@link IllegalArgumentException} may be thrown if the uri
@@ -338,7 +338,7 @@ public final class NdefRecord implements Parcelable {
     public static NdefRecord createUri(Uri uri) {
         if (uri == null) throw new NullPointerException("uri is null");
 
-        uri = uri.normalize();
+        uri = uri.normalizeScheme();
         String uriString = uri.toString();
         if (uriString.length() == 0) throw new IllegalArgumentException("uri is empty");
 
@@ -364,7 +364,7 @@ public final class NdefRecord implements Parcelable {
      * and {@link #RTD_URI}. This is the most efficient encoding
      * of a URI into NDEF.<p>
       * The uriString parameter will be normalized with
-     * {@link Uri#normalize} to set the scheme to lower case to
+     * {@link Uri#normalizeScheme} to set the scheme to lower case to
      * follow Android best practices for intent filtering.
      * However the unchecked exception
      * {@link IllegalArgumentException} may be thrown if the uriString
@@ -665,7 +665,7 @@ public final class NdefRecord implements Parcelable {
      * actually valid: it always attempts to create and return a URI if
      * this record appears to be a URI record by the above rules.<p>
      * The returned URI will be normalized to have a lower case scheme
-     * using {@link Uri#normalize}.<p>
+     * using {@link Uri#normalizeScheme}.<p>
      *
      * @return URI, or null if this is not a URI record
      */
@@ -688,13 +688,13 @@ public final class NdefRecord implements Parcelable {
                         }
                     } catch (FormatException e) {  }
                 } else if (Arrays.equals(mType, RTD_URI)) {
-                    return parseWktUri().normalize();
+                    return parseWktUri().normalizeScheme();
                 }
                 break;
 
             case TNF_ABSOLUTE_URI:
                 Uri uri = Uri.parse(new String(mType, Charsets.UTF_8));
-                return uri.normalize();
+                return uri.normalizeScheme();
 
             case TNF_EXTERNAL_TYPE:
                 if (inSmartPoster) {
