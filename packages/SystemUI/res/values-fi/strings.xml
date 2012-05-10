@@ -140,14 +140,9 @@
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Tyhjennä kaikki ilmoitukset."</string>
     <string name="dreams_dock_launcher" msgid="3541196417659166245">"Ota näytönsäästäjä käyttöön"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Sovelluksen tiedot"</string>
-    <!-- no translation found for notifications_off_title (8936620513608443224) -->
-    <skip />
-    <!-- no translation found for notifications_off_text (2529001315769385273) -->
-    <skip />
-    <!-- no translation found for accessibility_rotation_lock_off (4062780228931590069) -->
-    <skip />
-    <!-- no translation found for accessibility_rotation_lock_on_landscape (6731197337665366273) -->
-    <skip />
-    <!-- no translation found for accessibility_rotation_lock_on_portrait (5809367521644012115) -->
-    <skip />
+    <string name="notifications_off_title" msgid="8936620513608443224">"Ilmoitukset pois käytöstä"</string>
+    <string name="notifications_off_text" msgid="2529001315769385273">"Ota ilmoitukset uudelleen käyttöön napauttamalla tätä."</string>
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ruutu kääntyy automaattisesti."</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Ruutu on lukittu vaakasuuntaan."</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Ruutu on lukittu pystysuuntaan."</string>
 </resources>
