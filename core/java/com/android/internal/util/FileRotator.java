@@ -19,8 +19,6 @@ package com.android.internal.util;
 import android.os.FileUtils;
 import android.util.Slog;
 
-import com.android.internal.util.FileRotator.Rewriter;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -29,8 +27,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import libcore.io.IoUtils;
+import libcore.io.Streams;
 
 /**
  * Utility that rotates files over time, similar to {@code logrotate}. There is
@@ -137,10 +138,38 @@ public class FileRotator {
     public void deleteAll() {
         final FileInfo info = new FileInfo(mPrefix);
         for (String name : mBasePath.list()) {
-            if (!info.parse(name)) continue;
+            if (info.parse(name)) {
+                // delete each file that matches parser
+                new File(mBasePath, name).delete();
+            }
+        }
+    }
 
-            // delete each file that matches parser
-            new File(mBasePath, name).delete();
+    /**
+     * Dump all files managed by this rotator for debugging purposes.
+     */
+    public void dumpAll(OutputStream os) throws IOException {
+        final ZipOutputStream zos = new ZipOutputStream(os);
+        try {
+            final FileInfo info = new FileInfo(mPrefix);
+            for (String name : mBasePath.list()) {
+                if (info.parse(name)) {
+                    final ZipEntry entry = new ZipEntry(name);
+                    zos.putNextEntry(entry);
+
+                    final File file = new File(mBasePath, name);
+                    final FileInputStream is = new FileInputStream(file);
+                    try {
+                        Streams.copy(is, zos);
+                    } finally {
+                        IoUtils.closeQuietly(is);
+                    }
+
+                    zos.closeEntry();
+                }
+            }
+        } finally {
+            IoUtils.closeQuietly(zos);
         }
     }
 
@@ -159,22 +188,22 @@ public class FileRotator {
     public void combineActive(final Reader reader, final Writer writer, long currentTimeMillis)
             throws IOException {
         rewriteActive(new Rewriter() {
-            /** {@inheritDoc} */
+            @Override
             public void reset() {
                 // ignored
             }
 
-            /** {@inheritDoc} */
+            @Override
             public void read(InputStream in) throws IOException {
                 reader.read(in);
             }
 
-            /** {@inheritDoc} */
+            @Override
             public boolean shouldWrite() {
                 return true;
             }
 
-            /** {@inheritDoc} */
+            @Override
             public void write(OutputStream out) throws IOException {
                 writer.write(out);
             }
@@ -224,11 +253,11 @@ public class FileRotator {
 
                 // write success, delete backup
                 backupFile.delete();
-            } catch (IOException e) {
+            } catch (Throwable t) {
                 // write failed, delete file and restore backup
                 file.delete();
                 backupFile.renameTo(file);
-                throw e;
+                throw rethrowAsIoException(t);
             }
 
         } else {
@@ -241,11 +270,11 @@ public class FileRotator {
 
                 // write success, delete empty backup
                 backupFile.delete();
-            } catch (IOException e) {
+            } catch (Throwable t) {
                 // write failed, delete file and empty backup
                 file.delete();
                 backupFile.delete();
-                throw e;
+                throw rethrowAsIoException(t);
             }
         }
     }
@@ -350,6 +379,14 @@ public class FileRotator {
         } finally {
             FileUtils.sync(fos);
             IoUtils.closeQuietly(bos);
+        }
+    }
+
+    private static IOException rethrowAsIoException(Throwable t) throws IOException {
+        if (t instanceof IOException) {
+            throw (IOException) t;
+        } else {
+            throw new IOException(t.getMessage(), t);
         }
     }
 

@@ -187,12 +187,12 @@ public class FileRotatorTest extends AndroidTestCase {
             rotate.combineActive(reader, new Writer() {
                 public void write(OutputStream out) throws IOException {
                     new DataOutputStream(out).writeUTF("bar");
-                    throw new ProtocolException("yikes");
+                    throw new NullPointerException("yikes");
                 }
             }, currentTime);
 
             fail("woah, somehow able to write exception");
-        } catch (ProtocolException e) {
+        } catch (IOException e) {
             // expected from above
         }
 
