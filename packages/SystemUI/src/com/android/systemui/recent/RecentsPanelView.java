@@ -91,6 +91,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private int mThumbnailWidth;
     private boolean mFitThumbnailToXY;
     private int mRecentItemLayoutId;
+    private boolean mFirstScreenful = true;
 
     public static interface OnRecentsPanelVisibilityChangedListener {
         public void onRecentsPanelVisibilityChanged(boolean visible);
@@ -206,6 +207,22 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
     }
 
+    public RecentsPanelView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public RecentsPanelView(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+        mContext = context;
+        updateValuesFromResources();
+
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RecentsPanelView,
+                defStyle, 0);
+
+        mRecentItemLayoutId = a.getResourceId(R.styleable.RecentsPanelView_recentItemLayout, 0);
+        a.recycle();
+    }
+
     public int numItemsInOneScreenful() {
         if (mRecentsContainer instanceof RecentsScrollView){
             RecentsScrollView scrollView
@@ -297,6 +314,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             mRecentTasksDirty = true;
             mWaitingToShow = false;
             mReadyToShow = false;
+            mRecentsNoApps.setVisibility(View.INVISIBLE);
         }
         if (animate) {
             if (mShowing != show) {
@@ -413,21 +431,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             mVisibilityChangedListener.onRecentsPanelVisibilityChanged(visibility == VISIBLE);
         }
         super.setVisibility(visibility);
-    }
-
-    public RecentsPanelView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public RecentsPanelView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        mContext = context;
-        updateValuesFromResources();
-
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RecentsPanelView,
-                defStyle, 0);
-
-        mRecentItemLayoutId = a.getResourceId(R.styleable.RecentsPanelView_recentItemLayout, 0);
     }
 
     public void updateValuesFromResources() {
@@ -572,7 +575,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         showIfReady();
     }
 
-    // additional optimization when we have sofware system buttons - start loading the recent
+    // additional optimization when we have software system buttons - start loading the recent
     // tasks on touch down
     @Override
     public boolean onTouch(View v, MotionEvent ev) {
@@ -631,7 +634,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
     }
 
-    boolean mFirstScreenful;
     public void onTasksLoaded(ArrayList<TaskDescription> tasks) {
         if (!mFirstScreenful && tasks.size() == 0) {
             return;
