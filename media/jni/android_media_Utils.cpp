@@ -125,6 +125,19 @@ static jobject makeByteBufferObject(
     return byteBufObj;
 }
 
+static void SetMapInt32(
+        JNIEnv *env, jobject hashMapObj, jmethodID hashMapPutID,
+        const char *key, int32_t value) {
+    jstring keyObj = env->NewStringUTF(key);
+    jobject valueObj = makeIntegerObject(env, value);
+
+    jobject res = env->CallObjectMethod(
+            hashMapObj, hashMapPutID, keyObj, valueObj);
+
+    env->DeleteLocalRef(valueObj); valueObj = NULL;
+    env->DeleteLocalRef(keyObj); keyObj = NULL;
+}
+
 status_t ConvertMessageToMap(
         JNIEnv *env, const sp<AMessage> &msg, jobject *map) {
     jclass hashMapClazz = env->FindClass("java/util/HashMap");
@@ -202,6 +215,41 @@ status_t ConvertMessageToMap(
 
                 valueObj = makeByteBufferObject(
                         env, buffer->data(), buffer->size());
+                break;
+            }
+
+            case AMessage::kTypeRect:
+            {
+                int32_t left, top, right, bottom;
+                CHECK(msg->findRect(key, &left, &top, &right, &bottom));
+
+                SetMapInt32(
+                        env,
+                        hashMap,
+                        hashMapPutID,
+                        StringPrintf("%s-left", key).c_str(),
+                        left);
+
+                SetMapInt32(
+                        env,
+                        hashMap,
+                        hashMapPutID,
+                        StringPrintf("%s-top", key).c_str(),
+                        top);
+
+                SetMapInt32(
+                        env,
+                        hashMap,
+                        hashMapPutID,
+                        StringPrintf("%s-right", key).c_str(),
+                        right);
+
+                SetMapInt32(
+                        env,
+                        hashMap,
+                        hashMapPutID,
+                        StringPrintf("%s-bottom", key).c_str(),
+                        bottom);
                 break;
             }
 
