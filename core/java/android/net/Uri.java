@@ -1718,9 +1718,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     }
 
     /**
-     * Return a normalized representation of this Uri.
-     *
-     * <p>A normalized Uri has a lowercase scheme component.
+     * Return an equivalent URI with a lowercase scheme component.
      * This aligns the Uri with Android best practices for
      * intent filtering.
      *
@@ -1740,7 +1738,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      * @see {@link android.content.Intent#setData}
      * @see {@link #setNormalizedData}
      */
-    public Uri normalize() {
+    public Uri normalizeScheme() {
         String scheme = getScheme();
         if (scheme == null) return this;  // give up
         String lowerScheme = scheme.toLowerCase(Locale.US);
