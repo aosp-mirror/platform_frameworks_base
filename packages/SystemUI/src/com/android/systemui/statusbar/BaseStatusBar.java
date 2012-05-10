@@ -486,17 +486,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         // for blaming (see SwipeHelper.setLongPressListener)
         row.setTag(sbn.pkg);
 
-        // XXX: temporary: while testing big notifications, auto-expand all of them
         ViewGroup.LayoutParams lp = row.getLayoutParams();
-        Boolean expandable = Boolean.FALSE;
-        if (large != null) {
-            lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-            expandable = Boolean.TRUE;
-        } else {
-            lp.height = rowHeight;
-        }
-        row.setLayoutParams(lp);
-        row.setTag(R.id.expandable_tag, expandable);
         workAroundBadLayerDrawableOpacity(row);
         View vetoButton = updateNotificationVetoButton(row, sbn);
         vetoButton.setContentDescription(mContext.getString(
@@ -562,10 +552,11 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         applyLegacyRowBackground(sbn, content);
 
+        row.setTag(R.id.expandable_tag, Boolean.valueOf(large != null));
         entry.row = row;
         entry.content = content;
         entry.expanded = expandedOneU;
-        entry.expandedLarge = expandedOneU;
+        entry.setLargeView(expandedLarge);
 
         return true;
     }
@@ -674,6 +665,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         // Remove the expanded view.
         ViewGroup rowParent = (ViewGroup)entry.row.getParent();
         if (rowParent != null) rowParent.removeView(entry.row);
+        updateExpansionStates();
         updateNotificationIcons();
 
         return entry.notification;
@@ -712,9 +704,45 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (DEBUG) {
             Slog.d(TAG, "addNotificationViews: added at " + pos);
         }
+        updateExpansionStates();
         updateNotificationIcons();
 
         return iconView;
+    }
+
+    protected boolean expandView(NotificationData.Entry entry, boolean expand) {
+        if (entry.expandable()) {
+            int rowHeight =
+                    mContext.getResources().getDimensionPixelSize(R.dimen.notification_height);
+            ViewGroup.LayoutParams lp = entry.row.getLayoutParams();
+            if (expand) {
+                lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            } else {
+                lp.height = rowHeight;
+            }
+            entry.row.setLayoutParams(lp);
+            return expand;
+        } else {
+            return false;
+        }
+    }
+
+    protected void updateExpansionStates() {
+        int N = mNotificationData.size();
+        for (int i = 0; i < N; i++) {
+            NotificationData.Entry entry = mNotificationData.get(i);
+            if (i == (N-1)) {
+                if (DEBUG) Slog.d(TAG, "expanding top notification at " + i);
+                expandView(entry, true);
+            } else {
+                if (!entry.userExpanded()) {
+                    if (DEBUG) Slog.d(TAG, "collapsing notification at " + i);
+                    expandView(entry, false);
+                } else {
+                    if (DEBUG) Slog.d(TAG, "ignoring user-modified notification at " + i);
+                }
+            }
+        }
     }
 
     protected abstract void haltTicker();
@@ -722,6 +750,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected abstract void updateNotificationIcons();
     protected abstract void tick(IBinder key, StatusBarNotification n, boolean firstTime);
     protected abstract void updateExpandedViewPos(int expandedPosition);
+    protected abstract int getExpandedViewMaxHeight();
 
     protected boolean isTopNotification(ViewGroup parent, NotificationData.Entry entry) {
         return parent.indexOfChild(entry.row) == 0;
@@ -798,6 +827,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     handleNotificationError(key, notification, "Couldn't update icon: " + ic);
                     return;
                 }
+                updateExpansionStates();
             }
             catch (RuntimeException e) {
                 // It failed to add cleanly.  Log, and remove the view from the panel.
@@ -807,6 +837,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         } else {
             if (DEBUG) Slog.d(TAG, "not reusing notification for key: " + key);
+            if (DEBUG) Slog.d(TAG, "contents was " + (contentsUnchanged ? "unchanged" : "changed"));
+            if (DEBUG) Slog.d(TAG, "order was " + (orderUnchanged ? "unchanged" : "changed"));
+            if (DEBUG) Slog.d(TAG, "notification is " + (isTopAnyway ? "top" : "not top"));
             removeNotificationViews(key);
             addNotificationViews(key, notification);
         }
