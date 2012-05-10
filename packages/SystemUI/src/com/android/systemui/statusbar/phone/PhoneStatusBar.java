@@ -42,7 +42,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
@@ -105,16 +104,10 @@ public class PhoneStatusBar extends BaseStatusBar {
     public static final String ACTION_STATUSBAR_START
             = "com.android.internal.policy.statusbar.START";
 
-    private static final boolean ENABLE_INTRUDERS = false;
     private static final boolean DIM_BEHIND_EXPANDED_PANEL = false;
-
-    static final int EXPANDED_LEAVE_ALONE = -10000;
-    static final int EXPANDED_FULL_OPEN = -10001;
 
     private static final int MSG_OPEN_NOTIFICATION_PANEL = 1000;
     private static final int MSG_CLOSE_NOTIFICATION_PANEL = 1001;
-    private static final int MSG_SHOW_INTRUDER = 1002;
-    private static final int MSG_HIDE_INTRUDER = 1003;
     // 1020-1030 reserved for BaseStatusBar
 
     // will likely move to a resource or other tunable param at some point
@@ -178,10 +171,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     // drag bar
     CloseDragHandle mCloseView;
     private int mCloseViewHeight;
-
-    // all notifications
-    NotificationData mNotificationData = new NotificationData();
-    NotificationRowLayout mPile;
 
     // position
     int[] mPositionTmp = new int[2];
@@ -519,7 +508,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             toggleRecentApps();
         }
     };
-    private StatusBarNotification mCurrentlyIntrudingNotification;
+
     View.OnTouchListener mHomeSearchActionListener = new View.OnTouchListener() {
         public boolean onTouch(View v, MotionEvent event) {
             switch(event.getAction()) {
@@ -693,124 +682,13 @@ public class PhoneStatusBar extends BaseStatusBar {
 
             // show the ticker if there isn't an intruder too
             if (mCurrentlyIntrudingNotification == null) {
-                tick(notification);
+                tick(null, notification, true);
             }
         }
 
         // Recalculate the position of the sliding windows and the titles.
         setAreThereNotifications();
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
-    }
-
-    public void updateNotification(IBinder key, StatusBarNotification notification) {
-        if (DEBUG) Slog.d(TAG, "updateNotification(" + key + " -> " + notification + ")");
-
-        final NotificationData.Entry oldEntry = mNotificationData.findByKey(key);
-        if (oldEntry == null) {
-            Slog.w(TAG, "updateNotification for unknown key: " + key);
-            return;
-        }
-
-        final StatusBarNotification oldNotification = oldEntry.notification;
-
-        // XXX: modify when we do something more intelligent with the two content views
-        final RemoteViews oldContentView = (oldNotification.notification.bigContentView != null) 
-                ? oldNotification.notification.bigContentView
-                : oldNotification.notification.contentView;
-        final RemoteViews contentView = (notification.notification.bigContentView != null) 
-                ? notification.notification.bigContentView
-                : notification.notification.contentView;
-
-        if (DEBUG) {
-            Slog.d(TAG, "old notification: when=" + oldNotification.notification.when
-                    + " ongoing=" + oldNotification.isOngoing()
-                    + " expanded=" + oldEntry.expanded
-                    + " contentView=" + oldContentView
-                    + " rowParent=" + oldEntry.row.getParent());
-            Slog.d(TAG, "new notification: when=" + notification.notification.when
-                    + " ongoing=" + oldNotification.isOngoing()
-                    + " contentView=" + contentView);
-        }
-
-
-        // Can we just reapply the RemoteViews in place?  If when didn't change, the order
-        // didn't change.
-        boolean contentsUnchanged = oldEntry.expanded != null
-                && contentView != null && oldContentView != null
-                && contentView.getPackage() != null
-                && oldContentView.getPackage() != null
-                && oldContentView.getPackage().equals(contentView.getPackage())
-                && oldContentView.getLayoutId() == contentView.getLayoutId();
-        ViewGroup rowParent = (ViewGroup) oldEntry.row.getParent();
-        boolean orderUnchanged = notification.notification.when==oldNotification.notification.when
-                && notification.score == oldNotification.score;
-                // score now encompasses/supersedes isOngoing()
-
-        boolean updateTicker = notification.notification.tickerText != null
-                && !TextUtils.equals(notification.notification.tickerText,
-                        oldEntry.notification.notification.tickerText);
-        boolean isFirstAnyway = rowParent.indexOfChild(oldEntry.row) == 0;
-        if (contentsUnchanged && (orderUnchanged || isFirstAnyway)) {
-            if (DEBUG) Slog.d(TAG, "reusing notification for key: " + key);
-            oldEntry.notification = notification;
-            try {
-                // Reapply the RemoteViews
-                contentView.reapply(mContext, oldEntry.content);
-                // update the contentIntent
-                final PendingIntent contentIntent = notification.notification.contentIntent;
-                if (contentIntent != null) {
-                    final View.OnClickListener listener = new NotificationClicker(contentIntent,
-                            notification.pkg, notification.tag, notification.id);
-                    oldEntry.content.setOnClickListener(listener);
-                } else {
-                    oldEntry.content.setOnClickListener(null);
-                }
-                // Update the icon.
-                final StatusBarIcon ic = new StatusBarIcon(notification.pkg,
-                        notification.notification.icon, notification.notification.iconLevel,
-                        notification.notification.number,
-                        notification.notification.tickerText);
-                if (!oldEntry.icon.set(ic)) {
-                    handleNotificationError(key, notification, "Couldn't update icon: " + ic);
-                    return;
-                }
-            }
-            catch (RuntimeException e) {
-                // It failed to add cleanly.  Log, and remove the view from the panel.
-                Slog.w(TAG, "Couldn't reapply views for package " + contentView.getPackage(), e);
-                removeNotificationViews(key);
-                addNotificationViews(key, notification);
-            }
-        } else {
-            if (SPEW) Slog.d(TAG, "not reusing notification");
-            removeNotificationViews(key);
-            addNotificationViews(key, notification);
-        }
-
-        // Update the veto button accordingly (and as a result, whether this row is
-        // swipe-dismissable)
-        updateNotificationVetoButton(oldEntry.row, notification);
-
-        // Restart the ticker if it's still running
-        if (updateTicker) {
-            mTicker.halt();
-            tick(notification);
-        }
-
-        // Recalculate the position of the sliding windows and the titles.
-        setAreThereNotifications();
-        updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
-
-        // See if we need to update the intruder.
-        if (ENABLE_INTRUDERS && oldNotification == mCurrentlyIntrudingNotification) {
-            if (DEBUG) Slog.d(TAG, "updating the current intruder:" + notification);
-            // XXX: this is a hack for Alarms. The real implementation will need to *update* 
-            // the intruder.
-            if (notification.notification.fullScreenIntent == null) { // TODO(dsandler): consistent logic with add()
-                if (DEBUG) Slog.d(TAG, "no longer intrudes!");
-                mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
-            }
-        }
     }
 
     public void removeNotification(IBinder key) {
@@ -839,44 +717,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         updateRecentsPanel();
-    }
-
-
-    StatusBarIconView addNotificationViews(IBinder key, StatusBarNotification notification) {
-        if (DEBUG) {
-            Slog.d(TAG, "addNotificationViews(key=" + key + ", notification=" + notification);
-        }
-        // Construct the icon.
-        final StatusBarIconView iconView = new StatusBarIconView(mContext,
-                notification.pkg + "/0x" + Integer.toHexString(notification.id),
-                notification.notification);
-        iconView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-
-        final StatusBarIcon ic = new StatusBarIcon(notification.pkg,
-                    notification.notification.icon,
-                    notification.notification.iconLevel,
-                    notification.notification.number,
-                    notification.notification.tickerText);
-        if (!iconView.set(ic)) {
-            handleNotificationError(key, notification, "Couldn't create icon: " + ic);
-            return null;
-        }
-        // Construct the expanded view.
-        NotificationData.Entry entry = new NotificationData.Entry(key, notification, iconView);
-        if (!inflateViews(entry, mPile)) {
-            handleNotificationError(key, notification, "Couldn't expand RemoteViews for: "
-                    + notification);
-            return null;
-        }
-
-        // Add the expanded view and icon.
-        int pos = mNotificationData.add(entry);
-        if (DEBUG) {
-            Slog.d(TAG, "addNotificationViews: added at " + pos);
-        }
-        updateNotificationIcons();
-
-        return iconView;
     }
 
     private void loadNotificationShade() {
@@ -915,7 +755,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         updateNotificationIcons();
     }
 
-    private void updateNotificationIcons() {
+    @Override
+    protected void updateNotificationIcons() {
         loadNotificationShade();
 
         final LinearLayout.LayoutParams params
@@ -956,21 +797,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
-    StatusBarNotification removeNotificationViews(IBinder key) {
-        NotificationData.Entry entry = mNotificationData.remove(key);
-        if (entry == null) {
-            Slog.w(TAG, "removeNotification for unknown key: " + key);
-            return null;
-        }
-        // Remove the expanded view.
-        ViewGroup rowParent = (ViewGroup)entry.row.getParent();
-        if (rowParent != null) rowParent.removeView(entry.row);
-        updateNotificationIcons();
-
-        return entry.notification;
-    }
-
-    private void setAreThereNotifications() {
+    @Override
+    protected void setAreThereNotifications() {
         final boolean any = mNotificationData.size() > 0;
 
         final boolean clearable = any && mNotificationData.hasClearableItems();
@@ -1754,7 +1582,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
-    private void tick(StatusBarNotification n) {
+    @Override
+    protected void tick(IBinder key, StatusBarNotification n, boolean firstTime) {
         // no ticking in lights-out mode
         if (!areLightsOn()) return;
         
@@ -1767,21 +1596,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                             | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
                 mTicker.addEntry(n);
             }
-        }
-    }
-
-    /**
-     * Cancel this notification and tell the StatusBarManagerService / NotificationManagerService
-     * about the failure.
-     *
-     * WARNING: this will call back into us.  Don't hold any locks.
-     */
-    void handleNotificationError(IBinder key, StatusBarNotification n, String message) {
-        removeNotification(key);
-        try {
-            mBarService.onNotificationError(n.pkg, n.tag, n.id, n.uid, n.initialPid, message);
-        } catch (RemoteException ex) {
-            // The end is nigh.
         }
     }
 
@@ -1961,7 +1775,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         return mDisplayMetrics.heightPixels - mNotificationPanelMarginBottomPx;
     }
 
-    void updateExpandedViewPos(int expandedPosition) {
+    @Override
+    protected void updateExpandedViewPos(int expandedPosition) {
         if (SPEW) {
             Slog.d(TAG, "updateExpandedViewPos before expandedPosition=" + expandedPosition
                     //+ " mTrackingParams.y=" + ((mTrackingParams == null) ? "?" : mTrackingParams.y)
@@ -2288,5 +2103,10 @@ public class PhoneStatusBar extends BaseStatusBar {
             vibrate();
         }
     };
+
+    @Override
+    protected void haltTicker() {
+        mTicker.halt();
+    }
 }
 
