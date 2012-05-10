@@ -402,7 +402,7 @@ static int pid_compare(const void* v1, const void* v2)
     return *((const jint*)v1) - *((const jint*)v2);
 }
 
-static jlong android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
+static jlong getFreeMemoryImpl(const char* const sums[], const int sumsLen[], int num)
 {
     int fd = open("/proc/meminfo", O_RDONLY);
 
@@ -424,11 +424,8 @@ static jlong android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
     int numFound = 0;
     jlong mem = 0;
 
-    static const char* const sums[] = { "MemFree:", "Cached:", NULL };
-    static const int sumsLen[] = { strlen("MemFree:"), strlen("Cached:"), 0 };
-
     char* p = buffer;
-    while (*p && numFound < 2) {
+    while (*p && numFound < num) {
         int i = 0;
         while (sums[i]) {
             if (strncmp(p, sums[i], sumsLen[i]) == 0) {
@@ -451,6 +448,20 @@ static jlong android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
     }
 
     return numFound > 0 ? mem : -1;
+}
+
+static jlong android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
+{
+    static const char* const sums[] = { "MemFree:", "Cached:", NULL };
+    static const int sumsLen[] = { strlen("MemFree:"), strlen("Cached:"), 0 };
+    return getFreeMemoryImpl(sums, sumsLen, 2);
+}
+
+static jlong android_os_Process_getTotalMemory(JNIEnv* env, jobject clazz)
+{
+    static const char* const sums[] = { "MemTotal:", NULL };
+    static const int sumsLen[] = { strlen("MemTotal:"), 0 };
+    return getFreeMemoryImpl(sums, sumsLen, 1);
 }
 
 void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileStr,
@@ -901,6 +912,7 @@ static const JNINativeMethod methods[] = {
     {"sendSignal", "(II)V", (void*)android_os_Process_sendSignal},
     {"sendSignalQuiet", "(II)V", (void*)android_os_Process_sendSignalQuiet},
     {"getFreeMemory", "()J", (void*)android_os_Process_getFreeMemory},
+    {"getTotalMemory", "()J", (void*)android_os_Process_getTotalMemory},
     {"readProcLines", "(Ljava/lang/String;[Ljava/lang/String;[J)V", (void*)android_os_Process_readProcLines},
     {"getPids", "(Ljava/lang/String;[I)[I", (void*)android_os_Process_getPids},
     {"readProcFile", "(Ljava/lang/String;[I[Ljava/lang/String;[J[F)Z", (void*)android_os_Process_readProcFile},

@@ -5360,6 +5360,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         final long homeAppMem = mProcessList.getMemLevel(ProcessList.HOME_APP_ADJ);
         final long hiddenAppMem = mProcessList.getMemLevel(ProcessList.HIDDEN_APP_MIN_ADJ);
         outInfo.availMem = Process.getFreeMemory();
+        outInfo.totalMem = Process.getTotalMemory();
         outInfo.threshold = homeAppMem;
         outInfo.lowMemory = outInfo.availMem < (homeAppMem + ((hiddenAppMem-homeAppMem)/2));
         outInfo.hiddenAppThreshold = hiddenAppMem;
