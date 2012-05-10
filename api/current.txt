@@ -12487,7 +12487,7 @@ package android.net {
     method public abstract boolean isHierarchical();
     method public boolean isOpaque();
     method public abstract boolean isRelative();
-    method public android.net.Uri normalize();
+    method public android.net.Uri normalizeScheme();
     method public static android.net.Uri parse(java.lang.String);
     method public abstract java.lang.String toString();
     method public static android.net.Uri withAppendedPath(android.net.Uri, java.lang.String);

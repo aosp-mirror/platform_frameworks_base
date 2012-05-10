@@ -4573,7 +4573,7 @@ public class Intent implements Parcelable, Cloneable {
      * <p><em>Note: scheme matching in the Android framework is
      * case-sensitive, unlike the formal RFC. As a result,
      * you should always write your Uri with a lower case scheme,
-     * or use {@link Uri#normalize} or
+     * or use {@link Uri#normalizeScheme} or
      * {@link #setDataAndNormalize}
      * to ensure that the scheme is converted to lower case.</em>
      *
@@ -4599,7 +4599,7 @@ public class Intent implements Parcelable, Cloneable {
      * previously set (for example, by {@link #setType}).
      *
      * <p>The data Uri is normalized using
-     * {@link android.net.Uri#normalize} before it is set,
+     * {@link android.net.Uri#normalizeScheme} before it is set,
      * so really this is just a convenience method for
      * <pre>
      * setData(data.normalize())
@@ -4612,10 +4612,10 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #getData
      * @see #setType
-     * @see android.net.Uri#normalize
+     * @see android.net.Uri#normalizeScheme
      */
     public Intent setDataAndNormalize(Uri data) {
-        return setData(data.normalize());
+        return setData(data.normalizeScheme());
     }
 
     /**
@@ -4687,7 +4687,7 @@ public class Intent implements Parcelable, Cloneable {
      * <p><em>Note: MIME type and Uri scheme matching in the
      * Android framework is case-sensitive, unlike the formal RFC definitions.
      * As a result, you should always write these elements with lower case letters,
-     * or use {@link #normalizeMimeType} or {@link android.net.Uri#normalize} or
+     * or use {@link #normalizeMimeType} or {@link android.net.Uri#normalizeScheme} or
      * {@link #setDataAndTypeAndNormalize}
      * to ensure that they are converted to lower case.</em>
      *
@@ -4700,7 +4700,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #setType
      * @see #setData
      * @see #normalizeMimeType
-     * @see android.net.Uri#normalize
+     * @see android.net.Uri#normalizeScheme
      * @see #setDataAndTypeAndNormalize
      */
     public Intent setDataAndType(Uri data, String type) {
@@ -4716,7 +4716,7 @@ public class Intent implements Parcelable, Cloneable {
      * data with your own type given here.
      *
      * <p>The data Uri and the MIME type are normalize using
-     * {@link android.net.Uri#normalize} and {@link #normalizeMimeType}
+     * {@link android.net.Uri#normalizeScheme} and {@link #normalizeMimeType}
      * before they are set, so really this is just a convenience method for
      * <pre>
      * setDataAndType(data.normalize(), Intent.normalizeMimeType(type))
@@ -4732,10 +4732,10 @@ public class Intent implements Parcelable, Cloneable {
      * @see #setData
      * @see #setDataAndType
      * @see #normalizeMimeType
-     * @see android.net.Uri#normalize
+     * @see android.net.Uri#normalizeScheme
      */
     public Intent setDataAndTypeAndNormalize(Uri data, String type) {
-        return setDataAndType(data.normalize(), normalizeMimeType(type));
+        return setDataAndType(data.normalizeScheme(), normalizeMimeType(type));
     }
 
     /**
