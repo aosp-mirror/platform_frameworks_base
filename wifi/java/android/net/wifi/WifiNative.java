@@ -442,8 +442,8 @@ public class WifiNative {
         return doBooleanCommand("SET p2p_ssid_postfix " + postfix);
     }
 
-    public boolean setP2pGroupIdle(int time) {
-        return doBooleanCommand("SET p2p_group_idle " + time);
+    public boolean setP2pGroupIdle(String iface, int time) {
+        return doBooleanCommand("SET interface=" + iface + " p2p_group_idle " + time);
     }
 
     public void setPowerSave(boolean enabled) {
@@ -622,13 +622,6 @@ public class WifiNative {
             }
         }
         return "";
-    }
-
-    public boolean isGroupOwner(String deviceAddress) {
-        /* BSS returns details only for a GO */
-        String bssInfo = doStringCommand("BSS p2p_dev_addr=" + deviceAddress);
-        if (TextUtils.isEmpty(bssInfo)) return false;
-        return true;
     }
 
     public String p2pPeer(String deviceAddress) {
