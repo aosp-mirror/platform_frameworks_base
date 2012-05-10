@@ -175,28 +175,20 @@
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Giám sát vị trí thực của bạn."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Kết nối mạng"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Truy cập các tính năng mạng khác nhau."</string>
-    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
-    <skip />
-    <!-- no translation found for permgrouplab_shortrangeNetwork (130808676377486118) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
-    <skip />
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Truy cập vào các thiết bị và mạng thông qua Bluetooth."</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Mạng tầm ngắn"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Truy cập vào các thiết bị thông qua mạng tầm ngắn như NFC."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Cài đặt âm thanh"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Thay đổi cài đặt âm thanh."</string>
     <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Ảnh hưởng tới pin"</string>
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Sử dụng các tính năng có thể làm nhanh hết pin."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Lịch"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Truy cập trực tiếp vào lịch và sự kiện."</string>
-    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
-    <skip />
-    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
-    <skip />
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Đọc từ điển người dùng"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Đọc các từ trong từ điển người dùng."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Ghi từ điển người dùng"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Thêm từ vào từ điển người dùng."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Dấu trang và lịch sử"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Truy cập trực tiếp vào dấu trang và lịch sử trình duyệt."</string>
     <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Báo thức"</string>
@@ -569,8 +561,7 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Cho phép ứng dụng đọc nội dung của bộ lưu trữ USB, bộ lưu trữ này có thể bao gồm ảnh và đa phương tiện."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Cho phép ứng dụng đọc nội dung của thẻ SD, thẻ này có thể bao gồm ảnh và đa phương tiện."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"sửa đổi hoặc xóa nội dung của bộ lưu trữ USB của bạn"</string>
-    <!-- no translation found for permlab_sdcardWrite (8805693630050458763) -->
-    <skip />
+    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"sửa đổi hoặc xóa nội dung của thẻ SD của bạn"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Cho phép ứng dụng ghi vào bộ lưu trữ USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Cho phép ứng dụng ghi vào thẻ SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"sửa đổi/xóa nội dung trên bộ nhớ phương tiện cục bộ"</string>
@@ -1090,8 +1081,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Đặt"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Xong"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"MỚI: "</font></string>
-    <!-- no translation found for perms_description_app (5139836143293299417) -->
-    <skip />
+    <string name="perms_description_app" msgid="5139836143293299417">"Được cung cấp bởi <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Không yêu cầu quyền"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Bộ nhớ dung lượng lớn USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB đã kết nối"</string>
@@ -1321,8 +1311,7 @@
     <string name="sending" msgid="3245653681008218030">"Đang gửi…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Khởi chạy trình duyệt?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Chấp nhận cuộc gọi?"</string>
-    <!-- no translation found for activity_resolver_use_always (4167356512478150080) -->
+    <!-- no translation found for activity_resolver_use_always (8017770747801494933) -->
     <skip />
-    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
-    <skip />
+    <string name="activity_resolver_use_once" msgid="405646673463328329">"Chỉ một lần"</string>
 </resources>

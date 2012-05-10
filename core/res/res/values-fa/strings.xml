@@ -168,84 +168,47 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"پیام های شما"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"پیام کوتاه، ایمیل و دیگر پیامها را بخوانید."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"اطلاعات شخصی شما"</string>
-    <!-- no translation found for permgroupdesc_personalInfo (8426453129788861338) -->
-    <skip />
-    <!-- no translation found for permgrouplab_socialInfo (5799096623412043791) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_socialInfo (7129842457611643493) -->
-    <skip />
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"مستقیم به اطلاعات مربوط به خود، ذخیره شده در روی کارت تماس خود دسترسی داشته باشید."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"اطلاعات اجتماعی شما"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"مستقیم به اطلاعات مخاطبین و روابط اجتماعی دسترسی داشته باشید."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"موقعیت مکانی شما"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"بر موقعیت مکانی فیزیکی خود نظارت داشته باشید."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"ارتباط شبکه"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"به ویژگی‎های مختلف شبکه دسترسی داشته باشید."</string>
-    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
-    <skip />
-    <!-- no translation found for permgrouplab_shortrangeNetwork (130808676377486118) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
-    <skip />
-    <!-- no translation found for permgrouplab_audioSettings (8329261670151871235) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_audioSettings (2641515403347568130) -->
-    <skip />
-    <!-- no translation found for permgrouplab_affectsBattery (6209246653424798033) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_affectsBattery (6441275320638916947) -->
-    <skip />
-    <!-- no translation found for permgrouplab_calendar (5863508437783683902) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calendar (5777534316982184416) -->
-    <skip />
-    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
-    <skip />
-    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
-    <skip />
-    <!-- no translation found for permgrouplab_bookmarks (1949519673103968229) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_bookmarks (4169771606257963028) -->
-    <skip />
-    <!-- no translation found for permgrouplab_deviceAlarms (6117704629728824101) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_deviceAlarms (4769356362251641175) -->
-    <skip />
-    <!-- no translation found for permgrouplab_voicemail (4162237145027592133) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_voicemail (2498403969862951393) -->
-    <skip />
-    <!-- no translation found for permgrouplab_microphone (171539900250043464) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_microphone (7106618286905738408) -->
-    <skip />
-    <!-- no translation found for permgrouplab_camera (4820372495894586615) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_camera (2933667372289567714) -->
-    <skip />
-    <!-- no translation found for permgrouplab_appInfo (8028789762634147725) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_appInfo (3950378538049625907) -->
-    <skip />
-    <!-- no translation found for permgrouplab_wallpaper (3850280158041175998) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_wallpaper (5630417854750540154) -->
-    <skip />
-    <!-- no translation found for permgrouplab_systemClock (406535759236612992) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_systemClock (3944359833624094992) -->
-    <skip />
-    <!-- no translation found for permgrouplab_statusBar (2095862568113945398) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_statusBar (6242593432226807171) -->
-    <skip />
-    <!-- no translation found for permgrouplab_syncSettings (3341990986147826541) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_syncSettings (7603195265129031797) -->
-    <skip />
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"بلوتوث"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"از طریق بلوتوث به دستگاه‌ها و شبکه‌ها دسترسی داشته باشد."</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"شبکه‌های نزدیک"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"از طریق شبکه‌های نزدیک مانند NFC، به دستگاه‌ها دسترسی داشته باشد."</string>
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"تنظیمات صدا"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"تنظیمات صوتی را تغییر دهید."</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"روی باتری اثر دارد"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"از ویژگی‌هایی استفاده کنید که باتری را سریع خالی می‌کند."</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"تقویم"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"مستقیم به رویدادها و تقویم دسترسی داشته باشید."</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"خواندن فرهنگ لغت کاربر"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"کلمات را در فرهنگ لغت کاربر بخواند."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"نوشتن فرهنگ لغت کاربر"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"کلمات را به فرهنگ لغت کاربر اضافه کند."</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"نشانک‌ها و سابقه"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"مستقیم به نشانک‌ها و سابقه مرور دسترسی داشته باشید."</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"زنگ هشدار"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"ساعت زنگ دار را تنظیم کنید."</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"پست صوتی"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"به پست صوتی مستقیم دسترسی داشته باشید."</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"میکروفن"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"مستقیم به میکروفن برای ضبط صدا دسترسی داشته باشید."</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"دوربین"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"مستقیم به دوربین برای عکس گرفتن یا ضبط فیلم دسترسی داشته باشید."</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"اطلاعات برنامه‌های شما"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"می‌تواند بر عملکرد برنامه‌های دیگر روی دستگاه اثر بگذارد."</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"تصویر زمینه"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"تنظیمات تصویر زمینه دستگاه را تغییر دهید."</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"ساعت"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"زمان یا منطقه زمانی دستگاه را تغییر دهید."</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"نوار وضعیت"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"تنظیمات نوار وضعیت دستگاه را تغییر دهید."</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"تنظیمات همگام‌سازی"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"به تنظیمات همگام‌سازی دسترسی داشته باشید."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"حساب های شما"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"به حساب های موجود دسترسی داشته باشید."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"کنترل های سخت افزار"</string>
@@ -256,10 +219,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"دسترسی سطح پایین و کنترل سیستم."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"ابزارهای توسعه"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"ویژگیهایی که فقط مورد نیاز برنامه نویسان است."</string>
-    <!-- no translation found for permgrouplab_display (4279909676036402636) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_display (6051002031933013714) -->
-    <skip />
+    <string name="permgrouplab_display" msgid="4279909676036402636">"رابط برنامه دیگر"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"روی رابط برنامه‌های دیگر اثر دارد."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ذخیره سازی"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"به حافظه USB دسترسی پیدا کنید."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"به کارت SD دسترسی داشته باشید."</string>
@@ -600,8 +561,7 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"به برنامه امکان می‌دهد محتویات حافظه USB را بخواند که ممکن است حاوی عکس و رسانه باشد."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"به برنامه اجازه می‌دهد محتویات کارت SD را بخواند که ممکن است حاوی عکس و رسانه باشد."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"اصلاح یا حذف محتویات حافظه USB شما"</string>
-    <!-- no translation found for permlab_sdcardWrite (8805693630050458763) -->
-    <skip />
+    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"محتوای کارت SD شما را اصلاح کرده یا تغییر دهد"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"به برنامه اجازه می‎دهد تا در حافظه USB بنویسد."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"به برنامه اجازه می‎دهد تا در کارت SD بنویسد."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"تغییر/حذف محتواهای حافظه رسانه داخلی"</string>
@@ -779,8 +739,7 @@
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"سیم کارت درون تلفن نیست."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"سیم کارت را وارد کنید."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"سیم کارت موجود نیست یا قابل خواندن نیست. یک سیم کارت وارد کنید."</string>
-    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (5096149665138916184) -->
-    <skip />
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"سیم کارت غیرقابل استفاده است."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"سیم کارت شما به طور دائم غیر فعال شده است. "\n"برای داشتن سیم کارت دیگر با ارائه‎دهنده سرویس بی‎سیم خود تماس بگیرید."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"دکمه تراک قبلی"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"دکمه تراک بعدی"</string>
@@ -1122,8 +1081,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"تنظیم"</string>
     <string name="date_time_done" msgid="2507683751759308828">"انجام شد"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"جدید: "</font></string>
-    <!-- no translation found for perms_description_app (5139836143293299417) -->
-    <skip />
+    <string name="perms_description_app" msgid="5139836143293299417">"ارائه شده توسط <xliff:g id="APP_NAME">%1$s</xliff:g> ."</string>
     <string name="no_permissions" msgid="7283357728219338112">"مجوزی لازم نیست"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"حافظه انبوه USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB متصل شد"</string>
@@ -1353,8 +1311,7 @@
     <string name="sending" msgid="3245653681008218030">"درحال ارسال..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"مرورگر راه‌اندازی شود؟"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"تماس را می‌پذیرید؟"</string>
-    <!-- no translation found for activity_resolver_use_always (4167356512478150080) -->
+    <!-- no translation found for activity_resolver_use_always (8017770747801494933) -->
     <skip />
-    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
-    <skip />
+    <string name="activity_resolver_use_once" msgid="405646673463328329">"فقط یکبار"</string>
 </resources>

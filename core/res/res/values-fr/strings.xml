@@ -1321,8 +1321,7 @@
     <string name="sending" msgid="3245653681008218030">"Envoi en cours…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Lancer le navigateur ?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Prendre l\'appel ?"</string>
-    <!-- no translation found for activity_resolver_use_always (4167356512478150080) -->
-    <skip />
+    <string name="activity_resolver_use_always" msgid="8017770747801494933">"Toujours"</string>
     <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
     <skip />
 </resources>
