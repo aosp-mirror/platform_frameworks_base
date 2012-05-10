@@ -32,10 +32,13 @@ public class TargetDrawable {
     public static final int[] STATE_INACTIVE =
             { android.R.attr.state_enabled, -android.R.attr.state_active };
     public static final int[] STATE_FOCUSED =
-            { android.R.attr.state_enabled, android.R.attr.state_focused };
+            { android.R.attr.state_enabled, -android.R.attr.state_active,
+                android.R.attr.state_focused };
 
     private float mTranslationX = 0.0f;
     private float mTranslationY = 0.0f;
+    private float mPositionX = 0.0f;
+    private float mPositionY = 0.0f;
     private float mScaleX = 1.0f;
     private float mScaleY = 1.0f;
     private float mAlpha = 1.0f;
@@ -196,6 +199,22 @@ public class TargetDrawable {
         return mAlpha;
     }
 
+    public void setPositionX(float x) {
+        mPositionX = x;
+    }
+
+    public void setPositionY(float y) {
+        mPositionY = y;
+    }
+
+    public float getPositionX() {
+        return mPositionX;
+    }
+
+    public float getPositionY() {
+        return mPositionY;
+    }
+
     public int getWidth() {
         return mDrawable != null ? mDrawable.getIntrinsicWidth() : 0;
     }
@@ -209,8 +228,8 @@ public class TargetDrawable {
             return;
         }
         canvas.save(Canvas.MATRIX_SAVE_FLAG);
-        canvas.translate(mTranslationX, mTranslationY);
-        canvas.scale(mScaleX, mScaleY);
+        canvas.scale(mScaleX, mScaleY, mPositionX, mPositionY);
+        canvas.translate(mTranslationX + mPositionX, mTranslationY + mPositionY);
         canvas.translate(-0.5f * getWidth(), -0.5f * getHeight());
         mDrawable.setAlpha((int) Math.round(mAlpha * 255f));
         mDrawable.draw(canvas);
