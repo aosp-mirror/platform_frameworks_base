@@ -62,6 +62,16 @@ public class BridgeContentResolver extends ContentResolver {
         return false;
     }
 
+    @Override
+    protected IContentProvider acquireUnstableProvider(Context c, String name) {
+        return acquireProvider(c, name);
+    }
+
+    @Override
+    public boolean releaseUnstableProvider(IContentProvider icp) {
+        return releaseProvider(icp);
+    }
+
     /**
      * Stub for the layoutlib bridge content resolver.
      */
