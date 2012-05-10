@@ -5209,6 +5209,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * call to continue to your children, you must be sure to call the super
      * implementation.
      *
+     * <p>Here is a sample layout that makes use of fitting system windows
+     * to have controls for a video view placed inside of the window decorations
+     * that it hides and shows.  This can be used with code like the second
+     * sample (video player) shown in {@link #setSystemUiVisibility(int)}.
+     *
+     * {@sample development/samples/ApiDemos/res/layout/video_player.xml complete}
+     *
      * @param insets Current content insets of the window.  Prior to
      * {@link android.os.Build.VERSION_CODES#JELLY_BEAN} you must not modify
      * the insets or else you and Android will be unhappy.
@@ -5251,7 +5258,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * Check for the FITS_SYSTEM_WINDOWS flag. If this method returns true, this view
+     * Check for state of {@link #setFitsSystemWindows(boolean). If this method
+     * returns true, this view
      * will account for system screen decorations such as the status bar and inset its
      * content. This allows the view to be positioned in absolute screen coordinates
      * and remain visible to the user.
@@ -5260,7 +5268,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @attr ref android.R.styleable#View_fitsSystemWindows
      */
-    public boolean fitsSystemWindows() {
+    public boolean getFitsSystemWindows() {
         return (mViewFlags & FITS_SYSTEM_WINDOWS) == FITS_SYSTEM_WINDOWS;
     }
 
@@ -15376,7 +15384,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * playing the application would like to go into a complete full-screen mode,
      * to use as much of the display as possible for the video.  When in this state
      * the user can not interact with the application; the system intercepts
-     * touching on the screen to pop the UI out of full screen mode.
+     * touching on the screen to pop the UI out of full screen mode.  See
+     * {@link #fitSystemWindows(Rect)} for a sample layout that goes with this code.
      *
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/view/VideoPlayerActivity.java
      *      content}
@@ -15458,11 +15467,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         }
     }
 
-    void updateLocalSystemUiVisibility(int localValue, int localChanges) {
+    boolean updateLocalSystemUiVisibility(int localValue, int localChanges) {
         int val = (mSystemUiVisibility&~localChanges) | (localValue&localChanges);
         if (val != mSystemUiVisibility) {
             setSystemUiVisibility(val);
+            return true;
         }
+        return false;
     }
 
     /** @hide */
@@ -16861,7 +16872,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * Interface definition for a callback to be invoked when the status bar changes
      * visibility.  This reports <strong>global</strong> changes to the system UI
-     * state, not just what the application is requesting.
+     * state, not what the application is requesting.
      *
      * @see View#setOnSystemUiVisibilityChangeListener(android.view.View.OnSystemUiVisibilityChangeListener)
      */
@@ -16870,10 +16881,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
          * Called when the status bar changes visibility because of a call to
          * {@link View#setSystemUiVisibility(int)}.
          *
-         * @param visibility  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE} or
-         * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}.  This tells you the
-         * <strong>global</strong> state of the UI visibility flags, not what your
-         * app is currently applying.
+         * @param visibility  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE},
+         * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, and {@link #SYSTEM_UI_FLAG_FULLSCREEN}.
+         * This tells you the <strong>global</strong> state of these UI visibility
+         * flags, not what your app is currently applying.
          */
         public void onSystemUiVisibilityChange(int visibility);
     }
@@ -17157,6 +17168,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
          * Hack to force certain system UI visibility flags to be cleared.
          */
         int mDisabledSystemUiVisibility;
+
+        /**
+         * Last global system UI visibility reported by the window manager.
+         */
+        int mGlobalSystemUiVisibility;
 
         /**
          * True if a view in this hierarchy has an OnSystemUiVisibilityChangeListener
