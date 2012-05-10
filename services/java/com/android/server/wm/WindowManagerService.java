@@ -7542,7 +7542,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         for (i=0; i<N; i++) {
-            WindowState w = mWindows.get(i);
+            final WindowState w = mWindows.get(i);
+            final WindowStateAnimator winAnimator = w.mWinAnimator;
+            boolean layerChanged = false;
+            int oldLayer = w.mLayer;
             if (w.mBaseLayer == curBaseLayer || w.mIsImWindow
                     || (i > 0 && w.mIsWallpaper)) {
                 curLayer += WINDOW_LAYER_MULTIPLIER;
@@ -7551,22 +7554,33 @@ public class WindowManagerService extends IWindowManager.Stub
                 curBaseLayer = curLayer = w.mBaseLayer;
                 w.mLayer = curLayer;
             }
+            if (w.mLayer != oldLayer) {
+                layerChanged = true;
+            }
+            oldLayer = winAnimator.mAnimLayer;
             if (w.mTargetAppToken != null) {
-                w.mWinAnimator.mAnimLayer =
+                winAnimator.mAnimLayer =
                         w.mLayer + w.mTargetAppToken.mAppAnimator.animLayerAdjustment;
             } else if (w.mAppToken != null) {
-                w.mWinAnimator.mAnimLayer =
+                winAnimator.mAnimLayer =
                         w.mLayer + w.mAppToken.mAppAnimator.animLayerAdjustment;
             } else {
-                w.mWinAnimator.mAnimLayer = w.mLayer;
+                winAnimator.mAnimLayer = w.mLayer;
             }
             if (w.mIsImWindow) {
-                w.mWinAnimator.mAnimLayer += mInputMethodAnimLayerAdjustment;
+                winAnimator.mAnimLayer += mInputMethodAnimLayerAdjustment;
             } else if (w.mIsWallpaper) {
-                w.mWinAnimator.mAnimLayer += mWallpaperAnimLayerAdjustment;
+                winAnimator.mAnimLayer += mWallpaperAnimLayerAdjustment;
+            }
+            if (winAnimator.mAnimLayer != oldLayer) {
+                layerChanged = true;
+            }
+            if (layerChanged && mAnimator.isDimming(winAnimator)) {
+                // Force an animation pass just to update the mDimAnimator layer.
+                scheduleAnimationLocked();
             }
             if (DEBUG_LAYERS) Slog.v(TAG, "Assign layer " + w + ": "
-                    + w.mWinAnimator.mAnimLayer);
+                    + winAnimator.mAnimLayer);
             //System.out.println(
             //    "Assigned layer " + curLayer + " to " + w.mClient.asBinder());
         }
@@ -8270,7 +8284,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (!mInnerFields.mDimming) {
                 //Slog.i(TAG, "DIM BEHIND: " + w);
                 mInnerFields.mDimming = true;
-                if (!mAnimator.isDimming()) {
+                final WindowStateAnimator winAnimator = w.mWinAnimator;
+                if (!mAnimator.isDimming(winAnimator)) {
                     final int width, height;
                     if (attrs.type == WindowManager.LayoutParams.TYPE_BOOT_PROGRESS) {
                         width = mCurDisplayWidth;
@@ -8279,7 +8294,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         width = innerDw;
                         height = innerDh;
                     }
-                    mAnimator.startDimming(w.mWinAnimator, w.mExiting ? 0 : w.mAttrs.dimAmount,
+                    mAnimator.startDimming(winAnimator, w.mExiting ? 0 : w.mAttrs.dimAmount,
                             width, height);
                 }
             }

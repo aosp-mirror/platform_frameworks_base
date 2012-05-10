@@ -551,6 +551,10 @@ public class WindowAnimator {
         return mDimParams != null;
     }
 
+    boolean isDimming(final WindowStateAnimator winAnimator) {
+        return mDimParams != null && mDimParams.mDimWinAnimator == winAnimator;
+    }
+
     public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         if (mWindowDetachedWallpaper != null) {
             pw.print("  mWindowDetachedWallpaper="); pw.println(mWindowDetachedWallpaper);
