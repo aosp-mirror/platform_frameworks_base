@@ -208,6 +208,7 @@
   <java-symbol type="id" name="inbox_text2" />
   <java-symbol type="id" name="inbox_text3" />
   <java-symbol type="id" name="inbox_text4" />
+  <java-symbol type="id" name="status_bar_latest_event_content" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />
@@ -1004,6 +1005,9 @@
   <java-symbol type="drawable" name="ic_lockscreen_unlock" />
   <java-symbol type="drawable" name="ic_lockscreen_search" />
   <java-symbol type="drawable" name="notification_bg" />
+  <java-symbol type="drawable" name="notification_bg_low" />
+  <java-symbol type="drawable" name="notification_template_icon_bg" />
+  <java-symbol type="drawable" name="notification_template_icon_low_bg" />
 
   <java-symbol type="layout" name="action_bar_home" />
   <java-symbol type="layout" name="action_bar_title_item" />
@@ -1091,6 +1095,7 @@
   <java-symbol type="layout" name="zoom_controls" />
   <java-symbol type="layout" name="zoom_magnify" />
   <java-symbol type="layout" name="notification_action" />
+  <java-symbol type="layout" name="notification_action_tombstone" />
   <java-symbol type="layout" name="notification_intruder_content" />
   <java-symbol type="layout" name="notification_template_base" />
   <java-symbol type="layout" name="notification_template_big_base" />

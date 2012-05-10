@@ -49,14 +49,14 @@
          reducing false presses on navbar buttons; approx 2mm -->
     <dimen name="navigation_bar_deadzone_size">12dp</dimen>
 
-    <!-- thickness (height) of each notification row, including any separators or padding -->
-    <dimen name="notification_height">68dp</dimen>
+    <!-- thickness (height) of each 1U notification row plus glow, padding, etc -->
+    <dimen name="notification_height">72dp</dimen>
 
     <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>
 
-    <!-- Height of a small notification in the status bar -->
-    <dimen name="notification_min_height">@android:dimen/notification_large_icon_height</dimen>
+    <!-- Height of a small notification in the status bar plus glow, padding, etc -->
+    <dimen name="notification_min_height">72dp</dimen>
 
     <!-- Height of a small notification in the status bar -->
     <!-- TODO: change this back to 256dp once we deal with actions. -->
@@ -71,8 +71,8 @@
     <!-- gap on either side of status bar notification icons -->
     <dimen name="status_bar_icon_padding">0dp</dimen>
 
-    <!-- thickness (height) of dividers between each notification row -->
-    <dimen name="notification_divider_height">2dp</dimen>
+    <!-- half the distance between notifications in the panel -->
+    <dimen name="notification_divider_height">4dp</dimen>
 
     <!-- Notification drawer tuning parameters (phone UI) -->
     <!-- Initial velocity of the shade when expanding on its own -->
