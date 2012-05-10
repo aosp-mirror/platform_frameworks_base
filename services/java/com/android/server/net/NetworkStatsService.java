@@ -338,9 +338,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private NetworkStatsRecorder buildRecorder(
             String prefix, NetworkStatsSettings.Config config, boolean includeTags) {
+        final DropBoxManager dropBox = (DropBoxManager) mContext.getSystemService(
+                Context.DROPBOX_SERVICE);
         return new NetworkStatsRecorder(new FileRotator(
                 mBaseDir, prefix, config.rotateAgeMillis, config.deleteAgeMillis),
-                mNonMonotonicObserver, prefix, config.bucketDuration, includeTags);
+                mNonMonotonicObserver, dropBox, prefix, config.bucketDuration, includeTags);
     }
 
     private void shutdownLocked() {
