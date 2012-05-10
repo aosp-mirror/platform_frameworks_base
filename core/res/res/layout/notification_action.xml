@@ -17,7 +17,10 @@
 <Button xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/action0"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    style="@android:style/Widget.Holo.Button.Small"
+    android:layout_height="48dp"
     android:gravity="left|center_vertical"
+    android:drawablePadding="8dp"
+    android:paddingLeft="8dp"
+    android:textColor="#ccc"
+    android:textSize="14dp"
     />

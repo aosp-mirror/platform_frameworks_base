@@ -796,6 +796,12 @@ public class Notification implements Parcelable
         if (this.icon != 0) {
             contentView.setImageViewResource(R.id.icon, this.icon);
         }
+        if (priority < PRIORITY_LOW) {
+            contentView.setInt(R.id.icon,
+                    "setBackgroundResource", R.drawable.notification_template_icon_low_bg);
+            contentView.setInt(R.id.status_bar_latest_event_content,
+                    "setBackgroundResource", R.drawable.notification_bg_low);
+        }
         if (contentTitle != null) {
             contentView.setTextViewText(R.id.title, contentTitle);
         }
@@ -1363,6 +1369,12 @@ public class Notification implements Parcelable
             if (mLargeIcon != null) {
                 contentView.setImageViewBitmap(R.id.icon, mLargeIcon);
                 smallIconImageViewId = R.id.right_icon;
+            }
+            if (mPriority < PRIORITY_LOW) {
+                contentView.setInt(R.id.icon,
+                        "setBackgroundResource", R.drawable.notification_template_icon_low_bg);
+                contentView.setInt(R.id.status_bar_latest_event_content,
+                        "setBackgroundResource", R.drawable.notification_bg_low);
             }
             if (mSmallIcon != 0) {
                 contentView.setImageViewResource(smallIconImageViewId, mSmallIcon);

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 
 import android.app.ActivityManagerNative;
 import android.app.KeyguardManager;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
