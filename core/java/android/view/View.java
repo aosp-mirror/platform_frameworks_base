@@ -5257,6 +5257,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         return (mViewFlags & FITS_SYSTEM_WINDOWS) == FITS_SYSTEM_WINDOWS;
     }
 
+    /** @hide */
+    public boolean fitsSystemWindows() {
+        return getFitsSystemWindows();
+    }
+
     /**
      * Ask that a new dispatch of {@link #fitSystemWindows(Rect)} be performed.
      */

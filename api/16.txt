@@ -22847,7 +22847,6 @@ package android.view {
     method public final android.view.View findViewWithTag(java.lang.Object);
     method public void findViewsWithText(java.util.ArrayList<android.view.View>, java.lang.CharSequence, int);
     method protected boolean fitSystemWindows(android.graphics.Rect);
-    method public boolean fitsSystemWindows();
     method public android.view.View focusSearch(int);
     method public void forceLayout();
     method public float getAlpha();
