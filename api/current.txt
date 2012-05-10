@@ -7013,9 +7013,9 @@ package android.database {
     method public void unregisterDataSetObserver(android.database.DataSetObserver);
     field protected boolean mClosed;
     field protected android.content.ContentResolver mContentResolver;
-    field protected java.lang.Long mCurrentRowID;
+    field protected deprecated java.lang.Long mCurrentRowID;
     field protected int mPos;
-    field protected int mRowIdColumnIndex;
+    field protected deprecated int mRowIdColumnIndex;
     field protected deprecated java.util.HashMap mUpdatedRows;
   }
 
