@@ -1567,6 +1567,31 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
             throws RemoteException {
+        if (code == SYSPROPS_TRANSACTION) {
+            // We need to tell all apps about the system property change.
+            ArrayList<IBinder> procs = new ArrayList<IBinder>();
+            synchronized(this) {
+                for (SparseArray<ProcessRecord> apps : mProcessNames.getMap().values()) {
+                    final int NA = apps.size();
+                    for (int ia=0; ia<NA; ia++) {
+                        ProcessRecord app = apps.valueAt(ia);
+                        if (app.thread != null) {
+                            procs.add(app.thread.asBinder());
+                        }
+                    }
+                }
+            }
+
+            int N = procs.size();
+            for (int i=0; i<N; i++) {
+                Parcel data2 = Parcel.obtain();
+                try {
+                    procs.get(i).transact(IBinder.SYSPROPS_TRANSACTION, data2, null, 0);
+                } catch (RemoteException e) {
+                }
+                data2.recycle();
+            }
+        }
         try {
             return super.onTransact(code, data, reply, flags);
         } catch (RuntimeException e) {

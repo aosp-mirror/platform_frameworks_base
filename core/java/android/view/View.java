@@ -17210,7 +17210,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         /**
          * Show where the margins, bounds and layout bounds are for each view.
          */
-        final boolean mDebugLayout = SystemProperties.getBoolean(DEBUG_LAYOUT_PROPERTY, false);
+        boolean mDebugLayout = SystemProperties.getBoolean(DEBUG_LAYOUT_PROPERTY, false);
 
         /**
          * Point used to compute visible regions.
