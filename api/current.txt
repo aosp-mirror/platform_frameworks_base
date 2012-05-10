@@ -2820,6 +2820,7 @@ package android.app {
     field public long availMem;
     field public boolean lowMemory;
     field public long threshold;
+    field public long totalMem;
   }
 
   public static class ActivityManager.ProcessErrorStateInfo implements android.os.Parcelable {
