@@ -170,11 +170,6 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
             Log.w(TAG, "Attempt to bind to Face Unlock when already bound");
         }
 
-        // When switching between portrait and landscape view while Face Unlock is running, the
-        // screen will eventually go dark unless we poke the wakelock when Face Unlock is
-        // restarted
-        mKeyguardScreenCallback.pokeWakelock();
-
         mIsRunning = true;
         return true;
     }
@@ -268,7 +263,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
                 handleExposeFallback();
                 break;
             case MSG_POKE_WAKELOCK:
-                handlePokeWakelock();
+                handlePokeWakelock(msg.arg1);
                 break;
             default:
                 Log.e(TAG, "Unhandled message");
@@ -320,6 +315,11 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         if (mFaceUnlockView != null) {
             IBinder windowToken = mFaceUnlockView.getWindowToken();
             if (windowToken != null) {
+                // When switching between portrait and landscape view while Face Unlock is running,
+                // the screen will eventually go dark unless we poke the wakelock when Face Unlock
+                // is restarted.
+                mKeyguardScreenCallback.pokeWakelock();
+
                 int[] position;
                 position = new int[2];
                 mFaceUnlockView.getLocationInWindow(position);
@@ -366,7 +366,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
 
     /**
      * Stops the Face Unlock service and exposes the backup lock.  Called when the user presses the
-     * cancel button to skip Face Unlock or no face is detected.
+     * cancel button to skip Face Unlock, no face is detected or there is an error.
      */
     void handleCancel() {
         if (DEBUG) Log.d(TAG, "handleCancel()");
@@ -410,10 +410,10 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     }
 
     /**
-     * Pokes the wakelock to keep the screen alive and active.
+     * Pokes the wakelock to keep the screen alive and active for a specific amount of time.
      */
-    void handlePokeWakelock() {
-        mKeyguardScreenCallback.pokeWakelock();
+    void handlePokeWakelock(int millis) {
+        mKeyguardScreenCallback.pokeWakelock(millis);
     }
 
     /**
@@ -511,7 +511,8 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         }
 
         /**
-         * Called when the user presses cancel to skip Face Unlock or a face cannot be found.
+         * Called when the user presses cancel to skip Face Unlock, a face cannot be found or
+         * there is an error.
          */
         @Override
         public void cancel() {
@@ -540,12 +541,14 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         }
 
         /**
-         * Called when Face Unlock wants to keep the screen alive and active.
+         * Called when Face Unlock wants to keep the screen alive and active for a specific amount
+         * of time.
          */
-        @Override
-        public void pokeWakelock() {
-            if (DEBUG) Log.d(TAG, "pokeWakelock()");
-            mHandler.sendEmptyMessage(MSG_POKE_WAKELOCK);
+        public void pokeWakelock(int millis) {
+            if (DEBUG) Log.d(TAG, "pokeWakelock() for " + millis + "ms");
+            Message message = mHandler.obtainMessage(MSG_POKE_WAKELOCK, millis, -1);
+            mHandler.sendMessage(message);
         }
+
     };
 }
