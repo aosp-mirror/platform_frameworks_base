@@ -17,22 +17,22 @@
 */
 -->
 <set xmlns:android="http://schemas.android.com/apk/res/android">
-    <objectAnimator
-        android:interpolator="@interpolator/decelerate_quint"
-        android:valueFrom="1.125" android:valueTo="1.0"
+    <objectAnimator 
+        android:interpolator="@interpolator/decelerate_cubic"
+        android:valueFrom="0.8" android:valueTo="1.0"
         android:valueType="floatType"
         android:propertyName="scaleY"
-        android:duration="@android:integer/config_activityDefaultDur"/>
+        android:duration="300"/>
     <objectAnimator
-        android:interpolator="@interpolator/decelerate_quint"
-        android:valueFrom="1.125" android:valueTo="1.0"
+        android:interpolator="@interpolator/decelerate_cubic"
+        android:valueFrom="0.8" android:valueTo="1.0"
         android:valueType="floatType"
         android:propertyName="scaleX"
-        android:duration="@android:integer/config_activityDefaultDur"/>
+        android:duration="300"/>
     <objectAnimator
         android:interpolator="@interpolator/decelerate_cubic"
         android:valueFrom="0.0" android:valueTo="1.0"
         android:valueType="floatType"
         android:propertyName="alpha"
-        android:duration="@android:integer/config_activityDefaultDur"/>
+        android:duration="300"/>
 </set>
