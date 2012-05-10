@@ -2373,7 +2373,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         } else {
             if (mAccessibilityFocusedVirtualView == null) {
-                mAccessibilityFocusedVirtualView = provider.findAccessibilitiyFocus(View.NO_ID);
+                mAccessibilityFocusedVirtualView = provider.findAccessibilityFocus(View.NO_ID);
             }
             if (mAccessibilityFocusedVirtualView == null) {
                 return;
