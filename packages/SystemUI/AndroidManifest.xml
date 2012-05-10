@@ -161,18 +161,19 @@
 
         <!-- started from ... somewhere -->
         <activity
-            android:name=".Nyandroid"
+            android:name=".BeanBag"
             android:exported="true"
-            android:label="Nyandroid"
-            android:icon="@drawable/nyandroid04"
-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
+            android:label="BeanBag"
+            android:icon="@drawable/redbeandroid"
+            android:theme="@android:style/Theme.Wallpaper.NoTitleBar.Fullscreen"
             android:hardwareAccelerated="true"
             android:launchMode="singleInstance"
             android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
-<!--                <category android:name="android.intent.category.DREAM" />-->
+                <category android:name="com.android.internal.category.PLATLOGO" />
+<!--            <category android:name="android.intent.category.LAUNCHER" />-->
             </intent-filter>
         </activity>
     </application>

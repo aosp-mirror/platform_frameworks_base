@@ -29,64 +29,43 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 public class PlatLogoActivity extends Activity {
-    Vibrator mZzz;
     Toast mToast;
     ImageView mContent;
     int mCount;
     final Handler mHandler = new Handler();
 
-    Runnable mSuperLongPress = new Runnable() {
-        public void run() {
-            mCount++;
-            mZzz.vibrate(50 * mCount);
-            final float scale = 1f + 0.25f * mCount * mCount;
-            mContent.setScaleX(scale);
-            mContent.setScaleY(scale);
-
-            if (mCount <= 3) {
-                mHandler.postDelayed(mSuperLongPress, ViewConfiguration.getLongPressTimeout());
-            } else {
-                try {
-                    startActivity(new Intent(Intent.ACTION_MAIN)
-                        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                            | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-                        .setClassName("com.android.systemui","com.android.systemui.Nyandroid"));
-                } catch (ActivityNotFoundException ex) {
-                    android.util.Log.e("PlatLogoActivity", "Couldn't find platlogo screensaver.");
-                }
-                finish();
-            }
-        }
-    };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mZzz = (Vibrator)getSystemService(VIBRATOR_SERVICE);
-        mToast = Toast.makeText(this, "Android 4.0: Ice Cream Sandwich", Toast.LENGTH_SHORT);
+        mToast = Toast.makeText(this, "Android X.X: Jelly Bean", Toast.LENGTH_SHORT);
 
         mContent = new ImageView(this);
         mContent.setImageResource(com.android.internal.R.drawable.platlogo);
         mContent.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
-        mContent.setOnTouchListener(new View.OnTouchListener() {
+        mContent.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                final int action = event.getAction();
-                if (action == MotionEvent.ACTION_DOWN) {
-                    mContent.setPressed(true);
-                    mHandler.removeCallbacks(mSuperLongPress);
-                    mCount = 0;
-                    mHandler.postDelayed(mSuperLongPress, 2*ViewConfiguration.getLongPressTimeout());
-                } else if (action == MotionEvent.ACTION_UP) {
-                    if (mContent.isPressed()) {
-                        mContent.setPressed(false);
-                        mHandler.removeCallbacks(mSuperLongPress);
-                        mToast.show();
-                    }
+            public void onClick(View v) {
+                mToast.show();
+                mContent.setImageResource(com.android.internal.R.drawable.platlogo_alt);
+            }
+        });
+
+        mContent.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                try {
+                    startActivity(new Intent(Intent.ACTION_MAIN)
+                        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                            | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                        .addCategory("com.android.internal.category.PLATLOGO"));
+                        //.setClassName("com.android.systemui","com.android.systemui.BeanBag"));
+                } catch (ActivityNotFoundException ex) {
+                    android.util.Log.e("PlatLogoActivity", "Couldn't find a bag of beans.");
                 }
+                finish();
                 return true;
             }
         });
