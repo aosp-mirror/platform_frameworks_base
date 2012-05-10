@@ -140,10 +140,8 @@
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Brisanje svih obavijesti."</string>
     <string name="dreams_dock_launcher" msgid="3541196417659166245">"Aktivirajte čuvar zaslona"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Informacije o aplikaciji"</string>
-    <!-- no translation found for notifications_off_title (8936620513608443224) -->
-    <skip />
-    <!-- no translation found for notifications_off_text (2529001315769385273) -->
-    <skip />
+    <string name="notifications_off_title" msgid="8936620513608443224">"Obavijesti isključene"</string>
+    <string name="notifications_off_text" msgid="2529001315769385273">"Dotaknite ovdje da biste ponovo uključili obavijesti."</string>
     <!-- no translation found for accessibility_rotation_lock_off (4062780228931590069) -->
     <skip />
     <!-- no translation found for accessibility_rotation_lock_on_landscape (6731197337665366273) -->
