@@ -2128,6 +2128,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     static final int ACCESSIBILITY_STATE_CHANGED = 0x00000080 << IMPORTANT_FOR_ACCESSIBILITY_SHIFT;
 
+    /**
+     * Flag indicating that view has an animation set on it. This is used to track whether an
+     * animation is cleared between successive frames, in order to tell the associated
+     * DisplayList to clear its animation matrix.
+     */
+    static final int VIEW_IS_ANIMATING_TRANSFORM = 0x10000000;
+
     /* End of masks for mPrivateFlags2 */
 
     static final int DRAG_MASK = DRAG_CAN_ACCEPT | DRAG_HOVERED;
@@ -12764,16 +12771,27 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         if (a != null) {
             more = drawAnimation(parent, drawingTime, a, scalingRequired);
             concatMatrix = a.willChangeTransformationMatrix();
+            if (concatMatrix) {
+                mPrivateFlags2 |= VIEW_IS_ANIMATING_TRANSFORM;
+            }
             transformToApply = parent.mChildTransformation;
-        } else if (!useDisplayListProperties &&
-                (flags & ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
-            final boolean hasTransform =
-                    parent.getChildStaticTransformation(this, parent.mChildTransformation);
-            if (hasTransform) {
-                final int transformType = parent.mChildTransformation.getTransformationType();
-                transformToApply = transformType != Transformation.TYPE_IDENTITY ?
-                        parent.mChildTransformation : null;
-                concatMatrix = (transformType & Transformation.TYPE_MATRIX) != 0;
+        } else {
+            if ((mPrivateFlags2 & VIEW_IS_ANIMATING_TRANSFORM) == VIEW_IS_ANIMATING_TRANSFORM &&
+                    mDisplayList != null) {
+                // No longer animating: clear out old animation matrix
+                mDisplayList.setAnimationMatrix(null);
+                mPrivateFlags2 &= ~VIEW_IS_ANIMATING_TRANSFORM;
+            }
+            if (!useDisplayListProperties &&
+                    (flags & ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
+                final boolean hasTransform =
+                        parent.getChildStaticTransformation(this, parent.mChildTransformation);
+                if (hasTransform) {
+                    final int transformType = parent.mChildTransformation.getTransformationType();
+                    transformToApply = transformType != Transformation.TYPE_IDENTITY ?
+                            parent.mChildTransformation : null;
+                    concatMatrix = (transformType & Transformation.TYPE_MATRIX) != 0;
+                }
             }
         }
 

@@ -131,7 +131,8 @@ class GLES20DisplayList extends DisplayList {
     @Override
     public void setAnimationMatrix(Matrix matrix) {
         try {
-            nSetAnimationMatrix(getNativeDisplayList(), matrix.native_instance);
+            nSetAnimationMatrix(getNativeDisplayList(),
+                    (matrix != null) ? matrix.native_instance : 0);
         } catch (IllegalStateException e) {
             // invalid DisplayList okay: we'll set current values the next time we render to it
         }
