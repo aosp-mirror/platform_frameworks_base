@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2011 The Android Open Source Project
+<!-- Copyright (C) 2012 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,9 +14,13 @@
      limitations under the License.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:exitFadeDuration="@android:integer/config_mediumAnimTime">
-
-    <item android:state_pressed="true"  android:drawable="@drawable/notification_bg_normal_pressed" />
-    <item android:state_pressed="false" android:drawable="@drawable/notification_bg_normal" />
-</selector>
+<Button xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/action0"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:gravity="left|center_vertical"
+    android:drawablePadding="8dp"
+    android:paddingLeft="8dp"
+    android:textColor="#666"
+    android:textSize="14dp"
+    />

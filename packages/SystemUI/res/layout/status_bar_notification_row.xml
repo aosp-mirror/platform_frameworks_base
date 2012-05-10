@@ -1,7 +1,6 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@*android:drawable/notification_bg"
     >
 
     <View
@@ -34,7 +33,6 @@
         >
 
         <com.android.internal.widget.SizeAdaptiveLayout android:id="@+id/adaptive"
-           android:background="@*android:drawable/notification_bg"
            android:layout_width="match_parent"
            android:layout_height="wrap_content" />
 
