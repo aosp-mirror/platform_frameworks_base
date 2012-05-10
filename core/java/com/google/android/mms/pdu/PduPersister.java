@@ -1058,9 +1058,10 @@ public class PduPersister {
                 }
             }
         }
-
-        long threadId = Threads.getOrCreateThreadId(mContext, recipients);
-        values.put(Mms.THREAD_ID, threadId);
+        if (!recipients.isEmpty()) {
+            long threadId = Threads.getOrCreateThreadId(mContext, recipients);
+            values.put(Mms.THREAD_ID, threadId);
+        }
 
         SqliteWrapper.update(mContext, mContentResolver, uri, values, null, null);
     }
@@ -1299,7 +1300,6 @@ public class PduPersister {
         }
 
         HashSet<String> recipients = new HashSet<String>();
-        long threadId = DUMMY_THREAD_ID;
         int msgType = pdu.getMessageType();
         // Here we only allocate thread ID for M-Notification.ind,
         // M-Retrieve.conf and M-Send.req.
@@ -1326,9 +1326,11 @@ public class PduPersister {
                     }
                 }
             }
-            threadId = Threads.getOrCreateThreadId(mContext, recipients);
+            if (!recipients.isEmpty()) {
+                long threadId = Threads.getOrCreateThreadId(mContext, recipients);
+                values.put(Mms.THREAD_ID, threadId);
+            }
         }
-        values.put(Mms.THREAD_ID, threadId);
 
         // Save parts first to avoid inconsistent message is loaded
         // while saving the parts.
