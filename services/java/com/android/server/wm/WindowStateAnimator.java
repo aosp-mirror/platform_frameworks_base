@@ -142,6 +142,8 @@ class WindowStateAnimator {
         mContext = mService.mContext;
         mAttrFlags = win.mAttrs.flags;
         mAttrType = win.mAttrs.type;
+        mAnimDw = service.mAppDisplayWidth;
+        mAnimDh = service.mAppDisplayHeight;
     }
 
     public void setAnimation(Animation anim) {
@@ -231,6 +233,8 @@ class WindowStateAnimator {
                         " scale=" + mService.mWindowAnimationScale);
                     mAnimation.initialize(mWin.mFrame.width(), mWin.mFrame.height(),
                             mAnimDw, mAnimDh);
+                    mAnimDw = mService.mAppDisplayWidth;
+                    mAnimDh = mService.mAppDisplayHeight;
                     mAnimation.setStartTime(currentTime);
                     mLocalAnimating = true;
                     mAnimating = true;
@@ -377,7 +381,7 @@ class WindowStateAnimator {
             mService.mPendingRemove.add(mWin);
             mWin.mRemoveOnExit = false;
         }
-        if (mService.mWallpaperTarget == mWin) {
+        if (mService.mWallpaperTarget == mWin && mService.mLowerWallpaperTarget == null) {
             mAnimator.hideWallpapersLocked();
         }
     }
