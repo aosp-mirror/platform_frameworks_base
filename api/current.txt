@@ -3733,10 +3733,6 @@ package android.app {
     field public static final int FLAG_ONGOING_EVENT = 2; // 0x2
     field public static final int FLAG_ONLY_ALERT_ONCE = 8; // 0x8
     field public static final int FLAG_SHOW_LIGHTS = 1; // 0x1
-    field public static final java.lang.String KIND_CALL = "android.call";
-    field public static final java.lang.String KIND_EMAIL = "android.email";
-    field public static final java.lang.String KIND_EVENT = "android.event";
-    field public static final java.lang.String KIND_MESSAGE = "android.message";
     field public static final java.lang.String KIND_PROMO = "android.promo";
     field public static final int PRIORITY_DEFAULT = 0; // 0x0
     field public static final int PRIORITY_HIGH = 1; // 0x1
@@ -3754,7 +3750,6 @@ package android.app {
     field public android.app.PendingIntent fullScreenIntent;
     field public int icon;
     field public int iconLevel;
-    field public java.lang.String[] kind;
     field public android.graphics.Bitmap largeIcon;
     field public int ledARGB;
     field public int ledOffMS;
@@ -3789,7 +3784,6 @@ package android.app {
   public static class Notification.Builder {
     ctor public Notification.Builder(android.content.Context);
     method public android.app.Notification.Builder addAction(int, java.lang.CharSequence, android.app.PendingIntent);
-    method public android.app.Notification.Builder addKind(java.lang.String);
     method public android.app.Notification build();
     method public deprecated android.app.Notification getNotification();
     method public android.app.Notification.Builder setAutoCancel(boolean);
