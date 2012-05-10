@@ -44,14 +44,20 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     /**
      * This must be set to the index of the row ID column by any
      * subclass that wishes to support updates.
+     *
+     * @deprecated This field should not be used.
      */
+    @Deprecated
     protected int mRowIdColumnIndex;
 
     /**
      * If {@link #mRowIdColumnIndex} is not -1 this contains contains the value of
      * the column at {@link #mRowIdColumnIndex} for the current row this cursor is
      * pointing at.
+     *
+     * @deprecated This field should not be used.
      */
+    @Deprecated
     protected Long mCurrentRowID;
 
     protected boolean mClosed;
@@ -62,8 +68,8 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     private ContentObserver mSelfObserver;
     private boolean mSelfObserverRegistered;
 
-    private DataSetObservable mDataSetObservable = new DataSetObservable();
-    private ContentObservable mContentObservable = new ContentObservable();
+    private final DataSetObservable mDataSetObservable = new DataSetObservable();
+    private final ContentObservable mContentObservable = new ContentObservable();
 
     private Bundle mExtras = Bundle.EMPTY;
 
