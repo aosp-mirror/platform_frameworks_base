@@ -66,6 +66,17 @@ public class LimitedLengthInputStreamTest extends AndroidTestCase {
         }
     }
 
+    @MediumTest
+    public void testConstructor_OffsetLengthOverflow_Fail() throws Exception {
+        try {
+        InputStream is = new LimitedLengthInputStream(mTestStream1, Long.MAX_VALUE - 1,
+                Long.MAX_VALUE - 1);
+            fail("Should fail when offset + length is > Long.MAX_VALUE");
+        } catch (IOException e) {
+            // success
+        }
+    }
+
     private void checkReadBytesWithOffsetAndLength_WithString1(int offset, int length)
             throws Exception {
         byte[] temp = new byte[TEST_STRING1.length];
@@ -182,5 +193,4 @@ public class LimitedLengthInputStreamTest extends AndroidTestCase {
     public void testSingleByteRead_NonZeroOffset_FullLength_Success() throws Exception {
         checkSingleByteRead_WithString1(3, TEST_STRING1.length - 3);
     }
-
 }
