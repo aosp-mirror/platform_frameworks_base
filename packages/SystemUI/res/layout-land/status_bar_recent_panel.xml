@@ -27,6 +27,12 @@
     systemui:recentItemLayout="@layout/status_bar_recent_item"
     >
 
+    <ImageView
+        android:id="@+id/recents_transition_placeholder_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible" />
+
     <FrameLayout
         android:id="@+id/recents_bg_protect"
         android:background="@drawable/status_bar_recents_background"
