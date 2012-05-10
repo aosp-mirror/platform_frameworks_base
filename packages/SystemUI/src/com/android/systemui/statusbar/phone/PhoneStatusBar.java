@@ -1771,7 +1771,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         return a < 0f ? 0f : (a > 1f ? 1f : a);
     }
 
-    int getExpandedViewMaxHeight() {
+    @Override
+    protected int getExpandedViewMaxHeight() {
         return mDisplayMetrics.heightPixels - mNotificationPanelMarginBottomPx;
     }
 

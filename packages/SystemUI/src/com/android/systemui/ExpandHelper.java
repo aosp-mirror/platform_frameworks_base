@@ -34,6 +34,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         View getChildAtPosition(MotionEvent ev);
         View getChildAtPosition(float x, float y);
         boolean canChildBeExpanded(View v);
+        boolean setUserExpandedChild(View v, boolean userxpanded);
     }
 
     private static final String TAG = "ExpandHelper";
@@ -272,6 +273,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         mScaleAnimation.start();
         mStretching = false;
         setGlow(0f);
+        mCallback.setUserExpandedChild(mCurrView, h == mNaturalHeight);
         if (DEBUG) Log.d(TAG, "scale was finished on view: " + mCurrView);
         clearView();
     }
