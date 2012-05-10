@@ -110,7 +110,7 @@ public class SurfaceTextureTarget extends Filter {
     }
 
     @Override
-    public void setupPorts() {
+    public synchronized void setupPorts() {
         // Make sure we have a SurfaceView
         if (mSurfaceTexture == null) {
             throw new RuntimeException("Null SurfaceTexture passed to SurfaceTextureTarget");
@@ -158,7 +158,7 @@ public class SurfaceTextureTarget extends Filter {
     }
 
     @Override
-    public void open(FilterContext context) {
+    public synchronized void open(FilterContext context) {
         // Set up SurfaceTexture internals
         mSurfaceId = context.getGLEnvironment().registerSurfaceTexture(
             mSurfaceTexture, mScreenWidth, mScreenHeight);
@@ -169,17 +169,42 @@ public class SurfaceTextureTarget extends Filter {
 
 
     @Override
-    public void close(FilterContext context) {
+    public synchronized void close(FilterContext context) {
         if (mSurfaceId > 0) {
             context.getGLEnvironment().unregisterSurfaceId(mSurfaceId);
+            mSurfaceId = -1;
+            // Once the surface is unregistered, remove the surfacetexture reference.
+            // The surfaceId could not have been valid without a valid surfacetexture.
+            mSurfaceTexture = null;
         }
     }
 
+    // This should be called from the client side when the surfacetexture is no longer
+    // valid. e.g. from onPause() in the application using the filter graph.
+    public synchronized void disconnect(FilterContext context) {
+        if (mLogVerbose) Log.v(TAG, "disconnect");
+        if (mSurfaceTexture == null) {
+            Log.d(TAG, "SurfaceTexture is already null. Nothing to disconnect.");
+            return;
+        }
+        mSurfaceTexture = null;
+        // Make sure we unregister the surface as well if a surface was registered.
+        // There can be a situation where the surface was not registered but the
+        // surfacetexture was valid. For example, the disconnect can be called before
+        // the filter was opened. Hence, the surfaceId may not be a valid one here,
+        // and need to check for its validity.
+        if (mSurfaceId > 0) {
+            context.getGLEnvironment().unregisterSurfaceId(mSurfaceId);
+            mSurfaceId = -1;
+        }
+    }
 
     @Override
-    public void process(FilterContext context) {
-        if (mLogVerbose) Log.v(TAG, "Starting frame processing");
-
+    public synchronized void process(FilterContext context) {
+        // Surface is not registered. Nothing to render into.
+        if (mSurfaceId <= 0) {
+            return;
+        }
         GLEnvironment glEnv = context.getGLEnvironment();
 
         // Get input frame
@@ -197,8 +222,6 @@ public class SurfaceTextureTarget extends Filter {
 
         // See if we need to copy to GPU
         Frame gpuFrame = null;
-        if (mLogVerbose) Log.v("SurfaceTextureTarget", "Got input format: " + input.getFormat());
-
         int target = input.getFormat().getTarget();
         if (target != FrameFormat.TARGET_GPU) {
             gpuFrame = context.getFrameManager().duplicateFrameToTarget(input,
