@@ -26,7 +26,9 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -48,11 +50,9 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.PopupMenu;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.android.systemui.R;
@@ -82,6 +82,9 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private int mNumItemsWaitingForThumbnailsAndIcons;
     private Choreographer mChoreo;
     OnRecentsPanelVisibilityChangedListener mVisibilityChangedListener;
+
+    ImageView mPlaceholderThumbnail;
+    boolean mHideWindowAfterPlaceholderThumbnailIsHidden;
 
     private RecentTasksLoader mRecentTasksLoader;
     private ArrayList<TaskDescription> mRecentTaskDescriptions;
@@ -283,7 +286,9 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     public void show(boolean show, boolean animate,
             ArrayList<TaskDescription> recentTaskDescriptions, boolean firstScreenful) {
         // For now, disable animations. We may want to re-enable in the future
-        animate = false;
+        if (show) {
+            animate = false;
+        }
         if (show) {
             // Need to update list of recent apps before we set visibility so this view's
             // content description is updated before it gets focus for TalkBack mode
@@ -687,11 +692,31 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 context.getSystemService(Context.ACTIVITY_SERVICE);
         holder.thumbnailViewImage.setDrawingCacheEnabled(true);
         Bitmap bm = holder.thumbnailViewImage.getDrawingCache();
-        ActivityOptions opts = ActivityOptions.makeThumbnailScaleUpAnimation(
+        mPlaceholderThumbnail = (ImageView) findViewById(R.id.recents_transition_placeholder_icon);
+
+        final ImageView placeholderThumbnail = mPlaceholderThumbnail;
+        mHideWindowAfterPlaceholderThumbnailIsHidden = false;
+        placeholderThumbnail.setVisibility(VISIBLE);
+        Bitmap b2 = bm.copy(bm.getConfig(), true);
+        placeholderThumbnail.setImageBitmap(b2);
+
+        Rect r = new Rect();
+        holder.thumbnailViewImage.getGlobalVisibleRect(r);
+
+        placeholderThumbnail.setTranslationX(r.left);
+        placeholderThumbnail.setTranslationY(r.top);
+
+        show(false, true);
+
+        ActivityOptions opts = ActivityOptions.makeDelayedThumbnailScaleUpAnimation(
                 holder.thumbnailViewImage, bm, 0, 0,
                 new ActivityOptions.OnAnimationStartedListener() {
                     @Override public void onAnimationStarted() {
-                        hide(true);
+                        mPlaceholderThumbnail = null;
+                        placeholderThumbnail.setVisibility(INVISIBLE);
+                        if (mHideWindowAfterPlaceholderThumbnailIsHidden) {
+                            hideWindow();
+                        }
                     }
                 });
         if (ad.taskId >= 0) {
@@ -707,6 +732,15 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             context.startActivity(intent, opts.toBundle());
         }
         holder.thumbnailViewImage.setDrawingCacheEnabled(false);
+    }
+
+    public void hideWindow() {
+        if (mPlaceholderThumbnail != null) {
+            mHideWindowAfterPlaceholderThumbnailIsHidden = true;
+        } else {
+            setVisibility(GONE);
+            mHideWindowAfterPlaceholderThumbnailIsHidden = false;
+        }
     }
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
