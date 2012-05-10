@@ -608,17 +608,19 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // clamp threshold into safe range
         mPersistThreshold = MathUtils.constrain(thresholdBytes, 128 * KB_IN_BYTES, 2 * MB_IN_BYTES);
-        updatePersistThresholds();
-
         if (LOGV) {
             Slog.v(TAG, "advisePersistThreshold() given " + thresholdBytes + ", clamped to "
                     + mPersistThreshold);
         }
 
-        // persist if beyond new thresholds
+        // update and persist if beyond new thresholds
         final long currentTime = mTime.hasCache() ? mTime.currentTimeMillis()
                 : System.currentTimeMillis();
         synchronized (mStatsLock) {
+            if (!mSystemReady) return;
+
+            updatePersistThresholds();
+
             mDevRecorder.maybePersistLocked(currentTime);
             mXtRecorder.maybePersistLocked(currentTime);
             mUidRecorder.maybePersistLocked(currentTime);
