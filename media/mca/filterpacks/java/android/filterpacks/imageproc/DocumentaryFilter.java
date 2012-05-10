@@ -28,6 +28,7 @@ import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
 
+import java.util.Date;
 import java.util.Random;
 
 public class DocumentaryFilter extends Filter {
@@ -36,6 +37,7 @@ public class DocumentaryFilter extends Filter {
     private int mTileSize = 640;
 
     private Program mProgram;
+    private Random mRandom;
 
     private int mWidth = 0;
     private int mHeight = 0;
@@ -44,17 +46,24 @@ public class DocumentaryFilter extends Filter {
     private final String mDocumentaryShader =
             "precision mediump float;\n" +
             "uniform sampler2D tex_sampler_0;\n" +
+            "uniform vec2 seed;\n" +
             "uniform float stepsize;\n" +
             "uniform float inv_max_dist;\n" +
             "uniform vec2 center;\n" +
             "varying vec2 v_texcoord;\n" +
             "float rand(vec2 loc) {\n" +
-            "  return fract(sin(dot(loc, vec2(12.9898, 78.233))) * 43758.5453);\n" +
+            "  const float divide = 0.00048828125;\n" +
+            "  const float factor = 2048.0;\n" +
+            "  float value = sin(dot(loc, vec2(12.9898, 78.233)));\n" +
+            "  float residual = mod(dot(mod(loc, divide), vec2(0.9898, 0.233)), divide);\n" +
+            "  float part2 = mod(value, divide);\n" +
+            "  float part1 = value - part2;\n" +
+            "  return fract(0.5453 * part1 + factor * (part2 + residual));\n" +
             "}\n" +
             "void main() {\n" +
             // black white
             "  vec4 color = texture2D(tex_sampler_0, v_texcoord);\n" +
-            "  float dither = rand(v_texcoord);\n" +
+            "  float dither = rand(v_texcoord + seed);\n" +
             "  vec3 xform = clamp(2.0 * color.rgb, 0.0, 1.0);\n" +
             "  vec3 temp = clamp(2.0 * (color.rgb + stepsize), 0.0, 1.0);\n" +
             "  vec3 new_color = clamp(xform + (temp - xform) * (dither - 0.5), 0.0, 1.0);\n" +
@@ -69,6 +78,8 @@ public class DocumentaryFilter extends Filter {
 
     public DocumentaryFilter(String name) {
         super(name);
+        Date date = new Date();
+        mRandom = new Random(new Date().getTime());
     }
 
     @Override
@@ -138,7 +149,9 @@ public class DocumentaryFilter extends Filter {
             mProgram.setHostValue("center", center);
             mProgram.setHostValue("inv_max_dist", 1.0f / max_dist);
             mProgram.setHostValue("stepsize", 1.0f / 255.0f);
+
+            float seed[] = { mRandom.nextFloat(), mRandom.nextFloat() };
+            mProgram.setHostValue("seed", seed);
         }
     }
-
 }

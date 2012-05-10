@@ -46,8 +46,6 @@ public class BitmapOverlayFilter extends Filter {
     private Program mProgram;
     private Frame mFrame;
 
-    private int mWidth = 0;
-    private int mHeight = 0;
     private int mTarget = FrameFormat.TARGET_UNSPECIFIED;
 
     private final String mOverlayShader =
@@ -113,17 +111,16 @@ public class BitmapOverlayFilter extends Filter {
             initProgram(context, inputFormat.getTarget());
         }
 
-        // Check if the frame size has changed
-        if (inputFormat.getWidth() != mWidth || inputFormat.getHeight() != mHeight) {
-            mWidth = inputFormat.getWidth();
-            mHeight = inputFormat.getHeight();
+        if (mBitmap != null) {
+            Frame frame = createBitmapFrame(context);
+            // Process
+            Frame[] inputs = {input, frame};
+            mProgram.process(inputs, output);
 
-            createBitmapFrame(context);
+            frame.release();
+        } else {
+            output.setDataFromFrame(input);
         }
-
-        // Process
-        Frame[] inputs = {input, mFrame};
-        mProgram.process(inputs, output);
 
         // Push output
         pushOutput("image", output);
@@ -132,22 +129,18 @@ public class BitmapOverlayFilter extends Filter {
         output.release();
     }
 
-    private void createBitmapFrame(FilterContext context) {
-        if (mBitmap != null) {
-            FrameFormat format = ImageFormat.create(mBitmap.getWidth(),
-                                                    mBitmap.getHeight(),
-                                                    ImageFormat.COLORSPACE_RGBA,
-                                                    FrameFormat.TARGET_GPU);
+    private Frame createBitmapFrame(FilterContext context) {
+        FrameFormat format = ImageFormat.create(mBitmap.getWidth(),
+                                                mBitmap.getHeight(),
+                                                ImageFormat.COLORSPACE_RGBA,
+                                                FrameFormat.TARGET_GPU);
 
-            if (mFrame != null) {
-                mFrame.release();
-            }
+        Frame frame = context.getFrameManager().newFrame(format);
+        frame.setBitmap(mBitmap);
 
-            mFrame = context.getFrameManager().newFrame(format);
-            mFrame.setBitmap(mBitmap);
+        mBitmap.recycle();
+        mBitmap = null;
 
-            mBitmap.recycle();
-            mBitmap = null;
-        }
+        return frame;
     }
 }
