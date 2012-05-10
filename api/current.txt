@@ -5121,6 +5121,8 @@ package android.content {
     ctor public ContentResolver(android.content.Context);
     method public final android.content.ContentProviderClient acquireContentProviderClient(android.net.Uri);
     method public final android.content.ContentProviderClient acquireContentProviderClient(java.lang.String);
+    method public final android.content.ContentProviderClient acquireUnstableContentProviderClient(android.net.Uri);
+    method public final android.content.ContentProviderClient acquireUnstableContentProviderClient(java.lang.String);
     method public static void addPeriodicSync(android.accounts.Account, java.lang.String, android.os.Bundle, long);
     method public static java.lang.Object addStatusChangeListener(int, android.content.SyncStatusObserver);
     method public android.content.ContentProviderResult[] applyBatch(java.lang.String, java.util.ArrayList<android.content.ContentProviderOperation>) throws android.content.OperationApplicationException, android.os.RemoteException;

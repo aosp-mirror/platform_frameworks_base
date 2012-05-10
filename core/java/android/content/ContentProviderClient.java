@@ -37,13 +37,16 @@ import java.util.ArrayList;
 public class ContentProviderClient {
     private final IContentProvider mContentProvider;
     private final ContentResolver mContentResolver;
+    private final boolean mStable;
 
     /**
      * @hide
      */
-    ContentProviderClient(ContentResolver contentResolver, IContentProvider contentProvider) {
+    ContentProviderClient(ContentResolver contentResolver,
+            IContentProvider contentProvider, boolean stable) {
         mContentProvider = contentProvider;
         mContentResolver = contentResolver;
+        mStable = stable;
     }
 
     /** See {@link ContentProvider#query ContentProvider.query} */
@@ -141,7 +144,11 @@ public class ContentProviderClient {
      * @return true if this was release, false if it was already released
      */
     public boolean release() {
-        return mContentResolver.releaseProvider(mContentProvider);
+        if (mStable) {
+            return mContentResolver.releaseProvider(mContentProvider);
+        } else {
+            return mContentResolver.releaseUnstableProvider(mContentProvider);
+        }
     }
 
     /**

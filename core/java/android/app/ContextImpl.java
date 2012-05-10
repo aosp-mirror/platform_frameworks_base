@@ -1692,6 +1692,16 @@ class ContextImpl extends Context {
             return mMainThread.releaseProvider(provider);
         }
 
+        @Override
+        protected IContentProvider acquireUnstableProvider(Context c, String name) {
+            return mMainThread.acquireUnstableProvider(c, name);
+        }
+
+        @Override
+        public boolean releaseUnstableProvider(IContentProvider icp) {
+            return mMainThread.releaseUnstableProvider(icp);
+        }
+
         private final ActivityThread mMainThread;
     }
 }
