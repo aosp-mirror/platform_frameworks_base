@@ -30,6 +30,7 @@ import android.filterfw.format.ImageFormat;
 import android.filterfw.geometry.Quad;
 import android.filterfw.geometry.Point;
 
+import java.util.Date;
 import java.util.Random;
 
 public class GrainFilter extends Filter {
@@ -49,14 +50,20 @@ public class GrainFilter extends Filter {
     private int mHeight = 0;
     private int mTarget = FrameFormat.TARGET_UNSPECIFIED;
 
-    private Random mRandom = new Random();
+    private Random mRandom;
 
     private final String mNoiseShader =
             "precision mediump float;\n" +
             "uniform vec2 seed;\n" +
             "varying vec2 v_texcoord;\n" +
             "float rand(vec2 loc) {\n" +
-            "  return fract(sin(dot(loc, vec2(12.9898, 78.233))) * 43758.5453);\n" +
+            "  const float divide = 0.00048828125;\n" +
+            "  const float factor = 2048.0;\n" +
+            "  float value = sin(dot(loc, vec2(12.9898, 78.233)));\n" +
+            "  float residual = mod(dot(mod(loc, divide), vec2(0.9898, 0.233)), divide);\n" +
+            "  float part2 = mod(value, divide);\n" +
+            "  float part1 = value - part2;\n" +
+            "  return fract(0.5453 * part1 + factor * (part2 + residual));\n" +
             "}\n" +
             "void main() {\n" +
             "  gl_FragColor = vec4(rand(v_texcoord + seed), 0.0, 0.0, 1.0);\n" +
@@ -86,6 +93,7 @@ public class GrainFilter extends Filter {
 
     public GrainFilter(String name) {
         super(name);
+        mRandom = new Random(new Date().getTime());
     }
 
     @Override
