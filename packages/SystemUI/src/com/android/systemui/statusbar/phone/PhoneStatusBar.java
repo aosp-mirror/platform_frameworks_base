@@ -991,12 +991,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         // Expand the window to encompass the full screen in anticipation of the drag.
         // This is only possible to do atomically because the status bar is at the top of the screen!
         WindowManager.LayoutParams lp = (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
-        lp.flags &= (~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        lp.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
         final WindowManager wm = WindowManagerImpl.getDefault();
         wm.updateViewLayout(mStatusBarWindow, lp);
-
-        mStatusBarWindow.requestFocus(View.FOCUS_FORWARD);
 
         visibilityChanged(true);
     }
@@ -1084,7 +1083,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         // Shrink the window to the size of the status bar only
         WindowManager.LayoutParams lp = (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
         lp.height = getStatusBarHeight();
-        lp.flags |= (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        lp.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         final WindowManager wm = WindowManagerImpl.getDefault();
         wm.updateViewLayout(mStatusBarWindow, lp);
 
