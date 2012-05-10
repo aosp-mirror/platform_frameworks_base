@@ -17,8 +17,6 @@
 package com.android.commands.input;
 
 import android.hardware.input.InputManager;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.InputDevice;
@@ -59,7 +57,11 @@ public class Input {
                 }
             } else if (command.equals("keyevent")) {
                 if (args.length == 2) {
-                    sendKeyEvent(Integer.parseInt(args[1]));
+                    int keyCode = KeyEvent.keyCodeFromString(args[1]);
+                    if (keyCode == KeyEvent.KEYCODE_UNKNOWN) {
+                        keyCode = KeyEvent.keyCodeFromString("KEYCODE_" + args[1]);
+                    }
+                    sendKeyEvent(keyCode);
                     return;
                 }
             } else if (command.equals("tap")) {
@@ -163,7 +165,7 @@ public class Input {
     private void showUsage() {
         System.err.println("usage: input ...");
         System.err.println("       input text <string>");
-        System.err.println("       input keyevent <key code>");
+        System.err.println("       input keyevent <key code number or name>");
         System.err.println("       input tap <x> <y>");
         System.err.println("       input swipe <x1> <y1> <x2> <y2>");
     }
