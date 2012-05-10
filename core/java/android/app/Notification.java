@@ -390,21 +390,25 @@ public class Notification implements Parcelable
     public int priority;
     
     /**
+     * @hide
      * Notification type: incoming call (voice or video) or similar synchronous communication request.
      */
     public static final String KIND_CALL = "android.call";
 
     /**
+     * @hide
      * Notification type: incoming direct message (SMS, instant message, etc.).
      */
     public static final String KIND_MESSAGE = "android.message";
 
     /**
+     * @hide
      * Notification type: asynchronous bulk message (email).
      */
     public static final String KIND_EMAIL = "android.email";
 
     /**
+     * @hide
      * Notification type: calendar event.
      */
     public static final String KIND_EVENT = "android.event";
@@ -415,6 +419,7 @@ public class Notification implements Parcelable
     public static final String KIND_PROMO = "android.promo";
 
     /**
+     * @hide
      * If this notification matches of one or more special types (see the <code>KIND_*</code>
      * constants), add them here, best match first.
      */
@@ -977,8 +982,14 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Show the {@link Notification#when} field as a countdown (or count-up) timer instead of a timestamp.  
+         * Show the {@link Notification#when} field as a stopwatch.
+         * 
+         * Instead of presenting <code>when</code> as a timestamp, the notification will show an 
+         * automatically updating display of the minutes and seconds since <code>when</code>.
          *
+         * Useful when showing an elapsed time (like an ongoing phone call).
+         *
+         * @see android.widget.Chronometer
          * @see Notification#when
          */
         public Builder setUsesChronometer(boolean b) {
@@ -1303,6 +1314,8 @@ public class Notification implements Parcelable
         }
         
         /**
+         * @hide
+         * 
          * Add a kind (category) to this notification. Optional.
          * 
          * @see Notification#kind
