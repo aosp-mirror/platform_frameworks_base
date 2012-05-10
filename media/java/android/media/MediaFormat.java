@@ -53,6 +53,7 @@ import java.util.Map;
  * <tr><td>{@link #KEY_IS_ADTS}</td><td>Integer</td><td>optional, if content is AAC audio, setting this key to 1 indicates that each audio frame is prefixed by the ADTS header.</td></tr>
  * <tr><td>{@link #KEY_AAC_PROFILE}</td><td>Integer</td><td><b>encoder-only</b>, optional, if content is AAC audio, specifies the desired profile.</td></tr>
  * <tr><td>{@link #KEY_CHANNEL_MASK}</td><td>Integer</td><td>A mask of audio channel assignments</td></tr>
+ * <tr><td>{@link #KEY_FLAC_COMPRESSION_LEVEL}</td><td>Integer</td><td><b>encoder-only</b>, optional, if content is FLAC audio, specifies the desired compression level.</td></tr>
  * </table>
  *
  */
@@ -154,6 +155,13 @@ public final class MediaFormat {
      * Constants are declared in {@link android.media.MediaCodecInfo.CodecCapabilities}.
      */
     public static final String KEY_AAC_PROFILE = "aac-profile";
+
+    /**
+     * A key describing the FLAC compression level to be used (FLAC audio format only).
+     * The associated value is an integer ranging from 0 (fastest, least compression)
+     * to 8 (slowest, most compression).
+     */
+    public static final String KEY_FLAC_COMPRESSION_LEVEL = "flac-compression-level";
 
     /* package private */ MediaFormat(Map<String, Object> map) {
         mMap = map;
