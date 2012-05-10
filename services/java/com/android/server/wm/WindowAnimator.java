@@ -454,6 +454,7 @@ public class WindowAnimator {
         mPendingLayoutChanges = 0;
         mCurrentTime = SystemClock.uptimeMillis();
         mBulkUpdateParams = 0;
+        boolean wasAnimating = mAnimating;
         mAnimating = false;
         if (WindowManagerService.DEBUG_WINDOW_TRACE) {
             Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
@@ -509,6 +510,8 @@ public class WindowAnimator {
 
         if (mAnimating) {
             mService.scheduleAnimationLocked();
+        } else if (wasAnimating) {
+            mService.requestTraversalLocked();
         }
         if (WindowManagerService.DEBUG_WINDOW_TRACE) {
             Slog.i(TAG, "!!! animate: exit mAnimating=" + mAnimating
