@@ -1317,15 +1317,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    void updateLocalSystemUiVisibility(int localValue, int localChanges) {
-        super.updateLocalSystemUiVisibility(localValue, localChanges);
+    boolean updateLocalSystemUiVisibility(int localValue, int localChanges) {
+        boolean changed = super.updateLocalSystemUiVisibility(localValue, localChanges);
 
         final int count = mChildrenCount;
         final View[] children = mChildren;
         for (int i=0; i <count; i++) {
             final View child = children[i];
-            child.updateLocalSystemUiVisibility(localValue, localChanges);
+            changed |= child.updateLocalSystemUiVisibility(localValue, localChanges);
         }
+        return changed;
     }
 
     /**
