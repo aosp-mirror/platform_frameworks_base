@@ -100,15 +100,11 @@ public class WifiWatchdogStateMachine extends StateMachine {
        Level 1  -88 <= RSSI < -78
        Level 0         RSSI < -88 */
 
-    /* Wi-fi connection is considered poor below this
-       RSSI level threshold and the watchdog report it
-       to the WifiStateMachine */
-    private static final int RSSI_LEVEL_CUTOFF = 0;
     /* Wi-fi connection is monitored actively below this
        threshold */
-    private static final int RSSI_LEVEL_MONITOR = 1;
-    /* RSSI threshold during monitoring below which network is avoided */
-    private static final int RSSI_MONITOR_THRESHOLD = -84;
+    private static final int RSSI_LEVEL_MONITOR = 0;
+    /* Rssi threshold is at level 0 (-88dBm) */
+    private static final int RSSI_MONITOR_THRESHOLD = -88;
     /* Number of times RSSI is measured to be low before being avoided */
     private static final int RSSI_MONITOR_COUNT = 5;
     private int mRssiMonitorCount = 0;
@@ -193,7 +189,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private WalledGardenCheckState mWalledGardenCheckState = new WalledGardenCheckState();
     /* Online and watching link connectivity */
     private OnlineWatchState mOnlineWatchState = new OnlineWatchState();
-    /* RSSI level is at RSSI_LEVEL_MONITOR and needs close monitoring */
+    /* RSSI level is below RSSI_LEVEL_MONITOR and needs close monitoring */
     private RssiMonitoringState mRssiMonitoringState = new RssiMonitoringState();
     /* Online and doing nothing */
     private OnlineState mOnlineState = new OnlineState();
@@ -731,9 +727,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
         }
 
         private void handleRssiChange() {
-            if (mCurrentSignalLevel <= RSSI_LEVEL_CUTOFF) {
-                sendPoorLinkDetected();
-            } else if (mCurrentSignalLevel <= RSSI_LEVEL_MONITOR) {
+            if (mCurrentSignalLevel <= RSSI_LEVEL_MONITOR) {
                 transitionTo(mRssiMonitoringState);
             } else {
                 //stay here
@@ -773,9 +767,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
             switch (msg.what) {
                 case EVENT_RSSI_CHANGE:
                     mCurrentSignalLevel = calculateSignalLevel(msg.arg1);
-                    if (mCurrentSignalLevel <= RSSI_LEVEL_CUTOFF) {
-                        sendPoorLinkDetected();
-                    } else if (mCurrentSignalLevel <= RSSI_LEVEL_MONITOR) {
+                    if (mCurrentSignalLevel <= RSSI_LEVEL_MONITOR) {
                         //stay here;
                     } else {
                         //We dont need frequent RSSI monitoring any more
