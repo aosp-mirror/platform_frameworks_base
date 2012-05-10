@@ -70,16 +70,16 @@ public class ContainerEncryptionParams implements Parcelable {
     private final byte[] mMacTag;
 
     /** Offset into file where authenticated (e.g., MAC protected) data begins. */
-    private final int mAuthenticatedDataStart;
+    private final long mAuthenticatedDataStart;
 
     /** Offset into file where encrypted data begins. */
-    private final int mEncryptedDataStart;
+    private final long mEncryptedDataStart;
 
     /**
      * Offset into file for the end of encrypted data (and, by extension,
      * authenticated data) in file.
      */
-    private final int mDataEnd;
+    private final long mDataEnd;
 
     public ContainerEncryptionParams(String encryptionAlgorithm,
             AlgorithmParameterSpec encryptionSpec, SecretKey encryptionKey)
@@ -99,6 +99,8 @@ public class ContainerEncryptionParams implements Parcelable {
      * @param macAlgorithm MAC algorithm to use; format matches JCE
      * @param macSpec algorithm parameters specification, may be {@code null}
      * @param macKey key used for authentication (i.e., for the MAC tag)
+     * @param macTag message authentication code (MAC) tag for the authenticated
+     *            data
      * @param authenticatedDataStart offset of start of authenticated data in
      *            stream
      * @param encryptedDataStart offset of start of encrypted data in stream
@@ -109,7 +111,7 @@ public class ContainerEncryptionParams implements Parcelable {
     public ContainerEncryptionParams(String encryptionAlgorithm,
             AlgorithmParameterSpec encryptionSpec, SecretKey encryptionKey, String macAlgorithm,
             AlgorithmParameterSpec macSpec, SecretKey macKey, byte[] macTag,
-            int authenticatedDataStart, int encryptedDataStart, int dataEnd)
+            long authenticatedDataStart, long encryptedDataStart, long dataEnd)
             throws InvalidAlgorithmParameterException {
         if (TextUtils.isEmpty(encryptionAlgorithm)) {
             throw new NullPointerException("algorithm == null");
@@ -172,15 +174,15 @@ public class ContainerEncryptionParams implements Parcelable {
         return mMacTag;
     }
 
-    public int getAuthenticatedDataStart() {
+    public long getAuthenticatedDataStart() {
         return mAuthenticatedDataStart;
     }
 
-    public int getEncryptedDataStart() {
+    public long getEncryptedDataStart() {
         return mEncryptedDataStart;
     }
 
-    public int getDataEnd() {
+    public long getDataEnd() {
         return mDataEnd;
     }
 
@@ -315,9 +317,9 @@ public class ContainerEncryptionParams implements Parcelable {
 
         dest.writeByteArray(mMacTag);
 
-        dest.writeInt(mAuthenticatedDataStart);
-        dest.writeInt(mEncryptedDataStart);
-        dest.writeInt(mDataEnd);
+        dest.writeLong(mAuthenticatedDataStart);
+        dest.writeLong(mEncryptedDataStart);
+        dest.writeLong(mDataEnd);
     }
 
     private ContainerEncryptionParams(Parcel source) throws InvalidAlgorithmParameterException {
@@ -333,9 +335,9 @@ public class ContainerEncryptionParams implements Parcelable {
 
         mMacTag = source.createByteArray();
 
-        mAuthenticatedDataStart = source.readInt();
-        mEncryptedDataStart = source.readInt();
-        mDataEnd = source.readInt();
+        mAuthenticatedDataStart = source.readLong();
+        mEncryptedDataStart = source.readLong();
+        mDataEnd = source.readLong();
 
         switch (encParamType) {
             case ENC_PARAMS_IV_PARAMETERS:
