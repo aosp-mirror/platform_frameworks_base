@@ -4278,6 +4278,14 @@ public final class ActivityThread {
         }
     }
 
+    public final IContentProvider acquireUnstableProvider(Context c, String name) {
+        return acquireProvider(c, name);
+    }
+
+    public final boolean releaseUnstableProvider(IContentProvider provider) {
+        return releaseProvider(provider);
+    }
+
     final void completeRemoveProvider(IContentProvider provider) {
         IBinder jBinder = provider.asBinder();
         String remoteProviderName = null;
