@@ -1311,6 +1311,6 @@
     <string name="sending" msgid="3245653681008218030">"S\'està enviant…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Vols iniciar el navegador?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Vols acceptar la trucada?"</string>
-    <string name="activity_resolver_use_always" msgid="4167356512478150080">"Utilitza sempre"</string>
+    <string name="activity_resolver_use_always" msgid="8017770747801494933">"Sempre"</string>
     <string name="activity_resolver_use_once" msgid="405646673463328329">"Només una vegada"</string>
 </resources>

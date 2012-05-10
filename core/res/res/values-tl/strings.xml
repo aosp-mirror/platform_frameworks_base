@@ -175,28 +175,20 @@
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Subaybayan ang iyong pisikal na lokasyon."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Pakikipag-ugnay sa network"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Mag-access ng iba\'t ibang mga tampok ng network."</string>
-    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
-    <skip />
-    <!-- no translation found for permgrouplab_shortrangeNetwork (130808676377486118) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
-    <skip />
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"I-access ang mga device at network sa pamamagitan ng Bluetooth."</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Mga Network na May Maikling Saklaw"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"I-access ang mga device sa pamamagitan ng mga network na may maikling saklaw gaya ng NFC."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Mga Setting ng Audio"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Baguhin ang mga setting ng audio."</string>
     <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Naaapektuhan ang Baterya"</string>
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Gumamit ng mga tampok na mabilisang uubos ng baterya."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendaryo"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Direktang access sa kalendaryo at mga kaganapan."</string>
-    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
-    <skip />
-    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
-    <skip />
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Basahin ang Disyunaryo ng User"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Magbasa ng mga salita sa diksyunaryo ng user."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Magsulat sa Diksyunaryo ng User"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Magdagdag ng mga salita sa diksyunaryo ng user."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Mga Bookmark at Kasaysayan"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Direktang access sa mga bookmark at kasaysayan ng browser."</string>
     <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Alarm"</string>
@@ -569,8 +561,7 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Bigay-daan app basahin nilalaman ng USB storage, maaaring may mga larawan at media."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Binibigyang-daan aang app na basahin ang mga nilalaman ng SD card, na maaaring may mga larawan at media."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"bago tanggal laman USB storage"</string>
-    <!-- no translation found for permlab_sdcardWrite (8805693630050458763) -->
-    <skip />
+    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"baguhin o tanggalin ang mga nilalaman ng iyong SD card"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Pinapayagan ang app na magsulat sa USB storage."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Pinapayagan ang app na magsulat sa SD card."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"baguhin/tanggalin ang mga nilalaman ng panloob na imbakan ng media"</string>
@@ -1090,8 +1081,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Itakda"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Tapos na"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"BAGO: "</font></string>
-    <!-- no translation found for perms_description_app (5139836143293299417) -->
-    <skip />
+    <string name="perms_description_app" msgid="5139836143293299417">"Ibinigay ng <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Walang mga kinakailangang pahintulot"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB mass storage"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Nakakonekta ang USB"</string>
@@ -1321,8 +1311,7 @@
     <string name="sending" msgid="3245653681008218030">"Ipinapadala..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Ilunsad ang Browser?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Tanggapin ang tawag?"</string>
-    <!-- no translation found for activity_resolver_use_always (4167356512478150080) -->
+    <!-- no translation found for activity_resolver_use_always (8017770747801494933) -->
     <skip />
-    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
-    <skip />
+    <string name="activity_resolver_use_once" msgid="405646673463328329">"Isang Beses Lang"</string>
 </resources>

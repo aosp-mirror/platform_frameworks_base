@@ -1311,6 +1311,6 @@
     <string name="sending" msgid="3245653681008218030">"جارٍ الإرسال..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"تشغيل المتصفح؟"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"هل تريد قبول المكالمة؟"</string>
-    <string name="activity_resolver_use_always" msgid="4167356512478150080">"استخدام دائمًا"</string>
+    <string name="activity_resolver_use_always" msgid="8017770747801494933">"دومًا"</string>
     <string name="activity_resolver_use_once" msgid="405646673463328329">"مرة واحدة فقط"</string>
 </resources>

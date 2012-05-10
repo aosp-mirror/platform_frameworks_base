@@ -1311,6 +1311,6 @@
     <string name="sending" msgid="3245653681008218030">"שולח…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"להפעיל את הדפדפן?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"האם לקבל את השיחה?"</string>
-    <string name="activity_resolver_use_always" msgid="4167356512478150080">"השתמש תמיד"</string>
+    <string name="activity_resolver_use_always" msgid="8017770747801494933">"תמיד"</string>
     <string name="activity_resolver_use_once" msgid="405646673463328329">"רק פעם אחת"</string>
 </resources>
