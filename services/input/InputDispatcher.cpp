@@ -3354,6 +3354,25 @@ bool InputDispatcher::afterKeyEventLockedInterruptible(const sp<Connection>& con
             // generated a fallback or if the window is not a foreground window,
             // then cancel the associated fallback key, if any.
             if (fallbackKeyCode != -1) {
+                // Dispatch the unhandled key to the policy with the cancel flag.
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+                ALOGD("Unhandled key event: Asking policy to cancel fallback action.  "
+                        "keyCode=%d, action=%d, repeatCount=%d, policyFlags=0x%08x",
+                        keyEntry->keyCode, keyEntry->action, keyEntry->repeatCount,
+                        keyEntry->policyFlags);
+#endif
+                KeyEvent event;
+                initializeKeyEvent(&event, keyEntry);
+                event.setFlags(event.getFlags() | AKEY_EVENT_FLAG_CANCELED);
+
+                mLock.unlock();
+
+                mPolicy->dispatchUnhandledKey(connection->inputWindowHandle,
+                        &event, keyEntry->policyFlags, &event);
+
+                mLock.lock();
+
+                // Cancel the fallback key.
                 if (fallbackKeyCode != AKEYCODE_UNKNOWN) {
                     CancelationOptions options(CancelationOptions::CANCEL_FALLBACK_EVENTS,
                             "application handled the original non-fallback key "
@@ -3374,8 +3393,9 @@ bool InputDispatcher::afterKeyEventLockedInterruptible(const sp<Connection>& con
 #if DEBUG_OUTBOUND_EVENT_DETAILS
                 ALOGD("Unhandled key event: Skipping unhandled key event processing "
                         "since this is not an initial down.  "
-                        "keyCode=%d, action=%d, repeatCount=%d",
-                        originalKeyCode, keyEntry->action, keyEntry->repeatCount);
+                        "keyCode=%d, action=%d, repeatCount=%d, policyFlags=0x%08x",
+                        originalKeyCode, keyEntry->action, keyEntry->repeatCount,
+                        keyEntry->policyFlags);
 #endif
                 return false;
             }
@@ -3383,8 +3403,9 @@ bool InputDispatcher::afterKeyEventLockedInterruptible(const sp<Connection>& con
             // Dispatch the unhandled key to the policy.
 #if DEBUG_OUTBOUND_EVENT_DETAILS
             ALOGD("Unhandled key event: Asking policy to perform fallback action.  "
-                    "keyCode=%d, action=%d, repeatCount=%d",
-                    keyEntry->keyCode, keyEntry->action, keyEntry->repeatCount);
+                    "keyCode=%d, action=%d, repeatCount=%d, policyFlags=0x%08x",
+                    keyEntry->keyCode, keyEntry->action, keyEntry->repeatCount,
+                    keyEntry->policyFlags);
 #endif
             KeyEvent event;
             initializeKeyEvent(&event, keyEntry);
@@ -3426,7 +3447,7 @@ bool InputDispatcher::afterKeyEventLockedInterruptible(const sp<Connection>& con
                             "to send %d instead.  Fallback canceled.",
                             event.getKeyCode(), originalKeyCode, fallbackKeyCode);
                 } else {
-                    ALOGD("Unhandled key event: Policy did not request fallback for %d,"
+                    ALOGD("Unhandled key event: Policy did not request fallback for %d, "
                             "but on the DOWN it had requested to send %d.  "
                             "Fallback canceled.",
                             originalKeyCode, fallbackKeyCode);
@@ -3903,8 +3924,10 @@ void InputDispatcher::InputState::addKeyMemento(const KeyEntry* entry, int32_t f
     memento.source = entry->source;
     memento.keyCode = entry->keyCode;
     memento.scanCode = entry->scanCode;
+    memento.metaState = entry->metaState;
     memento.flags = flags;
     memento.downTime = entry->downTime;
+    memento.policyFlags = entry->policyFlags;
 }
 
 void InputDispatcher::InputState::addMotionMemento(const MotionEntry* entry,
@@ -3919,6 +3942,7 @@ void InputDispatcher::InputState::addMotionMemento(const MotionEntry* entry,
     memento.downTime = entry->downTime;
     memento.setPointers(entry);
     memento.hovering = hovering;
+    memento.policyFlags = entry->policyFlags;
 }
 
 void InputDispatcher::InputState::MotionMemento::setPointers(const MotionEntry* entry) {
@@ -3935,9 +3959,9 @@ void InputDispatcher::InputState::synthesizeCancelationEvents(nsecs_t currentTim
         const KeyMemento& memento = mKeyMementos.itemAt(i);
         if (shouldCancelKey(memento, options)) {
             outEvents.push(new KeyEntry(currentTime,
-                    memento.deviceId, memento.source, 0,
+                    memento.deviceId, memento.source, memento.policyFlags,
                     AKEY_EVENT_ACTION_UP, memento.flags | AKEY_EVENT_FLAG_CANCELED,
-                    memento.keyCode, memento.scanCode, 0, 0, memento.downTime));
+                    memento.keyCode, memento.scanCode, memento.metaState, 0, memento.downTime));
         }
     }
 
@@ -3945,7 +3969,7 @@ void InputDispatcher::InputState::synthesizeCancelationEvents(nsecs_t currentTim
         const MotionMemento& memento = mMotionMementos.itemAt(i);
         if (shouldCancelMotion(memento, options)) {
             outEvents.push(new MotionEntry(currentTime,
-                    memento.deviceId, memento.source, 0,
+                    memento.deviceId, memento.source, memento.policyFlags,
                     memento.hovering
                             ? AMOTION_EVENT_ACTION_HOVER_EXIT
                             : AMOTION_EVENT_ACTION_CANCEL,

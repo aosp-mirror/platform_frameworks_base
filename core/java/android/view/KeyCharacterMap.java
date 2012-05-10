@@ -386,19 +386,19 @@ public class KeyCharacterMap implements Parcelable {
      *
      * @param keyCode The key code.
      * @param metaState The meta key modifier state.
-     * @param outFallbackAction The fallback action object to populate.
-     * @return True if a fallback action was found, false otherwise.
+     * @return The fallback action, or null if none.  Remember to recycle the fallback action.
      *
      * @hide
      */
-    public boolean getFallbackAction(int keyCode, int metaState,
-            FallbackAction outFallbackAction) {
-        if (outFallbackAction == null) {
-            throw new IllegalArgumentException("fallbackAction must not be null");
-        }
-
+    public FallbackAction getFallbackAction(int keyCode, int metaState) {
+        FallbackAction action = FallbackAction.obtain();
         metaState = KeyEvent.normalizeMetaState(metaState);
-        return nativeGetFallbackAction(mPtr, keyCode, metaState, outFallbackAction);
+        if (nativeGetFallbackAction(mPtr, keyCode, metaState, action)) {
+            action.metaState = KeyEvent.normalizeMetaState(action.metaState);
+            return action;
+        }
+        action.recycle();
+        return null;
     }
 
     /**
@@ -727,7 +727,44 @@ public class KeyCharacterMap implements Parcelable {
      * @hide
      */
     public static final class FallbackAction {
+        private static final int MAX_RECYCLED = 10;
+        private static final Object sRecycleLock = new Object();
+        private static FallbackAction sRecycleBin;
+        private static int sRecycledCount;
+
+        private FallbackAction next;
+
         public int keyCode;
         public int metaState;
+
+        private FallbackAction() {
+        }
+
+        public static FallbackAction obtain() {
+            final FallbackAction target;
+            synchronized (sRecycleLock) {
+                if (sRecycleBin == null) {
+                    target = new FallbackAction();
+                } else {
+                    target = sRecycleBin;
+                    sRecycleBin = target.next;
+                    sRecycledCount--;
+                    target.next = null;
+                }
+            }
+            return target;
+        }
+
+        public void recycle() {
+            synchronized (sRecycleLock) {
+                if (sRecycledCount < MAX_RECYCLED) {
+                    next = sRecycleBin;
+                    sRecycleBin = this;
+                    sRecycledCount += 1;
+                } else {
+                    next = null;
+                }
+            }
+        }
     }
 }

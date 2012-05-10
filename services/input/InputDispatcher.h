@@ -732,8 +732,10 @@ private:
             uint32_t source;
             int32_t keyCode;
             int32_t scanCode;
+            int32_t metaState;
             int32_t flags;
             nsecs_t downTime;
+            uint32_t policyFlags;
         };
 
         struct MotionMemento {
@@ -747,6 +749,7 @@ private:
             PointerProperties pointerProperties[MAX_POINTERS];
             PointerCoords pointerCoords[MAX_POINTERS];
             bool hovering;
+            uint32_t policyFlags;
 
             void setPointers(const MotionEntry* entry);
         };
