@@ -23,6 +23,7 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.opengl.ManagedEGLContext;
 import android.os.IBinder;
+import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
@@ -111,6 +112,8 @@ public class WindowManagerImpl implements WindowManager {
     private ViewRootImpl[] mRoots;
     private WindowManager.LayoutParams[] mParams;
     private boolean mNeedsEglTerminate;
+
+    private Runnable mSystemPropertyUpdater = null;
 
     private final static Object sLock = new Object();
     private final static WindowManagerImpl sWindowManager = new WindowManagerImpl();
@@ -237,6 +240,22 @@ public class WindowManagerImpl implements WindowManager {
         View panelParentView = null;
         
         synchronized (this) {
+            // Start watching for system property changes.
+            if (mSystemPropertyUpdater == null) {
+                mSystemPropertyUpdater = new Runnable() {
+                    @Override public void run() {
+                        synchronized (this) {
+                            synchronized (this) {
+                                for (ViewRootImpl root : mRoots) {
+                                    root.loadSystemProperties();
+                                }
+                            }
+                        }
+                    }
+                };
+                SystemProperties.addChangeCallback(mSystemPropertyUpdater);
+            }
+
             // Here's an odd/questionable case: if someone tries to add a
             // view multiple times, then we simply bump up a nesting count
             // and they need to remove the view the corresponding number of

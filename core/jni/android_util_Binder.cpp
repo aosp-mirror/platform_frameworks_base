@@ -308,6 +308,12 @@ protected:
             env->DeleteLocalRef(excep2);
         }
 
+        // Need to always call through the native implementation of
+        // SYSPROPS_TRANSACTION.
+        if (code == SYSPROPS_TRANSACTION) {
+            BBinder::onTransact(code, data, reply, flags);
+        }
+
         //aout << "onTransact to Java code; result=" << res << endl
         //    << "Transact from " << this << " to Java code returning "
         //    << reply << ": " << *reply << endl;
