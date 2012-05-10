@@ -11259,6 +11259,7 @@ package android.media {
     field public static final java.lang.String KEY_CHANNEL_MASK = "channel-mask";
     field public static final java.lang.String KEY_COLOR_FORMAT = "color-format";
     field public static final java.lang.String KEY_DURATION = "durationUs";
+    field public static final java.lang.String KEY_FLAC_COMPRESSION_LEVEL = "flac-compression-level";
     field public static final java.lang.String KEY_FRAME_RATE = "frame-rate";
     field public static final java.lang.String KEY_HEIGHT = "height";
     field public static final java.lang.String KEY_IS_ADTS = "is-adts";
