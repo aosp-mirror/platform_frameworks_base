@@ -1134,7 +1134,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         private State mStopTetheringErrorState;
         private State mSetDnsForwardersErrorState;
 
-        private ArrayList mNotifyList;
+        private ArrayList<TetherInterfaceSM> mNotifyList;
 
         private int mCurrentConnectionSequence;
         private int mMobileApnReserved = ConnectivityManager.TYPE_NONE;
@@ -1164,7 +1164,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             mSetDnsForwardersErrorState = new SetDnsForwardersErrorState();
             addState(mSetDnsForwardersErrorState);
 
-            mNotifyList = new ArrayList();
+            mNotifyList = new ArrayList<TetherInterfaceSM>();
             setInitialState(mInitialState);
         }
 
@@ -1361,8 +1361,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             protected void notifyTetheredOfNewUpstreamIface(String ifaceName) {
                 if (DBG) Log.d(TAG, "notifying tethered with iface =" + ifaceName);
                 mUpstreamIfaceName = ifaceName;
-                for (Object o : mNotifyList) {
-                    TetherInterfaceSM sm = (TetherInterfaceSM)o;
+                for (TetherInterfaceSM sm : mNotifyList) {
                     sm.sendMessage(TetherInterfaceSM.CMD_TETHER_CONNECTION_CHANGED,
                             ifaceName);
                 }
@@ -1380,13 +1379,13 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 switch (message.what) {
                     case CMD_TETHER_MODE_REQUESTED:
                         TetherInterfaceSM who = (TetherInterfaceSM)message.obj;
-                        if (VDBG) Log.d(TAG, "Tether Mode requested by " + who.toString());
+                        if (VDBG) Log.d(TAG, "Tether Mode requested by " + who);
                         mNotifyList.add(who);
                         transitionTo(mTetherModeAliveState);
                         break;
                     case CMD_TETHER_MODE_UNREQUESTED:
                         who = (TetherInterfaceSM)message.obj;
-                        if (VDBG) Log.d(TAG, "Tether Mode unrequested by " + who.toString());
+                        if (VDBG) Log.d(TAG, "Tether Mode unrequested by " + who);
                         int index = mNotifyList.indexOf(who);
                         if (index != -1) {
                             mNotifyList.remove(who);
@@ -1423,18 +1422,29 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 switch (message.what) {
                     case CMD_TETHER_MODE_REQUESTED:
                         TetherInterfaceSM who = (TetherInterfaceSM)message.obj;
+                        if (VDBG) Log.d(TAG, "Tether Mode requested by " + who);
                         mNotifyList.add(who);
                         who.sendMessage(TetherInterfaceSM.CMD_TETHER_CONNECTION_CHANGED,
                                 mUpstreamIfaceName);
                         break;
                     case CMD_TETHER_MODE_UNREQUESTED:
                         who = (TetherInterfaceSM)message.obj;
+                        if (VDBG) Log.d(TAG, "Tether Mode unrequested by " + who);
                         int index = mNotifyList.indexOf(who);
                         if (index != -1) {
+                            if (DBG) Log.d(TAG, "TetherModeAlive removing notifyee " + who);
                             mNotifyList.remove(index);
                             if (mNotifyList.isEmpty()) {
                                 turnOffMasterTetherSettings(); // transitions appropriately
+                            } else {
+                                if (DBG) {
+                                    Log.d(TAG, "TetherModeAlive still has " + mNotifyList.size() +
+                                            " live requests:");
+                                    for (Object o : mNotifyList) Log.d(TAG, "  " + o);
+                                }
                             }
+                        } else {
+                           Log.e(TAG, "TetherModeAliveState UNREQUESTED has unknown who: " + who);
                         }
                         break;
                     case CMD_UPSTREAM_CHANGED:
@@ -1561,7 +1571,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             pw.println();
             pw.println("Tether state:");
             for (Object o : mIfaces.values()) {
-                pw.println(" "+o.toString());
+                pw.println(" " + o);
             }
         }
         pw.println();
