@@ -485,7 +485,7 @@ public class PowerManagerService extends IPowerManager.Stub
                 //mDimScreen = getInt(DIM_SCREEN) != 0;
 
                 mScreenBrightnessSetting = getInt(SCREEN_BRIGHTNESS, DEFAULT_SCREEN_BRIGHTNESS);
-                mLightSensorAdjustSetting = getFloat(SCREEN_AUTO_BRIGHTNESS_ADJ, 0);
+                mLightSensorAdjustSetting = 0; //getFloat(SCREEN_AUTO_BRIGHTNESS_ADJ, 0);
 
                 // SCREEN_BRIGHTNESS_MODE, default to manual
                 setScreenBrightnessMode(getInt(SCREEN_BRIGHTNESS_MODE,
@@ -649,7 +649,7 @@ public class PowerManagerService extends IPowerManager.Stub
                         + Settings.System.NAME + "=?) or ("
                         + Settings.System.NAME + "=?)",
                 new String[]{STAY_ON_WHILE_PLUGGED_IN, SCREEN_OFF_TIMEOUT, DIM_SCREEN, SCREEN_BRIGHTNESS,
-                        SCREEN_BRIGHTNESS_MODE, SCREEN_AUTO_BRIGHTNESS_ADJ,
+                        SCREEN_BRIGHTNESS_MODE, /*SCREEN_AUTO_BRIGHTNESS_ADJ,*/
                         WINDOW_ANIMATION_SCALE, TRANSITION_ANIMATION_SCALE},
                 null);
         mSettings = new ContentQueryMap(settingsCursor, Settings.System.NAME, true, mHandler);
