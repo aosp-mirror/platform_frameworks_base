@@ -27,4 +27,10 @@
         android:state_focused="false"
         android:drawable="@drawable/ic_lockscreen_camera_activated" />
 
+    <item
+        android:state_enabled="true"
+        android:state_active="false"
+        android:state_focused="true"
+        android:drawable="@drawable/ic_lockscreen_camera_activated" />
+
 </selector>
