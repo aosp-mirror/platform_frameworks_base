@@ -2176,11 +2176,12 @@ public final class WebViewCore {
 
     DrawData mLastDrawData = null;
 
-    private Boolean m_skipDrawFlag = false;
+    private Object m_skipDrawFlagLock = new Object();
+    private boolean m_skipDrawFlag = false;
     private boolean m_drawWasSkipped = false;
 
     void pauseWebKitDraw() {
-        synchronized (m_skipDrawFlag) {
+        synchronized (m_skipDrawFlagLock) {
             if (!m_skipDrawFlag) {
                 m_skipDrawFlag = true;
             }
@@ -2188,7 +2189,7 @@ public final class WebViewCore {
     }
 
     void resumeWebKitDraw() {
-        synchronized (m_skipDrawFlag) {
+        synchronized (m_skipDrawFlagLock) {
             if (m_skipDrawFlag && m_drawWasSkipped) {
                 // a draw was dropped, send a retry
                 m_drawWasSkipped = false;
@@ -2199,7 +2200,7 @@ public final class WebViewCore {
     }
 
     private void webkitDraw() {
-        synchronized (m_skipDrawFlag) {
+        synchronized (m_skipDrawFlagLock) {
             if (m_skipDrawFlag) {
                 m_drawWasSkipped = true;
                 return;
