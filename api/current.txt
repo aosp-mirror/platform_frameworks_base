@@ -140,6 +140,7 @@ package android {
   public static final class Manifest.permission_group {
     ctor public Manifest.permission_group();
     field public static final java.lang.String ACCOUNTS = "android.permission-group.ACCOUNTS";
+    field public static final java.lang.String AFFECTS_BATTERY = "android.permission-group.AFFECTS_BATTERY";
     field public static final java.lang.String APP_INFO = "android.permission-group.APP_INFO";
     field public static final java.lang.String AUDIO_SETTINGS = "android.permission-group.AUDIO_SETTINGS";
     field public static final java.lang.String BLUETOOTH_NETWORK = "android.permission-group.BLUETOOTH_NETWORK";
@@ -150,7 +151,6 @@ package android {
     field public static final java.lang.String DEVELOPMENT_TOOLS = "android.permission-group.DEVELOPMENT_TOOLS";
     field public static final java.lang.String DEVICE_ALARMS = "android.permission-group.DEVICE_ALARMS";
     field public static final java.lang.String DISPLAY = "android.permission-group.DISPLAY";
-    field public static final java.lang.String AFFECTS_BATTERY = "android.permission-group.AFFECTS_BATTERY";
     field public static final java.lang.String HARDWARE_CONTROLS = "android.permission-group.HARDWARE_CONTROLS";
     field public static final java.lang.String LOCATION = "android.permission-group.LOCATION";
     field public static final java.lang.String MESSAGES = "android.permission-group.MESSAGES";
@@ -758,7 +758,7 @@ package android {
     field public static final int pathPrefix = 16842795; // 0x101002b
     field public static final int permission = 16842758; // 0x1010006
     field public static final int permissionGroup = 16842762; // 0x101000a
-    field public static final int permissionGroupFlags = 16843691; // 0x10103ab
+    field public static final int permissionGroupFlags = 16843699; // 0x10103b3
     field public static final int persistent = 16842765; // 0x101000d
     field public static final int persistentDrawingCache = 16842990; // 0x10100ee
     field public static final deprecated int phoneNumber = 16843111; // 0x1010167
