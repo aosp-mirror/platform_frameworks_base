@@ -129,9 +129,9 @@ public class ApnContext {
         return apn;
     }
 
-    public synchronized void removeNextWaitingApn() {
-        if ((mWaitingApns != null) && (!mWaitingApns.isEmpty())) {
-            mWaitingApns.remove(0);
+    public synchronized void removeWaitingApn(ApnSetting apn) {
+        if (mWaitingApns != null) {
+            mWaitingApns.remove(apn);
         }
     }
 
