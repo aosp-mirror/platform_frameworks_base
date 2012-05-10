@@ -151,7 +151,7 @@ public abstract class AccessibilityNodeProvider {
      * @see #createAccessibilityNodeInfo(int)
      * @see AccessibilityNodeInfo
      */
-    public AccessibilityNodeInfo findAccessibilitiyFocus(int virtualViewId) {
+    public AccessibilityNodeInfo findAccessibilityFocus(int virtualViewId) {
         return null;
     }
 
