@@ -22,6 +22,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.android.internal.statusbar.StatusBarNotification;
+import com.android.systemui.R;
 
 import java.util.Comparator;
 import java.util.ArrayList;
@@ -38,12 +39,31 @@ public class NotificationData {
         public View content; // takes the click events and sends the PendingIntent
         public View expanded; // the inflated RemoteViews
         public ImageView largeIcon;
-        public View expandedLarge;
+        protected View expandedLarge;
         public Entry() {}
         public Entry(IBinder key, StatusBarNotification n, StatusBarIconView ic) {
             this.key = key;
             this.notification = n;
             this.icon = ic;
+        }
+        public void setLargeView(View expandedLarge) {
+            this.expandedLarge = expandedLarge;
+            writeBooleanTag(row, R.id.expandable_tag, expandedLarge != null);
+        }
+        public View getLargeView() {
+            return expandedLarge;
+        }
+        /**
+         * Return whether the entry can be expanded.
+         */
+        public boolean expandable() {
+            return NotificationData.getIsExpandable(row);
+        }
+        /**
+         * Return whether the entry has been manually expanded by the user.
+         */
+        public boolean userExpanded() {
+            return NotificationData.getUserExpanded(row);
         }
     }
     private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
@@ -133,5 +153,42 @@ public class NotificationData {
             }
         }
         return false;
+    }
+
+    protected static boolean readBooleanTag(View view, int id)  {
+        if (view != null) {
+            Object value = view.getTag(id);
+            return value != null && value instanceof Boolean && ((Boolean) value).booleanValue();
+        }
+        return false;
+    }
+
+    protected static boolean writeBooleanTag(View view, int id, boolean value)  {
+        if (view != null) {
+            view.setTag(id, Boolean.valueOf(value));
+            return value;
+        }
+        return false;
+    }
+
+    /**
+     * Return whether the entry can be expanded.
+     */
+    public static boolean getIsExpandable(View row) {
+        return readBooleanTag(row, R.id.expandable_tag);
+    }
+
+    /**
+     * Return whether the entry has been manually expanded by the user.
+     */
+    public static boolean getUserExpanded(View row) {
+        return readBooleanTag(row, R.id.user_expanded_tag);
+    }
+
+    /**
+     * Set whether the entry has been manually expanded by the user.
+     */
+    public static boolean setUserExpanded(View row, boolean userExpanded) {
+        return writeBooleanTag(row, R.id.user_expanded_tag, userExpanded);
     }
 }

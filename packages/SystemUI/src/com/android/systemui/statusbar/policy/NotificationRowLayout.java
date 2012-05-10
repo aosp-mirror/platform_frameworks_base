@@ -39,6 +39,7 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
+import com.android.systemui.statusbar.NotificationData;
 
 import java.util.HashMap;
 
@@ -175,9 +176,11 @@ public class NotificationRowLayout
     }
 
     public boolean canChildBeExpanded(View v) {
-        Object isExpandable = v.getTag(R.id.expandable_tag);
-        return isExpandable != null && isExpandable instanceof Boolean &&
-                ((Boolean)isExpandable).booleanValue();
+        return NotificationData.getIsExpandable(v);
+    }
+
+    public boolean setUserExpandedChild(View v, boolean userExpanded) {
+        return NotificationData.setUserExpanded(v, userExpanded);
     }
 
     public void onChildDismissed(View v) {
