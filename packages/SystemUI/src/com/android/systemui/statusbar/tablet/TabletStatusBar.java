@@ -348,6 +348,11 @@ public class TabletStatusBar extends BaseStatusBar implements
         scroller.setFillViewport(true);
     }
 
+    @Override
+    protected int getExpandedViewMaxHeight() {
+        return getNotificationPanelHeight();
+    }
+
     private int getNotificationPanelHeight() {
         final Resources res = mContext.getResources();
         final Display d = WindowManagerImpl.getDefault().getDefaultDisplay();
