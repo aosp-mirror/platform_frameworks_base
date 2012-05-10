@@ -189,7 +189,7 @@ public class UiTestAutomationBridge {
         final AccessibilityServiceInfo info = new AccessibilityServiceInfo();
         info.eventTypes = AccessibilityEvent.TYPES_ALL_MASK;
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
-        info.flags |= AccessibilityServiceInfo.INCLUDE_NOT_IMPORTANT_VIEWS;
+        info.flags |= AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
 
         try {
             manager.registerUiTestAutomationService(mListener, info);

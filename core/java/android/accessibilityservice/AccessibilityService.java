@@ -284,16 +284,6 @@ public abstract class AccessibilityService extends Service {
     public static final int GESTURE_SWIPE_DOWN_AND_RIGHT = 16;
 
     /**
-     * The user has performed a double tap gesture on the touch screen.
-     */
-    public static final int GESTURE_DOUBLE_TAP = 17;
-
-    /**
-     * The user has performed a tap and hold gesture on the touch screen.
-     */
-    public static final int GESTURE_TAP_AND_HOLD = 18;
-
-    /**
      * The {@link Intent} that must be declared as handled by the service.
      */
     public static final String SERVICE_INTERFACE =
@@ -377,14 +367,12 @@ public abstract class AccessibilityService extends Service {
 
     /**
      * Called by the system when the user performs a specific gesture on the
-     * touch screen. If the gesture is not handled in this callback the system
-     * may provide default handing. Therefore, one should return true from this
-     * function if overriding of default behavior is desired.
+     * touch screen.
      *
-     * <strong>Note:</strong> To receive gestures an accessibility service
-     *         must declare that it can handle such by specifying the
-     *         <code>&lt;{@link android.R.styleable#AccessibilityService_canHandleGestures
-     *         canHandleGestures}&gt;</code> attribute.
+     * <strong>Note:</strong> To receive gestures an accessibility service must
+     * request that the device is in touch exploration mode by setting the
+     * {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_INCLUDE_NOT_IMPORTANT_VIEWS}
+     * flag.
      *
      * @param gestureId The unique id of the performed gesture.
      *
@@ -406,13 +394,8 @@ public abstract class AccessibilityService extends Service {
      * @see #GESTURE_SWIPE_RIGHT_AND_UP
      * @see #GESTURE_SWIPE_RIGHT_AND_LEFT
      * @see #GESTURE_SWIPE_RIGHT_AND_DOWN
-     * @see #GESTURE_CLOCKWISE_CIRCLE
-     * @see #GESTURE_COUNTER_CLOCKWISE_CIRCLE
-     * @see #GESTURE_DOUBLE_TAP
-     * @see #GESTURE_TAP_AND_HOLD
      */
     protected boolean onGesture(int gestureId) {
-        // TODO: Describe the default gesture processing in the javaDoc once it is finalized.
         return false;
     }
 
