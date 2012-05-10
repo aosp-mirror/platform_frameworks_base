@@ -1490,7 +1490,16 @@ public class Notification implements Parcelable
             RemoteViews button = new RemoteViews(mContext.getPackageName(), R.layout.notification_action);
             button.setTextViewCompoundDrawables(R.id.action0, action.icon, 0, 0, 0);
             button.setTextViewText(R.id.action0, action.title);
-            button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
+            if (action.actionIntent != null) {
+                button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
+                //button.setBoolean(R.id.action0, "setEnabled", true);
+                button.setFloat(R.id.button0, "setAlpha", 1.0f);
+                button.setBoolean(R.id.button0, "setClickable", true);
+            } else {
+                //button.setBoolean(R.id.action0, "setEnabled", false);
+                button.setFloat(R.id.button0, "setAlpha", 0.5f);
+                button.setBoolean(R.id.button0, "setClickable", false);
+            }
             button.setContentDescription(R.id.action0, action.title);
             return button;
         }
