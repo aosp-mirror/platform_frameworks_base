@@ -3795,13 +3795,15 @@ public final class ViewRootImpl implements ViewParent,
         }
         if (mView == null) return;
         if (args.localChanges != 0) {
-            if (mAttachInfo != null) {
-                mAttachInfo.mRecomputeGlobalAttributes = true;
-            }
             mView.updateLocalSystemUiVisibility(args.localValue, args.localChanges);
-            scheduleTraversals();            
         }
-        mView.dispatchSystemUiVisibilityChanged(args.globalVisibility);
+        if (mAttachInfo != null) {
+            int visibility = args.globalVisibility&View.SYSTEM_UI_CLEARABLE_FLAGS;
+            if (visibility != mAttachInfo.mGlobalSystemUiVisibility) {
+                mAttachInfo.mGlobalSystemUiVisibility = visibility;
+                mView.dispatchSystemUiVisibilityChanged(visibility);
+            }
+        }
     }
 
     public void handleDispatchDoneAnimating() {

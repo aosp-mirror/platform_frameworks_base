@@ -23939,7 +23939,6 @@ package android.view {
     method public final android.view.View findViewWithTag(java.lang.Object);
     method public void findViewsWithText(java.util.ArrayList<android.view.View>, java.lang.CharSequence, int);
     method protected boolean fitSystemWindows(android.graphics.Rect);
-    method public boolean fitsSystemWindows();
     method public android.view.View focusSearch(int);
     method public void forceLayout();
     method public android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider();
@@ -23964,6 +23963,7 @@ package android.view {
     method public void getDrawingRect(android.graphics.Rect);
     method public long getDrawingTime();
     method public boolean getFilterTouchesWhenObscured();
+    method public boolean getFitsSystemWindows();
     method public java.util.ArrayList<android.view.View> getFocusables(int);
     method public void getFocusedRect(android.graphics.Rect);
     method public boolean getGlobalVisibleRect(android.graphics.Rect, android.graphics.Point);
