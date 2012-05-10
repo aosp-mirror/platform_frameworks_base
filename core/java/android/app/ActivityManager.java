@@ -1078,13 +1078,20 @@ public class ActivityManager {
      */
     public static class MemoryInfo implements Parcelable {
         /**
-         * The total available memory on the system.  This number should not
+         * The available memory on the system.  This number should not
          * be considered absolute: due to the nature of the kernel, a significant
          * portion of this memory is actually in use and needed for the overall
          * system to run well.
          */
         public long availMem;
-        
+
+        /**
+         * The total memory accessible by the kernel.  This is basically the
+         * RAM size of the device, not including below-kernel fixed allocations
+         * like DMA buffers, RAM for the baseband CPU, etc.
+         */
+        public long totalMem;
+
         /**
          * The threshold of {@link #availMem} at which we consider memory to be
          * low and start killing background services and other non-extraneous
@@ -1116,6 +1123,7 @@ public class ActivityManager {
 
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeLong(availMem);
+            dest.writeLong(totalMem);
             dest.writeLong(threshold);
             dest.writeInt(lowMemory ? 1 : 0);
             dest.writeLong(hiddenAppThreshold);
@@ -1126,6 +1134,7 @@ public class ActivityManager {
         
         public void readFromParcel(Parcel source) {
             availMem = source.readLong();
+            totalMem = source.readLong();
             threshold = source.readLong();
             lowMemory = source.readInt() != 0;
             hiddenAppThreshold = source.readLong();

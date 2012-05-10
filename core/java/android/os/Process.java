@@ -897,6 +897,9 @@ public class Process {
     public static final native long getFreeMemory();
     
     /** @hide */
+    public static final native long getTotalMemory();
+    
+    /** @hide */
     public static final native void readProcLines(String path,
             String[] reqFields, long[] outSizes);
     
