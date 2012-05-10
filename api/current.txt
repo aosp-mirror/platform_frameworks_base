@@ -25254,7 +25254,7 @@ package android.view.accessibility {
     ctor public AccessibilityNodeProvider();
     method public android.view.accessibility.AccessibilityNodeInfo accessibilityFocusSearch(int, int);
     method public android.view.accessibility.AccessibilityNodeInfo createAccessibilityNodeInfo(int);
-    method public android.view.accessibility.AccessibilityNodeInfo findAccessibilitiyFocus(int);
+    method public android.view.accessibility.AccessibilityNodeInfo findAccessibilityFocus(int);
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(java.lang.String, int);
     method public boolean performAction(int, int, android.os.Bundle);
   }
