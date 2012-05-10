@@ -83,19 +83,22 @@ public class WifiP2pDnsSdServiceInfo extends WifiP2pServiceInfo {
      *  e.g) "MyPrinter"
      * @param serviceType service type.<br>
      *  e.g) "_ipp._tcp"
-     * @param txtRecord TXT record as defined at
+     * @param txtMap TXT record with key/value pair in a map confirming to format defined at
      * http://files.dns-sd.org/draft-cheshire-dnsext-dns-sd.txt
      * @return Bonjour service information object
      */
     public static WifiP2pDnsSdServiceInfo newInstance(String instanceName,
-            String serviceType, DnsSdTxtRecord txtRecord) {
+            String serviceType, Map<String, String> txtMap) {
         if (TextUtils.isEmpty(instanceName) || TextUtils.isEmpty(serviceType)) {
             throw new IllegalArgumentException(
                     "instance name or service type cannot be empty");
         }
 
-        if (txtRecord == null) {
-            txtRecord = new DnsSdTxtRecord();
+        DnsSdTxtRecord txtRecord = new DnsSdTxtRecord();
+        if (txtMap != null) {
+            for (String key : txtMap.keySet()) {
+                txtRecord.set(key, txtMap.get(key));
+            }
         }
 
         ArrayList<String> queries = new ArrayList<String>();
