@@ -35,6 +35,7 @@ import java.lang.ref.WeakReference;
 public class DynamicLayout extends Layout
 {
     private static final int PRIORITY = 128;
+    private static final int BLOCK_MINIMUM_CHARACTER_LENGTH = 400;
 
     /**
      * Make a layout for the specified text that will be updated as
@@ -117,10 +118,6 @@ public class DynamicLayout extends Layout
 
         mObjects = new PackedObjectVector<Directions>(1);
 
-        mBlockEndLines = new int[] { 0 };
-        mBlockIndices = new int[] { INVALID_BLOCK_INDEX };
-        mNumberOfBlocks = 1;
-
         mIncludePad = includepad;
 
         /*
@@ -170,7 +167,6 @@ public class DynamicLayout extends Layout
         mObjects.insertAt(0, dirs);
 
         // Update from 0 characters to whatever the real text is
-
         reflow(base, 0, 0, base.length());
 
         if (base instanceof Spannable) {
@@ -295,14 +291,12 @@ public class DynamicLayout extends Layout
         // the very end of the buffer, then we already have a line that
         // starts there, so disregard the blank line.
 
-        if (where + after != len &&
-            reflowed.getLineStart(n - 1) == where + after)
+        if (where + after != len && reflowed.getLineStart(n - 1) == where + after)
             n--;
 
         // remove affected lines from old layout
         mInts.deleteAt(startline, endline - startline);
         mObjects.deleteAt(startline, endline - startline);
-        updateBlocks(startline, endline - 1, n);
 
         // adjust offsets in layout for new height and offsets
 
@@ -362,9 +356,67 @@ public class DynamicLayout extends Layout
             mObjects.insertAt(startline + i, objects);
         }
 
+        updateBlocks(startline, endline - 1, n);
+
         synchronized (sLock) {
             sStaticLayout = reflowed;
             reflowed.finish();
+        }
+    }
+
+    /**
+     * Create the initial block structure, cutting the text into blocks of at least
+     * BLOCK_MINIMUM_CHARACTER_SIZE characters, aligned on the ends of paragraphs.
+     */
+    private void createBlocks() {
+        int offset = BLOCK_MINIMUM_CHARACTER_LENGTH;
+        mNumberOfBlocks = 0;
+        final CharSequence text = mDisplay;
+
+        while (true) {
+            offset = TextUtils.indexOf(text, '\n', offset);
+            if (offset < 0) {
+                addBlockAtOffset(text.length());
+                break;
+            } else {
+                addBlockAtOffset(offset);
+                offset += BLOCK_MINIMUM_CHARACTER_LENGTH;
+            }
+        }
+
+        // mBlockIndices and mBlockEndLines should have the same length
+        mBlockIndices = new int[mBlockEndLines.length];
+        for (int i = 0; i < mBlockEndLines.length; i++) {
+            mBlockIndices[i] = INVALID_BLOCK_INDEX;
+        }
+    }
+
+    /**
+     * Create a new block, ending at the specified character offset.
+     * A block will actually be created only if has at least one line, i.e. this offset is
+     * not on the end line of the previous block.
+     */
+    private void addBlockAtOffset(int offset) {
+        final int line = getLineForOffset(offset);
+
+        if (mBlockEndLines == null) {
+            // Initial creation of the array, no test on previous block ending line
+            mBlockEndLines = new int[ArrayUtils.idealIntArraySize(1)];
+            mBlockEndLines[mNumberOfBlocks] = line;
+            mNumberOfBlocks++;
+            return;
+        }
+
+        final int previousBlockEndLine = mBlockEndLines[mNumberOfBlocks - 1];
+        if (line > previousBlockEndLine) {
+            if (mNumberOfBlocks == mBlockEndLines.length) {
+                // Grow the array if needed
+                int[] blockEndLines = new int[ArrayUtils.idealIntArraySize(mNumberOfBlocks + 1)];
+                System.arraycopy(mBlockEndLines, 0, blockEndLines, 0, mNumberOfBlocks);
+                mBlockEndLines = blockEndLines;
+            }
+            mBlockEndLines[mNumberOfBlocks] = line;
+            mNumberOfBlocks++;
         }
     }
 
@@ -388,6 +440,11 @@ public class DynamicLayout extends Layout
      * @hide
      */
     void updateBlocks(int startLine, int endLine, int newLineCount) {
+        if (mBlockEndLines == null) {
+            createBlocks();
+            return;
+        }
+
         int firstBlock = -1;
         int lastBlock = -1;
         for (int i = 0; i < mNumberOfBlocks; i++) {
