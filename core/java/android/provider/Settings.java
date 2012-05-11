@@ -4253,6 +4253,10 @@ public final class Settings {
         /** Timeout for package verification. {@hide} */
         public static final String PACKAGE_VERIFIER_TIMEOUT = "verifier_timeout";
 
+        /** {@hide} */
+        public static final String
+                READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT = "read_external_storage_enforced_default";
+
         /**
          * Duration in milliseconds before pre-authorized URIs for the contacts
          * provider should expire.
