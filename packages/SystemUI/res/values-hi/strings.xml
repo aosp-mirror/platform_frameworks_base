@@ -140,8 +140,9 @@
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सभी सूचनाएं साफ़ करें."</string>
     <string name="dreams_dock_launcher" msgid="3541196417659166245">"स्‍क्रीन सेवर सक्रिय करें"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"एप्‍लिकेशन जानकारी"</string>
-    <!-- no translation found for notifications_off_title (8936620513608443224) -->
-    <skip />
-    <!-- no translation found for notifications_off_text (2529001315769385273) -->
-    <skip />
+    <string name="notifications_off_title" msgid="8936620513608443224">"सूचनाएं बंद"</string>
+    <string name="notifications_off_text" msgid="2529001315769385273">"सूचनाओं को पुन: चालू करने के लिए यहां टैप करें."</string>
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"स्‍क्रीन स्‍वचालित रूप से घूमेगी."</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"स्‍क्रीन लैंडस्केप अभिविन्यास में लॉक है."</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"स्‍क्रीन पोर्ट्रेट अभिविन्‍यास में लॉक है."</string>
 </resources>

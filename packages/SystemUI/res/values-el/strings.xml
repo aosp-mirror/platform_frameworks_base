@@ -144,4 +144,7 @@
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Πληροφορίες εφαρμογής"</string>
     <string name="notifications_off_title" msgid="8936620513608443224">"Ειδοποιήσεις ανενεργές"</string>
     <string name="notifications_off_text" msgid="2529001315769385273">"Πατήστε εδώ για να ενεργοποιήσετε ξανά τις ειδοποιήσεις."</string>
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Θα γίνεται αυτόματη περιστροφή της οθόνης."</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Η οθόνη έχει κλειδωθεί σε οριζόντιο προσανατολισμό."</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Η οθόνη έχει κλειδωθεί σε κατακόρυφο προσανατολισμό."</string>
 </resources>

@@ -146,4 +146,7 @@
     <skip />
     <!-- no translation found for notifications_off_text (2529001315769385273) -->
     <skip />
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"画面は自動的に回転します。"</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"画面は横向きにロックされています。"</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"画面は縦向きにロックされています。"</string>
 </resources>
