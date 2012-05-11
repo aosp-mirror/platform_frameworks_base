@@ -98,6 +98,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserId;
+import android.provider.Settings.Secure;
 import android.security.SystemKeyStore;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -9259,7 +9260,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         mContext.enforceCallingOrSelfPermission(GRANT_REVOKE_PERMISSIONS, null);
         if (READ_EXTERNAL_STORAGE.equals(permission)) {
             synchronized (mPackages) {
-                if (mSettings.mReadExternalStorageEnforced != enforced) {
+                if (mSettings.mReadExternalStorageEnforced == null
+                        || mSettings.mReadExternalStorageEnforced != enforced) {
                     mSettings.mReadExternalStorageEnforced = enforced;
                     mSettings.writeLPr();
 
@@ -9284,7 +9286,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public boolean isPermissionEnforced(String permission) {
-        mContext.enforceCallingOrSelfPermission(GRANT_REVOKE_PERMISSIONS, null);
         synchronized (mPackages) {
             return isPermissionEnforcedLocked(permission);
         }
@@ -9292,7 +9293,13 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private boolean isPermissionEnforcedLocked(String permission) {
         if (READ_EXTERNAL_STORAGE.equals(permission)) {
-            return mSettings.mReadExternalStorageEnforced;
+            if (mSettings.mReadExternalStorageEnforced != null) {
+                return mSettings.mReadExternalStorageEnforced;
+            } else {
+                // if user hasn't defined, fall back to secure default
+                return Secure.getInt(mContext.getContentResolver(),
+                        Secure.READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT, 0) != 0;
+            }
         } else {
             return true;
         }
