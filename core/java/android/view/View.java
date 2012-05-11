@@ -2135,6 +2135,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     static final int VIEW_IS_ANIMATING_TRANSFORM = 0x10000000;
 
+    /**
+     * Flag indicating whether a view failed the quickReject() check in draw(). This condition
+     * is used to check whether later changes to the view's transform should invalidate the
+     * view to force the quickReject test to run again.
+     */
+    static final int VIEW_QUICK_REJECTED = 0x20000000;
+
     /* End of masks for mPrivateFlags2 */
 
     static final int DRAG_MASK = DRAG_CAN_ACCEPT | DRAG_HOVERED;
@@ -8567,6 +8574,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         if (mDisplayList != null) {
             mDisplayList.setCameraDistance(-Math.abs(distance) / dpi);
         }
+        if ((mPrivateFlags2 & VIEW_QUICK_REJECTED) == VIEW_QUICK_REJECTED) {
+            // View was rejected last time it was drawn by its parent; this may have changed
+            invalidateParentIfNeeded();
+        }
     }
 
     /**
@@ -8608,6 +8619,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             invalidateViewProperty(false, true);
             if (mDisplayList != null) {
                 mDisplayList.setRotation(rotation);
+            }
+            if ((mPrivateFlags2 & VIEW_QUICK_REJECTED) == VIEW_QUICK_REJECTED) {
+                // View was rejected last time it was drawn by its parent; this may have changed
+                invalidateParentIfNeeded();
             }
         }
     }
@@ -8656,6 +8671,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             if (mDisplayList != null) {
                 mDisplayList.setRotationY(rotationY);
             }
+            if ((mPrivateFlags2 & VIEW_QUICK_REJECTED) == VIEW_QUICK_REJECTED) {
+                // View was rejected last time it was drawn by its parent; this may have changed
+                invalidateParentIfNeeded();
+            }
         }
     }
 
@@ -8703,6 +8722,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             if (mDisplayList != null) {
                 mDisplayList.setRotationX(rotationX);
             }
+            if ((mPrivateFlags2 & VIEW_QUICK_REJECTED) == VIEW_QUICK_REJECTED) {
+                // View was rejected last time it was drawn by its parent; this may have changed
+                invalidateParentIfNeeded();
+            }
         }
     }
 
@@ -8742,6 +8765,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             if (mDisplayList != null) {
                 mDisplayList.setScaleX(scaleX);
             }
+            if ((mPrivateFlags2 & VIEW_QUICK_REJECTED) == VIEW_QUICK_REJECTED) {
+                // View was rejected last time it was drawn by its parent; this may have changed
+                invalidateParentIfNeeded();
+            }
         }
     }
 
@@ -8780,6 +8807,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             invalidateViewProperty(false, true);
             if (mDisplayList != null) {
                 mDisplayList.setScaleY(scaleY);
+            }
+            if ((mPrivateFlags2 & VIEW_QUICK_REJECTED) == VIEW_QUICK_REJECTED) {
+                // View was rejected last time it was drawn by its parent; this may have changed
+                invalidateParentIfNeeded();
             }
         }
     }
@@ -8828,6 +8859,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             if (mDisplayList != null) {
                 mDisplayList.setPivotX(pivotX);
             }
+            if ((mPrivateFlags2 & VIEW_QUICK_REJECTED) == VIEW_QUICK_REJECTED) {
+                // View was rejected last time it was drawn by its parent; this may have changed
+                invalidateParentIfNeeded();
+            }
         }
     }
 
@@ -8873,6 +8908,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             invalidateViewProperty(false, true);
             if (mDisplayList != null) {
                 mDisplayList.setPivotY(pivotY);
+            }
+            if ((mPrivateFlags2 & VIEW_QUICK_REJECTED) == VIEW_QUICK_REJECTED) {
+                // View was rejected last time it was drawn by its parent; this may have changed
+                invalidateParentIfNeeded();
             }
         }
     }
@@ -9032,6 +9071,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             }
             mBackgroundSizeChanged = true;
             invalidateParentIfNeeded();
+            if ((mPrivateFlags2 & VIEW_QUICK_REJECTED) == VIEW_QUICK_REJECTED) {
+                // View was rejected last time it was drawn by its parent; this may have changed
+                invalidateParentIfNeeded();
+            }
         }
     }
 
@@ -9101,6 +9144,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             }
             mBackgroundSizeChanged = true;
             invalidateParentIfNeeded();
+            if ((mPrivateFlags2 & VIEW_QUICK_REJECTED) == VIEW_QUICK_REJECTED) {
+                // View was rejected last time it was drawn by its parent; this may have changed
+                invalidateParentIfNeeded();
+            }
         }
     }
 
@@ -9164,6 +9211,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             }
             mBackgroundSizeChanged = true;
             invalidateParentIfNeeded();
+            if ((mPrivateFlags2 & VIEW_QUICK_REJECTED) == VIEW_QUICK_REJECTED) {
+                // View was rejected last time it was drawn by its parent; this may have changed
+                invalidateParentIfNeeded();
+            }
         }
     }
 
@@ -9224,6 +9275,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             }
             mBackgroundSizeChanged = true;
             invalidateParentIfNeeded();
+            if ((mPrivateFlags2 & VIEW_QUICK_REJECTED) == VIEW_QUICK_REJECTED) {
+                // View was rejected last time it was drawn by its parent; this may have changed
+                invalidateParentIfNeeded();
+            }
         }
     }
 
@@ -9308,6 +9363,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             if (mDisplayList != null) {
                 mDisplayList.setTranslationX(translationX);
             }
+            if ((mPrivateFlags2 & VIEW_QUICK_REJECTED) == VIEW_QUICK_REJECTED) {
+                // View was rejected last time it was drawn by its parent; this may have changed
+                invalidateParentIfNeeded();
+            }
         }
     }
 
@@ -9344,6 +9403,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             invalidateViewProperty(false, true);
             if (mDisplayList != null) {
                 mDisplayList.setTranslationY(translationY);
+            }
+            if ((mPrivateFlags2 & VIEW_QUICK_REJECTED) == VIEW_QUICK_REJECTED) {
+                // View was rejected last time it was drawn by its parent; this may have changed
+                invalidateParentIfNeeded();
             }
         }
     }
@@ -12816,8 +12879,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
         if (!concatMatrix && canvas.quickReject(mLeft, mTop, mRight, mBottom, Canvas.EdgeType.BW) &&
                 (mPrivateFlags & DRAW_ANIMATION) == 0) {
+            mPrivateFlags2 |= VIEW_QUICK_REJECTED;
             return more;
         }
+        mPrivateFlags2 &= ~VIEW_QUICK_REJECTED;
 
         if (hardwareAccelerated) {
             // Clear INVALIDATED flag to allow invalidation to occur during rendering, but
