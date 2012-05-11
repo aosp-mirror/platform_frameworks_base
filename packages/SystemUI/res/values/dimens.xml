@@ -58,9 +58,8 @@
     <!-- Height of a small notification in the status bar plus glow, padding, etc -->
     <dimen name="notification_min_height">72dp</dimen>
 
-    <!-- Height of a small notification in the status bar -->
-    <!-- TODO: change this back to 256dp once we deal with actions. -->
-    <dimen name="notification_max_height">320dp</dimen>
+    <!-- Height of a large notification in the status bar -->
+    <dimen name="notification_max_height">256dp</dimen>
 
     <!-- size at which Notification icons will be drawn in the status bar -->
     <dimen name="status_bar_icon_drawing_size">18dip</dimen>
