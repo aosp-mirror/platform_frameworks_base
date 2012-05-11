@@ -33,6 +33,8 @@ commonUiSources:= \
     Keyboard.cpp \
     KeyCharacterMap.cpp \
     KeyLayoutMap.cpp \
+    VelocityControl.cpp \
+    VelocityTracker.cpp \
     VirtualKeyMap.cpp
 
 commonSources:= \
