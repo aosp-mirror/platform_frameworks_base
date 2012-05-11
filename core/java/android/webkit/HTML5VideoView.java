@@ -357,4 +357,7 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
         return mStartWhenPrepared;
     }
 
+    public void showControllerInFullScreen() {
+    }
+
 }

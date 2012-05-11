@@ -279,6 +279,7 @@ class HTML5VideoViewProxy extends Handler
         }
 
         public static void end() {
+            mHTML5VideoView.showControllerInFullScreen();
             if (mCurrentProxy != null) {
                 if (isVideoSelfEnded)
                     mCurrentProxy.dispatchOnEnded();
