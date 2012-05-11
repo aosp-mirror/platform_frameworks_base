@@ -112,13 +112,14 @@ class HTML5VideoViewProxy extends Handler
                 mBaseLayer = layer;
 
                 int currentVideoLayerId = mHTML5VideoView.getVideoLayerId();
-                SurfaceTexture surfTexture = mHTML5VideoView.getSurfaceTexture(currentVideoLayerId);
+                SurfaceTexture surfTexture =
+                        HTML5VideoInline.getSurfaceTexture(currentVideoLayerId);
                 int textureName = mHTML5VideoView.getTextureName();
 
                 if (layer != 0 && surfTexture != null && currentVideoLayerId != -1) {
                     int playerState = mHTML5VideoView.getCurrentState();
                     if (mHTML5VideoView.getPlayerBuffering())
-                        playerState = HTML5VideoView.STATE_NOTPREPARED;
+                        playerState = HTML5VideoView.STATE_PREPARING;
                     boolean foundInTree = nativeSendSurfaceTexture(surfTexture,
                             layer, currentVideoLayerId, textureName,
                             playerState);
@@ -145,6 +146,7 @@ class HTML5VideoViewProxy extends Handler
                 HTML5VideoViewProxy proxy, WebViewClassic webView) {
                 // Save the inline video info and inherit it in the full screen
                 int savePosition = 0;
+                boolean canSkipPrepare = false;
                 if (mHTML5VideoView != null) {
                     // We don't allow enter full screen mode while the previous
                     // full screen video hasn't finished yet.
@@ -156,15 +158,20 @@ class HTML5VideoViewProxy extends Handler
                     // save the current position.
                     if (layerId == mHTML5VideoView.getVideoLayerId()) {
                         savePosition = mHTML5VideoView.getCurrentPosition();
+                        int playerState = mHTML5VideoView.getCurrentState();
+                        canSkipPrepare = (playerState == HTML5VideoView.STATE_PREPARING
+                                || playerState == HTML5VideoView.STATE_PREPARED
+                                || playerState == HTML5VideoView.STATE_PLAYING)
+                                && !mHTML5VideoView.isFullScreenMode();
                     }
-                    mHTML5VideoView.release();
+                    if (!canSkipPrepare) {
+                        mHTML5VideoView.reset();
+                    }
                 }
                 mHTML5VideoView = new HTML5VideoFullScreen(proxy.getContext(),
-                        layerId, savePosition);
+                        layerId, savePosition, canSkipPrepare);
                 mCurrentProxy = proxy;
-
                 mHTML5VideoView.setVideoURI(url, mCurrentProxy);
-
                 mHTML5VideoView.enterFullScreenVideoState(layerId, proxy, webView);
         }
 
@@ -217,8 +224,7 @@ class HTML5VideoViewProxy extends Handler
                     if (!backFromFullScreenMode) {
                         mHTML5VideoView.pauseAndDispatch(mCurrentProxy);
                     }
-                    // release the media player to avoid finalize error
-                    mHTML5VideoView.release();
+                    mHTML5VideoView.reset();
                 }
                 mCurrentProxy = proxy;
                 mHTML5VideoView = new HTML5VideoInline(videoLayerId, time);

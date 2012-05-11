@@ -31,11 +31,10 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
     // NOTE: these values are in sync with VideoLayerAndroid.h in webkit side.
     // Please keep them in sync when changed.
     static final int STATE_INITIALIZED        = 0;
-    static final int STATE_NOTPREPARED        = 1;
+    static final int STATE_PREPARING          = 1;
     static final int STATE_PREPARED           = 2;
     static final int STATE_PLAYING            = 3;
-    static final int STATE_RELEASED           = 4;
-    protected int mCurrentState;
+    static final int STATE_RESETTED           = 4;
 
     protected HTML5VideoViewProxy mProxy;
 
@@ -46,11 +45,11 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
     // This is used to find the VideoLayer on the native side.
     protected int mVideoLayerId;
 
-    // Every video will have one MediaPlayer. Given the fact we only have one
-    // SurfaceTexture, there is only one MediaPlayer in action. Every time we
-    // switch videos, a new instance of MediaPlayer will be created in reset().
-    // Switching between inline and full screen will also create a new instance.
-    protected MediaPlayer mPlayer;
+    // Given the fact we only have one SurfaceTexture, we cannot support multiple
+    // player at the same time. We may recreate a new one and abandon the old
+    // one at transition time.
+    protected static MediaPlayer mPlayer = null;
+    protected static int mCurrentState = -1;
 
     // We need to save such info.
     protected Uri mUri;
@@ -60,10 +59,12 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
     // See http://www.whatwg.org/specs/web-apps/current-work/#event-media-timeupdate
     protected static Timer mTimer;
 
+    protected boolean mPauseDuringPreparing;
+
     // The spec says the timer should fire every 250 ms or less.
     private static final int TIMEUPDATE_PERIOD = 250;  // ms
+    private boolean mSkipPrepare = false;
 
-    protected boolean mPauseDuringPreparing;
     // common Video control FUNCTIONS:
     public void start() {
         if (mCurrentState == STATE_PREPARED) {
@@ -83,7 +84,7 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
     public void pause() {
         if (isPlaying()) {
             mPlayer.pause();
-        } else if (mCurrentState == STATE_NOTPREPARED) {
+        } else if (mCurrentState == STATE_PREPARING) {
             mPauseDuringPreparing = true;
         }
         // Delete the Timer to stop it since there is no stop call.
@@ -124,11 +125,11 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
         }
     }
 
-    public void release() {
-        if (mCurrentState != STATE_RELEASED) {
-            mPlayer.release();
+    public void reset() {
+        if (mCurrentState != STATE_RESETTED) {
+            mPlayer.reset();
         }
-        mCurrentState = STATE_RELEASED;
+        mCurrentState = STATE_RESETTED;
     }
 
     public void stopPlayback() {
@@ -142,9 +143,16 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
     }
 
     // Every time we start a new Video, we create a VideoView and a MediaPlayer
-    public void init(int videoLayerId, int position) {
-        mPlayer = new MediaPlayer();
-        mCurrentState = STATE_INITIALIZED;
+    public void init(int videoLayerId, int position, boolean skipPrepare) {
+        if (mPlayer == null) {
+            mPlayer = new MediaPlayer();
+            mCurrentState = STATE_INITIALIZED;
+        }
+        mSkipPrepare = skipPrepare;
+        // If we want to skip the prepare, then we keep the state.
+        if (!mSkipPrepare) {
+            mCurrentState = STATE_INITIALIZED;
+        }
         mProxy = null;
         mVideoLayerId = videoLayerId;
         mSaveSeekTime = position;
@@ -195,17 +203,28 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
     }
 
     public void prepareDataCommon(HTML5VideoViewProxy proxy) {
-        try {
-            mPlayer.setDataSource(proxy.getContext(), mUri, mHeaders);
-            mPlayer.prepareAsync();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (!mSkipPrepare) {
+            try {
+                mPlayer.reset();
+                mPlayer.setDataSource(proxy.getContext(), mUri, mHeaders);
+                mPlayer.prepareAsync();
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            mCurrentState = STATE_PREPARING;
+        } else {
+            // If we skip prepare and the onPrepared happened in inline mode, we
+            // don't need to call prepare again, we just need to call onPrepared
+            // to refresh the state here.
+            if (mCurrentState >= STATE_PREPARED) {
+                onPrepared(mPlayer);
+            }
+            mSkipPrepare = false;
         }
-        mCurrentState = STATE_NOTPREPARED;
     }
 
     public void reprepareData(HTML5VideoViewProxy proxy) {
@@ -294,10 +313,6 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
         return false;
     }
 
-    public SurfaceTexture getSurfaceTexture(int videoLayerId) {
-        return null;
-    }
-
     public void deleteSurfaceTexture() {
     }
 
@@ -332,14 +347,14 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
         return false;
     }
 
-    private boolean m_startWhenPrepared = false;
+    private boolean mStartWhenPrepared = false;
 
     public void setStartWhenPrepared(boolean willPlay) {
-        m_startWhenPrepared  = willPlay;
+        mStartWhenPrepared  = willPlay;
     }
 
     public boolean getStartWhenPrepared() {
-        return m_startWhenPrepared;
+        return mStartWhenPrepared;
     }
 
 }
