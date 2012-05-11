@@ -56,6 +56,12 @@ public class WifiConfiguration implements Parcelable {
      */
     public static final String ENGINE_ENABLE = "1";
 
+    /**
+     * String to set the engine value to when it should be disabled.
+     * @hide
+     */
+    public static final String ENGINE_DISABLE = "0";
+
     /** {@hide} */
     public static final String ssidVarName = "ssid";
     /** {@hide} */
