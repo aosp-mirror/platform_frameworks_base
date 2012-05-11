@@ -2020,8 +2020,9 @@ public class MediaPlayer
                 if (msg.obj == null) {
                     mOnTimedTextListener.onTimedText(mMediaPlayer, null);
                 } else {
-                    if (msg.obj instanceof byte[]) {
-                        TimedText text = new TimedText((byte[])(msg.obj));
+                    if (msg.obj instanceof Parcel) {
+                        Parcel parcel = (Parcel)msg.obj;
+                        TimedText text = new TimedText(parcel);
                         mOnTimedTextListener.onTimedText(mMediaPlayer, text);
                     }
                 }
