@@ -4723,11 +4723,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         getBoundsOnScreen(bounds);
         info.setBoundsInScreen(bounds);
 
-        if ((mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
-            ViewParent parent = getParentForAccessibility();
-            if (parent instanceof View) {
-                info.setParent((View) parent);
-            }
+        ViewParent parent = getParentForAccessibility();
+        if (parent instanceof View) {
+            info.setParent((View) parent);
         }
 
         info.setVisibleToUser(isVisibleToUser());
@@ -6503,6 +6501,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *       that is interesting for accessilility purposes.
      */
     public void notifyAccessibilityStateChanged() {
+        if (!AccessibilityManager.getInstance(mContext).isEnabled()) {
+            return;
+        }
         if ((mPrivateFlags2 & ACCESSIBILITY_STATE_CHANGED) == 0) {
             mPrivateFlags2 |= ACCESSIBILITY_STATE_CHANGED;
             if (mParent != null) {
