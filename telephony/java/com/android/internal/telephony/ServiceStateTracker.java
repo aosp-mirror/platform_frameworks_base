@@ -23,6 +23,7 @@ import android.os.Registrant;
 import android.os.RegistrantList;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
+import android.util.TimeUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -507,13 +508,15 @@ public abstract class ServiceStateTracker extends Handler {
         // Determine retVal
         boolean retVal = ((iccCardExist && (mcc != prevMcc)) || needToFixTimeZone);
         if (DBG) {
+            long ctm = System.currentTimeMillis();
             log("shouldFixTimeZoneNow: retVal=" + retVal +
                     " iccCard=" + iccCard +
                     " iccCard.state=" + (iccCard == null ? "null" : iccCard.getState().toString()) +
                     " iccCardExist=" + iccCardExist +
                     " operatorNumeric=" + operatorNumeric + " mcc=" + mcc +
                     " prevOperatorNumeric=" + prevOperatorNumeric + " prevMcc=" + prevMcc +
-                    " needToFixTimeZone=" + needToFixTimeZone);
+                    " needToFixTimeZone=" + needToFixTimeZone +
+                    " ltod=" + TimeUtils.logTimeOfDay(ctm));
         }
         return retVal;
     }
