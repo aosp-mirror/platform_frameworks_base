@@ -485,6 +485,7 @@ package android {
     field public static final int focusable = 16842970; // 0x10100da
     field public static final int focusableInTouchMode = 16842971; // 0x10100db
     field public static final int focusedMonthDateColor = 16843587; // 0x1010343
+    field public static final int fontFamily = 16843692; // 0x10103ac
     field public static final int footerDividersEnabled = 16843311; // 0x101022f
     field public static final int foreground = 16843017; // 0x1010109
     field public static final int foregroundGravity = 16843264; // 0x1010200
@@ -620,7 +621,7 @@ package android {
     field public static final int layerType = 16843604; // 0x1010354
     field public static final int layout = 16842994; // 0x10100f2
     field public static final int layoutAnimation = 16842988; // 0x10100ec
-    field public static final int layoutDirection = 16843695; // 0x10103af
+    field public static final int layoutDirection = 16843696; // 0x10103b0
     field public static final int layout_above = 16843140; // 0x1010184
     field public static final int layout_alignBaseline = 16843142; // 0x1010186
     field public static final int layout_alignBottom = 16843146; // 0x101018a
@@ -642,10 +643,10 @@ package android {
     field public static final int layout_height = 16842997; // 0x10100f5
     field public static final int layout_margin = 16842998; // 0x10100f6
     field public static final int layout_marginBottom = 16843002; // 0x10100fa
-    field public static final int layout_marginEnd = 16843699; // 0x10103b3
+    field public static final int layout_marginEnd = 16843700; // 0x10103b4
     field public static final int layout_marginLeft = 16842999; // 0x10100f7
     field public static final int layout_marginRight = 16843001; // 0x10100f9
-    field public static final int layout_marginStart = 16843698; // 0x10103b2
+    field public static final int layout_marginStart = 16843699; // 0x10103b3
     field public static final int layout_marginTop = 16843000; // 0x10100f8
     field public static final int layout_row = 16843643; // 0x101037b
     field public static final int layout_rowSpan = 16843644; // 0x101037c
@@ -741,10 +742,10 @@ package android {
     field public static final int packageNames = 16843649; // 0x1010381
     field public static final int padding = 16842965; // 0x10100d5
     field public static final int paddingBottom = 16842969; // 0x10100d9
-    field public static final int paddingEnd = 16843697; // 0x10103b1
+    field public static final int paddingEnd = 16843698; // 0x10103b2
     field public static final int paddingLeft = 16842966; // 0x10100d6
     field public static final int paddingRight = 16842968; // 0x10100d8
-    field public static final int paddingStart = 16843696; // 0x10103b0
+    field public static final int paddingStart = 16843697; // 0x10103b1
     field public static final int paddingTop = 16842967; // 0x10100d7
     field public static final int panelBackground = 16842846; // 0x101005e
     field public static final int panelColorBackground = 16842849; // 0x1010061
@@ -957,7 +958,7 @@ package android {
     field public static final int summaryColumn = 16843426; // 0x10102a2
     field public static final int summaryOff = 16843248; // 0x10101f0
     field public static final int summaryOn = 16843247; // 0x10101ef
-    field public static final int supportsRtl = 16843692; // 0x10103ac
+    field public static final int supportsRtl = 16843693; // 0x10103ad
     field public static final int supportsUploading = 16843419; // 0x101029b
     field public static final int switchMinWidth = 16843632; // 0x1010370
     field public static final int switchPadding = 16843633; // 0x1010371
@@ -988,7 +989,7 @@ package android {
     field public static final int tension = 16843370; // 0x101026a
     field public static final int testOnly = 16843378; // 0x1010272
     field public static final int text = 16843087; // 0x101014f
-    field public static final int textAlignment = 16843694; // 0x10103ae
+    field public static final int textAlignment = 16843695; // 0x10103af
     field public static final int textAllCaps = 16843660; // 0x101038c
     field public static final int textAppearance = 16842804; // 0x1010034
     field public static final int textAppearanceButton = 16843271; // 0x1010207
@@ -1028,7 +1029,7 @@ package android {
     field public static final int textColorTertiary = 16843282; // 0x1010212
     field public static final int textColorTertiaryInverse = 16843283; // 0x1010213
     field public static final int textCursorDrawable = 16843618; // 0x1010362
-    field public static final int textDirection = 16843693; // 0x10103ad
+    field public static final int textDirection = 16843694; // 0x10103ae
     field public static final int textEditNoPasteWindowLayout = 16843541; // 0x1010315
     field public static final int textEditPasteWindowLayout = 16843540; // 0x1010314
     field public static final int textEditSideNoPasteWindowLayout = 16843615; // 0x101035f
