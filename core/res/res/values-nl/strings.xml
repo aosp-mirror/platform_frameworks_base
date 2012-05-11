@@ -1311,6 +1311,6 @@
     <string name="sending" msgid="3245653681008218030">"Verzenden..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Browser starten?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Oproep accepteren?"</string>
-    <string name="activity_resolver_use_always" msgid="4167356512478150080">"Altijd gebruiken"</string>
+    <string name="activity_resolver_use_always" msgid="8017770747801494933">"Altijd"</string>
     <string name="activity_resolver_use_once" msgid="405646673463328329">"Alleen nu gebruiken"</string>
 </resources>

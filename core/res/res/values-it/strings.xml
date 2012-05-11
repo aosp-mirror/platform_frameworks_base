@@ -1311,6 +1311,6 @@
     <string name="sending" msgid="3245653681008218030">"Invio..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Avviare l\'applicazione Browser?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Accettare la chiamata?"</string>
-    <string name="activity_resolver_use_always" msgid="4167356512478150080">"Utilizza sempre"</string>
+    <string name="activity_resolver_use_always" msgid="8017770747801494933">"Sempre"</string>
     <string name="activity_resolver_use_once" msgid="405646673463328329">"Solo una volta"</string>
 </resources>
