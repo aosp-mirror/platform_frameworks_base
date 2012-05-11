@@ -7257,10 +7257,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // usually because this instance is an editable field in a list
         if (!mDispatchTemporaryDetach) mTemporaryDetach = true;
 
-        // Because of View recycling in ListView, there is no easy way to know when a TextView with
-        // selection becomes visible again. Until a better solution is found, stop text selection
-        // mode (if any) as soon as this TextView is recycled.
-        if (mEditor != null) mEditor.hideControllers();
+        // Tell the editor that we are temporarily detached. It can use this to preserve
+        // selection state as needed.
+        if (mEditor != null) mEditor.mTemporaryDetach = true;
     }
 
     @Override
@@ -7269,6 +7268,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Only track when onStartTemporaryDetach() is called directly,
         // usually because this instance is an editable field in a list
         if (!mDispatchTemporaryDetach) mTemporaryDetach = false;
+        if (mEditor != null) mEditor.mTemporaryDetach = false;
     }
 
     @Override

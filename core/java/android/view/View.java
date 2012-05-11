@@ -5584,7 +5584,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     "unmatched pair of setHasTransientState calls");
         }
         if ((hasTransientState && mTransientStateCount == 1) ||
-                (hasTransientState && mTransientStateCount == 0)) {
+                (!hasTransientState && mTransientStateCount == 0)) {
             // update flag if we've just incremented up from 0 or decremented down to 0
             mPrivateFlags2 = (mPrivateFlags2 & ~HAS_TRANSIENT_STATE) |
                     (hasTransientState ? HAS_TRANSIENT_STATE : 0);
