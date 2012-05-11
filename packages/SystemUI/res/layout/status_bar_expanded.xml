@@ -30,63 +30,11 @@
     android:layout_marginLeft="@dimen/notification_panel_margin_left"
     >
 
-    <LinearLayout
+    <include layout="@layout/status_bar_expanded_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/notification_panel_header_padding_top"
-        android:background="@drawable/notification_header_bg"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:baselineAligned="false"
-        >
-        <com.android.systemui.statusbar.policy.Clock
-            android:id="@+id/clock"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:singleLine="true"
-            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
-            />
-
-        <com.android.systemui.statusbar.policy.DateView android:id="@+id/date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
-            />
-
-        <com.android.systemui.statusbar.RotationToggle android:id="@+id/rotation_lock_button"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_margin="8dp"
-            android:button="@drawable/ic_notify_rotation"
-            android:contentDescription="@string/accessibility_rotation_lock_off"
-            />
-
-        <ImageView android:id="@+id/settings_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:scaleType="center"
-            android:src="@drawable/ic_notify_quicksettings"
-            android:contentDescription="@string/accessibility_settings_button"
-            />
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            />
-
-        <ImageView android:id="@+id/clear_all_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:scaleType="center"
-            android:src="@drawable/ic_notify_clear"
-            android:contentDescription="@string/accessibility_clear_all"
-            />            
-    </LinearLayout>
-
+        />
+ 
     <ScrollView
         android:id="@+id/scroll"
         android:layout_width="match_parent"
