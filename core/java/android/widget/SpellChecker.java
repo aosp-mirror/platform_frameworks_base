@@ -343,6 +343,36 @@ public class SpellChecker implements SpellCheckerSessionListener {
                 if (!isInDictionary && looksLikeTypo) {
                     createMisspelledSuggestionSpan(
                             editable, suggestionsInfo, spellCheckSpan, offset, length);
+                } else {
+                    // Valid word -- isInDictionary || !looksLikeTypo
+                    if (mIsSentenceSpellCheckSupported) {
+                        // Allow the spell checker to remove existing misspelled span by
+                        // overwriting the span over the same place
+                        final int spellCheckSpanStart = editable.getSpanStart(spellCheckSpan);
+                        final int spellCheckSpanEnd = editable.getSpanEnd(spellCheckSpan);
+                        final int start;
+                        final int end;
+                        if (offset != USE_SPAN_RANGE && length != USE_SPAN_RANGE) {
+                            start = spellCheckSpanStart + offset;
+                            end = start + length;
+                        } else {
+                            start = spellCheckSpanStart;
+                            end = spellCheckSpanEnd;
+                        }
+                        if (spellCheckSpanStart >= 0 && spellCheckSpanEnd > spellCheckSpanStart
+                                && end > start) {
+                            final Long key = Long.valueOf(TextUtils.packRangeInLong(start, end));
+                            final SuggestionSpan tempSuggestionSpan = mSuggestionSpanCache.get(key);
+                            if (tempSuggestionSpan != null) {
+                                if (DBG) {
+                                    Log.i(TAG, "Remove existing misspelled span. "
+                                            + editable.subSequence(start, end));
+                                }
+                                editable.removeSpan(tempSuggestionSpan);
+                                mSuggestionSpanCache.remove(key);
+                            }
+                        }
+                    }
                 }
                 return spellCheckSpan;
             }
