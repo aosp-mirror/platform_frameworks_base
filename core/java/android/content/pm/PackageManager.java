@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
-import android.content.pm.ManifestDigest;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
@@ -1089,10 +1088,6 @@ public abstract class PackageManager {
      */
     public static final String EXTRA_VERIFICATION_INSTALL_FLAGS
             = "android.content.pm.extra.VERIFICATION_INSTALL_FLAGS";
-
-    /** {@hide} */
-    // TODO: enable this for userdebug and eng builds; see 6389556
-    public static final boolean DEFAULT_ENFORCE_READ_EXTERNAL_STORAGE = false;
 
     /**
      * Retrieve overall information about an application package that is

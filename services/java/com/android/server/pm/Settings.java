@@ -111,7 +111,7 @@ final class Settings {
     int mInternalSdkPlatform;
     int mExternalSdkPlatform;
 
-    boolean mReadExternalStorageEnforced = PackageManager.DEFAULT_ENFORCE_READ_EXTERNAL_STORAGE;
+    Boolean mReadExternalStorageEnforced;
 
     /** Device identity for the purpose of package verification. */
     private VerifierDeviceIdentity mVerifierDeviceIdentity;
@@ -1147,8 +1147,7 @@ final class Settings {
                 serializer.endTag(null, "verifier");
             }
 
-            if (mReadExternalStorageEnforced
-                    != PackageManager.DEFAULT_ENFORCE_READ_EXTERNAL_STORAGE) {
+            if (mReadExternalStorageEnforced != null) {
                 serializer.startTag(null, TAG_READ_EXTERNAL_STORAGE);
                 serializer.attribute(
                         null, ATTR_ENFORCEMENT, mReadExternalStorageEnforced ? "1" : "0");
