@@ -38,6 +38,7 @@ public final class Trace {
     public static final long TRACE_TAG_ACTIVITY_MANAGER = 1L << 6;
     public static final long TRACE_TAG_SYNC_MANAGER = 1L << 7;
     public static final long TRACE_TAG_AUDIO = 1L << 8;
+    public static final long TRACE_TAG_VIDEO = 1L << 9;
 
     public static final int TRACE_FLAGS_START_BIT = 1;
     public static final String[] TRACE_TAGS = {
