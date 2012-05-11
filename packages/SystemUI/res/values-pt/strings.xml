@@ -144,10 +144,7 @@
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Informações do aplicativo"</string>
     <string name="notifications_off_title" msgid="8936620513608443224">"Notificações desativadas"</string>
     <string name="notifications_off_text" msgid="2529001315769385273">"Toque aqui para ativar as notificações novamente."</string>
-    <!-- no translation found for accessibility_rotation_lock_off (4062780228931590069) -->
-    <skip />
-    <!-- no translation found for accessibility_rotation_lock_on_landscape (6731197337665366273) -->
-    <skip />
-    <!-- no translation found for accessibility_rotation_lock_on_portrait (5809367521644012115) -->
-    <skip />
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"A tela girará automaticamente."</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"A tela está bloqueada na orientação paisagem."</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"A tela está bloqueada na orientação retrato."</string>
 </resources>
