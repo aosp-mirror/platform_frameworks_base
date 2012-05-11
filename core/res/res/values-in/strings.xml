@@ -175,14 +175,10 @@
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Memonitor lokasi fisik Anda."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Komunikasi jaringan"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Mengakses berbagai fitur jaringan."</string>
-    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
-    <skip />
-    <!-- no translation found for permgrouplab_shortrangeNetwork (130808676377486118) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
-    <skip />
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Mengakses perangkat dan jaringan melalui Bluetooth."</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Jaringan jarak pendek"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Mengakses perangkat melalui jaringan jarak pendek seperti NFC."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Setelan Audio"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Mengubah setelan audio."</string>
     <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Memengaruhi Baterai"</string>
@@ -195,8 +191,7 @@
     <skip />
     <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
     <skip />
-    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
-    <skip />
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Menambahkan kata ke kamus pengguna."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Bookmark dan Riwayat"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Akses langsung ke bookmark dan riwayat browser."</string>
     <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Alarm"</string>
@@ -1090,8 +1085,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Setel"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Selesai"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"BARU: "</font></string>
-    <!-- no translation found for perms_description_app (5139836143293299417) -->
-    <skip />
+    <string name="perms_description_app" msgid="5139836143293299417">"Disediakan oleh <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Tidak perlu izin"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Penyimpanan massal USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB terhubung"</string>
@@ -1321,8 +1315,6 @@
     <string name="sending" msgid="3245653681008218030">"Mengirim..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Luncurkan Browser?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Terima panggilan?"</string>
-    <!-- no translation found for activity_resolver_use_always (8017770747801494933) -->
-    <skip />
-    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
-    <skip />
+    <string name="activity_resolver_use_always" msgid="8017770747801494933">"Selalu"</string>
+    <string name="activity_resolver_use_once" msgid="405646673463328329">"Sekali Saja"</string>
 </resources>
