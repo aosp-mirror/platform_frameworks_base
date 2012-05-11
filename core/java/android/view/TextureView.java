@@ -561,7 +561,17 @@ public class TextureView extends View {
             applyUpdate();
             applyTransformMatrix();
 
-            mLayer.copyInto(bitmap);
+            // This case can happen if the app invokes setSurfaceTexture() before
+            // we are able to create the hardware layer. We can safely initialize
+            // the layer here thanks to the validate() call at the beginning of
+            // this method
+            if (mLayer == null && mUpdateSurface) {
+                getHardwareLayer();
+            }
+
+            if (mLayer != null) {
+                mLayer.copyInto(bitmap);
+            }
         }
         return bitmap;
     }
