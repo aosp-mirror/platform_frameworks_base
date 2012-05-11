@@ -159,6 +159,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
      * is invoked */
     private boolean mAutonomousGroup;
 
+    /* Invitation to join an existing p2p group */
+    private boolean mJoinExistingGroup;
+
     /* Track whether we are in p2p discovery. This is used to avoid sending duplicate
      * broadcasts
      */
@@ -761,7 +764,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
                         //Stop discovery before issuing connect
                         mWifiNative.p2pStopFind();
-                        if (mWifiNative.isGroupOwner(mSavedPeerConfig.deviceAddress)) {
+                        if (mPeers.isGroupOwner(mSavedPeerConfig.deviceAddress)) {
                             p2pConnectWithPinDisplay(mSavedPeerConfig, JOIN_GROUP);
                         } else {
                             p2pConnectWithPinDisplay(mSavedPeerConfig, FORM_GROUP);
@@ -778,7 +781,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                             mWifiNative.p2pStopFind();
                             //If peer is a GO, we do not need to send provisional discovery,
                             //the supplicant takes care of it.
-                            if (mWifiNative.isGroupOwner(mSavedPeerConfig.deviceAddress)) {
+                            if (mPeers.isGroupOwner(mSavedPeerConfig.deviceAddress)) {
                                 if (DBG) logd("Sending join to GO");
                                 p2pConnectWithPinDisplay(mSavedPeerConfig, JOIN_GROUP);
                                 transitionTo(mGroupNegotiationState);
@@ -795,6 +798,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiMonitor.P2P_GO_NEGOTIATION_REQUEST_EVENT:
                     mSavedPeerConfig = (WifiP2pConfig) message.obj;
 
+                    mAutonomousGroup = false;
+                    mJoinExistingGroup = false;
                     if (!sendConnectNoticeToApp(mPeers.get(mSavedPeerConfig.deviceAddress),
                             mSavedPeerConfig)) {
                         transitionTo(mUserAuthorizingInvitationState);
@@ -824,6 +829,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         }
                     }
 
+                    mAutonomousGroup = false;
+                    mJoinExistingGroup = true;
                     //TODO In the p2p client case, we should set source address correctly.
                     if (!sendConnectNoticeToApp(mPeers.get(mSavedPeerConfig.deviceAddress),
                             mSavedPeerConfig)) {
@@ -840,8 +847,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                    break;
                 case WifiP2pManager.CREATE_GROUP:
                    mAutonomousGroup = true;
-                   // An autonomous GO requires group idle settings to be reset
-                   mWifiNative.setP2pGroupIdle(0);
                    if (mWifiNative.p2pGroupAdd()) {
                         replyToMessage(message, WifiP2pManager.CREATE_GROUP_SUCCEEDED);
                     } else {
@@ -863,11 +868,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             if (DBG) logd(getName());
             sendMessageDelayed(obtainMessage(GROUP_CREATING_TIMED_OUT,
                     ++mGroupCreatingTimeoutIndex, 0), GROUP_CREATING_WAIT_TIME_MS);
-
-            // Set default group idle settings
-            if (!mAutonomousGroup) {
-                mWifiNative.setP2pGroupIdle(GROUP_IDLE_TIME_S);
-            }
         }
 
         @Override
@@ -921,7 +921,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             switch (message.what) {
                 case PEER_CONNECTION_USER_ACCEPT:
                     //TODO: handle persistence
-                    if (mWifiNative.isGroupOwner(mSavedPeerConfig.deviceAddress)) {
+                    if (mJoinExistingGroup) {
                         p2pConnectWithPinDisplay(mSavedPeerConfig, JOIN_GROUP);
                     } else {
                         p2pConnectWithPinDisplay(mSavedPeerConfig, FORM_GROUP);
@@ -983,6 +983,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                             mWifiNative.p2pConnect(mSavedPeerConfig, FORM_GROUP);
                             transitionTo(mGroupNegotiationState);
                         } else {
+                            mJoinExistingGroup = false;
                             transitionTo(mUserAuthorizingInvitationState);
                         }
                     }
@@ -1031,6 +1032,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     if (mGroup.isGroupOwner()) {
                         startDhcpServer(mGroup.getInterface());
                     } else {
+                        // Set group idle only for a client on the group interface to speed up
+                        // disconnect when GO is gone. Setting group idle time for a group owner
+                        // causes connectivity issues for new clients
+                        mWifiNative.setP2pGroupIdle(mGroup.getInterface(), GROUP_IDLE_TIME_S);
                         mDhcpStateMachine = DhcpStateMachine.makeDhcpStateMachine(mContext,
                                 P2pStateMachine.this, mGroup.getInterface());
                         mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_START_DHCP);
@@ -1451,6 +1456,13 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             .setNegativeButton(r.getString(R.string.decline), new OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            if (DBG) logd(getName() + " ignore connect");
+                            sendMessage(PEER_CONNECTION_USER_REJECT);
+                        }
+                    })
+            .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                        @Override
+                        public void onCancel(DialogInterface arg0) {
                             if (DBG) logd(getName() + " ignore connect");
                             sendMessage(PEER_CONNECTION_USER_REJECT);
                         }
