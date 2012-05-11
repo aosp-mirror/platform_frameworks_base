@@ -323,7 +323,9 @@ public class HTML5VideoFullScreen extends HTML5VideoView
 
     @Override
     public void showControllerInFullScreen() {
-        mMediaController.show(0);
+        if (mMediaController != null) {
+            mMediaController.show(0);
+        }
     }
 
     // Other listeners functions:
