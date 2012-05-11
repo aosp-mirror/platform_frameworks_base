@@ -175,28 +175,20 @@
     <string name="permgroupdesc_location" msgid="5704679763124170100">"실제 위치 모니터링"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"네트워크 통신"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"다양한 네트워크 기능에 액세스할 수 있도록 합니다."</string>
-    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
-    <skip />
-    <!-- no translation found for permgrouplab_shortrangeNetwork (130808676377486118) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
-    <skip />
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"블루투스"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"블루투스를 통해 기기 및 네트워크에 액세스"</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"단거리 네트워크"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"NFC와 같은 단거리 네트워크를 통해 기기에 액세스"</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"오디오 설정"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"오디오 설정을 변경합니다."</string>
     <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"배터리 소모"</string>
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"배터리를 빨리 소모시킬 수 있는 기능을 사용합니다."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"캘린더"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"캘린더 및 일정에 직접 액세스합니다."</string>
-    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
-    <skip />
-    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
-    <skip />
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"사용자 사전 읽기"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"사용자 사전의 단어 읽기"</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"사용자 사전 쓰기"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"사용자 사전에 단어 추가"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"북마크 및 기록"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"북마크 및 브라우저 기록에 직접 액세스합니다."</string>
     <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"알람"</string>
@@ -569,8 +561,7 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"앱이 사진과 미디어를 포함하고 있을 수 있는 USB 저장소의 콘텐츠를 읽도록 허용합니다."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"앱이 사진과 미디어를 포함하고 있을 수 있는 SD 카드의 콘텐츠를 읽도록 허용합니다."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB 저장소의 콘텐츠 수정 또는 삭제"</string>
-    <!-- no translation found for permlab_sdcardWrite (8805693630050458763) -->
-    <skip />
+    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD 카드의 콘텐츠 수정 또는 삭제"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"앱이 USB 저장소에 쓸 수 있도록 허용합니다."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"앱이 SD 카드에 쓸 수 있도록 허용합니다."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"내부 미디어 저장소 콘텐츠 수정/삭제"</string>
@@ -1090,8 +1081,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"설정"</string>
     <string name="date_time_done" msgid="2507683751759308828">"완료"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"신규: "</font></string>
-    <!-- no translation found for perms_description_app (5139836143293299417) -->
-    <skip />
+    <string name="perms_description_app" msgid="5139836143293299417">"<xliff:g id="APP_NAME">%1$s</xliff:g> 제공"</string>
     <string name="no_permissions" msgid="7283357728219338112">"권한 필요 없음"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB 대용량 저장소"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB 연결됨"</string>
@@ -1321,8 +1311,6 @@
     <string name="sending" msgid="3245653681008218030">"전송 중..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"브라우저를 실행하시겠습니까?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"통화를 수락하시겠습니까?"</string>
-    <!-- no translation found for activity_resolver_use_always (8017770747801494933) -->
-    <skip />
-    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
-    <skip />
+    <string name="activity_resolver_use_always" msgid="8017770747801494933">"항상"</string>
+    <string name="activity_resolver_use_once" msgid="405646673463328329">"한 번만"</string>
 </resources>
