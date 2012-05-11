@@ -198,6 +198,7 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         // after reading the MetaData
         if (mMediaController != null) {
             mMediaController.setEnabled(true);
+            mMediaController.show();
         }
 
         if (mProgressView != null) {
@@ -318,6 +319,11 @@ public class HTML5VideoFullScreen extends HTML5VideoView
             return mCurrentBufferPercentage;
         }
     return 0;
+    }
+
+    @Override
+    public void showControllerInFullScreen() {
+        mMediaController.show(0);
     }
 
     // Other listeners functions:
