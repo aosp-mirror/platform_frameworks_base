@@ -26,6 +26,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.TimeZone;
 import java.util.Date;
@@ -380,5 +381,23 @@ public class TimeUtils {
             return;
         }
         formatDuration(time-now, pw, 0);
+    }
+
+    /**
+     * Convert a System.currentTimeMillis() value to a time of day value like
+     * that printed in logs. MM-DD HH:MM:SS.MMM
+     *
+     * @param millis since the epoch (1/1/1970)
+     * @return String representation of the time.
+     * @hide
+     */
+    public static String logTimeOfDay(long millis) {
+        Calendar c = Calendar.getInstance();
+        if (millis >= 0) {
+            c.setTimeInMillis(millis);
+            return String.format("%tm-%td %tH:%tM:%tS.%tL", c, c, c, c, c, c);
+        } else {
+            return Long.toString(millis);
+        }
     }
 }

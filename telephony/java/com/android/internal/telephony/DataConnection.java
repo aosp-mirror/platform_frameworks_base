@@ -31,6 +31,7 @@ import android.os.AsyncResult;
 import android.os.Message;
 import android.os.SystemProperties;
 import android.text.TextUtils;
+import android.util.TimeUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -1225,21 +1226,6 @@ public abstract class DataConnection extends StateMachine {
     }
 
     /**
-     * Convert a System.currentTimeMillis() value to a time of day value.
-     *
-     * @param millis since the epoch (1/1/1970)
-     * @return String representation of the time.
-     */
-    private String timeMillisToTimeOfDay(long millis) {
-        Calendar c = Calendar.getInstance();
-        if (millis >= 0) {
-            c.setTimeInMillis(millis);
-            return String.format("%tm-%td %tH:%tM:%tS.%tL", c, c, c, c, c, c);
-        } else {
-            return Long.toString(millis);
-        }
-    }
-    /**
      * Dump the current state.
      *
      * @param fd
@@ -1263,8 +1249,8 @@ public abstract class DataConnection extends StateMachine {
         pw.println(" mLinkProperties=" + mLinkProperties);
         pw.flush();
         pw.println(" mCapabilities=" + mCapabilities);
-        pw.println(" createTime=" + timeMillisToTimeOfDay(createTime));
-        pw.println(" lastFailTime=" + timeMillisToTimeOfDay(lastFailTime));
+        pw.println(" createTime=" + TimeUtils.logTimeOfDay(createTime));
+        pw.println(" lastFailTime=" + TimeUtils.logTimeOfDay(lastFailTime));
         pw.println(" lastFailCause=" + lastFailCause);
         pw.flush();
         pw.println(" mRetryOverride=" + mRetryOverride);
