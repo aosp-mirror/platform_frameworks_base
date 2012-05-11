@@ -68,24 +68,29 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
                                         TextAppearance_textSize, -1);
 
         mStyle = a.getInt(com.android.internal.R.styleable.TextAppearance_textStyle, 0);
-        int tf = a.getInt(com.android.internal.R.styleable.TextAppearance_typeface, 0);
+        String family = a.getString(com.android.internal.R.styleable.TextAppearance_fontFamily);
+        if (family != null) {
+            mTypeface = family;
+        } else {
+            int tf = a.getInt(com.android.internal.R.styleable.TextAppearance_typeface, 0);
 
-        switch (tf) {
-            case 1:
-                mTypeface = "sans";
-                break;
+            switch (tf) {
+                case 1:
+                    mTypeface = "sans";
+                    break;
 
-            case 2:
-                mTypeface = "serif";
-                break;
+                case 2:
+                    mTypeface = "serif";
+                    break;
 
-            case 3:
-                mTypeface = "monospace";
-                break;
-                
-            default:
-                mTypeface = null;
-                break;
+                case 3:
+                    mTypeface = "monospace";
+                    break;
+
+                default:
+                    mTypeface = null;
+                    break;
+            }
         }
 
         a.recycle();

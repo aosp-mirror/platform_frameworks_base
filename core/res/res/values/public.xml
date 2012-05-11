@@ -3605,4 +3605,6 @@
   <public type="attr" name="importantForAccessibility" id="0x010103aa" />
   <public type="attr" name="kcm" id="0x010103ab" />
 
+  <public type="attr" name="fontFamily" />
+
 </resources>

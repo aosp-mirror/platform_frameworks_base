@@ -154,6 +154,7 @@ import java.util.Locale;
  * @attr ref android.R.styleable#TextView_textColorLink
  * @attr ref android.R.styleable#TextView_textSize
  * @attr ref android.R.styleable#TextView_textScaleX
+ * @attr ref android.R.styleable#TextView_fontFamily
  * @attr ref android.R.styleable#TextView_typeface
  * @attr ref android.R.styleable#TextView_textStyle
  * @attr ref android.R.styleable#TextView_cursorVisible
@@ -464,6 +465,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         ColorStateList textColorHint = null;
         ColorStateList textColorLink = null;
         int textSize = 15;
+        String fontFamily = null;
         int typefaceIndex = -1;
         int styleIndex = -1;
         boolean allCaps = false;
@@ -514,6 +516,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 case com.android.internal.R.styleable.TextAppearance_typeface:
                     typefaceIndex = appearance.getInt(attr, -1);
+                    break;
+
+                case com.android.internal.R.styleable.TextAppearance_fontFamily:
+                    fontFamily = appearance.getString(attr);
                     break;
 
                 case com.android.internal.R.styleable.TextAppearance_textStyle:
@@ -779,6 +785,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case com.android.internal.R.styleable.TextView_textStyle:
                 styleIndex = a.getInt(attr, styleIndex);
+                break;
+
+            case com.android.internal.R.styleable.TextView_fontFamily:
+                fontFamily = a.getString(attr);
                 break;
 
             case com.android.internal.R.styleable.TextView_password:
@@ -1051,7 +1061,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             typefaceIndex = MONOSPACE;
         }
 
-        setTypefaceByIndex(typefaceIndex, styleIndex);
+        setTypefaceFromAttrs(fontFamily, typefaceIndex, styleIndex);
 
         if (shadowcolor != 0) {
             setShadowLayer(r, dx, dy, shadowcolor);
@@ -1111,8 +1121,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private void setTypefaceByIndex(int typefaceIndex, int styleIndex) {
+    private void setTypefaceFromAttrs(String familyName, int typefaceIndex, int styleIndex) {
         Typeface tf = null;
+        if (familyName != null) {
+            tf = Typeface.create(familyName, styleIndex);
+            if (tf != null) {
+                setTypeface(tf);
+                return;
+            }
+        }
         switch (typefaceIndex) {
             case SANS:
                 tf = Typeface.SANS_SERIF;
@@ -2160,14 +2177,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             setLinkTextColor(colors);
         }
 
+        String familyName;
         int typefaceIndex, styleIndex;
 
+        familyName = appearance.getString(com.android.internal.R.styleable.
+                                          TextAppearance_fontFamily);
         typefaceIndex = appearance.getInt(com.android.internal.R.styleable.
                                           TextAppearance_typeface, -1);
         styleIndex = appearance.getInt(com.android.internal.R.styleable.
                                        TextAppearance_textStyle, -1);
 
-        setTypefaceByIndex(typefaceIndex, styleIndex);
+        setTypefaceFromAttrs(familyName, typefaceIndex, styleIndex);
 
         if (appearance.getBoolean(com.android.internal.R.styleable.TextAppearance_textAllCaps,
                 false)) {
@@ -2269,6 +2289,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @see #getTypeface()
      *
+     * @attr ref android.R.styleable#TextView_fontFamily
      * @attr ref android.R.styleable#TextView_typeface
      * @attr ref android.R.styleable#TextView_textStyle
      */
@@ -2290,6 +2311,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @see #setTypeface(Typeface)
      *
+     * @attr ref android.R.styleable#TextView_fontFamily
      * @attr ref android.R.styleable#TextView_typeface
      * @attr ref android.R.styleable#TextView_textStyle
      */
@@ -3690,15 +3712,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         boolean forceUpdate = false;
         if (isPassword) {
             setTransformationMethod(PasswordTransformationMethod.getInstance());
-            setTypefaceByIndex(MONOSPACE, 0);
+            setTypefaceFromAttrs(null /* fontFamily */, MONOSPACE, 0);
         } else if (isVisiblePassword) {
             if (mTransformation == PasswordTransformationMethod.getInstance()) {
                 forceUpdate = true;
             }
-            setTypefaceByIndex(MONOSPACE, 0);
+            setTypefaceFromAttrs(null /* fontFamily */, MONOSPACE, 0);
         } else if (wasPassword || wasVisiblePassword) {
             // not in password mode, clean up typeface and transformation
-            setTypefaceByIndex(-1, -1);
+            setTypefaceFromAttrs(null /* fontFamily */, -1, -1);
             if (mTransformation == PasswordTransformationMethod.getInstance()) {
                 forceUpdate = true;
             }
