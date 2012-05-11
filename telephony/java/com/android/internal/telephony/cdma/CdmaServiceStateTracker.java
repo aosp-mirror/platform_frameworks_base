@@ -878,13 +878,19 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             // For NITZ string without time zone,
             // need adjust time to reflect default time zone setting
             zone = TimeZone.getDefault();
-            long tzOffset;
-            tzOffset = zone.getOffset(System.currentTimeMillis());
+            long ctm = System.currentTimeMillis();
+            long tzOffset = zone.getOffset(ctm);
+            if (DBG) {
+                log("fixTimeZone: tzOffset=" + tzOffset + " ltod=" + TimeUtils.logTimeOfDay(ctm));
+            }
             if (getAutoTime()) {
-                setAndBroadcastNetworkSetTime(System.currentTimeMillis() - tzOffset);
+                long adj = ctm - tzOffset;
+                if (DBG) log("fixTimeZone: adj ltod=" + TimeUtils.logTimeOfDay(adj));
+                setAndBroadcastNetworkSetTime(adj);
             } else {
                 // Adjust the saved NITZ time to account for tzOffset.
                 mSavedTime = mSavedTime - tzOffset;
+                if (DBG) log("fixTimeZone: adj mSavedTime=" + mSavedTime);
             }
             if (DBG) log("fixTimeZone: using default TimeZone");
         } else if (isoCountryCode.equals("")) {

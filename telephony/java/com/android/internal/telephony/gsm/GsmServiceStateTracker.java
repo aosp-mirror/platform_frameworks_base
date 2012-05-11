@@ -923,10 +923,16 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                         zone = TimeZone.getDefault();
                         // For NITZ string without timezone,
                         // need adjust time to reflect default timezone setting
-                        long tzOffset;
-                        tzOffset = zone.getOffset(System.currentTimeMillis());
+                        long ctm = System.currentTimeMillis();
+                        long tzOffset = zone.getOffset(ctm);
+                        if (DBG) {
+                            log("pollStateDone: tzOffset=" + tzOffset + " ltod=" +
+                                        TimeUtils.logTimeOfDay(ctm));
+                        }
                         if (getAutoTime()) {
-                            setAndBroadcastNetworkSetTime(System.currentTimeMillis() - tzOffset);
+                            long adj = ctm - tzOffset;
+                            if (DBG) log("pollStateDone: adj ltod=" + TimeUtils.logTimeOfDay(adj));
+                            setAndBroadcastNetworkSetTime(adj);
                         } else {
                             // Adjust the saved NITZ time to account for tzOffset.
                             mSavedTime = mSavedTime - tzOffset;
