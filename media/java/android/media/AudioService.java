@@ -501,6 +501,24 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     }
 
+    private void checkAllAliasStreamVolumes() {
+        int numStreamTypes = AudioSystem.getNumStreamTypes();
+        for (int streamType = 0; streamType < numStreamTypes; streamType++) {
+            if (streamType != mStreamVolumeAlias[streamType]) {
+                mStreamStates[streamType].
+                                    setAllIndexes(mStreamStates[mStreamVolumeAlias[streamType]],
+                                                  false /*lastAudible*/);
+                mStreamStates[streamType].
+                                    setAllIndexes(mStreamStates[mStreamVolumeAlias[streamType]],
+                                                  true /*lastAudible*/);
+            }
+            // apply stream volume
+            if (mStreamStates[streamType].muteCount() == 0) {
+                mStreamStates[streamType].applyAllVolumes();
+            }
+        }
+    }
+
     private void createStreamStates() {
         int numStreamTypes = AudioSystem.getNumStreamTypes();
         VolumeStreamState[] streams = mStreamStates = new VolumeStreamState[numStreamTypes];
@@ -509,23 +527,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             streams[i] = new VolumeStreamState(System.VOLUME_SETTINGS[mStreamVolumeAlias[i]], i);
         }
 
-        // Correct stream index values for streams with aliases
-        for (int i = 0; i < numStreamTypes; i++) {
-            int device = getDeviceForStream(i);
-            if (mStreamVolumeAlias[i] != i) {
-                int index = rescaleIndex(streams[i].getIndex(device, false  /* lastAudible */),
-                                mStreamVolumeAlias[i],
-                                i);
-                synchronized (streams[i]) {
-                    streams[i].mIndex.put(device, streams[i].getValidIndex(index));
-                    streams[i].applyDeviceVolume(device);
-                    index = rescaleIndex(streams[i].getIndex(device, true  /* lastAudible */),
-                                mStreamVolumeAlias[i],
-                                i);
-                    streams[i].mLastAudibleIndex.put(device, streams[i].getValidIndex(index));
-                }
-            }
-        }
+        checkAllAliasStreamVolumes();
     }
 
     private void dumpStreamStates(PrintWriter pw) {
@@ -679,9 +681,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
         final int device = getDeviceForStream(streamTypeAlias);
         // get last audible index if stream is muted, current index otherwise
-        final int oldIndex = streamState.getIndex(device,
+        final int aliasIndex = streamState.getIndex(device,
                                                   (streamState.muteCount() != 0) /* lastAudible */);
         boolean adjustVolume = true;
+
+        // convert one UI step (+/-1) into a number of internal units on the stream alias
+        int step = rescaleIndex(10, streamType, streamTypeAlias);
 
         // If either the client forces allowing ringer modes for this adjustment,
         // or the stream type is one that is affected by ringer modes
@@ -694,35 +699,30 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             }
             // Check if the ringer mode changes with this volume adjustment. If
             // it does, it will handle adjusting the volume, so we won't below
-            adjustVolume = checkForRingerModeChange(oldIndex, direction);
+            adjustVolume = checkForRingerModeChange(aliasIndex, direction, step);
         }
 
         // If stream is muted, adjust last audible index only
         int index;
+        final int oldIndex = mStreamStates[streamType].getIndex(device,
+                (mStreamStates[streamType].muteCount() != 0) /* lastAudible */);
+
         if (streamState.muteCount() != 0) {
             if (adjustVolume) {
-                // adjust volume on all stream types sharing the same alias otherwise a query
-                // on last audible index for an alias would not give the correct value
-                int numStreamTypes = AudioSystem.getNumStreamTypes();
-                for (int i = numStreamTypes - 1; i >= 0; i--) {
-                    if (mStreamVolumeAlias[i] == streamTypeAlias) {
-                        VolumeStreamState s = mStreamStates[i];
-
-                        s.adjustLastAudibleIndex(direction, device);
-                        // Post a persist volume msg
-                        sendMsg(mAudioHandler,
-                                MSG_PERSIST_VOLUME,
-                                SENDMSG_QUEUE,
-                                PERSIST_LAST_AUDIBLE,
-                                device,
-                                s,
-                                PERSIST_DELAY);
-                    }
-                }
+                // Post a persist volume msg
+                // no need to persist volume on all streams sharing the same alias
+                streamState.adjustLastAudibleIndex(direction * step, device);
+                sendMsg(mAudioHandler,
+                        MSG_PERSIST_VOLUME,
+                        SENDMSG_QUEUE,
+                        PERSIST_LAST_AUDIBLE,
+                        device,
+                        streamState,
+                        PERSIST_DELAY);
             }
-            index = streamState.getIndex(device, true  /* lastAudible */);
+            index = mStreamStates[streamType].getIndex(device, true  /* lastAudible */);
         } else {
-            if (adjustVolume && streamState.adjustIndex(direction, device)) {
+            if (adjustVolume && streamState.adjustIndex(direction * step, device)) {
                 // Post message to set system volume (it in turn will post a message
                 // to persist). Do not change volume if stream is muted.
                 sendMsg(mAudioHandler,
@@ -733,7 +733,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         streamState,
                         0);
             }
-            index = streamState.getIndex(device, false  /* lastAudible */);
+            index = mStreamStates[streamType].getIndex(device, false  /* lastAudible */);
         }
 
         sendVolumeUpdate(streamType, oldIndex, index, flags);
@@ -765,6 +765,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         final int oldIndex = streamState.getIndex(device,
                                                   (streamState.muteCount() != 0) /* lastAudible */);
 
+        index = rescaleIndex(index * 10, streamType, mStreamVolumeAlias[streamType]);
+
         // setting volume on master stream type also controls silent mode
         if (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
                 (mStreamVolumeAlias[streamType] == getMasterStreamType())) {
@@ -783,11 +785,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             setRingerMode(newRingerMode);
         }
 
-        index = rescaleIndex(index * 10, streamType, mStreamVolumeAlias[streamType]);
         setStreamVolumeInt(mStreamVolumeAlias[streamType], index, device, false, true);
         // get last audible index if stream is muted, current index otherwise
-        index = streamState.getIndex(device,
-                                     (streamState.muteCount() != 0) /* lastAudible */);
+        index = mStreamStates[streamType].getIndex(device,
+                                 (mStreamStates[streamType].muteCount() != 0) /* lastAudible */);
 
         sendVolumeUpdate(streamType, oldIndex, index, flags);
     }
@@ -1089,7 +1090,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /** @see AudioManager#setRingerMode(int) */
     public void setRingerMode(int ringerMode) {
-        ensureValidRingerMode(ringerMode);
+        if ((ringerMode == AudioManager.RINGER_MODE_VIBRATE) && !mHasVibrator) {
+            ringerMode = AudioManager.RINGER_MODE_SILENT;
+        }
         if (ringerMode != getRingerMode()) {
             setRingerModeInt(ringerMode, true);
             // Send sticky broadcast
@@ -1599,12 +1602,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         streamState.mDeathHandlers.get(i).mute(false);
                     }
                 }
-                // apply stream volume
-                if (streamState.muteCount() == 0) {
-                    streamState.applyAllVolumes();
-                }
             }
         }
+
+        checkAllAliasStreamVolumes();
 
         // apply new ringer mode
         setRingerModeInt(getRingerMode(), false);
@@ -2015,20 +2016,25 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      * adjusting volume. If so, this will set the proper ringer mode and volume
      * indices on the stream states.
      */
-    private boolean checkForRingerModeChange(int oldIndex, int direction) {
+    private boolean checkForRingerModeChange(int oldIndex, int direction,  int step) {
         boolean adjustVolumeIndex = true;
         int ringerMode = getRingerMode();
-        int uiIndex = (oldIndex + 5) / 10;
 
         switch (ringerMode) {
         case RINGER_MODE_NORMAL:
             if (direction == AudioManager.ADJUST_LOWER) {
                 if (mHasVibrator) {
-                    if (uiIndex == 1) {
+                    // "step" is the delta in internal index units corresponding to a
+                    // change of 1 in UI index units.
+                    // Because of rounding when rescaling from one stream index range to its alias
+                    // index range, we cannot simply test oldIndex == step:
+                    //   (step <= oldIndex < 2 * step) is equivalent to: (old UI index == 1)
+                    if (step <= oldIndex && oldIndex < 2 * step) {
                         ringerMode = RINGER_MODE_VIBRATE;
                     }
                 } else {
-                    if (uiIndex == 0 && mPrevVolDirection != AudioManager.ADJUST_LOWER) {
+                    // (oldIndex < step) is equivalent to (old UI index == 0)
+                    if ((oldIndex < step) && mPrevVolDirection != AudioManager.ADJUST_LOWER) {
                         ringerMode = RINGER_MODE_SILENT;
                     }
                 }
@@ -2257,8 +2263,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
             readSettings();
 
-            applyAllVolumes();
-
             mDeathHandlers = new ArrayList<VolumeDeathHandler>();
         }
 
@@ -2369,7 +2373,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
         public boolean adjustIndex(int deltaIndex, int device) {
             return setIndex(getIndex(device,
-                                     false  /* lastAudible */) + deltaIndex * 10,
+                                     false  /* lastAudible */) + deltaIndex,
                             device,
                             true  /* lastAudible */);
         }
@@ -2424,12 +2428,28 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
 
         public synchronized void setLastAudibleIndex(int index, int device) {
+            // Apply change to all streams using this one as alias
+            // if changing volume of current device, also change volume of current
+            // device on aliased stream
+            boolean currentDevice = (device == getDeviceForStream(mStreamType));
+            int numStreamTypes = AudioSystem.getNumStreamTypes();
+            for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
+                if (streamType != mStreamType &&
+                        mStreamVolumeAlias[streamType] == mStreamType) {
+                    int scaledIndex = rescaleIndex(index, mStreamType, streamType);
+                    mStreamStates[streamType].setLastAudibleIndex(scaledIndex, device);
+                    if (currentDevice) {
+                        mStreamStates[streamType].setLastAudibleIndex(scaledIndex,
+                                                                   getDeviceForStream(streamType));
+                    }
+                }
+            }
             mLastAudibleIndex.put(device, getValidIndex(index));
         }
 
         public synchronized void adjustLastAudibleIndex(int deltaIndex, int device) {
             setLastAudibleIndex(getIndex(device,
-                                         true  /* lastAudible */) + deltaIndex * 10,
+                                         true  /* lastAudible */) + deltaIndex,
                                 device);
         }
 
