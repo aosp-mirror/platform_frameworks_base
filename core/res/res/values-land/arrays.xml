@@ -69,4 +69,11 @@
         <item>@string/description_target_camera</item>
     </array>
 
+    <array name="lockscreen_chevron_drawables">
+        <item>@null</item>
+        <item>@drawable/ic_lockscreen_chevron_up</item>
+        <item>@null</item>
+        <item>@null</item>
+    </array>
+
 </resources>

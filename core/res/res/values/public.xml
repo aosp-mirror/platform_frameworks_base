@@ -1009,6 +1009,7 @@
   <java-symbol type="drawable" name="notification_bg_low" />
   <java-symbol type="drawable" name="notification_template_icon_bg" />
   <java-symbol type="drawable" name="notification_template_icon_low_bg" />
+  <java-symbol type="drawable" name="ic_lockscreen_unlock_phantom" />
 
   <java-symbol type="layout" name="action_bar_home" />
   <java-symbol type="layout" name="action_bar_title_item" />
