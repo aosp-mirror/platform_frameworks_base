@@ -473,8 +473,16 @@ public class SpellChecker implements SpellCheckerSessionListener {
         private Object mRange = new Object();
 
         public void parse(int start, int end) {
-            if (end > start) {
-                setRangeSpan((Editable) mTextView.getText(), start, end);
+            final int max = mTextView.length();
+            final int parseEnd;
+            if (end > max) {
+                Log.w(TAG, "Parse invalid region, from " + start + " to " + end);
+                parseEnd = max;
+            } else {
+                parseEnd = end;
+            }
+            if (parseEnd > start) {
+                setRangeSpan((Editable) mTextView.getText(), start, parseEnd);
                 parse();
             }
         }
@@ -612,6 +620,8 @@ public class SpellChecker implements SpellCheckerSessionListener {
                         break;
                     }
                     if (spellCheckEnd <= spellCheckStart) {
+                        Log.w(TAG, "Trying to spellcheck invalid region, from "
+                                + start + " to " + end);
                         break;
                     }
                     if (createSpellCheckSpan) {
