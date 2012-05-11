@@ -1311,7 +1311,6 @@
     <string name="sending" msgid="3245653681008218030">"正在发送..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"要启动浏览器吗？"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"要接听电话吗？"</string>
-    <!-- no translation found for activity_resolver_use_always (8017770747801494933) -->
-    <skip />
+    <string name="activity_resolver_use_always" msgid="8017770747801494933">"始终"</string>
     <string name="activity_resolver_use_once" msgid="405646673463328329">"仅此一次"</string>
 </resources>
