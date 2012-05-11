@@ -298,6 +298,24 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
             return estimate(time, yCoeff);
         }
 
+        /**
+         * Gets the X coefficient with the specified index.
+         * @param index The index of the coefficient to return.
+         * @return The X coefficient, or 0 if the index is greater than the degree.
+         */
+        public float getXCoeff(int index) {
+            return index <= degree ? xCoeff[index] : 0;
+        }
+
+        /**
+         * Gets the Y coefficient with the specified index.
+         * @param index The index of the coefficient to return.
+         * @return The Y coefficient, or 0 if the index is greater than the degree.
+         */
+        public float getYCoeff(int index) {
+            return index <= degree ? yCoeff[index] : 0;
+        }
+
         private float estimate(float time, float[] c) {
             float a = 0;
             float scale = 1;
