@@ -142,10 +142,7 @@
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Informacije o aplikaciji"</string>
     <string name="notifications_off_title" msgid="8936620513608443224">"Obavijesti isključene"</string>
     <string name="notifications_off_text" msgid="2529001315769385273">"Dotaknite ovdje da biste ponovo uključili obavijesti."</string>
-    <!-- no translation found for accessibility_rotation_lock_off (4062780228931590069) -->
-    <skip />
-    <!-- no translation found for accessibility_rotation_lock_on_landscape (6731197337665366273) -->
-    <skip />
-    <!-- no translation found for accessibility_rotation_lock_on_portrait (5809367521644012115) -->
-    <skip />
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Zaslon će se automatski zakrenuti."</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Zaslon je zaključan u pejzažnoj orijentaciji."</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Zaslon je zaključan u portretnoj orijentaciji."</string>
 </resources>
