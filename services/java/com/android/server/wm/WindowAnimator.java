@@ -269,7 +269,7 @@ public class WindowAnimator {
                                 mPendingLayoutChanges);
                         }
                         mService.mFocusMayChange = true;
-                    } else if (win.isReadyForDisplay() && winAnimator.mAnimation == null) {
+                    } else if (win.isReadyForDisplay()) {
                         mForceHiding = true;
                     }
                 } else if (mPolicy.canBeForceHidden(win, win.mAttrs)) {
