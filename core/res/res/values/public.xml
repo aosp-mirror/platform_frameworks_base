@@ -3603,7 +3603,7 @@
   <public type="attr" name="permissionGroupFlags" id="0x010103a8" />
   <public type="attr" name="isolatedProcess" id="0x010103a9" />
   <public type="attr" name="importantForAccessibility" id="0x010103aa" />
-  <public type="attr" name="kcm" id="0x010103ab" />
+  <public type="attr" name="keyboardLayout" id="0x010103ab" />
   <public type="attr" name="fontFamily" id="0x010103ac" />
 
 </resources>

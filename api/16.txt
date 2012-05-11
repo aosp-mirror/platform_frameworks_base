@@ -593,7 +593,6 @@ package android {
     field public static final int itemIconDisabledAlpha = 16843057; // 0x1010131
     field public static final int itemPadding = 16843565; // 0x101032d
     field public static final int itemTextAppearance = 16843052; // 0x101012c
-    field public static final int kcm = 16843691; // 0x10103ab
     field public static final int keepScreenOn = 16843286; // 0x1010216
     field public static final int key = 16843240; // 0x10101e8
     field public static final int keyBackground = 16843315; // 0x1010233
@@ -608,6 +607,7 @@ package android {
     field public static final int keyTextColor = 16843318; // 0x1010236
     field public static final int keyTextSize = 16843316; // 0x1010234
     field public static final int keyWidth = 16843325; // 0x101023d
+    field public static final int keyboardLayout = 16843691; // 0x10103ab
     field public static final int keyboardMode = 16843341; // 0x101024d
     field public static final int keycode = 16842949; // 0x10100c5
     field public static final int killAfterRestore = 16843420; // 0x101029c
