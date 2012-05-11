@@ -108,6 +108,15 @@ public class WifiP2pDeviceList implements Parcelable {
         return Collections.unmodifiableCollection(mDevices.values());
     }
 
+    /** @hide */
+    public boolean isGroupOwner(String deviceAddress) {
+        if (deviceAddress != null) {
+            WifiP2pDevice device = mDevices.get(deviceAddress);
+            if (device != null) return device.isGroupOwner();
+        }
+        return false;
+    }
+
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
         for (WifiP2pDevice device : mDevices.values()) {
