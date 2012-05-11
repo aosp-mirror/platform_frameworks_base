@@ -2979,10 +2979,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 address);
     }
 
+    private void sendBecomingNoisyIntent() {
+        mContext.sendBroadcast(new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
+    }
+
     // must be called synchronized on mConnectedDevices
     private void makeA2dpDeviceUnavailableNow(String address) {
-        Intent noisyIntent = new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-        mContext.sendBroadcast(noisyIntent);
+        sendBecomingNoisyIntent();
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_UNAVAILABLE,
                 address);
@@ -3059,12 +3062,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private boolean handleDeviceConnection(boolean connected, int device, String params) {
         synchronized (mConnectedDevices) {
             boolean isConnected = (mConnectedDevices.containsKey(device) &&
-                    mConnectedDevices.get(device).equals(params));
+                    (params.isEmpty() || mConnectedDevices.get(device).equals(params)));
 
             if (isConnected && !connected) {
                 AudioSystem.setDeviceConnectionState(device,
                                               AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                                              params);
+                                              mConnectedDevices.get(device));
                  mConnectedDevices.remove(device);
                  return true;
             } else if (!isConnected && connected) {
@@ -3185,9 +3188,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             } else if (action.equals(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG) ||
                            action.equals(Intent.ACTION_USB_AUDIO_DEVICE_PLUG)) {
                 state = intent.getIntExtra("state", 0);
+                if (state == 0) {
+                    sendBecomingNoisyIntent();
+                }
                 int alsaCard = intent.getIntExtra("card", -1);
                 int alsaDevice = intent.getIntExtra("device", -1);
-                String params = "card=" + alsaCard + ";device=" + alsaDevice;
+                String params = (alsaCard == -1 && alsaDevice == -1 ? ""
+                                    : "card=" + alsaCard + ";device=" + alsaDevice);
                 device = action.equals(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG) ?
                         AudioSystem.DEVICE_OUT_USB_ACCESSORY : AudioSystem.DEVICE_OUT_USB_DEVICE;
                 Log.v(TAG, "Broadcast Receiver: Got "
