@@ -3600,27 +3600,22 @@
 <!-- ===============================================================
      Resources added in version 16 of the platform (Jelly Bean)
      =============================================================== -->
-  <public type="attr" name="isolatedProcess" id="0x010103a7" />
+  <public type="attr" name="parentActivityName" id="0x010103a7" />
+  <public type="attr" name="permissionGroupFlags" id="0x010103a8" />
+  <public type="attr" name="isolatedProcess" id="0x010103a9" />
+  <public type="attr" name="importantForAccessibility" id="0x010103aa" />
+  <public type="attr" name="kcm" id="0x010103ab" />
 
-  <public type="attr" name="supportsRtl" id="0x010103a8" />
-
+<!-- ===============================================================
+     Resources added in version 17 of the platform (Jelly Bean MRx?)
+     =============================================================== -->
+  <public type="attr" name="supportsRtl" id="0x010103ac" />
   <public type="attr" name="textDirection"/>
   <public type="attr" name="textAlignment"/>
-
   <public type="attr" name="layoutDirection" />
-
   <public type="attr" name="paddingStart"/>
   <public type="attr" name="paddingEnd"/>
-
   <public type="attr" name="layout_marginStart"/>
   <public type="attr" name="layout_marginEnd"/>
-  <public type="attr" name="kcm"/>
-
-
-  <public type="attr" name="parentActivityName" />
-
-  <public type="attr" name="importantForAccessibility"/>
-
-  <public type="attr" name="permissionGroupFlags"/>
 
 </resources>

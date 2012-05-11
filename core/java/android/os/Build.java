@@ -370,7 +370,7 @@ public class Build {
         public static final int ICE_CREAM_SANDWICH_MR1 = 15;
 
         /**
-         * Next up on Android!
+         * Android 4.1.
          *
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
@@ -381,7 +381,7 @@ public class Build {
          * exist in the application's manifest.
          * </ul>
          */
-        public static final int JELLY_BEAN = CUR_DEVELOPMENT;
+        public static final int JELLY_BEAN = 16;
     }
     
     /** The type of build, like "user" or "eng". */
