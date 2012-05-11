@@ -588,12 +588,12 @@ package android {
     field public static final int isRepeatable = 16843336; // 0x1010248
     field public static final int isScrollContainer = 16843342; // 0x101024e
     field public static final int isSticky = 16843335; // 0x1010247
-    field public static final int isolatedProcess = 16843687; // 0x10103a7
+    field public static final int isolatedProcess = 16843689; // 0x10103a9
     field public static final int itemBackground = 16843056; // 0x1010130
     field public static final int itemIconDisabledAlpha = 16843057; // 0x1010131
     field public static final int itemPadding = 16843565; // 0x101032d
     field public static final int itemTextAppearance = 16843052; // 0x101012c
-    field public static final int kcm = 16843688; // 0x10103a8
+    field public static final int kcm = 16843691; // 0x10103ab
     field public static final int keepScreenOn = 16843286; // 0x1010216
     field public static final int key = 16843240; // 0x10101e8
     field public static final int keyBackground = 16843315; // 0x1010233
@@ -746,14 +746,14 @@ package android {
     field public static final int panelColorForeground = 16842848; // 0x1010060
     field public static final int panelFullBackground = 16842847; // 0x101005f
     field public static final int panelTextAppearance = 16842850; // 0x1010062
-    field public static final int parentActivityName = 16843689; // 0x10103a9
+    field public static final int parentActivityName = 16843687; // 0x10103a7
     field public static final deprecated int password = 16843100; // 0x101015c
     field public static final int path = 16842794; // 0x101002a
     field public static final int pathPattern = 16842796; // 0x101002c
     field public static final int pathPrefix = 16842795; // 0x101002b
     field public static final int permission = 16842758; // 0x1010006
     field public static final int permissionGroup = 16842762; // 0x101000a
-    field public static final int permissionGroupFlags = 16843691; // 0x10103ab
+    field public static final int permissionGroupFlags = 16843688; // 0x10103a8
     field public static final int persistent = 16842765; // 0x101000d
     field public static final int persistentDrawingCache = 16842990; // 0x10100ee
     field public static final deprecated int phoneNumber = 16843111; // 0x1010167
@@ -15218,7 +15218,7 @@ package android.os {
     field public static final int HONEYCOMB_MR2 = 13; // 0xd
     field public static final int ICE_CREAM_SANDWICH = 14; // 0xe
     field public static final int ICE_CREAM_SANDWICH_MR1 = 15; // 0xf
-    field public static final int JELLY_BEAN = 10000; // 0x2710
+    field public static final int JELLY_BEAN = 16; // 0x10
   }
 
   public final class Bundle implements java.lang.Cloneable android.os.Parcelable {
