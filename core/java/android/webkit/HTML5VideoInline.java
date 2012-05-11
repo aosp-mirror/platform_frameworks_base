@@ -21,7 +21,7 @@ public class HTML5VideoInline extends HTML5VideoView{
     // associated with the surface texture can be used for showing the screen
     // shot when paused, so they are not singleton.
     private static SurfaceTexture mSurfaceTexture = null;
-    private int[] mTextureNames;
+    private static int[] mTextureNames = null;
     // Every time when the VideoLayer Id change, we need to recreate the
     // SurfaceTexture in order to delete the old video's decoder memory.
     private static int mVideoLayerUsingSurfaceTexture = -1;
@@ -35,8 +35,7 @@ public class HTML5VideoInline extends HTML5VideoView{
     }
 
     HTML5VideoInline(int videoLayerId, int position) {
-        init(videoLayerId, position);
-        mTextureNames = null;
+        init(videoLayerId, position, false);
     }
 
     @Override
@@ -69,15 +68,14 @@ public class HTML5VideoInline extends HTML5VideoView{
 
     // Inline Video specific FUNCTIONS:
 
-    @Override
-    public SurfaceTexture getSurfaceTexture(int videoLayerId) {
+    public static SurfaceTexture getSurfaceTexture(int videoLayerId) {
         // Create the surface texture.
         if (videoLayerId != mVideoLayerUsingSurfaceTexture
             || mSurfaceTexture == null
             || mTextureNames == null) {
-            if (mTextureNames != null) {
-                GLES20.glDeleteTextures(1, mTextureNames, 0);
-            }
+            // The GL texture will store in the VideoLayerManager at native side.
+            // They will be clean up when requested.
+            // The reason we recreated GL texture name is for screen shot support.
             mTextureNames = new int[1];
             GLES20.glGenTextures(1, mTextureNames, 0);
             mSurfaceTexture = new SurfaceTexture(mTextureNames[0]);

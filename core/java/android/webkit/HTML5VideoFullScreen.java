@@ -104,7 +104,9 @@ public class HTML5VideoFullScreen extends HTML5VideoView
             // After we return from this we can't use the surface any more.
             // The current Video View will be destroy when we play a new video.
             pauseAndDispatch(mProxy);
+            // TODO: handle full screen->inline mode transition without a reload.
             mPlayer.release();
+            mPlayer = null;
             mSurfaceHolder = null;
             if (mMediaController != null) {
                 mMediaController.hide();
@@ -128,12 +130,12 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         return mVideoSurfaceView;
     }
 
-    HTML5VideoFullScreen(Context context, int videoLayerId, int position) {
+    HTML5VideoFullScreen(Context context, int videoLayerId, int position, boolean skipPrepare) {
         mVideoSurfaceView = new VideoSurfaceView(context);
         mFullScreenMode = FULLSCREEN_OFF;
         mVideoWidth = 0;
         mVideoHeight = 0;
-        init(videoLayerId, position);
+        init(videoLayerId, position, skipPrepare);
     }
 
     private void setMediaController(MediaController m) {
@@ -156,8 +158,6 @@ public class HTML5VideoFullScreen extends HTML5VideoView
     }
 
     private void prepareForFullScreen() {
-        // So in full screen, we reset the MediaPlayer
-        mPlayer.reset();
         MediaController mc = new FullScreenMediaController(mProxy.getContext(), mLayout);
         mc.setSystemUiVisibility(mLayout.getSystemUiVisibility());
         setMediaController(mc);
@@ -243,7 +243,7 @@ public class HTML5VideoFullScreen extends HTML5VideoView
 
                 // Don't show the controller after exiting the full screen.
                 mMediaController = null;
-                mCurrentState = STATE_RELEASED;
+                mCurrentState = STATE_RESETTED;
             }
         };
 
