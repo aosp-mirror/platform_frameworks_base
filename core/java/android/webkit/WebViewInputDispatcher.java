@@ -334,6 +334,7 @@ final class WebViewInputDispatcher {
 
             DispatchEvent d = obtainDispatchEventLocked(eventToEnqueue, eventType, 0,
                     webKitXOffset, webKitYOffset, webKitScale);
+            updateStateTrackersLocked(d, event);
             enqueueEventLocked(d);
         }
         return true;
@@ -787,7 +788,6 @@ final class WebViewInputDispatcher {
 
                 flags = d.mFlags;
 
-                updateStateTrackersLocked(d, event);
                 if (event == d.mEvent) {
                     d.mEvent = null; // retain ownership of event, don't recycle it yet
                 }
