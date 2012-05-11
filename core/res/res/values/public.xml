@@ -3605,11 +3605,12 @@
   <public type="attr" name="isolatedProcess" id="0x010103a9" />
   <public type="attr" name="importantForAccessibility" id="0x010103aa" />
   <public type="attr" name="kcm" id="0x010103ab" />
+  <public type="attr" name="fontFamily" id="0x010103ac" />
 
 <!-- ===============================================================
      Resources added in version 17 of the platform (Jelly Bean MRx?)
      =============================================================== -->
-  <public type="attr" name="supportsRtl" id="0x010103ac" />
+  <public type="attr" name="supportsRtl" id="0x010103ad" />
   <public type="attr" name="textDirection"/>
   <public type="attr" name="textAlignment"/>
   <public type="attr" name="layoutDirection" />
