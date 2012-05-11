@@ -528,6 +528,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             content.setOnClickListener(null);
         }
 
+        // TODO(cwren) normalize variable names with those in updateNotification
         View expandedOneU = null;
         View expandedLarge = null;
         Exception exception = null;
@@ -781,32 +782,41 @@ public abstract class BaseStatusBar extends SystemUI implements
         final StatusBarNotification oldNotification = oldEntry.notification;
 
         // XXX: modify when we do something more intelligent with the two content views
-        final RemoteViews oldContentView = (oldNotification.notification.bigContentView != null)
-                ? oldNotification.notification.bigContentView
-                : oldNotification.notification.contentView;
-        final RemoteViews contentView = (notification.notification.bigContentView != null)
-                ? notification.notification.bigContentView
-                : notification.notification.contentView;
+        final RemoteViews oldContentView = oldNotification.notification.contentView;
+        final RemoteViews contentView = notification.notification.contentView;
+        final RemoteViews oldBigContentView = oldNotification.notification.bigContentView;
+        final RemoteViews bigContentView = notification.notification.bigContentView;
 
         if (DEBUG) {
             Slog.d(TAG, "old notification: when=" + oldNotification.notification.when
                     + " ongoing=" + oldNotification.isOngoing()
                     + " expanded=" + oldEntry.expanded
                     + " contentView=" + oldContentView
+                    + " bigContentView=" + oldBigContentView
                     + " rowParent=" + oldEntry.row.getParent());
             Slog.d(TAG, "new notification: when=" + notification.notification.when
                     + " ongoing=" + oldNotification.isOngoing()
-                    + " contentView=" + contentView);
+                    + " contentView=" + contentView
+                    + " bigContentView=" + bigContentView);
         }
 
         // Can we just reapply the RemoteViews in place?  If when didn't change, the order
         // didn't change.
+
+        // 1U is never null
         boolean contentsUnchanged = oldEntry.expanded != null
-                && contentView != null && oldContentView != null
                 && contentView.getPackage() != null
                 && oldContentView.getPackage() != null
                 && oldContentView.getPackage().equals(contentView.getPackage())
                 && oldContentView.getLayoutId() == contentView.getLayoutId();
+        // large view may be null
+        boolean bigContentsUnchanged =
+                (oldEntry.getLargeView() == null && bigContentView == null)
+                || ((oldEntry.getLargeView() != null && bigContentView != null)
+                    && bigContentView.getPackage() != null
+                    && oldBigContentView.getPackage() != null
+                    && oldBigContentView.getPackage().equals(bigContentView.getPackage())
+                    && oldBigContentView.getLayoutId() == bigContentView.getLayoutId());
         ViewGroup rowParent = (ViewGroup) oldEntry.row.getParent();
         boolean orderUnchanged = notification.notification.when==oldNotification.notification.when
                 && notification.score == oldNotification.score;
@@ -816,12 +826,15 @@ public abstract class BaseStatusBar extends SystemUI implements
                 && !TextUtils.equals(notification.notification.tickerText,
                         oldEntry.notification.notification.tickerText);
         boolean isTopAnyway = isTopNotification(rowParent, oldEntry);
-        if (contentsUnchanged && (orderUnchanged || isTopAnyway)) {
+        if (contentsUnchanged && bigContentsUnchanged && (orderUnchanged || isTopAnyway)) {
             if (DEBUG) Slog.d(TAG, "reusing notification for key: " + key);
             oldEntry.notification = notification;
             try {
                 // Reapply the RemoteViews
-                contentView.reapply(mContext, oldEntry.content);
+                contentView.reapply(mContext, oldEntry.expanded);
+                if (bigContentView != null && oldEntry.getLargeView() != null) {
+                    bigContentView.reapply(mContext, oldEntry.getLargeView());
+                }
                 // update the contentIntent
                 final PendingIntent contentIntent = notification.notification.contentIntent;
                 if (contentIntent != null) {
