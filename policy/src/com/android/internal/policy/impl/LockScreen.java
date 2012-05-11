@@ -322,6 +322,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
                     mCallback.pokeWakelock();
                 break;
 
+                case com.android.internal.R.drawable.ic_lockscreen_unlock_phantom:
                 case com.android.internal.R.drawable.ic_lockscreen_unlock:
                     mCallback.goToUnlockScreen();
                 break;
@@ -341,7 +342,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
             try {
                 mContext.startActivity(intent);
             } catch (ActivityNotFoundException e) {
-                Log.w(TAG, "Camera application not found");
+                Log.w(TAG, "Activity not found for intent + " + intent.getAction());
             }
         }
 

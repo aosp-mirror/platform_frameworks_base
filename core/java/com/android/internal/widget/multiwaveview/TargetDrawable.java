@@ -85,6 +85,14 @@ public class TargetDrawable {
         setState(STATE_INACTIVE);
     }
 
+    public TargetDrawable(TargetDrawable other) {
+        mResourceId = other.mResourceId;
+        // Mutate the drawable so we can animate shared drawable properties.
+        mDrawable = other.mDrawable != null ? other.mDrawable.mutate() : null;
+        resizeDrawables();
+        setState(STATE_INACTIVE);
+    }
+
     public void setState(int [] state) {
         if (mDrawable instanceof StateListDrawable) {
             StateListDrawable d = (StateListDrawable) mDrawable;
