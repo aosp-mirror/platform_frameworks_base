@@ -397,6 +397,9 @@ public interface WindowManagerPolicy {
          * Creates an input channel that will receive all input from the input dispatcher.
          */
         public InputChannel monitorInput(String name);
+
+        public void shutdown();
+        public void rebootSafeMode();
     }
 
     /**
