@@ -2109,5 +2109,10 @@ public class PhoneStatusBar extends BaseStatusBar {
     protected void haltTicker() {
         mTicker.halt();
     }
+
+    @Override
+    protected boolean isStatusBarExpanded() {
+        return mExpanded;
+    }
 }
 

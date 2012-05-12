@@ -53,6 +53,9 @@ public class DelegateViewHelper {
     }
 
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (mBar.isStatusBarExpanded()) {
+            return false;
+        }
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mDownPoint[0] = event.getX();
