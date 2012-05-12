@@ -666,7 +666,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     protected static final String VIEW_LOG_TAG = "View";
 
     /**
-     * When set to true, apps will draw debugging information about their layouts. 
+     * When set to true, apps will draw debugging information about their layouts.
      *
      * @hide
      */
@@ -4801,17 +4801,46 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * entirely by its predecessors, and has an alpha greater than zero.
      *
      * @return Whether the view is visible on the screen.
+     *
+     * @hide
      */
-    private boolean isVisibleToUser() {
+    protected boolean isVisibleToUser() {
+        return isVisibleToUser(null);
+    }
+
+    /**
+     * Computes whether the given portion of this view is visible to the user. Such a view is
+     * attached, visible, all its predecessors are visible, has an alpha greater than zero, and
+     * the specified portion is not clipped entirely by its predecessors.
+     *
+     * @param boundInView the portion of the view to test; coordinates should be relative; may be
+     *                    <code>null</code>, and the entire view will be tested in this case.
+     *                    When <code>true</code> is returned by the function, the actual visible
+     *                    region will be stored in this parameter; that is, if boundInView is fully
+     *                    contained within the view, no modification will be made, otherwise regions
+     *                    outside of the visible area of the view will be clipped.
+     *
+     * @return Whether the specified portion of the view is visible on the screen.
+     *
+     * @hide
+     */
+    protected boolean isVisibleToUser(Rect boundInView) {
+        Rect visibleRect = mAttachInfo.mTmpInvalRect;
+        Point offset = mAttachInfo.mPoint;
         // The first two checks are made also made by isShown() which
         // however traverses the tree up to the parent to catch that.
         // Therefore, we do some fail fast check to minimize the up
         // tree traversal.
-        return (mAttachInfo != null
-                && mAttachInfo.mWindowVisibility == View.VISIBLE
-                && getAlpha() > 0
-                && isShown()
-                && getGlobalVisibleRect(mAttachInfo.mTmpInvalRect));
+        boolean isVisible = mAttachInfo != null
+            && mAttachInfo.mWindowVisibility == View.VISIBLE
+            && getAlpha() > 0
+            && isShown()
+            && getGlobalVisibleRect(visibleRect, offset);
+            if (isVisible && boundInView != null) {
+                visibleRect.offset(-offset.x, -offset.y);
+                isVisible &= boundInView.intersect(visibleRect);
+            }
+            return isVisible;
     }
 
     /**

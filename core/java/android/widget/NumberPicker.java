@@ -2239,20 +2239,17 @@ public class NumberPicker extends LinearLayout {
             info.setPackageName(mContext.getPackageName());
             info.setSource(NumberPicker.this, virtualViewId);
             info.setParent(NumberPicker.this);
-            info.addChild(NumberPicker.this, VIRTUAL_VIEW_ID_DECREMENT);
-            info.addChild(NumberPicker.this, VIRTUAL_VIEW_ID_INPUT);
-            info.addChild(NumberPicker.this, VIRTUAL_VIEW_ID_INCREMENT);
             info.setText(text);
             info.setClickable(true);
             info.setLongClickable(true);
             info.setEnabled(NumberPicker.this.isEnabled());
             Rect boundsInParent = mTempRect;
             boundsInParent.set(left, top, right, bottom);
+            info.setVisibleToUser(isVisibleToUser(boundsInParent));
             info.setBoundsInParent(boundsInParent);
             Rect boundsInScreen = boundsInParent;
             int[] locationOnScreen = mTempArray;
             getLocationOnScreen(locationOnScreen);
-            boundsInScreen.offsetTo(0, 0);
             boundsInScreen.offset(locationOnScreen[0], locationOnScreen[1]);
             info.setBoundsInScreen(boundsInScreen);
             return info;
@@ -2261,19 +2258,22 @@ public class NumberPicker extends LinearLayout {
         private AccessibilityNodeInfo createAccessibilityNodeInfoForNumberPicker(int left, int top,
                 int right, int bottom) {
             AccessibilityNodeInfo info = AccessibilityNodeInfo.obtain();
-            info.setClassName(Button.class.getName());
+            info.setClassName(NumberPicker.class.getName());
             info.setPackageName(mContext.getPackageName());
             info.setSource(NumberPicker.this);
+            info.addChild(NumberPicker.this, VIRTUAL_VIEW_ID_DECREMENT);
+            info.addChild(NumberPicker.this, VIRTUAL_VIEW_ID_INPUT);
+            info.addChild(NumberPicker.this, VIRTUAL_VIEW_ID_INCREMENT);
             info.setParent((View) getParent());
             info.setEnabled(NumberPicker.this.isEnabled());
             info.setScrollable(true);
             Rect boundsInParent = mTempRect;
             boundsInParent.set(left, top, right, bottom);
             info.setBoundsInParent(boundsInParent);
+            info.setVisibleToUser(isVisibleToUser());
             Rect boundsInScreen = boundsInParent;
             int[] locationOnScreen = mTempArray;
             getLocationOnScreen(locationOnScreen);
-            boundsInScreen.offsetTo(0, 0);
             boundsInScreen.offset(locationOnScreen[0], locationOnScreen[1]);
             info.setBoundsInScreen(boundsInScreen);
             return info;
