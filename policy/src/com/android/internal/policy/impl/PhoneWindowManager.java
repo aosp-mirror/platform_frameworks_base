@@ -60,7 +60,6 @@ import android.os.Vibrator;
 import android.provider.Settings;
 
 import com.android.internal.R;
-import com.android.internal.app.ShutdownThread;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.ITelephony;
@@ -727,7 +726,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mPowerKeyHandled = true;
                 performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
                 sendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
-                ShutdownThread.shutdown(mContext, true);
+                mWindowManagerFuncs.shutdown();
                 break;
             }
         }
@@ -741,7 +740,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     void showGlobalActionsDialog() {
         if (mGlobalActions == null) {
-            mGlobalActions = new GlobalActions(mContext);
+            mGlobalActions = new GlobalActions(mContext, mWindowManagerFuncs);
         }
         final boolean keyguardShowing = keyguardIsShowingTq();
         mGlobalActions.showDialog(keyguardShowing, isDeviceProvisioned());
