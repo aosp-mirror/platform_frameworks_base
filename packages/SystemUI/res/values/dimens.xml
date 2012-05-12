@@ -105,9 +105,6 @@
     <!-- The width of the view containing the menu status bar icon -->
     <dimen name="navigation_menu_key_width">40dip</dimen>
 
-    <!-- Default target placement radius for navigation bar search target -->
-    <dimen name="navbar_search_target_placement_radius">150dip</dimen>
-
     <!-- Default distance beyond which snaps to the target radius -->
     <dimen name="navbar_search_snap_margin">20dip</dimen>
 
