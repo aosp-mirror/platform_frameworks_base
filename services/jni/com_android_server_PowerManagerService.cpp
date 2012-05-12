@@ -83,6 +83,13 @@ bool android_server_PowerManagerService_isScreenBright() {
 }
 
 void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType) {
+    if (gPowerModule) {
+        // Tell the power HAL when user activity occurs.
+        if (gPowerModule->powerHint) {
+            gPowerModule->powerHint(gPowerModule, POWER_HINT_INTERACTION, NULL);
+        }
+    }
+
     if (gPowerManagerServiceObj) {
         // Throttle calls into user activity by event type.
         // We're a little conservative about argument checking here in case the caller
@@ -264,6 +271,8 @@ int register_android_server_PowerManagerService(JNIEnv* env) {
     }
     gScreenOn = true;
     gScreenBright = true;
+    gPowerManagerServiceObj = NULL;
+    gPowerModule = NULL;
     return 0;
 }
 
