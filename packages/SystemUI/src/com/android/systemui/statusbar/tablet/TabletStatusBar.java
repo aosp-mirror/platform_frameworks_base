@@ -1618,6 +1618,11 @@ public class TabletStatusBar extends BaseStatusBar implements
     @Override
     protected void updateExpandedViewPos(int expandedPosition) {
     }
+
+    @Override
+    protected boolean isStatusBarExpanded() {
+        return mNotificationPanel.getVisibility() == View.VISIBLE;
+    }
 }
 
 
