@@ -23,7 +23,10 @@ LOCAL_C_INCLUDES += \
     frameworks/base/services \
     frameworks/base/core/jni \
     external/skia/include/core \
-    libcore/include
+    libcore/include \
+    libcore/include/libsuspend \
+	$(call include-path-for, libhardware)/hardware \
+	$(call include-path-for, libhardware_legacy)/hardware_legacy \
 
 LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \
@@ -38,7 +41,8 @@ LOCAL_SHARED_LIBRARIES := \
     libinput \
     libskia \
     libgui \
-    libusbhost
+    libusbhost \
+    libsuspend
 
 ifeq ($(WITH_MALLOC_LEAK_CHECK),true)
     LOCAL_CFLAGS += -DMALLOC_LEAK_CHECK

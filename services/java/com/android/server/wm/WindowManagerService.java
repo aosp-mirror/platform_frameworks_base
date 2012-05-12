@@ -34,7 +34,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.app.ShutdownThread;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.PhoneWindowManager;
 import com.android.internal.view.IInputContext;
@@ -48,6 +47,7 @@ import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.input.InputFilter;
 import com.android.server.input.InputManagerService;
+import com.android.server.pm.ShutdownThread;
 
 import android.Manifest;
 import android.app.ActivityManagerNative;
@@ -82,7 +82,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
-import android.os.Power;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -5025,6 +5024,18 @@ public class WindowManagerService extends IWindowManager.Stub
         return mInputManager.monitorInput(inputChannelName);
     }
 
+    // Called by window manager policy.  Not exposed externally.
+    @Override
+    public void shutdown() {
+        ShutdownThread.shutdown(mContext, true);
+    }
+
+    // Called by window manager policy.  Not exposed externally.
+    @Override
+    public void rebootSafeMode() {
+        ShutdownThread.rebootSafeMode(mContext, true);
+    }
+
     public void setInputFilter(InputFilter filter) {
         mInputManager.setInputFilter(filter);
     }
@@ -8700,13 +8711,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 mPowerManager.setScreenBrightnessOverride(-1);
             } else {
                 mPowerManager.setScreenBrightnessOverride((int)
-                        (mInnerFields.mScreenBrightness * Power.BRIGHTNESS_ON));
+                        (mInnerFields.mScreenBrightness * PowerManager.BRIGHTNESS_ON));
             }
             if (mInnerFields.mButtonBrightness < 0 || mInnerFields.mButtonBrightness > 1.0f) {
                 mPowerManager.setButtonBrightnessOverride(-1);
             } else {
                 mPowerManager.setButtonBrightnessOverride((int)
-                        (mInnerFields.mButtonBrightness * Power.BRIGHTNESS_ON));
+                        (mInnerFields.mButtonBrightness * PowerManager.BRIGHTNESS_ON));
             }
         }
         if (mInnerFields.mHoldScreen != mHoldingScreenOn) {

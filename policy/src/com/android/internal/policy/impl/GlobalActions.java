@@ -16,14 +16,12 @@
 
 package com.android.internal.policy.impl;
 
-import com.android.internal.app.ShutdownThread;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.R;
 
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
-import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -48,6 +46,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.WindowManagerPolicy.WindowManagerFuncs;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -68,6 +67,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private static final boolean SHOW_SILENT_TOGGLE = true;
 
     private final Context mContext;
+    private final WindowManagerFuncs mWindowManagerFuncs;
     private final AudioManager mAudioManager;
 
     private ArrayList<Action> mItems;
@@ -88,8 +88,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     /**
      * @param context everything needs a context :(
      */
-    public GlobalActions(Context context) {
+    public GlobalActions(Context context, WindowManagerFuncs windowManagerFuncs) {
         mContext = context;
+        mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
 
         // receive broadcasts
@@ -186,11 +187,11 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
                 public void onPress() {
                     // shutdown by making sure radio and power are handled accordingly.
-                    ShutdownThread.shutdown(mContext, true);
+                    mWindowManagerFuncs.shutdown();
                 }
 
                 public boolean onLongPress() {
-                    ShutdownThread.rebootSafeMode(mContext, true);
+                    mWindowManagerFuncs.rebootSafeMode();
                     return true;
                 }
 

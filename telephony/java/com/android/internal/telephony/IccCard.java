@@ -26,7 +26,6 @@ import android.content.res.Resources;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Power;
 import android.os.PowerManager;
 import android.os.Registrant;
 import android.os.RegistrantList;

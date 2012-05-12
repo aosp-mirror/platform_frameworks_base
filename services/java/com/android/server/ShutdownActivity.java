@@ -22,7 +22,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Slog;
-import com.android.internal.app.ShutdownThread;
+
+import com.android.server.pm.ShutdownThread;
 
 public class ShutdownActivity extends Activity {
 
