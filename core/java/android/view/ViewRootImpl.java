@@ -263,7 +263,6 @@ public final class ViewRootImpl implements ViewParent,
     final Rect mPendingVisibleInsets = new Rect();
     final Rect mPendingContentInsets = new Rect();
     final Rect mPendingSystemInsets = new Rect();
-    final Rect mActiveRect = new Rect();
     final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
             = new ViewTreeObserver.InternalInsetsInfo();
 
@@ -1696,14 +1695,6 @@ public final class ViewRootImpl implements ViewParent,
                     layoutRequested = true;
                 }
             }
-        }
-
-        if (activeRectChanged && mSurface.isValid()) {
-            mActiveRect.set(attachInfo.mSystemInsets.left, attachInfo.mSystemInsets.top,
-                    mWidth - attachInfo.mSystemInsets.right,
-                    mHeight - attachInfo.mSystemInsets.bottom);
-            //Log.i(TAG, "Active rect " + mWindowAttributes.getTitle() + ": " + mActiveRect);
-            mSurface.setActiveRect(mActiveRect);
         }
 
         final boolean didLayout = layoutRequested && !mStopped;

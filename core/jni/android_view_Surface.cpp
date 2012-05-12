@@ -345,32 +345,6 @@ static inline SkBitmap::Config convertPixelFormat(PixelFormat format)
     }
 }
 
-static void Surface_setActiveRect(JNIEnv* env, jobject thiz, jobject activeRect)
-{
-    const sp<Surface>& surface(getSurface(env, thiz));
-    if (!Surface::isValid(surface)) {
-        doThrowIAE(env);
-        return;
-    }
-
-    android_native_rect_t nativeRect;
-    if (activeRect) {
-        nativeRect.left  = env->GetIntField(activeRect, ro.l);
-        nativeRect.top   = env->GetIntField(activeRect, ro.t);
-        nativeRect.right = env->GetIntField(activeRect, ro.r);
-        nativeRect.bottom= env->GetIntField(activeRect, ro.b);
-    } else {
-        doThrowIAE(env, "activeRect may not be null");
-        return;
-    }
-
-    int err = native_window_set_active_rect(surface.get(), &nativeRect);
-    if (err != NO_ERROR) {
-        doThrowRE(env, String8::format(
-                "Surface::setActiveRect returned an error: %d", err).string());
-    }
-}
-
 static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz, jobject dirtyRect)
 {
     const sp<Surface>& surface(getSurface(env, clazz));
@@ -773,6 +747,28 @@ static void Surface_setFreezeTint(
     }
 }
 
+static void Surface_setWindowCrop(JNIEnv* env, jobject thiz, jobject crop)
+{
+    const sp<SurfaceControl>& surface(getSurfaceControl(env, thiz));
+    if (surface == 0) return;
+
+    Rect nativeCrop;
+    if (crop) {
+        nativeCrop.left  = env->GetIntField(crop, ro.l);
+        nativeCrop.top   = env->GetIntField(crop, ro.t);
+        nativeCrop.right = env->GetIntField(crop, ro.r);
+        nativeCrop.bottom= env->GetIntField(crop, ro.b);
+    } else {
+        nativeCrop.left = nativeCrop.top = nativeCrop.right =
+                nativeCrop.bottom = 0;
+    }
+
+    status_t err = surface->setCrop(nativeCrop);
+    if (err<0 && err!=NO_INIT) {
+        doThrowIAE(env);
+    }
+}
+
 // ----------------------------------------------------------------------------
 
 static void Surface_copyFrom(
@@ -915,7 +911,7 @@ static JNINativeMethod gSurfaceMethods[] = {
     {"readFromParcel",      "(Landroid/os/Parcel;)V", (void*)Surface_readFromParcel },
     {"writeToParcel",       "(Landroid/os/Parcel;I)V", (void*)Surface_writeToParcel },
     {"isConsumerRunningBehind", "()Z", (void*)Surface_isConsumerRunningBehind },
-    {"setActiveRect",       "(Landroid/graphics/Rect;)V", (void*)Surface_setActiveRect },
+    {"setWindowCrop",       "(Landroid/graphics/Rect;)V", (void*)Surface_setWindowCrop },
 };
 
 void nativeClassInit(JNIEnv* env, jclass clazz)
