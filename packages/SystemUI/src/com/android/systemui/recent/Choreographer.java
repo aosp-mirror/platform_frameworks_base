@@ -102,12 +102,14 @@ import android.view.ViewRootImpl;
             builder.with(noRecentAppsFadeAnim);
         }
 
-        Drawable background = mScrimView.getBackground();
-        if (background != null) {
-            Animator bgAnim = ObjectAnimator.ofInt(background,
-                "alpha", appearing ? 0 : 255, appearing ? 255 : 0);
-            bgAnim.setDuration(appearing ? SCRIM_DURATION : CLOSE_DURATION);
-            builder.with(bgAnim);
+        if (appearing) {
+            Drawable background = mScrimView.getBackground();
+            if (background != null) {
+                Animator bgAnim = ObjectAnimator.ofInt(background,
+                    "alpha", appearing ? 0 : 255, appearing ? 255 : 0);
+                bgAnim.setDuration(appearing ? SCRIM_DURATION : CLOSE_DURATION);
+                builder.with(bgAnim);
+            }
         }
         mContentAnim.addListener(this);
         if (mListener != null) {
