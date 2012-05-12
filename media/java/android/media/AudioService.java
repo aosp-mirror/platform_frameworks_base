@@ -33,6 +33,7 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -3607,24 +3608,20 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     // RemoteControl
     //==========================================================================================
     public void dispatchMediaKeyEvent(KeyEvent keyEvent) {
-        dispatchMediaKeyEvent(keyEvent, false /*needWakeLock*/);
+        filterMediaKeyEvent(keyEvent, false /*needWakeLock*/);
     }
 
     public void dispatchMediaKeyEventUnderWakelock(KeyEvent keyEvent) {
-        dispatchMediaKeyEvent(keyEvent, true /*needWakeLock*/);
+        filterMediaKeyEvent(keyEvent, true /*needWakeLock*/);
     }
 
-    /**
-     * Handles the dispatching of the media button events to one of the registered listeners,
-     * or if there was none, broadcast a ACTION_MEDIA_BUTTON intent to the rest of the system.
-     */
-    private void dispatchMediaKeyEvent(KeyEvent keyEvent, boolean needWakeLock) {
+    private void filterMediaKeyEvent(KeyEvent keyEvent, boolean needWakeLock) {
         // sanity check on the incoming key event
         if (!isValidMediaKeyEvent(keyEvent)) {
             Log.e(TAG, "not dispatching invalid media key event " + keyEvent);
             return;
         }
-        // event filtering
+        // event filtering based on audio mode
         synchronized(mRingingLock) {
             if (mIsRinging || (getMode() == AudioSystem.MODE_IN_CALL) ||
                     (getMode() == AudioSystem.MODE_IN_COMMUNICATION) ||
@@ -3632,6 +3629,22 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 return;
             }
         }
+        // event filtering based on voice-based interactions
+        if (isValidVoiceInputKeyCode(keyEvent.getKeyCode())) {
+            filterVoiceInputKeyEvent(keyEvent, needWakeLock);
+        } else {
+            dispatchMediaKeyEvent(keyEvent, needWakeLock);
+        }
+    }
+
+    /**
+     * Handles the dispatching of the media button events to one of the registered listeners,
+     * or if there was none, broadcast an ACTION_MEDIA_BUTTON intent to the rest of the system.
+     * @param keyEvent a non-null KeyEvent whose key code is one of the supported media buttons
+     * @param needWakeLock true if a PARTIAL_WAKE_LOCK needs to be held while this key event
+     *     is dispatched.
+     */
+    private void dispatchMediaKeyEvent(KeyEvent keyEvent, boolean needWakeLock) {
         if (needWakeLock) {
             mMediaEventWakeLock.acquire();
         }
@@ -3660,6 +3673,140 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     }
 
+    /**
+     * The minimum duration during which a user must press to trigger voice-based interactions
+     */
+    private final static int MEDIABUTTON_LONG_PRESS_DURATION_MS = 300;
+    /**
+     * The different states of the state machine to handle the launch of voice-based interactions,
+     * stored in mVoiceButtonState.
+     */
+    private final static int VOICEBUTTON_STATE_IDLE = 0;
+    private final static int VOICEBUTTON_STATE_DOWN = 1;
+    private final static int VOICEBUTTON_STATE_DOWN_IGNORE_NEW = 2;
+    /**
+     * The different actions after state transitions on mVoiceButtonState.
+     */
+    private final static int VOICEBUTTON_ACTION_DISCARD_CURRENT_KEY_PRESS = 1;
+    private final static int VOICEBUTTON_ACTION_START_VOICE_INPUT = 2;
+    private final static int VOICEBUTTON_ACTION_SIMULATE_KEY_PRESS = 3;
+
+    private final Object mVoiceEventLock = new Object();
+    private int mVoiceButtonState = VOICEBUTTON_STATE_IDLE;
+    private long mVoiceButtonDownTime = 0;
+
+    /**
+     * Log an error when an unexpected action is encountered in the state machine to filter
+     * key events.
+     * @param keyAction the unexpected action of the key event being filtered
+     * @param stateName the string corresponding to the state in which the error occurred
+     */
+    private static void logErrorForKeyAction(int keyAction, String stateName) {
+        Log.e(TAG, "unexpected action "
+                + KeyEvent.actionToString(keyAction)
+                + " in " + stateName + " state");
+    }
+
+    /**
+     * Filter key events that may be used for voice-based interactions
+     * @param keyEvent a non-null KeyEvent whose key code is that of one of the supported
+     *    media buttons that can be used to trigger voice-based interactions.
+     * @param needWakeLock true if a PARTIAL_WAKE_LOCK needs to be held while this key event
+     *     is dispatched.
+     */
+    private void filterVoiceInputKeyEvent(KeyEvent keyEvent, boolean needWakeLock) {
+        int voiceButtonAction = VOICEBUTTON_ACTION_DISCARD_CURRENT_KEY_PRESS;
+        int keyAction = keyEvent.getAction();
+        synchronized (mVoiceEventLock) {
+            // state machine on mVoiceButtonState
+            switch (mVoiceButtonState) {
+
+                case VOICEBUTTON_STATE_IDLE:
+                    if (keyAction == KeyEvent.ACTION_DOWN) {
+                        mVoiceButtonDownTime = keyEvent.getDownTime();
+                        // valid state transition
+                        mVoiceButtonState = VOICEBUTTON_STATE_DOWN;
+                    } else if (keyAction == KeyEvent.ACTION_UP) {
+                        // no state transition
+                        // action is still VOICEBUTTON_ACTION_DISCARD_CURRENT_KEY_PRESS
+                    } else {
+                        logErrorForKeyAction(keyAction, "VOICEBUTTON_STATE_IDLE");
+                    }
+                    break;
+
+                case VOICEBUTTON_STATE_DOWN:
+                    if ((keyEvent.getEventTime() - mVoiceButtonDownTime)
+                            >= MEDIABUTTON_LONG_PRESS_DURATION_MS) {
+                        // press was long enough, start voice-based interactions, regardless of
+                        //   whether this was a DOWN or UP key event
+                        voiceButtonAction = VOICEBUTTON_ACTION_START_VOICE_INPUT;
+                        if (keyAction == KeyEvent.ACTION_UP) {
+                            // done tracking the key press, so transition back to idle state
+                            mVoiceButtonState = VOICEBUTTON_STATE_IDLE;
+                        } else if (keyAction == KeyEvent.ACTION_DOWN) {
+                            // no need to observe the upcoming key events
+                            mVoiceButtonState = VOICEBUTTON_STATE_DOWN_IGNORE_NEW;
+                        } else {
+                            logErrorForKeyAction(keyAction, "VOICEBUTTON_STATE_DOWN");
+                        }
+                    } else {
+                        if (keyAction == KeyEvent.ACTION_UP) {
+                            // press wasn't long enough, simulate complete key press
+                            voiceButtonAction = VOICEBUTTON_ACTION_SIMULATE_KEY_PRESS;
+                            // not tracking the key press anymore, so transition back to idle state
+                            mVoiceButtonState = VOICEBUTTON_STATE_IDLE;
+                        } else if (keyAction == KeyEvent.ACTION_DOWN) {
+                            // no state transition
+                            // action is still VOICEBUTTON_ACTION_DISCARD_CURRENT_KEY_PRESS
+                        } else {
+                            logErrorForKeyAction(keyAction, "VOICEBUTTON_STATE_DOWN");
+                        }
+                    }
+                    break;
+
+                case VOICEBUTTON_STATE_DOWN_IGNORE_NEW:
+                    if (keyAction == KeyEvent.ACTION_UP) {
+                        // done tracking the key press, so transition back to idle state
+                        mVoiceButtonState = VOICEBUTTON_STATE_IDLE;
+                        // action is still VOICEBUTTON_ACTION_DISCARD_CURRENT_KEY_PRESS
+                    } else if (keyAction == KeyEvent.ACTION_DOWN) {
+                        // no state transition: we've already launched voice-based interactions
+                        // action is still VOICEBUTTON_ACTION_DISCARD_CURRENT_KEY_PRESS
+                    } else  {
+                        logErrorForKeyAction(keyAction, "VOICEBUTTON_STATE_DOWN_IGNORE_NEW");
+                    }
+                    break;
+            }
+        }//synchronized (mVoiceEventLock)
+
+        // take action after media button event filtering for voice-based interactions
+        switch (voiceButtonAction) {
+            case VOICEBUTTON_ACTION_DISCARD_CURRENT_KEY_PRESS:
+                if (DEBUG_RC) Log.v(TAG, "   ignore key event");
+                break;
+            case VOICEBUTTON_ACTION_START_VOICE_INPUT:
+                if (DEBUG_RC) Log.v(TAG, "   start voice-based interactions");
+                // then start the voice-based interactions
+                startVoiceBasedInteractions(needWakeLock);
+                break;
+            case VOICEBUTTON_ACTION_SIMULATE_KEY_PRESS:
+                if (DEBUG_RC) Log.v(TAG, "   send simulated key event");
+                sendSimulatedMediaButtonEvent(keyEvent, needWakeLock);
+                break;
+        }
+    }
+
+    private void sendSimulatedMediaButtonEvent(KeyEvent originalKeyEvent, boolean needWakeLock) {
+        // send DOWN event
+        KeyEvent keyEvent = KeyEvent.changeAction(originalKeyEvent, KeyEvent.ACTION_DOWN);
+        dispatchMediaKeyEvent(keyEvent, needWakeLock);
+        // send UP event
+        keyEvent = KeyEvent.changeAction(originalKeyEvent, KeyEvent.ACTION_UP);
+        dispatchMediaKeyEvent(keyEvent, needWakeLock);
+
+    }
+
+
     private static boolean isValidMediaKeyEvent(KeyEvent keyEvent) {
         if (keyEvent == null) {
             return false;
@@ -3686,6 +3833,63 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         return true;
     }
 
+    /**
+     * Checks whether the given key code is one that can trigger the launch of voice-based
+     *   interactions.
+     * @param keyCode the key code associated with the key event
+     * @return true if the key is one of the supported voice-based interaction triggers
+     */
+    private static boolean isValidVoiceInputKeyCode(int keyCode) {
+        if (keyCode == KeyEvent.KEYCODE_HEADSETHOOK) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Tell the system to start voice-based interactions / voice commands
+     */
+    private void startVoiceBasedInteractions(boolean needWakeLock) {
+        Intent voiceIntent = new Intent(android.speech.RecognizerIntent.ACTION_WEB_SEARCH);
+        if (needWakeLock) {
+            mMediaEventWakeLock.acquire();
+        }
+        voiceIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        try {
+            if (mKeyguardManager != null) {
+                // it's ok to start voice-based interactions when:
+                // - the device is locked but doesn't require a password to be unlocked
+                // - the device is not locked
+                if ((mKeyguardManager.isKeyguardLocked() && !mKeyguardManager.isKeyguardSecure())
+                        || !mKeyguardManager.isKeyguardLocked()) {
+                    mContext.startActivity(voiceIntent);
+                }
+            }
+        } catch (ActivityNotFoundException e) {
+            Log.e(TAG, "Error launching activity for ACTION_WEB_SEARCH: " + e);
+        } finally {
+            if (needWakeLock) {
+                mMediaEventWakeLock.release();
+            }
+        }
+    }
+
+    /**
+     * Verify whether it is safe to start voice-based interactions given the state of the system
+     * @return false is the Keyguard is locked and secure, true otherwise
+     */
+    private boolean safeToStartVoiceBasedInteractions() {
+        KeyguardManager keyguard =
+                (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        if (keyguard == null) {
+            return false;
+        }
+        
+        return true;
+    }
+
     private PowerManager.WakeLock mMediaEventWakeLock;
 
     private static final int WAKELOCK_RELEASE_ON_FINISHED = 1980; //magic number
@@ -3703,7 +3907,14 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     BroadcastReceiver mKeyEventDone = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            if (intent.getExtras().containsKey(EXTRA_WAKELOCK_ACQUIRED)) {
+            if (intent == null) {
+                return;
+            }
+            Bundle extras = intent.getExtras();
+            if (extras == null) {
+                return;
+            }
+            if (extras.containsKey(EXTRA_WAKELOCK_ACQUIRED)) {
                 mMediaEventWakeLock.release();
             }
         }
