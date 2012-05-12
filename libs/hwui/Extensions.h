@@ -40,7 +40,6 @@ namespace uirenderer {
 #endif
 
 // Vendor strings
-
 #define VENDOR_IMG "Imagination Technologies"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,6 +67,7 @@ public:
         mHasFramebufferFetch = hasExtension("GL_NV_shader_framebuffer_fetch");
         mHasDiscardFramebuffer = hasExtension("GL_EXT_discard_framebuffer");
         mHasDebugMarker = hasExtension("GL_EXT_debug_marker");
+        mHasDebugLabel = hasExtension("GL_EXT_debug_label");
 
         const char* vendor = (const char*) glGetString(GL_VENDOR);
         EXT_LOGD("Vendor: %s", vendor);
@@ -84,6 +84,7 @@ public:
     inline bool needsHighpTexCoords() const { return mNeedsHighpTexCoords; }
     inline bool hasDiscardFramebuffer() const { return mHasDiscardFramebuffer; }
     inline bool hasDebugMarker() const { return mHasDebugMarker; }
+    inline bool hasDebugLabel() const { return mHasDebugLabel; }
 
     bool hasExtension(const char* extension) const {
         const String8 s(extension);
@@ -104,6 +105,7 @@ private:
     bool mHasFramebufferFetch;
     bool mHasDiscardFramebuffer;
     bool mHasDebugMarker;
+    bool mHasDebugLabel;
 }; // class Extensions
 
 }; // namespace uirenderer
