@@ -3221,28 +3221,23 @@ public class WindowManagerService extends IWindowManager.Stub
             // Entering app zooms out from the center of the thumbnail.
             float scaleW = thumbWidth / mAppDisplayWidth;
             float scaleH = thumbHeight / mAppDisplayHeight;
-            AnimationSet set = new AnimationSet(true);
             Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
                     computePivot(mNextAppTransitionStartX, scaleW),
                     computePivot(mNextAppTransitionStartY, scaleH));
             scale.setDuration(duration);
             scale.setFillBefore(true);
-            set.addAnimation(scale);
-            // Need to set an alpha animation on the entering app window
-            // in case it appears one frame before the thumbnail window
-            // (this solves flicker)
-            Animation alpha = new AlphaAnimation(0, 1);
-            alpha.setDuration(1);
-            alpha.setFillAfter(true);
-            set.addAnimation(alpha);
-            a = set;
             if (delayDuration > 0) {
-                a.setStartOffset(delayDuration);
+                scale.setStartOffset(delayDuration);
             }
+            a = scale;
         } else {
-            a = createExitAnimationLocked(transit, duration);
-            if (delayDuration > 0) {
-                a.setStartOffset(delayDuration);
+            if (delayed) {
+                a = new AlphaAnimation(1, 0);
+                a.setStartOffset(0);
+                a.setDuration(delayDuration - 50);
+                a.setBackgroundColor(0xFF000000);
+            } else {
+                a = createExitAnimationLocked(transit, duration);
             }
         }
         a.setFillAfter(true);
