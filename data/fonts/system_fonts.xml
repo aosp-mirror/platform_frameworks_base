@@ -46,6 +46,17 @@
 
     <family>
         <nameset>
+            <name>sans-serif-condensed</name>
+        </nameset>
+        <fileset>
+            <file>RobotoCondensed-Regular.ttf</file>
+            <file>RobotoCondensed-Bold.ttf</file>
+            <file>RobotoCondensed-Italic.ttf</file>
+            <file>RobotoCondensed-BoldItalic.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <nameset>
             <name>serif</name>
             <name>times</name>
             <name>times new roman</name>
