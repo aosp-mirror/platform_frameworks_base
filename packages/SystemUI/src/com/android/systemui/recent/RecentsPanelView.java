@@ -469,7 +469,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             Display d = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
             if (!ActivityManager.isHighEndGfx(d)) {
-                mRecentsScrim.setBackgroundDrawable(null);
+                mRecentsScrim.setBackground(null);
             } else if (mRecentsScrim.getBackground() instanceof BitmapDrawable) {
                 // In order to save space, we make the background texture repeat in the Y direction
                 ((BitmapDrawable) mRecentsScrim.getBackground()).setTileModeY(TileMode.REPEAT);
