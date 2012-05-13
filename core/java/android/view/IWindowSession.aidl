@@ -58,10 +58,6 @@ interface IWindowSession {
      * {@link WindowManagerImpl#RELAYOUT_DEFER_SURFACE_DESTROY}.
      * @param outFrame Rect in which is placed the new position/size on
      * screen.
-     * @param outSystemInsets Rect in which is placed the offsets from
-     * <var>outFrame</var> over which any core system UI elements are
-     * currently covering the window.  This is not generally used for
-     * layout, but just to know where the window is obscured.
      * @param outContentInsets Rect in which is placed the offsets from
      * <var>outFrame</var> in which the content of the window should be
      * placed.  This can be used to modify the window layout to ensure its
@@ -83,7 +79,7 @@ interface IWindowSession {
      */
     int relayout(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
-            int flags, out Rect outFrame, out Rect outSystemInsets,
+            int flags, out Rect outFrame,
             out Rect outContentInsets, out Rect outVisibleInsets,
             out Configuration outConfig, out Surface outSurface);
 
