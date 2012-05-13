@@ -231,7 +231,17 @@ public class SurfaceView extends View {
     public void setVisibility(int visibility) {
         super.setVisibility(visibility);
         mViewVisibility = visibility == VISIBLE;
-        mRequestedVisible = mWindowVisibility && mViewVisibility;
+        boolean newRequestedVisible = mWindowVisibility && mViewVisibility;
+        if (newRequestedVisible != mRequestedVisible) {
+            // our base class (View) invalidates the layout only when
+            // we go from/to the GONE state. However, SurfaceView needs
+            // to request a re-layout when the visibility changes at all.
+            // This is needed because the transparent region is computed
+            // as part of the layout phase, and it changes (obviously) when
+            // the visibility changes.
+            requestLayout();
+        }
+        mRequestedVisible = newRequestedVisible;
         updateWindow(false, false);
     }
 
