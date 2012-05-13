@@ -436,8 +436,9 @@ class WindowStateAnimator {
 
         private float mSurfaceTraceAlpha = 0;
         private int mLayer;
-        private PointF mPosition = new PointF();
-        private Point mSize;
+        private final PointF mPosition = new PointF();
+        private final Point mSize = new Point();
+        private final Rect mWindowCrop = new Rect();
         private boolean mShown = false;
         private String mName = "Not named";
 
@@ -445,7 +446,7 @@ class WindowStateAnimator {
                        int pid, int display, int w, int h, int format, int flags) throws
                        OutOfResourcesException {
             super(s, pid, display, w, h, format, flags);
-            mSize = new Point(w, h);
+            mSize.set(w, h);
             Slog.v(SURFACE_TAG, "ctor: " + this + ". Called by "
                     + Debug.getCallers(3));
         }
@@ -455,7 +456,7 @@ class WindowStateAnimator {
                    throws OutOfResourcesException {
             super(s, pid, name, display, w, h, format, flags);
             mName = name;
-            mSize = new Point(w, h);
+            mSize.set(w, h);
             Slog.v(SURFACE_TAG, "ctor: " + this + ". Called by "
                     + Debug.getCallers(3));
         }
@@ -489,7 +490,7 @@ class WindowStateAnimator {
         @Override
         public void setPosition(float x, float y) {
             super.setPosition(x, y);
-            mPosition = new PointF(x, y);
+            mPosition.set(x, y);
             Slog.v(SURFACE_TAG, "setPosition: " + this + ". Called by "
                     + Debug.getCallers(3));
         }
@@ -497,8 +498,16 @@ class WindowStateAnimator {
         @Override
         public void setSize(int w, int h) {
             super.setSize(w, h);
-            mSize = new Point(w, h);
+            mSize.set(w, h);
             Slog.v(SURFACE_TAG, "setSize: " + this + ". Called by "
+                    + Debug.getCallers(3));
+        }
+
+        @Override
+        public void setWindowCrop(Rect crop) {
+            super.setWindowCrop(crop);
+            mWindowCrop.set(crop);
+            Slog.v(SURFACE_TAG, "setWindowCrop: " + this + ". Called by "
                     + Debug.getCallers(3));
         }
 
@@ -545,7 +554,8 @@ class WindowStateAnimator {
             return "Surface " + Integer.toHexString(System.identityHashCode(this)) + " "
                     + mName + ": shown=" + mShown + " layer=" + mLayer
                     + " alpha=" + mSurfaceTraceAlpha + " " + mPosition.x + "," + mPosition.y
-                    + " " + mSize.x + "x" + mSize.y;
+                    + " " + mSize.x + "x" + mSize.y
+                    + " crop=" + mWindowCrop.toShortString();
         }
     }
 
@@ -596,6 +606,7 @@ class WindowStateAnimator {
             mSurfaceY = 0;
             mSurfaceW = w;
             mSurfaceH = h;
+            mWin.mLastSystemDecorRect.set(0, 0, 0, 0);
             try {
                 final boolean isHwAccelerated = (attrs.flags &
                         WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0;
@@ -988,6 +999,55 @@ class WindowStateAnimator {
                         + " size=(" + width + "x" + height + ")", e);
                 if (!recoveringMemory) {
                     mService.reclaimSomeSurfaceMemoryLocked(this, "size", true);
+                }
+            }
+        }
+
+        // Need to recompute a new system decor rect each time.
+        if ((w.mAttrs.flags & LayoutParams.FLAG_SCALED) != 0) {
+            // Currently can't do this cropping for scaled windows.  We'll
+            // just keep the crop rect the same as the source surface.
+            w.mSystemDecorRect.set(0, 0, w.mRequestedWidth, w.mRequestedHeight);
+        } else if (w.mLayer >= mService.mSystemDecorLayer) {
+            // Above the decor layer is easy, just use the entire window.
+            w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(),
+                    w.mCompatFrame.height());
+        } else {
+            final Rect decorRect = mService.mSystemDecorRect;
+            // Compute the offset of the window in relation to the decor rect.
+            final int offX = w.mXOffset + w.mFrame.left;
+            final int offY = w.mYOffset + w.mFrame.top;
+            // Initialize the decor rect to the entire frame.
+            w.mSystemDecorRect.set(0, 0, w.mFrame.width(), w.mFrame.height());
+            // Intersect with the decor rect, offsetted by window position.
+            w.mSystemDecorRect.intersect(decorRect.left-offX, decorRect.top-offY,
+                    decorRect.right-offX, decorRect.bottom-offY);
+            // If size compatibility is being applied to the window, the
+            // surface is scaled relative to the screen.  Also apply this
+            // scaling to the crop rect.  We aren't using the standard rect
+            // scale function because we want to round things to make the crop
+            // always round to a larger rect to ensure we don't crop too
+            // much and hide part of the window that should be seen.
+            if (w.mEnforceSizeCompat && w.mInvGlobalScale != 1.0f) {
+                final float scale = w.mInvGlobalScale;
+                w.mSystemDecorRect.left = (int) (w.mSystemDecorRect.left * scale - 0.5f);
+                w.mSystemDecorRect.top = (int) (w.mSystemDecorRect.top * scale - 0.5f);
+                w.mSystemDecorRect.right = (int) ((w.mSystemDecorRect.right+1) * scale - 0.5f);
+                w.mSystemDecorRect.bottom = (int) ((w.mSystemDecorRect.bottom+1) * scale - 0.5f);
+            }
+        }
+
+        if (!w.mSystemDecorRect.equals(w.mLastSystemDecorRect)) {
+            w.mLastSystemDecorRect.set(w.mSystemDecorRect);
+            try {
+                if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
+                        "CROP " + w.mSystemDecorRect.toShortString(), null);
+                mSurface.setWindowCrop(w.mSystemDecorRect);
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "Error setting crop surface of " + w
+                        + " crop=" + w.mSystemDecorRect.toShortString(), e);
+                if (!recoveringMemory) {
+                    mService.reclaimSomeSurfaceMemoryLocked(this, "crop", true);
                 }
             }
         }

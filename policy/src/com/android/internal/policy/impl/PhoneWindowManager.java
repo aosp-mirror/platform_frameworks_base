@@ -15,7 +15,6 @@
 
 package com.android.internal.policy.impl;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IUiModeManager;
@@ -37,8 +36,6 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.RectF;
-import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.os.BatteryManager;
@@ -149,7 +146,6 @@ import java.io.FileDescriptor;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 /**
  * WindowManagerPolicy implementation for the Android phone UI.  This
@@ -247,8 +243,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     static final int SYSTEM_UI_CHANGING_LAYOUT =
             View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
-
-    private static final int BTN_MOUSE = 0x110;
 
     /* Table of Application Launch keys.  Maps from key codes to intent categories.
      *
@@ -448,7 +442,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     static final Rect mTmpParentFrame = new Rect();
     static final Rect mTmpDisplayFrame = new Rect();
-    static final Rect mTmpSystemFrame = new Rect();
     static final Rect mTmpContentFrame = new Rect();
     static final Rect mTmpVisibleFrame = new Rect();
     static final Rect mTmpNavigationFrame = new Rect();
@@ -2302,7 +2295,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mStatusBarLayer = mNavigationBar.getSurfaceLayer();
             // And compute the final frame.
             mNavigationBar.computeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame,
-                    mTmpNavigationFrame, mTmpNavigationFrame, mTmpNavigationFrame);
+                    mTmpNavigationFrame, mTmpNavigationFrame);
             if (DEBUG_LAYOUT) Log.i(TAG, "mNavigationBar frame: " + mTmpNavigationFrame);
         }
         if (DEBUG_LAYOUT) Log.i(TAG, String.format("mDock rect: (%d,%d - %d,%d)",
@@ -2323,7 +2316,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mStatusBarLayer = mStatusBar.getSurfaceLayer();
 
             // Let the status bar determine its size.
-            mStatusBar.computeFrameLw(pf, df, df, vf, vf);
+            mStatusBar.computeFrameLw(pf, df, vf, vf);
 
             // For layout, the status bar is always at the top with our fixed height.
             mStableTop = mUnrestrictedScreenTop + mStatusBarHeight;
@@ -2355,6 +2348,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mSystemTop = mUnrestrictedScreenTop + mStatusBarHeight;
             }
         }
+    }
+
+    /** {@inheritDoc} */
+    public int getSystemDecorRectLw(Rect systemRect) {
+        systemRect.left = mSystemLeft;
+        systemRect.top = mSystemTop;
+        systemRect.right = mSystemRight;
+        systemRect.bottom = mSystemBottom;
+        if (mStatusBar != null) return mStatusBar.getSurfaceLayer();
+        if (mNavigationBar != null) return mNavigationBar.getSurfaceLayer();
+        return 0;
     }
 
     void setAttachedWindowFrames(WindowState win, int fl, int adjust,
@@ -2427,7 +2431,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         final Rect pf = mTmpParentFrame;
         final Rect df = mTmpDisplayFrame;
-        final Rect sf = mTmpSystemFrame;
         final Rect cf = mTmpContentFrame;
         final Rect vf = mTmpVisibleFrame;
         
@@ -2671,20 +2674,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             df.right = df.bottom = cf.right = cf.bottom = vf.right = vf.bottom = 10000;
         }
 
-        // Compute the system frame.  This is easy: for things behind the
-        // status bar, it is any application windows; otherwise it is not set.
-        int parentType = attached != null ? attached.getAttrs().type : attrs.type;
-        if (win.getSurfaceLayer() < mStatusBarLayer
-                && parentType < WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW) {
-            sf.left = mSystemLeft;
-            sf.top = mSystemTop;
-            sf.right = mSystemRight;
-            sf.bottom = mSystemBottom;
-        } else {
-            sf.left = sf.top = -10000;
-            sf.right = sf.bottom = 10000;
-        }
-
         if (DEBUG_LAYOUT) Log.v(TAG, "Compute frame " + attrs.getTitle()
                 + ": sim=#" + Integer.toHexString(sim)
                 + " attach=" + attached + " type=" + attrs.type 
@@ -2692,7 +2681,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + " pf=" + pf.toShortString() + " df=" + df.toShortString()
                 + " cf=" + cf.toShortString() + " vf=" + vf.toShortString());
         
-        win.computeFrameLw(pf, df, sf, cf, vf);
+        win.computeFrameLw(pf, df, cf, vf);
         
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.

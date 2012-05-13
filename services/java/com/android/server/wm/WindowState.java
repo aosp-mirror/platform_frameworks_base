@@ -133,14 +133,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mContentInsetsChanged;
 
     /**
-     * Insets that are covered by system windows such as the status bar.  These
-     * are in the application's coordinate space (without compatibility scale applied).
-     */
-    final Rect mSystemInsets = new Rect();
-    final Rect mLastSystemInsets = new Rect();
-    boolean mSystemInsetsChanged;
-
-    /**
      * Set to true if we are waiting for this window to receive its
      * given internal insets before laying out other windows based on it.
      */
@@ -171,6 +163,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     int mTouchableInsets = ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 
+    /**
+     * This is rectangle of the window's surface that is not covered by
+     * system decorations.
+     */
+    final Rect mSystemDecorRect = new Rect();
+    final Rect mLastSystemDecorRect = new Rect();
+
     // Current transformation being applied.
     float mGlobalScale=1;
     float mInvGlobalScale=1;
@@ -187,7 +186,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     final Rect mContainingFrame = new Rect();
     final Rect mDisplayFrame = new Rect();
-    final Rect mSystemFrame = new Rect();
     final Rect mContentFrame = new Rect();
     final Rect mParentFrame = new Rect();
     final Rect mVisibleFrame = new Rect();
@@ -356,7 +354,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     @Override
-    public void computeFrameLw(Rect pf, Rect df, Rect sf, Rect cf, Rect vf) {
+    public void computeFrameLw(Rect pf, Rect df, Rect cf, Rect vf) {
         mHaveFrame = true;
 
         final Rect container = mContainingFrame;
@@ -413,9 +411,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mContentChanged = true;
         }
 
-        final Rect system = mSystemFrame;
-        system.set(sf);
-
         final Rect content = mContentFrame;
         content.set(cf);
 
@@ -449,10 +444,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
         // Make sure the system, content and visible frames are inside of the
         // final window frame.
-        if (system.left < frame.left) system.left = frame.left;
-        if (system.top < frame.top) system.top = frame.top;
-        if (system.right > frame.right) system.right = frame.right;
-        if (system.bottom > frame.bottom) system.bottom = frame.bottom;
         if (content.left < frame.left) content.left = frame.left;
         if (content.top < frame.top) content.top = frame.top;
         if (content.right > frame.right) content.right = frame.right;
@@ -461,12 +452,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (visible.top < frame.top) visible.top = frame.top;
         if (visible.right > frame.right) visible.right = frame.right;
         if (visible.bottom > frame.bottom) visible.bottom = frame.bottom;
-
-        final Rect systemInsets = mSystemInsets;
-        systemInsets.left = system.left-frame.left;
-        systemInsets.top = system.top-frame.top;
-        systemInsets.right = frame.right-system.right;
-        systemInsets.bottom = frame.bottom-system.bottom;
 
         final Rect contentInsets = mContentInsets;
         contentInsets.left = content.left-frame.left;
@@ -485,7 +470,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // If there is a size compatibility scale being applied to the
             // window, we need to apply this to its insets so that they are
             // reported to the app in its coordinate space.
-            systemInsets.scale(mInvGlobalScale);
             contentInsets.scale(mInvGlobalScale);
             visibleInsets.scale(mInvGlobalScale);
 
@@ -506,7 +490,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                         + mRequestedWidth + ", mRequestedheight="
                         + mRequestedHeight + ") to" + " (pw=" + pw + ", ph=" + ph
                         + "): frame=" + mFrame.toShortString()
-                        + " si=" + systemInsets.toShortString()
                         + " ci=" + contentInsets.toShortString()
                         + " vi=" + visibleInsets.toShortString());
             //}
@@ -526,11 +509,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     @Override
     public Rect getDisplayFrameLw() {
         return mDisplayFrame;
-    }
-
-    @Override
-    public Rect getSystemFrameLw() {
-        return mSystemFrame;
     }
 
     @Override
@@ -1067,6 +1045,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             pw.print(prefix); pw.print("mFrame="); mFrame.printShortString(pw);
                     pw.print(" last="); mLastFrame.printShortString(pw);
                     pw.println();
+            pw.print(prefix); pw.print("mSystemDecorRect="); mSystemDecorRect.printShortString(pw);
+                    pw.print(" last="); mLastSystemDecorRect.printShortString(pw);
+                    pw.println();
         }
         if (mEnforceSizeCompat) {
             pw.print(prefix); pw.print("mCompatFrame="); mCompatFrame.printShortString(pw);
@@ -1078,16 +1059,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.print(" parent="); mParentFrame.printShortString(pw);
                     pw.print(" display="); mDisplayFrame.printShortString(pw);
                     pw.println();
-            pw.print(prefix); pw.print("    system="); mSystemFrame.printShortString(pw);
-                    pw.print(" content="); mContentFrame.printShortString(pw);
+            pw.print(prefix); pw.print("    content="); mContentFrame.printShortString(pw);
                     pw.print(" visible="); mVisibleFrame.printShortString(pw);
                     pw.println();
-            pw.print(prefix); pw.print("Cur insets: system="); mSystemInsets.printShortString(pw);
-                    pw.print(" content="); mContentInsets.printShortString(pw);;
+            pw.print(prefix); pw.print("Cur insets: content=");
+                    mContentInsets.printShortString(pw);
                     pw.print(" visible="); mVisibleInsets.printShortString(pw);
                     pw.println();
-            pw.print(prefix); pw.print("Lst insets: system="); mLastSystemInsets.printShortString(pw);
-                    pw.print(" content="); mLastContentInsets.printShortString(pw);;
+            pw.print(prefix); pw.print("Lst insets: content=");
+                    mLastContentInsets.printShortString(pw);
                     pw.print(" visible="); mLastVisibleInsets.printShortString(pw);
                     pw.println();
         }

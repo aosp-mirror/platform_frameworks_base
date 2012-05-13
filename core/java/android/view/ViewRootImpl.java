@@ -262,7 +262,6 @@ public final class ViewRootImpl implements ViewParent,
 
     final Rect mPendingVisibleInsets = new Rect();
     final Rect mPendingContentInsets = new Rect();
-    final Rect mPendingSystemInsets = new Rect();
     final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
             = new ViewTreeObserver.InternalInsetsInfo();
 
@@ -272,7 +271,6 @@ public final class ViewRootImpl implements ViewParent,
     final Configuration mPendingConfiguration = new Configuration();
 
     class ResizedInfo {
-        Rect systemInsets;
         Rect contentInsets;
         Rect visibleInsets;
         Configuration newConfig;
@@ -568,7 +566,6 @@ public final class ViewRootImpl implements ViewParent,
                 if (mTranslator != null) {
                     mTranslator.translateRectInScreenToAppWindow(mAttachInfo.mContentInsets);
                 }
-                mPendingSystemInsets.set(0, 0, 0, 0);
                 mPendingContentInsets.set(mAttachInfo.mContentInsets);
                 mPendingVisibleInsets.set(0, 0, 0, 0);
                 if (DEBUG_LAYOUT) Log.v(TAG, "Added window " + mWindow);
@@ -1235,7 +1232,6 @@ public final class ViewRootImpl implements ViewParent,
         getRunQueue().executeActions(attachInfo.mHandler);
 
         boolean insetsChanged = false;
-        boolean activeRectChanged = false;
 
         boolean layoutRequested = mLayoutRequested && !mStopped;
         if (layoutRequested) {
@@ -1247,12 +1243,7 @@ public final class ViewRootImpl implements ViewParent,
                 // to opposite of the added touch mode.
                 mAttachInfo.mInTouchMode = !mAddedTouchMode;
                 ensureTouchModeLocally(mAddedTouchMode);
-                activeRectChanged = true;
             } else {
-                if (!mPendingSystemInsets.equals(mAttachInfo.mSystemInsets)) {
-                    mAttachInfo.mSystemInsets.set(mPendingSystemInsets);
-                    activeRectChanged = true;
-                }
                 if (!mPendingContentInsets.equals(mAttachInfo.mContentInsets)) {
                     insetsChanged = true;
                 }
@@ -1406,10 +1397,6 @@ public final class ViewRootImpl implements ViewParent,
                     mPendingConfiguration.seq = 0;
                 }
 
-                if (!mPendingSystemInsets.equals(mAttachInfo.mSystemInsets)) {
-                    activeRectChanged = true;
-                    mAttachInfo.mSystemInsets.set(mPendingSystemInsets);
-                }
                 contentInsetsChanged = !mPendingContentInsets.equals(
                         mAttachInfo.mContentInsets);
                 visibleInsetsChanged = !mPendingVisibleInsets.equals(
@@ -1512,7 +1499,6 @@ public final class ViewRootImpl implements ViewParent,
                         // before actually drawing them, so it can display then
                         // all at once.
                         newSurface = true;
-                        activeRectChanged = true;
                         mFullRedrawNeeded = true;
                         mPreviousTransparentRegion.setEmpty();
 
@@ -1578,7 +1564,6 @@ public final class ViewRootImpl implements ViewParent,
             // window size we asked for. We should avoid this by getting a maximum size from
             // the window session beforehand.
             if (mWidth != frame.width() || mHeight != frame.height()) {
-                activeRectChanged = true;
                 mWidth = frame.width();
                 mHeight = frame.height();
             }
@@ -2814,7 +2799,6 @@ public final class ViewRootImpl implements ViewParent,
                 ResizedInfo ri = (ResizedInfo)msg.obj;
 
                 if (mWinFrame.width() == msg.arg1 && mWinFrame.height() == msg.arg2
-                        && mPendingSystemInsets.equals(ri.systemInsets)
                         && mPendingContentInsets.equals(ri.contentInsets)
                         && mPendingVisibleInsets.equals(ri.visibleInsets)
                         && ((ResizedInfo)msg.obj).newConfig == null) {
@@ -2831,7 +2815,6 @@ public final class ViewRootImpl implements ViewParent,
                     mWinFrame.right = msg.arg1;
                     mWinFrame.top = 0;
                     mWinFrame.bottom = msg.arg2;
-                    mPendingSystemInsets.set(((ResizedInfo)msg.obj).systemInsets);
                     mPendingContentInsets.set(((ResizedInfo)msg.obj).contentInsets);
                     mPendingVisibleInsets.set(((ResizedInfo)msg.obj).visibleInsets);
                     if (msg.what == MSG_RESIZED_REPORT) {
@@ -3866,7 +3849,7 @@ public final class ViewRootImpl implements ViewParent,
                 (int) (mView.getMeasuredWidth() * appScale + 0.5f),
                 (int) (mView.getMeasuredHeight() * appScale + 0.5f),
                 viewVisibility, insetsPending ? WindowManagerImpl.RELAYOUT_INSETS_PENDING : 0,
-                mWinFrame, mPendingSystemInsets, mPendingContentInsets, mPendingVisibleInsets,
+                mWinFrame, mPendingContentInsets, mPendingVisibleInsets,
                 mPendingConfiguration, mSurface);
         //Log.d(TAG, "<<<<<< BACK FROM relayout");
         if (restore) {
@@ -4062,11 +4045,10 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessage(msg);
     }
 
-    public void dispatchResized(int w, int h, Rect systemInsets, Rect contentInsets,
+    public void dispatchResized(int w, int h, Rect contentInsets,
             Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
         if (DEBUG_LAYOUT) Log.v(TAG, "Resizing " + this + ": w=" + w
-                + " h=" + h + " systemInsets=" + systemInsets.toShortString()
-                + " contentInsets=" + contentInsets.toShortString()
+                + " h=" + h + " contentInsets=" + contentInsets.toShortString()
                 + " visibleInsets=" + visibleInsets.toShortString()
                 + " reportDraw=" + reportDraw);
         Message msg = mHandler.obtainMessage(reportDraw ? MSG_RESIZED_REPORT :MSG_RESIZED);
@@ -4079,7 +4061,6 @@ public final class ViewRootImpl implements ViewParent,
         msg.arg1 = w;
         msg.arg2 = h;
         ResizedInfo ri = new ResizedInfo();
-        ri.systemInsets = new Rect(systemInsets);
         ri.contentInsets = new Rect(contentInsets);
         ri.visibleInsets = new Rect(visibleInsets);
         ri.newConfig = newConfig;
@@ -4735,11 +4716,11 @@ public final class ViewRootImpl implements ViewParent,
             mViewAncestor = new WeakReference<ViewRootImpl>(viewAncestor);
         }
 
-        public void resized(int w, int h, Rect systemInsets, Rect contentInsets,
+        public void resized(int w, int h, Rect contentInsets,
                 Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
-                viewAncestor.dispatchResized(w, h, systemInsets, contentInsets,
+                viewAncestor.dispatchResized(w, h, contentInsets,
                         visibleInsets, reportDraw, newConfig);
             }
         }

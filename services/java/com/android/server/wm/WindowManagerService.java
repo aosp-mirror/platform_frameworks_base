@@ -480,6 +480,9 @@ public class WindowManagerService extends IWindowManager.Stub
             = new ArrayList<IRotationWatcher>();
     int mDeferredRotationPauseCount;
 
+    final Rect mSystemDecorRect = new Rect();
+    int mSystemDecorLayer = 0;
+
     int mPendingLayoutChanges = 0;
     boolean mLayoutNeeded = true;
     boolean mTraversalScheduled = false;
@@ -2647,7 +2650,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public int relayoutWindow(Session session, IWindow client, int seq,
             WindowManager.LayoutParams attrs, int requestedWidth,
             int requestedHeight, int viewVisibility, int flags,
-            Rect outFrame, Rect outSystemInsets, Rect outContentInsets,
+            Rect outFrame, Rect outContentInsets,
             Rect outVisibleInsets, Configuration outConfig, Surface outSurface) {
         boolean displayed = false;
         boolean inTouchMode;
@@ -2939,7 +2942,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mAppToken.updateReportedVisibilityLocked();
             }
             outFrame.set(win.mCompatFrame);
-            outSystemInsets.set(win.mSystemInsets);
             outContentInsets.set(win.mContentInsets);
             outVisibleInsets.set(win.mVisibleInsets);
             if (localLOGV) Slog.v(
@@ -7710,6 +7712,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         
         mPolicy.beginLayoutLw(dw, dh, mRotation);
+        mSystemDecorLayer = mPolicy.getSystemDecorRectLw(mSystemDecorRect);
 
         int seq = mLayoutSeq+1;
         if (seq < 0) seq = 0;
@@ -8172,8 +8175,6 @@ public class WindowManagerService extends IWindowManager.Stub
     private void updateResizingWindows(final WindowState w) {
         final WindowStateAnimator winAnimator = w.mWinAnimator;
         if (w.mHasSurface && !w.mAppFreezing && w.mLayoutSeq == mLayoutSeq) {
-            w.mSystemInsetsChanged |=
-                    !w.mLastSystemInsets.equals(w.mSystemInsets);
             w.mContentInsetsChanged |=
                     !w.mLastContentInsets.equals(w.mContentInsets);
             w.mVisibleInsetsChanged |=
@@ -8190,8 +8191,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     + ": configChanged=" + configChanged
                     + " last=" + w.mLastFrame + " frame=" + w.mFrame);
             w.mLastFrame.set(w.mFrame);
-            if (w.mSystemInsetsChanged
-                    || w.mContentInsetsChanged
+            if (w.mContentInsetsChanged
                     || w.mVisibleInsetsChanged
                     || winAnimator.mSurfaceResized
                     || configChanged) {
@@ -8203,7 +8203,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             + " configChanged=" + configChanged);
                 }
 
-                w.mLastSystemInsets.set(w.mSystemInsets);
                 w.mLastContentInsets.set(w.mContentInsets);
                 w.mLastVisibleInsets.set(w.mVisibleInsets);
                 makeWindowFreezingScreenIfNeededLocked(w);
@@ -8587,11 +8586,10 @@ public class WindowManagerService extends IWindowManager.Stub
                             winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING) Slog.i(
                             TAG, "Resizing " + win + " WITH DRAW PENDING");
                     win.mClient.resized((int)winAnimator.mSurfaceW,
-                            (int)winAnimator.mSurfaceH, win.mLastSystemInsets,
+                            (int)winAnimator.mSurfaceH,
                             win.mLastContentInsets, win.mLastVisibleInsets,
                             winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING,
                             configChanged ? win.mConfiguration : null);
-                    win.mSystemInsetsChanged = false;
                     win.mContentInsetsChanged = false;
                     win.mVisibleInsetsChanged = false;
                     winAnimator.mSurfaceResized = false;
@@ -9582,6 +9580,8 @@ public class WindowManagerService extends IWindowManager.Stub
         pw.print("  mInTouchMode="); pw.print(mInTouchMode);
                 pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
         if (dumpAll) {
+            pw.print("  mSystemDecorRect="); pw.print(mSystemDecorRect.toShortString());
+                    pw.print(" mSystemDecorLayer="); pw.println(mSystemDecorLayer);
             if (mLastStatusBarVisibility != 0) {
                 pw.print("  mLastStatusBarVisibility=0x");
                         pw.println(Integer.toHexString(mLastStatusBarVisibility));
