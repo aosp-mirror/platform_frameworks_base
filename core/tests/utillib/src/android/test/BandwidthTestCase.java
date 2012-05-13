@@ -18,6 +18,7 @@ package android.test;
 import android.net.NetworkStats;
 import android.net.TrafficStats;
 import android.os.Bundle;
+import android.util.Log;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -29,6 +30,7 @@ import java.lang.reflect.Modifier;
  * as an {@link InstrumentationTestCase}
  */
 public class BandwidthTestCase extends InstrumentationTestCase {
+    private static final String TAG = "BandwidthTestCase";
     private static final String REPORT_KEY_PACKETS_SENT = "txPackets";
     private static final String REPORT_KEY_PACKETS_RECEIVED = "rxPackets";
     private static final String REPORT_KEY_BYTES_SENT = "txBytes";
@@ -86,11 +88,26 @@ public class BandwidthTestCase extends InstrumentationTestCase {
             }
         } else if (method.isAnnotationPresent(BandwidthTest.class) ||
                 testClass.isAnnotationPresent(BandwidthTest.class)) {
-            TrafficStats.startDataProfiling(null);
+            /**
+             * If bandwidth profiling fails for whatever reason the test
+             * should be allow to execute to its completion.
+             * Typically bandwidth profiling would fail when a lower level
+             * component is missing, such as the kernel module, for a newly
+             * introduced hardware.
+             */
+            try{
+                TrafficStats.startDataProfiling(null);
+            } catch(IllegalStateException isx){
+                Log.w(TAG, "Failed to start bandwidth profiling");
+            }
             runMethod(method, 1, false);
-            NetworkStats stats = TrafficStats.stopDataProfiling(null);
-            NetworkStats.Entry entry = stats.getTotal(null);
-            getInstrumentation().sendStatus(2, getBandwidthStats(entry));
+            try{
+                NetworkStats stats = TrafficStats.stopDataProfiling(null);
+                NetworkStats.Entry entry = stats.getTotal(null);
+                getInstrumentation().sendStatus(2, getBandwidthStats(entry));
+            } catch (IllegalStateException isx){
+                Log.w(TAG, "Failed to collect bandwidth stats");
+            }
         } else {
             runMethod(method, runCount, isRepetitive);
         }
