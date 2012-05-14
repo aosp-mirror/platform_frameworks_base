@@ -114,6 +114,8 @@ option java_package com.android.server
 # Package Manager ready:
 3100 boot_progress_pms_ready (time|2|3)
 # + check activity_launch_time for Home app
+# Value of "unknown sources" setting at app install time
+3110 unknown_sources_enabled (value|1)
 
 
 # ---------------------------
