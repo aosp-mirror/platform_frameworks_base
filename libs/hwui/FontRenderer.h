@@ -41,11 +41,13 @@ namespace uirenderer {
 
 #if RENDER_TEXT_AS_GLYPHS
     typedef uint16_t glyph_t;
+    #define TO_GLYPH(g) g
     #define GET_METRICS(paint, glyph) paint->getGlyphMetrics(glyph)
     #define GET_GLYPH(text) nextGlyph((const uint16_t**) &text)
     #define IS_END_OF_STRING(glyph) false
 #else
     typedef SkUnichar glyph_t;
+    #define TO_GLYPH(g) ((SkUnichar) g)
     #define GET_METRICS(paint, glyph) paint->getUnicharMetrics(glyph)
     #define GET_GLYPH(text) SkUTF16_NextUnichar((const uint16_t**) &text)
     #define IS_END_OF_STRING(glyph) glyph < 0
@@ -98,7 +100,7 @@ public:
     uint32_t mCurrentRow;
     uint32_t mCurrentCol;
     bool mDirty;
-    CacheTexture *mCacheTexture;
+    CacheTexture* mCacheTexture;
 };
 
 struct CachedGlyphInfo {
@@ -236,8 +238,6 @@ public:
     FontRenderer();
     ~FontRenderer();
 
-    void init();
-    void deinit();
     void flushLargeCaches();
 
     void setGammaTable(const uint8_t* gammaTable) {
@@ -278,6 +278,7 @@ public:
 
     GLuint getTexture(bool linearFiltering = false) {
         checkInit();
+
         if (linearFiltering != mCurrentCacheTexture->mLinearFiltering) {
             mCurrentCacheTexture->mLinearFiltering = linearFiltering;
             mLinearFiltering = linearFiltering;
@@ -287,6 +288,7 @@ public:
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
         }
+
         return mCurrentCacheTexture->mTextureId;
     }
 
@@ -326,7 +328,6 @@ protected:
     void initRender(const Rect* clip, Rect* bounds);
     void finishRender();
 
-    String16 mLatinPrecache;
     void precacheLatin(SkPaint* paint);
 
     void issueDrawCommand();
