@@ -1107,7 +1107,7 @@
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Als Kamera angeschlossen"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Als Installationsprogramm angeschlossen"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Mit USB-Zubehör verbunden"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"Zum Anzeigen weiterer USB-Optionen berühren"</string>
+    <string name="usb_notification_message" msgid="2290859399983720271">"Für mehr USB-Optionen berühren"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB-Speicher formatieren?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD-Karte formatieren?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Alle in Ihrem USB-Speicher abgelegten Dateien werden gelöscht. Diese Aktion kann nicht rückgängig gemacht werden!"</string>
