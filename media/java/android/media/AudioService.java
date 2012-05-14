@@ -701,6 +701,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             // Check if the ringer mode changes with this volume adjustment. If
             // it does, it will handle adjusting the volume, so we won't below
             adjustVolume = checkForRingerModeChange(aliasIndex, direction, step);
+            if ((streamTypeAlias == getMasterStreamType()) &&
+                    (mRingerMode == AudioManager.RINGER_MODE_SILENT)) {
+                streamState.setLastAudibleIndex(0, device);
+            }
         }
 
         // If stream is muted, adjust last audible index only
