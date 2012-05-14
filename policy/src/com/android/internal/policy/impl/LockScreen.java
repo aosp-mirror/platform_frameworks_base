@@ -129,6 +129,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
 
         // Get the target position for the given resource. Returns -1 if not found.
         public int getTargetPosition(int resourceId);
+
+        // Clean up when this widget is going away
+        public void cleanUp();
     }
 
     class SlidingTabMethods implements SlidingTab.OnTriggerListener, UnlockWidgetCommonMethods {
@@ -197,6 +200,10 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         public int getTargetPosition(int resourceId) {
             return -1; // Not supported
         }
+
+        public void cleanUp() {
+            mSlidingTab.setOnTriggerListener(null);
+        }
     }
 
     class WaveViewMethods implements WaveView.OnTriggerListener, UnlockWidgetCommonMethods {
@@ -239,6 +246,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         }
         public int getTargetPosition(int resourceId) {
             return -1; // Not supported
+        }
+        public void cleanUp() {
+            mWaveView.setOnTriggerListener(null);
         }
     }
 
@@ -373,6 +383,10 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
 
         public int getTargetPosition(int resourceId) {
             return mMultiWaveView.getTargetPosition(resourceId);
+        }
+
+        public void cleanUp() {
+            mMultiWaveView.setOnTriggerListener(null);
         }
     }
 
@@ -592,6 +606,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
     public void cleanUp() {
         mUpdateMonitor.removeCallback(mInfoCallback); // this must be first
         mUpdateMonitor.removeCallback(mSimStateCallback);
+        mUnlockWidgetMethods.cleanUp();
         mLockPatternUtils = null;
         mUpdateMonitor = null;
         mCallback = null;
