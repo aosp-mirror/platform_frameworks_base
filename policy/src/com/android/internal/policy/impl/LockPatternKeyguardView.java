@@ -414,12 +414,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         }
     };
 
-    // Indicates whether a biometric unlock method is in use
-    private boolean isBiometricUnlockInstalledAndSelected() {
-        return (mLockPatternUtils.usingBiometricWeak() &&
-                mLockPatternUtils.isBiometricWeakInstalled());
-    }
-
     /**
      * @param context Used to inflate, and create views.
      * @param callback Keyguard callback object for pokewakelock(), etc.
@@ -443,14 +437,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         sIsFirstAppearanceAfterBoot = false;
         mPluggedIn = mUpdateMonitor.isDevicePluggedIn();
         mScreenOn = ((PowerManager)context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
-
-        // If the biometric unlock is not being used, we don't bother constructing it.  Then we can
-        // simply check if it is null when deciding whether we should make calls to it.
-        if (isBiometricUnlockInstalledAndSelected()) {
-            mBiometricUnlock = new FaceUnlock(context, updateMonitor, lockPatternUtils,
-                    mKeyguardScreenCallback);
-        }
-
         mUpdateMonitor.registerInfoCallback(mInfoCallback);
 
         /**
@@ -848,19 +834,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             }
         }
 
-        // Re-create the unlock screen if necessary. This is primarily required to properly handle
-        // SIM state changes. This typically happens when this method is called by reset()
+        // Re-create the unlock screen if necessary.
         final UnlockMode unlockMode = getUnlockMode();
         if (mode == Mode.UnlockScreen && unlockMode != UnlockMode.Unknown) {
             if (force || mUnlockScreen == null || unlockMode != mUnlockScreenMode) {
-                boolean restartBiometricUnlock = false;
-                if (mBiometricUnlock != null) {
-                    restartBiometricUnlock = mBiometricUnlock.stop();
-                }
                 recreateUnlockScreen(unlockMode);
-                if (mBiometricUnlock != null && restartBiometricUnlock) {
-                    maybeStartBiometricUnlock();
-                }
             }
         }
 
@@ -973,13 +951,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             throw new IllegalArgumentException("unknown unlock mode " + unlockMode);
         }
         initializeTransportControlView(unlockView);
-
-        if (mBiometricUnlock != null) {
-            // TODO: make faceLockAreaView a more general biometricUnlockView
-            // We will need to add our Face Unlock specific child views programmatically in
-            // initializeView rather than having them in the XML files.
-            mBiometricUnlock.initializeView(unlockView.findViewById(R.id.faceLockAreaView));
-        }
+        initializeBiometricUnlockView(unlockView);
 
         mUnlockScreenMode = unlockMode;
         return unlockView;
@@ -993,6 +965,55 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             mUpdateMonitor.reportClockVisible(true);
             mTransportControlView.setVisibility(View.GONE); // hide until it requests being shown.
             mTransportControlView.setCallback(mWidgetCallback);
+        }
+    }
+
+    /**
+     * This returns false if there is any condition that indicates that the biometric unlock should
+     * not be used before the next time the unlock screen is recreated.  In other words, if this
+     * returns false there is no need to even construct the biometric unlock.
+     */
+    private boolean useBiometricUnlock() {
+        final UnlockMode unlockMode = getUnlockMode();
+        final boolean backupIsTimedOut = (mUpdateMonitor.getFailedAttempts() >=
+                LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT);
+        return (mLockPatternUtils.usingBiometricWeak() &&
+                mLockPatternUtils.isBiometricWeakInstalled() &&
+                !mUpdateMonitor.getMaxBiometricUnlockAttemptsReached() &&
+                !backupIsTimedOut &&
+                (unlockMode == UnlockMode.Pattern || unlockMode == UnlockMode.Password));
+    }
+
+    private void initializeBiometricUnlockView(View view) {
+        boolean restartBiometricUnlock = false;
+
+        if (mBiometricUnlock != null) {
+            restartBiometricUnlock = mBiometricUnlock.stop();
+        }
+
+        // If the biometric unlock is not being used, we don't bother constructing it.  Then we can
+        // simply check if it is null when deciding whether we should make calls to it.
+        mBiometricUnlock = null;
+        if (useBiometricUnlock()) {
+            // TODO: make faceLockAreaView a more general biometricUnlockView
+            // We will need to add our Face Unlock specific child views programmatically in
+            // initializeView rather than having them in the XML files.
+            View biometricUnlockView = view.findViewById(R.id.faceLockAreaView);
+            if (biometricUnlockView != null) {
+                mBiometricUnlock = new FaceUnlock(mContext, mUpdateMonitor, mLockPatternUtils,
+                        mKeyguardScreenCallback);
+                mBiometricUnlock.initializeView(biometricUnlockView);
+
+                // If this is being called because the screen turned off, we want to cover the
+                // backup lock so it is covered when the screen turns back on.
+                if (!mScreenOn) mBiometricUnlock.show(0);
+            } else {
+                Log.w(TAG, "Couldn't find biometric unlock view");
+            }
+        }
+
+        if (mBiometricUnlock != null && restartBiometricUnlock) {
+            maybeStartBiometricUnlock();
         }
     }
 
