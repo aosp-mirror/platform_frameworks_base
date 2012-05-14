@@ -555,6 +555,7 @@ void FontRenderer::deallocateTextureMemory(CacheTexture *cacheTexture) {
         glDeleteTextures(1, &cacheTexture->mTextureId);
         delete[] cacheTexture->mTexture;
         cacheTexture->mTexture = NULL;
+        cacheTexture->mTextureId = 0;
     }
 }
 
@@ -589,7 +590,13 @@ void FontRenderer::allocateTextureMemory(CacheTexture* cacheTexture) {
     int height = cacheTexture->mHeight;
 
     cacheTexture->mTexture = new uint8_t[width * height];
+#if DEBUG_FONT_RENDERER
     memset(cacheTexture->mTexture, 0, width * height * sizeof(uint8_t));
+#endif
+
+    if (!cacheTexture->mTextureId) {
+        glGenTextures(1, &cacheTexture->mTextureId);
+    }
 
     glBindTexture(GL_TEXTURE_2D, cacheTexture->mTextureId);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -680,11 +687,8 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
 }
 
 CacheTexture* FontRenderer::createCacheTexture(int width, int height, bool allocate) {
-    GLuint textureId;
-    glGenTextures(1, &textureId);
-
     uint8_t* textureMemory = NULL;
-    CacheTexture* cacheTexture = new CacheTexture(textureMemory, textureId, width, height);
+    CacheTexture* cacheTexture = new CacheTexture(textureMemory, width, height);
 
     if (allocate) {
         allocateTextureMemory(cacheTexture);
