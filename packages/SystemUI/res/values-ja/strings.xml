@@ -142,10 +142,8 @@
     <string name="accessibility_clear_all" msgid="5235938559247164925">"通知をすべて消去。"</string>
     <string name="dreams_dock_launcher" msgid="3541196417659166245">"スクリーンセーバーを有効にする"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"アプリ情報"</string>
-    <!-- no translation found for notifications_off_title (8936620513608443224) -->
-    <skip />
-    <!-- no translation found for notifications_off_text (2529001315769385273) -->
-    <skip />
+    <string name="notifications_off_title" msgid="8936620513608443224">"通知OFF"</string>
+    <string name="notifications_off_text" msgid="2529001315769385273">"通知を再度ONにするにはここをタップします。"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"画面は自動的に回転します。"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"画面は横向きにロックされています。"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"画面は縦向きにロックされています。"</string>
