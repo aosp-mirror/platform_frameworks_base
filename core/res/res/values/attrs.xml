@@ -5627,6 +5627,6 @@
         <!-- The display label of the keyboard layout. -->
         <attr name="label" />
         <!-- The key character map file resource. -->
-        <attr name="kcm" format="reference" />
+        <attr name="keyboardLayout" format="reference" />
     </declare-styleable>
 </resources>

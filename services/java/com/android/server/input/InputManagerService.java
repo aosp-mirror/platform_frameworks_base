@@ -597,7 +597,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
         visitAllKeyboardLayouts(new KeyboardLayoutVisitor() {
             @Override
             public void visitKeyboardLayout(Resources resources,
-                    String descriptor, String label, int kcmResId) {
+                    String descriptor, String label, int keyboardLayoutResId) {
                 list.add(new KeyboardLayout(descriptor, label));
             }
         });
@@ -614,7 +614,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
         visitKeyboardLayout(keyboardLayoutDescriptor, new KeyboardLayoutVisitor() {
             @Override
             public void visitKeyboardLayout(Resources resources,
-                    String descriptor, String label, int kcmResId) {
+                    String descriptor, String label, int keyboardLayoutResId) {
                 result[0] = new KeyboardLayout(descriptor, label);
             }
         });
@@ -683,10 +683,11 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
                                     com.android.internal.R.styleable.KeyboardLayout_name);
                             String label = a.getString(
                                     com.android.internal.R.styleable.KeyboardLayout_label);
-                            int kcmResId = a.getResourceId(
-                                     com.android.internal.R.styleable.KeyboardLayout_kcm, 0);
-                            if (name == null || label == null || kcmResId == 0) {
-                                Log.w(TAG, "Missing required 'name', 'label' or 'kcm' "
+                            int keyboardLayoutResId = a.getResourceId(
+                                    com.android.internal.R.styleable.KeyboardLayout_keyboardLayout,
+                                    0);
+                            if (name == null || label == null || keyboardLayoutResId == 0) {
+                                Log.w(TAG, "Missing required 'name', 'label' or 'keyboardLayout' "
                                         + "attributes in keyboard layout "
                                         + "resource from receiver "
                                         + receiver.packageName + "/" + receiver.name);
@@ -695,7 +696,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
                                         receiver.packageName, receiver.name, name);
                                 if (keyboardName == null || name.equals(keyboardName)) {
                                     visitor.visitKeyboardLayout(resources, descriptor,
-                                            label, kcmResId);
+                                            label, keyboardLayoutResId);
                                 }
                             }
                         } finally {
@@ -1138,11 +1139,11 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
         visitKeyboardLayout(keyboardLayoutDescriptor, new KeyboardLayoutVisitor() {
             @Override
             public void visitKeyboardLayout(Resources resources,
-                    String descriptor, String label, int kcmResId) {
+                    String descriptor, String label, int keyboardLayoutResId) {
                 try {
                     result[0] = descriptor;
                     result[1] = Streams.readFully(new InputStreamReader(
-                            resources.openRawResource(kcmResId)));
+                            resources.openRawResource(keyboardLayoutResId)));
                 } catch (IOException ex) {
                 } catch (NotFoundException ex) {
                 }
@@ -1261,7 +1262,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
 
     private interface KeyboardLayoutVisitor {
         void visitKeyboardLayout(Resources resources,
-                String descriptor, String label, int kcmResId);
+                String descriptor, String label, int keyboardLayoutResId);
     }
 
     private final class InputDevicesChangedListenerRecord implements DeathRecipient {

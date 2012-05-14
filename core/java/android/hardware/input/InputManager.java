@@ -96,14 +96,14 @@ public final class InputManager {
      * &lt;keyboard-layouts xmlns:android="http://schemas.android.com/apk/res/android">
      *     &lt;keyboard-layout android:name="keyboard_layout_english_us"
      *             android:label="@string/keyboard_layout_english_us_label"
-     *             android:kcm="@raw/keyboard_layout_english_us" />
+     *             android:keyboardLayout="@raw/keyboard_layout_english_us" />
      * &lt;/keyboard-layouts>
      * </p><p>
      * The <code>android:name</code> attribute specifies an identifier by which
      * the keyboard layout will be known in the package.
      * The <code>android:label</code> attributes specifies a human-readable descriptive
      * label to describe the keyboard layout in the user interface, such as "English (US)".
-     * The <code>android:kcm</code> attribute refers to a
+     * The <code>android:keyboardLayout</code> attribute refers to a
      * <a href="http://source.android.com/tech/input/key-character-map-files.html">
      * key character map</a> resource that defines the keyboard layout.
      * </p>
