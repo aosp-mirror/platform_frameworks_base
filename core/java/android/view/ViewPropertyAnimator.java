@@ -342,6 +342,7 @@ public class ViewPropertyAnimator {
      * otherwise), then this method can be used.
      */
     public void start() {
+        mView.removeCallbacks(mAnimationStarter);
         startAnimation();
     }
 
