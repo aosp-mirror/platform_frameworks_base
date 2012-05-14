@@ -72,6 +72,7 @@ public class RSTestCore {
         unitTests.add(new UT_clamp(this, mRes, mCtx));
         unitTests.add(new UT_clamp_relaxed(this, mRes, mCtx));
         unitTests.add(new UT_convert(this, mRes, mCtx));
+        unitTests.add(new UT_convert_relaxed(this, mRes, mCtx));
         unitTests.add(new UT_rsdebug(this, mRes, mCtx));
         unitTests.add(new UT_rstime(this, mRes, mCtx));
         unitTests.add(new UT_rstypes(this, mRes, mCtx));
