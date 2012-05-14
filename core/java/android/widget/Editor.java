@@ -16,6 +16,9 @@
 
 package android.widget;
 
+import com.android.internal.util.ArrayUtils;
+import com.android.internal.widget.EditableInputConnection;
+
 import android.R;
 import android.content.ClipData;
 import android.content.ClipData.Item;
@@ -70,10 +73,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
-import android.view.ViewGroup;
 import android.view.View.DragShadowBuilder;
 import android.view.View.OnClickListener;
+import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
@@ -85,11 +88,11 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Editor.InputContentType;
+import android.widget.Editor.InputMethodState;
+import android.widget.Editor.SelectionModifierCursorController;
 import android.widget.TextView.Drawables;
 import android.widget.TextView.OnEditorActionListener;
-
-import com.android.internal.util.ArrayUtils;
-import com.android.internal.widget.EditableInputConnection;
 
 import java.text.BreakIterator;
 import java.util.Arrays;
@@ -102,6 +105,8 @@ import java.util.HashMap;
  * @hide
  */
 public class Editor {
+    private static final String TAG = "Editor";
+
     static final int BLINK = 500;
     private static final float[] TEMP_POSITION = new float[2];
     private static int DRAG_SHADOW_MAX_TEXT_LENGTH = 20;
@@ -151,6 +156,8 @@ public class Editor {
 
     boolean mInBatchEditControllers;
     boolean mShowSoftInputOnFocus = true;
+    boolean mPreserveDetachedSelection;
+    boolean mTemporaryDetach;
 
     SuggestionsPopupWindow mSuggestionsPopupWindow;
     SuggestionRangeSpan mSuggestionRangeSpan;
@@ -190,6 +197,7 @@ public class Editor {
             showError();
             mShowErrorAfterAttach = false;
         }
+        mTemporaryDetach = false;
 
         final ViewTreeObserver observer = mTextView.getViewTreeObserver();
         // No need to create the controller.
@@ -198,10 +206,22 @@ public class Editor {
             observer.addOnTouchModeChangeListener(mInsertionPointCursorController);
         }
         if (mSelectionModifierCursorController != null) {
+            mSelectionModifierCursorController.resetTouchOffsets();
             observer.addOnTouchModeChangeListener(mSelectionModifierCursorController);
         }
         updateSpellCheckSpans(0, mTextView.getText().length(),
                 true /* create the spell checker if needed */);
+
+        if (mTextView.hasTransientState() &&
+                mTextView.getSelectionStart() != mTextView.getSelectionEnd()) {
+            // Since transient state is reference counted make sure it stays matched
+            // with our own calls to it for managing selection.
+            // The action mode callback will set this back again when/if the action mode starts.
+            mTextView.setHasTransientState(false);
+
+            // We had an active selection from before, start the selection mode.
+            startSelectionActionMode();
+        }
     }
 
     void onDetachedFromWindow() {
@@ -234,7 +254,10 @@ public class Editor {
             mSpellChecker = null;
         }
 
+        mPreserveDetachedSelection = true;
         hideControllers();
+        mPreserveDetachedSelection = false;
+        mTemporaryDetach = false;
     }
 
     private void showError() {
@@ -877,7 +900,9 @@ public class Editor {
                 hideControllers();
                 Selection.setSelection((Spannable) mTextView.getText(), selStart, selEnd);
             } else {
+                if (mTemporaryDetach) mPreserveDetachedSelection = true;
                 hideControllers();
+                if (mTemporaryDetach) mPreserveDetachedSelection = false;
                 downgradeEasyCorrectionSpans();
             }
 
@@ -2679,6 +2704,7 @@ public class Editor {
 
             if (menu.hasVisibleItems() || mode.getCustomView() != null) {
                 getSelectionController().show();
+                mTextView.setHasTransientState(true);
                 return true;
             } else {
                 return false;
@@ -2707,7 +2733,17 @@ public class Editor {
             if (mCustomSelectionActionModeCallback != null) {
                 mCustomSelectionActionModeCallback.onDestroyActionMode(mode);
             }
-            Selection.setSelection((Spannable) mTextView.getText(), mTextView.getSelectionEnd());
+
+            /*
+             * If we're ending this mode because we're detaching from a window,
+             * we still have selection state to preserve. Don't clear it, we'll
+             * bring back the selection mode when (if) we get reattached.
+             */
+            if (!mPreserveDetachedSelection) {
+                Selection.setSelection((Spannable) mTextView.getText(),
+                        mTextView.getSelectionEnd());
+                mTextView.setHasTransientState(false);
+            }
 
             if (mSelectionModifierCursorController != null) {
                 mSelectionModifierCursorController.hide();

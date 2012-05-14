@@ -6317,6 +6317,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     if (mTransientStateViews == null) {
                         mTransientStateViews = new SparseArray<View>();
                     }
+                    scrap.dispatchStartTemporaryDetach();
                     mTransientStateViews.put(position, scrap);
                 }
                 return;
