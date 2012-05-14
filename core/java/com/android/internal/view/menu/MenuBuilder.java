@@ -873,15 +873,20 @@ public class MenuBuilder implements Menu {
 
         boolean invoked = itemImpl.invoke();
 
+        final ActionProvider provider = item.getActionProvider();
+        final boolean providerHasSubMenu = provider != null && provider.hasSubMenu();
         if (itemImpl.hasCollapsibleActionView()) {
             invoked |= itemImpl.expandActionView();
             if (invoked) close(true);
-        } else if (item.hasSubMenu()) {
+        } else if (itemImpl.hasSubMenu() || providerHasSubMenu) {
             close(false);
 
-            final SubMenuBuilder subMenu = (SubMenuBuilder) item.getSubMenu();
-            final ActionProvider provider = item.getActionProvider();
-            if (provider != null && provider.hasSubMenu()) {
+            if (!itemImpl.hasSubMenu()) {
+                itemImpl.setSubMenu(new SubMenuBuilder(getContext(), this, itemImpl));
+            }
+
+            final SubMenuBuilder subMenu = (SubMenuBuilder) itemImpl.getSubMenu();
+            if (providerHasSubMenu) {
                 provider.onPrepareSubMenu(subMenu);
             }
             invoked |= dispatchSubMenuSelected(subMenu);
