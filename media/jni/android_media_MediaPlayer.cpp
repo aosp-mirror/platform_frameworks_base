@@ -72,6 +72,7 @@ private:
     JNIMediaPlayerListener();
     jclass      mClass;     // Reference to MediaPlayer class
     jobject     mObject;    // Weak ref to MediaPlayer Java object to call on
+    jobject     mParcel;
 };
 
 JNIMediaPlayerListener::JNIMediaPlayerListener(JNIEnv* env, jobject thiz, jobject weak_thiz)
@@ -90,6 +91,7 @@ JNIMediaPlayerListener::JNIMediaPlayerListener(JNIEnv* env, jobject thiz, jobjec
     // We use a weak reference so the MediaPlayer object can be garbage collected.
     // The reference is only used as a proxy for callbacks.
     mObject  = env->NewGlobalRef(weak_thiz);
+    mParcel = env->NewGlobalRef(createJavaParcelObject(env));
 }
 
 JNIMediaPlayerListener::~JNIMediaPlayerListener()
@@ -98,24 +100,29 @@ JNIMediaPlayerListener::~JNIMediaPlayerListener()
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     env->DeleteGlobalRef(mObject);
     env->DeleteGlobalRef(mClass);
+
+    recycleJavaParcelObject(env, mParcel);
+    env->DeleteGlobalRef(mParcel);
 }
 
 void JNIMediaPlayerListener::notify(int msg, int ext1, int ext2, const Parcel *obj)
 {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     if (obj && obj->dataSize() > 0) {
-        jbyteArray jArray = env->NewByteArray(obj->dataSize());
-        if (jArray != NULL) {
-            jbyte *nArray = env->GetByteArrayElements(jArray, NULL);
-            memcpy(nArray, obj->data(), obj->dataSize());
-            env->ReleaseByteArrayElements(jArray, nArray, 0);
+        if (mParcel != NULL) {
+            Parcel* nativeParcel = parcelForJavaObject(env, mParcel);
+            nativeParcel->setData(obj->data(), obj->dataSize());
             env->CallStaticVoidMethod(mClass, fields.post_event, mObject,
-                    msg, ext1, ext2, jArray);
-            env->DeleteLocalRef(jArray);
+                    msg, ext1, ext2, mParcel);
         }
     } else {
         env->CallStaticVoidMethod(mClass, fields.post_event, mObject,
                 msg, ext1, ext2, NULL);
+    }
+    if (env->ExceptionCheck()) {
+        ALOGW("An exception occurred while notifying an event.");
+        LOGW_EX(env);
+        env->ExceptionClear();
     }
 }
 
@@ -532,7 +539,6 @@ android_media_MediaPlayer_invoke(JNIEnv *env, jobject thiz,
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return UNKNOWN_ERROR;
     }
-
 
     Parcel *request = parcelForJavaObject(env, java_request);
     Parcel *reply = parcelForJavaObject(env, java_reply);

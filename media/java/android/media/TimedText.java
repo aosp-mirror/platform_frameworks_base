@@ -28,7 +28,7 @@ import java.util.ArrayList;
  * Class to hold the timed text's metadata, including:
  * <ul>
  * <li> The characters for rendering</li>
- * <li> The rendering postion for the timed text</li>
+ * <li> The rendering position for the timed text</li>
  * </ul>
  *
  * <p> To render the timed text, applications need to do the following:
@@ -86,7 +86,6 @@ public final class TimedText
 
     private static final String TAG = "TimedText";
 
-    private Parcel mParcel = Parcel.obtain();
     private final HashMap<Integer, Object> mKeyObjectMap =
             new HashMap<Integer, Object>();
 
@@ -356,10 +355,8 @@ public final class TimedText
      * @throws IllegalArgumentExcept if parseParcel() fails.
      * {@hide}
      */
-    public TimedText(byte[] obj) {
-        mParcel.unmarshall(obj, 0, obj.length);
-
-        if (!parseParcel()) {
+    public TimedText(Parcel parcel) {
+        if (!parseParcel(parcel)) {
             mKeyObjectMap.clear();
             throw new IllegalArgumentException("parseParcel() fails");
         }
@@ -393,28 +390,28 @@ public final class TimedText
      * Parcel. These are stored in mKeyObjectMap for application to retrieve.
      * @return false if an error occurred during parsing. Otherwise, true.
      */
-    private boolean parseParcel() {
-        mParcel.setDataPosition(0);
-        if (mParcel.dataAvail() == 0) {
+    private boolean parseParcel(Parcel parcel) {
+        parcel.setDataPosition(0);
+        if (parcel.dataAvail() == 0) {
             return false;
         }
 
-        int type = mParcel.readInt();
+        int type = parcel.readInt();
         if (type == KEY_LOCAL_SETTING) {
-            type = mParcel.readInt();
+            type = parcel.readInt();
             if (type != KEY_START_TIME) {
                 return false;
             }
-            int mStartTimeMs = mParcel.readInt();
+            int mStartTimeMs = parcel.readInt();
             mKeyObjectMap.put(type, mStartTimeMs);
 
-            type = mParcel.readInt();
+            type = parcel.readInt();
             if (type != KEY_STRUCT_TEXT) {
                 return false;
             }
 
-            int textLen = mParcel.readInt();
-            byte[] text = mParcel.createByteArray();
+            int textLen = parcel.readInt();
+            byte[] text = parcel.createByteArray();
             if (text == null || text.length == 0) {
                 mTextChars = null;
             } else {
@@ -426,8 +423,8 @@ public final class TimedText
             return false;
         }
 
-        while (mParcel.dataAvail() > 0) {
-            int key = mParcel.readInt();
+        while (parcel.dataAvail() > 0) {
+            int key = parcel.readInt();
             if (!isValidKey(key)) {
                 Log.w(TAG, "Invalid timed text key found: " + key);
                 return false;
@@ -437,77 +434,77 @@ public final class TimedText
 
             switch (key) {
                 case KEY_STRUCT_STYLE_LIST: {
-                    readStyle();
+                    readStyle(parcel);
                     object = mStyleList;
                     break;
                 }
                 case KEY_STRUCT_FONT_LIST: {
-                    readFont();
+                    readFont(parcel);
                     object = mFontList;
                     break;
                 }
                 case KEY_STRUCT_HIGHLIGHT_LIST: {
-                    readHighlight();
+                    readHighlight(parcel);
                     object = mHighlightPosList;
                     break;
                 }
                 case KEY_STRUCT_KARAOKE_LIST: {
-                    readKaraoke();
+                    readKaraoke(parcel);
                     object = mKaraokeList;
                     break;
                 }
                 case KEY_STRUCT_HYPER_TEXT_LIST: {
-                    readHyperText();
+                    readHyperText(parcel);
                     object = mHyperTextList;
 
                     break;
                 }
                 case KEY_STRUCT_BLINKING_TEXT_LIST: {
-                    readBlinkingText();
+                    readBlinkingText(parcel);
                     object = mBlinkingPosList;
 
                     break;
                 }
                 case KEY_WRAP_TEXT: {
-                    mWrapText = mParcel.readInt();
+                    mWrapText = parcel.readInt();
                     object = mWrapText;
                     break;
                 }
                 case KEY_HIGHLIGHT_COLOR_RGBA: {
-                    mHighlightColorRGBA = mParcel.readInt();
+                    mHighlightColorRGBA = parcel.readInt();
                     object = mHighlightColorRGBA;
                     break;
                 }
                 case KEY_DISPLAY_FLAGS: {
-                    mDisplayFlags = mParcel.readInt();
+                    mDisplayFlags = parcel.readInt();
                     object = mDisplayFlags;
                     break;
                 }
                 case KEY_STRUCT_JUSTIFICATION: {
 
-                    int horizontal = mParcel.readInt();
-                    int vertical = mParcel.readInt();
+                    int horizontal = parcel.readInt();
+                    int vertical = parcel.readInt();
                     mJustification = new Justification(horizontal, vertical);
 
                     object = mJustification;
                     break;
                 }
                 case KEY_BACKGROUND_COLOR_RGBA: {
-                    mBackgroundColorRGBA = mParcel.readInt();
+                    mBackgroundColorRGBA = parcel.readInt();
                     object = mBackgroundColorRGBA;
                     break;
                 }
                 case KEY_STRUCT_TEXT_POS: {
-                    int top = mParcel.readInt();
-                    int left = mParcel.readInt();
-                    int bottom = mParcel.readInt();
-                    int right = mParcel.readInt();
+                    int top = parcel.readInt();
+                    int left = parcel.readInt();
+                    int bottom = parcel.readInt();
+                    int right = parcel.readInt();
                     mTextBounds = new Rect(left, top, right, bottom);
 
                     break;
                 }
                 case KEY_SCROLL_DELAY: {
-                    mScrollDelay = mParcel.readInt();
+                    mScrollDelay = parcel.readInt();
                     object = mScrollDelay;
                     break;
                 }
@@ -520,18 +517,18 @@ public final class TimedText
                 if (mKeyObjectMap.containsKey(key)) {
                     mKeyObjectMap.remove(key);
                 }
+                // Previous mapping will be replaced with the new object, if there was one.
                 mKeyObjectMap.put(key, object);
             }
         }
 
-        mParcel.recycle();
         return true;
     }
 
     /*
      * To parse and store the Style list.
      */
-    private void readStyle() {
+    private void readStyle(Parcel parcel) {
         boolean endOfStyle = false;
         int startChar = -1;
         int endChar = -1;
@@ -541,23 +538,23 @@ public final class TimedText
         boolean isUnderlined = false;
         int fontSize = -1;
         int colorRGBA = -1;
-        while (!endOfStyle && (mParcel.dataAvail() > 0)) {
-            int key = mParcel.readInt();
+        while (!endOfStyle && (parcel.dataAvail() > 0)) {
+            int key = parcel.readInt();
             switch (key) {
                 case KEY_START_CHAR: {
-                    startChar = mParcel.readInt();
+                    startChar = parcel.readInt();
                     break;
                 }
                 case KEY_END_CHAR: {
-                    endChar = mParcel.readInt();
+                    endChar = parcel.readInt();
                     break;
                 }
                 case KEY_FONT_ID: {
-                    fontId = mParcel.readInt();
+                    fontId = parcel.readInt();
                     break;
                 }
                 case KEY_STYLE_FLAGS: {
-                    int flags = mParcel.readInt();
+                    int flags = parcel.readInt();
                     // In the absence of any bits set in flags, the text
                     // is plain. Otherwise, 1: bold, 2: italic, 4: underline
                     isBold = ((flags % 2) == 1);
@@ -566,17 +563,17 @@ public final class TimedText
                     break;
                 }
                 case KEY_FONT_SIZE: {
-                    fontSize = mParcel.readInt();
+                    fontSize = parcel.readInt();
                     break;
                 }
                 case KEY_TEXT_COLOR_RGBA: {
-                    colorRGBA = mParcel.readInt();
+                    colorRGBA = parcel.readInt();
                     break;
                 }
                 default: {
                     // End of the Style parsing. Reset the data position back
-                    // to the position before the last mParcel.readInt() call.
-                    mParcel.setDataPosition(mParcel.dataPosition() - 4);
+                    // to the position before the last parcel.readInt() call.
+                    parcel.setDataPosition(parcel.dataPosition() - 4);
                     endOfStyle = true;
                     break;
                 }
@@ -594,14 +591,14 @@ public final class TimedText
     /*
      * To parse and store the Font list
      */
-    private void readFont() {
-        int entryCount = mParcel.readInt();
+    private void readFont(Parcel parcel) {
+        int entryCount = parcel.readInt();
 
         for (int i = 0; i < entryCount; i++) {
-            int id = mParcel.readInt();
-            int nameLen = mParcel.readInt();
+            int id = parcel.readInt();
+            int nameLen = parcel.readInt();
 
-            byte[] text = mParcel.createByteArray();
+            byte[] text = parcel.createByteArray();
             final String name = new String(text, 0, nameLen);
 
             Font font = new Font(id, name);
@@ -616,9 +613,9 @@ public final class TimedText
     /*
      * To parse and store the Highlight list
      */
-    private void readHighlight() {
-        int startChar = mParcel.readInt();
-        int endChar = mParcel.readInt();
+    private void readHighlight(Parcel parcel) {
+        int startChar = parcel.readInt();
+        int endChar = parcel.readInt();
         CharPos pos = new CharPos(startChar, endChar);
 
         if (mHighlightPosList == null) {
@@ -630,14 +627,14 @@ public final class TimedText
     /*
      * To parse and store the Karaoke list
      */
-    private void readKaraoke() {
-        int entryCount = mParcel.readInt();
+    private void readKaraoke(Parcel parcel) {
+        int entryCount = parcel.readInt();
 
         for (int i = 0; i < entryCount; i++) {
-            int startTimeMs = mParcel.readInt();
-            int endTimeMs = mParcel.readInt();
-            int startChar = mParcel.readInt();
-            int endChar = mParcel.readInt();
+            int startTimeMs = parcel.readInt();
+            int endTimeMs = parcel.readInt();
+            int startChar = parcel.readInt();
+            int endChar = parcel.readInt();
             Karaoke kara = new Karaoke(startTimeMs, endTimeMs,
                                        startChar, endChar);
 
@@ -651,16 +648,16 @@ public final class TimedText
     /*
      * To parse and store HyperText list
      */
-    private void readHyperText() {
-        int startChar = mParcel.readInt();
-        int endChar = mParcel.readInt();
+    private void readHyperText(Parcel parcel) {
+        int startChar = parcel.readInt();
+        int endChar = parcel.readInt();
 
-        int len = mParcel.readInt();
-        byte[] url = mParcel.createByteArray();
+        int len = parcel.readInt();
+        byte[] url = parcel.createByteArray();
         final String urlString = new String(url, 0, len);
 
-        len = mParcel.readInt();
-        byte[] alt = mParcel.createByteArray();
+        len = parcel.readInt();
+        byte[] alt = parcel.createByteArray();
         final String altString = new String(alt, 0, len);
         HyperText hyperText = new HyperText(startChar, endChar, urlString, altString);
 
@@ -674,9 +671,9 @@ public final class TimedText
     /*
      * To parse and store blinking text list
      */
-    private void readBlinkingText() {
-        int startChar = mParcel.readInt();
-        int endChar = mParcel.readInt();
+    private void readBlinkingText(Parcel parcel) {
+        int startChar = parcel.readInt();
+        int endChar = parcel.readInt();
         CharPos blinkingPos = new CharPos(startChar, endChar);
 
         if (mBlinkingPosList == null) {
