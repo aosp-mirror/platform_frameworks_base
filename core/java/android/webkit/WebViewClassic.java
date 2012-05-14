@@ -7452,18 +7452,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
                 case SHOW_RECT_MSG_ID: {
                     WebViewCore.ShowRectData data = (WebViewCore.ShowRectData) msg.obj;
-                    int x = getScrollX();
                     int left = contentToViewX(data.mLeft);
                     int width = contentToViewDimension(data.mWidth);
                     int maxWidth = contentToViewDimension(data.mContentWidth);
                     int viewWidth = getViewWidth();
-                    if (width < viewWidth) {
-                        // center align
-                        x += left + width / 2 - getScrollX() - viewWidth / 2;
-                    } else {
-                        x += (int) (left + data.mXPercentInDoc * width
-                                - getScrollX() - data.mXPercentInView * viewWidth);
-                    }
+                    int x = (int) (left + data.mXPercentInDoc * width -
+                                   data.mXPercentInView * viewWidth);
                     if (DebugFlags.WEB_VIEW) {
                         Log.v(LOGTAG, "showRectMsg=(left=" + left + ",width=" +
                               width + ",maxWidth=" + maxWidth +
