@@ -60,9 +60,9 @@ class FontRenderer;
 class CacheTexture {
 public:
     CacheTexture(){}
-    CacheTexture(uint8_t* texture, GLuint textureId, uint16_t width, uint16_t height) :
-        mTexture(texture), mTextureId(textureId), mWidth(width), mHeight(height),
-        mLinearFiltering(false) {}
+    CacheTexture(uint8_t* texture, uint16_t width, uint16_t height) :
+            mTexture(texture), mTextureId(0), mWidth(width), mHeight(height),
+            mLinearFiltering(false) { }
     ~CacheTexture() {
         if (mTexture != NULL) {
             delete[] mTexture;
