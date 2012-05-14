@@ -70,13 +70,28 @@
     </family>
     <family>
         <fileset>
+            <file>DroidSansTamil-Regular.ttf</file>
+            <file>DroidSansTamil-Bold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>AnjaliNewLipi-light.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
             <file>Lohit-Bengali.ttf</file>
         </fileset>
     </family>
     <family>
         <fileset>
-            <file>DroidSansTamil-Regular.ttf</file>
-            <file>DroidSansTamil-Bold.ttf</file>
+            <file>Lohit-Kannada.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>Lohit-Telugu.ttf</file>
         </fileset>
     </family>
     <family>
