@@ -181,23 +181,37 @@ public class MultiWaveView extends View {
         mAlwaysTrackFinger = a.getBoolean(R.styleable.MultiWaveView_alwaysTrackFinger, false);
         mGravity = a.getInt(R.styleable.MultiWaveView_gravity, Gravity.TOP);
 
-        // Read chevron animation drawables
-        final int chevrons[] = { R.styleable.MultiWaveView_leftChevronDrawable,
-                R.styleable.MultiWaveView_rightChevronDrawable,
-                R.styleable.MultiWaveView_topChevronDrawable,
-                R.styleable.MultiWaveView_bottomChevronDrawable
-        };
+        // Read array of chevron drawables
+        TypedValue outValue = new TypedValue();
+        if (a.getValue(R.styleable.MultiWaveView_chevronDrawables, outValue)) {
+            ArrayList<TargetDrawable> chevrons = loadDrawableArray(outValue.resourceId);
+            for (int i = 0; i < chevrons.size(); i++) {
+                final TargetDrawable chevron = chevrons.get(i);
+                for (int k = 0; k < mFeedbackCount; k++) {
+                    mChevronDrawables.add(chevron == null ? null : new TargetDrawable(chevron));
+                }
+            }
+        }
 
-        for (int chevron : chevrons) {
-            TypedValue typedValue = a.peekValue(chevron);
-            for (int i = 0; i < mFeedbackCount; i++) {
-                mChevronDrawables.add(
-                    typedValue != null ? new TargetDrawable(res, typedValue.resourceId) : null);
+        // Support old-style chevron specification if new specification not found
+        if (mChevronDrawables.size() == 0) {
+            final int chevronResIds[] = {
+                    R.styleable.MultiWaveView_rightChevronDrawable,
+                    R.styleable.MultiWaveView_topChevronDrawable,
+                    R.styleable.MultiWaveView_leftChevronDrawable,
+                    R.styleable.MultiWaveView_bottomChevronDrawable
+            };
+
+            for (int i = 0; i < chevronResIds.length; i++) {
+                TypedValue typedValue = a.peekValue(chevronResIds[i]);
+                for (int k = 0; k < mFeedbackCount; k++) {
+                    mChevronDrawables.add(
+                        typedValue != null ? new TargetDrawable(res, typedValue.resourceId) : null);
+                }
             }
         }
 
         // Read array of target drawables
-        TypedValue outValue = new TypedValue();
         if (a.getValue(R.styleable.MultiWaveView_targetDrawables, outValue)) {
             internalSetTargetResources(outValue.resourceId);
         }
@@ -318,23 +332,24 @@ public class MultiWaveView extends View {
      * mFeedbackCount items in the order: left, right, top, bottom.
      */
     private void startChevronAnimation() {
-        final float r = mHandleDrawable.getWidth() * 0.4f;
-        final float chevronAnimationDistance = mOuterRadius * 0.9f / 2.0f;
-        final float from[][] = {
-                { -r, 0},  // left
-                { +r, 0},  // right
-                {0, -r},  // top
-                {0, +r} }; // bottom
-        final float to[][] = {
-                { -chevronAnimationDistance, 0},  // left
-                { chevronAnimationDistance, 0},  // right
-                { 0, -chevronAnimationDistance},  // top
-                { 0, +chevronAnimationDistance} }; // bottom
-
+        final float chevronStartDistance = mHandleDrawable.getWidth() * 0.8f;
+        final float chevronStopDistance = mOuterRadius * 0.9f / 2.0f;
         mChevronAnimations.clear();
         final float startScale = 0.5f;
         final float endScale = 2.0f;
-        for (int direction = 0; direction < 4; direction++) {
+
+        final int directionCount = mFeedbackCount > 0 ? mChevronDrawables.size()/mFeedbackCount : 0;
+
+        // Add an animation for all chevron drawables.  There are mFeedbackCount drawables
+        // in each direction and directionCount directions.
+        for (int direction = 0; direction < directionCount; direction++) {
+            double angle = 2.0 * Math.PI * direction / directionCount;
+            final float sx = (float) Math.cos(angle);
+            final float sy = 0.0f - (float) Math.sin(angle);
+            final float[] xrange = new float[]
+                 {sx * chevronStartDistance, sx * chevronStopDistance};
+            final float[] yrange = new float[]
+                 {sy * chevronStartDistance, sy * chevronStopDistance};
             for (int count = 0; count < mFeedbackCount; count++) {
                 int delay = count * CHEVRON_INCREMENTAL_DELAY;
                 final TargetDrawable icon = mChevronDrawables.get(direction*mFeedbackCount + count);
@@ -344,8 +359,8 @@ public class MultiWaveView extends View {
                 mChevronAnimations.add(Tweener.to(icon, CHEVRON_ANIMATION_DURATION,
                         "ease", mChevronAnimationInterpolator,
                         "delay", delay,
-                        "x", new float[] { from[direction][0], to[direction][0] },
-                        "y", new float[] { from[direction][1], to[direction][1] },
+                        "x", xrange,
+                        "y", yrange,
                         "alpha", new float[] {1.0f, 0.0f},
                         "scaleX", new float[] {startScale, endScale},
                         "scaleY", new float[] {startScale, endScale},
@@ -529,22 +544,31 @@ public class MultiWaveView extends View {
         }
     }
 
-    private void internalSetTargetResources(int resourceId) {
+    private ArrayList<TargetDrawable> loadDrawableArray(int resourceId) {
         Resources res = getContext().getResources();
         TypedArray array = res.obtainTypedArray(resourceId);
-        int count = array.length();
-        ArrayList<TargetDrawable> targetDrawables = new ArrayList<TargetDrawable>(count);
+        final int count = array.length();
+        ArrayList<TargetDrawable> drawables = new ArrayList<TargetDrawable>(count);
+        for (int i = 0; i < count; i++) {
+            TypedValue value = array.peekValue(i);
+            TargetDrawable target = new TargetDrawable(res, value != null ? value.resourceId : 0);
+            drawables.add(target);
+        }
+        array.recycle();
+        return drawables;
+    }
+
+    private void internalSetTargetResources(int resourceId) {
+        mTargetDrawables = loadDrawableArray(resourceId);
+        mTargetResourceId = resourceId;
+        final int count = mTargetDrawables.size();
         int maxWidth = mHandleDrawable.getWidth();
         int maxHeight = mHandleDrawable.getHeight();
         for (int i = 0; i < count; i++) {
-            TypedValue value = array.peekValue(i);
-            TargetDrawable target= new TargetDrawable(res, value != null ? value.resourceId : 0);
-            targetDrawables.add(target);
+            TargetDrawable target = mTargetDrawables.get(i);
             maxWidth = Math.max(maxWidth, target.getWidth());
             maxHeight = Math.max(maxHeight, target.getHeight());
         }
-        mTargetResourceId = resourceId;
-        mTargetDrawables = targetDrawables;
         if (mMaxTargetWidth != maxWidth || mMaxTargetHeight != maxHeight) {
             mMaxTargetWidth = maxWidth;
             mMaxTargetHeight = maxHeight;
@@ -553,7 +577,6 @@ public class MultiWaveView extends View {
             updateTargetPositions(mWaveCenterX, mWaveCenterY);
             updateChevronPositions(mWaveCenterX, mWaveCenterY);
         }
-        array.recycle();
     }
 
     /**
