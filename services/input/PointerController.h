@@ -21,6 +21,7 @@
 
 #include <ui/DisplayInfo.h>
 #include <androidfw/Input.h>
+#include <utils/BitSet.h>
 #include <utils/RefBase.h>
 #include <utils/Looper.h>
 #include <utils/String8.h>

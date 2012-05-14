@@ -22,6 +22,8 @@
 #include "InputListener.h"
 
 #include <androidfw/Input.h>
+#include <androidfw/VelocityControl.h>
+#include <androidfw/VelocityTracker.h>
 #include <ui/DisplayInfo.h>
 #include <utils/KeyedVector.h>
 #include <utils/threads.h>
