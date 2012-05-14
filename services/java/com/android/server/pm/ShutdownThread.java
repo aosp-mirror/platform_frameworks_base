@@ -15,7 +15,7 @@
  */
 
  
-package com.android.internal.app;
+package com.android.server.pm;
 
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
@@ -32,7 +32,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
-import android.os.Power;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -44,6 +43,8 @@ import android.os.storage.IMountService;
 import android.os.storage.IMountShutdownObserver;
 
 import com.android.internal.telephony.ITelephony;
+import com.android.server.PowerManagerService;
+
 import android.util.Log;
 import android.view.WindowManager;
 
@@ -456,7 +457,7 @@ public final class ShutdownThread extends Thread {
         if (reboot) {
             Log.i(TAG, "Rebooting, reason: " + reason);
             try {
-                Power.reboot(reason);
+                PowerManagerService.lowLevelReboot(reason);
             } catch (Exception e) {
                 Log.e(TAG, "Reboot failed, will attempt shutdown instead", e);
             }
@@ -479,6 +480,6 @@ public final class ShutdownThread extends Thread {
 
         // Shutdown power
         Log.i(TAG, "Performing low-level shutdown...");
-        Power.shutdown();
+        PowerManagerService.lowLevelShutdown();
     }
 }

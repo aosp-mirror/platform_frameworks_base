@@ -17,8 +17,8 @@
 package com.android.server;
 
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.app.ShutdownThread;
 import com.android.server.am.BatteryStatsService;
+import com.android.server.pm.ShutdownThread;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
@@ -47,7 +47,6 @@ import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.LocalPowerManager;
 import android.os.Message;
-import android.os.Power;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -71,6 +70,7 @@ import static android.provider.Settings.System.WINDOW_ANIMATION_SCALE;
 import static android.provider.Settings.System.TRANSITION_ANIMATION_SCALE;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,6 +83,12 @@ public class PowerManagerService extends IPowerManager.Stub
 
     private static final String TAG = "PowerManagerService";
     static final String PARTIAL_NAME = "PowerManagerService";
+
+    // Wake lock that ensures that the CPU is running.  The screen might not be on.
+    private static final int PARTIAL_WAKE_LOCK_ID = 1;
+
+    // Wake lock that ensures that the screen is on.
+    private static final int FULL_WAKE_LOCK_ID = 2;
 
     static final boolean DEBUG_SCREEN_ON = false;
 
@@ -134,6 +140,10 @@ public class PowerManagerService extends IPowerManager.Stub
     // Screen brightness should always have a value, but just in case...
     private static final int DEFAULT_SCREEN_BRIGHTNESS = 192;
 
+    // Threshold for BRIGHTNESS_LOW_BATTERY (percentage)
+    // Screen will stay dim if battery level is <= LOW_BATTERY_THRESHOLD
+    private static final int LOW_BATTERY_THRESHOLD = 10;
+
     // flags for setPowerState
     private static final int ALL_LIGHTS_OFF         = 0x00000000;
     private static final int SCREEN_ON_BIT          = 0x00000001;
@@ -175,8 +185,8 @@ public class PowerManagerService extends IPowerManager.Stub
     // we should read them from the driver, but our current hardware returns 0
     // for the initial value.  Oops!
     static final int INITIAL_SCREEN_BRIGHTNESS = 255;
-    static final int INITIAL_BUTTON_BRIGHTNESS = Power.BRIGHTNESS_OFF;
-    static final int INITIAL_KEYBOARD_BRIGHTNESS = Power.BRIGHTNESS_OFF;
+    static final int INITIAL_BUTTON_BRIGHTNESS = PowerManager.BRIGHTNESS_OFF;
+    static final int INITIAL_KEYBOARD_BRIGHTNESS = PowerManager.BRIGHTNESS_OFF;
 
     private final int MY_UID;
     private final int MY_PID;
@@ -296,6 +306,11 @@ public class PowerManagerService extends IPowerManager.Stub
     private native void nativeInit();
     private native void nativeSetPowerState(boolean screenOn, boolean screenBright);
     private native void nativeStartSurfaceFlingerAnimation(int mode);
+    private static native void nativeAcquireWakeLock(int lock, String id);
+    private static native void nativeReleaseWakeLock(String id);
+    private static native int nativeSetScreenState(boolean on);
+    private static native void nativeShutdown();
+    private static native void nativeReboot(String reason) throws IOException;
 
     /*
     static PrintStream mLog;
@@ -515,14 +530,13 @@ public class PowerManagerService extends IPowerManager.Stub
         MY_PID = Process.myPid();
         Binder.restoreCallingIdentity(token);
 
-        // XXX remove this when the kernel doesn't timeout wake locks
-        Power.setLastUserActivityTimeout(7*24*3600*1000); // one week
-
         // assume nothing is on yet
         mUserState = mPowerState = 0;
 
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
+
+        nativeInit();
     }
 
     private ContentQueryMap mSettings;
@@ -540,11 +554,6 @@ public class PowerManagerService extends IPowerManager.Stub
         mKeyboardLight = lights.getLight(LightsService.LIGHT_ID_KEYBOARD);
         mAttentionLight = lights.getLight(LightsService.LIGHT_ID_ATTENTION);
         mHeadless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
-
-        nativeInit();
-        synchronized (mLocks) {
-            updateNativePowerStateLocked();
-        }
 
         mInitComplete = false;
         mScreenBrightnessAnimator = new ScreenBrightnessAnimator("mScreenBrightnessUpdaterThread",
@@ -581,8 +590,6 @@ public class PowerManagerService extends IPowerManager.Stub
             }
         }
 
-        nativeInit();
-        Power.powerInitNative();
         synchronized (mLocks) {
             updateNativePowerStateLocked();
             // We make sure to start out with the screen on due to user activity.
@@ -684,6 +691,26 @@ public class PowerManagerService extends IPowerManager.Stub
             mInitComplete = true;
             mHandlerThread.notifyAll();
         }
+    }
+
+    /**
+     * Low-level function turn the device off immediately, without trying
+     * to be clean.  Most people should use
+     * {@link com.android.server.pm.internal.app.ShutdownThread} for a clean shutdown.
+     */
+    public static void lowLevelShutdown() {
+        nativeShutdown();
+    }
+
+    /**
+     * Low-level function to reboot the device.
+     *
+     * @param reason code to pass to the kernel (e.g. "recovery"), or null.
+     * @throws IOException if reboot fails for some reason (eg, lack of
+     *         permission)
+     */
+    public static void lowLevelReboot(String reason) throws IOException {
+        nativeReboot(reason);
     }
 
     private class WakeLock implements IBinder.DeathRecipient
@@ -926,7 +953,7 @@ public class PowerManagerService extends IPowerManager.Stub
                     if (LOG_PARTIAL_WL) EventLog.writeEvent(EventLogTags.POWER_PARTIAL_WAKE_STATE, 1, tag);
                 }
             }
-            Power.acquireWakeLock(Power.PARTIAL_WAKE_LOCK,PARTIAL_NAME);
+            nativeAcquireWakeLock(PARTIAL_WAKE_LOCK_ID, PARTIAL_NAME);
         }
 
         if (diffsource) {
@@ -1010,7 +1037,7 @@ public class PowerManagerService extends IPowerManager.Stub
             mPartialCount--;
             if (mPartialCount == 0) {
                 if (LOG_PARTIAL_WL) EventLog.writeEvent(EventLogTags.POWER_PARTIAL_WAKE_STATE, 0, wl.tag);
-                Power.releaseWakeLock(PARTIAL_NAME);
+                nativeReleaseWakeLock(PARTIAL_NAME);
             }
         }
         // Unlink the lock from the binder.
@@ -1719,10 +1746,10 @@ public class PowerManagerService extends IPowerManager.Stub
                             + " mSkippedScreenOn=" + mSkippedScreenOn);
                 }
                 mScreenBrightnessHandler.removeMessages(ScreenBrightnessAnimator.ANIMATE_LIGHTS);
-                mScreenBrightnessAnimator.animateTo(Power.BRIGHTNESS_OFF, SCREEN_BRIGHT_BIT, 0);
+                mScreenBrightnessAnimator.animateTo(PowerManager.BRIGHTNESS_OFF, SCREEN_BRIGHT_BIT, 0);
             }
         }
-        int err = Power.setScreenState(on);
+        int err = nativeSetScreenState(on);
         if (err == 0) {
             mLastScreenOnTime = (on ? SystemClock.elapsedRealtime() : 0);
             if (mUseSoftwareAutoBrightness) {
@@ -1934,7 +1961,7 @@ public class PowerManagerService extends IPowerManager.Stub
 
     private boolean batteryIsLow() {
         return (!mIsPowered &&
-                mBatteryService.getBatteryLevel() <= Power.LOW_BATTERY_THRESHOLD);
+                mBatteryService.getBatteryLevel() <= LOW_BATTERY_THRESHOLD);
     }
 
     private boolean shouldDeferScreenOnLocked() {
@@ -2024,7 +2051,7 @@ public class PowerManagerService extends IPowerManager.Stub
                         nominalCurrentValue = mScreenBrightnessDim;
                         break;
                     case 0:
-                        nominalCurrentValue = Power.BRIGHTNESS_OFF;
+                        nominalCurrentValue = PowerManager.BRIGHTNESS_OFF;
                         break;
                     case SCREEN_BRIGHT_BIT:
                     default:
@@ -2050,7 +2077,7 @@ public class PowerManagerService extends IPowerManager.Stub
                         // was dim
                         steps = (int)(ANIM_STEPS*ratio*scale);
                     }
-                    brightness = Power.BRIGHTNESS_OFF;
+                    brightness = PowerManager.BRIGHTNESS_OFF;
                 } else {
                     if ((oldState & SCREEN_ON_BIT) != 0) {
                         // was bright
@@ -2101,13 +2128,13 @@ public class PowerManagerService extends IPowerManager.Stub
 
         if (offMask != 0) {
             if (mSpew) Slog.i(TAG, "Setting brightess off: " + offMask);
-            setLightBrightness(offMask, Power.BRIGHTNESS_OFF);
+            setLightBrightness(offMask, PowerManager.BRIGHTNESS_OFF);
         }
         if (dimMask != 0) {
             int brightness = mScreenBrightnessDim;
             if ((newState & BATTERY_LOW_BIT) != 0 &&
-                    brightness > Power.BRIGHTNESS_LOW_BATTERY) {
-                brightness = Power.BRIGHTNESS_LOW_BATTERY;
+                    brightness > PowerManager.BRIGHTNESS_LOW_BATTERY) {
+                brightness = PowerManager.BRIGHTNESS_LOW_BATTERY;
             }
             if (mSpew) Slog.i(TAG, "Setting brightess dim " + brightness + ": " + dimMask);
             setLightBrightness(dimMask, brightness);
@@ -2115,8 +2142,8 @@ public class PowerManagerService extends IPowerManager.Stub
         if (onMask != 0) {
             int brightness = getPreferredBrightness();
             if ((newState & BATTERY_LOW_BIT) != 0 &&
-                    brightness > Power.BRIGHTNESS_LOW_BATTERY) {
-                brightness = Power.BRIGHTNESS_LOW_BATTERY;
+                    brightness > PowerManager.BRIGHTNESS_LOW_BATTERY) {
+                brightness = PowerManager.BRIGHTNESS_LOW_BATTERY;
             }
             if (mSpew) Slog.i(TAG, "Setting brightess on " + brightness + ": " + onMask);
             setLightBrightness(onMask, brightness);
@@ -2198,8 +2225,8 @@ public class PowerManagerService extends IPowerManager.Stub
                     if (elapsed < duration) {
                         int delta = endValue - startValue;
                         newValue = startValue + delta * elapsed / duration;
-                        newValue = Math.max(Power.BRIGHTNESS_OFF, newValue);
-                        newValue = Math.min(Power.BRIGHTNESS_ON, newValue);
+                        newValue = Math.max(PowerManager.BRIGHTNESS_OFF, newValue);
+                        newValue = Math.min(PowerManager.BRIGHTNESS_ON, newValue);
                     } else {
                         newValue = endValue;
                         mInitialAnimation = false;
@@ -2249,7 +2276,7 @@ public class PowerManagerService extends IPowerManager.Stub
 
                 if (target != currentValue) {
                     final boolean doScreenAnim = (mask & (SCREEN_BRIGHT_BIT | SCREEN_ON_BIT)) != 0;
-                    final boolean turningOff = endValue == Power.BRIGHTNESS_OFF;
+                    final boolean turningOff = endValue == PowerManager.BRIGHTNESS_OFF;
                     if (turningOff && doScreenAnim) {
                         // Cancel all pending animations since we're turning off
                         mScreenBrightnessHandler.removeCallbacksAndMessages(null);
@@ -2353,7 +2380,7 @@ public class PowerManagerService extends IPowerManager.Stub
 
     private boolean isScreenTurningOffLocked() {
         return (mScreenBrightnessAnimator.isAnimating()
-                && mScreenBrightnessAnimator.endValue == Power.BRIGHTNESS_OFF);
+                && mScreenBrightnessAnimator.endValue == PowerManager.BRIGHTNESS_OFF);
     }
 
     private boolean shouldLog(long time) {
