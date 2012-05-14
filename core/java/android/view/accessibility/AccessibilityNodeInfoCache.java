@@ -16,9 +16,14 @@
 
 package android.view.accessibility;
 
+import android.os.Build;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseLongArray;
+
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Simple cache for AccessibilityNodeInfos. The cache is mapping an
@@ -36,9 +41,13 @@ public class AccessibilityNodeInfoCache {
 
     private static final boolean DEBUG = false;
 
+    private static final boolean CHECK_INTEGRITY = true;
+
     private final Object mLock = new Object();
 
     private final LongSparseArray<AccessibilityNodeInfo> mCacheImpl;
+
+    private int mWindowId;
 
     public AccessibilityNodeInfoCache() {
         if (ENABLED) {
@@ -59,20 +68,48 @@ public class AccessibilityNodeInfoCache {
             final int eventType = event.getEventType();
             switch (eventType) {
                 case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
+                    // New window so we clear the cache.
+                    mWindowId = event.getWindowId();
                     clear();
                 } break;
+                case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER:
+                case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT: {
+                    final int windowId = event.getWindowId();
+                    if (mWindowId != windowId) {
+                        // New window so we clear the cache.
+                        mWindowId = windowId;
+                        clear();
+                    }
+                } break;
                 case AccessibilityEvent.TYPE_VIEW_FOCUSED:
+                case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
                 case AccessibilityEvent.TYPE_VIEW_SELECTED:
                 case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
                 case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
-                    final long accessibilityNodeId = event.getSourceNodeId();
-                    remove(accessibilityNodeId);
+                    // Since we prefetch the descendants of a node we
+                    // just remove the entire subtree since when the node
+                    // is fetched we will gets its descendant anyway.
+                    synchronized (mLock) {
+                        final long sourceId = event.getSourceNodeId();
+                        clearSubTreeLocked(sourceId);
+                        if (eventType == AccessibilityEvent.TYPE_VIEW_FOCUSED) {
+                            clearSubtreeWithOldInputFocusLocked(sourceId);
+                        }
+                        if (eventType == AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED) {
+                            clearSubtreeWithOldAccessibilityFocusLocked(sourceId);
+                        }
+                    }
                 } break;
                 case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
                 case AccessibilityEvent.TYPE_VIEW_SCROLLED: {
-                    final long accessibilityNodeId = event.getSourceNodeId();
-                    clearSubTree(accessibilityNodeId);
+                    synchronized (mLock) {
+                        final long accessibilityNodeId = event.getSourceNodeId();
+                        clearSubTreeLocked(accessibilityNodeId);
+                    }
                 } break;
+            }
+            if (Build.IS_DEBUGGABLE && CHECK_INTEGRITY) {
+                checkIntegrity();
             }
         }
     }
@@ -105,51 +142,45 @@ public class AccessibilityNodeInfoCache {
     /**
      * Caches an {@link AccessibilityNodeInfo} given its accessibility node id.
      *
-     * @param accessibilityNodeId The info accessibility node id.
      * @param info The {@link AccessibilityNodeInfo} to cache.
      */
-    public void put(long accessibilityNodeId, AccessibilityNodeInfo info) {
+    public void add(AccessibilityNodeInfo info) {
         if (ENABLED) {
             synchronized(mLock) {
                 if (DEBUG) {
-                    Log.i(LOG_TAG, "put(" + accessibilityNodeId + ", " + info + ")");
+                    Log.i(LOG_TAG, "add(" + info + ")");
                 }
+
+                final long sourceId = info.getSourceNodeId();
+                AccessibilityNodeInfo oldInfo = mCacheImpl.get(sourceId);
+                if (oldInfo != null) {
+                    // If the added node is in the cache we have to be careful if
+                    // the new one represents a source state where some of the
+                    // children have been removed to avoid having disconnected
+                    // subtrees in the cache.
+                    SparseLongArray oldChildrenIds = oldInfo.getChildNodeIds();
+                    SparseLongArray newChildrenIds = info.getChildNodeIds();
+                    final int oldChildCount = oldChildrenIds.size();
+                    for (int i = 0; i < oldChildCount; i++) {
+                        final long oldChildId = oldChildrenIds.valueAt(i);
+                        if (newChildrenIds.indexOfValue(oldChildId) < 0) {
+                            clearSubTreeLocked(oldChildId);
+                        }
+                    }
+
+                    // Also be careful if the parent has changed since the new
+                    // parent may be a predecessor of the old parent which will
+                    // make the cached tree cyclic.
+                    final long oldParentId = oldInfo.getParentNodeId();
+                    if (info.getParentNodeId() != oldParentId) {
+                        clearSubTreeLocked(oldParentId);
+                    }
+                }
+
                 // Cache a copy since the client calls to AccessibilityNodeInfo#recycle()
                 // will wipe the data of the cached info.
                 AccessibilityNodeInfo clone = AccessibilityNodeInfo.obtain(info);
-                mCacheImpl.put(accessibilityNodeId, clone);
-            }
-        }
-    }
-
-    /**
-     * Returns whether the cache contains an accessibility node id key.
-     *
-     * @param accessibilityNodeId The key for which to check.
-     * @return True if the key is in the cache.
-     */
-    public boolean containsKey(long accessibilityNodeId) {
-        if (ENABLED) {
-            synchronized(mLock) {
-                return (mCacheImpl.indexOfKey(accessibilityNodeId) >= 0);
-            }
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Removes a cached {@link AccessibilityNodeInfo}.
-     *
-     * @param accessibilityNodeId The info accessibility node id.
-     */
-    public void remove(long accessibilityNodeId) {
-        if (ENABLED) {
-            synchronized(mLock) {
-                if (DEBUG) {
-                    Log.i(LOG_TAG, "remove(" + accessibilityNodeId + ")");
-                }
-                mCacheImpl.remove(accessibilityNodeId);
+                mCacheImpl.put(sourceId, clone);
             }
         }
     }
@@ -179,7 +210,7 @@ public class AccessibilityNodeInfoCache {
      *
      * @param rootNodeId The root id.
      */
-    private void clearSubTree(long rootNodeId) {
+    private void clearSubTreeLocked(long rootNodeId) {
         AccessibilityNodeInfo current = mCacheImpl.get(rootNodeId);
         if (current == null) {
             return;
@@ -189,7 +220,124 @@ public class AccessibilityNodeInfoCache {
         final int childCount = childNodeIds.size();
         for (int i = 0; i < childCount; i++) {
             final long childNodeId = childNodeIds.valueAt(i);
-            clearSubTree(childNodeId);
+            clearSubTreeLocked(childNodeId);
+        }
+    }
+
+    /**
+     * We are enforcing the invariant for a single input focus.
+     *
+     * @param currentInputFocusId The current input focused node.
+     */
+    private void clearSubtreeWithOldInputFocusLocked(long currentInputFocusId) {
+        final int cacheSize = mCacheImpl.size();
+        for (int i = 0; i < cacheSize; i++) {
+            AccessibilityNodeInfo info = mCacheImpl.valueAt(i);
+            final long infoSourceId = info.getSourceNodeId();
+            if (infoSourceId != currentInputFocusId && info.isFocused()) {
+                clearSubTreeLocked(infoSourceId);
+                return;
+            }
+        }
+    }
+
+    /**
+     * We are enforcing the invariant for a single accessibility focus.
+     *
+     * @param currentInputFocusId The current input focused node.
+     */
+    private void clearSubtreeWithOldAccessibilityFocusLocked(long currentAccessibilityFocusId) {
+        final int cacheSize = mCacheImpl.size();
+        for (int i = 0; i < cacheSize; i++) {
+            AccessibilityNodeInfo info = mCacheImpl.valueAt(i);
+            final long infoSourceId = info.getSourceNodeId();
+            if (infoSourceId != currentAccessibilityFocusId && info.isAccessibilityFocused()) {
+                clearSubTreeLocked(infoSourceId);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Check the integrity of the cache which is it does not have nodes
+     * from more than one window, there are no duplicates, all nodes are
+     * connected, there is a single input focused node, and there is a
+     * single accessibility focused node.
+     */
+    private void checkIntegrity() {
+        synchronized (mLock) {
+            // Get the root.
+            if (mCacheImpl.size() <= 0) {
+                return;
+            }
+
+            // If the cache is a tree it does not matter from
+            // which node we start to search for the root.
+            AccessibilityNodeInfo root = mCacheImpl.valueAt(0);
+            AccessibilityNodeInfo parent = root;
+            while (parent != null) {
+                root = parent;
+                parent = mCacheImpl.get(parent.getParentNodeId());
+            }
+
+            // Traverse the tree and do some checks.
+            final int windowId = root.getWindowId();
+            AccessibilityNodeInfo accessFocus = null;
+            AccessibilityNodeInfo inputFocus = null;
+            HashSet<AccessibilityNodeInfo> seen = new HashSet<AccessibilityNodeInfo>();
+            Queue<AccessibilityNodeInfo> fringe = new LinkedList<AccessibilityNodeInfo>();
+            fringe.add(root);
+
+            while (!fringe.isEmpty()) {
+                AccessibilityNodeInfo current = fringe.poll();
+                // Check for duplicates
+                if (!seen.add(current)) {
+                    Log.e(LOG_TAG, "Duplicate node: " + current);
+                    return;
+                }
+
+                // Check for one accessibility focus.
+                if (current.isAccessibilityFocused()) {
+                    if (accessFocus != null) {
+                        Log.e(LOG_TAG, "Duplicate accessibility focus:" + current);
+                    } else {
+                        accessFocus = current;
+                    }
+                }
+
+                // Check for one input focus.
+                if (current.isFocused()) {
+                    if (inputFocus != null) {
+                        Log.e(LOG_TAG, "Duplicate input focus: " + current);
+                    } else {
+                        inputFocus = current;
+                    }
+                }
+
+                SparseLongArray childIds = current.getChildNodeIds();
+                final int childCount = childIds.size();
+                for (int i = 0; i < childCount; i++) {
+                    final long childId = childIds.valueAt(i);
+                    AccessibilityNodeInfo child = mCacheImpl.get(childId);
+                    if (child != null) {
+                        fringe.add(child);
+                    }
+                }
+            }
+
+            // Check for disconnected nodes or ones from another window.
+            final int cacheSize = mCacheImpl.size();
+            for (int i = 0; i < cacheSize; i++) {
+                AccessibilityNodeInfo info = mCacheImpl.valueAt(i);
+                if (!seen.contains(info)) {
+                    if (info.getWindowId() == windowId) {
+                        Log.e(LOG_TAG, "Disconneced node: ");
+                    } else {
+                        Log.e(LOG_TAG, "Node from: " + info.getWindowId() + " not from:"
+                                + windowId + " " + info);
+                    }
+                }
+            }
         }
     }
 }
