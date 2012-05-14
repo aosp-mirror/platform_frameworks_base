@@ -511,7 +511,7 @@ public class Surface implements Parcelable {
     /** @hide */
     public native   void setFlags(int flags, int mask);
     /** @hide */
-    public native   void setActiveRect(Rect activeRect);
+    public native   void setWindowCrop(Rect crop);
 
 
    
