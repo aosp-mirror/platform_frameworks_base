@@ -48,7 +48,7 @@
             android:id="@+id/latestItems"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            systemui:rowHeight="@dimen/notification_height"
+            systemui:rowHeight="@dimen/notification_row_min_height"
             />
     </ScrollView>
 

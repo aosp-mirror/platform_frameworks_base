@@ -77,7 +77,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:descendantFocusability="afterDescendants"
-                    systemui:rowHeight="@dimen/notification_height"
+                    systemui:rowHeight="@dimen/notification_row_min_height"
                     />
             </ScrollView>
         </LinearLayout>

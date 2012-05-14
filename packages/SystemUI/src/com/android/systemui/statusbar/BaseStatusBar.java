@@ -478,7 +478,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected  boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
         int rowHeight =
-                mContext.getResources().getDimensionPixelSize(R.dimen.notification_height);
+                mContext.getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
         int minHeight =
                 mContext.getResources().getDimensionPixelSize(R.dimen.notification_min_height);
         int maxHeight =
@@ -498,7 +498,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         // for blaming (see SwipeHelper.setLongPressListener)
         row.setTag(sbn.pkg);
 
-        ViewGroup.LayoutParams lp = row.getLayoutParams();
         workAroundBadLayerDrawableOpacity(row);
         View vetoButton = updateNotificationVetoButton(row, sbn);
         vetoButton.setContentDescription(mContext.getString(
@@ -509,13 +508,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         // bind the click event to the content area
         ViewGroup content = (ViewGroup)row.findViewById(R.id.content);
         ViewGroup adaptive = (ViewGroup)row.findViewById(R.id.adaptive);
-
-        // Ensure that R.id.content is properly set to 64dp high if 1U
-        lp = content.getLayoutParams();
-        if (large == null) {
-            lp.height = minHeight;
-        }
-        content.setLayoutParams(lp);
 
         content.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
 
@@ -557,7 +549,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 SizeAdaptiveLayout.LayoutParams params =
                         new SizeAdaptiveLayout.LayoutParams(expandedLarge.getLayoutParams());
                 params.minHeight = minHeight+1;
-                params.maxHeight = SizeAdaptiveLayout.LayoutParams.UNBOUNDED;
+                params.maxHeight = maxHeight;
                 adaptive.addView(expandedLarge, params);
             }
             row.setDrawingCacheEnabled(true);
@@ -724,20 +716,18 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected boolean expandView(NotificationData.Entry entry, boolean expand) {
-        if (entry.expandable()) {
-            int rowHeight =
-                    mContext.getResources().getDimensionPixelSize(R.dimen.notification_height);
-            ViewGroup.LayoutParams lp = entry.row.getLayoutParams();
-            if (expand) {
-                lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-            } else {
-                lp.height = rowHeight;
-            }
-            entry.row.setLayoutParams(lp);
-            return expand;
+        int rowHeight =
+                mContext.getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
+        ViewGroup.LayoutParams lp = entry.row.getLayoutParams();
+        if (entry.expandable() && expand) {
+            if (DEBUG) Slog.d(TAG, "setting expanded row height to WRAP_CONTENT");
+            lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         } else {
-            return false;
+            if (DEBUG) Slog.d(TAG, "setting collapsed row height to " + rowHeight);
+            lp.height = rowHeight;
         }
+        entry.row.setLayoutParams(lp);
+        return expand;
     }
 
     protected void updateExpansionStates() {

@@ -101,8 +101,8 @@ public class NotificationRowLayout
         float densityScale = getResources().getDisplayMetrics().density;
         float pagingTouchSlop = ViewConfiguration.get(mContext).getScaledPagingTouchSlop();
         mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
-        int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
-        int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_max_height);
+        int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
+        int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_max_height);
         mExpandHelper = new ExpandHelper(mContext, this, minHeight, maxHeight);
     }
 
