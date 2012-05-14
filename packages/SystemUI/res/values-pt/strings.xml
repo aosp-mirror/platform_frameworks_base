@@ -62,8 +62,8 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Ampliar p/ preencher tela"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"Zoom em modo de compatibilidade"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Quando um aplicativo é desenvolvido para uma tela menor, um controle de zoom é exibido perto do relógio."</string>
-    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Salvar captura de tela..."</string>
-    <string name="screenshot_saving_title" msgid="8242282144535555697">"Salvar captura de tela..."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Salvando captura de tela..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Salvando captura de tela..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"A captura de tela está sendo salva."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Captura de tela obtida."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Toque para visualizar a captura de tela."</string>
