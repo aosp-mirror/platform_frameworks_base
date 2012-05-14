@@ -776,12 +776,6 @@ void FontRenderer::checkInit() {
     initTextTexture();
     initVertexArrayBuffers();
 
-    // We store a string with letters in a rough frequency of occurrence
-    mLatinPrecache = String16("eisarntolcdugpmhbyfvkwzxjq ");
-    mLatinPrecache += String16("EISARNTOLCDUGPMHBYFVKWZXJQ");
-    mLatinPrecache += String16(",.?!()-+@;:'");
-    mLatinPrecache += String16("0123456789");
-
     mInitialized = true;
 }
 
@@ -944,11 +938,19 @@ uint32_t FontRenderer::getRemainingCacheCapacity() {
 void FontRenderer::precacheLatin(SkPaint* paint) {
     // Remaining capacity is measured in %
     uint32_t remainingCapacity = getRemainingCacheCapacity();
-    uint32_t precacheIdx = 0;
-    while (remainingCapacity > 25 && precacheIdx < mLatinPrecache.size()) {
-        mCurrentFont->getCachedGlyph(paint, (int32_t) mLatinPrecache[precacheIdx]);
+    uint32_t precacheIndex = 0;
+
+    // We store a string with letters in a rough frequency of occurrence
+    String16 l("eisarntolcdugpmhbyfvkwzxjq EISARNTOLCDUGPMHBYFVKWZXJQ,.?!()-+@;:'0123456789");
+
+    size_t size = l.size();
+    uint16_t latin[size];
+    paint->utfToGlyphs(l.string(), SkPaint::kUTF16_TextEncoding, size * sizeof(char16_t), latin);
+
+    while (remainingCapacity > 25 && precacheIndex < size) {
+        mCurrentFont->getCachedGlyph(paint, TO_GLYPH(latin[precacheIndex]));
         remainingCapacity = getRemainingCacheCapacity();
-        precacheIdx ++;
+        precacheIndex++;
     }
 }
 
