@@ -258,14 +258,14 @@ public class MultiWaveView extends View {
     protected int getSuggestedMinimumWidth() {
         // View should be large enough to contain the background + handle and
         // target drawable on either edge.
-        return mOuterRing.getWidth() + mMaxTargetWidth;
+        return (int) (Math.max(mOuterRing.getWidth(), 2 * mOuterRadius) + mMaxTargetWidth);
     }
 
     @Override
     protected int getSuggestedMinimumHeight() {
         // View should be large enough to contain the unlock ring + target and
         // target drawable on either edge
-        return mOuterRing.getHeight() + mMaxTargetHeight;
+        return (int) (Math.max(mOuterRing.getHeight(), 2 * mOuterRadius) + mMaxTargetHeight);
     }
 
     private int resolveMeasured(int measureSpec, int desired)
@@ -941,10 +941,14 @@ public class MultiWaveView extends View {
         super.onLayout(changed, left, top, right, bottom);
         final int width = right - left;
         final int height = bottom - top;
+        // Target placement width/height. This puts the targets on the greater of the ring
+        // width or the specified outer radius.
+        final float placementWidth = Math.max(mOuterRing.getWidth(), 2 * mOuterRadius);
+        final float placementHeight = Math.max(mOuterRing.getHeight(), 2 * mOuterRadius);
         float newWaveCenterX = mHorizontalOffset + mHorizontalInset
-                + Math.max(width, mMaxTargetWidth + mOuterRing.getWidth()) / 2;
+                + Math.max(width, mMaxTargetWidth + placementWidth) / 2;
         float newWaveCenterY = mVerticalOffset + mVerticalInset
-                + Math.max(height, + mMaxTargetHeight + mOuterRing.getHeight()) / 2;
+                + Math.max(height, + mMaxTargetHeight + placementHeight) / 2;
 
         assignDefaultsIfNeeded(newWaveCenterX, newWaveCenterY);
 

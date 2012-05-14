@@ -30,7 +30,7 @@
     <!-- left side: status and music -->
     <RelativeLayout
         android:layout_height="match_parent"
-        android:layout_weight="1"
+        android:layout_weight="0.42"
         android:layout_width="0dip"
         android:gravity="center">
 
@@ -67,7 +67,7 @@
     <!-- right side -->
     <RelativeLayout
         android:layout_height="match_parent"
-        android:layout_weight="1"
+        android:layout_weight="0.58"
         android:layout_width="0dip"
         android:gravity="center_horizontal|center_vertical">
 
@@ -87,7 +87,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_rowSpan="7"
-            android:layout_gravity="center_vertical|center_horizontal"
+            android:layout_gravity="center_vertical|right"
             android:gravity="center"
 
             android:targetDrawables="@array/lockscreen_targets_with_camera"

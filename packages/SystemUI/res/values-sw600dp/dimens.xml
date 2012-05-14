@@ -27,9 +27,6 @@
     <!-- 0x33 = center_horizontal|top -->
     <integer name="notification_panel_layout_gravity">0x31</integer>
 
-    <!-- Default target placement radius for navigation bar search target -->
-    <dimen name="navbar_search_target_placement_radius">182dip</dimen>
-
     <!-- Diameter of outer shape drawable shown in navbar search-->
     <dimen name="navbar_search_outerring_diameter">364dp</dimen>
 

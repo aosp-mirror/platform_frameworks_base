@@ -31,7 +31,7 @@
     <!-- top: status -->
     <RelativeLayout
         android:layout_height="0dip"
-        android:layout_weight="1"
+        android:layout_weight="0.42"
         android:layout_width="match_parent"
         android:gravity="center">
 
@@ -69,8 +69,9 @@
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dip"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_weight="0.58"
+            android:orientation="vertical"
+            android:gravity="bottom">
 
         <TextView
             android:id="@+id/screenLocked"
@@ -87,7 +88,7 @@
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_gravity="center_horizontal"
             android:gravity="center"
 
             android:targetDrawables="@array/lockscreen_targets_with_camera"

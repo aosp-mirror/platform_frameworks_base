@@ -61,7 +61,6 @@
                 prvandroid:directionDescriptions="@array/navbar_search_direction_descriptions"
                 prvandroid:handleDrawable="@drawable/navbar_search_handle"
                 prvandroid:waveDrawable="@drawable/navbar_search_outerring"
-                prvandroid:outerRadius="@dimen/navbar_search_target_placement_radius"
                 prvandroid:snapMargin="@dimen/navbar_search_snap_margin"
                 prvandroid:hitRadius="@dimen/navbar_search_hit_radius"
                 prvandroid:feedbackCount="0"
