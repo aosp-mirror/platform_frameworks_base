@@ -176,9 +176,9 @@
     <string name="permgrouplab_network" msgid="5808983377727109831">"Comunicação da rede"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Acesse diversos recursos de rede."</string>
     <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
-    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Acessar dispositivos e redes através do Bluetooth."</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Acessar dispositivos e redes por meio do Bluetooth."</string>
     <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Redes de curto alcance"</string>
-    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Acessar dispositivos através de redes de curto alcance de redes como a NFC."</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Acessar dispositivos por meio de redes de curto alcance de redes como a NFC."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Configurações de áudio"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Alterar as configurações de áudio."</string>
     <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Afeta a bateria"</string>
