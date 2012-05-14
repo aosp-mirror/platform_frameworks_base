@@ -48,25 +48,9 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 Caches::Caches(): Singleton<Caches>(), mInitialized(false) {
-    GLint maxTextureUnits;
-    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
-    if (maxTextureUnits < REQUIRED_TEXTURE_UNITS_COUNT) {
-        ALOGW("At least %d texture units are required!", REQUIRED_TEXTURE_UNITS_COUNT);
-    }
-
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-
-    if (extensions.hasDebugMarker()) {
-        eventMark = glInsertEventMarkerEXT;
-        startMark = glPushGroupMarkerEXT;
-        endMark = glPopGroupMarkerEXT;
-    } else {
-        eventMark = eventMarkNull;
-        startMark = startMarkNull;
-        endMark = endMarkNull;
-    }
-
     init();
+    initExtensions();
+    initConstraints();
 
     mDebugLevel = readDebugLevel();
     ALOGD("Enabling debug mode %d", mDebugLevel);
@@ -103,6 +87,36 @@ void Caches::init() {
     currentProgram = NULL;
 
     mInitialized = true;
+}
+
+void Caches::initExtensions() {
+    if (extensions.hasDebugMarker()) {
+        eventMark = glInsertEventMarkerEXT;
+        startMark = glPushGroupMarkerEXT;
+        endMark = glPopGroupMarkerEXT;
+    } else {
+        eventMark = eventMarkNull;
+        startMark = startMarkNull;
+        endMark = endMarkNull;
+    }
+
+    if (extensions.hasDebugLabel()) {
+        setLabel = glLabelObjectEXT;
+        getLabel = glGetObjectLabelEXT;
+    } else {
+        setLabel = setLabelNull;
+        getLabel = getLabelNull;
+    }
+}
+
+void Caches::initConstraints() {
+    GLint maxTextureUnits;
+    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
+    if (maxTextureUnits < REQUIRED_TEXTURE_UNITS_COUNT) {
+        ALOGW("At least %d texture units are required!", REQUIRED_TEXTURE_UNITS_COUNT);
+    }
+
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
 }
 
 void Caches::terminate() {
