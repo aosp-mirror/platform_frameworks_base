@@ -1977,7 +1977,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
                     String reason = intent.getStringExtra("reason");
                     if (reason != null) {
-                        excludeRecents = reason.equals("recentapps");
+                        excludeRecents = reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS);
                     }
                 }
                 animateCollapse(excludeRecents);
