@@ -61,15 +61,15 @@ class FontRenderer;
 
 class CacheTexture {
 public:
-    CacheTexture(){}
+    CacheTexture() { }
     CacheTexture(uint8_t* texture, GLuint textureId, uint16_t width, uint16_t height) :
-        mTexture(texture), mTextureId(textureId), mWidth(width), mHeight(height),
-        mLinearFiltering(false) {}
+            mTexture(texture), mTextureId(textureId), mWidth(width), mHeight(height),
+            mLinearFiltering(false) { }
     ~CacheTexture() {
-        if (mTexture != NULL) {
+        if (mTexture) {
             delete[] mTexture;
         }
-        if (mTextureId != 0) {
+        if (mTextureId) {
             glDeleteTextures(1, &mTextureId);
         }
     }
@@ -90,7 +90,7 @@ public:
                 mCurrentRow(currentRow),
                 mCurrentCol(currentCol),
                 mDirty(false),
-                mCacheTexture(cacheTexture){
+                mCacheTexture(cacheTexture) {
     }
 
     bool fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_t *retOriginY);
