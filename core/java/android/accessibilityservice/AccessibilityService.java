@@ -371,7 +371,7 @@ public abstract class AccessibilityService extends Service {
      *
      * <strong>Note:</strong> To receive gestures an accessibility service must
      * request that the device is in touch exploration mode by setting the
-     * {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_INCLUDE_NOT_IMPORTANT_VIEWS}
+     * {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE}
      * flag.
      *
      * @param gestureId The unique id of the performed gesture.
@@ -565,10 +565,8 @@ public abstract class AccessibilityService extends Service {
             mCaller.sendMessage(message);
         }
 
-        public void onGesture(int gestureId, IAccessibilityServiceClientCallback callback,
-                int interactionId) {
-            Message message = mCaller.obtainMessageIIO(DO_ON_GESTURE, gestureId, interactionId,
-                    callback);
+        public void onGesture(int gestureId) {
+            Message message = mCaller.obtainMessageI(DO_ON_GESTURE, gestureId);
             mCaller.sendMessage(message);
         }
 
@@ -601,15 +599,7 @@ public abstract class AccessibilityService extends Service {
                     return;
                 case DO_ON_GESTURE :
                     final int gestureId = message.arg1;
-                    final int interactionId = message.arg2;
-                    IAccessibilityServiceClientCallback callback =
-                        (IAccessibilityServiceClientCallback) message.obj;
-                    final boolean handled = mCallback.onGesture(gestureId);
-                    try {
-                        callback.setGestureResult(gestureId, handled, interactionId);
-                    } catch (RemoteException re) {
-                        Log.e(LOG_TAG, "Error calling back with the gesture resut.", re);
-                    }
+                    mCallback.onGesture(gestureId);
                     return;
                 default :
                     Log.w(LOG_TAG, "Unknown message type " + message.what);
