@@ -79,6 +79,7 @@ import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewManager;
+import android.view.ViewParent;
 import android.view.ViewStub;
 import android.view.Window;
 import android.view.WindowManager;
@@ -582,7 +583,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             st.decorView.setWindowBackground(getContext().getResources().getDrawable(
                     backgroundResId));
 
-
+            ViewParent shownPanelParent = st.shownPanelView.getParent();
+            if (shownPanelParent != null && shownPanelParent instanceof ViewGroup) {
+                ((ViewGroup) shownPanelParent).removeView(st.shownPanelView);
+            }
             st.decorView.addView(st.shownPanelView, lp);
 
             /*
