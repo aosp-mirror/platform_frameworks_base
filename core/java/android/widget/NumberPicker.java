@@ -2172,6 +2172,18 @@ public class NumberPicker extends LinearLayout {
                             }
                             return false;
                         }
+                        case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+                            if (getWrapSelectorWheel() || getValue() < getMaxValue()) {
+                                changeValueByOne(true);
+                                return true;
+                            }
+                        } return false;
+                        case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+                            if (getWrapSelectorWheel() || getValue() > getMinValue()) {
+                                changeValueByOne(false);
+                                return true;
+                            }
+                        } return false;
                     }
                 } break;
                 case VIRTUAL_VIEW_ID_INPUT: {
@@ -2496,6 +2508,12 @@ public class NumberPicker extends LinearLayout {
             }
             if (mAccessibilityFocusedView == View.NO_ID) {
                 info.addAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
+            }
+            if (getWrapSelectorWheel() || getValue() < getMaxValue()) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+            }
+            if (getWrapSelectorWheel() || getValue() > getMinValue()) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
             }
 
             return info;

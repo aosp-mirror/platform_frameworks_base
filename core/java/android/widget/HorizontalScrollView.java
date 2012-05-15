@@ -739,6 +739,9 @@ public class HorizontalScrollView extends FrameLayout {
 
     @Override
     public boolean performAccessibilityAction(int action, Bundle arguments) {
+        if (super.performAccessibilityAction(action, arguments)) {
+            return true;
+        }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
                 final int viewportWidth = getWidth() - mPaddingLeft - mPaddingRight;
@@ -757,7 +760,7 @@ public class HorizontalScrollView extends FrameLayout {
                 }
             } return false;
         }
-        return super.performAccessibilityAction(action, arguments);
+        return false;
     }
 
     @Override
