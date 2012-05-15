@@ -6007,8 +6007,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             return;
         }
         if ((focusableMode & FOCUSABLES_ACCESSIBILITY) == FOCUSABLES_ACCESSIBILITY) {
-            if (AccessibilityManager.getInstance(mContext).isEnabled()
-                    && includeForAccessibility()) {
+            if (canTakeAccessibilityFocusFromHover()) {
                 views.add(this);
                 return;
             }
@@ -6161,57 +6160,28 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         }
     }
 
-    /**
-     * Find the best view to take accessibility focus from a hover.
-     * This function finds the deepest actionable view and if that
-     * fails ask the parent to take accessibility focus from hover.
-     *
-     * @param x The X hovered location in this view coorditantes.
-     * @param y The Y hovered location in this view coorditantes.
-     * @return Whether the request was handled.
-     *
-     * @hide
-     */
-    public boolean requestAccessibilityFocusFromHover(float x, float y) {
-        if (onRequestAccessibilityFocusFromHover(x, y)) {
-            return true;
-        }
-        ViewParent parent = mParent;
-        if (parent instanceof View) {
-            View parentView = (View) parent;
-
-            float[] position = mAttachInfo.mTmpTransformLocation;
-            position[0] = x;
-            position[1] = y;
-
-            // Compensate for the transformation of the current matrix.
-            if (!hasIdentityMatrix()) {
-                getMatrix().mapPoints(position);
+    private void requestAccessibilityFocusFromHover() {
+        if (includeForAccessibility() && isActionableForAccessibility()) {
+            requestAccessibilityFocus();
+        } else {
+            if (mParent != null) {
+                View nextFocus = mParent.findViewToTakeAccessibilityFocusFromHover(this, this);
+                if (nextFocus != null) {
+                    nextFocus.requestAccessibilityFocus();
+                }
             }
-
-            // Compensate for the parent scroll and the offset
-            // of this view stop from the parent top.
-            position[0] += mLeft - parentView.mScrollX;
-            position[1] += mTop - parentView.mScrollY;
-
-            return parentView.requestAccessibilityFocusFromHover(position[0], position[1]);
         }
-        return false;
     }
 
     /**
-     * Requests to give this View focus from hover.
-     *
-     * @param x The X hovered location in this view coorditantes.
-     * @param y The Y hovered location in this view coorditantes.
-     * @return Whether the request was handled.
-     *
      * @hide
      */
-    public boolean onRequestAccessibilityFocusFromHover(float x, float y) {
-        if (includeForAccessibility()
-                && (isActionableForAccessibility() || hasListenersForAccessibility())) {
-            return requestAccessibilityFocus();
+    public boolean canTakeAccessibilityFocusFromHover() {
+        if (includeForAccessibility() && isActionableForAccessibility()) {
+            return true;
+        }
+        if (mParent != null) {
+            return (mParent.findViewToTakeAccessibilityFocusFromHover(this, this) == this);
         }
         return false;
     }
@@ -6473,14 +6443,15 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * important for accessibility are regarded.
      *
      * @return Whether to regard the view for accessibility.
+     *
+     * @hide
      */
-    boolean includeForAccessibility() {
+    public boolean includeForAccessibility() {
         if (mAttachInfo != null) {
             if (!mAttachInfo.mIncludeNotImportantViews) {
                 return isImportantForAccessibility();
-            } else {
-                return true;
             }
+            return true;
         }
         return false;
     }
@@ -6491,8 +6462,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * accessiiblity.
      *
      * @return True if the view is actionable for accessibility.
+     *
+     * @hide
      */
-    private boolean isActionableForAccessibility() {
+    public boolean isActionableForAccessibility() {
         return (isClickable() || isLongClickable() || isFocusable());
     }
 
@@ -7668,7 +7641,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     && pointInView(event.getX(), event.getY())) {
                 sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
                 mSendingHoverAccessibilityEvents = true;
-                requestAccessibilityFocusFromHover((int) event.getX(), (int) event.getY());
+                requestAccessibilityFocusFromHover();
             }
         } else {
             if (action == MotionEvent.ACTION_HOVER_EXIT

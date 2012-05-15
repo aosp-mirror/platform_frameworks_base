@@ -2325,6 +2325,14 @@ public final class ViewRootImpl implements ViewParent,
         return true;
     }
 
+    @Override
+    public View findViewToTakeAccessibilityFocusFromHover(View child, View descendant) {
+        if (descendant.includeForAccessibility()) {
+            return descendant;
+        }
+        return null;
+    }
+
     /**
      * We want to draw a highlight around the current accessibility focused.
      * Since adding a style for all possible view is not a viable option we
@@ -2520,6 +2528,20 @@ public final class ViewRootImpl implements ViewParent,
         return handled;
     }
 
+    /**
+     * @hide
+     */
+    public View getAccessibilityFocusedHost() {
+        return mAccessibilityFocusedHost;
+    }
+
+    /**
+     * @hide
+     */
+    public AccessibilityNodeInfo getAccessibilityFocusedVirtualView() {
+        return mAccessibilityFocusedVirtualView;
+    }
+
     void setAccessibilityFocusedHost(View host) {
         if (mAccessibilityFocusedHost != null && mAccessibilityFocusedVirtualView == null) {
             mAccessibilityFocusedHost.clearAccessibilityFocusNoCallbacks();
@@ -2672,7 +2694,7 @@ public final class ViewRootImpl implements ViewParent,
     /**
      * Return true if child is an ancestor of parent, (or equal to the parent).
      */
-    static boolean isViewDescendantOf(View child, View parent) {
+    public static boolean isViewDescendantOf(View child, View parent) {
         if (child == parent) {
             return true;
         }

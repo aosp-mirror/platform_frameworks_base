@@ -24,7 +24,6 @@ import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewDebug;
@@ -32,6 +31,7 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeProvider;
 
 /**
  * An AdapterView is a view whose children are determined by an {@link Adapter}.
@@ -955,24 +955,6 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         event.setFromIndex(getFirstVisiblePosition());
         event.setToIndex(getLastVisiblePosition());
         event.setItemCount(getCount());
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public boolean onRequestAccessibilityFocusFromHover(float x, float y) {
-        // We prefer to five focus to the child instead of this view.
-        // Usually the children are not actionable for accessibility,
-        // and they will not take accessibility focus, so we give it.
-        final int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (isTransformedTouchPointInView(x, y, child, null)) {
-                return child.requestAccessibilityFocus();
-            }
-        }
-        return super.onRequestAccessibilityFocusFromHover(x, y);
     }
 
     private boolean isScrollableForAccessibility() {

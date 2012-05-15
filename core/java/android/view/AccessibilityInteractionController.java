@@ -330,7 +330,7 @@ final class AccessibilityInteractionController {
                                 if (provider != null) {
                                     List<AccessibilityNodeInfo> infosFromProvider =
                                         provider.findAccessibilityNodeInfosByText(text,
-                                                virtualDescendantId);
+                                                AccessibilityNodeInfo.UNDEFINED);
                                     if (infosFromProvider != null) {
                                         infos.addAll(infosFromProvider);
                                     }
