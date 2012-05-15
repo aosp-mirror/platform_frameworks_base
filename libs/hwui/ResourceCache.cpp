@@ -59,11 +59,11 @@ void ResourceCache::incrementRefcount(void* resource, ResourceType resourceType)
 void ResourceCache::incrementRefcount(SkBitmap* bitmapResource) {
     SkSafeRef(bitmapResource->pixelRef());
     SkSafeRef(bitmapResource->getColorTable());
-    incrementRefcount((void*)bitmapResource, kBitmap);
+    incrementRefcount((void*) bitmapResource, kBitmap);
 }
 
 void ResourceCache::incrementRefcount(SkPath* pathResource) {
-    incrementRefcount((void*)pathResource, kPath);
+    incrementRefcount((void*) pathResource, kPath);
 }
 
 void ResourceCache::incrementRefcount(SkiaShader* shaderResource) {
