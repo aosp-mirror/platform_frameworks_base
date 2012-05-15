@@ -34,6 +34,7 @@
               android:layout_marginLeft="4dip"
               android:layout_marginRight="16dip"
               android:textAppearance="?android:attr/textAppearanceSmall"
+              android:textColor="?android:attr/actionMenuTextColor"
               android:textSize="12sp"
               android:textAllCaps="true"
               android:text="@string/action_mode_done" />
