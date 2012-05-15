@@ -15285,10 +15285,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * Sets the next animation to play for this view.
      * If you want the animation to play immediately, use
-     * startAnimation. This method provides allows fine-grained
+     * {@link #startAnimation(android.view.animation.Animation)} instead.
+     * This method provides allows fine-grained
      * control over the start time and invalidation, but you
      * must make sure that 1) the animation has a start time set, and
-     * 2) the view will be invalidated when the animation is supposed to
+     * 2) the view's parent (which controls animations on its children)
+     * will be invalidated when the animation is supposed to
      * start.
      *
      * @param animation The next animation, or null.
