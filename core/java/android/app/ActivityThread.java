@@ -275,7 +275,7 @@ public final class ActivityThread {
         }
 
         public String toString() {
-            ComponentName componentName = intent.getComponent();
+            ComponentName componentName = intent != null ? intent.getComponent() : null;
             return "ActivityRecord{"
                 + Integer.toHexString(System.identityHashCode(this))
                 + " token=" + token + " " + (componentName == null
