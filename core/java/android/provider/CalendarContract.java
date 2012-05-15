@@ -105,6 +105,17 @@ public final class CalendarContract {
      * and it should call {@link Activity#setResult(int)} with
      * {@link Activity#RESULT_OK} or {@link Activity#RESULT_CANCELED} to
      * acknowledge whether the action was handled or not.
+     *
+     * The custom app should have an intent-filter like the following
+     * <pre>
+     * {@code
+     * <intent-filter>
+     *    <action android:name="android.provider.calendar.action.HANDLE_CUSTOM_EVENT" />
+     *    <category android:name="android.intent.category.DEFAULT" />
+     *    <data android:mimeType="vnd.android.cursor.item/event" />
+     * </intent-filter>
+     * }
+     * </pre>
      * <p>
      * Input: {@link Intent#getData} has the event URI. The extra
      * {@link #EXTRA_EVENT_BEGIN_TIME} has the start time of the instance. The
