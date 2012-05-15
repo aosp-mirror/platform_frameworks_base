@@ -25,6 +25,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.app.PendingIntent;
+import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -1343,7 +1344,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     sendDownAndUpKeyEvents(KeyEvent.KEYCODE_APP_SWITCH);
                 } return true;
                 case AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS: {
-                    // TODO: Implement when 6346026 is fixed.
+                    expandStatusBar();
                 } return true;
             }
             return false;
@@ -1409,6 +1410,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             InputManager.getInstance().injectInputEvent(up,
                     InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
             up.recycle();
+
+            Binder.restoreCallingIdentity(token);
+        }
+
+        private void expandStatusBar() {
+            final long token = Binder.clearCallingIdentity();
+
+            StatusBarManager statusBarManager = (StatusBarManager) mContext.getSystemService(
+                    android.app.Service.STATUS_BAR_SERVICE);
+            statusBarManager.expand();
 
             Binder.restoreCallingIdentity(token);
         }
