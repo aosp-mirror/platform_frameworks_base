@@ -1186,6 +1186,7 @@ class WindowStateAnimator {
             mSurfaceX = left;
             mSurfaceY = top;
             mSurface.setPosition(left, top);
+            mSurface.setWindowCrop(null);
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error positioning surface of " + mWin
                     + " pos=(" + left + "," + top + ")", e);
