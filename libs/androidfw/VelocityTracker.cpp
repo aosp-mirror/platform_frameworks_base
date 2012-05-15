@@ -33,13 +33,7 @@
 
 namespace android {
 
-// --- VelocityTracker ---
-
-const uint32_t VelocityTracker::DEFAULT_DEGREE;
-const nsecs_t VelocityTracker::DEFAULT_HORIZON;
-const uint32_t VelocityTracker::HISTORY_SIZE;
-
-static inline float vectorDot(const float* a, const float* b, uint32_t m) {
+static float vectorDot(const float* a, const float* b, uint32_t m) {
     float r = 0;
     while (m--) {
         r += *(a++) * *(b++);
@@ -47,7 +41,7 @@ static inline float vectorDot(const float* a, const float* b, uint32_t m) {
     return r;
 }
 
-static inline float vectorNorm(const float* a, uint32_t m) {
+static float vectorNorm(const float* a, uint32_t m) {
     float r = 0;
     while (m--) {
         float t = *(a++);
@@ -91,45 +85,52 @@ static String8 matrixToString(const float* a, uint32_t m, uint32_t n, bool rowMa
 }
 #endif
 
-VelocityTracker::VelocityTracker() {
-    clear();
+
+// --- VelocityTracker ---
+
+VelocityTracker::VelocityTracker() :
+        mCurrentPointerIdBits(0), mActivePointerId(-1),
+        mStrategy(new LeastSquaresVelocityTrackerStrategy()) {
+}
+
+VelocityTracker::VelocityTracker(VelocityTrackerStrategy* strategy) :
+        mCurrentPointerIdBits(0), mActivePointerId(-1),
+        mStrategy(strategy) {
+}
+
+VelocityTracker::~VelocityTracker() {
+    delete mStrategy;
 }
 
 void VelocityTracker::clear() {
-    mIndex = 0;
-    mMovements[0].idBits.clear();
+    mCurrentPointerIdBits.clear();
     mActivePointerId = -1;
+
+    mStrategy->clear();
 }
 
 void VelocityTracker::clearPointers(BitSet32 idBits) {
-    BitSet32 remainingIdBits(mMovements[mIndex].idBits.value & ~idBits.value);
-    mMovements[mIndex].idBits = remainingIdBits;
+    BitSet32 remainingIdBits(mCurrentPointerIdBits.value & ~idBits.value);
+    mCurrentPointerIdBits = remainingIdBits;
 
     if (mActivePointerId >= 0 && idBits.hasBit(mActivePointerId)) {
         mActivePointerId = !remainingIdBits.isEmpty() ? remainingIdBits.firstMarkedBit() : -1;
     }
+
+    mStrategy->clearPointers(idBits);
 }
 
 void VelocityTracker::addMovement(nsecs_t eventTime, BitSet32 idBits, const Position* positions) {
-    if (++mIndex == HISTORY_SIZE) {
-        mIndex = 0;
-    }
-
     while (idBits.count() > MAX_POINTERS) {
         idBits.clearLastMarkedBit();
     }
 
-    Movement& movement = mMovements[mIndex];
-    movement.eventTime = eventTime;
-    movement.idBits = idBits;
-    uint32_t count = idBits.count();
-    for (uint32_t i = 0; i < count; i++) {
-        movement.positions[i] = positions[i];
+    mCurrentPointerIdBits = idBits;
+    if (mActivePointerId < 0 || !idBits.hasBit(mActivePointerId)) {
+        mActivePointerId = idBits.isEmpty() ? -1 : idBits.firstMarkedBit();
     }
 
-    if (mActivePointerId < 0 || !idBits.hasBit(mActivePointerId)) {
-        mActivePointerId = count != 0 ? idBits.firstMarkedBit() : -1;
-    }
+    mStrategy->addMovement(eventTime, idBits, positions);
 
 #if DEBUG_VELOCITY
     ALOGD("VelocityTracker: addMovement eventTime=%lld, idBits=0x%08x, activePointerId=%d",
@@ -139,7 +140,7 @@ void VelocityTracker::addMovement(nsecs_t eventTime, BitSet32 idBits, const Posi
         uint32_t index = idBits.getIndexOfBit(id);
         iterBits.clearBit(id);
         Estimator estimator;
-        getEstimator(id, DEFAULT_DEGREE, DEFAULT_HORIZON, &estimator);
+        getEstimator(id, &estimator);
         ALOGD("  %d: position (%0.3f, %0.3f), "
                 "estimator (degree=%d, xCoeff=%s, yCoeff=%s, confidence=%f)",
                 id, positions[index].x, positions[index].y,
@@ -213,6 +214,61 @@ void VelocityTracker::addMovement(const MotionEvent* event) {
         positions[i].y = event->getY(i);
     }
     addMovement(eventTime, idBits, positions);
+}
+
+bool VelocityTracker::getVelocity(uint32_t id, float* outVx, float* outVy) const {
+    Estimator estimator;
+    if (getEstimator(id, &estimator) && estimator.degree >= 1) {
+        *outVx = estimator.xCoeff[1];
+        *outVy = estimator.yCoeff[1];
+        return true;
+    }
+    *outVx = 0;
+    *outVy = 0;
+    return false;
+}
+
+bool VelocityTracker::getEstimator(uint32_t id, Estimator* outEstimator) const {
+    return mStrategy->getEstimator(id, outEstimator);
+}
+
+
+// --- LeastSquaresVelocityTrackerStrategy ---
+
+const uint32_t LeastSquaresVelocityTrackerStrategy::DEGREE;
+const nsecs_t LeastSquaresVelocityTrackerStrategy::HORIZON;
+const uint32_t LeastSquaresVelocityTrackerStrategy::HISTORY_SIZE;
+
+LeastSquaresVelocityTrackerStrategy::LeastSquaresVelocityTrackerStrategy() {
+    clear();
+}
+
+LeastSquaresVelocityTrackerStrategy::~LeastSquaresVelocityTrackerStrategy() {
+}
+
+void LeastSquaresVelocityTrackerStrategy::clear() {
+    mIndex = 0;
+    mMovements[0].idBits.clear();
+}
+
+void LeastSquaresVelocityTrackerStrategy::clearPointers(BitSet32 idBits) {
+    BitSet32 remainingIdBits(mMovements[mIndex].idBits.value & ~idBits.value);
+    mMovements[mIndex].idBits = remainingIdBits;
+}
+
+void LeastSquaresVelocityTrackerStrategy::addMovement(nsecs_t eventTime, BitSet32 idBits,
+        const VelocityTracker::Position* positions) {
+    if (++mIndex == HISTORY_SIZE) {
+        mIndex = 0;
+    }
+
+    Movement& movement = mMovements[mIndex];
+    movement.eventTime = eventTime;
+    movement.idBits = idBits;
+    uint32_t count = idBits.count();
+    for (uint32_t i = 0; i < count; i++) {
+        movement.positions[i] = positions[i];
+    }
 }
 
 /**
@@ -361,22 +417,8 @@ static bool solveLeastSquares(const float* x, const float* y, uint32_t m, uint32
     return true;
 }
 
-bool VelocityTracker::getVelocity(uint32_t id, float* outVx, float* outVy) const {
-    Estimator estimator;
-    if (getEstimator(id, DEFAULT_DEGREE, DEFAULT_HORIZON, &estimator)) {
-        if (estimator.degree >= 1) {
-            *outVx = estimator.xCoeff[1];
-            *outVy = estimator.yCoeff[1];
-            return true;
-        }
-    }
-    *outVx = 0;
-    *outVy = 0;
-    return false;
-}
-
-bool VelocityTracker::getEstimator(uint32_t id, uint32_t degree, nsecs_t horizon,
-        Estimator* outEstimator) const {
+bool LeastSquaresVelocityTrackerStrategy::getEstimator(uint32_t id,
+        VelocityTracker::Estimator* outEstimator) const {
     outEstimator->clear();
 
     // Iterate over movement samples in reverse time order and collect samples.
@@ -393,11 +435,11 @@ bool VelocityTracker::getEstimator(uint32_t id, uint32_t degree, nsecs_t horizon
         }
 
         nsecs_t age = newestMovement.eventTime - movement.eventTime;
-        if (age > horizon) {
+        if (age > HORIZON) {
             break;
         }
 
-        const Position& position = movement.getPosition(id);
+        const VelocityTracker::Position& position = movement.getPosition(id);
         x[m] = position.x;
         y[m] = position.y;
         time[m] = -age * 0.000000001f;
@@ -409,9 +451,7 @@ bool VelocityTracker::getEstimator(uint32_t id, uint32_t degree, nsecs_t horizon
     }
 
     // Calculate a least squares polynomial fit.
-    if (degree > Estimator::MAX_DEGREE) {
-        degree = Estimator::MAX_DEGREE;
-    }
+    uint32_t degree = DEGREE;
     if (degree > m - 1) {
         degree = m - 1;
     }
