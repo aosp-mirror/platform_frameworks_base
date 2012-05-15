@@ -581,7 +581,7 @@ public class GridLayout extends ViewGroup {
     }
 
     private int getDefaultMargin(View c, boolean isAtEdge, boolean horizontal, boolean leading) {
-        return /*isAtEdge ? DEFAULT_CONTAINER_MARGIN :*/ getDefaultMargin(c, horizontal, leading);
+        return isAtEdge ? DEFAULT_CONTAINER_MARGIN : getDefaultMargin(c, horizontal, leading);
     }
 
     private int getDefaultMargin(View c, LayoutParams p, boolean horizontal, boolean leading) {
@@ -733,11 +733,53 @@ public class GridLayout extends ViewGroup {
     @Override
     protected void onSetLayoutParams(View child, ViewGroup.LayoutParams layoutParams) {
         super.onSetLayoutParams(child, layoutParams);
+
+        if (!checkLayoutParams(layoutParams)) {
+            handleInvalidParams("supplied LayoutParams are of the wrong type");
+        }
+
         invalidateStructure();
     }
 
     final LayoutParams getLayoutParams(View c) {
         return (LayoutParams) c.getLayoutParams();
+    }
+
+    private static void handleInvalidParams(String msg) {
+        throw new IllegalArgumentException(msg + ". ");
+    }
+
+    private void checkLayoutParams(LayoutParams lp, boolean horizontal) {
+        String groupName = horizontal ? "column" : "row";
+        Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
+        Interval span = spec.span;
+        if (span.min != UNDEFINED && span.min < 0) {
+            handleInvalidParams(groupName + " indices must be positive");
+        }
+        Axis axis = horizontal ? horizontalAxis : verticalAxis;
+        int count = axis.definedCount;
+        if (count != UNDEFINED) {
+            if (span.max > count) {
+                handleInvalidParams(groupName +
+                        " indices (start + span) mustn't exceed the " + groupName + " count");
+            }
+            if (span.size() > count) {
+                handleInvalidParams(groupName + " span mustn't exceed the " + groupName + " count");
+            }
+        }
+    }
+
+    @Override
+    protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
+        if (!(p instanceof LayoutParams)) {
+            return false;
+        }
+        LayoutParams lp = (LayoutParams) p;
+
+        checkLayoutParams(lp, true);
+        checkLayoutParams(lp, false);
+
+        return true;
     }
 
     @Override
@@ -1143,6 +1185,7 @@ public class GridLayout extends ViewGroup {
                 Interval span = spec.span;
                 result = max(result, span.min);
                 result = max(result, span.max);
+                result = max(result, span.size());
             }
             return result == -1 ? UNDEFINED : result;
         }
@@ -1159,6 +1202,11 @@ public class GridLayout extends ViewGroup {
         }
 
         public void setCount(int count) {
+            if (count != UNDEFINED && count < getMaxIndex()) {
+                handleInvalidParams((horizontal ? "column" : "row") +
+                        "Count must be greater than or equal to the maximum of all grid indices " +
+                        "(and spans) defined in the LayoutParams of each child");
+            }
             this.definedCount = count;
         }
 
@@ -1478,20 +1526,6 @@ public class GridLayout extends ViewGroup {
         This is a special case of the Linear Programming problem that is, in turn,
         equivalent to the single-source shortest paths problem on a digraph, for
         which the O(n^2) Bellman-Ford algorithm the most commonly used general solution.
-
-        Other algorithms are faster in the case where no arcs have negative weights
-        but allowing negative weights turns out to be the same as accommodating maximum
-        size requirements as well as minimum ones.
-
-        Bellman-Ford works by iteratively 'relaxing' constraints over all nodes (an O(N)
-        process) and performing this step N times. Proof of correctness hinges on the
-        fact that there can be no negative weight chains of length > N - unless a
-        'negative weight loop' exists. The algorithm catches this case in a final
-        checking phase that reports failure.
-
-        By topologically sorting the nodes and checking this condition at each step
-        typical layout problems complete after the first iteration and the algorithm
-        completes in O(N) steps with very low constants.
         */
         private void solve(Arc[] arcs, int[] locations) {
             String axisName = horizontal ? "horizontal" : "vertical";
