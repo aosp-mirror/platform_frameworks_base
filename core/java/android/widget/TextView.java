@@ -7240,7 +7240,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (mEditor != null && mEditor.mSpellChecker != null && newStart < 0 &&
                 what instanceof SpellCheckSpan) {
-            mEditor.mSpellChecker.removeSpellCheckSpan((SpellCheckSpan) what);
+            mEditor.mSpellChecker.onSpellCheckSpanRemoved((SpellCheckSpan) what);
         }
     }
 
