@@ -21,6 +21,7 @@
 
 
 #include <cutils/log.h>
+#include <cutils/properties.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <androidfw/InputTransport.h>
@@ -43,15 +44,23 @@ static const nsecs_t NANOS_PER_MS = 1000000;
 
 // Latency added during resampling.  A few milliseconds doesn't hurt much but
 // reduces the impact of mispredicted touch positions.
-static const nsecs_t RESAMPLE_LATENCY = 4 * NANOS_PER_MS;
+static const nsecs_t RESAMPLE_LATENCY = 5 * NANOS_PER_MS;
 
 // Minimum time difference between consecutive samples before attempting to resample.
-static const nsecs_t RESAMPLE_MIN_DELTA = 1 * NANOS_PER_MS;
+static const nsecs_t RESAMPLE_MIN_DELTA = 2 * NANOS_PER_MS;
 
-// Maximum linear interpolation scale value.  The larger this is, the more error may
-// potentially be introduced.
-static const float RESAMPLE_MAX_ALPHA = 2.0f;
+// Maximum time to predict forward from the last known state, to avoid predicting too
+// far into the future.  This time is further bounded by 50% of the last time delta.
+static const nsecs_t RESAMPLE_MAX_PREDICTION = 8 * NANOS_PER_MS;
 
+template<typename T>
+inline static T min(const T& a, const T& b) {
+    return a < b ? a : b;
+}
+
+inline static float lerp(float a, float b, float alpha) {
+    return a + alpha * (b - a);
+}
 
 // --- InputMessage ---
 
@@ -352,10 +361,26 @@ status_t InputPublisher::receiveFinishedSignal(uint32_t* outSeq, bool* outHandle
 // --- InputConsumer ---
 
 InputConsumer::InputConsumer(const sp<InputChannel>& channel) :
+        mResampleTouch(isTouchResamplingEnabled()),
         mChannel(channel), mMsgDeferred(false) {
 }
 
 InputConsumer::~InputConsumer() {
+}
+
+bool InputConsumer::isTouchResamplingEnabled() {
+    char value[PROPERTY_VALUE_MAX];
+    int length = property_get("debug.inputconsumer.resample", value, NULL);
+    if (length > 0) {
+        if (!strcmp("0", value)) {
+            return false;
+        }
+        if (strcmp("1", value)) {
+            ALOGD("Unrecognized property value for 'debug.inputconsumer.resample'.  "
+                    "Use '1' or '0'.");
+        }
+    }
+    return true;
 }
 
 status_t InputConsumer::consume(InputEventFactoryInterface* factory,
@@ -538,18 +563,19 @@ status_t InputConsumer::consumeSamples(InputEventFactoryInterface* factory,
 }
 
 void InputConsumer::updateTouchState(InputMessage* msg) {
-    if (!(msg->body.motion.source & AINPUT_SOURCE_CLASS_POINTER)) {
+    if (!mResampleTouch ||
+            !(msg->body.motion.source & AINPUT_SOURCE_CLASS_POINTER)) {
         return;
     }
 
     int32_t deviceId = msg->body.motion.deviceId;
     int32_t source = msg->body.motion.source;
+    nsecs_t eventTime = msg->body.motion.eventTime;
 
-    // TODO: Filter the incoming touch event so that it aligns better
-    // with prior predictions.  Turning RESAMPLE_LATENCY offsets the need
-    // for filtering but it would be nice to reduce the latency further.
-
-    switch (msg->body.motion.action) {
+    // Update the touch state history to incorporate the new input message.
+    // If the message is in the past relative to the most recently produced resampled
+    // touch, then use the resampled time and coordinates instead.
+    switch (msg->body.motion.action & AMOTION_EVENT_ACTION_MASK) {
     case AMOTION_EVENT_ACTION_DOWN: {
         ssize_t index = findTouchState(deviceId, source);
         if (index < 0) {
@@ -567,6 +593,40 @@ void InputConsumer::updateTouchState(InputMessage* msg) {
         if (index >= 0) {
             TouchState& touchState = mTouchStates.editItemAt(index);
             touchState.addHistory(msg);
+            if (eventTime < touchState.lastResample.eventTime) {
+                rewriteMessage(touchState, msg);
+            } else {
+                touchState.lastResample.idBits.clear();
+            }
+        }
+        break;
+    }
+
+    case AMOTION_EVENT_ACTION_POINTER_DOWN: {
+        ssize_t index = findTouchState(deviceId, source);
+        if (index >= 0) {
+            TouchState& touchState = mTouchStates.editItemAt(index);
+            touchState.lastResample.idBits.clearBit(msg->body.motion.getActionId());
+            rewriteMessage(touchState, msg);
+        }
+        break;
+    }
+
+    case AMOTION_EVENT_ACTION_POINTER_UP: {
+        ssize_t index = findTouchState(deviceId, source);
+        if (index >= 0) {
+            TouchState& touchState = mTouchStates.editItemAt(index);
+            rewriteMessage(touchState, msg);
+            touchState.lastResample.idBits.clearBit(msg->body.motion.getActionId());
+        }
+        break;
+    }
+
+    case AMOTION_EVENT_ACTION_SCROLL: {
+        ssize_t index = findTouchState(deviceId, source);
+        if (index >= 0) {
+            const TouchState& touchState = mTouchStates.itemAt(index);
+            rewriteMessage(touchState, msg);
         }
         break;
     }
@@ -575,6 +635,8 @@ void InputConsumer::updateTouchState(InputMessage* msg) {
     case AMOTION_EVENT_ACTION_CANCEL: {
         ssize_t index = findTouchState(deviceId, source);
         if (index >= 0) {
+            const TouchState& touchState = mTouchStates.itemAt(index);
+            rewriteMessage(touchState, msg);
             mTouchStates.removeAt(index);
         }
         break;
@@ -582,13 +644,30 @@ void InputConsumer::updateTouchState(InputMessage* msg) {
     }
 }
 
+void InputConsumer::rewriteMessage(const TouchState& state, InputMessage* msg) {
+    for (size_t i = 0; i < msg->body.motion.pointerCount; i++) {
+        uint32_t id = msg->body.motion.pointers[i].properties.id;
+        if (state.lastResample.idBits.hasBit(id)) {
+            PointerCoords& msgCoords = msg->body.motion.pointers[i].coords;
+            const PointerCoords& resampleCoords = state.lastResample.getPointerById(id);
+#if DEBUG_RESAMPLING
+            ALOGD("[%d] - rewrite (%0.3f, %0.3f), old (%0.3f, %0.3f)", id,
+                    resampleCoords.getAxisValue(AMOTION_EVENT_AXIS_X),
+                    resampleCoords.getAxisValue(AMOTION_EVENT_AXIS_Y),
+                    msgCoords.getAxisValue(AMOTION_EVENT_AXIS_X),
+                    msgCoords.getAxisValue(AMOTION_EVENT_AXIS_Y));
+#endif
+            msgCoords.setAxisValue(AMOTION_EVENT_AXIS_X, resampleCoords.getX());
+            msgCoords.setAxisValue(AMOTION_EVENT_AXIS_Y, resampleCoords.getY());
+        }
+    }
+}
+
 void InputConsumer::resampleTouchState(nsecs_t sampleTime, MotionEvent* event,
     const InputMessage* next) {
-    if (event->getAction() != AMOTION_EVENT_ACTION_MOVE
-            || !(event->getSource() & AINPUT_SOURCE_CLASS_POINTER)) {
-#if DEBUG_RESAMPLING
-        ALOGD("Not resampled, not a move.");
-#endif
+    if (!mResampleTouch
+            || !(event->getSource() & AINPUT_SOURCE_CLASS_POINTER)
+            || event->getAction() != AMOTION_EVENT_ACTION_MOVE) {
         return;
     }
 
@@ -608,39 +687,9 @@ void InputConsumer::resampleTouchState(nsecs_t sampleTime, MotionEvent* event,
         return;
     }
 
+    // Ensure that the current sample has all of the pointers that need to be reported.
     const History* current = touchState.getHistory(0);
-    const History* other;
-    History future;
-    if (next) {
-        future.initializeFrom(next);
-        other = &future;
-    } else if (touchState.historySize >= 2) {
-        other = touchState.getHistory(1);
-    } else {
-#if DEBUG_RESAMPLING
-        ALOGD("Not resampled, insufficient data.");
-#endif
-        return;
-    }
-
-    nsecs_t delta = current->eventTime - other->eventTime;
-    if (delta > -RESAMPLE_MIN_DELTA && delta < RESAMPLE_MIN_DELTA) {
-#if DEBUG_RESAMPLING
-        ALOGD("Not resampled, delta time is %lld", delta);
-#endif
-        return;
-    }
-
-    float alpha = float(current->eventTime - sampleTime) / delta;
-    if (fabs(alpha) > RESAMPLE_MAX_ALPHA) {
-#if DEBUG_RESAMPLING
-        ALOGD("Not resampled, alpha is %f", alpha);
-#endif
-        return;
-    }
-
     size_t pointerCount = event->getPointerCount();
-    PointerCoords resampledCoords[MAX_POINTERS];
     for (size_t i = 0; i < pointerCount; i++) {
         uint32_t id = event->getPointerId(i);
         if (!current->idBits.hasBit(id)) {
@@ -649,32 +698,89 @@ void InputConsumer::resampleTouchState(nsecs_t sampleTime, MotionEvent* event,
 #endif
             return;
         }
-        const PointerCoords& currentCoords =
-                current->pointers[current->idBits.getIndexOfBit(id)];
+    }
+
+    // Find the data to use for resampling.
+    const History* other;
+    History future;
+    float alpha;
+    if (next) {
+        // Interpolate between current sample and future sample.
+        // So current->eventTime <= sampleTime <= future.eventTime.
+        future.initializeFrom(next);
+        other = &future;
+        nsecs_t delta = future.eventTime - current->eventTime;
+        if (delta < RESAMPLE_MIN_DELTA) {
+#if DEBUG_RESAMPLING
+            ALOGD("Not resampled, delta time is %lld ns.", delta);
+#endif
+            return;
+        }
+        alpha = float(sampleTime - current->eventTime) / delta;
+    } else if (touchState.historySize >= 2) {
+        // Extrapolate future sample using current sample and past sample.
+        // So other->eventTime <= current->eventTime <= sampleTime.
+        other = touchState.getHistory(1);
+        nsecs_t delta = current->eventTime - other->eventTime;
+        if (delta < RESAMPLE_MIN_DELTA) {
+#if DEBUG_RESAMPLING
+            ALOGD("Not resampled, delta time is %lld ns.", delta);
+#endif
+            return;
+        }
+        nsecs_t maxPredict = current->eventTime + min(delta / 2, RESAMPLE_MAX_PREDICTION);
+        if (sampleTime > maxPredict) {
+#if DEBUG_RESAMPLING
+            ALOGD("Sample time is too far in the future, adjusting prediction "
+                    "from %lld to %lld ns.",
+                    sampleTime - current->eventTime, maxPredict - current->eventTime);
+#endif
+            sampleTime = maxPredict;
+        }
+        alpha = float(current->eventTime - sampleTime) / delta;
+    } else {
+#if DEBUG_RESAMPLING
+        ALOGD("Not resampled, insufficient data.");
+#endif
+        return;
+    }
+
+    // Resample touch coordinates.
+    touchState.lastResample.eventTime = sampleTime;
+    touchState.lastResample.idBits.clear();
+    for (size_t i = 0; i < pointerCount; i++) {
+        uint32_t id = event->getPointerId(i);
+        touchState.lastResample.idToIndex[id] = i;
+        touchState.lastResample.idBits.markBit(id);
+        PointerCoords& resampledCoords = touchState.lastResample.pointers[i];
+        const PointerCoords& currentCoords = current->getPointerById(id);
         if (other->idBits.hasBit(id)
                 && shouldResampleTool(event->getToolType(i))) {
-            const PointerCoords& otherCoords =
-                    other->pointers[other->idBits.getIndexOfBit(id)];
-            resampledCoords[i].lerp(currentCoords, otherCoords, alpha);
+            const PointerCoords& otherCoords = other->getPointerById(id);
+            resampledCoords.copyFrom(currentCoords);
+            resampledCoords.setAxisValue(AMOTION_EVENT_AXIS_X,
+                    lerp(currentCoords.getX(), otherCoords.getX(), alpha));
+            resampledCoords.setAxisValue(AMOTION_EVENT_AXIS_Y,
+                    lerp(currentCoords.getY(), otherCoords.getY(), alpha));
 #if DEBUG_RESAMPLING
             ALOGD("[%d] - out (%0.3f, %0.3f), cur (%0.3f, %0.3f), "
                     "other (%0.3f, %0.3f), alpha %0.3f",
-                    i, resampledCoords[i].getX(), resampledCoords[i].getY(),
+                    id, resampledCoords.getX(), resampledCoords.getY(),
                     currentCoords.getX(), currentCoords.getY(),
                     otherCoords.getX(), otherCoords.getY(),
                     alpha);
 #endif
         } else {
-            resampledCoords[i].copyFrom(currentCoords);
+            resampledCoords.copyFrom(currentCoords);
 #if DEBUG_RESAMPLING
             ALOGD("[%d] - out (%0.3f, %0.3f), cur (%0.3f, %0.3f)",
-                    i, resampledCoords[i].getX(), resampledCoords[i].getY(),
+                    id, resampledCoords.getX(), resampledCoords.getY(),
                     currentCoords.getX(), currentCoords.getY());
 #endif
         }
     }
 
-    event->addSample(sampleTime, resampledCoords);
+    event->addSample(sampleTime, touchState.lastResample.pointers);
 }
 
 bool InputConsumer::shouldResampleTool(int32_t toolType) {
