@@ -491,20 +491,28 @@ final class AccessibilityInteractionController {
                 if ((direction & View.FOCUS_ACCESSIBILITY) ==  View.FOCUS_ACCESSIBILITY) {
                     AccessibilityNodeProvider provider = root.getAccessibilityNodeProvider();
                     if (provider != null) {
-                        next = provider.accessibilityFocusSearch(direction,
-                                virtualDescendantId);
-                    } else if (virtualDescendantId == View.NO_ID) {
-                        View nextView = root.focusSearch(direction);
-                        if (nextView != null) {
-                            // If the focus search reached a node with a provider
-                            // we delegate to the provider to find the next one.
-                            provider = nextView.getAccessibilityNodeProvider();
-                            if (provider != null) {
-                                next = provider.accessibilityFocusSearch(direction,
-                                        virtualDescendantId);
-                            } else {
-                                next = nextView.createAccessibilityNodeInfo();
-                             }
+                        next = provider.accessibilityFocusSearch(direction, virtualDescendantId);
+                        if (next != null) {
+                            return;
+                        }
+                    }
+                    View nextView = root.focusSearch(direction);
+                    while (nextView != null) {
+                        // If the focus search reached a node with a provider
+                        // we delegate to the provider to find the next one.
+                        // If the provider does not return a virtual view to
+                        // take accessibility focus we try the next view found
+                        // by the focus search algorithm.
+                        provider = nextView.getAccessibilityNodeProvider();
+                        if (provider != null) {
+                            next = provider.accessibilityFocusSearch(direction, View.NO_ID);
+                            if (next != null) {
+                                break;
+                            }
+                            nextView = nextView.focusSearch(direction);
+                        } else {
+                            next = nextView.createAccessibilityNodeInfo();
+                            break;
                         }
                     }
                 } else {
