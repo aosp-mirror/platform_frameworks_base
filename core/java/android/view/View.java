@@ -17150,12 +17150,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         boolean mUse32BitDrawingCache;
 
         /**
-         * Describes the parts of the window that are currently completely
-         * obscured by system UI elements.
-         */
-        final Rect mSystemInsets = new Rect();
-
-        /**
          * For windows that are full-screen but using insets to layout inside
          * of the screen decorations, these are the current insets for the
          * content of the window.
