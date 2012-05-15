@@ -2090,8 +2090,15 @@ public final class ActivityThread {
                     r.activity.mCalled = false;
                     mInstrumentation.callActivityOnPause(r.activity);
                     // We need to keep around the original state, in case
-                    // we need to be created again.
-                    r.state = oldState;
+                    // we need to be created again.  But we only do this
+                    // for pre-Honeycomb apps, which always save their state
+                    // when pausing, so we can not have them save their state
+                    // when restarting from a paused state.  For HC and later,
+                    // we want to (and can) let the state be saved as the normal
+                    // part of stopping the activity.
+                    if (r.isPreHoneycomb()) {
+                        r.state = oldState;
+                    }
                     if (!r.activity.mCalled) {
                         throw new SuperNotCalledException(
                             "Activity " + r.intent.getComponent().toShortString() +

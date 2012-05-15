@@ -2619,6 +2619,7 @@ final class ActivityStack {
         }
 
         boolean addingToTask = false;
+        boolean movedHome = false;
         TaskRecord reuseTask = null;
         if (((launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) != 0 &&
                 (launchFlags&Intent.FLAG_ACTIVITY_MULTIPLE_TASK) == 0)
@@ -2657,6 +2658,7 @@ final class ActivityStack {
                         if (callerAtFront) {
                             // We really do want to push this one into the
                             // user's face, right now.
+                            movedHome = true;
                             moveHomeToFrontFromLaunchLocked(launchFlags);
                             moveTaskToFrontLocked(taskTop.task, r, options);
                         }
@@ -2835,7 +2837,9 @@ final class ActivityStack {
                 r.setTask(reuseTask, reuseTask, true);
             }
             newTask = true;
-            moveHomeToFrontFromLaunchLocked(launchFlags);
+            if (!movedHome) {
+                moveHomeToFrontFromLaunchLocked(launchFlags);
+            }
             
         } else if (sourceRecord != null) {
             if (!addingToTask &&
