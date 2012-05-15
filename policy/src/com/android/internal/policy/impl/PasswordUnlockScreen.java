@@ -113,10 +113,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         mPasswordEntry.setOnEditorActionListener(this);
 
         mKeyboardHelper = new PasswordEntryKeyboardHelper(context, mKeyboardView, this, false);
-        mKeyboardHelper.setEnableHaptics(
-                Settings.Secure.getInt(mContext.getContentResolver(),
-                        Settings.Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED, 0)
-                        != 0);
+        mKeyboardHelper.setEnableHaptics(mLockPatternUtils.isTactileFeedbackEnabled());
         boolean imeOrDeleteButtonVisible = false;
         if (mIsAlpha) {
             // We always use the system IME for alpha keyboard, so hide lockscreen's soft keyboard
