@@ -91,6 +91,7 @@ public:
         DrawBitmap,
         DrawBitmapMatrix,
         DrawBitmapRect,
+        DrawBitmapData,
         DrawBitmapMesh,
         DrawPatch,
         DrawColor,
@@ -422,6 +423,19 @@ private:
         return (SkBitmap*) getInt();
     }
 
+    SkBitmap* getBitmapData() {
+        SkBitmap* bitmap = new SkBitmap;
+        bitmap->setConfig((SkBitmap::Config) getInt(), getInt(), getInt());
+        if (!bitmap->allocPixels()) {
+            delete bitmap;
+            return NULL;
+        }
+
+        bitmap->setPixels((void*) mReader.skip(bitmap->height() * bitmap->rowBytes()));
+
+        return bitmap;
+    }
+
     SkiaShader* getShader() {
         return (SkiaShader*) getInt();
     }
@@ -574,6 +588,7 @@ public:
     virtual void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, SkPaint* paint);
+    virtual void drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual void drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
             float* vertices, int* colors, SkPaint* paint);
     virtual void drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
@@ -701,16 +716,23 @@ private:
 
     void addInts(const int32_t* values, uint32_t count) {
         mWriter.writeInt(count);
-        for (uint32_t i = 0; i < count; i++) {
-            mWriter.writeInt(values[i]);
-        }
+        mWriter.write(values, count * sizeof(int32_t));
+    }
+
+    void addBitmapData(SkBitmap* bitmap) {
+        mWriter.writeInt(bitmap->config());
+        mWriter.writeInt(bitmap->width());
+        mWriter.writeInt(bitmap->height());
+
+        SkAutoLockPixels alp(*bitmap);
+        void* src = bitmap->getPixels();
+
+        mWriter.write(src, bitmap->rowBytes() * bitmap->height());
     }
 
     void addUInts(const uint32_t* values, int8_t count) {
         mWriter.writeInt(count);
-        for (int8_t i = 0; i < count; i++) {
-            mWriter.writeInt(values[i]);
-        }
+        mWriter.write(values, count * sizeof(uint32_t));
     }
 
     inline void addFloat(float value) {
@@ -719,9 +741,7 @@ private:
 
     void addFloats(const float* values, int32_t count) {
         mWriter.writeInt(count);
-        for (int32_t i = 0; i < count; i++) {
-            mWriter.writeScalar(values[i]);
-        }
+        mWriter.write(values, count * sizeof(float));
     }
 
     inline void addPoint(float x, float y) {
