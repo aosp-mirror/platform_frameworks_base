@@ -398,7 +398,6 @@ public:
 
 private:
     void init();
-
     void initProperties();
 
     void clearResources();
@@ -424,16 +423,7 @@ private:
     }
 
     SkBitmap* getBitmapData() {
-        SkBitmap* bitmap = new SkBitmap;
-        bitmap->setConfig((SkBitmap::Config) getInt(), getInt(), getInt());
-        if (!bitmap->allocPixels()) {
-            delete bitmap;
-            return NULL;
-        }
-
-        bitmap->setPixels((void*) mReader.skip(bitmap->height() * bitmap->rowBytes()));
-
-        return bitmap;
+        return (SkBitmap*) getInt();
     }
 
     SkiaShader* getShader() {
@@ -497,6 +487,7 @@ private:
     }
 
     Vector<SkBitmap*> mBitmapResources;
+    Vector<SkBitmap*> mOwnedBitmapResources;
     Vector<SkiaColorFilter*> mFilterResources;
 
     Vector<SkPaint*> mPaints;
@@ -551,6 +542,8 @@ public:
     virtual ~DisplayListRenderer();
 
     ANDROID_API DisplayList* getDisplayList(DisplayList* displayList);
+
+    virtual bool isDeferred();
 
     virtual void setViewport(int width, int height);
     virtual void prepareDirty(float left, float top, float right, float bottom, bool opaque);
@@ -632,6 +625,10 @@ public:
 
     const Vector<SkBitmap*>& getBitmapResources() const {
         return mBitmapResources;
+    }
+
+    const Vector<SkBitmap*>& getOwnedBitmapResources() const {
+        return mOwnedBitmapResources;
     }
 
     const Vector<SkiaColorFilter*>& getFilterResources() const {
@@ -717,17 +714,6 @@ private:
     void addInts(const int32_t* values, uint32_t count) {
         mWriter.writeInt(count);
         mWriter.write(values, count * sizeof(int32_t));
-    }
-
-    void addBitmapData(SkBitmap* bitmap) {
-        mWriter.writeInt(bitmap->config());
-        mWriter.writeInt(bitmap->width());
-        mWriter.writeInt(bitmap->height());
-
-        SkAutoLockPixels alp(*bitmap);
-        void* src = bitmap->getPixels();
-
-        mWriter.write(src, bitmap->rowBytes() * bitmap->height());
     }
 
     void addUInts(const uint32_t* values, int8_t count) {
@@ -825,6 +811,12 @@ private:
         Caches::getInstance().resourceCache.incrementRefcount(bitmap);
     }
 
+    void addBitmapData(SkBitmap* bitmap) {
+        addInt((int) bitmap);
+        mOwnedBitmapResources.add(bitmap);
+        Caches::getInstance().resourceCache.incrementRefcount(bitmap);
+    }
+
     inline void addShader(SkiaShader* shader) {
         if (!shader) {
             addInt((int) NULL);
@@ -851,6 +843,7 @@ private:
     }
 
     Vector<SkBitmap*> mBitmapResources;
+    Vector<SkBitmap*> mOwnedBitmapResources;
     Vector<SkiaColorFilter*> mFilterResources;
 
     Vector<SkPaint*> mPaints;

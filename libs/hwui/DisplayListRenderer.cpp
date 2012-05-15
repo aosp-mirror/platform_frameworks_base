@@ -162,6 +162,13 @@ void DisplayList::clearResources() {
     }
     mBitmapResources.clear();
 
+    for (size_t i = 0; i < mOwnedBitmapResources.size(); i++) {
+        SkBitmap* bitmap = mOwnedBitmapResources.itemAt(i);
+        caches.resourceCache.decrementRefcount(bitmap);
+        caches.resourceCache.destructor(bitmap);
+    }
+    mOwnedBitmapResources.clear();
+
     for (size_t i = 0; i < mFilterResources.size(); i++) {
         caches.resourceCache.decrementRefcount(mFilterResources.itemAt(i));
     }
@@ -217,44 +224,51 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
 
     Caches& caches = Caches::getInstance();
 
-    const Vector<SkBitmap*> &bitmapResources = recorder.getBitmapResources();
+    const Vector<SkBitmap*>& bitmapResources = recorder.getBitmapResources();
     for (size_t i = 0; i < bitmapResources.size(); i++) {
         SkBitmap* resource = bitmapResources.itemAt(i);
         mBitmapResources.add(resource);
         caches.resourceCache.incrementRefcount(resource);
     }
 
-    const Vector<SkiaColorFilter*> &filterResources = recorder.getFilterResources();
+    const Vector<SkBitmap*> &ownedBitmapResources = recorder.getOwnedBitmapResources();
+    for (size_t i = 0; i < ownedBitmapResources.size(); i++) {
+        SkBitmap* resource = ownedBitmapResources.itemAt(i);
+        mOwnedBitmapResources.add(resource);
+        caches.resourceCache.incrementRefcount(resource);
+    }
+
+    const Vector<SkiaColorFilter*>& filterResources = recorder.getFilterResources();
     for (size_t i = 0; i < filterResources.size(); i++) {
         SkiaColorFilter* resource = filterResources.itemAt(i);
         mFilterResources.add(resource);
         caches.resourceCache.incrementRefcount(resource);
     }
 
-    const Vector<SkiaShader*> &shaders = recorder.getShaders();
+    const Vector<SkiaShader*>& shaders = recorder.getShaders();
     for (size_t i = 0; i < shaders.size(); i++) {
         SkiaShader* resource = shaders.itemAt(i);
         mShaders.add(resource);
         caches.resourceCache.incrementRefcount(resource);
     }
 
-    const Vector<SkPaint*> &paints = recorder.getPaints();
+    const Vector<SkPaint*>& paints = recorder.getPaints();
     for (size_t i = 0; i < paints.size(); i++) {
         mPaints.add(paints.itemAt(i));
     }
 
-    const Vector<SkPath*> &paths = recorder.getPaths();
+    const Vector<SkPath*>& paths = recorder.getPaths();
     for (size_t i = 0; i < paths.size(); i++) {
         mPaths.add(paths.itemAt(i));
     }
 
-    const SortedVector<SkPath*> &sourcePaths = recorder.getSourcePaths();
+    const SortedVector<SkPath*>& sourcePaths = recorder.getSourcePaths();
     for (size_t i = 0; i < sourcePaths.size(); i++) {
         mSourcePaths.add(sourcePaths.itemAt(i));
         caches.resourceCache.incrementRefcount(sourcePaths.itemAt(i));
     }
 
-    const Vector<SkMatrix*> &matrices = recorder.getMatrices();
+    const Vector<SkMatrix*>& matrices = recorder.getMatrices();
     for (size_t i = 0; i < matrices.size(); i++) {
         mMatrices.add(matrices.itemAt(i));
     }
@@ -1036,10 +1050,7 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
                 SkPaint* paint = getPaint(renderer);
                 DISPLAY_LIST_LOGD("%s%s %p, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
                         bitmap, x, y, paint);
-                if (bitmap) {
-                    renderer.drawBitmap(bitmap, x, y, paint);
-                    delete bitmap;
-                }
+                renderer.drawBitmap(bitmap, x, y, paint);
             }
             break;
             case DrawBitmapMesh: {
@@ -1295,6 +1306,12 @@ void DisplayListRenderer::reset() {
     }
     mBitmapResources.clear();
 
+    for (size_t i = 0; i < mOwnedBitmapResources.size(); i++) {
+        SkBitmap* bitmap = mOwnedBitmapResources.itemAt(i);
+        caches.resourceCache.decrementRefcount(bitmap);
+    }
+    mOwnedBitmapResources.clear();
+
     for (size_t i = 0; i < mFilterResources.size(); i++) {
         caches.resourceCache.decrementRefcount(mFilterResources.itemAt(i));
     }
@@ -1334,6 +1351,10 @@ DisplayList* DisplayListRenderer::getDisplayList(DisplayList* displayList) {
     }
     displayList->setRenderable(mHasDrawOps);
     return displayList;
+}
+
+bool DisplayListRenderer::isDeferred() {
+    return true;
 }
 
 void DisplayListRenderer::setViewport(int width, int height) {
