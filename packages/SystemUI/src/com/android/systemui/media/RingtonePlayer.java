@@ -41,7 +41,7 @@ import java.util.HashMap;
  */
 public class RingtonePlayer extends SystemUI {
     private static final String TAG = "RingtonePlayer";
-    private static final boolean LOGD = true;
+    private static final boolean LOGD = false;
 
     // TODO: support Uri switching under same IBinder
 
