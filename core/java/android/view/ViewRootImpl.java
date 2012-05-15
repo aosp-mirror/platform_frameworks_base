@@ -1855,17 +1855,14 @@ public final class ViewRootImpl implements ViewParent,
                 performDraw();
             }
         } else {
-            // End any pending transitions on this non-visible window
-            if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
+            if (viewVisibility == View.VISIBLE) {
+                // Try again
+                scheduleTraversals();
+            } else if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
                 for (int i = 0; i < mPendingTransitions.size(); ++i) {
                     mPendingTransitions.get(i).endChangingAnimations();
                 }
                 mPendingTransitions.clear();
-            }
-
-            if (viewVisibility == View.VISIBLE) {
-                // Try again
-                scheduleTraversals();
             }
         }
     }
