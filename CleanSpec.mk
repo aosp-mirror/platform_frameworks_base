@@ -129,6 +129,9 @@ $(call add-clean-step, rm -rf $(OUT_DIR)/host/$(HOST_PREBUILT_TAG)/obj/STATIC_LI
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/android/accessibilityservice/IEventListener.java)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/android/accessibilityservice/IEventListener.P)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/android/view/accessibility/IAccessibilityManager.P)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/android/accessibilityservice/IAccessibilityServiceClientCallback.java)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/android/accessibilityservice/IAccessibilityServiceClientCallback.P)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/android/accessibilityservice/IAccessibilityServiceClient.P)
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
 # ************************************************

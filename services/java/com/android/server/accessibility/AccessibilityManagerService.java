@@ -23,7 +23,6 @@ import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
-import android.accessibilityservice.IAccessibilityServiceClientCallback;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -44,7 +43,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -58,9 +56,7 @@ import android.view.IWindow;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
-import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
@@ -69,8 +65,6 @@ import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.os.HandlerCaller;
-import com.android.internal.os.HandlerCaller.Callback;
 import com.android.server.accessibility.TouchExplorer.GestureListener;
 import com.android.server.wm.WindowManagerService;
 
@@ -85,7 +79,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class is instantiated by the system as a system level service and can be
@@ -106,8 +99,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         "registerUiTestAutomationService";
 
     private static final int OWN_PROCESS_ID = android.os.Process.myPid();
-
-    private static final int UNDEFINED = -1;
 
     private static int sIdCounter = 0;
 
@@ -154,10 +145,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private final SecurityPolicy mSecurityPolicy;
 
     private Service mUiAutomationService;
-
-    private GestureHandler mGestureHandler;
-
-    private int mDefaultGestureHandlingHelperServiceId = UNDEFINED;
 
     /**
      * Handler for delayed event dispatch.
@@ -416,7 +403,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             IAccessibilityInteractionConnection connection) throws RemoteException {
         synchronized (mLock) {
             final IWindow addedWindowToken = windowToken;
-            final IAccessibilityInteractionConnection addedConnection = connection;
             final int windowId = sNextWindowId++;
             AccessibilityConnectionWrapper wrapper = new AccessibilityConnectionWrapper(windowId,
                     connection);
@@ -486,41 +472,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public boolean onGesture(int gestureId) {
-        // Lazily instantiate the gesture handler.
-        if (mGestureHandler == null) {
-            mGestureHandler = new GestureHandler();
-        }
         synchronized (mLock) {
             boolean handled = notifyGestureLocked(gestureId, false);
             if (!handled) {
                 handled = notifyGestureLocked(gestureId, true);
             }
-            if (!handled) {
-                mGestureHandler.scheduleHandleGestureDefault(gestureId);
-            }
             return handled;
-        }
-    }
-
-    private Service getDefaultGestureHandlingHelperService() {
-        // Since querying of screen content is done through the
-        // AccessibilityInteractionClient which talks to an
-        // IAccessibilityServiceConnection implementation we create a proxy
-        // Service when necessary to enable interaction with the remote
-        // view tree. Note that this service is just a stateless proxy
-        // that does not get any events or interrupts.
-        if (mDefaultGestureHandlingHelperServiceId == UNDEFINED) {
-            ComponentName name = new ComponentName("android",
-                    "DefaultGestureHandlingHelperService");
-            AccessibilityServiceInfo info = new AccessibilityServiceInfo();
-            Service service = new Service(name, info, true);
-            mDefaultGestureHandlingHelperServiceId = service.mId;
-            AccessibilityInteractionClient.getInstance().addConnection(
-                    mDefaultGestureHandlingHelperServiceId, service);
-            return service;
-        } else {
-            return (Service) AccessibilityInteractionClient.getInstance()
-                .getConnection(mDefaultGestureHandlingHelperServiceId);
         }
     }
 
@@ -537,7 +494,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         for (int i = mServices.size() - 1; i >= 0; i--) {
             Service service = mServices.get(i);
             if (service.mReqeustTouchExplorationMode && service.mIsDefault == isDefault) {
-                mGestureHandler.scheduleHandleGesture(gestureId, service.mServiceInterface);
+                try {
+                    service.mServiceInterface.onGesture(gestureId);
+                } catch (RemoteException re) {
+                    Slog.e(LOG_TAG, "Error during sending gesture " + gestureId
+                            + " to " + service.mService, re);
+                }
                 return true;
             }
         }
@@ -979,212 +941,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             unlinkToDeath();
             synchronized (mLock) {
                 removeAccessibilityInteractionConnectionLocked(mWindowId);
-            }
-        }
-    }
-
-    class GestureHandler extends IAccessibilityServiceClientCallback.Stub
-            implements Runnable, Callback {
-
-        private static final String THREAD_NAME = "AccessibilityGestureHandler";
-
-        private static final long TIMEOUT_INTERACTION_MILLIS = 5000;
-
-        private static final int MSG_HANDLE_GESTURE = 1;
-
-        private static final int MSG_HANDLE_GESTURE_DEFAULT = 2;
-
-        private final AtomicInteger mInteractionCounter = new AtomicInteger();
-
-        private final Object mGestureLock = new Object();
-
-        private HandlerCaller mHandlerCaller;
-
-        private volatile int mInteractionId = -1;
-
-        private volatile boolean mGestureResult;
-
-        public GestureHandler() {
-            synchronized (mGestureLock) {
-                Thread worker = new Thread(this, THREAD_NAME);
-                worker.start();
-                while (mHandlerCaller == null) {
-                    try {
-                        mGestureLock.wait();
-                    } catch (InterruptedException ie) {
-                        /*  ignore */
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void run() {
-            Looper.prepare();
-            synchronized (mGestureLock) {
-                mHandlerCaller = new HandlerCaller(mContext, Looper.myLooper(), this);
-                mGestureLock.notifyAll();
-            }
-            Looper.loop();
-        }
-
-        @Override
-        public void setGestureResult(int gestureId, boolean handled, int interactionId) {
-            synchronized (mGestureLock) {
-                if (interactionId > mInteractionId) {
-                    mGestureResult = handled;
-                    mInteractionId = interactionId;
-                }
-                mGestureLock.notifyAll();
-            }
-        }
-
-        @Override
-        public void executeMessage(Message message) {
-            final int type = message.what;
-            switch (type) {
-                case MSG_HANDLE_GESTURE: {
-                    IAccessibilityServiceClient service =
-                        (IAccessibilityServiceClient) message.obj;
-                    final int gestureId = message.arg1;
-                    final int interactionId = message.arg2;
-
-                    try {
-                        service.onGesture(gestureId, this, interactionId);
-                    } catch (RemoteException re) {
-                        Slog.e(LOG_TAG, "Error dispatching a gesture to a client.", re);
-                        return;
-                    }
-
-                    long waitTimeMillis = 0;
-                    final long startTimeMillis = SystemClock.uptimeMillis();
-                    synchronized (mGestureLock) {
-                        while (true) {
-                            try {
-                                // Did we get the expected callback?
-                                if (mInteractionId == interactionId) {
-                                    break;
-                                }
-                                // Did we get an obsolete callback?
-                                if (mInteractionId > interactionId) {
-                                    break;
-                                }
-                                // Did we time out?
-                                final long elapsedTimeMillis =
-                                    SystemClock.uptimeMillis() - startTimeMillis;
-                                waitTimeMillis = TIMEOUT_INTERACTION_MILLIS - elapsedTimeMillis;
-                                if (waitTimeMillis <= 0) {
-                                    break;
-                                }
-                                mGestureLock.wait(waitTimeMillis);
-                            } catch (InterruptedException ie) {
-                                /* ignore */
-                            }
-                        }
-                        handleGestureIfNeededAndResetLocked(gestureId);
-                    }
-                } break;
-                case MSG_HANDLE_GESTURE_DEFAULT: {
-                    final int gestureId = message.arg1;
-                    handleGestureDefault(gestureId);
-                } break;
-                default: {
-                    throw new IllegalArgumentException("Unknown message type: " + type);
-                }
-            }
-        }
-
-        private void handleGestureIfNeededAndResetLocked(int gestureId) {
-            if (!mGestureResult) {
-                handleGestureDefault(gestureId);
-            }
-            mGestureResult = false;
-            mInteractionId = -1;
-        }
-
-        public void scheduleHandleGesture(int gestureId, IAccessibilityServiceClient service) {
-            final int interactionId = mInteractionCounter.incrementAndGet();
-            mHandlerCaller.obtainMessageIIO(MSG_HANDLE_GESTURE, gestureId, interactionId,
-                    service).sendToTarget();
-        }
-
-        public void scheduleHandleGestureDefault(int gestureId) {
-            final int interactionId = mInteractionCounter.incrementAndGet();
-            mHandlerCaller.obtainMessageI(MSG_HANDLE_GESTURE_DEFAULT, gestureId).sendToTarget();
-        }
-
-        private void handleGestureDefault(int gestureId) {
-            Service service = getDefaultGestureHandlingHelperService();
-
-            // Global actions.
-            switch (gestureId) {
-                case AccessibilityService.GESTURE_SWIPE_DOWN_AND_LEFT: {
-                    service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
-                } return;
-                case AccessibilityService.GESTURE_SWIPE_DOWN_AND_RIGHT: {
-                    service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME);
-                } return;
-                case AccessibilityService.GESTURE_SWIPE_UP_AND_LEFT: {
-                    service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_RECENTS);
-                } return;
-                case AccessibilityService.GESTURE_SWIPE_UP_AND_RIGHT: {
-                    service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS);
-                } return;
-            }
-
-            AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
-
-            AccessibilityNodeInfo root = client.getRootInActiveWindow(service.mId);
-            if (root == null) {
-                return;
-            }
-
-            AccessibilityNodeInfo current = root.findFocus(
-                    AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
-            if (current == null) {
-                current = root;
-            }
-
-            // Local actions.
-            AccessibilityNodeInfo next = null;
-            switch (gestureId) {
-                case AccessibilityService.GESTURE_SWIPE_UP: {
-                    // TODO:
-                } break;
-                case AccessibilityService.GESTURE_SWIPE_DOWN: {
-                    // TODO:
-                } break;
-                case AccessibilityService.GESTURE_SWIPE_LEFT: {
-                    // TODO: Implement the RTL support.
-//                     if (mLayoutDirection == View.LAYOUT_DIRECTION_LTR) {
-                        next = current.focusSearch(View.ACCESSIBILITY_FOCUS_BACKWARD);
-//                     } else { // LAYOUT_DIRECTION_RTL
-//                        next = current.focusSearch(View.ACCESSIBILITY_FOCUS_FORWARD);
-//                     }
-                } break;
-                case AccessibilityService.GESTURE_SWIPE_RIGHT: {
-                    // TODO: Implement the RTL support.
-//                    if (mLayoutDirection == View.LAYOUT_DIRECTION_LTR) {
-                        next = current.focusSearch(View.ACCESSIBILITY_FOCUS_FORWARD);
-//                    } else { // LAYOUT_DIRECTION_RTL
-//                        next = current.focusSearch(View.ACCESSIBILITY_FOCUS_BACKWARD);
-//                    }
-                } break;
-                case AccessibilityService.GESTURE_SWIPE_UP_AND_DOWN: {
-                    next = current.focusSearch(View.ACCESSIBILITY_FOCUS_UP);
-                } break;
-                case AccessibilityService.GESTURE_SWIPE_DOWN_AND_UP: {
-                    next = current.focusSearch(View.ACCESSIBILITY_FOCUS_DOWN);
-                } break;
-                case AccessibilityService.GESTURE_SWIPE_LEFT_AND_RIGHT: {
-                    next = current.focusSearch(View.ACCESSIBILITY_FOCUS_LEFT);
-                } break;
-                case AccessibilityService.GESTURE_SWIPE_RIGHT_AND_LEFT: {
-                    next = current.focusSearch(View.ACCESSIBILITY_FOCUS_RIGHT);
-                } break;
-            }
-            if (next != null && !next.equals(current)) {
-                next.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
             }
         }
     }
