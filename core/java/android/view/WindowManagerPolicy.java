@@ -145,10 +145,6 @@ public interface WindowManagerPolicy {
          * @param displayFrame The frame of the overall display in which this
          * window can appear, used for constraining the overall dimensions
          * of the window.
-         * @param systemFrame The frame within the display that any system
-         * elements are currently covering.  These indicate which parts of
-         * the window should be considered completely obscured by the screen
-         * decorations.
          * @param contentFrame The frame within the display in which we would
          * like active content to appear.  This will cause windows behind to
          * be resized to match the given content frame.
@@ -160,7 +156,7 @@ public interface WindowManagerPolicy {
          * are visible.
          */
         public void computeFrameLw(Rect parentFrame, Rect displayFrame,
-                Rect systemFrame, Rect contentFrame, Rect visibleFrame);
+                Rect contentFrame, Rect visibleFrame);
 
         /**
          * Retrieve the current frame of the window that has been assigned by
@@ -186,14 +182,6 @@ public interface WindowManagerPolicy {
          * @return Rect The rectangle holding the display frame.
          */
         public Rect getDisplayFrameLw();
-
-        /**
-         * Retrieve the frame of the system elements that last covered the window.
-         * Must be called with the window manager lock held.
-         *
-         * @return Rect The rectangle holding the system frame.
-         */
-        public Rect getSystemFrameLw();
 
         /**
          * Retrieve the frame of the content area that this window was last
@@ -773,6 +761,21 @@ public interface WindowManagerPolicy {
     public void beginLayoutLw(int displayWidth, int displayHeight, int displayRotation);
 
     /**
+     * Return the rectangle of the screen currently covered by system decorations.
+     * This will be called immediately after {@link #layoutWindowLw}.  It can
+     * fill in the rectangle to indicate any part of the screen that it knows
+     * for sure is covered by system decor such as the status bar.  The rectangle
+     * is initially set to the actual size of the screen, indicating nothing is
+     * covered.
+     *
+     * @param systemRect The rectangle of the screen that is not covered by
+     * system decoration.
+     * @return Returns the layer above which the system rectangle should
+     * not be applied.
+     */
+    public int getSystemDecorRectLw(Rect systemRect);
+
+    /**
      * Called for each window attached to the window manager as layout is
      * proceeding.  The implementation of this function must take care of
      * setting the window's frame, either here or in finishLayout().
@@ -797,7 +800,7 @@ public interface WindowManagerPolicy {
      * 
      */
     public void getContentInsetHintLw(WindowManager.LayoutParams attrs, Rect contentInset);
-    
+
     /**
      * Called when layout of the windows is finished.  After this function has
      * returned, all windows given to layoutWindow() <em>must</em> have had a

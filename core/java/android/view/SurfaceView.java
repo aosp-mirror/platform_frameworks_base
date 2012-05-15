@@ -98,7 +98,6 @@ public class SurfaceView extends View {
     MyWindow mWindow;
     final Rect mVisibleInsets = new Rect();
     final Rect mWinFrame = new Rect();
-    final Rect mSystemInsets = new Rect();
     final Rect mContentInsets = new Rect();
     final Configuration mConfiguration = new Configuration();
     
@@ -472,7 +471,7 @@ public class SurfaceView extends View {
                         mWindow, mWindow.mSeq, mLayout, mWidth, mHeight,
                             visible ? VISIBLE : GONE,
                             WindowManagerImpl.RELAYOUT_DEFER_SURFACE_DESTROY,
-                            mWinFrame, mSystemInsets, mContentInsets,
+                            mWinFrame, mContentInsets,
                             mVisibleInsets, mConfiguration, mNewSurface);
                     if ((relayoutResult&WindowManagerImpl.RELAYOUT_RES_FIRST_TIME) != 0) {
                         mReportDrawNeeded = true;
@@ -606,7 +605,7 @@ public class SurfaceView extends View {
             mSurfaceView = new WeakReference<SurfaceView>(surfaceView);
         }
 
-        public void resized(int w, int h, Rect systemInsets, Rect contentInsets,
+        public void resized(int w, int h, Rect contentInsets,
                 Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
             SurfaceView surfaceView = mSurfaceView.get();
             if (surfaceView != null) {
