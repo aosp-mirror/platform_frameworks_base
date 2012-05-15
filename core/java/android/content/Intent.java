@@ -810,11 +810,17 @@ public class Intent implements Parcelable, Cloneable {
      * <p>
      * As a convenience, an Intent of this form can be created with the
      * {@link #createChooser} function.
-     * <p>Input: No data should be specified.  get*Extra must have
+     * <p>
+     * If the target {@link #EXTRA_INTENT} contains {@link ClipData}, you should
+     * also copy it to this intent along with relevant flags, such as
+     * {@link #FLAG_GRANT_READ_URI_PERMISSION}.
+     * <p>
+     * Input: No data should be specified.  get*Extra must have
      * a {@link #EXTRA_INTENT} field containing the Intent being executed,
      * and can optionally have a {@link #EXTRA_TITLE} field containing the
      * title text to display in the chooser.
-     * <p>Output: Depends on the protocol of {@link #EXTRA_INTENT}.
+     * <p>
+     * Output: Depends on the protocol of {@link #EXTRA_INTENT}.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CHOOSER = "android.intent.action.CHOOSER";
@@ -835,8 +841,17 @@ public class Intent implements Parcelable, Cloneable {
         if (title != null) {
             intent.putExtra(EXTRA_TITLE, title);
         }
+
+        // Migrate any clip data and flags from target.
+        final ClipData targetClipData = target.getClipData();
+        if (targetClipData != null) {
+            intent.setClipData(targetClipData);
+            intent.addFlags(target.getFlags()
+                    & (FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION));
+        }
         return intent;
     }
+
     /**
      * Activity Action: Allow the user to select a particular kind of data and
      * return it.  This is different than {@link #ACTION_PICK} in that here we
@@ -6587,19 +6602,35 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Migrate any {@link #EXTRA_STREAM} in {@link #ACTION_SEND} and
-     * {@link #ACTION_SEND_MULTIPLE} to {@link ClipData}.
+     * {@link #ACTION_SEND_MULTIPLE} to {@link ClipData}. Also inspects nested
+     * intents in {@link #ACTION_CHOOSER}.
      *
+     * @return Whether any contents were migrated.
      * @hide
      */
-    public void migrateExtraStreamToClipData() {
+    public boolean migrateExtraStreamToClipData() {
         // Refuse to touch if extras already parcelled
-        if (mExtras != null && mExtras.isParcelled()) return;
+        if (mExtras != null && mExtras.isParcelled()) return false;
 
         // Bail when someone already gave us ClipData
-        if (getClipData() != null) return;
+        if (getClipData() != null) return false;
 
         final String action = getAction();
-        if (ACTION_SEND.equals(action)) {
+        if (ACTION_CHOOSER.equals(action)) {
+            // Inspect target intent to see if we need to migrate
+            final Intent target = getParcelableExtra(EXTRA_INTENT);
+            if (target.migrateExtraStreamToClipData()) {
+                // Since we migrated in child, we need to promote ClipData and
+                // flags to ourselves to grant.
+                setClipData(target.getClipData());
+                addFlags(target.getFlags()
+                        & (FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION));
+                return true;
+            } else {
+                return false;
+            }
+
+        } else if (ACTION_SEND.equals(action)) {
             try {
                 final Uri stream = getParcelableExtra(EXTRA_STREAM);
                 final CharSequence text = getCharSequenceExtra(EXTRA_TEXT);
@@ -6610,6 +6641,7 @@ public class Intent implements Parcelable, Cloneable {
                             new ClipData.Item(text, htmlText, null, stream));
                     setClipData(clipData);
                     addFlags(FLAG_GRANT_READ_URI_PERMISSION);
+                    return true;
                 }
             } catch (ClassCastException e) {
             }
@@ -6626,14 +6658,14 @@ public class Intent implements Parcelable, Cloneable {
                 if (texts != null) {
                     if (num >= 0 && num != texts.size()) {
                         // Wha...!  F- you.
-                        return;
+                        return false;
                     }
                     num = texts.size();
                 }
                 if (htmlTexts != null) {
                     if (num >= 0 && num != htmlTexts.size()) {
                         // Wha...!  F- you.
-                        return;
+                        return false;
                     }
                     num = htmlTexts.size();
                 }
@@ -6648,10 +6680,13 @@ public class Intent implements Parcelable, Cloneable {
 
                     setClipData(clipData);
                     addFlags(FLAG_GRANT_READ_URI_PERMISSION);
+                    return true;
                 }
             } catch (ClassCastException e) {
             }
         }
+
+        return false;
     }
 
     private static ClipData.Item makeClipItem(ArrayList<Uri> streams, ArrayList<CharSequence> texts,
