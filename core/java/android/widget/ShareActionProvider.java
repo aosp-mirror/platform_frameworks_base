@@ -44,7 +44,6 @@ import com.android.internal.R;
  * <code>
  *  // In Activity#onCreateOptionsMenu
  *  public boolean onCreateOptionsMenu(Menu menu) {
- *      getManuInflater().inflate(R.menu.my_menu, menu);
  *      // Get the menu item.
  *      MenuItem menuItem = menu.findItem(R.id.my_menu_item);
  *      // Get the provider and hold onto it to set/change the share intent.
@@ -246,7 +245,7 @@ public class ShareActionProvider extends ActionProvider {
      * call {@link android.app.Activity#invalidateOptionsMenu()} to recreate the
      * action view. You should <strong>not</strong> call
      * {@link android.app.Activity#invalidateOptionsMenu()} from
-     * {@link android.app.Activity#onCreateOptionsMenu(Menu)}.
+     * {@link android.app.Activity#onCreateOptionsMenu(Menu)}."
      * <p>
      * <code>
      * private void doShare(Intent intent) {
