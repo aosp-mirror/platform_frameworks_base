@@ -169,6 +169,8 @@ public:
     void computeValues(TextLayoutValue* value, const SkPaint* paint, const UChar* chars,
             size_t start, size_t count, size_t contextCount, int dirFlags);
 
+    void purgeCaches();
+
 private:
     /**
      * Harfbuzz shaper item
@@ -217,6 +219,9 @@ private:
      * Buffer for normalizing a piece of a run with ICU
      */
     UnicodeString mBuffer;
+
+    void init();
+    void unrefTypefaces();
 
     SkTypeface* typefaceForUnichar(const SkPaint* paint, SkTypeface* typeface,
         SkUnichar unichar, HB_Script script);
