@@ -48,8 +48,7 @@ public:
     void addMovement(const MotionEvent* event);
     void computeCurrentVelocity(int32_t units, float maxVelocity);
     void getVelocity(int32_t id, float* outVx, float* outVy);
-    bool getEstimator(int32_t id, uint32_t degree, nsecs_t horizon,
-            VelocityTracker::Estimator* outEstimator);
+    bool getEstimator(int32_t id, VelocityTracker::Estimator* outEstimator);
 
 private:
     struct Velocity {
@@ -129,9 +128,8 @@ void VelocityTrackerState::getVelocity(int32_t id, float* outVx, float* outVy) {
     }
 }
 
-bool VelocityTrackerState::getEstimator(int32_t id, uint32_t degree, nsecs_t horizon,
-        VelocityTracker::Estimator* outEstimator) {
-    return mVelocityTracker.getEstimator(id, degree, horizon, outEstimator);
+bool VelocityTrackerState::getEstimator(int32_t id, VelocityTracker::Estimator* outEstimator) {
+    return mVelocityTracker.getEstimator(id, outEstimator);
 }
 
 
@@ -186,14 +184,10 @@ static jfloat android_view_VelocityTracker_nativeGetYVelocity(JNIEnv* env, jclas
 }
 
 static jboolean android_view_VelocityTracker_nativeGetEstimator(JNIEnv* env, jclass clazz,
-        jint ptr, jint id, jint degree, jint horizonMillis, jobject outEstimatorObj) {
+        jint ptr, jint id, jobject outEstimatorObj) {
     VelocityTrackerState* state = reinterpret_cast<VelocityTrackerState*>(ptr);
     VelocityTracker::Estimator estimator;
-    bool result = state->getEstimator(id,
-            degree < 0 ? VelocityTracker::DEFAULT_DEGREE : uint32_t(degree),
-            horizonMillis < 0 ? VelocityTracker::DEFAULT_HORIZON :
-                    nsecs_t(horizonMillis) * 1000000L,
-            &estimator);
+    bool result = state->getEstimator(id, &estimator);
 
     jfloatArray xCoeffObj = jfloatArray(env->GetObjectField(outEstimatorObj,
             gEstimatorClassInfo.xCoeff));
@@ -236,7 +230,7 @@ static JNINativeMethod gVelocityTrackerMethods[] = {
             "(II)F",
             (void*)android_view_VelocityTracker_nativeGetYVelocity },
     { "nativeGetEstimator",
-            "(IIIILandroid/view/VelocityTracker$Estimator;)Z",
+            "(IILandroid/view/VelocityTracker$Estimator;)Z",
             (void*)android_view_VelocityTracker_nativeGetEstimator },
 };
 

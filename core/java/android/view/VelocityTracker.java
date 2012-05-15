@@ -60,8 +60,7 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
     private static native void nativeComputeCurrentVelocity(int ptr, int units, float maxVelocity);
     private static native float nativeGetXVelocity(int ptr, int id);
     private static native float nativeGetYVelocity(int ptr, int id);
-    private static native boolean nativeGetEstimator(int ptr, int id,
-            int degree, int horizonMillis, Estimator outEstimator);
+    private static native boolean nativeGetEstimator(int ptr, int id, Estimator outEstimator);
 
     /**
      * Retrieve a new VelocityTracker object to watch the velocity of a
@@ -227,21 +226,17 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      * this method.
      *
      * @param id Which pointer's velocity to return.
-     * @param degree The desired polynomial degree.  The actual estimator may have
-     * a lower degree than what is requested here.  If -1, uses the default degree.
-     * @param horizonMillis The maximum age of the oldest sample to consider, in milliseconds.
-     * If -1, uses the default horizon.
      * @param outEstimator The estimator to populate.
      * @return True if an estimator was obtained, false if there is no information
      * available about the pointer.
      *
      * @hide For internal use only.  Not a final API.
      */
-    public boolean getEstimator(int id, int degree, int horizonMillis, Estimator outEstimator) {
+    public boolean getEstimator(int id, Estimator outEstimator) {
         if (outEstimator == null) {
             throw new IllegalArgumentException("outEstimator must not be null");
         }
-        return nativeGetEstimator(mPtr, id, degree, horizonMillis, outEstimator);
+        return nativeGetEstimator(mPtr, id, outEstimator);
     }
 
     /**

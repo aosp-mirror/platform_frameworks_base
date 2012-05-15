@@ -527,7 +527,7 @@ public class PointerLocationView extends View implements InputDeviceListener {
                 ps.addTrace(coords.x, coords.y);
                 ps.mXVelocity = mVelocity.getXVelocity(id);
                 ps.mYVelocity = mVelocity.getYVelocity(id);
-                mVelocity.getEstimator(id, -1, -1, ps.mEstimator);
+                mVelocity.getEstimator(id, ps.mEstimator);
                 ps.mToolType = event.getToolType(i);
             }
         }

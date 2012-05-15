@@ -23,19 +23,13 @@
 
 namespace android {
 
+class VelocityTrackerStrategy;
+
 /*
  * Calculates the velocity of pointer movements over time.
  */
 class VelocityTracker {
 public:
-    // Default polynomial degree.  (used by getVelocity)
-    static const uint32_t DEFAULT_DEGREE = 2;
-
-    // Default sample horizon.  (used by getVelocity)
-    // We don't use too much history by default since we want to react to quick
-    // changes in direction.
-    static const nsecs_t DEFAULT_HORIZON = 100 * 1000000; // 100 ms
-
     struct Position {
         float x, y;
     };
@@ -64,6 +58,8 @@ public:
     };
 
     VelocityTracker();
+    VelocityTracker(VelocityTrackerStrategy* strategy);
+    ~VelocityTracker();
 
     // Resets the velocity tracker state.
     void clear();
@@ -88,35 +84,80 @@ public:
     // insufficient movement information for the pointer.
     bool getVelocity(uint32_t id, float* outVx, float* outVy) const;
 
-    // Gets a quadratic estimator for the movements of the specified pointer id.
+    // Gets an estimator for the recent movements of the specified pointer id.
     // Returns false and clears the estimator if there is no information available
     // about the pointer.
-    bool getEstimator(uint32_t id, uint32_t degree, nsecs_t horizon,
-            Estimator* outEstimator) const;
+    bool getEstimator(uint32_t id, Estimator* outEstimator) const;
 
     // Gets the active pointer id, or -1 if none.
     inline int32_t getActivePointerId() const { return mActivePointerId; }
 
     // Gets a bitset containing all pointer ids from the most recent movement.
-    inline BitSet32 getCurrentPointerIdBits() const { return mMovements[mIndex].idBits; }
+    inline BitSet32 getCurrentPointerIdBits() const { return mCurrentPointerIdBits; }
 
 private:
+    BitSet32 mCurrentPointerIdBits;
+    int32_t mActivePointerId;
+    VelocityTrackerStrategy* mStrategy;
+};
+
+
+/*
+ * Implements a particular velocity tracker algorithm.
+ */
+class VelocityTrackerStrategy {
+protected:
+    VelocityTrackerStrategy() { }
+
+public:
+    virtual ~VelocityTrackerStrategy() { }
+
+    virtual void clear() = 0;
+    virtual void clearPointers(BitSet32 idBits) = 0;
+    virtual void addMovement(nsecs_t eventTime, BitSet32 idBits,
+            const VelocityTracker::Position* positions) = 0;
+    virtual bool getEstimator(uint32_t id, VelocityTracker::Estimator* outEstimator) const = 0;
+};
+
+
+/*
+ * Velocity tracker algorithm based on least-squares linear regression.
+ */
+class LeastSquaresVelocityTrackerStrategy : public VelocityTrackerStrategy {
+public:
+    LeastSquaresVelocityTrackerStrategy();
+    virtual ~LeastSquaresVelocityTrackerStrategy();
+
+    virtual void clear();
+    virtual void clearPointers(BitSet32 idBits);
+    virtual void addMovement(nsecs_t eventTime, BitSet32 idBits,
+            const VelocityTracker::Position* positions);
+    virtual bool getEstimator(uint32_t id, VelocityTracker::Estimator* outEstimator) const;
+
+private:
+    // Polynomial degree.  Must be less than or equal to Estimator::MAX_DEGREE.
+    static const uint32_t DEGREE = 2;
+
+    // Sample horizon.
+    // We don't use too much history by default since we want to react to quick
+    // changes in direction.
+    static const nsecs_t HORIZON = 100 * 1000000; // 100 ms
+
     // Number of samples to keep.
     static const uint32_t HISTORY_SIZE = 20;
 
     struct Movement {
         nsecs_t eventTime;
         BitSet32 idBits;
-        Position positions[MAX_POINTERS];
+        VelocityTracker::Position positions[MAX_POINTERS];
 
-        inline const Position& getPosition(uint32_t id) const {
+        inline const VelocityTracker::Position& getPosition(uint32_t id) const {
             return positions[idBits.getIndexOfBit(id)];
         }
     };
 
     uint32_t mIndex;
     Movement mMovements[HISTORY_SIZE];
-    int32_t mActivePointerId;
 };
 
 } // namespace android
