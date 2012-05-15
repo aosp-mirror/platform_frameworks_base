@@ -531,29 +531,26 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
         catch (RuntimeException e) {
-            exception = e;
-        }
-        if (expandedOneU == null && expandedLarge == null) {
             final String ident = sbn.pkg + "/0x" + Integer.toHexString(sbn.id);
-            Slog.e(TAG, "couldn't inflate view for notification " + ident, exception);
+            Slog.e(TAG, "couldn't inflate view for notification " + ident, e);
             return false;
-        } else {
-            if (expandedOneU != null) {
-                SizeAdaptiveLayout.LayoutParams params =
-                        new SizeAdaptiveLayout.LayoutParams(expandedOneU.getLayoutParams());
-                params.minHeight = minHeight;
-                params.maxHeight = minHeight;
-                adaptive.addView(expandedOneU, params);
-            }
-            if (expandedLarge != null) {
-                SizeAdaptiveLayout.LayoutParams params =
-                        new SizeAdaptiveLayout.LayoutParams(expandedLarge.getLayoutParams());
-                params.minHeight = minHeight+1;
-                params.maxHeight = maxHeight;
-                adaptive.addView(expandedLarge, params);
-            }
-            row.setDrawingCacheEnabled(true);
         }
+
+        if (expandedOneU != null) {
+            SizeAdaptiveLayout.LayoutParams params =
+                    new SizeAdaptiveLayout.LayoutParams(expandedOneU.getLayoutParams());
+            params.minHeight = minHeight;
+            params.maxHeight = minHeight;
+            adaptive.addView(expandedOneU, params);
+        }
+        if (expandedLarge != null) {
+            SizeAdaptiveLayout.LayoutParams params =
+                    new SizeAdaptiveLayout.LayoutParams(expandedLarge.getLayoutParams());
+            params.minHeight = minHeight+1;
+            params.maxHeight = maxHeight;
+            adaptive.addView(expandedLarge, params);
+        }
+        row.setDrawingCacheEnabled(true);
 
         applyLegacyRowBackground(sbn, content);
 

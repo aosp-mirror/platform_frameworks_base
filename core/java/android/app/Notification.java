@@ -907,6 +907,8 @@ public class Notification implements Parcelable
      * </pre>
      */
     public static class Builder {
+        private static final int MAX_ACTION_BUTTONS = 2;
+
         private Context mContext;
 
         private long mWhen;
@@ -938,7 +940,7 @@ public class Notification implements Parcelable
         private ArrayList<String> mKindList = new ArrayList<String>(1);
         private Bundle mExtras;
         private int mPriority;
-        private ArrayList<Action> mActions = new ArrayList<Action>(3);
+        private ArrayList<Action> mActions = new ArrayList<Action>(MAX_ACTION_BUTTONS);
         private boolean mUseChronometer;
         private Style mStyle;
 
@@ -1460,7 +1462,7 @@ public class Notification implements Parcelable
             if (N > 0) {
                 // Log.d("Notification", "has actions: " + mContentText);
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
-                if (N>3) N=3;
+                if (N>MAX_ACTION_BUTTONS) N=MAX_ACTION_BUTTONS;
                 big.removeAllViews(R.id.actions);
                 for (int i=0; i<N; i++) {
                     final RemoteViews button = generateActionButton(mActions.get(i));
@@ -1500,18 +1502,14 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews generateActionButton(Action action) {
-            RemoteViews button = new RemoteViews(mContext.getPackageName(), R.layout.notification_action);
+            final boolean tombstone = (action.actionIntent == null);
+            RemoteViews button = new RemoteViews(mContext.getPackageName(), 
+                    tombstone ? R.layout.notification_action_tombstone
+                              : R.layout.notification_action);
             button.setTextViewCompoundDrawables(R.id.action0, action.icon, 0, 0, 0);
             button.setTextViewText(R.id.action0, action.title);
-            if (action.actionIntent != null) {
+            if (!tombstone) {
                 button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
-                //button.setBoolean(R.id.action0, "setEnabled", true);
-                button.setFloat(R.id.button0, "setAlpha", 1.0f);
-                button.setBoolean(R.id.button0, "setClickable", true);
-            } else {
-                //button.setBoolean(R.id.action0, "setEnabled", false);
-                button.setFloat(R.id.button0, "setAlpha", 0.5f);
-                button.setBoolean(R.id.button0, "setClickable", false);
             }
             button.setContentDescription(R.id.action0, action.title);
             return button;

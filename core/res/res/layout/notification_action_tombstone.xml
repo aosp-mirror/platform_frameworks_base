@@ -15,12 +15,16 @@
 -->
 
 <Button xmlns:android="http://schemas.android.com/apk/res/android"
+    style="?android:attr/borderlessButtonStyle" 
     android:id="@+id/action0"
-    android:layout_width="match_parent"
+    android:layout_width="0dp"
     android:layout_height="48dp"
+    android:layout_weight="1"
     android:gravity="left|center_vertical"
     android:drawablePadding="8dp"
     android:paddingLeft="8dp"
-    android:textColor="#666"
+    android:textColor="#ccc"
     android:textSize="14dp"
+    android:alpha="0.5"
+    android:enabled="false"
     />
