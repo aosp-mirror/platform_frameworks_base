@@ -20,6 +20,7 @@ import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -1367,6 +1368,35 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(Gallery.class.getName());
+        info.setScrollable(mItemCount > 1);
+        if (mItemCount > 0 && mSelectedPosition < mItemCount - 1) {
+            info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+        }
+        if (mItemCount > 0 && mSelectedPosition > 0) {
+            info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+        }
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        if (super.performAccessibilityAction(action, arguments)) {
+            return true;
+        }
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+                if (mItemCount > 0 && mSelectedPosition < mItemCount - 1) {
+                    final int currentChildIndex = mSelectedPosition - mFirstPosition;
+                    return scrollToChild(currentChildIndex + 1);
+                }
+            } return false;
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+                if (mItemCount > 0 && mSelectedPosition > 0) {
+                    final int currentChildIndex = mSelectedPosition - mFirstPosition;
+                    return scrollToChild(currentChildIndex - 1);
+                }
+            } return false;
+        }
+        return false;
     }
 
     /**

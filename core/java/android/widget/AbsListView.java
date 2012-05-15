@@ -1480,6 +1480,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     @Override
     public boolean performAccessibilityAction(int action, Bundle arguments) {
+        if (super.performAccessibilityAction(action, arguments)) {
+            return true;
+        }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
                 if (getLastVisiblePosition() < getCount() - 1) {
@@ -1496,7 +1499,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
             } return false;
         }
-        return super.performAccessibilityAction(action, arguments);
+        return false;
     }
 
     /**
