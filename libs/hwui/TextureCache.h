@@ -67,6 +67,11 @@ public:
      */
     Texture* get(SkBitmap* bitmap);
     /**
+     * Returns the texture associated with the specified bitmap. The generated
+     * texture is not kept in the cache. The caller must destroy the texture.
+     */
+    Texture* getTransient(SkBitmap* bitmap);
+    /**
      * Removes the texture associated with the specified bitmap.
      * Upon remove the texture is freed.
      */

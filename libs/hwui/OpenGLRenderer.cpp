@@ -1502,6 +1502,21 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* pai
     restore();
 }
 
+void OpenGLRenderer::drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint) {
+    const float right = left + bitmap->width();
+    const float bottom = top + bitmap->height();
+
+    if (quickReject(left, top, right, bottom)) {
+        return;
+    }
+
+    mCaches.activeTexture(0);
+    Texture* texture = mCaches.textureCache.getTransient(bitmap);
+    const AutoTexture autoCleanup(texture);
+
+    drawTextureRect(left, top, right, bottom, texture, paint);
+}
+
 void OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
         float* vertices, int* colors, SkPaint* paint) {
     // TODO: Do a quickReject
