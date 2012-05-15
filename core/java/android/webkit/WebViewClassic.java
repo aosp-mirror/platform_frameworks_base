@@ -2939,6 +2939,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
         // premature data from webkit, ignore
         if ((w | h) == 0) {
+            invalidate();
             return;
         }
 
@@ -2951,10 +2952,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             // updated when we get out of that mode.
             if (!mDrawHistory) {
                 // repin our scroll, taking into account the new content size
-                if (updateScrollCoordinates(pinLocX(getScrollX()),
-                        pinLocY(getScrollY()))) {
-                    invalidate();
-                }
+                updateScrollCoordinates(pinLocX(getScrollX()), pinLocY(getScrollY()));
                 if (!mScroller.isFinished()) {
                     // We are in the middle of a scroll.  Repin the final scroll
                     // position.
@@ -2962,6 +2960,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     mScroller.setFinalY(pinLocY(mScroller.getFinalY()));
                 }
             }
+            invalidate();
         }
         contentSizeChanged(updateLayout);
     }
@@ -7956,7 +7955,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
 
         // update the zoom information based on the new picture
-        mZoomManager.onNewPicture(draw);
+        if (mZoomManager.onNewPicture(draw))
+            invalidate();
 
         if (isPictureAfterFirstLayout) {
             mViewManager.postReadyToDrawAll();
