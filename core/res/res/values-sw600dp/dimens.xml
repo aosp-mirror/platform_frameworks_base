@@ -51,12 +51,6 @@
     <!-- Size of status line font in LockScreen. -->
     <dimen name="keyguard_pattern_unlock_status_line_font_size">14sp</dimen>
 
-    <!-- Default padding to apply to AppWidgetHostViews containing widgets targeting API level 14 and up. -->
-    <dimen name="default_app_widget_padding_left">12dp</dimen>
-    <dimen name="default_app_widget_padding_top">4dp</dimen>
-    <dimen name="default_app_widget_padding_right">12dp</dimen>
-    <dimen name="default_app_widget_padding_bottom">20dp</dimen>
-
     <!-- Minimum width for an action button in the menu area of an action bar -->
     <dimen name="action_button_min_width">64dip</dimen>
 

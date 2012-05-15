@@ -50,6 +50,12 @@
     <dimen name="preference_screen_header_padding_side">0dip</dimen>
     <integer name="preference_screen_header_scrollbarStyle">0x0</integer> <!-- insideOverlay -->
 
+    <!-- Default padding to apply to AppWidgetHostViews containing widgets targeting API level 14 and up. -->
+    <dimen name="default_app_widget_padding_left">12dp</dimen>
+    <dimen name="default_app_widget_padding_top">4dp</dimen>
+    <dimen name="default_app_widget_padding_right">12dp</dimen>
+    <dimen name="default_app_widget_padding_bottom">20dp</dimen>
+
     <!-- Preference fragment padding, sides -->
     <dimen name="preference_fragment_padding_side">32dp</dimen>
     <!-- Padding to the left of the preference panel breadcrumb -->
