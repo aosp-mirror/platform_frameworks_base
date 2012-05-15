@@ -1008,8 +1008,10 @@ class ZoomManager {
     /**
      * Updates zoom values when Webkit produces a new picture. This method
      * should only be called from the UI thread's message handler.
+     *
+     * @return True if zoom value has changed
      */
-    public void onNewPicture(WebViewCore.DrawData drawData) {
+    public boolean onNewPicture(WebViewCore.DrawData drawData) {
         final int viewWidth = mWebView.getViewWidth();
         final boolean zoomOverviewWidthChanged = setupZoomOverviewWidth(drawData, viewWidth);
         final float newZoomOverviewScale = getZoomOverviewScale();
@@ -1056,6 +1058,8 @@ class ZoomManager {
             // so next new picture could be forced into overview mode if it's true.
             mInitialZoomOverview = mInZoomOverview;
         }
+
+        return scaleHasDiff;
     }
 
     /**
