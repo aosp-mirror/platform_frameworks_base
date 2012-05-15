@@ -47,23 +47,20 @@ LOCAL_C_INCLUDES += \
     $(TOP)/frameworks/native/include/media/openmax
 
 LOCAL_SHARED_LIBRARIES := \
-    libandroid_runtime \
-    libaudioflinger \
     libaudioutils \
-    libbinder \
     libcutils \
     libdl \
-    libgui \
-    libmedia \
+    libutils \
+    libandroid_runtime \
     libnativehelper \
+    libmedia \
+    libaudioflinger \
+    libbinder \
     libstagefright \
     libstagefright_foundation \
     libstagefright_omx \
-    libutils \
-    libvideoeditor_core \
-    libvideoeditor_osal \
-    libvideoeditor_videofilters \
-    libvideoeditorplayer \
+    libgui \
+    libvideoeditorplayer
 
 
 LOCAL_CFLAGS += \
@@ -74,6 +71,15 @@ LOCAL_CFLAGS += \
     -DUSE_STAGEFRIGHT_VIDEOENC \
     -DUSE_STAGEFRIGHT_READERS \
     -DUSE_STAGEFRIGHT_3GPP_READER
+
+LOCAL_STATIC_LIBRARIES := \
+    libvideoeditor_core \
+    libstagefright_color_conversion \
+    libvideoeditor_3gpwriter \
+    libvideoeditor_mcs \
+    libvideoeditor_videofilters \
+    libvideoeditor_stagefrightshells \
+    libvideoeditor_osal
 
 LOCAL_MODULE:= libvideoeditor_jni
 
