@@ -145,8 +145,8 @@ void VelocityTracker::addMovement(nsecs_t eventTime, BitSet32 idBits, const Posi
                 "estimator (degree=%d, xCoeff=%s, yCoeff=%s, confidence=%f)",
                 id, positions[index].x, positions[index].y,
                 int(estimator.degree),
-                vectorToString(estimator.xCoeff, estimator.degree).string(),
-                vectorToString(estimator.yCoeff, estimator.degree).string(),
+                vectorToString(estimator.xCoeff, estimator.degree + 1).string(),
+                vectorToString(estimator.yCoeff, estimator.degree + 1).string(),
                 estimator.confidence);
     }
 #endif
@@ -195,6 +195,11 @@ void VelocityTracker::addMovement(const MotionEvent* event) {
         idBits.markBit(event->getPointerId(i));
     }
 
+    uint32_t pointerIndex[MAX_POINTERS];
+    for (size_t i = 0; i < pointerCount; i++) {
+        pointerIndex[i] = idBits.getIndexOfBit(event->getPointerId(i));
+    }
+
     nsecs_t eventTime;
     Position positions[pointerCount];
 
@@ -202,16 +207,18 @@ void VelocityTracker::addMovement(const MotionEvent* event) {
     for (size_t h = 0; h < historySize; h++) {
         eventTime = event->getHistoricalEventTime(h);
         for (size_t i = 0; i < pointerCount; i++) {
-            positions[i].x = event->getHistoricalX(i, h);
-            positions[i].y = event->getHistoricalY(i, h);
+            uint32_t index = pointerIndex[i];
+            positions[index].x = event->getHistoricalX(i, h);
+            positions[index].y = event->getHistoricalY(i, h);
         }
         addMovement(eventTime, idBits, positions);
     }
 
     eventTime = event->getEventTime();
     for (size_t i = 0; i < pointerCount; i++) {
-        positions[i].x = event->getX(i);
-        positions[i].y = event->getY(i);
+        uint32_t index = pointerIndex[i];
+        positions[index].x = event->getX(i);
+        positions[index].y = event->getY(i);
     }
     addMovement(eventTime, idBits, positions);
 }
