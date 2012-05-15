@@ -2111,8 +2111,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     @Override
-    protected boolean isStatusBarExpanded() {
-        return mExpanded;
+    protected boolean shouldDisableNavbarGestures() {
+        return mExpanded || (mDisabled & StatusBarManager.DISABLE_HOME) != 0;
     }
 }
 

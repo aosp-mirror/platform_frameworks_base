@@ -1620,8 +1620,9 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     @Override
-    protected boolean isStatusBarExpanded() {
-        return mNotificationPanel.getVisibility() == View.VISIBLE;
+    protected boolean shouldDisableNavbarGestures() {
+        return mNotificationPanel.getVisibility() == View.VISIBLE
+                || (mDisabled & StatusBarManager.DISABLE_HOME) != 0;
     }
 }
 
