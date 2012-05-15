@@ -38,6 +38,7 @@ import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -521,6 +522,12 @@ public class AppWidgetHostView extends FrameLayout {
         // TODO: get this color from somewhere.
         tv.setBackgroundColor(Color.argb(127, 0, 0, 0));
         return tv;
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(AppWidgetHostView.class.getName());
     }
 
     private static class ParcelableSparseArray extends SparseArray<Parcelable> implements Parcelable {
