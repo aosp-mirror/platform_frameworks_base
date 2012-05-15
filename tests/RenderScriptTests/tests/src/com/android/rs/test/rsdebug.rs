@@ -2,6 +2,9 @@
 
 // Testing primitive types
 float floatTest = 1.99f;
+float2 float2Test = {2.99f, 12.99f};
+float3 float3Test = {3.99f, 13.99f, 23.99f};
+float4 float4Test = {4.99f, 14.99f, 24.99f, 34.99f};
 double doubleTest = 2.05;
 char charTest = -8;
 short shortTest = -16;
@@ -23,6 +26,9 @@ static bool basic_test(uint32_t index) {
     // For this reason, none of the outputs are actually checked.
 
     rsDebug("floatTest", floatTest);
+    rsDebug("float2Test", float2Test);
+    rsDebug("float3Test", float3Test);
+    rsDebug("float4Test", float4Test);
     rsDebug("doubleTest", doubleTest);
     rsDebug("charTest", charTest);
     rsDebug("shortTest", shortTest);
