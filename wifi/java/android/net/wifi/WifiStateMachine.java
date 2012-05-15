@@ -182,6 +182,14 @@ public class WifiStateMachine extends StateMachine {
     /* Tracks sequence number on a tether notification time out */
     private int mTetherToken = 0;
 
+    /**
+     * Driver start time out.
+     */
+    private static final int DRIVER_START_TIME_OUT_MSECS = 10000;
+
+    /* Tracks sequence number on a driver time out */
+    private int mDriverStartToken = 0;
+
     private LinkProperties mLinkProperties;
 
     /* Tracks sequence number on a periodic scan message */
@@ -250,7 +258,8 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_STOP_SUPPLICANT_FAILED           = BASE + 17;
     /* Delayed stop to avoid shutting down driver too quick*/
     static final int CMD_DELAYED_STOP_DRIVER              = BASE + 18;
-
+    /* A delayed message sent to start driver when it fail to come up */
+    static final int CMD_DRIVER_START_TIMED_OUT           = BASE + 19;
 
     /* Start the soft access point */
     static final int CMD_START_AP                         = BASE + 21;
@@ -1837,6 +1846,7 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_START_DRIVER:
                 case CMD_STOP_DRIVER:
                 case CMD_DELAYED_STOP_DRIVER:
+                case CMD_DRIVER_START_TIMED_OUT:
                 case CMD_START_AP:
                 case CMD_START_AP_SUCCESS:
                 case CMD_START_AP_FAILURE:
@@ -2476,10 +2486,16 @@ public class WifiStateMachine extends StateMachine {
     }
 
     class DriverStartingState extends State {
+        private int mTries;
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+
+            mTries = 1;
+            /* Send ourselves a delayed message to start driver a second time */
+            sendMessageDelayed(obtainMessage(CMD_DRIVER_START_TIMED_OUT,
+                        ++mDriverStartToken, 0), DRIVER_START_TIME_OUT_MSECS);
         }
         @Override
         public boolean processMessage(Message message) {
@@ -2493,6 +2509,24 @@ public class WifiStateMachine extends StateMachine {
                      */
                     if (SupplicantState.isDriverActive(state)) {
                         transitionTo(mDriverStartedState);
+                    }
+                    break;
+                case CMD_DRIVER_START_TIMED_OUT:
+                    if (message.arg1 == mDriverStartToken) {
+                        if (mTries >= 2) {
+                            loge("Failed to start driver after " + mTries);
+                            transitionTo(mDriverStoppedState);
+                        } else {
+                            loge("Driver start failed, retrying");
+                            mWakeLock.acquire();
+                            mWifiNative.startDriver();
+                            mWakeLock.release();
+
+                            ++mTries;
+                            /* Send ourselves a delayed message to start driver again */
+                            sendMessageDelayed(obtainMessage(CMD_DRIVER_START_TIMED_OUT,
+                                        ++mDriverStartToken, 0), DRIVER_START_TIME_OUT_MSECS);
+                        }
                     }
                     break;
                     /* Queue driver commands & connection events */
