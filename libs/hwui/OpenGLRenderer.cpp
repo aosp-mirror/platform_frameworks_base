@@ -144,6 +144,10 @@ uint32_t OpenGLRenderer::getStencilSize() {
     return STENCIL_BUFFER_SIZE;
 }
 
+bool OpenGLRenderer::isDeferred() {
+    return false;
+}
+
 void OpenGLRenderer::setViewport(int width, int height) {
     mOrthoMatrix.loadOrtho(0, width, height, 0, -1, 1);
 

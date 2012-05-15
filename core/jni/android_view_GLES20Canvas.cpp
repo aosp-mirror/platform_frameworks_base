@@ -357,19 +357,26 @@ static void android_view_GLES20Canvas_drawBitmapMatrix(JNIEnv* env, jobject claz
 static void android_view_GLES20Canvas_drawBitmapData(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, jintArray colors, jint offset, jint stride,
         jfloat left, jfloat top, jint width, jint height, jboolean hasAlpha, SkPaint* paint) {
-    SkBitmap bitmap;
-    SkBitmap::Config config = hasAlpha ? SkBitmap::kARGB_8888_Config : SkBitmap::kRGB_565_Config;
-    bitmap.setConfig(config, width, height);
+    SkBitmap* bitmap = new SkBitmap;
+    bitmap->setConfig(hasAlpha ? SkBitmap::kARGB_8888_Config : SkBitmap::kRGB_565_Config,
+            width, height);
 
-    if (!bitmap.allocPixels()) {
+    if (!bitmap->allocPixels()) {
+        delete bitmap;
         return;
     }
 
-    if (!GraphicsJNI::SetPixels(env, colors, offset, stride, 0, 0, width, height, bitmap)) {
+    if (!GraphicsJNI::SetPixels(env, colors, offset, stride, 0, 0, width, height, *bitmap)) {
+        delete bitmap;
         return;
     }
 
-    renderer->drawBitmapData(&bitmap, left, top, paint);
+    renderer->drawBitmapData(bitmap, left, top, paint);
+
+    // If the renderer is a deferred renderer it will own the bitmap
+    if (!renderer->isDeferred()) {
+        delete bitmap;
+    }
 }
 
 static void android_view_GLES20Canvas_drawBitmapMesh(JNIEnv* env, jobject clazz,
