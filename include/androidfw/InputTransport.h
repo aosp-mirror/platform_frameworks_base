@@ -92,6 +92,12 @@ struct InputMessage {
                 PointerCoords coords;
             } pointers[MAX_POINTERS];
 
+            int32_t getActionId() const {
+                uint32_t index = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK)
+                        >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+                return pointers[index].properties.id;
+            }
+
             inline size_t size() const {
                 return sizeof(Motion) - sizeof(Pointer) * MAX_POINTERS
                         + sizeof(Pointer) * pointerCount;
@@ -322,6 +328,10 @@ public:
     bool hasPendingBatch() const;
 
 private:
+    // True if touch resampling is enabled.
+    const bool mResampleTouch;
+
+    // The input channel.
     sp<InputChannel> mChannel;
 
     // The current input message.
@@ -341,6 +351,7 @@ private:
     struct History {
         nsecs_t eventTime;
         BitSet32 idBits;
+        int32_t idToIndex[MAX_POINTER_ID + 1];
         PointerCoords pointers[MAX_POINTERS];
 
         void initializeFrom(const InputMessage* msg) {
@@ -349,9 +360,13 @@ private:
             for (size_t i = 0; i < msg->body.motion.pointerCount; i++) {
                 uint32_t id = msg->body.motion.pointers[i].properties.id;
                 idBits.markBit(id);
-                size_t index = idBits.getIndexOfBit(id);
-                pointers[index].copyFrom(msg->body.motion.pointers[i].coords);
+                idToIndex[id] = i;
+                pointers[i].copyFrom(msg->body.motion.pointers[i].coords);
             }
+        }
+
+        const PointerCoords& getPointerById(uint32_t id) const {
+            return pointers[idToIndex[id]];
         }
     };
     struct TouchState {
@@ -360,12 +375,15 @@ private:
         size_t historyCurrent;
         size_t historySize;
         History history[2];
+        History lastResample;
 
         void initialize(int32_t deviceId, int32_t source) {
             this->deviceId = deviceId;
             this->source = source;
             historyCurrent = 0;
             historySize = 0;
+            lastResample.eventTime = 0;
+            lastResample.idBits.clear();
         }
 
         void addHistory(const InputMessage* msg) {
@@ -398,6 +416,7 @@ private:
             Batch& batch, size_t count, uint32_t* outSeq, InputEvent** outEvent);
 
     void updateTouchState(InputMessage* msg);
+    void rewriteMessage(const TouchState& state, InputMessage* msg);
     void resampleTouchState(nsecs_t frameTime, MotionEvent* event,
             const InputMessage *next);
 
@@ -412,6 +431,8 @@ private:
     static bool canAddSample(const Batch& batch, const InputMessage* msg);
     static ssize_t findSampleNoLaterThan(const Batch& batch, nsecs_t time);
     static bool shouldResampleTool(int32_t toolType);
+
+    static bool isTouchResamplingEnabled();
 };
 
 } // namespace android
