@@ -401,7 +401,7 @@ public class AudioTrack
             mChannels = AudioFormat.CHANNEL_OUT_STEREO;
             break;
         default:
-            if ((channelConfig & SUPPORTED_OUT_CHANNELS) != channelConfig) {
+            if (!isMultichannelConfigSupported(channelConfig)) {
                 // input channel configuration features unsupported channels
                 mChannelCount = 0;
                 mChannels = AudioFormat.CHANNEL_INVALID;
@@ -436,6 +436,37 @@ public class AudioTrack
         } else {
             mDataLoadMode = mode;
         }
+    }
+
+    /**
+     * Convenience method to check that the channel configuration (a.k.a channel mask) is supported
+     * @param channelConfig the mask to validate
+     * @return false if the AudioTrack can't be used with such a mask
+     */
+    private static boolean isMultichannelConfigSupported(int channelConfig) {
+        // check for unsupported channels
+        if ((channelConfig & SUPPORTED_OUT_CHANNELS) != channelConfig) {
+            Log.e(TAG, "Channel configuration features unsupported channels");
+            return false;
+        }
+        // check for unsupported multichannel combinations:
+        // - FL/FR must be present
+        // - L/R channels must be paired (e.g. no single L channel)
+        final int frontPair =
+                AudioFormat.CHANNEL_OUT_FRONT_LEFT | AudioFormat.CHANNEL_OUT_FRONT_RIGHT;
+        if ((channelConfig & frontPair) != frontPair) {
+                Log.e(TAG, "Front channels must be present in multichannel configurations");
+                return false;
+        }
+        final int backPair =
+                AudioFormat.CHANNEL_OUT_BACK_LEFT | AudioFormat.CHANNEL_OUT_BACK_RIGHT;
+        if ((channelConfig & backPair) != 0) {
+            if ((channelConfig & backPair) != backPair) {
+                Log.e(TAG, "Rear channels can't be used independently");
+                return false;
+            }
+        }
+        return true;
     }
 
 
