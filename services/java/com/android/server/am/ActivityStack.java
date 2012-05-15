@@ -1036,6 +1036,11 @@ final class ActivityStack {
 
     final void activityStoppedLocked(ActivityRecord r, Bundle icicle, Bitmap thumbnail,
             CharSequence description) {
+        if (r.state != ActivityState.STOPPING) {
+            Slog.i(TAG, "Activity reported stop, but no longer stopping: " + r);
+            mHandler.removeMessages(STOP_TIMEOUT_MSG, r);
+            return;
+        }
         if (DEBUG_SAVED_STATE) Slog.i(TAG, "Saving icicle of " + r + ": " + icicle);
         if (icicle != null) {
             // If icicle is null, this is happening due to a timeout, so we
@@ -4394,14 +4399,14 @@ final class ActivityStack {
             r.forceNewConfig = false;
             if (r.app == null || r.app.thread == null) {
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
-                        "Switch is destroying non-running " + r);
+                        "Config is destroying non-running " + r);
                 destroyActivityLocked(r, true, false, "config");
             } else if (r.state == ActivityState.PAUSING) {
                 // A little annoying: we are waiting for this activity to
                 // finish pausing.  Let's not do anything now, but just
                 // flag that it needs to be restarted when done pausing.
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
-                        "Switch is skipping already pausing " + r);
+                        "Config is skipping already pausing " + r);
                 r.configDestroy = true;
                 return true;
             } else if (r.state == ActivityState.RESUMED) {
@@ -4410,12 +4415,12 @@ final class ActivityStack {
                 // Instead of doing the normal handshaking, just say
                 // "restart!".
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
-                        "Switch is restarting resumed " + r);
+                        "Config is relaunching resumed " + r);
                 relaunchActivityLocked(r, r.configChangeFlags, true);
                 r.configChangeFlags = 0;
             } else {
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
-                        "Switch is restarting non-resumed " + r);
+                        "Config is relaunching non-resumed " + r);
                 relaunchActivityLocked(r, r.configChangeFlags, false);
                 r.configChangeFlags = 0;
             }
@@ -4461,7 +4466,9 @@ final class ActivityStack {
         r.startFreezingScreenLocked(r.app, 0);
         
         try {
-            if (DEBUG_SWITCH) Slog.i(TAG, "Switch is restarting resumed " + r);
+            if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG,
+                    (andResume ? "Relaunching to RESUMED " : "Relaunching to PAUSED ")
+                    + r);
             r.forceNewConfig = false;
             r.app.thread.scheduleRelaunchActivity(r.appToken, results, newIntents,
                     changes, !andResume, new Configuration(mService.mConfiguration));
@@ -4469,7 +4476,7 @@ final class ActivityStack {
             // the caller will only pass in 'andResume' if this activity is
             // currently resumed, which implies we aren't sleeping.
         } catch (RemoteException e) {
-            return false;
+            if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG, "Relaunch failed", e);
         }
 
         if (andResume) {
@@ -4478,6 +4485,10 @@ final class ActivityStack {
             if (mMainStack) {
                 mService.reportResumedActivityLocked(r);
             }
+            r.state = ActivityState.RESUMED;
+        } else {
+            mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
+            r.state = ActivityState.PAUSED;
         }
 
         return true;
