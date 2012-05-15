@@ -6027,7 +6027,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             return;
         }
         if ((focusableMode & FOCUSABLES_ACCESSIBILITY) == FOCUSABLES_ACCESSIBILITY) {
-            if (canTakeAccessibilityFocusFromHover()) {
+            if (canTakeAccessibilityFocusFromHover() || getAccessibilityNodeProvider() != null) {
                 views.add(this);
                 return;
             }
@@ -6156,12 +6156,15 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @hide
      */
     public void clearAccessibilityFocus() {
-        if ((mPrivateFlags2 & ACCESSIBILITY_FOCUSED) != 0) {
-            mPrivateFlags2 &= ~ACCESSIBILITY_FOCUSED;
-            ViewRootImpl viewRootImpl = getViewRootImpl();
-            if (viewRootImpl != null) {
+        ViewRootImpl viewRootImpl = getViewRootImpl();
+        if (viewRootImpl != null) {
+            View focusHost = viewRootImpl.getAccessibilityFocusedHost();
+            if (focusHost != null && ViewRootImpl.isViewDescendantOf(focusHost, this)) {
                 viewRootImpl.setAccessibilityFocusedHost(null);
             }
+        }
+        if ((mPrivateFlags2 & ACCESSIBILITY_FOCUSED) != 0) {
+            mPrivateFlags2 &= ~ACCESSIBILITY_FOCUSED;
             invalidate();
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
             notifyAccessibilityStateChanged();
