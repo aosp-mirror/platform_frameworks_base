@@ -63,6 +63,8 @@ public:
     ANDROID_API OpenGLRenderer();
     virtual ~OpenGLRenderer();
 
+    virtual bool isDeferred();
+
     virtual void setViewport(int width, int height);
 
     ANDROID_API void prepare(bool opaque);
