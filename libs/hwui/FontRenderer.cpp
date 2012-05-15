@@ -540,9 +540,11 @@ void FontRenderer::flushAllAndInvalidate() {
         issueDrawCommand();
         mCurrentQuadIndex = 0;
     }
+
     for (uint32_t i = 0; i < mActiveFonts.size(); i++) {
         mActiveFonts[i]->invalidateTextureCache();
     }
+
     for (uint32_t i = 0; i < mCacheLines.size(); i++) {
         mCacheLines[i]->mCurrentCol = 0;
     }
@@ -551,7 +553,7 @@ void FontRenderer::flushAllAndInvalidate() {
 void FontRenderer::deallocateTextureMemory(CacheTexture *cacheTexture) {
     if (cacheTexture && cacheTexture->mTexture) {
         glDeleteTextures(1, &cacheTexture->mTextureId);
-        delete cacheTexture->mTexture;
+        delete[] cacheTexture->mTexture;
         cacheTexture->mTexture = NULL;
     }
 }
@@ -582,11 +584,13 @@ void FontRenderer::flushLargeCaches() {
     deallocateTextureMemory(mCacheTexture512);
 }
 
-void FontRenderer::allocateTextureMemory(CacheTexture *cacheTexture) {
+void FontRenderer::allocateTextureMemory(CacheTexture* cacheTexture) {
     int width = cacheTexture->mWidth;
     int height = cacheTexture->mHeight;
+
     cacheTexture->mTexture = new uint8_t[width * height];
     memset(cacheTexture->mTexture, 0, width * height * sizeof(uint8_t));
+
     glBindTexture(GL_TEXTURE_2D, cacheTexture->mTextureId);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     // Initialize texture dimensions
@@ -654,11 +658,12 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
 
     uint32_t cacheWidth = cacheLine->mMaxWidth;
 
-    CacheTexture *cacheTexture = cacheLine->mCacheTexture;
-    if (cacheTexture->mTexture == NULL) {
+    CacheTexture* cacheTexture = cacheLine->mCacheTexture;
+    if (!cacheTexture->mTexture) {
         // Large-glyph texture memory is allocated only as needed
         allocateTextureMemory(cacheTexture);
     }
+
     uint8_t* cacheBuffer = cacheTexture->mTexture;
     uint8_t* bitmapBuffer = (uint8_t*) glyph.fImage;
     unsigned int stride = glyph.rowBytes();
@@ -677,32 +682,40 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
 CacheTexture* FontRenderer::createCacheTexture(int width, int height, bool allocate) {
     GLuint textureId;
     glGenTextures(1, &textureId);
-    uint8_t* textureMemory = NULL;
 
+    uint8_t* textureMemory = NULL;
     CacheTexture* cacheTexture = new CacheTexture(textureMemory, textureId, width, height);
+
     if (allocate) {
         allocateTextureMemory(cacheTexture);
     }
+
     return cacheTexture;
 }
 
 void FontRenderer::initTextTexture() {
+    for (uint32_t i = 0; i < mCacheLines.size(); i++) {
+        delete mCacheLines[i];
+    }
     mCacheLines.clear();
+
+    if (mCacheTextureSmall) {
+        delete mCacheTextureSmall;
+        delete mCacheTexture128;
+        delete mCacheTexture256;
+        delete mCacheTexture512;
+    }
 
     // Next, use other, separate caches for large glyphs.
     uint16_t maxWidth = 0;
     if (Caches::hasInstance()) {
         maxWidth = Caches::getInstance().maxTextureSize;
     }
+
     if (maxWidth > MAX_TEXT_CACHE_WIDTH || maxWidth == 0) {
         maxWidth = MAX_TEXT_CACHE_WIDTH;
     }
-    if (mCacheTextureSmall != NULL) {
-        delete mCacheTextureSmall;
-        delete mCacheTexture128;
-        delete mCacheTexture256;
-        delete mCacheTexture512;
-    }
+
     mCacheTextureSmall = createCacheTexture(mSmallCacheWidth, mSmallCacheHeight, true);
     mCacheTexture128 = createCacheTexture(maxWidth, 256, false);
     mCacheTexture256 = createCacheTexture(maxWidth, 256, false);
