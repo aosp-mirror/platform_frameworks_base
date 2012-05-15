@@ -296,41 +296,33 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
     private boolean isMuted(int streamType) {
         if (streamType == STREAM_MASTER) {
-            return mAudioService.isMasterMute();
+            return mAudioManager.isMasterMute();
         } else {
-            return mAudioService.isStreamMute(streamType);
+            return mAudioManager.isStreamMute(streamType);
         }
     }
 
     private int getStreamMaxVolume(int streamType) {
         if (streamType == STREAM_MASTER) {
-            return mAudioService.getMasterMaxVolume();
+            return mAudioManager.getMasterMaxVolume();
         } else {
-            return mAudioService.getStreamMaxVolume(streamType);
+            return mAudioManager.getStreamMaxVolume(streamType);
         }
     }
 
     private int getStreamVolume(int streamType) {
         if (streamType == STREAM_MASTER) {
-            return mAudioService.getMasterVolume();
+            return mAudioManager.getMasterVolume();
         } else {
-            return mAudioService.getStreamVolume(streamType);
+            return mAudioManager.getStreamVolume(streamType);
         }
     }
 
     private void setStreamVolume(int streamType, int index, int flags) {
         if (streamType == STREAM_MASTER) {
-            mAudioService.setMasterVolume(index, flags);
+            mAudioManager.setMasterVolume(index, flags);
         } else {
-            mAudioService.setStreamVolume(streamType, index, flags);
-        }
-    }
-
-    private int getLastAudibleStreamVolume(int streamType) {
-        if (streamType == STREAM_MASTER) {
-            return mAudioService.getLastAudibleMasterVolume();
-        } else {
-            return mAudioService.getLastAudibleStreamVolume(streamType);
+            mAudioManager.setStreamVolume(streamType, index, flags);
         }
     }
 
@@ -399,12 +391,17 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
     /** Update the mute and progress state of a slider */
     private void updateSlider(StreamControl sc) {
-        sc.seekbarView.setProgress(getLastAudibleStreamVolume(sc.streamType));
+        sc.seekbarView.setProgress(getStreamVolume(sc.streamType));
         final boolean muted = isMuted(sc.streamType);
         sc.icon.setImageResource(muted ? sc.iconMuteRes : sc.iconRes);
-        if (sc.streamType == AudioManager.STREAM_RING && muted
-                && mAudioManager.shouldVibrate(AudioManager.VIBRATE_TYPE_RINGER)) {
+        if (sc.streamType == AudioManager.STREAM_RING &&
+                mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE) {
             sc.icon.setImageResource(R.drawable.ic_audio_ring_notif_vibrate);
+        }
+        if (sc.streamType != mAudioManager.getMasterStreamType() && muted) {
+            sc.seekbarView.setEnabled(false);
+        } else {
+            sc.seekbarView.setEnabled(true);
         }
     }
 
@@ -510,9 +507,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     }
 
     protected void onShowVolumeChanged(int streamType, int flags) {
-        int index = isMuted(streamType) ?
-                getLastAudibleStreamVolume(streamType)
-                : getStreamVolume(streamType);
+        int index = getStreamVolume(streamType);
 
         mRingIsSilent = false;
 
@@ -592,6 +587,11 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
                 sc.seekbarView.setMax(max);
             }
             sc.seekbarView.setProgress(index);
+            if (streamType != mAudioManager.getMasterStreamType() && isMuted(streamType)) {
+                sc.seekbarView.setEnabled(false);
+            } else {
+                sc.seekbarView.setEnabled(true);
+            }
         }
 
         if (!mDialog.isShowing()) {
@@ -607,8 +607,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         // Do a little vibrate if applicable (only when going into vibrate mode)
         if ((flags & AudioManager.FLAG_VIBRATE) != 0 &&
                 mAudioService.isStreamAffectedByRingerMode(streamType) &&
-                mAudioService.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE &&
-                mAudioService.shouldVibrate(AudioManager.VIBRATE_TYPE_RINGER)) {
+                mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE) {
             sendMessageDelayed(obtainMessage(MSG_VIBRATE), VIBRATE_DELAY);
         }
     }
@@ -646,7 +645,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     protected void onVibrate() {
 
         // Make sure we ended up in vibrate ringer mode
-        if (mAudioService.getRingerMode() != AudioManager.RINGER_MODE_VIBRATE) {
+        if (mAudioManager.getRingerMode() != AudioManager.RINGER_MODE_VIBRATE) {
             return;
         }
 
