@@ -51,11 +51,12 @@ public class VignetteFilter extends Filter {
             "uniform float range;\n" +
             "uniform float inv_max_dist;\n" +
             "uniform float shade;\n" +
-            "uniform vec2 center;\n" +
+            "uniform vec2 scale;\n" +
             "varying vec2 v_texcoord;\n" +
             "void main() {\n" +
             "  const float slope = 20.0;\n" +
-            "  float dist = distance(gl_FragCoord.xy, center);\n" +
+            "  vec2 coord = v_texcoord - vec2(0.5, 0.5);\n" +
+            "  float dist = length(coord * scale);\n" +
             "  float lumen = shade / (1.0 + exp((dist * inv_max_dist - range) * slope)) + (1.0 - shade);\n" +
             "  vec4 color = texture2D(tex_sampler_0, v_texcoord);\n" +
             "  gl_FragColor = vec4(color.rgb * lumen, color.a);\n" +
@@ -93,13 +94,17 @@ public class VignetteFilter extends Filter {
 
     private void initParameters() {
         if (mProgram != null) {
-            float centerX = (float) (0.5 * mWidth);
-            float centerY = (float) (0.5 * mHeight);
-            float center[] = {centerX, centerY};
-            float max_dist = (float) Math.sqrt(centerX * centerX + centerY * centerY);
-
-            mProgram.setHostValue("center", center);
-            mProgram.setHostValue("inv_max_dist", 1.0f / max_dist);
+            float scale[] = new float[2];
+            if (mWidth > mHeight) {
+                scale[0] = 1f;
+                scale[1] = ((float) mHeight) / mWidth;
+            } else {
+                scale[0] = ((float) mWidth) / mHeight;
+                scale[1] = 1f;
+            }
+            float max_dist = ((float) Math.sqrt(scale[0] * scale[0] + scale[1] * scale[1])) * 0.5f;
+            mProgram.setHostValue("scale", scale);
+            mProgram.setHostValue("inv_max_dist", 1f / max_dist);
             mProgram.setHostValue("shade", mShade);
 
             updateParameters();
