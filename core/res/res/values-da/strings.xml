@@ -796,7 +796,7 @@
     <string name="js_dialog_title_default" msgid="6961903213729667573">"Javascript"</string>
     <string name="js_dialog_before_unload" msgid="730366588032430474">"Vil du gå væk fra denne side?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Tryk på OK for at fortsætte eller Annuller for at blive på den aktuelle side."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bekræft"</string>
-    <string name="double_tap_toast" msgid="4595046515400268881">"Tip: Dobbeltklik for at zoome ind eller ud."</string>
+    <string name="double_tap_toast" msgid="4595046515400268881">"Tip! Dobbeltklik for at zoome ind eller ud."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Autofyld"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Konfigurer Autofyld"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
@@ -997,7 +997,7 @@
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> blev oprindeligt åbnet."</string>
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Skaler"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Vis altid"</string>
-    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Aktiver dette igen i Systemindstillinger &gt; Apps &gt; Downloadet."</string>
+    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Aktivér dette igen i Systemindstillinger &gt; Apps &gt; Downloadet."</string>
     <string name="smv_application" msgid="3307209192155442829">"Appen <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) har overtrådt sin egen StrictMode-politik."</string>
     <string name="smv_process" msgid="5120397012047462446">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> har overtrådt sin egen StrictMode-politik."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android opgraderes..."</string>
