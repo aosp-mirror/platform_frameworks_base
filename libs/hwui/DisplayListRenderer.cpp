@@ -49,6 +49,7 @@ const char* DisplayList::OP_NAMES[] = {
     "DrawBitmap",
     "DrawBitmapMatrix",
     "DrawBitmapRect",
+    "DrawBitmapData",
     "DrawBitmapMesh",
     "DrawPatch",
     "DrawColor",
@@ -432,6 +433,14 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 SkPaint* paint = getPaint(renderer);
                 ALOGD("%s%s %p, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %p",
                         (char*) indent, OP_NAMES[op], bitmap, f1, f2, f3, f4, f5, f6, f7, f8, paint);
+            }
+            break;
+            case DrawBitmapData: {
+                SkBitmap* bitmap = getBitmapData();
+                float x = getFloat();
+                float y = getFloat();
+                SkPaint* paint = getPaint(renderer);
+                ALOGD("%s%s %.2f, %.2f, %p", (char*) indent, OP_NAMES[op], x, y, paint);
             }
             break;
             case DrawBitmapMesh: {
@@ -1020,6 +1029,19 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
                 renderer.drawBitmap(bitmap, f1, f2, f3, f4, f5, f6, f7, f8, paint);
             }
             break;
+            case DrawBitmapData: {
+                SkBitmap* bitmap = getBitmapData();
+                float x = getFloat();
+                float y = getFloat();
+                SkPaint* paint = getPaint(renderer);
+                DISPLAY_LIST_LOGD("%s%s %p, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
+                        bitmap, x, y, paint);
+                if (bitmap) {
+                    renderer.drawBitmap(bitmap, x, y, paint);
+                    delete bitmap;
+                }
+            }
+            break;
             case DrawBitmapMesh: {
                 int32_t verticesCount = 0;
                 uint32_t colorsCount = 0;
@@ -1483,6 +1505,15 @@ void DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float srcLeft, float srcT
     addBitmap(bitmap);
     addBounds(srcLeft, srcTop, srcRight, srcBottom);
     addBounds(dstLeft, dstTop, dstRight, dstBottom);
+    addPaint(paint);
+    addSkip(location);
+}
+
+void DisplayListRenderer::drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint) {
+    const bool reject = quickReject(left, top, left + bitmap->width(), bitmap->height());
+    uint32_t* location = addOp(DisplayList::DrawBitmapData, reject);
+    addBitmapData(bitmap);
+    addPoint(left, top);
     addPaint(paint);
     addSkip(location);
 }

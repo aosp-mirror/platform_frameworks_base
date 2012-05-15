@@ -160,6 +160,16 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
     return texture;
 }
 
+Texture* TextureCache::getTransient(SkBitmap* bitmap) {
+    Texture* texture = new Texture;
+    texture->bitmapSize = bitmap->rowBytes() * bitmap->height();
+    texture->cleanup = true;
+
+    generateTexture(bitmap, texture, false);
+
+    return texture;
+}
+
 void TextureCache::remove(SkBitmap* bitmap) {
     mCache.remove(bitmap);
 }

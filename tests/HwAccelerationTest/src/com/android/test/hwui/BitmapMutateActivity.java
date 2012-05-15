@@ -87,7 +87,7 @@ public class BitmapMutateActivity extends Activity {
             int width = mBitmap1.getWidth();
             int height = mBitmap1.getHeight();
 
-            canvas.translate((getWidth() - width) / 2, (getHeight() - height) / 2);
+            canvas.translate((getWidth() - width) / 2, 0);
 
             for (int x = 0; x < width; x++) {
                 int color = 0xff000000;
@@ -101,6 +101,11 @@ public class BitmapMutateActivity extends Activity {
 
             mBitmap1.setPixels(mPixels, 0, width, 0, 0, width, height);
             canvas.drawBitmap(mBitmap1, 0.0f, 0.0f, mBitmapPaint);
+
+            canvas.save();
+            canvas.translate(0.0f, height + 32);
+            canvas.drawBitmap(mPixels, 0, width, 0.0f, 0.0f, width, height, false, mBitmapPaint);
+            canvas.restore();
         }
     }
 }

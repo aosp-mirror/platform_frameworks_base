@@ -326,8 +326,8 @@ static void android_view_GLES20Canvas_concatMatrix(JNIEnv* env, jobject clazz,
 // ----------------------------------------------------------------------------
 
 static void android_view_GLES20Canvas_drawBitmap(JNIEnv* env, jobject clazz,
-        OpenGLRenderer* renderer, SkBitmap* bitmap, jbyteArray buffer, float left,
-        float top, SkPaint* paint) {
+        OpenGLRenderer* renderer, SkBitmap* bitmap, jbyteArray buffer,
+        jfloat left, jfloat top, SkPaint* paint) {
     // This object allows the renderer to allocate a global JNI ref to the buffer object.
     JavaHeapBitmapRef bitmapRef(env, bitmap, buffer);
 
@@ -352,6 +352,24 @@ static void android_view_GLES20Canvas_drawBitmapMatrix(JNIEnv* env, jobject claz
     JavaHeapBitmapRef bitmapRef(env, bitmap, buffer);
 
     renderer->drawBitmap(bitmap, matrix, paint);
+}
+
+static void android_view_GLES20Canvas_drawBitmapData(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer, jintArray colors, jint offset, jint stride,
+        jfloat left, jfloat top, jint width, jint height, jboolean hasAlpha, SkPaint* paint) {
+    SkBitmap bitmap;
+    SkBitmap::Config config = hasAlpha ? SkBitmap::kARGB_8888_Config : SkBitmap::kRGB_565_Config;
+    bitmap.setConfig(config, width, height);
+
+    if (!bitmap.allocPixels()) {
+        return;
+    }
+
+    if (!GraphicsJNI::SetPixels(env, colors, offset, stride, 0, 0, width, height, bitmap)) {
+        return;
+    }
+
+    renderer->drawBitmapData(&bitmap, left, top, paint);
 }
 
 static void android_view_GLES20Canvas_drawBitmapMesh(JNIEnv* env, jobject clazz,
@@ -880,6 +898,7 @@ static JNINativeMethod gMethods[] = {
     { "nDrawBitmap",        "(II[BFFI)V",      (void*) android_view_GLES20Canvas_drawBitmap },
     { "nDrawBitmap",        "(II[BFFFFFFFFI)V",(void*) android_view_GLES20Canvas_drawBitmapRect },
     { "nDrawBitmap",        "(II[BII)V",       (void*) android_view_GLES20Canvas_drawBitmapMatrix },
+    { "nDrawBitmap",        "(I[IIIFFIIZI)V",  (void*) android_view_GLES20Canvas_drawBitmapData },
 
     { "nDrawBitmapMesh",    "(II[BII[FI[III)V",(void*) android_view_GLES20Canvas_drawBitmapMesh },
 

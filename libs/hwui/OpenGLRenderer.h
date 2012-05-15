@@ -115,6 +115,7 @@ public:
     virtual void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, SkPaint* paint);
+    virtual void drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual void drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
             float* vertices, int* colors, SkPaint* paint);
     virtual void drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,

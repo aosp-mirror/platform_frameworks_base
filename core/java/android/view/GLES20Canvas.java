@@ -833,18 +833,39 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawBitmap(int[] colors, int offset, int stride, float x, float y,
             int width, int height, boolean hasAlpha, Paint paint) {
+        if (width < 0) {
+            throw new IllegalArgumentException("width must be >= 0");
+        }
+
+        if (height < 0) {
+            throw new IllegalArgumentException("height must be >= 0");
+        }
+
+        if (Math.abs(stride) < width) {
+            throw new IllegalArgumentException("abs(stride) must be >= width");
+        }
+
+        int lastScanline = offset + (height - 1) * stride;
+        int length = colors.length;
+
+        if (offset < 0 || (offset + width > length) || lastScanline < 0 ||
+                (lastScanline + width > length)) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+
         // Shaders are ignored when drawing bitmaps
         int modifier = paint != null ? setupColorFilter(paint) : MODIFIER_NONE;
         try {
-            final Bitmap.Config config = hasAlpha ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
-            final Bitmap b = Bitmap.createBitmap(colors, offset, stride, width, height, config);
             final int nativePaint = paint == null ? 0 : paint.mNativePaint;
-            nDrawBitmap(mRenderer, b.mNativeBitmap, b.mBuffer, x, y, nativePaint);
-            b.recycle();
+            nDrawBitmap(mRenderer, colors, offset, stride, x, y,
+                    width, height, hasAlpha, nativePaint);
         } finally {
             if (modifier != MODIFIER_NONE) nResetModifiers(mRenderer, modifier);
         }
     }
+
+    private static native void nDrawBitmap(int renderer, int[] colors, int offset, int stride,
+            float x, float y, int width, int height, boolean hasAlpha, int nativePaint);
 
     @Override
     public void drawBitmap(int[] colors, int offset, int stride, int x, int y,
