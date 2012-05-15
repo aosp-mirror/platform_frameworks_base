@@ -53,7 +53,7 @@ public class DelegateViewHelper {
     }
 
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (mBar.isStatusBarExpanded()) {
+        if (mBar.shouldDisableNavbarGestures()) {
             return false;
         }
         switch (event.getAction()) {
