@@ -81,7 +81,7 @@ public class KeyguardUpdateMonitor {
 
     private int mFailedAttempts = 0;
     private int mFailedBiometricUnlockAttempts = 0;
-    private static final int FAILED_BIOMETRIC_UNLOCK_ATTEMPTS_BEFORE_BACKUP = 15;
+    private static final int FAILED_BIOMETRIC_UNLOCK_ATTEMPTS_BEFORE_BACKUP = 5;
 
     private boolean mClockVisible;
 
