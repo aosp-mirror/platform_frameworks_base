@@ -1143,8 +1143,6 @@ public final class WebViewCore {
         static final int ADD_PACKAGE_NAME = 185;
         static final int REMOVE_PACKAGE_NAME = 186;
 
-        static final int HIT_TEST = 187;
-
         // accessibility support
         static final int MODIFY_SELECTION = 190;
 
@@ -1648,18 +1646,6 @@ public final class WebViewCore {
                                     (Set<String>) msg.obj);
                             break;
 
-                        case HIT_TEST:
-                            TouchHighlightData d = (TouchHighlightData) msg.obj;
-                            if (d.mNativeLayer != 0) {
-                                nativeScrollLayer(mNativeClass,
-                                        d.mNativeLayer, d.mNativeLayerRect);
-                            }
-                            WebKitHitTest hit = performHitTest(d.mX, d.mY, d.mSlop, true);
-                            mWebViewClassic.mPrivateHandler.obtainMessage(
-                                    WebViewClassic.HIT_TEST_RESULT, hit)
-                                    .sendToTarget();
-                            break;
-
                         case SET_USE_MOCK_DEVICE_ORIENTATION:
                             setUseMockDeviceOrientation();
                             break;
@@ -1788,6 +1774,15 @@ public final class WebViewCore {
                 return false;
             }
             switch (eventType) {
+                case WebViewInputDispatcher.EVENT_TYPE_HIT_TEST:
+                    int x = Math.round(event.getX());
+                    int y = Math.round(event.getY());
+                    WebKitHitTest hit = performHitTest(x, y,
+                            mWebViewClassic.getScaledNavSlop(), true);
+                    mWebViewClassic.mPrivateHandler.obtainMessage(
+                            WebViewClassic.HIT_TEST_RESULT, hit).sendToTarget();
+                    return false;
+
                 case WebViewInputDispatcher.EVENT_TYPE_CLICK:
                     return nativeMouseClick(mNativeClass);
 

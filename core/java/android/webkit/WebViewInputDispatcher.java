@@ -204,6 +204,11 @@ final class WebViewInputDispatcher {
     public static final int EVENT_TYPE_DOUBLE_TAP = 5;
 
     /**
+     * Event type: Indicates that a hit test should be performed
+     */
+    public static final int EVENT_TYPE_HIT_TEST = 6;
+
+    /**
      * Flag: This event is private to this queue.  Do not forward it.
      */
     public static final int FLAG_PRIVATE = 1 << 0;
@@ -499,13 +504,17 @@ final class WebViewInputDispatcher {
     }
 
     private void enqueueDoubleTapLocked(MotionEvent event) {
-        unscheduleClickLocked();
-        hideTapCandidateLocked();
         MotionEvent eventToEnqueue = MotionEvent.obtainNoHistory(event);
         DispatchEvent d = obtainDispatchEventLocked(eventToEnqueue, EVENT_TYPE_DOUBLE_TAP, 0,
                 mPostLastWebKitXOffset, mPostLastWebKitYOffset, mPostLastWebKitScale);
         enqueueEventLocked(d);
-        mIsDoubleTapCandidate = false;
+    }
+
+    private void enqueueHitTestLocked(MotionEvent event) {
+        MotionEvent eventToEnqueue = MotionEvent.obtainNoHistory(event);
+        DispatchEvent d = obtainDispatchEventLocked(eventToEnqueue, EVENT_TYPE_HIT_TEST, 0,
+                mPostLastWebKitXOffset, mPostLastWebKitYOffset, mPostLastWebKitScale);
+        enqueueEventLocked(d);
     }
 
     private void checkForSlopLocked(MotionEvent event) {
@@ -545,6 +554,7 @@ final class WebViewInputDispatcher {
             mInitialDownX = event.getX();
             mInitialDownY = event.getY();
             scheduleShowTapHighlightLocked();
+            enqueueHitTestLocked(event);
         } else if (action == MotionEvent.ACTION_UP) {
             unscheduleLongPressLocked();
             if (isClickCandidateLocked(event)) {
@@ -824,6 +834,7 @@ final class WebViewInputDispatcher {
             case EVENT_TYPE_CLICK:
             case EVENT_TYPE_HOVER:
             case EVENT_TYPE_SCROLL:
+            case EVENT_TYPE_HIT_TEST:
                 return false;
             case EVENT_TYPE_TOUCH:
                 return !mPostSendTouchEventsToWebKit

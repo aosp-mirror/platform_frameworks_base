@@ -1719,6 +1719,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         mZoomManager.updateDefaultZoomDensity(density);
     }
 
+    /* package */ int getScaledNavSlop() {
+        return viewToContentDimension(mNavSlop);
+    }
+
     /* package */ boolean onSavePassword(String schemePlusHost, String username,
             String password, final Message resumeMsg) {
         boolean rVal = false;
@@ -4339,10 +4343,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     private void removeTouchHighlight() {
-        if (mWebViewCore != null) {
-            mWebViewCore.removeMessages(EventHub.HIT_TEST);
-        }
-        mPrivateHandler.removeMessages(HIT_TEST_RESULT);
         setTouchHighlightRects(null);
     }
 
@@ -5834,7 +5834,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
                 mConfirmMove = false;
-                mInitialHitTestResult = null;
                 if (!mEditTextScroller.isFinished()) {
                     mEditTextScroller.abortAnimation();
                 }
@@ -5856,23 +5855,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     }
                 } else { // the normal case
                     mTouchMode = TOUCH_INIT_MODE;
-                    // TODO: Have WebViewInputDispatch handle this
-                    TouchHighlightData data = new TouchHighlightData();
-                    data.mX = contentX;
-                    data.mY = contentY;
-                    data.mNativeLayerRect = new Rect();
-                    if (mNativeClass != 0) {
-                        data.mNativeLayer = nativeScrollableLayer(mNativeClass,
-                                contentX, contentY, data.mNativeLayerRect, null);
-                    } else {
-                        data.mNativeLayer = 0;
-                    }
-                    data.mSlop = viewToContentDimension(mNavSlop);
-                    removeTouchHighlight();
-                    if (!mBlockWebkitViewMessages && mWebViewCore != null) {
-                        mWebViewCore.sendMessageAtFrontOfQueue(
-                                EventHub.HIT_TEST, data);
-                    }
                     if (mLogEvent && eventTime - mLastTouchUpTime < 1000) {
                         EventLog.writeEvent(EventLogTags.BROWSER_DOUBLE_TAP_DURATION,
                                 (eventTime - mLastTouchUpTime), eventTime);
