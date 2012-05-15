@@ -1074,6 +1074,7 @@ final class FragmentManagerImpl extends FragmentManager {
             f.setIndex(mAvailIndices.remove(mAvailIndices.size()-1));
             mActive.set(f.mIndex, f);
         }
+        if (DEBUG) Log.v(TAG, "Allocated fragment index " + f);
     }
     
     void makeInactive(Fragment f) {
@@ -1081,7 +1082,7 @@ final class FragmentManagerImpl extends FragmentManager {
             return;
         }
         
-        if (DEBUG) Log.v(TAG, "Freeing fragment index " + f.mIndex);
+        if (DEBUG) Log.v(TAG, "Freeing fragment index " + f);
         mActive.set(f.mIndex, null);
         if (mAvailIndices == null) {
             mAvailIndices = new ArrayList<Integer>();
@@ -1493,6 +1494,7 @@ final class FragmentManagerImpl extends FragmentManager {
                     fragments.add(f);
                     f.mRetaining = true;
                     f.mTargetIndex = f.mTarget != null ? f.mTarget.mIndex : -1;
+                    if (DEBUG) Log.v(TAG, "retainNonConfig: keeping retained " + f);
                 }
             }
         }
