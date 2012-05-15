@@ -3510,31 +3510,36 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public void closeSystemDialogs(String reason) {
         enforceNotIsolatedCaller("closeSystemDialogs");
+
+        final int uid = Binder.getCallingUid();
+        final long origId = Binder.clearCallingIdentity();
+        synchronized (this) {
+            closeSystemDialogsLocked(uid, reason);
+        }
+        Binder.restoreCallingIdentity(origId);
+    }
+
+    void closeSystemDialogsLocked(int callingUid, String reason) {
         Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         if (reason != null) {
             intent.putExtra("reason", reason);
         }
+        mWindowManager.closeSystemDialogs(reason);
         
-        final int uid = Binder.getCallingUid();
-        final long origId = Binder.clearCallingIdentity();
-        synchronized (this) {
-            mWindowManager.closeSystemDialogs(reason);
-            
-            for (int i=mMainStack.mHistory.size()-1; i>=0; i--) {
-                ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
-                if ((r.info.flags&ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
-                    r.stack.finishActivityLocked(r, i,
-                            Activity.RESULT_CANCELED, null, "close-sys");
-                }
+        for (int i=mMainStack.mHistory.size()-1; i>=0; i--) {
+            ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
+            if ((r.info.flags&ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
+                r.stack.finishActivityLocked(r, i,
+                        Activity.RESULT_CANCELED, null, "close-sys");
             }
-            
-            broadcastIntentLocked(null, null, intent, null,
-                    null, 0, null, null, null, false, false, -1, uid, 0 /* TODO: Verify */);
         }
-        Binder.restoreCallingIdentity(origId);
+        
+        broadcastIntentLocked(null, null, intent, null,
+                null, 0, null, null, null, false, false, -1,
+                callingUid, 0 /* TODO: Verify */);
     }
-    
+
     public Debug.MemoryInfo[] getProcessMemoryInfo(int[] pids)
             throws RemoteException {
         enforceNotIsolatedCaller("getProcessMemoryInfo");

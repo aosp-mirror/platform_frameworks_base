@@ -485,6 +485,7 @@ package android {
     field public static final int focusable = 16842970; // 0x10100da
     field public static final int focusableInTouchMode = 16842971; // 0x10100db
     field public static final int focusedMonthDateColor = 16843587; // 0x1010343
+    field public static final int fontFamily = 16843692; // 0x10103ac
     field public static final int footerDividersEnabled = 16843311; // 0x101022f
     field public static final int foreground = 16843017; // 0x1010109
     field public static final int foregroundGravity = 16843264; // 0x1010200
@@ -5822,6 +5823,7 @@ package android.content {
     field public static final int FLAG_ACTIVITY_CLEAR_TASK = 32768; // 0x8000
     field public static final int FLAG_ACTIVITY_CLEAR_TOP = 67108864; // 0x4000000
     field public static final int FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET = 524288; // 0x80000
+    field public static final int FLAG_ACTIVITY_CLOSE_SYSTEM_DIALOGS = 8192; // 0x2000
     field public static final int FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS = 8388608; // 0x800000
     field public static final int FLAG_ACTIVITY_FORWARD_RESULT = 33554432; // 0x2000000
     field public static final int FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY = 1048576; // 0x100000
