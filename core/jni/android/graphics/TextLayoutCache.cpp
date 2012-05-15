@@ -332,15 +332,7 @@ uint32_t TextLayoutValue::getElapsedTime() {
 }
 
 TextLayoutShaper::TextLayoutShaper() : mShaperItemGlyphArraySize(0) {
-    mDefaultTypeface = SkFontHost::CreateTypeface(NULL, NULL, NULL, 0, SkTypeface::kNormal);
-    mArabicTypeface = NULL;
-    mHebrewRegularTypeface = NULL;
-    mHebrewBoldTypeface = NULL;
-    mBengaliTypeface = NULL;
-    mThaiTypeface = NULL;
-    mDevanagariRegularTypeface = NULL;
-    mTamilRegularTypeface = NULL;
-    mTamilBoldTypeface = NULL;
+    init();
 
     mFontRec.klass = &harfbuzzSkiaClass;
     mFontRec.userData = 0;
@@ -359,7 +351,19 @@ TextLayoutShaper::TextLayoutShaper() : mShaperItemGlyphArraySize(0) {
     mShaperItem.font->userData = &mShapingPaint;
 }
 
-TextLayoutShaper::~TextLayoutShaper() {
+void TextLayoutShaper::init() {
+    mDefaultTypeface = SkFontHost::CreateTypeface(NULL, NULL, NULL, 0, SkTypeface::kNormal);
+    mArabicTypeface = NULL;
+    mHebrewRegularTypeface = NULL;
+    mHebrewBoldTypeface = NULL;
+    mBengaliTypeface = NULL;
+    mThaiTypeface = NULL;
+    mDevanagariRegularTypeface = NULL;
+    mTamilRegularTypeface = NULL;
+    mTamilBoldTypeface = NULL;
+}
+
+void TextLayoutShaper::unrefTypefaces() {
     SkSafeUnref(mDefaultTypeface);
     SkSafeUnref(mArabicTypeface);
     SkSafeUnref(mHebrewRegularTypeface);
@@ -369,6 +373,10 @@ TextLayoutShaper::~TextLayoutShaper() {
     SkSafeUnref(mDevanagariRegularTypeface);
     SkSafeUnref(mTamilRegularTypeface);
     SkSafeUnref(mTamilBoldTypeface);
+}
+
+TextLayoutShaper::~TextLayoutShaper() {
+    unrefTypefaces();
     deleteShaperItemGlyphArrays();
 }
 
@@ -983,6 +991,12 @@ HB_Face TextLayoutShaper::getCachedHBFace(SkTypeface* typeface) {
     return face;
 }
 
+void TextLayoutShaper::purgeCaches() {
+    mCachedHBFaces.clear();
+    unrefTypefaces();
+    init();
+}
+
 TextLayoutEngine::TextLayoutEngine() {
     mShaper = new TextLayoutShaper();
 #if USE_TEXT_LAYOUT_CACHE
@@ -1018,6 +1032,10 @@ sp<TextLayoutValue> TextLayoutEngine::getValue(const SkPaint* paint, const jchar
 void TextLayoutEngine::purgeCaches() {
 #if USE_TEXT_LAYOUT_CACHE
     mTextLayoutCache->clear();
+    mShaper->purgeCaches();
+#if DEBUG_GLYPHS
+    ALOGD("Purged TextLayoutEngine caches");
+#endif
 #endif
 }
 
