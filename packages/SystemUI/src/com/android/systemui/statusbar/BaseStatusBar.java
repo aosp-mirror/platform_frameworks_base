@@ -85,6 +85,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected static final boolean ENABLE_INTRUDERS = false;
 
+    // Should match the value in PhoneWindowManager
+    public static final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
+
     public static final int EXPANDED_LEAVE_ALONE = -10000;
     public static final int EXPANDED_FULL_OPEN = -10001;
 
@@ -398,6 +401,15 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected H createHandler() {
          return new H();
+    }
+
+    static void sendCloseSystemWindows(Context context, String reason) {
+        if (ActivityManagerNative.isSystemReady()) {
+            try {
+                ActivityManagerNative.getDefault().closeSystemDialogs(reason);
+            } catch (RemoteException e) {
+            }
+        }
     }
 
     protected class H extends Handler {

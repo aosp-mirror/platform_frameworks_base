@@ -1582,7 +1582,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                 if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
                     String reason = intent.getStringExtra("reason");
                     if (reason != null) {
-                        excludeRecents = reason.equals("recentapps");
+                        excludeRecents = reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS);
                     }
                 }
                 if (Intent.ACTION_SCREEN_OFF.equals(action)) {
