@@ -3543,7 +3543,7 @@ final class ActivityStack {
         }
         ActivityRecord r = mHistory.get(index);
 
-        while (index > 0) {
+        while (index >= 0) {
             ActivityRecord cur = mHistory.get(index);
             if (cur.task != r.task) {
                 break;
