@@ -55,6 +55,10 @@
 #define SYSTEM_BOOTANIMATION_FILE "/system/media/bootanimation.zip"
 #define SYSTEM_ENCRYPTED_BOOTANIMATION_FILE "/system/media/bootanimation-encrypted.zip"
 
+extern "C" int clock_nanosleep(clockid_t clock_id, int flags,
+                           const struct timespec *request,
+                           struct timespec *remain);
+
 namespace android {
 
 // ---------------------------------------------------------------------------
@@ -476,6 +480,7 @@ bool BootAnimation::movie()
         for (int r=0 ; !part.count || r<part.count ; r++) {
             for (int j=0 ; j<fcount && !exitPending(); j++) {
                 const Animation::Frame& frame(part.frames[j]);
+                nsecs_t lastFrame = systemTime();
 
                 if (r > 0) {
                     glBindTexture(GL_TEXTURE_2D, frame.tid);
@@ -508,10 +513,18 @@ bool BootAnimation::movie()
 
                 nsecs_t now = systemTime();
                 nsecs_t delay = frameDuration - (now - lastFrame);
+                //ALOGD("%lld, %lld", ns2ms(now - lastFrame), ns2ms(delay));
                 lastFrame = now;
-                long wait = ns2us(delay);
-                if (wait > 0)
-                    usleep(wait);
+
+                if (delay > 0) {
+                    struct timespec spec;
+                    spec.tv_sec  = (now + delay) / 1000000000;
+                    spec.tv_nsec = (now + delay) % 1000000000;
+                    int err;
+                    do {
+                        err = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &spec, NULL);
+                    } while (err<0 && errno == EINTR);
+                }
             }
             usleep(part.pause * ns2us(frameDuration));
         }
