@@ -1024,10 +1024,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mIsDefault = (info.flags & DEFAULT) != 0;
 
             if (mIsAutomation || info.getResolveInfo().serviceInfo.applicationInfo.targetSdkVersion
-                    // TODO: Uncomment this line and remove the line below when JellyBean
-                    // SDK version is finalized.
-                    // >= Build.VERSION_CODES.JELLY_BEAN) {
-                    > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+                    >= Build.VERSION_CODES.JELLY_BEAN) {
                 mIncludeNotImportantViews =
                     (info.flags & FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0;
             }
