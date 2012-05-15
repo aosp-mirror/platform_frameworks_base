@@ -8631,7 +8631,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private native void     nativeUpdateDrawGLFunction(int nativeInstance, Rect invScreenRect,
             Rect screenRect, RectF visibleContentRect, float scale);
     private native String   nativeGetSelection();
-    private native Rect     nativeLayerBounds(int layer);
     private native void     nativeSetHeightCanMeasure(boolean measure);
     private native boolean  nativeSetBaseLayer(int nativeInstance,
             int layer, boolean showVisualIndicator, boolean isPictureAfterFirstLayout);
