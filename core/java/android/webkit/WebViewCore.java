@@ -22,7 +22,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.Region;
 import android.media.MediaFile;
 import android.net.ProxyProperties;
 import android.net.Uri;
@@ -864,6 +863,7 @@ public final class WebViewCore {
     static class TextSelectionData {
         static final int REASON_UNKNOWN = 0;
         static final int REASON_ACCESSIBILITY_INJECTOR = 1;
+        static final int REASON_SELECT_WORD = 2;
         public TextSelectionData(int start, int end, int selectTextPtr) {
             mStart = start;
             mEnd = end;
@@ -1718,12 +1718,16 @@ public final class WebViewCore {
                             break;
                         }
                         case SELECT_WORD_AT: {
+                            mTextSelectionChangeReason
+                                    = TextSelectionData.REASON_SELECT_WORD;
                             int x = msg.arg1;
                             int y = msg.arg2;
                             if (!nativeSelectWordAt(mNativeClass, x, y)) {
                                 mWebViewClassic.mPrivateHandler.obtainMessage(WebViewClassic.SHOW_CARET_HANDLE)
                                     .sendToTarget();
                             }
+                            mTextSelectionChangeReason
+                                    = TextSelectionData.REASON_UNKNOWN;
                             break;
                         }
                         case SELECT_ALL:
