@@ -37,6 +37,9 @@ public:
     struct Estimator {
         static const size_t MAX_DEGREE = 2;
 
+        // Estimator time base.
+        nsecs_t time;
+
         // Polynomial coefficients describing motion in X and Y.
         float xCoeff[MAX_DEGREE + 1], yCoeff[MAX_DEGREE + 1];
 
@@ -48,6 +51,7 @@ public:
         float confidence;
 
         inline void clear() {
+            time = 0;
             degree = 0;
             confidence = 0;
             for (size_t i = 0; i <= MAX_DEGREE; i++) {
@@ -58,7 +62,6 @@ public:
     };
 
     VelocityTracker();
-    VelocityTracker(VelocityTrackerStrategy* strategy);
     ~VelocityTracker();
 
     // Resets the velocity tracker state.
@@ -96,6 +99,7 @@ public:
     inline BitSet32 getCurrentPointerIdBits() const { return mCurrentPointerIdBits; }
 
 private:
+    nsecs_t mLastEventTime;
     BitSet32 mCurrentPointerIdBits;
     int32_t mActivePointerId;
     VelocityTrackerStrategy* mStrategy;

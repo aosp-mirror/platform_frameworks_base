@@ -33,6 +33,16 @@
 
 namespace android {
 
+// Nanoseconds per milliseconds.
+static const nsecs_t NANOS_PER_MS = 1000000;
+
+// Threshold for determining that a pointer has stopped moving.
+// Some input devices do not send ACTION_MOVE events in the case where a pointer has
+// stopped.  We need to detect this case so that we can accurately predict the
+// velocity after the pointer starts moving again.
+static const nsecs_t ASSUME_POINTER_STOPPED_TIME = 40 * NANOS_PER_MS;
+
+
 static float vectorDot(const float* a, const float* b, uint32_t m) {
     float r = 0;
     while (m--) {
@@ -89,13 +99,8 @@ static String8 matrixToString(const float* a, uint32_t m, uint32_t n, bool rowMa
 // --- VelocityTracker ---
 
 VelocityTracker::VelocityTracker() :
-        mCurrentPointerIdBits(0), mActivePointerId(-1),
+        mLastEventTime(0), mCurrentPointerIdBits(0), mActivePointerId(-1),
         mStrategy(new LeastSquaresVelocityTrackerStrategy()) {
-}
-
-VelocityTracker::VelocityTracker(VelocityTrackerStrategy* strategy) :
-        mCurrentPointerIdBits(0), mActivePointerId(-1),
-        mStrategy(strategy) {
 }
 
 VelocityTracker::~VelocityTracker() {
@@ -124,6 +129,18 @@ void VelocityTracker::addMovement(nsecs_t eventTime, BitSet32 idBits, const Posi
     while (idBits.count() > MAX_POINTERS) {
         idBits.clearLastMarkedBit();
     }
+
+    if ((mCurrentPointerIdBits.value & idBits.value)
+            && eventTime >= mLastEventTime + ASSUME_POINTER_STOPPED_TIME) {
+#if DEBUG_VELOCITY
+        ALOGD("VelocityTracker: stopped for %0.3f ms, clearing state.",
+                (eventTime - mLastEventTime) * 0.000001f);
+#endif
+        // We have not received any movements for too long.  Assume that all pointers
+        // have stopped.
+        mStrategy->clear();
+    }
+    mLastEventTime = eventTime;
 
     mCurrentPointerIdBits = idBits;
     if (mActivePointerId < 0 || !idBits.hasBit(mActivePointerId)) {
@@ -467,6 +484,7 @@ bool LeastSquaresVelocityTrackerStrategy::getEstimator(uint32_t id,
         uint32_t n = degree + 1;
         if (solveLeastSquares(time, x, m, n, outEstimator->xCoeff, &xdet)
                 && solveLeastSquares(time, y, m, n, outEstimator->yCoeff, &ydet)) {
+            outEstimator->time = newestMovement.eventTime;
             outEstimator->degree = degree;
             outEstimator->confidence = xdet * ydet;
 #if DEBUG_LEAST_SQUARES
@@ -483,6 +501,7 @@ bool LeastSquaresVelocityTrackerStrategy::getEstimator(uint32_t id,
     // No velocity data available for this pointer, but we do have its current position.
     outEstimator->xCoeff[0] = x[0];
     outEstimator->yCoeff[0] = y[0];
+    outEstimator->time = newestMovement.eventTime;
     outEstimator->degree = 0;
     outEstimator->confidence = 1;
     return true;
