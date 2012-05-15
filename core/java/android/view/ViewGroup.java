@@ -1635,8 +1635,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final int childrenCount = children.getChildCount();
             for (int i = 0; i < childrenCount; i++) {
                 View child = children.getChildAt(i);
-                if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE
-                        && (child.mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
+                if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
                     if (child.includeForAccessibility()) {
                         childrenForAccessibility.add(child);
                     } else {

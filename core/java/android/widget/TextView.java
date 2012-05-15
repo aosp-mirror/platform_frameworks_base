@@ -1472,6 +1472,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         setText(mText);
+
+        if (hasPasswordTransformationMethod()) {
+            notifyAccessibilityStateChanged();
+        }
     }
 
     /**

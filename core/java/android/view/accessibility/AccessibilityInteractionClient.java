@@ -441,10 +441,6 @@ public final class AccessibilityInteractionClient
         sAccessibilityNodeInfoCache.clear();
     }
 
-    public void removeCachedNode(long accessibilityNodeId) {
-        sAccessibilityNodeInfoCache.remove(accessibilityNodeId);
-    }
-
     public void onAccessibilityEvent(AccessibilityEvent event) {
         sAccessibilityNodeInfoCache.onAccessibilityEvent(event);
     }
@@ -630,7 +626,7 @@ public final class AccessibilityInteractionClient
             applyCompatibilityScaleIfNeeded(info, windowScale);
             info.setConnectionId(connectionId);
             info.setSealed(true);
-            sAccessibilityNodeInfoCache.put(info.getSourceNodeId(), info);
+            sAccessibilityNodeInfoCache.add(info);
         }
     }
 
