@@ -20,6 +20,7 @@ import com.android.server.accessibility.TouchExplorer.GestureListener;
 import com.android.server.input.InputFilter;
 
 import android.content.Context;
+import android.os.PowerManager;
 import android.util.Slog;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -36,6 +37,8 @@ public class AccessibilityInputFilter extends InputFilter {
     private static final boolean DEBUG = false;
 
     private final Context mContext;
+
+    private final PowerManager mPm;
 
     private final GestureListener mGestureListener;
 
@@ -74,6 +77,7 @@ public class AccessibilityInputFilter extends InputFilter {
         super(context.getMainLooper());
         mContext = context;
         mGestureListener = gestureListener;
+        mPm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
     }
 
     @Override
@@ -108,6 +112,7 @@ public class AccessibilityInputFilter extends InputFilter {
                 mTouchExplorer.clear(motionEvent, policyFlags);
             }
             if ((policyFlags & WindowManagerPolicy.FLAG_PASS_TO_USER) != 0) {
+                mPm.userActivity(event.getEventTime(), false);
                 mTouchExplorer.onMotionEvent(motionEvent, policyFlags);
             } else {
                 mTouchExplorer.clear(motionEvent, policyFlags);
