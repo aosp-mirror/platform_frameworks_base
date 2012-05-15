@@ -5600,16 +5600,18 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         private final IPackageStatsObserver mObserver;
 
-        public MeasureParams(PackageStats stats, boolean success, IPackageStatsObserver observer) {
+        public MeasureParams(PackageStats stats, IPackageStatsObserver observer) {
             mObserver = observer;
             mStats = stats;
-            mSuccess = success;
         }
 
         @Override
         void handleStartCopy() throws RemoteException {
-            final boolean mounted;
+            synchronized (mInstallLock) {
+                mSuccess = getPackageSizeInfoLI(mStats.packageName, mStats);
+            }
 
+            final boolean mounted;
             if (Environment.isExternalStorageEmulated()) {
                 mounted = true;
             } else {
@@ -7781,22 +7783,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             final IPackageStatsObserver observer) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.GET_PACKAGE_SIZE, null);
-        // Queue up an async operation since the package deletion may take a little while.
-        mHandler.post(new Runnable() {
-            public void run() {
-                mHandler.removeCallbacks(this);
-                PackageStats stats = new PackageStats(packageName);
 
-                final boolean success;
-                synchronized (mInstallLock) {
-                    success = getPackageSizeInfoLI(packageName, stats);
-                }
+        PackageStats stats = new PackageStats(packageName);
 
-                Message msg = mHandler.obtainMessage(INIT_COPY);
-                msg.obj = new MeasureParams(stats, success, observer);
-                mHandler.sendMessage(msg);
-            } //end run
-        });
+        /*
+         * Queue up an async operation since the package measurement may take a
+         * little while.
+         */
+        Message msg = mHandler.obtainMessage(INIT_COPY);
+        msg.obj = new MeasureParams(stats, observer);
+        mHandler.sendMessage(msg);
     }
 
     private boolean getPackageSizeInfoLI(String packageName, PackageStats pStats) {
