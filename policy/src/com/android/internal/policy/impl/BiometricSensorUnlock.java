@@ -21,8 +21,7 @@ import android.view.View;
 interface BiometricSensorUnlock {
     /**
      * Initializes the view provided for the biometric unlock UI to work within.  The provided area
-     * completely covers the backup unlock mechanism.  The view is then displayed in the same manner
-     * as if {@link BiometricSensorUnlock#show(long)} was called with a timeout of 0.
+     * completely covers the backup unlock mechanism.
      * @param biometricUnlockView View provided for the biometric unlock UI.
      */
     public void initializeView(View biometricUnlockView);
