@@ -6159,7 +6159,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         ViewRootImpl viewRootImpl = getViewRootImpl();
         if (viewRootImpl != null) {
             View focusHost = viewRootImpl.getAccessibilityFocusedHost();
-            if (focusHost != null && ViewRootImpl.isViewDescendantOf(focusHost, this)) {
+            if (focusHost != null && focusHost != this
+                    && ViewRootImpl.isViewDescendantOf(focusHost, this)) {
                 viewRootImpl.setAccessibilityFocusedHost(null);
             }
         }
@@ -6637,7 +6638,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
     private boolean nextAtGranularity(int granularity) {
         CharSequence text = getIterableTextForAccessibility();
-        if (text != null && text.length() > 0) {
+        if (text == null || text.length() == 0) {
             return false;
         }
         TextSegmentIterator iterator = getIteratorForGranularity(granularity);
@@ -6661,7 +6662,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
     private boolean previousAtGranularity(int granularity) {
         CharSequence text = getIterableTextForAccessibility();
-        if (text != null && text.length() > 0) {
+        if (text == null || text.length() == 0) {
             return false;
         }
         TextSegmentIterator iterator = getIteratorForGranularity(granularity);
