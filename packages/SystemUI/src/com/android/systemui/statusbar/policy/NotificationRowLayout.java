@@ -36,7 +36,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 
 import com.android.systemui.ExpandHelper;
-import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.statusbar.NotificationData;
@@ -62,9 +61,6 @@ public class NotificationRowLayout
     HashMap<View, ValueAnimator> mDisappearingViews = new HashMap<View, ValueAnimator>();
 
     private SwipeHelper mSwipeHelper;
-    private ExpandHelper mExpandHelper;
-
-    private Gefingerpoken mCurrentHelper;
 
     // Flag set during notification removal animation to avoid causing too much work until
     // animation is done
@@ -80,8 +76,6 @@ public class NotificationRowLayout
         setLayoutTransition(new LayoutTransition());
         
         setOrientation(LinearLayout.VERTICAL);
-
-        setMotionEventSplittingEnabled(false);
 
         if (DEBUG) {
             setOnHierarchyChangeListener(new ViewGroup.OnHierarchyChangeListener() {
@@ -101,9 +95,6 @@ public class NotificationRowLayout
         float densityScale = getResources().getDisplayMetrics().density;
         float pagingTouchSlop = ViewConfiguration.get(mContext).getScaledPagingTouchSlop();
         mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
-        int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
-        int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_max_height);
-        mExpandHelper = new ExpandHelper(mContext, this, minHeight, maxHeight);
     }
 
     public void setLongPressListener(View.OnLongClickListener listener) {
@@ -135,39 +126,17 @@ public class NotificationRowLayout
         if (DEBUG) Log.v(TAG, "onInterceptTouchEvent()");
         if (DEBUG) logLayoutTransition();
 
-        MotionEvent cancellation = MotionEvent.obtain(ev);
-        cancellation.setAction(MotionEvent.ACTION_CANCEL);
-
-        if (mSwipeHelper.onInterceptTouchEvent(ev)) {
-            if (DEBUG) Log.v(TAG, "will swipe");
-            mCurrentHelper = mSwipeHelper;
-            mExpandHelper.onInterceptTouchEvent(cancellation);
-            return true;
-        } else if (mExpandHelper.onInterceptTouchEvent(ev)) {
-            if (DEBUG) Log.v(TAG, "will stretch");
-            mCurrentHelper = mExpandHelper;
-            mSwipeHelper.onInterceptTouchEvent(cancellation);
-            return true;
-        } else {
-            mCurrentHelper = null;
-            if (super.onInterceptTouchEvent(ev)) {
-                if (DEBUG) Log.v(TAG, "intercepting ourselves");
-                mSwipeHelper.onInterceptTouchEvent(cancellation);
-                mExpandHelper.onInterceptTouchEvent(cancellation);
-                return true;
-            }
-        }
-        return false;
+        return mSwipeHelper.onInterceptTouchEvent(ev) ||
+                super.onInterceptTouchEvent(ev);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         if (DEBUG) Log.v(TAG, "onTouchEvent()");
         if (DEBUG) logLayoutTransition();
-        if (mCurrentHelper != null) {
-            return mCurrentHelper.onTouchEvent(ev);
-        }
-        return super.onTouchEvent(ev);
+
+        return mSwipeHelper.onTouchEvent(ev) ||
+                super.onTouchEvent(ev);
     }
 
     public boolean canChildBeDismissed(View v) {
@@ -202,6 +171,13 @@ public class NotificationRowLayout
     public View getChildAtPosition(MotionEvent ev) {
         return getChildAtPosition(ev.getX(), ev.getY());
     }
+
+    public View getChildAtRawPosition(float touchX, float touchY) {
+        int[] location = new int[2];
+        getLocationOnScreen(location);
+        return getChildAtPosition((float) (touchX - location[0]), (float) (touchY - location[1]));
+    }
+
     public View getChildAtPosition(float touchX, float touchY) {
         // find the view under the pointer, accounting for GONE views
         final int count = getChildCount();
