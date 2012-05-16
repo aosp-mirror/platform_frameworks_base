@@ -148,6 +148,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                                 mCallbackHandler.sendMessage(mCallbackHandler.obtainMessage(
                                         event.getCode(), event.getRawEvent()));
                             } else {
+                                log("POST<- {" + rawEvent + "}");
                                 mResponseQueue.add(event.getCmdNumber(), event);
                             }
                         } catch (IllegalArgumentException e) {
@@ -327,6 +328,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                 loge("timed-out waiting for response to " + logCmd);
                 throw new NativeDaemonFailureException(logCmd, event);
             }
+            log("RMV <- {" + event + "}");
             events.add(event);
         } while (event.isClassContinue());
 
@@ -337,6 +339,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
             throw new NativeDaemonFailureException(logCmd, event);
         }
 
+        log("RTN <- {" + logCmd + "}");
         return events.toArray(new NativeDaemonEvent[events.size()]);
     }
 
