@@ -59,9 +59,14 @@ import com.android.internal.os.HandlerCaller;
  * An accessibility is declared as any other service in an AndroidManifest.xml but it
  * must also specify that it handles the "android.accessibilityservice.AccessibilityService"
  * {@link android.content.Intent}. Failure to declare this intent will cause the system to
- * ignore the accessibility service. Following is an example declaration:
+ * ignore the accessibility service. Additionally an accessibility service must request
+ * {@link android.Manifest.permission#BIND_ACCESSIBILITY_SERVICE
+ * android.permission.BIND_ACCESSIBILITY_SERVICE} permission to ensure that only the system
+ * can bind to it. Failure to declare this intent will cause the system to ignore the
+ * accessibility service. Following is an example declaration:
  * </p>
- * <pre> &lt;service android:name=".MyAccessibilityService"&gt;
+ * <pre> &lt;service android:name=".MyAccessibilityService"
+ *         android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE&gt;
  *     &lt;intent-filter&gt;
  *         &lt;action android:name="android.accessibilityservice.AccessibilityService" /&gt;
  *     &lt;/intent-filter&gt;
