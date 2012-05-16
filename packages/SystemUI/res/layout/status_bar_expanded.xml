@@ -23,34 +23,39 @@
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/notification_panel"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:layout_height="match_parent"
     android:background="@drawable/notification_panel_bg"
     android:paddingTop="@dimen/notification_panel_padding_top"
     android:layout_marginLeft="@dimen/notification_panel_margin_left"
     >
 
-    <include layout="@layout/status_bar_expanded_header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        />
- 
-    <ScrollView
-        android:id="@+id/scroll"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fadingEdge="none"
-        android:overScrollMode="ifContentScrolls"
-        android:layout_marginTop="@dimen/notification_panel_header_height"
         android:layout_marginBottom="@dimen/close_handle_underlap"
         >
-        <com.android.systemui.statusbar.policy.NotificationRowLayout
-            android:id="@+id/latestItems"
+
+        <include layout="@layout/status_bar_expanded_header"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            systemui:rowHeight="@dimen/notification_row_min_height"
+            android:layout_height="48dp"
             />
-    </ScrollView>
+     
+        <ScrollView
+            android:id="@+id/scroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fadingEdge="none"
+            android:overScrollMode="ifContentScrolls"
+            android:layout_marginTop="@dimen/notification_panel_header_height"
+            >
+            <com.android.systemui.statusbar.policy.NotificationRowLayout
+                android:id="@+id/latestItems"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                systemui:rowHeight="@dimen/notification_row_min_height"
+                />
+        </ScrollView>
+    </FrameLayout>
 
     <com.android.systemui.statusbar.phone.CloseDragHandle android:id="@+id/close"
         android:layout_width="match_parent"
@@ -67,5 +72,4 @@
             />
 
     </com.android.systemui.statusbar.phone.CloseDragHandle>
-
 </FrameLayout><!-- end of sliding panel -->
