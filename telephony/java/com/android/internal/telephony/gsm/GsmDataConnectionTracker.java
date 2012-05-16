@@ -1695,6 +1695,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     protected void restartDataStallAlarm() {
+        if (isConnected() == false) return;
         // To be called on screen status change.
         // Do not cancel the alarm if it is set with aggressive timeout.
         int nextAction = getRecoveryAction();
