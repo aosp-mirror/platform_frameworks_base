@@ -1598,8 +1598,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private void init() {
         OnTrimMemoryListener.init(mContext);
         mWebView.setWillNotDraw(false);
-        mWebView.setFocusable(true);
-        mWebView.setFocusableInTouchMode(true);
         mWebView.setClickable(true);
         mWebView.setLongClickable(true);
 
@@ -5767,12 +5765,13 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             return false;
         }
 
-        if (!mWebView.isFocused()) {
-            mWebView.requestFocus();
-        }
-
         if (mInputDispatcher == null) {
             return false;
+        }
+
+        if (mWebView.isFocusable() && mWebView.isFocusableInTouchMode()
+                && !mWebView.isFocused()) {
+            mWebView.requestFocus();
         }
 
         if (mInputDispatcher.postPointerEvent(ev, getScrollX(),
