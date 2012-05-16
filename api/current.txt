@@ -5823,6 +5823,7 @@ package android.content {
     field public static final int FLAG_ACTIVITY_CLEAR_TASK = 32768; // 0x8000
     field public static final int FLAG_ACTIVITY_CLEAR_TOP = 67108864; // 0x4000000
     field public static final int FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET = 524288; // 0x80000
+    field public static final int FLAG_ACTIVITY_CLOSE_SYSTEM_DIALOGS = 8192; // 0x2000
     field public static final int FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS = 8388608; // 0x800000
     field public static final int FLAG_ACTIVITY_FORWARD_RESULT = 33554432; // 0x2000000
     field public static final int FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY = 1048576; // 0x100000

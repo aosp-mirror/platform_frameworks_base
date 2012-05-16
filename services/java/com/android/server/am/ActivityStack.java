@@ -52,6 +52,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserId;
@@ -2531,6 +2532,10 @@ final class ActivityStack {
             // probably want to see whatever is behind it.
             mDismissKeyguardOnNextActivity = false;
             mService.mWindowManager.dismissKeyguard();
+        }
+        if (err >= ActivityManager.START_SUCCESS &&
+                (launchFlags&Intent.FLAG_ACTIVITY_CLOSE_SYSTEM_DIALOGS) != 0) {
+            mService.closeSystemDialogsLocked(Process.myUid(), "launch");
         }
         return err;
     }
