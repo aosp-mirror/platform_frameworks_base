@@ -49,6 +49,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.util.Xml;
+import android.view.WindowManager;
 import android.widget.RemoteViews;
 
 import com.android.internal.appwidget.IAppWidgetHost;
@@ -171,6 +172,7 @@ class AppWidgetServiceImpl {
     boolean mSafeMode;
     int mUserId;
     boolean mStateLoaded;
+    int mMaxWidgetBitmapMemory;
 
     // These are for debugging only -- widgets are going missing in some rare instances
     ArrayList<Provider> mDeletedProviders = new ArrayList<Provider>();
@@ -181,6 +183,14 @@ class AppWidgetServiceImpl {
         mPm = AppGlobals.getPackageManager();
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mUserId = userId;
+        computeMaximumWidgetBitmapMemory();
+    }
+
+    void computeMaximumWidgetBitmapMemory() {
+        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        int height = wm.getDefaultDisplay().getRawHeight();
+        int width = wm.getDefaultDisplay().getRawWidth();
+        mMaxWidgetBitmapMemory = 4 * width * height;
     }
 
     public void systemReady(boolean safeMode) {
@@ -806,6 +816,15 @@ class AppWidgetServiceImpl {
         if (appWidgetIds == null) {
             return;
         }
+
+        int bitmapMemoryUsage = views.estimateMemoryUsage();
+        if (bitmapMemoryUsage > mMaxWidgetBitmapMemory) {
+            throw new IllegalArgumentException("RemoteViews for widget update exceeds maximum" +
+                    " bitmap memory usage (used: " + bitmapMemoryUsage + ", max: " +
+                    mMaxWidgetBitmapMemory + ") The total memory cannot exceed that required to" +
+                    " fill the device's screen once.");
+        }
+
         if (appWidgetIds.length == 0) {
             return;
         }
