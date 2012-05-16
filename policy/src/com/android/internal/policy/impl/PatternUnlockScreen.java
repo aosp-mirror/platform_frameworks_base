@@ -41,7 +41,7 @@ import java.util.List;
 class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         implements KeyguardScreen {
 
-    private static final boolean DEBUG = true; /* TODO: revert before JB release */
+    private static final boolean DEBUG = false;
     private static final String TAG = "UnlockScreen";
 
     // how long before we clear the wrong pattern
@@ -321,7 +321,6 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
             implements LockPatternView.OnPatternListener {
 
         public void onPatternStart() {
-            if (DEBUG) Log.d(TAG, "Got pattern start");
             mLockPatternView.removeCallbacks(mCancelPatternRunnable);
         }
 
@@ -337,7 +336,6 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 // Give just a little extra time if they hit one of the first few dots
                 mCallback.pokeWakelock(UNLOCK_PATTERN_WAKE_INTERVAL_FIRST_DOTS_MS);
             }
-            if (DEBUG) Log.d(TAG, "Got pattern cell");
         }
 
         public void onPatternDetected(List<LockPatternView.Cell> pattern) {
