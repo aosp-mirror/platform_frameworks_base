@@ -166,7 +166,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
 
         mConnector = new NativeDaemonConnector(
-                new NetdCallbackReceiver(), "netd", 10, NETD_TAG, 50);
+                new NetdCallbackReceiver(), "netd", 10, NETD_TAG, 80);
         mThread = new Thread(mConnector, NETD_TAG);
 
         // Add ourself to the Watchdog monitors.
