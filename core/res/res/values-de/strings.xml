@@ -1091,7 +1091,7 @@
     <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"Bei der Verwendung Ihres USB-Speichers als USB-Massenspeicher ist ein Problem aufgetreten."</string>
     <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"Bei der Verwendung Ihrer SD-Karte als USB-Massenspeicher ist ein Problem aufgetreten."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB-Verbindung"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"Zum Kopieren von Dateien auf den/von dem Computer berühren"</string>
+    <string name="usb_storage_notification_message" msgid="939822783828183763">"Zum Kopieren von Dateien berühren"</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB-Speicher deaktivieren"</string>
     <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"Zum Deaktivieren des USB-Speichers berühren"</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB-Speicher in Verwendung"</string>
@@ -1114,7 +1114,7 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Alle Daten auf Ihrer Karte gehen verloren."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-Debugging"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Zum Deaktivieren von USB-Debugging tippen"</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Zum Deaktivieren von USB-Debugging berühren"</string>
     <string name="select_input_method" msgid="4653387336791222978">"Eingabemethode wählen"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Eingabemethoden einrichten"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Physische Tastatur"</string>
