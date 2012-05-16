@@ -134,10 +134,11 @@ public class WindowAnimator {
     }
 
     private void updateWindowsAppsAndRotationAnimationsLocked() {
+        final ArrayList<AppWindowToken> appTokens = mService.mAnimatingAppTokens;
         int i;
-        final int NAT = mService.mAppTokens.size();
+        final int NAT = appTokens.size();
         for (i=0; i<NAT; i++) {
-            final AppWindowAnimator appAnimator = mService.mAppTokens.get(i).mAppAnimator;
+            final AppWindowAnimator appAnimator = appTokens.get(i).mAppAnimator;
             final boolean wasAnimating = appAnimator.animation != null
                     && appAnimator.animation != AppWindowAnimator.sDummyAnimation;
             if (appAnimator.stepAnimationLocked(mCurrentTime, mInnerDw, mInnerDh)) {
@@ -391,9 +392,10 @@ public class WindowAnimator {
     private void testTokenMayBeDrawnLocked() {
         // See if any windows have been drawn, so they (and others
         // associated with them) can now be shown.
-        final int NT = mService.mAppTokens.size();
+        final ArrayList<AppWindowToken> appTokens = mService.mAnimatingAppTokens;
+        final int NT = appTokens.size();
         for (int i=0; i<NT; i++) {
-            AppWindowToken wtoken = mService.mAppTokens.get(i);
+            AppWindowToken wtoken = appTokens.get(i);
             if (wtoken.mAppAnimator.freezingScreen) {
                 int numInteresting = wtoken.numInterestingWindows;
                 if (numInteresting > 0 && wtoken.numDrawnWindows >= numInteresting) {
