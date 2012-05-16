@@ -935,6 +935,59 @@ class WindowStateAnimator {
         mDtDy = mWin.mGlobalScale;
     }
 
+    void updateSurfaceWindowCrop(final boolean recoveringMemory) {
+        final WindowState w = mWin;
+
+        // Need to recompute a new system decor rect each time.
+        if ((w.mAttrs.flags & LayoutParams.FLAG_SCALED) != 0) {
+            // Currently can't do this cropping for scaled windows.  We'll
+            // just keep the crop rect the same as the source surface.
+            w.mSystemDecorRect.set(0, 0, w.mRequestedWidth, w.mRequestedHeight);
+        } else if (w.mLayer >= mService.mSystemDecorLayer) {
+            // Above the decor layer is easy, just use the entire window.
+            w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(),
+                    w.mCompatFrame.height());
+        } else {
+            final Rect decorRect = mService.mSystemDecorRect;
+            // Compute the offset of the window in relation to the decor rect.
+            final int offX = w.mXOffset + w.mFrame.left;
+            final int offY = w.mYOffset + w.mFrame.top;
+            // Initialize the decor rect to the entire frame.
+            w.mSystemDecorRect.set(0, 0, w.mFrame.width(), w.mFrame.height());
+            // Intersect with the decor rect, offsetted by window position.
+            w.mSystemDecorRect.intersect(decorRect.left-offX, decorRect.top-offY,
+                    decorRect.right-offX, decorRect.bottom-offY);
+            // If size compatibility is being applied to the window, the
+            // surface is scaled relative to the screen.  Also apply this
+            // scaling to the crop rect.  We aren't using the standard rect
+            // scale function because we want to round things to make the crop
+            // always round to a larger rect to ensure we don't crop too
+            // much and hide part of the window that should be seen.
+            if (w.mEnforceSizeCompat && w.mInvGlobalScale != 1.0f) {
+                final float scale = w.mInvGlobalScale;
+                w.mSystemDecorRect.left = (int) (w.mSystemDecorRect.left * scale - 0.5f);
+                w.mSystemDecorRect.top = (int) (w.mSystemDecorRect.top * scale - 0.5f);
+                w.mSystemDecorRect.right = (int) ((w.mSystemDecorRect.right+1) * scale - 0.5f);
+                w.mSystemDecorRect.bottom = (int) ((w.mSystemDecorRect.bottom+1) * scale - 0.5f);
+            }
+        }
+
+        if (!w.mSystemDecorRect.equals(w.mLastSystemDecorRect)) {
+            w.mLastSystemDecorRect.set(w.mSystemDecorRect);
+            try {
+                if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
+                        "CROP " + w.mSystemDecorRect.toShortString(), null);
+                mSurface.setWindowCrop(w.mSystemDecorRect);
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "Error setting crop surface of " + w
+                        + " crop=" + w.mSystemDecorRect.toShortString(), e);
+                if (!recoveringMemory) {
+                    mService.reclaimSomeSurfaceMemoryLocked(this, "crop", true);
+                }
+            }
+        }
+    }
+
     void setSurfaceBoundaries(final boolean recoveringMemory) {
         final WindowState w = mWin;
         int width, height;
@@ -1003,54 +1056,7 @@ class WindowStateAnimator {
             }
         }
 
-        // Need to recompute a new system decor rect each time.
-        if ((w.mAttrs.flags & LayoutParams.FLAG_SCALED) != 0) {
-            // Currently can't do this cropping for scaled windows.  We'll
-            // just keep the crop rect the same as the source surface.
-            w.mSystemDecorRect.set(0, 0, w.mRequestedWidth, w.mRequestedHeight);
-        } else if (w.mLayer >= mService.mSystemDecorLayer) {
-            // Above the decor layer is easy, just use the entire window.
-            w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(),
-                    w.mCompatFrame.height());
-        } else {
-            final Rect decorRect = mService.mSystemDecorRect;
-            // Compute the offset of the window in relation to the decor rect.
-            final int offX = w.mXOffset + w.mFrame.left;
-            final int offY = w.mYOffset + w.mFrame.top;
-            // Initialize the decor rect to the entire frame.
-            w.mSystemDecorRect.set(0, 0, w.mFrame.width(), w.mFrame.height());
-            // Intersect with the decor rect, offsetted by window position.
-            w.mSystemDecorRect.intersect(decorRect.left-offX, decorRect.top-offY,
-                    decorRect.right-offX, decorRect.bottom-offY);
-            // If size compatibility is being applied to the window, the
-            // surface is scaled relative to the screen.  Also apply this
-            // scaling to the crop rect.  We aren't using the standard rect
-            // scale function because we want to round things to make the crop
-            // always round to a larger rect to ensure we don't crop too
-            // much and hide part of the window that should be seen.
-            if (w.mEnforceSizeCompat && w.mInvGlobalScale != 1.0f) {
-                final float scale = w.mInvGlobalScale;
-                w.mSystemDecorRect.left = (int) (w.mSystemDecorRect.left * scale - 0.5f);
-                w.mSystemDecorRect.top = (int) (w.mSystemDecorRect.top * scale - 0.5f);
-                w.mSystemDecorRect.right = (int) ((w.mSystemDecorRect.right+1) * scale - 0.5f);
-                w.mSystemDecorRect.bottom = (int) ((w.mSystemDecorRect.bottom+1) * scale - 0.5f);
-            }
-        }
-
-        if (!w.mSystemDecorRect.equals(w.mLastSystemDecorRect)) {
-            w.mLastSystemDecorRect.set(w.mSystemDecorRect);
-            try {
-                if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
-                        "CROP " + w.mSystemDecorRect.toShortString(), null);
-                mSurface.setWindowCrop(w.mSystemDecorRect);
-            } catch (RuntimeException e) {
-                Slog.w(TAG, "Error setting crop surface of " + w
-                        + " crop=" + w.mSystemDecorRect.toShortString(), e);
-                if (!recoveringMemory) {
-                    mService.reclaimSomeSurfaceMemoryLocked(this, "crop", true);
-                }
-            }
-        }
+        updateSurfaceWindowCrop(recoveringMemory);
     }
 
     public void prepareSurfaceLocked(final boolean recoveringMemory) {
@@ -1181,17 +1187,31 @@ class WindowStateAnimator {
     }
 
     void setWallpaperOffset(int left, int top) {
+        mSurfaceX = left;
+        mSurfaceY = top;
+        if (mAnimating) {
+            // If this window (or its app token) is animating, then the position
+            // of the surface will be re-computed on the next animation frame.
+            // We can't poke it directly here because it depends on whatever
+            // transformation is being applied by the animation.
+            return;
+        }
+        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+                ">>> OPEN TRANSACTION setWallpaperOffset");
         Surface.openTransaction();
         try {
-            mSurfaceX = left;
-            mSurfaceY = top;
-            mSurface.setPosition(left, top);
-            mSurface.setWindowCrop(null);
+            if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin,
+                    "POS " + left + ", " + top, null);
+            mSurface.setPosition(mWin.mFrame.left + left, mWin.mFrame.top + top);
+            updateSurfaceWindowCrop(false);
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error positioning surface of " + mWin
                     + " pos=(" + left + "," + top + ")", e);
+        } finally {
+            Surface.closeTransaction();
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+                    "<<< CLOSE TRANSACTION setWallpaperOffset");
         }
-        Surface.closeTransaction();
     }
 
     // This must be called while inside a transaction.
