@@ -109,9 +109,6 @@ public class LayoutTestsExecutor extends Activity {
     private LayoutTestController mLayoutTestController = new LayoutTestController(this);
     private boolean mCanOpenWindows;
     private boolean mDumpDatabaseCallbacks;
-    private boolean mIsGeolocationPermissionSet;
-    private boolean mGeolocationPermission;
-    private Map<GeolocationPermissions.Callback, String> mPendingGeolocationPermissionCallbacks;
 
     private EventSender mEventSender = new EventSender();
 
@@ -255,15 +252,8 @@ public class LayoutTestsExecutor extends Activity {
         @Override
         public void onGeolocationPermissionsShowPrompt(String origin,
                 GeolocationPermissions.Callback callback) {
-            if (mIsGeolocationPermissionSet) {
-                callback.invoke(origin, mGeolocationPermission, false);
-                return;
-            }
-            if (mPendingGeolocationPermissionCallbacks == null) {
-                mPendingGeolocationPermissionCallbacks =
-                        new HashMap<GeolocationPermissions.Callback, String>();
-            }
-            mPendingGeolocationPermissionCallbacks.put(callback, origin);
+            throw new RuntimeException(
+                    "The WebCore mock used by DRT should bypass the usual permissions flow.");
         }
     };
 
@@ -394,6 +384,7 @@ public class LayoutTestsExecutor extends Activity {
         webViewSettings.setPageCacheCapacity(0);
 
         // This is asynchronous, but it gets processed by WebCore before it starts loading pages.
+        WebViewClassic.fromWebView(mCurrentWebView).setUseMockGeolocation();
         WebViewClassic.fromWebView(mCurrentWebView).setUseMockDeviceOrientation();
 
         // Must do this after setting the AppCache path.
@@ -573,9 +564,8 @@ public class LayoutTestsExecutor extends Activity {
     private static final int MSG_DUMP_CHILD_FRAMES_AS_TEXT = 3;
     private static final int MSG_SET_CAN_OPEN_WINDOWS = 4;
     private static final int MSG_DUMP_DATABASE_CALLBACKS = 5;
-    private static final int MSG_SET_GEOLOCATION_PERMISSION = 6;
-    private static final int MSG_OVERRIDE_PREFERENCE = 7;
-    private static final int MSG_SET_XSS_AUDITOR_ENABLED = 8;
+    private static final int MSG_OVERRIDE_PREFERENCE = 6;
+    private static final int MSG_SET_XSS_AUDITOR_ENABLED = 7;
 
     /** String constants for use with layoutTestController.overridePreference() */
     private final String WEBKIT_OFFLINE_WEB_APPLICATION_CACHE_ENABLED =
@@ -644,22 +634,6 @@ public class LayoutTestsExecutor extends Activity {
                     mCanOpenWindows = true;
                     break;
 
-                case MSG_SET_GEOLOCATION_PERMISSION:
-                    mIsGeolocationPermissionSet = true;
-                    mGeolocationPermission = msg.arg1 == 1;
-
-                    if (mPendingGeolocationPermissionCallbacks != null) {
-                        Iterator<GeolocationPermissions.Callback> iter =
-                                mPendingGeolocationPermissionCallbacks.keySet().iterator();
-                        while (iter.hasNext()) {
-                            GeolocationPermissions.Callback callback = iter.next();
-                            String origin = mPendingGeolocationPermissionCallbacks.get(callback);
-                            callback.invoke(origin, mGeolocationPermission, false);
-                        }
-                        mPendingGeolocationPermissionCallbacks = null;
-                    }
-                    break;
-
                 case MSG_SET_XSS_AUDITOR_ENABLED:
                     WebViewClassic.fromWebView(mCurrentWebView).getSettings().
                             setXSSAuditorEnabled(msg.arg1 == 1);
@@ -679,8 +653,6 @@ public class LayoutTestsExecutor extends Activity {
     private void resetLayoutTestController() {
         mCanOpenWindows = false;
         mDumpDatabaseCallbacks = false;
-        mIsGeolocationPermissionSet = false;
-        mPendingGeolocationPermissionCallbacks = null;
     }
 
     public void dumpAsText(boolean enablePixelTest) {
@@ -721,12 +693,20 @@ public class LayoutTestsExecutor extends Activity {
         mLayoutTestControllerHandler.sendEmptyMessage(MSG_SET_CAN_OPEN_WINDOWS);
     }
 
+    public void setMockGeolocationPosition(double latitude, double longitude, double accuracy) {
+        WebViewClassic.fromWebView(mCurrentWebView).setMockGeolocationPosition(latitude,
+                                                                        longitude,
+                                                                        accuracy);
+    }
+
+    public void setMockGeolocationError(int code, String message) {
+        WebViewClassic.fromWebView(mCurrentWebView).setMockGeolocationError(code, message);
+    }
+
     public void setGeolocationPermission(boolean allow) {
         Log.i(LOG_TAG, mCurrentTestRelativePath + ": setGeolocationPermission(" + allow +
                 ") called");
-        Message msg = mLayoutTestControllerHandler.obtainMessage(MSG_SET_GEOLOCATION_PERMISSION);
-        msg.arg1 = allow ? 1 : 0;
-        msg.sendToTarget();
+        WebViewClassic.fromWebView(mCurrentWebView).setMockGeolocationPermission(allow);
     }
 
     public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,

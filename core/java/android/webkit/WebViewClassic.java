@@ -4818,6 +4818,43 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
+     * Sets use of the Geolocation mock client. Also resets that client. Called
+     * by DRT on UI thread, need to proxy to WebCore thread.
+     *
+     * debug only
+     */
+    public void setUseMockGeolocation() {
+        mWebViewCore.sendMessage(EventHub.SET_USE_MOCK_GEOLOCATION);
+    }
+
+    /**
+     * Called by DRT on WebCore thread.
+     *
+     * debug only
+     */
+    public void setMockGeolocationPosition(double latitude, double longitude, double accuracy) {
+        mWebViewCore.setMockGeolocationPosition(latitude, longitude, accuracy);
+    }
+
+    /**
+     * Called by DRT on WebCore thread.
+     *
+     * debug only
+     */
+    public void setMockGeolocationError(int code, String message) {
+        mWebViewCore.setMockGeolocationError(code, message);
+    }
+
+    /**
+     * Called by DRT on WebCore thread.
+     *
+     * debug only
+     */
+    public void setMockGeolocationPermission(boolean allow) {
+        mWebViewCore.setMockGeolocationPermission(allow);
+    }
+
+    /**
      * Called by DRT on WebCore thread.
      *
      * debug only

@@ -132,6 +132,8 @@ public final class WebViewCore {
     private int mRestoredX = 0;
     private int mRestoredY = 0;
 
+    private MockGeolocation mMockGeolocation = new MockGeolocation(this);
+
     private DeviceMotionAndOrientationManager mDeviceMotionAndOrientationManager =
             new DeviceMotionAndOrientationManager(this);
     private DeviceMotionService mDeviceMotionService;
@@ -1185,6 +1187,7 @@ public final class WebViewCore {
         static final int SET_INITIAL_FOCUS = 224;
 
         static final int SAVE_VIEW_STATE = 225;
+        static final int SET_USE_MOCK_GEOLOCATION = 226;
 
         // Private handler for WebCore messages.
         private Handler mHandler;
@@ -1644,6 +1647,10 @@ public final class WebViewCore {
                             }
                             BrowserFrame.sJavaBridge.addPackageNames(
                                     (Set<String>) msg.obj);
+                            break;
+
+                        case SET_USE_MOCK_GEOLOCATION:
+                            setUseMockGeolocation();
                             break;
 
                         case SET_USE_MOCK_DEVICE_ORIENTATION:
@@ -3034,6 +3041,22 @@ public final class WebViewCore {
 
     private void setUseMockDeviceOrientation() {
         mDeviceMotionAndOrientationManager.setUseMock();
+    }
+
+    private void setUseMockGeolocation() {
+        mMockGeolocation.setUseMock();
+    }
+
+    public void setMockGeolocationPosition(double latitude, double longitude, double accuracy) {
+        mMockGeolocation.setPosition(latitude, longitude, accuracy);
+    }
+
+    public void setMockGeolocationError(int code, String message) {
+        mMockGeolocation.setError(code, message);
+    }
+
+    public void setMockGeolocationPermission(boolean allow) {
+        mMockGeolocation.setPermission(allow);
     }
 
     public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
