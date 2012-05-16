@@ -2255,9 +2255,27 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * flags, we would like a stable view of the content insets given to
      * {@link #fitSystemWindows(Rect)}.  This means that the insets seen there
      * will always represent the worst case that the application can expect
-     * as a continue state.  In practice this means with any of system bar,
-     * nav bar, and status bar shown, but not the space that would be needed
-     * for an input method.
+     * as a continuous state.  In the stock Android UI this is the space for
+     * the system bar, nav bar, and status bar, but not more transient elements
+     * such as an input method.
+     *
+     * The stable layout your UI sees is based on the system UI modes you can
+     * switch to.  That is, if you specify {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}
+     * then you will get a stable layout for changes of the
+     * {@link #SYSTEM_UI_FLAG_FULLSCREEN} mode; if you specify
+     * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN} and
+     * {@link #SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION}, then you can transition
+     * to {@link #SYSTEM_UI_FLAG_FULLSCREEN} and {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}
+     * with a stable layout.  (Note that you should avoid using
+     * {@link #SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION} by itself.)
+     *
+     * If you have set the window flag {@ WindowManager.LayoutParams#FLAG_FULLSCREEN}
+     * to hide the status bar (instead of using {@link #SYSTEM_UI_FLAG_FULLSCREEN}),
+     * then a hidden status bar will be considered a "stable" state for purposes
+     * here.  This allows your UI to continually hide the status bar, while still
+     * using the system UI flags to hide the action bar while still retaining
+     * a stable layout.  Note that changing the window fullscreen flag will never
+     * provide a stable layout for a clean transition.
      *
      * <p>If you are using ActionBar in
      * overlay mode with {@link Window#FEATURE_ACTION_BAR_OVERLAY
