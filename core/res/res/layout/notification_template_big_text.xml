@@ -105,16 +105,13 @@
                 android:layout_weight="1"
                 />
         </LinearLayout>
-        <LinearLayout
-            android:id="@+id/actions"
+        <include
+            layout="@layout/notification_action_list"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:orientation="vertical"
             android:visibility="gone"
             android:layout_weight="1"
-                >
-                <!-- actions will be added here -->
-        </LinearLayout>
+            />
         <TextView android:id="@+id/overflow_title"
             android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Title"
             android:layout_width="match_parent"
