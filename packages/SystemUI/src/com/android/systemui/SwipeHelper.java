@@ -186,6 +186,7 @@ public class SwipeHelper implements Gefingerpoken {
     public void removeLongPressCallback() {
         if (mWatchLongPress != null) {
             mHandler.removeCallbacks(mWatchLongPress);
+            mWatchLongPress = null;
         }
     }
 
@@ -245,6 +246,7 @@ public class SwipeHelper implements Gefingerpoken {
                 mCurrView = null;
                 mCurrAnimView = null;
                 mLongPressSent = false;
+                removeLongPressCallback();
                 break;
         }
         return mDragging;
