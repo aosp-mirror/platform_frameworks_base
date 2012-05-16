@@ -34,6 +34,7 @@ import android.util.Log;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.CharArrayReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
@@ -45,7 +46,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.zip.CRC32;
 
@@ -55,7 +60,7 @@ import java.util.zip.CRC32;
  */
 public class SettingsBackupAgent extends BackupAgentHelper {
     private static final boolean DEBUG = false;
-    private static final boolean DEBUG_BACKUP = DEBUG || true;
+    private static final boolean DEBUG_BACKUP = DEBUG || false;
 
     private static final String KEY_SYSTEM = "system";
     private static final String KEY_SECURE = "secure";
@@ -110,6 +115,130 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private SettingsHelper mSettingsHelper;
     private WifiManager mWfm;
     private static String mWifiConfigFile;
+
+    // Class for capturing a network definition from the wifi supplicant config file
+    static class Network {
+        String ssid = "";  // equals() and hashCode() need these to be non-null
+        String key_mgmt = "";
+        final ArrayList<String> rawLines = new ArrayList<String>();
+
+        public static Network readFromStream(BufferedReader in) {
+            final Network n = new Network();
+            String line;
+            try {
+                while (in.ready()) {
+                    line = in.readLine();
+                    if (line == null || line.startsWith("}")) {
+                        break;
+                    }
+                    n.rememberLine(line);
+                }
+            } catch (IOException e) {
+                return null;
+            }
+            return n;
+        }
+
+        void rememberLine(String line) {
+            // can't rely on particular whitespace patterns so strip leading/trailing
+            line = line.trim();
+            if (line.isEmpty()) return; // only whitespace; drop the line
+            rawLines.add(line);
+
+            // remember the ssid and key_mgmt lines for duplicate culling
+            if (line.startsWith("ssid")) {
+                ssid = line;
+            } else if (line.startsWith("key_mgmt")) {
+                key_mgmt = line;
+            }
+        }
+
+        public void write(Writer w) throws IOException {
+            w.write("\nnetwork={\n");
+            for (String line : rawLines) {
+                w.write("\t" + line + "\n");
+            }
+            w.write("}\n");
+        }
+
+        public void dump() {
+            Log.v(TAG, "network={");
+            for (String line : rawLines) {
+                Log.v(TAG, "   " + line);
+            }
+            Log.v(TAG, "}");
+        }
+
+        // Same approach as Pair.equals() and Pair.hashCode()
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) return true;
+            if (!(o instanceof Network)) return false;
+            final Network other;
+            try {
+                other = (Network) o;
+            } catch (ClassCastException e) {
+                return false;
+            }
+            return ssid.equals(other.ssid) && key_mgmt.equals(other.key_mgmt);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = 17;
+            result = 31 * result + ssid.hashCode();
+            result = 31 * result + key_mgmt.hashCode();
+            return result;
+        }
+    }
+
+    // Ingest multiple wifi config file fragments, looking for network={} blocks
+    // and eliminating duplicates
+    class WifiNetworkSettings {
+        // One for fast lookup, one for maintaining ordering
+        final HashSet<Network> mKnownNetworks = new HashSet<Network>();
+        final ArrayList<Network> mNetworks = new ArrayList<Network>(8);
+
+        public void readNetworks(BufferedReader in) {
+            try {
+                String line;
+                while (in.ready()) {
+                    line = in.readLine();
+                    if (line != null) {
+                        // Parse out 'network=' decls so we can ignore duplicates
+                        if (line.startsWith("network")) {
+                            Network net = Network.readFromStream(in);
+                            if (! mKnownNetworks.contains(net)) {
+                                if (DEBUG_BACKUP) {
+                                    Log.v(TAG, "Adding " + net.ssid + " / " + net.key_mgmt);
+                                }
+                                mKnownNetworks.add(net);
+                                mNetworks.add(net);
+                            } else {
+                                if (DEBUG_BACKUP) {
+                                    Log.v(TAG, "Dupe; skipped " + net.ssid + " / " + net.key_mgmt);
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                // whatever happened, we're done now
+            }
+        }
+
+        public void write(Writer w) throws IOException {
+            for (Network net : mNetworks) {
+                net.write(w);
+            }
+        }
+
+        public void dump() {
+            for (Network net : mNetworks) {
+                net.dump();
+            }
+        }
+    }
 
     @Override
     public void onCreate() {
@@ -622,29 +751,51 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
     private void restoreWifiSupplicant(String filename, byte[] bytes, int size) {
         try {
-            File supplicantFile = new File(FILE_WIFI_SUPPLICANT);
-            if (supplicantFile.exists()) supplicantFile.delete();
-            copyWifiSupplicantTemplate();
+            WifiNetworkSettings supplicantImage = new WifiNetworkSettings();
 
-            OutputStream os = new BufferedOutputStream(new FileOutputStream(filename, true));
-            os.write("\n".getBytes());
-            os.write(bytes, 0, size);
-            os.close();
+            File supplicantFile = new File(FILE_WIFI_SUPPLICANT);
+            if (supplicantFile.exists()) {
+                // Retain the existing APs; we'll append the restored ones to them
+                BufferedReader in = new BufferedReader(new FileReader(FILE_WIFI_SUPPLICANT));
+                supplicantImage.readNetworks(in);
+                in.close();
+
+                supplicantFile.delete();
+            }
+
+            // Incorporate the restore AP information
+            if (size > 0) {
+                char[] restoredAsBytes = new char[size];
+                for (int i = 0; i < size; i++) restoredAsBytes[i] = (char) bytes[i];
+                BufferedReader in = new BufferedReader(new CharArrayReader(restoredAsBytes));
+                supplicantImage.readNetworks(in);
+
+                if (DEBUG_BACKUP) {
+                    Log.v(TAG, "Final AP list:");
+                    supplicantImage.dump();
+                }
+            }
+
+            // Install the correct default template
+            BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_WIFI_SUPPLICANT));
+            copyWifiSupplicantTemplate(bw);
+
+            // Write the restored supplicant config and we're done
+            supplicantImage.write(bw);
+            bw.close();
         } catch (IOException ioe) {
             Log.w(TAG, "Couldn't restore " + filename);
         }
     }
 
-    private void copyWifiSupplicantTemplate() {
+    private void copyWifiSupplicantTemplate(BufferedWriter bw) {
         try {
             BufferedReader br = new BufferedReader(new FileReader(FILE_WIFI_SUPPLICANT_TEMPLATE));
-            BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_WIFI_SUPPLICANT));
             char[] temp = new char[1024];
             int size;
             while ((size = br.read(temp)) > 0) {
                 bw.write(temp, 0, size);
             }
-            bw.close();
             br.close();
         } catch (IOException ioe) {
             Log.w(TAG, "Couldn't copy wpa_supplicant file");
