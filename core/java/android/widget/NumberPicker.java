@@ -2490,7 +2490,7 @@ public class NumberPicker extends LinearLayout {
                 info.addChild(NumberPicker.this, VIRTUAL_VIEW_ID_INCREMENT);
             }
 
-            info.setParent((View) getParent());
+            info.setParent((View) getParentForAccessibility());
             info.setEnabled(NumberPicker.this.isEnabled());
             info.setScrollable(true);
             Rect boundsInParent = mTempRect;
