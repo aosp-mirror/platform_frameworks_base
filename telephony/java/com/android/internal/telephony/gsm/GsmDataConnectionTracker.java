@@ -2141,10 +2141,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 // clean slate after call end.
                 resetPollStats();
             }
-        } else {
-            // reset reconnect timer
-            setupDataOnReadyApns(Phone.REASON_VOICE_CALL_ENDED);
         }
+        // reset reconnect timer
+        setupDataOnReadyApns(Phone.REASON_VOICE_CALL_ENDED);
     }
 
     @Override
