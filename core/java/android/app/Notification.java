@@ -1639,15 +1639,21 @@ public class Notification implements Parcelable
 
             if (mBuilder.mSubText == null) {
                 contentView.setViewVisibility(R.id.line3, View.GONE);
+            } else {
+                contentView.setViewVisibility(R.id.line3, View.VISIBLE);
             }
 
             if (mBigContentTitle != null && mBigContentTitle.equals("")) {
                 contentView.setViewVisibility(R.id.line1, View.GONE);
+            } else {
+                contentView.setViewVisibility(R.id.line1, View.VISIBLE);
             }
 
             if (mSummaryText != null && !mSummaryText.equals("")) {
                 contentView.setViewVisibility(R.id.overflow_title, View.VISIBLE);
                 contentView.setTextViewText(R.id.overflow_title, mSummaryText);
+            } else {
+                contentView.setViewVisibility(R.id.overflow_title, View.GONE);
             }
 
             return contentView;
@@ -1854,6 +1860,8 @@ public class Notification implements Parcelable
                 if (str != null && !str.equals("")) {
                     contentView.setViewVisibility(rowIds[i], View.VISIBLE);
                     contentView.setTextViewText(rowIds[i], str);
+                } else {
+                    contentView.setViewVisibility(rowIds[i], View.GONE);
                 }
                 i++;
             }
