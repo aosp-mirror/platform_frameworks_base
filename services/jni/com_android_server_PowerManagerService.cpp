@@ -83,11 +83,9 @@ bool android_server_PowerManagerService_isScreenBright() {
 }
 
 void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType) {
-    if (gPowerModule) {
-        // Tell the power HAL when user activity occurs.
-        if (gPowerModule->powerHint) {
-            gPowerModule->powerHint(gPowerModule, POWER_HINT_INTERACTION, NULL);
-        }
+    // Tell the power HAL when user activity occurs.
+    if (gPowerModule && gPowerModule->powerHint) {
+        gPowerModule->powerHint(gPowerModule, POWER_HINT_INTERACTION, NULL);
     }
 
     if (gPowerManagerServiceObj) {
@@ -131,16 +129,11 @@ static void nativeInit(JNIEnv* env, jobject obj) {
 
     status_t err = hw_get_module(POWER_HARDWARE_MODULE_ID,
             (hw_module_t const**)&gPowerModule);
-    if (err) {
-        String8 msg;
-        msg.appendFormat("Couldn't load %s module (%s)",
-                POWER_HARDWARE_MODULE_ID, strerror(-err));
-        ALOGE("%s", msg.string());
-        jniThrowRuntimeException(env, msg.string());
-        return;
+    if (!err) {
+        gPowerModule->init(gPowerModule);
+    } else {
+        ALOGE("Couldn't load %s module (%s)", POWER_HARDWARE_MODULE_ID, strerror(-err));
     }
-
-    gPowerModule->init(gPowerModule);
 }
 
 static void nativeSetPowerState(JNIEnv* env,
