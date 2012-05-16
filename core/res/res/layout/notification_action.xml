@@ -25,4 +25,6 @@
     android:paddingLeft="8dp"
     android:textColor="#ccc"
     android:textSize="14dp"
+    android:singleLine="true"
+    android:ellipsize="end"
     />
