@@ -1104,7 +1104,7 @@
     <string name="dlg_error_title" msgid="7323658469626514207">"Falha na operação do USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Conectado como um dispositivo de mídia"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Conectadas como uma câmera"</string>
+    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Conectado como câmera"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Conectados como um instalador"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Conectado a um acessório USB"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"Toque para obter outras opções USB."</string>

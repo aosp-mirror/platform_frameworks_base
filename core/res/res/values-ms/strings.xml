@@ -177,7 +177,7 @@
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Akses pelbagai ciri rangkaian."</string>
     <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
     <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Akses peranti dan rangkaian melalui Bluetooth."</string>
-    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Rangkaian jarak-pendek"</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Rangkaian jarak-dekat"</string>
     <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Akses peranti melalui rangkaian jarak dekat seperti NFC."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Tetapan Audio"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Tukar tetapan audio."</string>
