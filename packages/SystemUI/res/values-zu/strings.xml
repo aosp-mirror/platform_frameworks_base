@@ -142,7 +142,7 @@
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Ulwazi lohlelo lokusebenza"</string>
     <string name="notifications_off_title" msgid="8936620513608443224">"Izaziso zivaliwe"</string>
     <string name="notifications_off_text" msgid="2529001315769385273">"Thepha lapha ukuvula futhi izaziso."</string>
-    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Isikrini sizophenduka ngokuzanzakalela."</string>
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Isikrini sizophenduka ngokuzenzakalela."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Isikrini sikhiyelwe ngomumo we-landscape."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Isikrini sikhiyelwe ngomumo we-portrait."</string>
 </resources>
