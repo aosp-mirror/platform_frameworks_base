@@ -6561,6 +6561,16 @@ public class WindowManagerService extends IWindowManager.Stub
         sendScreenStatusToClients();
     }
 
+    public IBinder getFocusedWindowClientToken() {
+        synchronized (mWindowMap) {
+            WindowState windowState = getFocusedWindowLocked();
+            if (windowState != null) {
+                return windowState.mClient.asBinder();
+            }
+            return null;
+        }
+    }
+
     private WindowState getFocusedWindow() {
         synchronized (mWindowMap) {
             return getFocusedWindowLocked();
