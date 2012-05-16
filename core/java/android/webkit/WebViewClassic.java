@@ -7542,6 +7542,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     int cursorPosition = start + text.length();
                     replaceTextfieldText(start, end, text,
                             cursorPosition, cursorPosition);
+                    selectionDone();
                     break;
                 }
 
