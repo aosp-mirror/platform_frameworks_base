@@ -142,10 +142,7 @@
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Thông tin về ứng dụng"</string>
     <string name="notifications_off_title" msgid="8936620513608443224">"Tắt thông báo"</string>
     <string name="notifications_off_text" msgid="2529001315769385273">"Chạm vào đây để bật lại thông báo."</string>
-    <!-- no translation found for accessibility_rotation_lock_off (4062780228931590069) -->
-    <skip />
-    <!-- no translation found for accessibility_rotation_lock_on_landscape (6731197337665366273) -->
-    <skip />
-    <!-- no translation found for accessibility_rotation_lock_on_portrait (5809367521644012115) -->
-    <skip />
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Màn hinh sẽ xoay tự động."</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Màn hình hiện bị khóa theo hướng ngang."</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Màn hình hiện bị khóa theo hướng dọc."</string>
 </resources>
