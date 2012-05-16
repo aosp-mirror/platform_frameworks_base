@@ -16,12 +16,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="TextAppearance.StatusBar.Title" parent="@*android:style/TextAppearance.StatusBar">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
-    </style>
-
     <style name="TextAppearance.StatusBar.IntruderAlert"
         parent="@*android:style/TextAppearance.StatusBar">
     </style>
@@ -48,7 +42,7 @@
     </style>
 
     <style name="TextAppearance.StatusBar.Date" parent="@*android:style/TextAppearance.StatusBar.Icon">
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">16dp</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">@android:color/holo_blue_light</item>
     </style>
@@ -57,6 +51,7 @@
 
     <style name="TextAppearance.StatusBar.Expanded.Clock">
         <item name="android:textSize">32dp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">#ffffff</item>
     </style>
