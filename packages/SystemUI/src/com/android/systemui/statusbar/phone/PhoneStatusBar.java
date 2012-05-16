@@ -289,7 +289,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                         animateCollapse();
                     }
                 }
-                return true;
+                return mStatusBarWindow.onTouchEvent(event);
             }});
 
         mStatusBarView = (PhoneStatusBarView) mStatusBarWindow.findViewById(R.id.status_bar);
