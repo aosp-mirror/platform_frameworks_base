@@ -1122,9 +1122,9 @@ public abstract class SensorManager {
 
     /** Helper function to compute the angle change between two rotation matrices.
      *  Given a current rotation matrix (R) and a previous rotation matrix
-     *  (prevR) computes the rotation around the x,y, and z axes which
+     *  (prevR) computes the rotation around the z,x, and y axes which
      *  transforms prevR to R.
-     *  outputs a 3 element vector containing the x,y, and z angle
+     *  outputs a 3 element vector containing the z,x, and y angle
      *  change at indexes 0, 1, and 2 respectively.
      * <p> Each input matrix is either as a 3x3 or 4x4 row-major matrix
      * depending on the length of the passed array:
@@ -1143,14 +1143,13 @@ public abstract class SensorManager {
      *</pre>
      * @param R current rotation matrix
      * @param prevR previous rotation matrix
-     * @param angleChange an array of floats in which the angle change is stored
+     * @param angleChange an an array of floats (z, x, and y) in which the angle change is stored
      */
 
     public static void getAngleChange( float[] angleChange, float[] R, float[] prevR) {
         float rd1=0,rd4=0, rd6=0,rd7=0, rd8=0;
         float ri0=0,ri1=0,ri2=0,ri3=0,ri4=0,ri5=0,ri6=0,ri7=0,ri8=0;
         float pri0=0, pri1=0, pri2=0, pri3=0, pri4=0, pri5=0, pri6=0, pri7=0, pri8=0;
-        int i, j, k;
 
         if(R.length == 9) {
             ri0 = R[0];
