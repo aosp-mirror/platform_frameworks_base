@@ -16,7 +16,7 @@
 
 #define LOG_TAG "EventHub"
 
-#define LOG_NDEBUG 0
+// #define LOG_NDEBUG 0
 
 #include "EventHub.h"
 
@@ -767,7 +767,11 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
                     size_t count = size_t(readSize) / sizeof(struct input_event);
                     for (size_t i = 0; i < count; i++) {
                         const struct input_event& iev = readBuffer[i];
-                        nsecs_t delta = 0; 
+                        ALOGV("%s got: t0=%d, t1=%d, type=%d, code=%d, value=%d",
+                                device->path.string(),
+                                (int) iev.time.tv_sec, (int) iev.time.tv_usec,
+                                iev.type, iev.code, iev.value);
+
 #ifdef HAVE_POSIX_CLOCKS
                         // Use the time specified in the event instead of the current time
                         // so that downstream code can get more accurate estimates of
@@ -782,23 +786,10 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
                         // system call that also queries ktime_get_ts().
                         event->when = nsecs_t(iev.time.tv_sec) * 1000000000LL
                                 + nsecs_t(iev.time.tv_usec) * 1000LL;
-                        delta = now - event->when;
-
-                        // Only log verbose if events are older that 1ms
-                        if (delta > 1 * 1000000LL) {
-                            ALOGV("event time %lld, now %lld, delta %lldus", event->when, now, delta / 1000LL);
-                        }
+                        ALOGV("event time %lld, now %lld", event->when, now);
 #else
                         event->when = now;
 #endif
-                        if (delta > 1 * 1000000LL) {
-                            ALOGV("%s got: t0=%d, t1=%d, type=%d, code=%d, value=%d",
-                                  device->path.string(),
-                                  (int) iev.time.tv_sec, (int) iev.time.tv_usec,
-                                  iev.type, iev.code, iev.value);
-                        }
-
-
                         event->deviceId = deviceId;
                         event->type = iev.type;
                         event->code = iev.code;
