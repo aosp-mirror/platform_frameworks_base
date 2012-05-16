@@ -32,6 +32,7 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Vibrator;
@@ -45,7 +46,6 @@ import android.util.Slog;
 import android.media.AudioManager;
 import android.os.RemoteException;
 import android.provider.MediaStore;
-import android.provider.Settings;
 
 import java.io.File;
 
@@ -252,13 +252,19 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         }
     }
 
+    // This code should be the same as that in SearchPanelView
+    public boolean isAssistantAvailable() {
+        Intent intent = getAssistIntent();
+        return intent == null ? false
+                : mContext.getPackageManager().queryIntentActivities(intent,
+                        PackageManager.MATCH_DEFAULT_ONLY).size() > 0;
+    }
+
     private Intent getAssistIntent() {
         Intent intent = null;
-        if (mSearchManager == null) {
-            mSearchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
-        }
-        if (mSearchManager != null) {
-            ComponentName globalSearchActivity = mSearchManager.getGlobalSearchActivity();
+        SearchManager searchManager = getSearchManager();
+        if (searchManager != null) {
+            ComponentName globalSearchActivity = searchManager.getGlobalSearchActivity();
             if (globalSearchActivity != null) {
                 intent = new Intent(Intent.ACTION_ASSIST);
                 intent.setPackage(globalSearchActivity.getPackageName());
@@ -269,6 +275,13 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
             Slog.w(TAG, "No SearchManager");
         }
         return intent;
+    }
+
+    private SearchManager getSearchManager() {
+        if (mSearchManager == null) {
+            mSearchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
+        }
+        return mSearchManager;
     }
 
     class MultiWaveViewMethods implements MultiWaveView.OnTriggerListener,
@@ -517,14 +530,12 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
                         .isTargetPresent(com.android.internal.R.drawable.ic_lockscreen_search)
                         : false;
 
-        // TODO: test to see if search is available
-        boolean searchActionAvailable = true;
-
         if (disabledByAdmin) {
             Log.v(TAG, "Camera disabled by Device Policy");
         } else if (disabledBySimState) {
             Log.v(TAG, "Camera disabled by Sim State");
         }
+        boolean searchActionAvailable = isAssistantAvailable();
         mCameraDisabled = disabledByAdmin || disabledBySimState || !cameraTargetPresent;
         mSearchDisabled = disabledBySimState || !searchActionAvailable || !searchTargetPresent;
         mUnlockWidgetMethods.updateResources();

@@ -23,6 +23,7 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
@@ -69,8 +70,36 @@ public class SearchPanelView extends FrameLayout implements
 
     private SearchManager mSearchManager;
 
+    // This code should be the same as that used in LockScreen.java
     public boolean isAssistantAvailable() {
-        return mSearchManager != null && mSearchManager.getGlobalSearchActivity() != null;
+        Intent intent = getAssistIntent();
+        return intent == null ? false
+                : mContext.getPackageManager().queryIntentActivities(intent,
+                        PackageManager.MATCH_DEFAULT_ONLY).size() > 0;
+    }
+
+    private Intent getAssistIntent() {
+        Intent intent = null;
+        SearchManager searchManager = getSearchManager();
+        if (searchManager != null) {
+            ComponentName globalSearchActivity = searchManager.getGlobalSearchActivity();
+            if (globalSearchActivity != null) {
+                intent = new Intent(Intent.ACTION_ASSIST);
+                intent.setPackage(globalSearchActivity.getPackageName());
+            } else {
+                Slog.w(TAG, "No global search activity");
+            }
+        } else {
+            Slog.w(TAG, "No SearchManager");
+        }
+        return intent;
+    }
+
+    private SearchManager getSearchManager() {
+        if (mSearchManager == null) {
+            mSearchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
+        }
+        return mSearchManager;
     }
 
     private void startAssistActivity() {
