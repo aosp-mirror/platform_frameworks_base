@@ -19,5 +19,5 @@
     <size android:height="@dimen/navbar_search_outerring_diameter"
         android:width="@dimen/navbar_search_outerring_diameter" />
     <solid android:color="#00000000" />
-    <stroke android:color="#1affffff" android:width="2dp" />
+    <stroke android:color="#40ffffff" android:width="2dp" />
 </shape>

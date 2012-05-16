@@ -112,10 +112,10 @@
     <dimen name="navbar_search_hit_radius">60dip</dimen>
 
     <!-- Diameter of outer shape drawable shown in navbar search-->
-    <dimen name="navbar_search_outerring_diameter">270dp</dimen>
+    <dimen name="navbar_search_outerring_diameter">340dp</dimen>
 
     <!-- Threshold for swipe-up gesture to activate search dialog -->
-    <dimen name="navbar_search_up_threshhold">20dip</dimen>
+    <dimen name="navbar_search_up_threshhold">40dip</dimen>
 
     <!-- Height of search panel including navigation bar height -->
     <dimen name="navbar_search_panel_height">230dip</dimen>

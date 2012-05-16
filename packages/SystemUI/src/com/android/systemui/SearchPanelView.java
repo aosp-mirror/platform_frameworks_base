@@ -23,13 +23,14 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.speech.RecognizerIntent;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.widget.FrameLayout;
 
 import com.android.internal.widget.multiwaveview.MultiWaveView;
@@ -146,6 +147,14 @@ public class SearchPanelView extends FrameLayout implements
         }
     }
 
+    private OnPreDrawListener mPreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
+        public boolean onPreDraw() {
+            getViewTreeObserver().removeOnPreDrawListener(this);
+            mMultiWaveView.resumeAnimations();
+            return false;
+        }
+    };
+
     public void show(final boolean show, boolean animate) {
         if (animate) {
             if (mShowing != show) {
@@ -156,16 +165,20 @@ public class SearchPanelView extends FrameLayout implements
             mShowing = show;
             onAnimationEnd(null);
         }
-        postDelayed(new Runnable() {
-            public void run() {
-                setVisibility(show ? View.VISIBLE : View.INVISIBLE);
-                if (show) {
-                    setFocusable(true);
-                    setFocusableInTouchMode(true);
-                    requestFocus();
-                }
+        if (show) {
+            if (getVisibility() != View.VISIBLE) {
+                setVisibility(View.VISIBLE);
+                // Don't start the animation until we've created the layer, which is done
+                // right before we are drawn
+                mMultiWaveView.suspendAnimations();
+                getViewTreeObserver().addOnPreDrawListener(mPreDrawListener);
             }
-        }, show ? 0 : 100);
+            setFocusable(true);
+            setFocusableInTouchMode(true);
+            requestFocus();
+        } else {
+            setVisibility(View.INVISIBLE);
+        }
     }
 
     public void hide(boolean animate) {
