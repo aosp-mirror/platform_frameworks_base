@@ -61,6 +61,13 @@ public class NetworkTemplate implements Parcelable {
                 com.android.internal.R.array.config_data_usage_network_types);
     }
 
+    private static boolean sForceAllNetworkTypes = false;
+
+    // @VisibleForTesting
+    public static void forceAllNetworkTypes() {
+        sForceAllNetworkTypes = true;
+    }
+
     /**
      * Template to match {@link ConnectivityManager#TYPE_MOBILE} networks with
      * the given IMSI.
@@ -225,7 +232,7 @@ public class NetworkTemplate implements Parcelable {
             // TODO: consider matching against WiMAX subscriber identity
             return true;
         } else {
-            return (contains(DATA_USAGE_NETWORK_TYPES, ident.mType)
+            return ((sForceAllNetworkTypes || contains(DATA_USAGE_NETWORK_TYPES, ident.mType))
                     && Objects.equal(mSubscriberId, ident.mSubscriberId));
         }
     }
@@ -291,7 +298,7 @@ public class NetworkTemplate implements Parcelable {
         if (ident.mType == TYPE_WIMAX) {
             return true;
         } else {
-            return contains(DATA_USAGE_NETWORK_TYPES, ident.mType);
+            return sForceAllNetworkTypes || contains(DATA_USAGE_NETWORK_TYPES, ident.mType);
         }
     }
 

@@ -342,11 +342,23 @@ public class NetworkStatsHistory implements Parcelable {
      * for combining together stats for external reporting.
      */
     public void recordEntireHistory(NetworkStatsHistory input) {
+        recordHistory(input, Long.MIN_VALUE, Long.MAX_VALUE);
+    }
+
+    /**
+     * Record given {@link NetworkStatsHistory} into this history, copying only
+     * buckets that atomically occur in the inclusive time range. Doesn't
+     * interpolate across partial buckets.
+     */
+    public void recordHistory(NetworkStatsHistory input, long start, long end) {
         final NetworkStats.Entry entry = new NetworkStats.Entry(
                 IFACE_ALL, UID_ALL, SET_DEFAULT, TAG_NONE, 0L, 0L, 0L, 0L, 0L);
         for (int i = 0; i < input.bucketCount; i++) {
-            final long start = input.bucketStart[i];
-            final long end = start + input.bucketDuration;
+            final long bucketStart = input.bucketStart[i];
+            final long bucketEnd = bucketStart + input.bucketDuration;
+
+            // skip when bucket is outside requested range
+            if (bucketStart < start || bucketEnd > end) continue;
 
             entry.rxBytes = getLong(input.rxBytes, i, 0L);
             entry.rxPackets = getLong(input.rxPackets, i, 0L);
@@ -354,7 +366,7 @@ public class NetworkStatsHistory implements Parcelable {
             entry.txPackets = getLong(input.txPackets, i, 0L);
             entry.operations = getLong(input.operations, i, 0L);
 
-            recordData(start, end, entry);
+            recordData(bucketStart, bucketEnd, entry);
         }
     }
 
