@@ -2183,6 +2183,18 @@ public final class ViewRootImpl implements ViewParent,
     private boolean drawSoftware(Surface surface, AttachInfo attachInfo, int yoff,
             boolean scalingRequired, Rect dirty) {
 
+        // If we get here with a disabled & requested hardware renderer, something went
+        // wrong (an invalidate posted right before we destroyed the hardware surface
+        // for instance) so we should just bail out. Locking the surface with software
+        // rendering at this point would lock it forever and prevent hardware renderer
+        // from doing its job when it comes back.
+        if (attachInfo.mHardwareRenderer != null && !attachInfo.mHardwareRenderer.isEnabled() &&
+                attachInfo.mHardwareRenderer.isRequested()) {
+            mFullRedrawNeeded = true;
+            scheduleTraversals();
+            return false;
+        }
+
         // Draw with software renderer.
         Canvas canvas;
         try {
