@@ -176,9 +176,9 @@
     <string name="permgrouplab_network" msgid="5808983377727109831">"Netwerkkommunikasie"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Kry toegang tot verskeie netwerkfunksies."</string>
     <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
-    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Toegangstoestelle en netwerke deur Bluetooth."</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Kry toegang tot toestelle en netwerke deur Bluetooth."</string>
     <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Kortreeks-netwerke"</string>
-    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Toegangstoestelle met kortreeks-netwerke soos NFC."</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Kry toegang tot toestelle met kortreeks-netwerke soos NFC."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Oudio-instellings"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Verander oudio-instellings."</string>
     <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Affekteer battery"</string>
@@ -561,7 +561,7 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Laat die program toe om die USB-berging se inhoud te lees, wat foto\'s en media kan insluit."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Laat die program toe om die SD-kaart se inhoud te lees, wat foto\'s en media kan insluit."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"verander of vee die inhoud van jou USB-berging uit"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"Verander of skrap die inhoud van jou SD-kaart"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"Verander of vee die inhoud van jou SD-kaart uit"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Laat die program toe om die USB-geheue te skryf."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Laat die program toe om na die SD-kaart te skryf."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"verander/vee uit interne mediabergingsinhoud"</string>
