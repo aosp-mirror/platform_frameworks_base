@@ -26,7 +26,7 @@
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"सूची से निकालें"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"एप्‍लिकेशन जानकारी"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"कोई हाल ही के एप्लिकेशन नहीं"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"हाल ही के एप्लिकेशन ख़ारिज करें"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"हाल ही के एप्लिकेशन खारिज करें"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"1 हाल ही का एप्लिकेशन"</item>
     <item quantity="other" msgid="1040784359794890744">"%d हाल ही के एप्लिकेशन"</item>
