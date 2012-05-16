@@ -185,10 +185,10 @@
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Bruge funktioner, der hurtigt kan dræne batteriet."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Direkte adgang til kalender og begivenheder."</string>
-    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Læs brugerordbog"</string>
-    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Læs ord i brugerordbogen."</string>
-    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Skriv brugerordbog"</string>
-    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Føj ord til brugerordbogen."</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Læse brugerordbog"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Læse ord i brugerordbogen."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Skrive brugerordbog"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Føje ord til brugerordbogen."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Bogmærker og historik"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Direkte adgang til bogmærker og browserhistorik."</string>
     <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Alarm"</string>
@@ -561,7 +561,7 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Tillader, at appen læser USB-lagerets indhold, herunder billeder og mediefiler."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Tillader, at appen læser SD-kortets indhold, som kan omfatte billeder og mediefiler."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"ændre eller slette indhold på USB-lager"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"skift eller slet indholdet på dit SD-kort"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"ændre eller slette indholdet på dit SD-kort"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Lader appen skrive til USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Tillader, at appen kan skrive til SD-kortet."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"Rediger/slet internt medielagringsindhold"</string>

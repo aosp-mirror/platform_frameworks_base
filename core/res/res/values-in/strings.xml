@@ -185,12 +185,9 @@
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Menggunakan fitur yang dapat menguras baterai dengan cepat."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Akses langsung ke kalender dan acara."</string>
-    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
-    <skip />
-    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
-    <skip />
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Membaca Kamus Pengguna"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Membaca kata dalam kamus pengguna."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Menulis Kamus Pengguna"</string>
     <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Menambahkan kata ke kamus pengguna."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Bookmark dan Riwayat"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Akses langsung ke bookmark dan riwayat browser."</string>
@@ -564,8 +561,7 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Izinkan aplikasi membaca konten penyimpanan USB, yang mungkin mencakup foto dan media."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Izinkan aplikasi membaca konten kartu SD, yang mungkin mencakup foto dan media."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"ubah/hapus konten pympanan USB"</string>
-    <!-- no translation found for permlab_sdcardWrite (8805693630050458763) -->
-    <skip />
+    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"mengubah atau menghapus konten kartu SD Anda"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Mengizinkan apl menulis ke penyimpanan USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Memungkinkan apl menulis ke kartu SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"ubah/hapus konten penyimpanan media internal"</string>
