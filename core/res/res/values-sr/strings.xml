@@ -175,28 +175,20 @@
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Надгледајте своју физичку локацију."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Комуникација преко мреже"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Приступајте разним функцијама мреже."</string>
-    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
-    <skip />
-    <!-- no translation found for permgrouplab_shortrangeNetwork (130808676377486118) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_shortrangeNetwork (1884069062653436007) -->
-    <skip />
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Приступање уређајима и мрежама преко Bluetooth-а."</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Мреже кратког домета"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Приступање уређајима преко мрежа кратког домета, као што је NFC."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Аудио подешавања"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Промена аудио подешавања."</string>
     <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Утицај на батерију"</string>
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Коришћење функција које могу брзо да истроше батерију."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календар"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Директан приступ календару и догађајима."</string>
-    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
-    <skip />
-    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
-    <skip />
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Читање речника корисника"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Читање речи у речнику корисника."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Уписивање у речник корисника"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Додавање речи у речник корисника."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Обележивачи и историја"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Директан приступ обележивачима и историји прегледача."</string>
     <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Аларм"</string>
@@ -569,8 +561,7 @@
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3530894470637667917">"Дозвољава апликацији читање садржаја USB меморије, што могу да буду слике и медиа датотеке."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2555811422562526606">"Дозвољава апликацији да чита садржај SD картице, који може да обухвата слике и медиа датотеке."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"измена или брисање садржаја USB меморије"</string>
-    <!-- no translation found for permlab_sdcardWrite (8805693630050458763) -->
-    <skip />
+    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"мењање или брисање садржаја SD картице"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Дозвољава апликацији да уписује податке на USB меморију."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Дозвољава апликацији да уписује податке на SD картицу."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"измена/брисање интерне меморије медија"</string>
@@ -1090,8 +1081,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Подеси"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Готово"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"НОВО: "</font></string>
-    <!-- no translation found for perms_description_app (5139836143293299417) -->
-    <skip />
+    <string name="perms_description_app" msgid="5139836143293299417">"Омогућава <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Није потребна ниједна дозвола"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB великог капацитета"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB је повезан"</string>
@@ -1322,6 +1312,5 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Желите ли да покренете прегледач?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Желите ли да прихватите позив?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Увек"</string>
-    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
-    <skip />
+    <string name="activity_resolver_use_once" msgid="405646673463328329">"Само једном"</string>
 </resources>

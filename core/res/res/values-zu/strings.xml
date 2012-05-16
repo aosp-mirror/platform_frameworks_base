@@ -185,7 +185,7 @@
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Sebenzisa izici ezingakhipha ngokushesha ibhethri."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Ikhalenda"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Ukufinyelela okuqondile kukhalenda nezehlakalo."</string>
-    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Funda isichzamazwi somsebenzisi"</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Funda isichazamazwi somsebenzisi"</string>
     <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Funda amagama kusichazamazwi somsebenzisi."</string>
     <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Bhala isichazamazwi somsebenzisi"</string>
     <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Engeza amagama kusichazamazwi somsebenzisi."</string>
