@@ -322,7 +322,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     static final int RECENT_APPS_BEHAVIOR_SHOW_OR_DISMISS = 0;
     static final int RECENT_APPS_BEHAVIOR_EXIT_TOUCH_MODE_AND_SHOW = 1;
-    static final int RECENT_APPS_BEHAVIOR_DISMISS_AND_SWITCH = 2;
+    static final int RECENT_APPS_BEHAVIOR_DISMISS = 2;
+    static final int RECENT_APPS_BEHAVIOR_DISMISS_AND_SWITCH = 3;
 
     RecentApplicationsDialog mRecentAppsDialog;
     int mRecentAppsDialogHeldModifiers;
@@ -809,6 +810,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (mRecentAppsDialog.isShowing()) {
                     switch (behavior) {
                         case RECENT_APPS_BEHAVIOR_SHOW_OR_DISMISS:
+                        case RECENT_APPS_BEHAVIOR_DISMISS:
                             mRecentAppsDialog.dismiss();
                             break;
                         case RECENT_APPS_BEHAVIOR_DISMISS_AND_SWITCH:
@@ -830,6 +832,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             }
                             mRecentAppsDialog.show();
                             break;
+                        case RECENT_APPS_BEHAVIOR_DISMISS:
                         case RECENT_APPS_BEHAVIOR_DISMISS_AND_SWITCH:
                         default:
                             break;
@@ -1849,7 +1852,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             return 0;
         } else if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
-            if (down && repeatCount == 0) {
+            if (down && repeatCount == 0 && !keyguardOn) {
                 showOrHideRecentAppsDialog(RECENT_APPS_BEHAVIOR_SHOW_OR_DISMISS);
             }
             return -1;
@@ -1886,27 +1889,29 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // Invoke shortcuts using Meta.
-        if (down && repeatCount == 0
+        if (down && repeatCount == 0 && !keyguardOn
                 && (metaState & KeyEvent.META_META_ON) != 0) {
             final KeyCharacterMap kcm = event.getKeyCharacterMap();
-            Intent shortcutIntent = mShortcutManager.getIntent(kcm, keyCode,
-                    metaState & ~(KeyEvent.META_META_ON
-                            | KeyEvent.META_META_LEFT_ON | KeyEvent.META_META_RIGHT_ON));
-            if (shortcutIntent != null) {
-                shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                try {
-                    mContext.startActivity(shortcutIntent);
-                } catch (ActivityNotFoundException ex) {
-                    Slog.w(TAG, "Dropping shortcut key combination because "
-                            + "the activity to which it is registered was not found: "
-                            + "META+" + KeyEvent.keyCodeToString(keyCode), ex);
+            if (kcm.isPrintingKey(keyCode)) {
+                Intent shortcutIntent = mShortcutManager.getIntent(kcm, keyCode,
+                        metaState & ~(KeyEvent.META_META_ON
+                                | KeyEvent.META_META_LEFT_ON | KeyEvent.META_META_RIGHT_ON));
+                if (shortcutIntent != null) {
+                    shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    try {
+                        mContext.startActivity(shortcutIntent);
+                    } catch (ActivityNotFoundException ex) {
+                        Slog.w(TAG, "Dropping shortcut key combination because "
+                                + "the activity to which it is registered was not found: "
+                                + "META+" + KeyEvent.keyCodeToString(keyCode), ex);
+                    }
+                    return -1;
                 }
-                return -1;
             }
         }
 
         // Handle application launch keys.
-        if (down && repeatCount == 0) {
+        if (down && repeatCount == 0 && !keyguardOn) {
             String category = sApplicationLaunchKeyCategories.get(keyCode);
             if (category != null) {
                 Intent intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, category);
@@ -1924,7 +1929,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Display task switcher for ALT-TAB or Meta-TAB.
         if (down && repeatCount == 0 && keyCode == KeyEvent.KEYCODE_TAB) {
-            if (mRecentAppsDialogHeldModifiers == 0) {
+            if (mRecentAppsDialogHeldModifiers == 0 && !keyguardOn) {
                 final int shiftlessModifiers = event.getModifiers() & ~KeyEvent.META_SHIFT_MASK;
                 if (KeyEvent.metaStateHasModifiers(shiftlessModifiers, KeyEvent.META_ALT_ON)
                         || KeyEvent.metaStateHasModifiers(
@@ -1937,7 +1942,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else if (!down && mRecentAppsDialogHeldModifiers != 0
                 && (metaState & mRecentAppsDialogHeldModifiers) == 0) {
             mRecentAppsDialogHeldModifiers = 0;
-            showOrHideRecentAppsDialog(RECENT_APPS_BEHAVIOR_DISMISS_AND_SWITCH);
+            showOrHideRecentAppsDialog(keyguardOn ? RECENT_APPS_BEHAVIOR_DISMISS :
+                    RECENT_APPS_BEHAVIOR_DISMISS_AND_SWITCH);
         }
 
         // Let the application handle the key.
