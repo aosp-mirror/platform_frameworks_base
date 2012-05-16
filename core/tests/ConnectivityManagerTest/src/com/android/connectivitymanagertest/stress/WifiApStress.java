@@ -103,7 +103,7 @@ public class WifiApStress
             assertTrue(mAct.mWifiManager.setWifiApEnabled(config, true));
             // Wait for wifi ap state to be ENABLED
             assertTrue(mAct.waitForWifiAPState(WifiManager.WIFI_AP_STATE_ENABLED,
-                    ConnectivityManagerTestActivity.LONG_TIMEOUT));
+                    2 * ConnectivityManagerTestActivity.LONG_TIMEOUT));
             // Wait for wifi tethering result
             assertEquals(ConnectivityManagerTestActivity.SUCCESS,
                     mAct.waitForTetherStateChange(2*ConnectivityManagerTestActivity.SHORT_TIMEOUT));

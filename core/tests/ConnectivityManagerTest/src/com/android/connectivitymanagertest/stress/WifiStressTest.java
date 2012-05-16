@@ -83,6 +83,7 @@ public class WifiStressTest
     @Override
     public void setUp() throws Exception {
         super.setUp();
+
         mAct = getActivity();
         mRunner = (ConnectivityManagerStressTestRunner) getInstrumentation();
         mReconnectIterations = mRunner.mReconnectIterations;
@@ -97,11 +98,6 @@ public class WifiStressTest
         mOutputWriter = new BufferedWriter(new FileWriter(new File(
                 Environment.getExternalStorageDirectory(), OUTPUT_FILE), true));
         mAct.turnScreenOn();
-        if (mAct.mWifiManager.isWifiApEnabled()) {
-            // if soft AP is enabled, disable it
-            assertTrue(mAct.mWifiManager.setWifiApEnabled(null, false));
-            Log.v(TAG, "disable soft ap");
-        }
         if (!mAct.mWifiManager.isWifiEnabled()) {
             log("Enable wi-fi before stress tests.");
             if (!mAct.enableWifi()) {
