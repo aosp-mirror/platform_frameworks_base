@@ -21,6 +21,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -486,5 +487,46 @@ public abstract class AbsSeekBar extends ProgressBar {
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(AbsSeekBar.class.getName());
+
+        if (isEnabled()) {
+            final int progress = getProgress();
+            if (progress > 0) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+            }
+            if (progress < getMax()) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+            }
+        }
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        if (super.performAccessibilityAction(action, arguments)) {
+            return true;
+        }
+        if (!isEnabled()) {
+            return false;
+        }
+        final int progress = getProgress();
+        final int increment = Math.max(1, Math.round((float) getMax() / 5));
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+                if (progress <= 0) {
+                    return false;
+                }
+                setProgress(progress - increment, true);
+                onKeyChange();
+                return true;
+            }
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+                if (progress >= getMax()) {
+                    return false;
+                }
+                setProgress(progress + increment, true);
+                onKeyChange();
+                return true;
+            }
+        }
+        return false;
     }
 }
