@@ -27,11 +27,12 @@
         android:id="@+id/big_picture"
         android:layout_width="match_parent"
         android:layout_height="192dp"
+        android:layout_marginTop="64dp"
+        android:layout_gravity="bottom"
         android:scaleType="centerCrop"
         />
     <include layout="@layout/notification_template_base" 
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="192dp"
         />
 </FrameLayout>

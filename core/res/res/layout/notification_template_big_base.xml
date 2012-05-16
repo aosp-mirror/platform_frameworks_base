@@ -143,14 +143,11 @@
                 style="?android:attr/progressBarStyleHorizontal"
                 />
         </LinearLayout>
-        <LinearLayout
+        <include
+            layout="@layout/notification_action_list"
             android:id="@+id/actions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone"
-                >
-                <!-- actions will be added here -->
-        </LinearLayout>
+            />
     </LinearLayout>
 </FrameLayout>
