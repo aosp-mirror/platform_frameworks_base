@@ -31,7 +31,7 @@ import com.android.internal.widget.SizeAdaptiveLayout;
 
 public class ExpandHelper implements Gefingerpoken, OnClickListener {
     public interface Callback {
-        View getChildAtPosition(MotionEvent ev);
+        View getChildAtRawPosition(float x, float y);
         View getChildAtPosition(float x, float y);
         boolean canChildBeExpanded(View v);
         boolean setUserExpandedChild(View v, boolean userxpanded);
@@ -62,6 +62,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     private Context mContext;
 
     private boolean mStretching;
+    private View mEventSource;
     private View mCurrView;
     private View mCurrViewTopGlow;
     private View mCurrViewBottomGlow;
@@ -141,7 +142,19 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
             @Override
             public boolean onScaleBegin(ScaleGestureDetector detector) {
                 if (DEBUG) Log.v(TAG, "onscalebegin()");
-                View v = mCallback.getChildAtPosition(detector.getFocusX(), detector.getFocusY());
+                float x = detector.getFocusX();
+                float y = detector.getFocusY();
+
+                View v = null;
+                if (mEventSource != null) {
+                    int[] location = new int[2];
+                    mEventSource.getLocationOnScreen(location);
+                    x += (float) location[0];
+                    y += (float) location[1];
+                    v = mCallback.getChildAtRawPosition(x, y);
+                } else {
+                    v = mCallback.getChildAtPosition(x, y);
+                }
 
                 // your fingers have to be somewhat close to the bounds of the view in question
                 mInitialTouchFocusY = detector.getFocusY();
@@ -189,6 +202,11 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
             }
         });
     }
+
+    public void setEventSource(View eventSource) {
+        mEventSource = eventSource;
+    }
+
     public void setGlow(float glow) {
         if (!mGlowAnimationSet.isRunning() || glow == 0f) {
             if (mGlowAnimationSet.isRunning()) {
@@ -211,7 +229,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
             }
         }
     }
-
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (DEBUG) Log.d(TAG, "interceptTouch: act=" + (ev.getAction()) +
                          " stretching=" + mStretching);
@@ -223,11 +240,13 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         final int action = ev.getAction();
         if (DEBUG) Log.d(TAG, "touch: act=" + (action) + " stretching=" + mStretching);
         if (mStretching) {
+            if (DEBUG) Log.d(TAG, "detector ontouch");
             mDetector.onTouchEvent(ev);
         }
         switch (action) {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+                if (DEBUG) Log.d(TAG, "cancel");
                 mStretching = false;
                 clearView();
                 break;
