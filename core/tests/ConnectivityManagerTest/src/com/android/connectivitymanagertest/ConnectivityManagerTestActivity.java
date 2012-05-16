@@ -244,8 +244,13 @@ public class ConnectivityManagerTestActivity extends Activity {
         mContext = this;
         mChannel = mWifiManager.initialize(mContext, mContext.getMainLooper(), null);
 
-        initializeNetworkStates();
+        if (mWifiManager.isWifiApEnabled()) {
+            // if soft AP is enabled, disable it
+            mWifiManager.setWifiApEnabled(null, false);
+            log("Disable soft ap");
+        }
 
+        initializeNetworkStates();
         log("Clear Wifi before we start the test.");
         removeConfiguredNetworksAndDisableWifi();
         mWifiRegexs = mCM.getTetherableWifiRegexs();
