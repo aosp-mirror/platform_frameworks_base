@@ -631,6 +631,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.WebView">
         <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
         <item name="android:scrollbars">horizontal|vertical</item>
     </style>
 
