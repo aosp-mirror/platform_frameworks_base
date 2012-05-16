@@ -808,12 +808,15 @@ public class Intent implements Parcelable, Cloneable {
      * always present to the user a list of the things they can do, with a
      * nice title given by the caller such as "Send this photo with:".
      * <p>
+     * If you need to grant URI permissions through a chooser, you must specify
+     * the permissions to be granted on the ACTION_CHOOSER Intent
+     * <em>in addition</em> to the EXTRA_INTENT inside.  This means using
+     * {@link #setClipData} to specify the URIs to be granted as well as
+     * {@link #FLAG_GRANT_READ_URI_PERMISSION} and/or
+     * {@link #FLAG_GRANT_WRITE_URI_PERMISSION} as appropriate.
+     * <p>
      * As a convenience, an Intent of this form can be created with the
      * {@link #createChooser} function.
-     * <p>
-     * If the target {@link #EXTRA_INTENT} contains {@link ClipData}, you should
-     * also copy it to this intent along with relevant flags, such as
-     * {@link #FLAG_GRANT_READ_URI_PERMISSION}.
      * <p>
      * Input: No data should be specified.  get*Extra must have
      * a {@link #EXTRA_INTENT} field containing the Intent being executed,
@@ -827,6 +830,14 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Convenience function for creating a {@link #ACTION_CHOOSER} Intent.
+     *
+     * <p>Builds a new {@link #ACTION_CHOOSER} Intent that wraps the given
+     * target intent, also optionally supplying a title.  If the target
+     * intent has specified {@link #FLAG_GRANT_READ_URI_PERMISSION} or
+     * {@link #FLAG_GRANT_WRITE_URI_PERMISSION}, then these flags will also be
+     * set in the returned chooser intent, with its ClipData set appropriately:
+     * either a direct reflection of {@link #getClipData()} if that is non-null,
+     * or a new ClipData build from {@link #getData()}.
      *
      * @param target The Intent that the user will be selecting an activity
      * to perform.
@@ -843,12 +854,26 @@ public class Intent implements Parcelable, Cloneable {
         }
 
         // Migrate any clip data and flags from target.
-        final ClipData targetClipData = target.getClipData();
-        if (targetClipData != null) {
-            intent.setClipData(targetClipData);
-            intent.addFlags(target.getFlags()
-                    & (FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION));
+        int permFlags = target.getFlags()
+                & (FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION);
+        if (permFlags != 0) {
+            ClipData targetClipData = target.getClipData();
+            if (targetClipData == null && target.getData() != null) {
+                ClipData.Item item = new ClipData.Item(target.getData());
+                String[] mimeTypes;
+                if (target.getType() != null) {
+                    mimeTypes = new String[] { target.getType() };
+                } else {
+                    mimeTypes = new String[] { };
+                }
+                targetClipData = new ClipData(null, mimeTypes, item);
+            }
+            if (targetClipData != null) {
+                intent.setClipData(targetClipData);
+                intent.addFlags(permFlags);
+            }
         }
+
         return intent;
     }
 
@@ -3077,6 +3102,17 @@ public class Intent implements Parcelable, Cloneable {
      * saw.   This can only be used in conjunction with {@link #FLAG_ACTIVITY_NEW_TASK}.
      */
     public static final int FLAG_ACTIVITY_TASK_ON_HOME = 0X00004000;
+    /**
+     * If set in an Intent passed to {@link Context#startActivity Context.startActivity()},
+     * upon starting the activity the system will also clear any system dialogs that
+     * are currently shown.  This is intended primarily for any actions that are
+     * associated with buttons in a notification: tapping on the button to launch
+     * the activity needs to also dismiss the notification window (which is one
+     * of the system dialogs); setting this flag on the Intent associated with that
+     * action will ensure that and other system dialogs are dismissed so that the
+     * user arrives in the new activity.
+     */
+    public static final int FLAG_ACTIVITY_CLOSE_SYSTEM_DIALOGS = 0X00002000;
     /**
      * If set, when sending a broadcast only registered receivers will be
      * called -- no BroadcastReceiver components will be launched.

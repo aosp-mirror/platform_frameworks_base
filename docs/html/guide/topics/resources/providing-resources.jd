@@ -528,20 +528,22 @@ how this affects your application during runtime.</p>
 which indicates the current device orientation.</p>
       </td>
     </tr>
-    <tr id="DockQualifier">
-      <td>Dock mode</td>
+    <tr id="UiModeQualifier">
+      <td>UI mode</td>
       <td>
         <code>car</code><br/>
-        <code>desk</code>
+        <code>desk</code><br/>
+        <code>television</code>
       </td>
       <td>
         <ul class="nolist">
-          <li>{@code car}: Device is in a car dock</li>
-          <li>{@code desk}: Device is in a desk dock</li>
+          <li>{@code car}: Device is displaying in a car dock</li>
+          <li>{@code desk}: Device is displaying in a desk dock</li>
+          <li>{@code television}: Device is displaying on a television</li>
         </ul>
-        <p><em>Added in API level 8.</em></p>
+        <p><em>Added in API level 8, television added in API 13.</em></p>
         <p>This can change during the life of your application if the user places the device in a
-dock. You can enable or disable this mode using {@link
+dock. You can enable or disable some of these modes using {@link
 android.app.UiModeManager}. See <a href="runtime-changes.html">Handling Runtime Changes</a> for
 information about how this affects your application during runtime.</p>
       </td>
