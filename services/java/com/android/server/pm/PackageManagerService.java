@@ -1064,7 +1064,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             mInstaller.moveFiles();
 
             // Prune any system packages that no longer exist.
-            final List<String> possiblyDeletedSystemApps = new ArrayList<String>();
+            final List<String> possiblyDeletedUpdatedSystemApps = new ArrayList<String>();
             if (!mOnlyCore) {
                 Iterator<PackageSetting> psit = mSettings.mPackages.values().iterator();
                 while (psit.hasNext()) {
@@ -1104,7 +1104,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                         mInstaller.remove(ps.name, 0);
                         sUserManager.removePackageForAllUsers(ps.name);
                     } else {
-                        possiblyDeletedSystemApps.add(ps.name);
+                        final PackageSetting disabledPs = mSettings.getDisabledSystemPkgLPr(ps.name);
+                        if (disabledPs.codePath == null || !disabledPs.codePath.exists()) {
+                            possiblyDeletedUpdatedSystemApps.add(ps.name);
+                        }
                     }
                 }
             }
@@ -1135,18 +1138,33 @@ public class PackageManagerService extends IPackageManager.Stub {
                         scanMode, 0);
 
                 /**
-                 * Remove disable package settings for any system apps
-                 * that were removed via an OTA.
+                 * Remove disable package settings for any updated system
+                 * apps that were removed via an OTA. If they're not a
+                 * previously-updated app, remove them completely.
+                 * Otherwise, just revoke their system-level permissions.
                  */
-                for (String deletedAppName : possiblyDeletedSystemApps) {
+                for (String deletedAppName : possiblyDeletedUpdatedSystemApps) {
                     PackageParser.Package deletedPkg = mPackages.get(deletedAppName);
-                    if (deletedPkg != null) {
-                        mSettings.removeDisabledSystemPackageLPw(deletedAppName);
+                    mSettings.removeDisabledSystemPackageLPw(deletedAppName);
+
+                    String msg;
+                    if (deletedPkg == null) {
+                        msg = "Updated system package " + deletedAppName
+                                + " no longer exists; wiping its data";
+
+                        mInstaller.remove(deletedAppName, 0);
+                        sUserManager.removePackageForAllUsers(deletedAppName);
+                    } else {
+                        msg = "Updated system app + " + deletedAppName
+                                + " no longer present; removing system privileges for "
+                                + deletedAppName;
+
                         deletedPkg.applicationInfo.flags &= ~ApplicationInfo.FLAG_SYSTEM;
 
                         PackageSetting deletedPs = mSettings.mPackages.get(deletedAppName);
                         deletedPs.pkgFlags &= ~ApplicationInfo.FLAG_SYSTEM;
                     }
+                    reportSettingsProblem(Log.WARN, msg);
                 }
             } else {
                 mAppInstallObserver = null;
