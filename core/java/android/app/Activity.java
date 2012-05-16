@@ -2713,7 +2713,16 @@ public class Activity extends ContextThemeWrapper
                 onCreateNavigateUpTaskStack(b);
                 onPrepareNavigateUpTaskStack(b);
                 b.startActivities();
-                finishAffinity();
+
+                // We can't finishAffinity if we have a result.
+                // Fall back and simply finish the current activity instead.
+                if (mResultCode != RESULT_CANCELED || mResultData != null) {
+                    // Tell the developer what's going on to avoid hair-pulling.
+                    Log.i(TAG, "onNavigateUp only finishing topmost activity to return a result");
+                    finish();
+                } else {
+                    finishAffinity();
+                }
             } else {
                 navigateUpTo(upIntent);
             }
