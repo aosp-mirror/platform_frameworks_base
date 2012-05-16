@@ -69,7 +69,7 @@
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_home"
                 systemui:keyCode="3"
-                systemui:keyRepeat="true"
+                systemui:keyRepeat="false"
                 android:layout_weight="0"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 android:contentDescription="@string/accessibility_home"
