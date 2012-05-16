@@ -180,6 +180,9 @@ accessing a local), direct field access is about 7x faster than invoking a
 trivial getter. This is true in Froyo, but will improve in the future when
 the JIT inlines getter methods.</p>
 
+<p>Note that if you're using ProGuard, you can have the best
+of both worlds because ProGuard can inline accessors for you.</p>
+
 <a name="use_final" id="use_final"></a>
 <h2>Use Static Final For Constants</h2>
 
