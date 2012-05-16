@@ -79,18 +79,17 @@ public class MultiWaveView extends View {
     private static final int SHOW_ANIMATION_DURATION = 200;
     private static final int SHOW_ANIMATION_DELAY = 0;
     private static final float TAP_RADIUS_SCALE_ACCESSIBILITY_ENABLED = 1.3f;
-    private static final long RING_EXPAND_DURATION = 200;
     private static final float TARGET_INITIAL_POSITION_SCALE = 0.8f;
 
     private TimeInterpolator mChevronAnimationInterpolator = Ease.Quad.easeOut;
 
     private ArrayList<TargetDrawable> mTargetDrawables = new ArrayList<TargetDrawable>();
     private ArrayList<TargetDrawable> mChevronDrawables = new ArrayList<TargetDrawable>();
-    private ArrayList<Tweener> mChevronAnimations = new ArrayList<Tweener>();
-    private ArrayList<Tweener> mTargetAnimations = new ArrayList<Tweener>();
+    private AnimationBundle mChevronAnimations = new AnimationBundle();
+    private AnimationBundle mTargetAnimations = new AnimationBundle();
+    private AnimationBundle mHandleAnimations = new AnimationBundle();
     private ArrayList<String> mTargetDescriptions;
     private ArrayList<String> mDirectionDescriptions;
-    private Tweener mHandleAnimation;
     private OnTriggerListener mOnTriggerListener;
     private TargetDrawable mHandleDrawable;
     private TargetDrawable mOuterRing;
@@ -113,6 +112,33 @@ public class MultiWaveView extends View {
     private float mSnapMargin = 0.0f;
     private boolean mDragging;
     private int mNewTargetResources;
+
+    private class AnimationBundle extends ArrayList<Tweener> {
+        private static final long serialVersionUID = 0xA84D78726F127468L;
+        private boolean mSuspended;
+
+        public void start() {
+            if (mSuspended) return; // ignore attempts to start animations
+            final int count = size();
+            for (int i = 0; i < count; i++) {
+                Tweener anim = get(i);
+                anim.animator.start();
+            }
+        }
+
+        public void stop() {
+            final int count = size();
+            for (int i = 0; i < count; i++) {
+                Tweener anim = get(i);
+                anim.animator.end();
+            }
+            clear();
+        }
+
+        public void setSuspended(boolean suspend) {
+            mSuspended = suspend;
+        }
+    };
 
     private AnimatorListener mResetListener = new AnimatorListenerAdapter() {
         public void onAnimationEnd(Animator animator) {
@@ -239,6 +265,7 @@ public class MultiWaveView extends View {
 
         a.recycle();
         setVibrateEnabled(mVibrationDuration > 0);
+        assignDefaultsIfNeeded();
     }
 
     private void dump() {
@@ -252,6 +279,21 @@ public class MultiWaveView extends View {
         Log.v(TAG, "WaveCenterY = " + mWaveCenterY);
         Log.v(TAG, "HorizontalOffset = " + mHorizontalOffset);
         Log.v(TAG, "VerticalOffset = " + mVerticalOffset);
+    }
+
+    public void suspendAnimations() {
+        mChevronAnimations.setSuspended(true);
+        mTargetAnimations.setSuspended(true);
+        mHandleAnimations.setSuspended(true);
+    }
+
+    public void resumeAnimations() {
+        mChevronAnimations.setSuspended(false);
+        mTargetAnimations.setSuspended(false);
+        mHandleAnimations.setSuspended(false);
+        mChevronAnimations.start();
+        mTargetAnimations.start();
+        mHandleAnimations.start();
     }
 
     @Override
@@ -340,6 +382,8 @@ public class MultiWaveView extends View {
 
         final int directionCount = mFeedbackCount > 0 ? mChevronDrawables.size()/mFeedbackCount : 0;
 
+        mChevronAnimations.stop();
+
         // Add an animation for all chevron drawables.  There are mFeedbackCount drawables
         // in each direction and directionCount directions.
         for (int direction = 0; direction < directionCount; direction++) {
@@ -367,24 +411,21 @@ public class MultiWaveView extends View {
                         "onUpdate", mUpdateListener));
             }
         }
+        mChevronAnimations.start();
     }
 
     private void stopChevronAnimation() {
-        for (Tweener anim : mChevronAnimations) {
-            anim.animator.end();
-        }
-        mChevronAnimations.clear();
+        mChevronAnimations.stop();
     }
 
     private void stopHandleAnimation() {
-        if (mHandleAnimation != null) {
-            mHandleAnimation.animator.end();
-            mHandleAnimation = null;
-        }
+        mHandleAnimations.stop();
     }
 
     private void deactivateTargets() {
-        for (TargetDrawable target : mTargetDrawables) {
+        final int count = mTargetDrawables.size();
+        for (int i = 0; i < count; i++) {
+            TargetDrawable target = mTargetDrawables.get(i);
             target.setState(TargetDrawable.STATE_INACTIVE);
         }
         mActiveTarget = -1;
@@ -445,14 +486,16 @@ public class MultiWaveView extends View {
         // Animate handle back to the center based on current state.
         int delay = targetHit ? RETURN_TO_HOME_DELAY : 0;
         int duration = targetHit ? 0 : RETURN_TO_HOME_DURATION;
-        mHandleAnimation = Tweener.to(mHandleDrawable, duration,
+        mHandleAnimations.stop();
+        mHandleAnimations.add(Tweener.to(mHandleDrawable, duration,
                 "ease", Ease.Quart.easeOut,
                 "delay", delay,
                 "alpha", 1.0f,
                 "x", 0,
                 "y", 0,
                 "onUpdate", mUpdateListener,
-                "onComplete", (mDragging && !targetHit) ? mResetListenerWithPing : mResetListener);
+                "onComplete", (mDragging && !targetHit) ? mResetListenerWithPing : mResetListener));
+        mHandleAnimations.start();
 
         setGrabbedState(OnTriggerListener.NO_HANDLE);
     }
@@ -467,9 +510,7 @@ public class MultiWaveView extends View {
     }
 
     private void hideTargets(boolean animate) {
-        if (mTargetAnimations.size() > 0) {
-            stopTargetAnimation();
-        }
+        mTargetAnimations.stop();
         // Note: these animations should complete at the same time so that we can swap out
         // the target assets asynchronously from the setTargetResources() call.
         mAnimatingTargets = animate;
@@ -497,12 +538,12 @@ public class MultiWaveView extends View {
                 "delay", delay,
                 "onUpdate", mUpdateListener,
                 "onComplete", mTargetUpdateListener));
+
+        mTargetAnimations.start();
     }
 
     private void showTargets(boolean animate) {
-        if (mTargetAnimations.size() > 0) {
-            stopTargetAnimation();
-        }
+        mTargetAnimations.stop();
         mAnimatingTargets = animate;
         final int delay = animate ? SHOW_ANIMATION_DELAY : 0;
         final int length = mTargetDrawables.size();
@@ -521,7 +562,7 @@ public class MultiWaveView extends View {
         }
         mOuterRing.setScaleX(0.5f);
         mOuterRing.setScaleY(0.5f);
-        mTargetAnimations.add(Tweener.to(mOuterRing, animate ? RING_EXPAND_DURATION : 0,
+        mTargetAnimations.add(Tweener.to(mOuterRing, animate ? SHOW_ANIMATION_DURATION : 0,
                 "ease", Ease.Cubic.easeOut,
                 "alpha", 1.0f,
                 "scaleX", 1.0f,
@@ -529,13 +570,12 @@ public class MultiWaveView extends View {
                 "delay", delay,
                 "onUpdate", mUpdateListener,
                 "onComplete", mTargetUpdateListener));
+
+        mTargetAnimations.start();
     }
 
     private void stopTargetAnimation() {
-        for (Tweener anim : mTargetAnimations) {
-            anim.animator.end();
-        }
-        mTargetAnimations.clear();
+        mTargetAnimations.stop();
     }
 
     private void vibrate() {
@@ -658,7 +698,6 @@ public class MultiWaveView extends View {
      *
      */
     public void ping() {
-        stopChevronAnimation();
         startChevronAnimation();
     }
 
@@ -721,7 +760,7 @@ public class MultiWaveView extends View {
     }
 
     private void handleDown(MotionEvent event) {
-       if (!trySwitchToFirstTouchState(event)) {
+       if (!trySwitchToFirstTouchState(event.getX(), event.getY())) {
             mDragging = false;
             stopTargetAnimation();
             ping();
@@ -747,14 +786,11 @@ public class MultiWaveView extends View {
     }
 
     private void handleMove(MotionEvent event) {
-        if (!mDragging) {
-            trySwitchToFirstTouchState(event);
-            return;
-        }
-
         int activeTarget = -1;
         final int historySize = event.getHistorySize();
-        final boolean singleTarget = mTargetDrawables.size() == 1;
+        ArrayList<TargetDrawable> targets = mTargetDrawables;
+        int ntargets = targets.size();
+        final boolean singleTarget = ntargets == 1;
         float x = 0.0f;
         float y = 0.0f;
         for (int k = 0; k < historySize + 1; k++) {
@@ -768,25 +804,29 @@ public class MultiWaveView extends View {
             float limitX = tx * scale;
             float limitY = ty * scale;
 
-            if (singleTarget) {
-                // Snap to outer ring if there's only one target
-                float snapRadius = mOuterRadius - mSnapMargin;
-                if (touchRadius > snapRadius) {
-                    activeTarget = 0;
-                }
+            if (!mDragging) {
+                trySwitchToFirstTouchState(eventX, eventY);
             } else {
-                // If there's more than one target, snap to the closest one less than hitRadius away.
-                float best = Float.MAX_VALUE;
-                final float hitRadius2 = mHitRadius * mHitRadius;
-                for (int i = 0; i < mTargetDrawables.size(); i++) {
-                    // Snap to the first target in range
-                    TargetDrawable target = mTargetDrawables.get(i);
-                    float dx = limitX - target.getX();
-                    float dy = limitY - target.getY();
-                    float dist2 = dx*dx + dy*dy;
-                    if (target.isEnabled() && dist2 < hitRadius2 && dist2 < best) {
-                        activeTarget = i;
-                        best = dist2;
+                if (singleTarget) {
+                    // Snap to outer ring if there's only one target
+                    float snapRadius = mOuterRadius - mSnapMargin;
+                    if (touchRadius > snapRadius) {
+                        activeTarget = 0;
+                    }
+                } else {
+                    // For more than one target, snap to the closest one less than hitRadius away.
+                    float best = Float.MAX_VALUE;
+                    final float hitRadius2 = mHitRadius * mHitRadius;
+                    for (int i = 0; i < ntargets; i++) {
+                        // Snap to the first target in range
+                        TargetDrawable target = targets.get(i);
+                        float dx = limitX - target.getX();
+                        float dy = limitY - target.getY();
+                        float dist2 = dx*dx + dy*dy;
+                        if (target.isEnabled() && dist2 < hitRadius2 && dist2 < best) {
+                            activeTarget = i;
+                            best = dist2;
+                        }
                     }
                 }
             }
@@ -794,9 +834,13 @@ public class MultiWaveView extends View {
             y = limitY;
         }
 
+        if (!mDragging) {
+            return;
+        }
+
         if (activeTarget != -1) {
             switchToState(STATE_SNAP, x,y);
-            TargetDrawable target = mTargetDrawables.get(activeTarget);
+            TargetDrawable target = targets.get(activeTarget);
             float newX = singleTarget ? x : target.getX();
             float newY = singleTarget ? y : target.getY();
             moveHandleTo(newX, newY, false);
@@ -812,7 +856,7 @@ public class MultiWaveView extends View {
         if (mActiveTarget != activeTarget) {
             // Defocus the old target
             if (mActiveTarget != -1) {
-                TargetDrawable target = mTargetDrawables.get(mActiveTarget);
+                TargetDrawable target = targets.get(mActiveTarget);
                 if (target.hasState(TargetDrawable.STATE_FOCUSED)) {
                     target.setState(TargetDrawable.STATE_INACTIVE);
                     mHandleDrawable.setAlpha(1.0f);
@@ -820,7 +864,7 @@ public class MultiWaveView extends View {
             }
             // Focus the new target
             if (activeTarget != -1) {
-                TargetDrawable target = mTargetDrawables.get(activeTarget);
+                TargetDrawable target = targets.get(activeTarget);
                 if (target.hasState(TargetDrawable.STATE_FOCUSED)) {
                     target.setState(TargetDrawable.STATE_FOCUSED);
                     mHandleDrawable.setAlpha(0.0f);
@@ -877,9 +921,7 @@ public class MultiWaveView extends View {
         }
     }
 
-    private boolean trySwitchToFirstTouchState(MotionEvent event) {
-        final float x = event.getX();
-        final float y = event.getY();
+    private boolean trySwitchToFirstTouchState(float x, float y) {
         final float tx = x - mWaveCenterX;
         final float ty = y - mWaveCenterY;
         if (mAlwaysTrackFinger || dist2(tx,ty) <= getScaledTapRadiusSquared()) {
@@ -892,9 +934,9 @@ public class MultiWaveView extends View {
         return false;
     }
 
-    private void assignDefaultsIfNeeded(float centerX, float centerY) {
+    private void assignDefaultsIfNeeded() {
         if (mOuterRadius == 0.0f) {
-            mOuterRadius = 0.5f*(float) Math.hypot(centerX, centerY);
+            mOuterRadius = Math.max(mOuterRing.getWidth(), mOuterRing.getHeight())/2.0f;
         }
         if (mHitRadius == 0.0f) {
             // Use the radius of inscribed circle of the first target.
@@ -941,6 +983,7 @@ public class MultiWaveView extends View {
         super.onLayout(changed, left, top, right, bottom);
         final int width = right - left;
         final int height = bottom - top;
+
         // Target placement width/height. This puts the targets on the greater of the ring
         // width or the specified outer radius.
         final float placementWidth = Math.max(mOuterRing.getWidth(), 2 * mOuterRadius);
@@ -949,8 +992,6 @@ public class MultiWaveView extends View {
                 + Math.max(width, mMaxTargetWidth + placementWidth) / 2;
         float newWaveCenterY = mVerticalOffset + mVerticalInset
                 + Math.max(height, + mMaxTargetHeight + placementHeight) / 2;
-
-        assignDefaultsIfNeeded(newWaveCenterX, newWaveCenterY);
 
         if (mInitialLayout) {
             hideChevrons();
@@ -976,9 +1017,12 @@ public class MultiWaveView extends View {
 
     private void updateTargetPositions(float centerX, float centerY) {
         // Reposition the target drawables if the view changed.
-        for (int i = 0; i < mTargetDrawables.size(); i++) {
-            final TargetDrawable targetIcon = mTargetDrawables.get(i);
-            double angle = -2.0f * Math.PI * i / mTargetDrawables.size();
+        ArrayList<TargetDrawable> targets = mTargetDrawables;
+        final int size = targets.size();
+        final float alpha = (float) (-2.0f * Math.PI / size);
+        for (int i = 0; i < size; i++) {
+            final TargetDrawable targetIcon = targets.get(i);
+            final float angle = alpha * i;
             targetIcon.setPositionX(centerX);
             targetIcon.setPositionY(centerY);
             targetIcon.setX(mOuterRadius * (float) Math.cos(angle));
@@ -987,7 +1031,10 @@ public class MultiWaveView extends View {
     }
 
     private void updateChevronPositions(float centerX, float centerY) {
-        for (TargetDrawable target : mChevronDrawables) {
+        ArrayList<TargetDrawable> chevrons = mChevronDrawables;
+        final int size = chevrons.size();
+        for (int i = 0; i < size; i++) {
+            TargetDrawable target = chevrons.get(i);
             if (target != null) {
                 target.setPositionX(centerX);
                 target.setPositionY(centerY);
@@ -996,7 +1043,10 @@ public class MultiWaveView extends View {
     }
 
     private void hideChevrons() {
-        for (TargetDrawable chevron : mChevronDrawables) {
+        ArrayList<TargetDrawable> chevrons = mChevronDrawables;
+        final int size = chevrons.size();
+        for (int i = 0; i < size; i++) {
+            TargetDrawable chevron = chevrons.get(i);
             if (chevron != null) {
                 chevron.setAlpha(0.0f);
             }
@@ -1006,14 +1056,18 @@ public class MultiWaveView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         mOuterRing.draw(canvas);
-        for (TargetDrawable target : mTargetDrawables) {
+        final int ntargets = mTargetDrawables.size();
+        for (int i = 0; i < ntargets; i++) {
+            TargetDrawable target = mTargetDrawables.get(i);
             if (target != null) {
                 target.draw(canvas);
             }
         }
-        for (TargetDrawable target : mChevronDrawables) {
-            if (target != null) {
-                target.draw(canvas);
+        final int nchevrons = mChevronDrawables.size();
+        for (int i = 0; i < nchevrons; i++) {
+            TargetDrawable chevron = mChevronDrawables.get(i);
+            if (chevron != null) {
+                chevron.draw(canvas);
             }
         }
         mHandleDrawable.draw(canvas);

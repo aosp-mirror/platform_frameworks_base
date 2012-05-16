@@ -122,7 +122,6 @@ class Tweener {
             anim.addListener(listener);
         }
         anim.addListener(mCleanupListener);
-        anim.start();
 
         return tween;
     }
