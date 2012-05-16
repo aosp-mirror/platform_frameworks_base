@@ -489,7 +489,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         synchronized (mNotifications) {
             final StatusBarNotification n = mNotifications.remove(key);
             if (n == null) {
-                throw new IllegalArgumentException("removeNotification key not found: " + key);
+                Slog.e(TAG, "removeNotification key not found: " + key);
+                return;
             }
             if (mBar != null) {
                 try {
