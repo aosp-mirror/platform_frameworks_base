@@ -491,14 +491,32 @@ public final class Choreographer {
         }
     }
 
-    private final class FrameDisplayEventReceiver extends DisplayEventReceiver {
+    private final class FrameDisplayEventReceiver extends DisplayEventReceiver
+            implements Runnable {
+        private long mTimestampNanos;
+        private int mFrame;
+
         public FrameDisplayEventReceiver(Looper looper) {
             super(looper);
         }
 
         @Override
         public void onVsync(long timestampNanos, int frame) {
-            doFrame(timestampNanos, frame);
+            // Post the vsync event to the Handler.
+            // The idea is to prevent incoming vsync events from completely starving
+            // the message queue.  If there are no messages in the queue with timestamps
+            // earlier than the frame time, then the vsync event will be processed immediately.
+            // Otherwise, messages that predate the vsync event will be handled first.
+            mTimestampNanos = timestampNanos;
+            mFrame = frame;
+            Message msg = Message.obtain(mHandler, this);
+            msg.setAsynchronous(true);
+            mHandler.sendMessageAtTime(msg, timestampNanos / NANOS_PER_MS);
+        }
+
+        @Override
+        public void run() {
+            doFrame(mTimestampNanos, mFrame);
         }
     }
 
