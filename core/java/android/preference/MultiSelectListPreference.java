@@ -125,8 +125,9 @@ public class MultiSelectListPreference extends DialogPreference {
      * @param values The values to set for the key.
      */
     public void setValues(Set<String> values) {
-        mValues = values;
-        
+        mValues.clear();
+        mValues.addAll(values);
+
         persistStringSet(values);
     }
     
