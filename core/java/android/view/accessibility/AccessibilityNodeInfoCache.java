@@ -244,7 +244,7 @@ public class AccessibilityNodeInfoCache {
     /**
      * We are enforcing the invariant for a single accessibility focus.
      *
-     * @param currentInputFocusId The current input focused node.
+     * @param currentAccessibilityFocusId The current input focused node.
      */
     private void clearSubtreeWithOldAccessibilityFocusLocked(long currentAccessibilityFocusId) {
         final int cacheSize = mCacheImpl.size();
