@@ -34,6 +34,7 @@
     <include layout="@layout/status_bar_expanded"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:visibility="invisible"
         />
 
 </com.android.systemui.statusbar.phone.StatusBarWindowView>
