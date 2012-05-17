@@ -517,7 +517,6 @@
             0 - Nothing
             1 - Recent apps dialog
             2 - Recent apps view in SystemUI
-            3 - Voice search
          This needs to match the constants in
          policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
     -->

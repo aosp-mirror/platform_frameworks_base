@@ -179,7 +179,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int LONG_PRESS_HOME_NOTHING = 0;
     static final int LONG_PRESS_HOME_RECENT_DIALOG = 1;
     static final int LONG_PRESS_HOME_RECENT_SYSTEM_UI = 2;
-    static final int LONG_PRESS_HOME_VOICE_SEARCH = 3;
 
     // wallpaper is at the bottom, though the window manager may move it.
     static final int WALLPAPER_LAYER = 2;
@@ -759,9 +758,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mLongPressOnHomeBehavior > LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
                 mLongPressOnHomeBehavior = LONG_PRESS_HOME_NOTHING;
             }
-            if (hasNavigationBar()) {
-                mLongPressOnHomeBehavior = LONG_PRESS_HOME_VOICE_SEARCH;
-            }
         }
 
         if (mLongPressOnHomeBehavior != LONG_PRESS_HOME_NOTHING) {
@@ -780,18 +776,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mStatusBarService.toggleRecentApps();
             } catch (RemoteException e) {
                 Slog.e(TAG, "RemoteException when showing recent apps", e);
-            }
-        } else if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_VOICE_SEARCH) {
-            Intent intent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
-            try {
-                intent.setFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-                mContext.startActivity(intent);
-            } catch (ActivityNotFoundException e) {
-                Log.e(TAG, "Unable to launch. tag=" + TAG + " intent=" + intent, e);
-            } catch (SecurityException e) {
-                Log.e(TAG, "PhoneWindowManager does not have the permission to launch " +
-                      "tag=" + TAG + " intent=" + intent, e);
             }
         }
     }
