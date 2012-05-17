@@ -4447,6 +4447,7 @@ public final class ViewRootImpl implements ViewParent,
 
             for (int i = 0; i < viewCount; i++) {
                 mTempViews[i].invalidate();
+                mTempViews[i] = null;
             }
 
             for (int i = 0; i < viewRectCount; i++) {
