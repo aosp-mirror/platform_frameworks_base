@@ -1039,7 +1039,8 @@
             </intent-filter>
         </activity>
 
-        <service android:name="android.webkit.AccessibilityInjectorTest$MockAccessibilityService">
+        <service android:name="android.webkit.AccessibilityInjectorTest$MockAccessibilityService"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
