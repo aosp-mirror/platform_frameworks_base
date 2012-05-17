@@ -35,6 +35,7 @@
         android:layout_width="@dimen/notification_panel_width"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal|top"
+        android:visibility="invisible"
         />
 
 </com.android.systemui.statusbar.phone.StatusBarWindowView>
