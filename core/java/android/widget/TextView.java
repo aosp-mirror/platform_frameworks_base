@@ -7739,8 +7739,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             info.setText(getTextForAccessibility());
         }
 
-        if (TextUtils.isEmpty(getContentDescription())
-                && !TextUtils.isEmpty(mText)) {
+        if (TextUtils.isEmpty(getContentDescription()) && !TextUtils.isEmpty(mText)) {
             info.addAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
             info.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
             info.setMovementGranularities(AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER
