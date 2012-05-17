@@ -59,7 +59,7 @@
     <style name="TextAppearance.StatusBar.Expanded.Date">
         <item name="android:textSize">12dp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#666666</item>
+        <item name="android:textColor">#cccccc</item>
         <item name="android:textAllCaps">true</item>
     </style>
 

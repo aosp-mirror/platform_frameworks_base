@@ -301,6 +301,9 @@ public class PhoneStatusBar extends BaseStatusBar {
                 return true;
             }
         });
+        mNotificationPanel.setSystemUiVisibility(
+                  View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER
+                | View.STATUS_BAR_DISABLE_SYSTEM_INFO);
 
         if (!ActivityManager.isHighEndGfx(mDisplay)) {
             mStatusBarWindow.setBackground(null);
@@ -336,7 +339,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         mPixelFormat = PixelFormat.OPAQUE;
         mStatusIcons = (LinearLayout)mStatusBarView.findViewById(R.id.statusIcons);
         mNotificationIcons = (IconMerger)mStatusBarView.findViewById(R.id.notificationIcons);
-        mMoreIcon = mStatusBarView.findViewById(R.id.moreIcon);
         mNotificationIcons.setOverflowIndicator(mMoreIcon);
         mIcons = (LinearLayout)mStatusBarView.findViewById(R.id.icons);
         mTickerView = mStatusBarView.findViewById(R.id.ticker);
@@ -884,6 +886,15 @@ public class PhoneStatusBar extends BaseStatusBar {
         flagdbg.append(((diff  & StatusBarManager.DISABLE_CLOCK) != 0) ? "* " : " ");
         flagdbg.append(">");
         Slog.d(TAG, flagdbg.toString());
+        
+        if ((diff & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
+            mIcons.animate().cancel();
+            if ((state & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
+                mIcons.animate().alpha(0f).setStartDelay(100).setDuration(200).start();
+            } else {
+                mIcons.animate().alpha(1f).setStartDelay(0).setDuration(300).start();
+            }
+        }
 
         if ((diff & StatusBarManager.DISABLE_CLOCK) != 0) {
             boolean show = (state & StatusBarManager.DISABLE_CLOCK) == 0;
