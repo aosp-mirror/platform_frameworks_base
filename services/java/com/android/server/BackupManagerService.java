@@ -48,6 +48,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -251,6 +252,34 @@ class BackupManagerService extends IBackupManager.Stub {
     String mCurrentTransport;
     IBackupTransport mLocalTransport, mGoogleTransport;
     ActiveRestoreSession mActiveRestoreSession;
+
+    // Watch the device provisioning operation during setup
+    ContentObserver mProvisionedObserver;
+
+    class ProvisionedObserver extends ContentObserver {
+        public ProvisionedObserver(Handler handler) {
+            super(handler);
+        }
+
+        public void onChange(boolean selfChange) {
+            final boolean wasProvisioned = mProvisioned;
+            final boolean isProvisioned = deviceIsProvisioned();
+            // latch: never unprovision
+            mProvisioned = wasProvisioned || isProvisioned;
+            if (MORE_DEBUG) {
+                Slog.d(TAG, "Provisioning change: was=" + wasProvisioned
+                        + " is=" + isProvisioned + " now=" + mProvisioned);
+            }
+
+            synchronized (mQueueLock) {
+                if (mProvisioned && !wasProvisioned && mEnabled) {
+                    // we're now good to go, so start the backup alarms
+                    if (MORE_DEBUG) Slog.d(TAG, "Now provisioned, so starting backups");
+                    startBackupAlarmsLocked(FIRST_BACKUP_INTERVAL);
+                }
+            }
+        }
+    }
 
     class RestoreGetSetsParams {
         public IBackupTransport transport;
@@ -695,12 +724,19 @@ class BackupManagerService extends IBackupManager.Stub {
         mBackupHandler = new BackupHandler(mHandlerThread.getLooper());
 
         // Set up our bookkeeping
-        boolean areEnabled = Settings.Secure.getInt(context.getContentResolver(),
+        final ContentResolver resolver = context.getContentResolver();
+        boolean areEnabled = Settings.Secure.getInt(resolver,
                 Settings.Secure.BACKUP_ENABLED, 0) != 0;
-        mProvisioned = Settings.Secure.getInt(context.getContentResolver(),
-                Settings.Secure.BACKUP_PROVISIONED, 0) != 0;
-        mAutoRestore = Settings.Secure.getInt(context.getContentResolver(),
+        mProvisioned = Settings.Secure.getInt(resolver,
+                Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
+        mAutoRestore = Settings.Secure.getInt(resolver,
                 Settings.Secure.BACKUP_AUTO_RESTORE, 1) != 0;
+
+        mProvisionedObserver = new ProvisionedObserver(mBackupHandler);
+        resolver.registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.DEVICE_PROVISIONED),
+                false, mProvisionedObserver);
+
         // If Encrypted file systems is enabled or disabled, this call will return the
         // correct directory.
         mBaseStateDir = new File(Environment.getSecureDataDirectory(), "backup");
@@ -5172,24 +5208,9 @@ class BackupManagerService extends IBackupManager.Stub {
     public void setBackupProvisioned(boolean available) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setBackupProvisioned");
-
-        boolean wasProvisioned = mProvisioned;
-        synchronized (this) {
-            Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.BACKUP_PROVISIONED, available ? 1 : 0);
-            mProvisioned = available;
-        }
-
-        synchronized (mQueueLock) {
-            if (available && !wasProvisioned && mEnabled) {
-                // we're now good to go, so start the backup alarms
-                startBackupAlarmsLocked(FIRST_BACKUP_INTERVAL);
-            } else if (!available) {
-                // No longer enabled, so stop running backups
-                Slog.w(TAG, "Backup service no longer provisioned");
-                mAlarmManager.cancel(mRunBackupIntent);
-            }
-        }
+        /*
+         * This is now a no-op; provisioning is simply the device's own setup state.
+         */
     }
 
     private void startBackupAlarmsLocked(long delayBeforeFirstBackup) {
