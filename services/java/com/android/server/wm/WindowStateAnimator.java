@@ -71,8 +71,6 @@ class WindowStateAnimator {
 
     Surface mSurface;
     Surface mPendingDestroySurface;
-    boolean mReportDestroySurface;
-    boolean mSurfacePendingDestroy;
 
     /**
      * Set when we have changed the size of the surface, to know that
@@ -561,8 +559,6 @@ class WindowStateAnimator {
 
     Surface createSurfaceLocked() {
         if (mSurface == null) {
-            mReportDestroySurface = false;
-            mSurfacePendingDestroy = false;
             if (DEBUG_ANIM || DEBUG_ORIENTATION) Slog.i(TAG,
                     "createSurface " + this + ": mDrawState=DRAW_PENDING");
             mDrawState = DRAW_PENDING;
@@ -694,7 +690,6 @@ class WindowStateAnimator {
             mWin.mAppToken.startingDisplayed = false;
         }
 
-        mDrawState = NO_SURFACE;
         if (mSurface != null) {
 
             int i = mWin.mChildWindows.size();
@@ -702,17 +697,6 @@ class WindowStateAnimator {
                 i--;
                 WindowState c = mWin.mChildWindows.get(i);
                 c.mAttachedHidden = true;
-            }
-
-            if (mReportDestroySurface) {
-                mReportDestroySurface = false;
-                mSurfacePendingDestroy = true;
-                try {
-                    mWin.mClient.dispatchGetNewSurface();
-                    // We'll really destroy on the next time around.
-                    return;
-                } catch (RemoteException e) {
-                }
             }
 
             try {
@@ -760,6 +744,7 @@ class WindowStateAnimator {
             mSurfaceShown = false;
             mSurface = null;
             mWin.mHasSurface =false;
+            mDrawState = NO_SURFACE;
         }
     }
 
@@ -1147,7 +1132,7 @@ class WindowStateAnimator {
             }
         } else {
             if (DEBUG_ANIM) {
-                Slog.v(TAG, "prepareSurface: No changes in animation for " + mWin);
+                // Slog.v(TAG, "prepareSurface: No changes in animation for " + mWin);
             }
             displayed = true;
         }
