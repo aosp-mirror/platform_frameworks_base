@@ -822,21 +822,31 @@ final class WebViewInputDispatcher {
     }
 
     private void enqueueEventLocked(DispatchEvent d) {
-        if (!shouldSkipWebKit(d.mEventType)) {
+        if (!shouldSkipWebKit(d)) {
             enqueueWebKitEventLocked(d);
         } else {
             enqueueUiEventLocked(d);
         }
     }
 
-    private boolean shouldSkipWebKit(int eventType) {
-        switch (eventType) {
+    private boolean shouldSkipWebKit(DispatchEvent d) {
+        switch (d.mEventType) {
             case EVENT_TYPE_CLICK:
             case EVENT_TYPE_HOVER:
             case EVENT_TYPE_SCROLL:
             case EVENT_TYPE_HIT_TEST:
                 return false;
             case EVENT_TYPE_TOUCH:
+                // TODO: This should be cleaned up. We now have WebViewInputDispatcher
+                // and WebViewClassic both checking for slop and doing their own
+                // thing - they should be consolidated. And by consolidated, I mean
+                // WebViewClassic's version should just be deleted.
+                // The reason this is done is because webpages seem to expect
+                // that they only get an ontouchmove if the slop has been exceeded.
+                if (mIsTapCandidate && d.mEvent != null
+                        && d.mEvent.getActionMasked() == MotionEvent.ACTION_MOVE) {
+                    return true;
+                }
                 return !mPostSendTouchEventsToWebKit
                         || mPostDoNotSendTouchEventsToWebKitUntilNextGesture;
         }
