@@ -180,9 +180,9 @@ public final class BitmapRegionDecoder {
      */
     public Bitmap decodeRegion(Rect rect, BitmapFactory.Options options) {
         checkRecycled("decodeRegion called on recycled region decoder");
-        if (rect.left < 0 || rect.top < 0 || rect.right > getWidth()
-                || rect.bottom > getHeight())
-            throw new IllegalArgumentException("rectangle is not inside the image");
+        if (rect.right <= 0 || rect.bottom <= 0 || rect.left >= getWidth()
+                || rect.top >= getHeight())
+            throw new IllegalArgumentException("rectangle is outside the image");
         return nativeDecodeRegion(mNativeBitmapRegionDecoder, rect.left, rect.top,
                 rect.right - rect.left, rect.bottom - rect.top, options);
     }
