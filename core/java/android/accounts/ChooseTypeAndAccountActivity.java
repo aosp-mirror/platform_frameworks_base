@@ -119,8 +119,6 @@ public class ChooseTypeAndAccountActivity extends Activity
                     + savedInstanceState + ")");
         }
 
-        setContentView(R.layout.choose_type_and_account);
-
         if (savedInstanceState != null) {
             mPendingRequest = savedInstanceState.getInt(KEY_INSTANCE_STATE_PENDING_REQUEST);
             mExistingAccounts =
@@ -164,14 +162,29 @@ public class ChooseTypeAndAccountActivity extends Activity
             }
         }
 
-        // Read the validAccountTypes, if present, and add them to the setOfAllowableAccountTypes
-        Set<String> setOfAllowableAccountTypes = null;
-        final String[] validAccountTypes =
+        // An account type is relevant iff it is allowed by the caller and supported by the account
+        // manager.
+        Set<String> setOfRelevantAccountTypes = null;
+        final String[] allowedAccountTypes =
                 intent.getStringArrayExtra(EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY);
-        if (validAccountTypes != null) {
-            setOfAllowableAccountTypes = new HashSet<String>(validAccountTypes.length);
-            for (String type : validAccountTypes) {
-                setOfAllowableAccountTypes.add(type);
+        if (allowedAccountTypes != null) {
+
+            setOfRelevantAccountTypes = new HashSet<String>(allowedAccountTypes.length);
+            Set<String> setOfAllowedAccountTypes = new HashSet<String>(allowedAccountTypes.length);
+            for (String type : allowedAccountTypes) {
+                setOfAllowedAccountTypes.add(type);
+            }
+
+            AuthenticatorDescription[] descs = AccountManager.get(this).getAuthenticatorTypes();
+            Set<String> supportedAccountTypes = new HashSet<String>(descs.length);
+            for (AuthenticatorDescription desc : descs) {
+                supportedAccountTypes.add(desc.type);
+            }
+
+            for (String acctType : setOfAllowedAccountTypes) {
+                if (supportedAccountTypes.contains(acctType)) {
+                    setOfRelevantAccountTypes.add(acctType);
+                }
             }
         }
 
@@ -185,8 +198,8 @@ public class ChooseTypeAndAccountActivity extends Activity
                     && !setOfAllowableAccounts.contains(account)) {
                 continue;
             }
-            if (setOfAllowableAccountTypes != null
-                    && !setOfAllowableAccountTypes.contains(account.type)) {
+            if (setOfRelevantAccountTypes != null
+                    && !setOfRelevantAccountTypes.contains(account.type)) {
                 continue;
             }
             mAccountInfos.add(new AccountInfo(account,
@@ -194,30 +207,15 @@ public class ChooseTypeAndAccountActivity extends Activity
                     account.equals(selectedAccount)));
         }
 
-        // there is more than one allowable account. initialize the list adapter to allow
-        // the user to select an account.
-        ListView list = (ListView) findViewById(android.R.id.list);
-        list.setAdapter(new AccountArrayAdapter(this,
-                android.R.layout.simple_list_item_1, mAccountInfos));
-        list.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                onListItemClick((ListView)parent, v, position, id);
-            }
-        });
-
-        // set the listener for the addAccount button
-        Button addAccountButton = (Button) findViewById(R.id.addAccount);
-        addAccountButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(final View v) {
-                startChooseAccountTypeActivity();
-            }
-        });
-
         if (mPendingRequest == REQUEST_NULL) {
-            // If there are no allowable accounts go directly to add account
-            if (shouldSkipToChooseAccountTypeFlow()) {
-                startChooseAccountTypeActivity();
+            // If there are no relevant accounts and only one relevant account typoe go directly to
+            // add account. Otherwise let the user choose.
+            if (mAccountInfos.isEmpty()) {
+                if (setOfRelevantAccountTypes.size() == 1) {
+                    runAddAccountForAuthenticator(setOfRelevantAccountTypes.iterator().next());
+                } else {
+                    startChooseAccountTypeActivity();
+                }
                 return;
             }
 
@@ -229,6 +227,30 @@ public class ChooseTypeAndAccountActivity extends Activity
                 return;
             }
         }
+
+        setContentView(R.layout.choose_type_and_account);
+
+        // there is more than one allowable account. initialize the list adapter to allow
+        // the user to select an account.
+        ListView list = (ListView) findViewById(android.R.id.list);
+        list.setAdapter(new AccountArrayAdapter(this,
+                android.R.layout.simple_list_item_1, mAccountInfos));
+        list.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                onListItemClick((ListView)parent, v, position, id);
+            }
+        });
+
+        // set the listener for the addAccount button
+        Button addAccountButton = (Button) findViewById(R.id.addAccount);
+        addAccountButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                startChooseAccountTypeActivity();
+            }
+        });
     }
 
     @Override
@@ -267,7 +289,7 @@ public class ChooseTypeAndAccountActivity extends Activity
         if (resultCode == RESULT_CANCELED) {
             // if cancelling out of addAccount and the original state caused us to skip this,
             // finish this activity
-            if (shouldSkipToChooseAccountTypeFlow()) {
+            if (mAccountInfos.isEmpty()) {
                 setResult(Activity.RESULT_CANCELED);
                 finish();
             }
@@ -322,14 +344,6 @@ public class ChooseTypeAndAccountActivity extends Activity
         }
         setResult(Activity.RESULT_CANCELED);
         finish();
-    }
-
-    /**
-     * convenience method to check if we should skip the accounts list display and immediately
-     * jump to the flow that asks the user to select from the account type list
-     */
-    private boolean shouldSkipToChooseAccountTypeFlow() {
-        return mAccountInfos.isEmpty();
     }
 
     protected void runAddAccountForAuthenticator(String type) {
