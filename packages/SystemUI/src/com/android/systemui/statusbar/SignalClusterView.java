@@ -21,9 +21,9 @@ import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.android.systemui.statusbar.policy.NetworkController;
 
@@ -31,12 +31,12 @@ import com.android.systemui.R;
 
 // Intimately tied to the design of res/layout/signal_cluster_view.xml
 public class SignalClusterView
-        extends LinearLayout 
+        extends LinearLayout
         implements NetworkController.SignalCluster {
 
     static final boolean DEBUG = false;
     static final String TAG = "SignalClusterView";
-    
+
     NetworkController mNC;
 
     private boolean mWifiVisible = false;
@@ -130,6 +130,17 @@ public class SignalClusterView
         mAirplaneIconId = airplaneIconId;
 
         apply();
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        // Standard group layout onPopulateAccessibilityEvent() implementations
+        // ignore content description, so populate manually
+        if (mWifiVisible && mWifiGroup.getContentDescription() != null)
+            event.getText().add(mWifiGroup.getContentDescription());
+        if (mMobileVisible && mMobileGroup.getContentDescription() != null)
+            event.getText().add(mMobileGroup.getContentDescription());
+        return super.dispatchPopulateAccessibilityEvent(event);
     }
 
     // Run after each indicator change.
