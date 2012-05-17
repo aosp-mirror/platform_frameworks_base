@@ -19,25 +19,25 @@
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:background="#ff000000" android:shareInterpolator="false" android:zAdjustment="normal">
+
     <alpha android:fromAlpha="1.0" android:toAlpha="0"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
             android:interpolator="@interpolator/accelerate_quad"
-            android:duration="350"/>
+            android:duration="300"/>
 
-    <translate android:fromXDelta="0" android:toXDelta="-140%"
+    <translate android:fromXDelta="0" android:toXDelta="-120%"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:interpolator="@interpolator/decelerate_quad"
-            android:duration="350"/>
+            android:interpolator="@interpolator/accelerate_cubic"
+            android:duration="300"/>
 
-    <scale android:fromXScale="1.0" android:toXScale="0.6"
-            android:fromYScale="1.0" android:toYScale="0.6"
+    <scale android:fromXScale="1.0" android:toXScale="0.5"
+            android:fromYScale="1.0" android:toYScale="0.5"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:pivotX="50%p" android:pivotY="50%p"
-            android:interpolator="@interpolator/decelerate_cubic"
-            android:duration="350" />
+            android:pivotY="50%p" android:pivotX="0%p"
+            android:interpolator="@interpolator/accelerate_quad"
+            android:duration="300" />
 
     <!-- This is needed to keep the animation running while task_open_enter completes -->
     <alpha android:fromAlpha="1.0" android:toAlpha="1.0"
-            android:interpolator="@interpolator/accelerate_quad"
-            android:duration="500" />
+            android:duration="700" />
 </set>
