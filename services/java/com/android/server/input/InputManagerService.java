@@ -37,7 +37,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
@@ -597,8 +596,8 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
         visitAllKeyboardLayouts(new KeyboardLayoutVisitor() {
             @Override
             public void visitKeyboardLayout(Resources resources,
-                    String descriptor, String label, int keyboardLayoutResId) {
-                list.add(new KeyboardLayout(descriptor, label));
+                    String descriptor, String label, String collection, int keyboardLayoutResId) {
+                list.add(new KeyboardLayout(descriptor, label, collection));
             }
         });
         return list.toArray(new KeyboardLayout[list.size()]);
@@ -614,8 +613,8 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
         visitKeyboardLayout(keyboardLayoutDescriptor, new KeyboardLayoutVisitor() {
             @Override
             public void visitKeyboardLayout(Resources resources,
-                    String descriptor, String label, int keyboardLayoutResId) {
-                result[0] = new KeyboardLayout(descriptor, label);
+                    String descriptor, String label, String collection, int keyboardLayoutResId) {
+                result[0] = new KeyboardLayout(descriptor, label, collection);
             }
         });
         if (result[0] == null) {
@@ -663,6 +662,9 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
             return;
         }
 
+        CharSequence receiverLabel = receiver.loadLabel(pm);
+        String collection = receiverLabel != null ? receiverLabel.toString() : "";
+
         try {
             Resources resources = pm.getResourcesForApplication(receiver.applicationInfo);
             XmlResourceParser parser = resources.getXml(configResId);
@@ -696,7 +698,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
                                         receiver.packageName, receiver.name, name);
                                 if (keyboardName == null || name.equals(keyboardName)) {
                                     visitor.visitKeyboardLayout(resources, descriptor,
-                                            label, keyboardLayoutResId);
+                                            label, collection, keyboardLayoutResId);
                                 }
                             }
                         } finally {
@@ -1139,7 +1141,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
         visitKeyboardLayout(keyboardLayoutDescriptor, new KeyboardLayoutVisitor() {
             @Override
             public void visitKeyboardLayout(Resources resources,
-                    String descriptor, String label, int keyboardLayoutResId) {
+                    String descriptor, String label, String collection, int keyboardLayoutResId) {
                 try {
                     result[0] = descriptor;
                     result[1] = Streams.readFully(new InputStreamReader(
@@ -1262,7 +1264,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
 
     private interface KeyboardLayoutVisitor {
         void visitKeyboardLayout(Resources resources,
-                String descriptor, String label, int keyboardLayoutResId);
+                String descriptor, String label, String collection, int keyboardLayoutResId);
     }
 
     private final class InputDevicesChangedListenerRecord implements DeathRecipient {
