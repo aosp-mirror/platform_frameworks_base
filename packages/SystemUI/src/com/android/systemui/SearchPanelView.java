@@ -107,9 +107,11 @@ public class SearchPanelView extends FrameLayout implements
 
     private void startAssistActivity() {
         Intent intent = getAssistIntent();
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         try {
-            mContext.startActivity(intent);
+            ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
+                    R.anim.search_launch_enter, R.anim.search_launch_exit);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(intent, opts.toBundle());
         } catch (ActivityNotFoundException e) {
             Slog.w(TAG, "Activity not found for " + intent.getAction());
         }
