@@ -744,6 +744,9 @@ public class HorizontalScrollView extends FrameLayout {
         }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+                if (!isEnabled()) {
+                    return false;
+                }
                 final int viewportWidth = getWidth() - mPaddingLeft - mPaddingRight;
                 final int targetScrollX = Math.min(mScrollX + viewportWidth, getScrollRange());
                 if (targetScrollX != mScrollX) {
@@ -752,6 +755,9 @@ public class HorizontalScrollView extends FrameLayout {
                 }
             } return false;
             case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+                if (!isEnabled()) {
+                    return false;
+                }
                 final int viewportWidth = getWidth() - mPaddingLeft - mPaddingRight;
                 final int targetScrollX = Math.max(0, mScrollX - viewportWidth);
                 if (targetScrollX != mScrollX) {
@@ -770,10 +776,10 @@ public class HorizontalScrollView extends FrameLayout {
         final int scrollRange = getScrollRange();
         if (scrollRange > 0) {
             info.setScrollable(true);
-            if (mScrollX > 0) {
+            if (isEnabled() && mScrollX > 0) {
                 info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
             }
-            if (mScrollX < scrollRange) {
+            if (isEnabled() && mScrollX < scrollRange) {
                 info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
             }
         }
