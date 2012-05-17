@@ -1850,7 +1850,7 @@ public class Notification implements Parcelable
             contentView.setViewVisibility(R.id.text2, View.GONE);
 
             int[] rowIds = {R.id.inbox_text0, R.id.inbox_text1, R.id.inbox_text2, R.id.inbox_text3,
-                    R.id.inbox_text4};
+                    R.id.inbox_text4, R.id.inbox_text5, R.id.inbox_text6};
 
             // Make sure all rows are gone in case we reuse a view.
             for (int rowId : rowIds) {
@@ -1865,6 +1865,12 @@ public class Notification implements Parcelable
                     contentView.setTextViewText(rowIds[i], str);
                 }
                 i++;
+            }
+
+            if  (mTexts.size() > rowIds.length) {
+                contentView.setViewVisibility(R.id.inbox_more, View.VISIBLE);
+            } else {
+                contentView.setViewVisibility(R.id.inbox_more, View.GONE);
             }
 
             return contentView;
