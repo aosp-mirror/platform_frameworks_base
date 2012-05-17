@@ -213,14 +213,9 @@ status_t BootAnimation::readyToRun() {
     mAssets.addDefaultAssets();
 
     DisplayInfo dinfo;
-    char display_size[PROPERTY_VALUE_MAX];
-
-    if (property_get("sys.display-size", display_size, "") <= 0 ||
-        sscanf(display_size, "%dx%d", &dinfo.w, &dinfo.h) != 2) {
-        status_t status = session()->getDisplayInfo(0, &dinfo);
-        if (status)
-            return -1;
-    }
+    status_t status = session()->getDisplayInfo(0, &dinfo);
+    if (status)
+        return -1;
 
     // create the native surface
     sp<SurfaceControl> control = session()->createSurface(
