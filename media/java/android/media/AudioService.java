@@ -3625,12 +3625,14 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             Log.e(TAG, "not dispatching invalid media key event " + keyEvent);
             return;
         }
-        // event filtering based on audio mode
+        // event filtering for telephony
         synchronized(mRingingLock) {
-            if (mIsRinging || (getMode() == AudioSystem.MODE_IN_CALL) ||
-                    (getMode() == AudioSystem.MODE_IN_COMMUNICATION) ||
-                    (getMode() == AudioSystem.MODE_RINGTONE) ) {
-                return;
+            synchronized(mRCStack) {
+                if ((mMediaReceiverForCalls != null) &&
+                        (mIsRinging || (getMode() == AudioSystem.MODE_IN_CALL))) {
+                    dispatchMediaKeyEventForCalls(keyEvent, needWakeLock);
+                    return;
+                }
             }
         }
         // event filtering based on voice-based interactions
@@ -3639,6 +3641,25 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         } else {
             dispatchMediaKeyEvent(keyEvent, needWakeLock);
         }
+    }
+
+    /**
+     * Handles the dispatching of the media button events to the telephony package.
+     * Precondition: mMediaReceiverForCalls != null
+     * @param keyEvent a non-null KeyEvent whose key code is one of the supported media buttons
+     * @param needWakeLock true if a PARTIAL_WAKE_LOCK needs to be held while this key event
+     *     is dispatched.
+     */
+    private void dispatchMediaKeyEventForCalls(KeyEvent keyEvent, boolean needWakeLock) {
+        Intent keyIntent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
+        keyIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
+        keyIntent.setPackage(mMediaReceiverForCalls.getPackageName());
+        if (needWakeLock) {
+            mMediaEventWakeLock.acquire();
+            keyIntent.putExtra(EXTRA_WAKELOCK_ACQUIRED, WAKELOCK_RELEASE_ON_FINISHED);
+        }
+        mContext.sendOrderedBroadcast(keyIntent, null, mKeyEventDone,
+                mAudioHandler, Activity.RESULT_OK, null, null);
     }
 
     /**
@@ -4028,6 +4049,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private final Stack<RemoteControlStackEntry> mRCStack = new Stack<RemoteControlStackEntry>();
 
     /**
+     * The component the telephony package can register so telephony calls have priority to
+     * handle media button events
+     */
+    private ComponentName mMediaReceiverForCalls = null;
+
+    /**
      * Helper function:
      * Display in the log the current entries in the remote control focus stack
      */
@@ -4377,6 +4404,35 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
                 }
             }
+        }
+    }
+
+    /**
+     * see AudioManager.registerMediaButtonEventReceiverForCalls(ComponentName c)
+     * precondition: c != null
+     */
+    public void registerMediaButtonEventReceiverForCalls(ComponentName c) {
+        if (mContext.checkCallingPermission("android.permission.MODIFY_PHONE_STATE")
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Invalid permissions to register media button receiver for calls");
+            return;
+        }
+        synchronized(mRCStack) {
+            mMediaReceiverForCalls = c;
+        }
+    }
+
+    /**
+     * see AudioManager.unregisterMediaButtonEventReceiverForCalls()
+     */
+    public void unregisterMediaButtonEventReceiverForCalls() {
+        if (mContext.checkCallingPermission("android.permission.MODIFY_PHONE_STATE")
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Invalid permissions to unregister media button receiver for calls");
+            return;
+        }
+        synchronized(mRCStack) {
+            mMediaReceiverForCalls = null;
         }
     }
 
