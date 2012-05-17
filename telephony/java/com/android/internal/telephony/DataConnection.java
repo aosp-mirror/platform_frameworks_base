@@ -1256,6 +1256,7 @@ public abstract class DataConnection extends StateMachine {
         pw.println(" mRetryOverride=" + mRetryOverride);
         pw.println(" mRefCount=" + mRefCount);
         pw.println(" userData=" + userData);
+        if (mRetryMgr != null) pw.println(" " + mRetryMgr);
         pw.flush();
     }
 }
