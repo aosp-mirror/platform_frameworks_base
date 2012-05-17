@@ -1552,7 +1552,8 @@
         android:protectionLevel="signature" />
 
         <!-- Must be required by an {@link android.accessibilityservice.AccessibilityService},
-         to ensure that only the system can bind to it. -->
+         to ensure that only the system can bind to it.
+         @hide -->
     <permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE"
         android:label="@string/permlab_bindAccessibilityService"
         android:description="@string/permdesc_bindAccessibilityService"
