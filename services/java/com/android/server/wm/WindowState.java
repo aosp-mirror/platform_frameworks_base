@@ -679,8 +679,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     boolean isVisibleOrAdding() {
         final AppWindowToken atoken = mAppToken;
-        return ((mHasSurface && !mWinAnimator.mReportDestroySurface)
-                        || (!mRelayoutCalled && mViewVisibility == View.VISIBLE))
+        return (mHasSurface || (!mRelayoutCalled && mViewVisibility == View.VISIBLE))
                 && mPolicyVisibility && !mAttachedHidden
                 && (atoken == null || !atoken.hiddenRequested)
                 && !mExiting && !mDestroying;

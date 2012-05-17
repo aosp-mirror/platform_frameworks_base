@@ -691,13 +691,6 @@ public interface WindowManager extends ViewManager {
          */
         public static final int FLAG_NEEDS_MENU_KEY = 0x08000000;
 
-        /** Window flag: *sigh* The lock screen wants to continue running its
-         * animation while it is fading.  A kind-of hack to allow this.  Maybe
-         * in the future we just make this the default behavior.
-         *
-         * {@hide} */
-        public static final int FLAG_KEEP_SURFACE_WHILE_ANIMATING = 0x10000000;
-        
         /** Window flag: special flag to limit the size of the window to be
          * original size ([320x480] x density). Used to create window for applications
          * running under compatibility mode.
