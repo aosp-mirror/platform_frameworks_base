@@ -1445,7 +1445,8 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Returns an estimate of the bitmap heap memory usage for this RemoteViews.
      */
-    int estimateMemoryUsage() {
+    /** @hide */
+    public int estimateMemoryUsage() {
         return mMemoryUsageCounter.getMemoryUsage();
     }
 
