@@ -79,6 +79,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.Set;
 
 import javax.crypto.SecretKey;
@@ -178,7 +180,8 @@ class MountService extends IMountService.Stub
     final private ArrayList<MountServiceBinderListener> mListeners =
             new ArrayList<MountServiceBinderListener>();
     private boolean                               mBooted = false;
-    private boolean                               mReady = false;
+    private CountDownLatch                        mConnectedSignal = new CountDownLatch(1);
+    private CountDownLatch                        mAsecsScanned = new CountDownLatch(1);
     private boolean                               mSendUmsConnectedOnBoot = false;
     // true if we should fake MEDIA_MOUNTED state for external storage
     private boolean                               mEmulateExternalStorage = false;
@@ -446,15 +449,30 @@ class MountService extends IMountService.Stub
     final private HandlerThread mHandlerThread;
     final private Handler mHandler;
 
+    void waitForAsecScan() {
+        waitForLatch(mAsecsScanned);
+    }
+
     private void waitForReady() {
-        while (mReady == false) {
-            for (int retries = 5; retries > 0; retries--) {
-                if (mReady) {
+        waitForLatch(mConnectedSignal);
+    }
+
+    private void waitForLatch(CountDownLatch latch) {
+        if (latch == null) {
+            return;
+        }
+
+        for (;;) {
+            try {
+                if (latch.await(5000, TimeUnit.MILLISECONDS)) {
                     return;
+                } else {
+                    Slog.w(TAG, "Thread " + Thread.currentThread().getName()
+                            + " still waiting for MountService ready...");
                 }
-                SystemClock.sleep(1000);
+            } catch (InterruptedException e) {
+                Slog.w(TAG, "Interrupt while waiting for MountService to be ready.");
             }
-            Slog.w(TAG, "Waiting too long for mReady!");
         }
     }
 
@@ -627,7 +645,7 @@ class MountService extends IMountService.Stub
          * Since we'll be calling back into the NativeDaemonConnector,
          * we need to do our work in a new thread.
          */
-        new Thread() {
+        new Thread("MountService#onDaemonConnected") {
             @Override
             public void run() {
                 /**
@@ -668,14 +686,19 @@ class MountService extends IMountService.Stub
                     updatePublicVolumeState(mExternalStoragePath, Environment.MEDIA_REMOVED);
                 }
 
-                // Let package manager load internal ASECs.
-                mPms.updateExternalMediaStatus(true, false);
-
                 /*
                  * Now that we've done our initialization, release
                  * the hounds!
                  */
-                mReady = true;
+                mConnectedSignal.countDown();
+                mConnectedSignal = null;
+
+                // Let package manager load internal ASECs.
+                mPms.scanAvailableAsecs();
+
+                // Notify people waiting for ASECs to be scanned that it's done.
+                mAsecsScanned.countDown();
+                mAsecsScanned = null;
             }
         }.start();
     }
@@ -1159,22 +1182,12 @@ class MountService extends IMountService.Stub
         mObbActionHandler = new ObbActionHandler(mHandlerThread.getLooper());
 
         /*
-         * Vold does not run in the simulator, so pretend the connector thread
-         * ran and did its thing.
-         */
-        if ("simulator".equals(SystemProperties.get("ro.product.device"))) {
-            mReady = true;
-            mUmsEnabling = true;
-            return;
-        }
-
-        /*
          * Create the connection to vold with a maximum queue of twice the
          * amount of containers we'd ever expect to have. This keeps an
          * "asec list" from blocking a thread repeatedly.
          */
         mConnector = new NativeDaemonConnector(this, "vold", MAX_CONTAINERS * 2, VOLD_TAG, 25);
-        mReady = false;
+
         Thread thread = new Thread(mConnector, VOLD_TAG);
         thread.start();
 

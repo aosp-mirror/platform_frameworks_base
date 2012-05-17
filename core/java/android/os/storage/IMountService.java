@@ -1360,7 +1360,14 @@ public interface IMountService extends IInterface {
      */
     public Parcelable[] getVolumeList() throws RemoteException;
 
-    public String getSecureContainerFilesystemPath(String id) throws RemoteException;
+    /**
+     * Gets the path on the filesystem for the ASEC container itself.
+     * 
+     * @param cid ASEC container ID
+     * @return path to filesystem or {@code null} if it's not found
+     * @throws RemoteException
+     */
+    public String getSecureContainerFilesystemPath(String cid) throws RemoteException;
 
     /*
      * Fix permissions in a container which has just been created and populated.
