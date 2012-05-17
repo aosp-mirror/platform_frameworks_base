@@ -376,10 +376,8 @@ public class MultiWaveView extends View {
     private void startChevronAnimation() {
         final float chevronStartDistance = mHandleDrawable.getWidth() * 0.8f;
         final float chevronStopDistance = mOuterRadius * 0.9f / 2.0f;
-        mChevronAnimations.clear();
         final float startScale = 0.5f;
         final float endScale = 2.0f;
-
         final int directionCount = mFeedbackCount > 0 ? mChevronDrawables.size()/mFeedbackCount : 0;
 
         mChevronAnimations.stop();
