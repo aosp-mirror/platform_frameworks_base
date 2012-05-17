@@ -26,14 +26,14 @@
     android:fitsSystemWindows="true"
     >
 
-    <include layout="@layout/status_bar_expanded"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
-
     <include layout="@layout/status_bar"
         android:layout_width="match_parent"
         android:layout_height="@*android:dimen/status_bar_height"
+        />
+
+    <include layout="@layout/status_bar_expanded"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         />
 
 </com.android.systemui.statusbar.phone.StatusBarWindowView>
