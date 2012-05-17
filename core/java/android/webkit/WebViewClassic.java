@@ -1598,8 +1598,65 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        if (!mWebView.isEnabled()) {
+            // Only default actions are supported while disabled.
+            return mWebViewPrivate.super_performAccessibilityAction(action, arguments);
+        }
+
+        if (mAccessibilityInjector.supportsAccessibilityAction(action)) {
+            return mAccessibilityInjector.performAccessibilityAction(action, arguments);
+        }
+
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+                final int convertedContentHeight = contentToViewY(getContentHeight());
+                final int adjustedViewHeight = getHeight() - mWebView.getPaddingTop()
+                        - mWebView.getPaddingBottom();
+                final int maxScrollY = Math.max(convertedContentHeight - adjustedViewHeight, 0);
+                final boolean canScrollBackward = (getScrollY() > 0);
+                final boolean canScrollForward = ((getScrollY() - maxScrollY) > 0);
+                if ((action == AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) && canScrollBackward) {
+                    mWebView.scrollBy(0, adjustedViewHeight);
+                    return true;
+                }
+                if ((action == AccessibilityNodeInfo.ACTION_SCROLL_FORWARD) && canScrollForward) {
+                    mWebView.scrollBy(0, -adjustedViewHeight);
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        return mWebViewPrivate.super_performAccessibilityAction(action, arguments);
+    }
+
+    @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        if (!mWebView.isEnabled()) {
+            // Only default actions are supported while disabled.
+            return;
+        }
+
         info.setScrollable(isScrollableForAccessibility());
+
+        final int convertedContentHeight = contentToViewY(getContentHeight());
+        final int adjustedViewHeight = getHeight() - mWebView.getPaddingTop()
+                - mWebView.getPaddingBottom();
+        final int maxScrollY = Math.max(convertedContentHeight - adjustedViewHeight, 0);
+        final boolean canScrollBackward = (getScrollY() > 0);
+        final boolean canScrollForward = ((getScrollY() - maxScrollY) > 0);
+
+        if (canScrollForward) {
+            info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+        }
+
+        if (canScrollForward) {
+            info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+        }
+
+        mAccessibilityInjector.onInitializeAccessibilityNodeInfo(info);
     }
 
     @Override

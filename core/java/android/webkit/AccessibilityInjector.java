@@ -17,25 +17,37 @@
 package android.webkit;
 
 import android.content.Context;
-import android.os.Vibrator;
+import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.webkit.WebViewCore.EventHub;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Handles injecting accessibility JavaScript and related JavaScript -> Java
  * APIs.
  */
 class AccessibilityInjector {
+    // Default result returned from AndroidVox. Using true here means if the
+    // script fails, an accessibility service will always think that traversal
+    // has succeeded.
+    private static final String DEFAULT_ANDROIDVOX_RESULT = "true";
+
     // The WebViewClassic this injector is responsible for managing.
     private final WebViewClassic mWebViewClassic;
 
@@ -47,10 +59,12 @@ class AccessibilityInjector {
 
     // The Java objects that are exposed to JavaScript.
     private TextToSpeech mTextToSpeech;
+    private CallbackHandler mCallback;
 
     // Lazily loaded helper objects.
     private AccessibilityManager mAccessibilityManager;
     private AccessibilityInjectorFallback mAccessibilityInjector;
+    private JSONObject mAccessibilityJSONObject;
 
     // Whether the accessibility script has been injected into the current page.
     private boolean mAccessibilityScriptInjected;
@@ -61,8 +75,11 @@ class AccessibilityInjector {
     @SuppressWarnings("unused")
     private static final int ACCESSIBILITY_SCRIPT_INJECTION_PROVIDED = 1;
 
-    // Aliases for Java objects exposed to JavaScript.
-    private static final String ALIAS_ACCESSIBILITY_JS_INTERFACE = "accessibility";
+    // Alias for TTS API exposed to JavaScript.
+    private static final String ALIAS_TTS_JS_INTERFACE = "accessibility";
+
+    // Alias for traversal callback exposed to JavaScript.
+    private static final String ALIAS_TRAVERSAL_JS_INTERFACE = "accessibilityTraversal";
 
     // Template for JavaScript that injects a screen-reader.
     private static final String ACCESSIBILITY_SCREEN_READER_JAVASCRIPT_TEMPLATE =
@@ -72,6 +89,10 @@ class AccessibilityInjector {
                     "    chooser.src = '%1s';" +
                     "    document.getElementsByTagName('head')[0].appendChild(chooser);" +
                     "  })();";
+
+    // Template for JavaScript that performs AndroidVox actions.
+    private static final String ACCESSIBILITY_ANDROIDVOX_TEMPLATE =
+            "cvox.AndroidVox.performAction('%1s')";
 
     /**
      * Creates an instance of the AccessibilityInjector based on
@@ -99,6 +120,7 @@ class AccessibilityInjector {
         }
 
         addTtsApis();
+        addCallbackApis();
     }
 
     /**
@@ -109,6 +131,82 @@ class AccessibilityInjector {
      */
     public void removeAccessibilityApisIfNecessary() {
         removeTtsApis();
+        removeCallbackApis();
+    }
+
+    /**
+     * Initializes an {@link AccessibilityNodeInfo} with the actions and
+     * movement granularity levels supported by this
+     * {@link AccessibilityInjector}.
+     * <p>
+     * If an action identifier is added in this method, this
+     * {@link AccessibilityInjector} should also return {@code true} from
+     * {@link #supportsAccessibilityAction(int)}.
+     * </p>
+     *
+     * @param info The info to initialize.
+     * @see View#onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)
+     */
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        info.setMovementGranularities(AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER
+                | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD
+                | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_LINE
+                | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PARAGRAPH
+                | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PAGE);
+        info.addAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
+        info.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
+        info.addAction(AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT);
+        info.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT);
+        info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
+        info.setClickable(true);
+    }
+
+    /**
+     * Returns {@code true} if this {@link AccessibilityInjector} should handle
+     * the specified action.
+     *
+     * @param action An accessibility action identifier.
+     * @return {@code true} if this {@link AccessibilityInjector} should handle
+     *         the specified action.
+     */
+    public boolean supportsAccessibilityAction(int action) {
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY:
+            case AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY:
+            case AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT:
+            case AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT:
+            case AccessibilityNodeInfo.ACTION_CLICK:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Performs the specified accessibility action.
+     *
+     * @param action The identifier of the action to perform.
+     * @param arguments The action arguments, or {@code null} if no arguments.
+     * @return {@code true} if the action was successful.
+     * @see View#performAccessibilityAction(int, Bundle)
+     */
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        if (!isAccessibilityEnabled()) {
+            mAccessibilityScriptInjected = false;
+            toggleFallbackAccessibilityInjector(false);
+            return false;
+        }
+
+        if (mAccessibilityScriptInjected) {
+            return sendActionToAndroidVox(action, arguments);
+        }
+
+        if (mAccessibilityInjector != null) {
+            // TODO: Implement actions for non-JS handler.
+            return false;
+        }
+
+        return false;
     }
 
     /**
@@ -261,7 +359,7 @@ class AccessibilityInjector {
         final String pkgName = mContext.getPackageName();
 
         mTextToSpeech = new TextToSpeech(mContext, null, null, pkgName + ".**webview**", true);
-        mWebView.addJavascriptInterface(mTextToSpeech, ALIAS_ACCESSIBILITY_JS_INTERFACE);
+        mWebView.addJavascriptInterface(mTextToSpeech, ALIAS_TTS_JS_INTERFACE);
     }
 
     /**
@@ -273,10 +371,28 @@ class AccessibilityInjector {
             return;
         }
 
-        mWebView.removeJavascriptInterface(ALIAS_ACCESSIBILITY_JS_INTERFACE);
+        mWebView.removeJavascriptInterface(ALIAS_TTS_JS_INTERFACE);
         mTextToSpeech.stop();
         mTextToSpeech.shutdown();
         mTextToSpeech = null;
+    }
+
+    private void addCallbackApis() {
+        if (mCallback != null) {
+            return;
+        }
+
+        mCallback = new CallbackHandler(ALIAS_TRAVERSAL_JS_INTERFACE);
+        mWebView.addJavascriptInterface(mCallback, ALIAS_TRAVERSAL_JS_INTERFACE);
+    }
+
+    private void removeCallbackApis() {
+        if (mCallback == null) {
+            return;
+        }
+
+        mWebView.removeJavascriptInterface(ALIAS_TRAVERSAL_JS_INTERFACE);
+        mCallback = null;
     }
 
     /**
@@ -346,5 +462,170 @@ class AccessibilityInjector {
      */
     private boolean isAccessibilityEnabled() {
         return mAccessibilityManager.isEnabled();
+    }
+
+    /**
+     * Packs an accessibility action into a JSON object and sends it to AndroidVox.
+     *
+     * @param action The action identifier.
+     * @param arguments The action arguments, if applicable.
+     * @return The result of the action.
+     */
+    private boolean sendActionToAndroidVox(int action, Bundle arguments) {
+        if (mAccessibilityJSONObject == null) {
+            mAccessibilityJSONObject = new JSONObject();
+        } else {
+            // Remove all keys from the object.
+            final Iterator<?> keys = mAccessibilityJSONObject.keys();
+            while (keys.hasNext()) {
+                keys.next();
+                keys.remove();
+            }
+        }
+
+        try {
+            mAccessibilityJSONObject.accumulate("action", action);
+
+            switch (action) {
+                case AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY:
+                case AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY:
+                    final int granularity = arguments.getInt(
+                            AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT);
+                    mAccessibilityJSONObject.accumulate("granularity", granularity);
+                    break;
+                case AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT:
+                case AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT:
+                    final String element = arguments.getString(
+                            AccessibilityNodeInfo.ACTION_ARGUMENT_HTML_ELEMENT_STRING);
+                    mAccessibilityJSONObject.accumulate("element", element);
+                    break;
+            }
+        } catch (JSONException e) {
+            return false;
+        }
+
+        final String jsonString = mAccessibilityJSONObject.toString();
+        final String jsCode = String.format(ACCESSIBILITY_ANDROIDVOX_TEMPLATE, jsonString);
+        final String result = mCallback.performAction(mWebView, jsCode, DEFAULT_ANDROIDVOX_RESULT);
+
+        return ("true".equalsIgnoreCase(result));
+    }
+
+    /**
+     * Exposes result interface to JavaScript.
+     */
+    private static class CallbackHandler {
+        private static final String JAVASCRIPT_ACTION_TEMPLATE =
+                "javascript:(function() { %s.onResult(%d, %s); })();";
+
+        // Time in milliseconds to wait for a result before failing.
+        private static final long RESULT_TIMEOUT = 200;
+
+        private final AtomicInteger mResultIdCounter = new AtomicInteger();
+        private final Object mResultLock = new Object();
+        private final String mInterfaceName;
+
+        private String mResult = null;
+        private long mResultId = -1;
+
+        private CallbackHandler(String interfaceName) {
+            mInterfaceName = interfaceName;
+        }
+
+        /**
+         * Performs an action and attempts to wait for a result.
+         *
+         * @param webView The WebView to perform the action on.
+         * @param code JavaScript code that evaluates to a result.
+         * @param defaultResult The result to return if the action times out.
+         * @return The result of the action, or false if it timed out.
+         */
+        private String performAction(WebView webView, String code, String defaultResult) {
+            final int resultId = mResultIdCounter.getAndIncrement();
+            final String url = String.format(
+                    JAVASCRIPT_ACTION_TEMPLATE, mInterfaceName, resultId, code);
+            webView.loadUrl(url);
+
+            return getResultAndClear(resultId, defaultResult);
+        }
+
+        /**
+         * Gets the result of a request to perform an accessibility action.
+         *
+         * @param resultId The result id to match the result with the request.
+         * @param defaultResult The default result to return on timeout.
+         * @return The result of the request.
+         */
+        private String getResultAndClear(int resultId, String defaultResult) {
+            synchronized (mResultLock) {
+                final boolean success = waitForResultTimedLocked(resultId);
+                final String result = success ? mResult : defaultResult;
+                clearResultLocked();
+                return result;
+            }
+        }
+
+        /**
+         * Clears the result state.
+         */
+        private void clearResultLocked() {
+            mResultId = -1;
+            mResult = null;
+        }
+
+        /**
+         * Waits up to a given bound for a result of a request and returns it.
+         *
+         * @param resultId The result id to match the result with the request.
+         * @return Whether the result was received.
+         */
+        private boolean waitForResultTimedLocked(int resultId) {
+            long waitTimeMillis = RESULT_TIMEOUT;
+            final long startTimeMillis = SystemClock.uptimeMillis();
+            while (true) {
+                try {
+                    if (mResultId == resultId) {
+                        return true;
+                    }
+                    if (mResultId > resultId) {
+                        return false;
+                    }
+                    final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
+                    waitTimeMillis = RESULT_TIMEOUT - elapsedTimeMillis;
+                    if (waitTimeMillis <= 0) {
+                        return false;
+                    }
+                    mResultLock.wait(waitTimeMillis);
+                } catch (InterruptedException ie) {
+                    /* ignore */
+                }
+            }
+        }
+
+        /**
+         * Callback exposed to JavaScript. Handles returning the result of a
+         * request to a waiting (or potentially timed out) thread.
+         *
+         * @param id The result id of the request as a {@link String}.
+         * @param result The result of the request as a {@link String}.
+         */
+        @SuppressWarnings("unused")
+        public void onResult(String id, String result) {
+            final long resultId;
+
+            try {
+                resultId = Long.parseLong(id);
+            } catch (NumberFormatException e) {
+                return;
+            }
+
+            synchronized (mResultLock) {
+                if (resultId > mResultId) {
+                    mResult = result;
+                    mResultId = resultId;
+                }
+                mResultLock.notifyAll();
+            }
+        }
     }
 }
