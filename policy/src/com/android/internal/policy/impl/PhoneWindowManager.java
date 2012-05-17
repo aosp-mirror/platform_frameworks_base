@@ -410,6 +410,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mSystemLeft, mSystemTop, mSystemRight, mSystemBottom;
     // For applications requesting stable content insets, these are them.
     int mStableLeft, mStableTop, mStableRight, mStableBottom;
+    // For applications requesting stable content insets but have also set the
+    // fullscreen window flag, these are the stable dimensions without the status bar.
+    int mStableFullscreenLeft, mStableFullscreenTop;
+    int mStableFullscreenRight, mStableFullscreenBottom;
     // During layout, the current screen borders with all outer decoration
     // (status bar, input method dock) accounted for.
     int mCurLeft, mCurTop, mCurRight, mCurBottom;
@@ -2143,22 +2147,31 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     public void getContentInsetHintLw(WindowManager.LayoutParams attrs, Rect contentInset) {
         final int fl = attrs.flags;
+        final int systemUiVisibility = (attrs.systemUiVisibility|attrs.subtreeSystemUiVisibility);
 
-        if ((fl & (FLAG_LAYOUT_IN_SCREEN | FLAG_FULLSCREEN | FLAG_LAYOUT_INSET_DECOR))
+        if ((fl & (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR))
                 == (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR)) {
             int availRight, availBottom;
             if (mCanHideNavigationBar &&
-                    (attrs.systemUiVisibility & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0) {
+                    (systemUiVisibility & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0) {
                 availRight = mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
                 availBottom = mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
             } else {
                 availRight = mRestrictedScreenLeft + mRestrictedScreenWidth;
                 availBottom = mRestrictedScreenTop + mRestrictedScreenHeight;
             }
-            if ((attrs.systemUiVisibility & View.SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0) {
-                contentInset.set(mStableLeft, mStableTop,
-                        availRight - mStableRight, availBottom - mStableBottom);
-            } else if ((attrs.systemUiVisibility & (View.SYSTEM_UI_FLAG_FULLSCREEN
+            if ((systemUiVisibility & View.SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0) {
+                if ((fl & FLAG_FULLSCREEN) != 0) {
+                    contentInset.set(mStableFullscreenLeft, mStableFullscreenTop,
+                            availRight - mStableFullscreenRight,
+                            availBottom - mStableFullscreenBottom);
+                } else {
+                    contentInset.set(mStableLeft, mStableTop,
+                            availRight - mStableRight, availBottom - mStableBottom);
+                }
+            } else if ((fl & FLAG_FULLSCREEN) != 0) {
+                contentInset.setEmpty();
+            } else if ((systemUiVisibility & (View.SYSTEM_UI_FLAG_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)) == 0) {
                 contentInset.set(mCurLeft, mCurTop,
                         availRight - mCurRight, availBottom - mCurBottom);
@@ -2179,10 +2192,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mRestrictedScreenLeft = mRestrictedScreenTop = 0;
         mRestrictedScreenWidth = displayWidth;
         mRestrictedScreenHeight = displayHeight;
-        mDockLeft = mContentLeft = mStableLeft = mSystemLeft = mCurLeft = 0;
-        mDockTop = mContentTop = mStableTop = mSystemTop = mCurTop = 0;
-        mDockRight = mContentRight = mStableRight = mSystemRight = mCurRight = displayWidth;
-        mDockBottom = mContentBottom = mStableBottom = mSystemBottom = mCurBottom = displayHeight;
+        mDockLeft = mContentLeft = mStableLeft = mStableFullscreenLeft
+                = mSystemLeft = mCurLeft = 0;
+        mDockTop = mContentTop = mStableTop = mStableFullscreenTop
+                = mSystemTop = mCurTop = 0;
+        mDockRight = mContentRight = mStableRight = mStableFullscreenRight
+                = mSystemRight = mCurRight = displayWidth;
+        mDockBottom = mContentBottom = mStableBottom = mStableFullscreenBottom
+                = mSystemBottom = mCurBottom = displayHeight;
         mDockLayer = 0x10000000;
         mStatusBarLayer = -1;
 
@@ -2235,7 +2252,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
                 mTmpNavigationFrame.set(0, top, displayWidth, displayHeight);
-                mStableBottom = mTmpNavigationFrame.top;
+                mStableBottom = mStableFullscreenBottom = mTmpNavigationFrame.top;
                 if (navVisible) {
                     mNavigationBar.showLw(true);
                     mDockBottom = mTmpNavigationFrame.top;
@@ -2259,7 +2276,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
                 mTmpNavigationFrame.set(left, 0, displayWidth, displayHeight);
-                mStableRight = mTmpNavigationFrame.left;
+                mStableRight = mStableFullscreenRight = mTmpNavigationFrame.left;
                 if (navVisible) {
                     mNavigationBar.showLw(true);
                     mDockRight = mTmpNavigationFrame.left;
@@ -2397,7 +2414,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pf.set((fl & FLAG_LAYOUT_IN_SCREEN) == 0
                 ? attached.getFrameLw() : df);
     }
-    
+
+    private void applyStableConstraints(int sysui, int fl, Rect r) {
+        if ((sysui & View.SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0) {
+            // If app is requesting a stable layout, don't let the
+            // content insets go below the stable values.
+            if ((fl & FLAG_FULLSCREEN) != 0) {
+                if (r.left < mStableFullscreenLeft) r.left = mStableFullscreenLeft;
+                if (r.top < mStableFullscreenTop) r.top = mStableFullscreenTop;
+                if (r.right > mStableFullscreenRight) r.right = mStableFullscreenRight;
+                if (r.bottom > mStableFullscreenBottom) r.bottom = mStableFullscreenBottom;
+            } else {
+                if (r.left < mStableLeft) r.left = mStableLeft;
+                if (r.top < mStableTop) r.top = mStableTop;
+                if (r.right > mStableRight) r.right = mStableRight;
+                if (r.bottom > mStableBottom) r.bottom = mStableBottom;
+            }
+        }
+    }
+
     /** {@inheritDoc} */
     public void layoutWindowLw(WindowState win, WindowManager.LayoutParams attrs,
             WindowState attached) {
@@ -2504,14 +2539,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         cf.right = mContentRight;
                         cf.bottom = mContentBottom;
                     }
-                    if ((sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0) {
-                        // If app is requesting a stable layout, don't let the
-                        // content insets go below the stable values.
-                        if (cf.left < mStableLeft) cf.left = mStableLeft;
-                        if (cf.top < mStableTop) cf.top = mStableTop;
-                        if (cf.right > mStableRight) cf.right = mStableRight;
-                        if (cf.bottom > mStableBottom) cf.bottom = mStableBottom;
-                    }
+                    applyStableConstraints(sysUiFl, fl, cf);
                     if (adjust != SOFT_INPUT_ADJUST_NOTHING) {
                         vf.left = mCurLeft;
                         vf.top = mCurTop;
@@ -2593,14 +2621,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     pf.bottom = df.bottom = cf.bottom
                             = mRestrictedScreenTop+mRestrictedScreenHeight;
                 }
-                if ((sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0) {
-                    // If app is requesting a stable layout, don't let the
-                    // content insets go below the stable values.
-                    if (cf.left < mStableLeft) cf.left = mStableLeft;
-                    if (cf.top < mStableTop) cf.top = mStableTop;
-                    if (cf.right > mStableRight) cf.right = mStableRight;
-                    if (cf.bottom > mStableBottom) cf.bottom = mStableBottom;
-                }
+                applyStableConstraints(sysUiFl, fl, cf);
                 if (adjust != SOFT_INPUT_ADJUST_NOTHING) {
                     vf.left = mCurLeft;
                     vf.top = mCurTop;
@@ -4248,6 +4269,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(","); pw.print(mRestrictedScreenTop);
                 pw.print(") "); pw.print(mRestrictedScreenWidth);
                 pw.print("x"); pw.println(mRestrictedScreenHeight);
+        pw.print(prefix); pw.print("mStableFullscreen=("); pw.print(mStableFullscreenLeft);
+                pw.print(","); pw.print(mStableFullscreenTop);
+                pw.print(")-("); pw.print(mStableFullscreenRight);
+                pw.print(","); pw.print(mStableFullscreenBottom); pw.println(")");
         pw.print(prefix); pw.print("mStable=("); pw.print(mStableLeft);
                 pw.print(","); pw.print(mStableTop);
                 pw.print(")-("); pw.print(mStableRight);
