@@ -282,7 +282,8 @@ public class NetworkController extends BroadcastReceiver {
 
     public void refreshSignalCluster(SignalCluster cluster) {
         cluster.setWifiIndicators(
-                mWifiConnected, // only show wifi in the cluster if connected
+                // only show wifi in the cluster if connected or if wifi-only
+                mWifiEnabled && (mWifiConnected || !mHasMobileDataFeature),
                 mWifiIconId,
                 mWifiActivityIconId,
                 mContentDescriptionWifi);
@@ -786,7 +787,7 @@ public class NetworkController extends BroadcastReceiver {
             if (mDataAndWifiStacked) {
                 mWifiIconId = 0;
             } else {
-                mWifiIconId = mWifiEnabled ? WifiIcons.WIFI_SIGNAL_STRENGTH[0][0] : 0;
+                mWifiIconId = mWifiEnabled ? R.drawable.stat_sys_wifi_signal_null : 0;
             }
             mContentDescriptionWifi = mContext.getString(R.string.accessibility_no_wifi);
         }
