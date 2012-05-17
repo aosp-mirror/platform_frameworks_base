@@ -22,7 +22,7 @@
               android:orientation="vertical"
               android:layout_height="wrap_content"
               android:layout_width="match_parent"
-              android:background="?android:attr/activatedBackgroundIndicator"
+              android:background="@android:drawable/activity_picker_bg"
               android:padding="16dp">
 
     <!-- Extended activity info to distinguish between duplicate activity names -->
