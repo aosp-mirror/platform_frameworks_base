@@ -63,7 +63,8 @@ public class DelegateViewHelper {
                 break;
         }
         if (mDelegateView != null) {
-            if (mDelegateView.getVisibility() != View.VISIBLE && event.getAction() != MotionEvent.ACTION_CANCEL) {
+            if (mDelegateView.getVisibility() != View.VISIBLE
+                    && event.getAction() != MotionEvent.ACTION_CANCEL) {
                 final boolean isVertical = (mOrientation == Surface.ROTATION_90
                         || mOrientation == Surface.ROTATION_270);
                 final int historySize = event.getHistorySize();
