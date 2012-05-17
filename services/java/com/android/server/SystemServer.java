@@ -320,6 +320,21 @@ class ServerThread extends Thread {
         }
 
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
+            MountService mountService = null;
+            if (!"0".equals(SystemProperties.get("system_init.startmountservice"))) {
+                try {
+                    /*
+                     * NotificationManagerService is dependant on MountService,
+                     * (for media / usb notifications) so we must start MountService first.
+                     */
+                    Slog.i(TAG, "Mount Service");
+                    mountService = new MountService(context);
+                    ServiceManager.addService("mount", mountService);
+                } catch (Throwable e) {
+                    reportWtf("starting Mount Service", e);
+                }
+            }
+
             try {
                 Slog.i(TAG,  "LockSettingsService");
                 lockSettings = new LockSettingsService(context);
@@ -441,17 +456,13 @@ class ServerThread extends Thread {
                 reportWtf("starting UpdateLockService", e);
             }
 
-            if (!"0".equals(SystemProperties.get("system_init.startmountservice"))) {
-                try {
-                    /*
-                     * NotificationManagerService is dependant on MountService,
-                     * (for media / usb notifications) so we must start MountService first.
-                     */
-                    Slog.i(TAG, "Mount Service");
-                    ServiceManager.addService("mount", new MountService(context));
-                } catch (Throwable e) {
-                    reportWtf("starting Mount Service", e);
-                }
+            /*
+             * MountService has a few dependencies: Notification Manager and
+             * AppWidget Provider. Make sure MountService is completely started
+             * first before continuing.
+             */
+            if (mountService != null) {
+                mountService.waitForAsecScan();
             }
 
             try {

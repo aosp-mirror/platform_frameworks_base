@@ -240,6 +240,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     // This is where all application persistent data goes for secondary users.
     final File mUserAppDataDir;
 
+    /** The location for ASEC container files on internal storage. */
+    final String mAsecInternalPath;
+
     // This is the object monitoring the framework dir.
     final FileObserver mFrameworkInstallObserver;
 
@@ -907,6 +910,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             File dataDir = Environment.getDataDirectory();
             mAppDataDir = new File(dataDir, "data");
+            mAsecInternalPath = new File(dataDir, "app-asec").getPath();
             mUserAppDataDir = new File(dataDir, "user");
             mDrmAppPrivateInstallDir = new File(dataDir, "app-private");
 
@@ -1043,7 +1047,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             scanDirLI(mFrameworkDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR,
                     scanMode | SCAN_NO_DEX, 0);
-            
+
             // Collect all system packages.
             mSystemAppDir = new File(Environment.getRootDirectory(), "app");
             mSystemInstallObserver = new AppDirObserver(
@@ -6479,6 +6483,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    private boolean isAsecExternal(String cid) {
+        final String asecPath = PackageHelper.getSdFilesystem(cid);
+        return !asecPath.startsWith(mAsecInternalPath);
+    }
+
     /**
      * Extract the MountService "container ID" from the full code path of an
      * .apk.
@@ -6517,7 +6526,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         AsecInstallArgs(String cid) {
-            super(null, null, 0, null, null);
+            super(null, null, isAsecExternal(cid) ? PackageManager.INSTALL_EXTERNAL : 0, null, null);
             this.cid = cid;
             setCachePath(PackageHelper.getSdDir(cid));
         }
@@ -8659,6 +8668,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         });
     }
 
+    /**
+     * Called by MountService when the initial ASECs to scan are available.
+     * Should block until all the ASEC containers are finished being scanned.
+     */
+    public void scanAvailableAsecs() {
+        updateExternalMediaStatusInner(true, false);
+    }
+
     /*
      * Collect information of applications on external media, map them against
      * existing containers and update information based on current mount status.
@@ -8793,7 +8810,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                     continue;
                 }
                 // Parse package
-                int parseFlags = PackageParser.PARSE_ON_SDCARD | mDefParseFlags;
+                int parseFlags = mDefParseFlags;
+                if (args.isExternal()) {
+                    parseFlags |= PackageParser.PARSE_ON_SDCARD;
+                }
+
                 doGc = true;
                 synchronized (mInstallLock) {
                     final PackageParser.Package pkg = scanPackageLI(new File(codePath), parseFlags,
