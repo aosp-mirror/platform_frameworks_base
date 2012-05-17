@@ -3699,38 +3699,15 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     }
 
     /**
-     * The minimum duration during which a user must press to trigger voice-based interactions
-     */
-    private final static int MEDIABUTTON_LONG_PRESS_DURATION_MS = 300;
-    /**
-     * The different states of the state machine to handle the launch of voice-based interactions,
-     * stored in mVoiceButtonState.
-     */
-    private final static int VOICEBUTTON_STATE_IDLE = 0;
-    private final static int VOICEBUTTON_STATE_DOWN = 1;
-    private final static int VOICEBUTTON_STATE_DOWN_IGNORE_NEW = 2;
-    /**
-     * The different actions after state transitions on mVoiceButtonState.
+     * The different actions performed in response to a voice button key event.
      */
     private final static int VOICEBUTTON_ACTION_DISCARD_CURRENT_KEY_PRESS = 1;
     private final static int VOICEBUTTON_ACTION_START_VOICE_INPUT = 2;
     private final static int VOICEBUTTON_ACTION_SIMULATE_KEY_PRESS = 3;
 
     private final Object mVoiceEventLock = new Object();
-    private int mVoiceButtonState = VOICEBUTTON_STATE_IDLE;
-    private long mVoiceButtonDownTime = 0;
-
-    /**
-     * Log an error when an unexpected action is encountered in the state machine to filter
-     * key events.
-     * @param keyAction the unexpected action of the key event being filtered
-     * @param stateName the string corresponding to the state in which the error occurred
-     */
-    private static void logErrorForKeyAction(int keyAction, String stateName) {
-        Log.e(TAG, "unexpected action "
-                + KeyEvent.actionToString(keyAction)
-                + " in " + stateName + " state");
-    }
+    private boolean mVoiceButtonDown;
+    private boolean mVoiceButtonHandled;
 
     /**
      * Filter key events that may be used for voice-based interactions
@@ -3740,67 +3717,32 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      *     is dispatched.
      */
     private void filterVoiceInputKeyEvent(KeyEvent keyEvent, boolean needWakeLock) {
+        if (DEBUG_RC) {
+            Log.v(TAG, "voice input key event: " + keyEvent + ", needWakeLock=" + needWakeLock);
+        }
+
         int voiceButtonAction = VOICEBUTTON_ACTION_DISCARD_CURRENT_KEY_PRESS;
         int keyAction = keyEvent.getAction();
         synchronized (mVoiceEventLock) {
-            // state machine on mVoiceButtonState
-            switch (mVoiceButtonState) {
-
-                case VOICEBUTTON_STATE_IDLE:
-                    if (keyAction == KeyEvent.ACTION_DOWN) {
-                        mVoiceButtonDownTime = keyEvent.getDownTime();
-                        // valid state transition
-                        mVoiceButtonState = VOICEBUTTON_STATE_DOWN;
-                    } else if (keyAction == KeyEvent.ACTION_UP) {
-                        // no state transition
-                        // action is still VOICEBUTTON_ACTION_DISCARD_CURRENT_KEY_PRESS
-                    } else {
-                        logErrorForKeyAction(keyAction, "VOICEBUTTON_STATE_IDLE");
+            if (keyAction == KeyEvent.ACTION_DOWN) {
+                if (keyEvent.getRepeatCount() == 0) {
+                    // initial down
+                    mVoiceButtonDown = true;
+                    mVoiceButtonHandled = false;
+                } else if (mVoiceButtonDown && !mVoiceButtonHandled
+                        && (keyEvent.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
+                    // long-press, start voice-based interactions
+                    mVoiceButtonHandled = true;
+                    voiceButtonAction = VOICEBUTTON_ACTION_START_VOICE_INPUT;
+                }
+            } else if (keyAction == KeyEvent.ACTION_UP) {
+                if (mVoiceButtonDown) {
+                    // voice button up
+                    mVoiceButtonDown = false;
+                    if (!mVoiceButtonHandled && !keyEvent.isCanceled()) {
+                        voiceButtonAction = VOICEBUTTON_ACTION_SIMULATE_KEY_PRESS;
                     }
-                    break;
-
-                case VOICEBUTTON_STATE_DOWN:
-                    if ((keyEvent.getEventTime() - mVoiceButtonDownTime)
-                            >= MEDIABUTTON_LONG_PRESS_DURATION_MS) {
-                        // press was long enough, start voice-based interactions, regardless of
-                        //   whether this was a DOWN or UP key event
-                        voiceButtonAction = VOICEBUTTON_ACTION_START_VOICE_INPUT;
-                        if (keyAction == KeyEvent.ACTION_UP) {
-                            // done tracking the key press, so transition back to idle state
-                            mVoiceButtonState = VOICEBUTTON_STATE_IDLE;
-                        } else if (keyAction == KeyEvent.ACTION_DOWN) {
-                            // no need to observe the upcoming key events
-                            mVoiceButtonState = VOICEBUTTON_STATE_DOWN_IGNORE_NEW;
-                        } else {
-                            logErrorForKeyAction(keyAction, "VOICEBUTTON_STATE_DOWN");
-                        }
-                    } else {
-                        if (keyAction == KeyEvent.ACTION_UP) {
-                            // press wasn't long enough, simulate complete key press
-                            voiceButtonAction = VOICEBUTTON_ACTION_SIMULATE_KEY_PRESS;
-                            // not tracking the key press anymore, so transition back to idle state
-                            mVoiceButtonState = VOICEBUTTON_STATE_IDLE;
-                        } else if (keyAction == KeyEvent.ACTION_DOWN) {
-                            // no state transition
-                            // action is still VOICEBUTTON_ACTION_DISCARD_CURRENT_KEY_PRESS
-                        } else {
-                            logErrorForKeyAction(keyAction, "VOICEBUTTON_STATE_DOWN");
-                        }
-                    }
-                    break;
-
-                case VOICEBUTTON_STATE_DOWN_IGNORE_NEW:
-                    if (keyAction == KeyEvent.ACTION_UP) {
-                        // done tracking the key press, so transition back to idle state
-                        mVoiceButtonState = VOICEBUTTON_STATE_IDLE;
-                        // action is still VOICEBUTTON_ACTION_DISCARD_CURRENT_KEY_PRESS
-                    } else if (keyAction == KeyEvent.ACTION_DOWN) {
-                        // no state transition: we've already launched voice-based interactions
-                        // action is still VOICEBUTTON_ACTION_DISCARD_CURRENT_KEY_PRESS
-                    } else  {
-                        logErrorForKeyAction(keyAction, "VOICEBUTTON_STATE_DOWN_IGNORE_NEW");
-                    }
-                    break;
+                }
             }
         }//synchronized (mVoiceEventLock)
 
