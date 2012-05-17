@@ -584,17 +584,138 @@ public final class NfcAdapter {
         }
     }
 
-    //TODO: make sure NFC service has permission for URI
-    //TODO: see if we will eventually support multiple URIs
-    //TODO: javadoc
+    /**
+     * Set one or more {@link Uri}s to send using Android Beam (TM). Every
+     * Uri you provide must have either scheme 'file' or scheme 'content'.
+     *
+     * <p>For the data provided through this method, Android Beam tries to
+     * switch to alternate transports such as Bluetooth to achieve a fast
+     * transfer speed. Hence this method is very suitable
+     * for transferring large files such as pictures or songs.
+     *
+     * <p>The receiving side will store the content of each Uri in
+     * a file and present a notification to the user to open the file
+     * with a {@link android.content.Intent} with action
+     * {@link android.content.Intent#ACTION_VIEW}.
+     * If multiple URIs are sent, the {@link android.content.Intent} will refer
+     * to the first of the stored files.
+     *
+     * <p>This method may be called at any time before {@link Activity#onDestroy},
+     * but the URI(s) are only made available for Android Beam when the
+     * specified activity(s) are in resumed (foreground) state. The recommended
+     * approach is to call this method during your Activity's
+     * {@link Activity#onCreate} - see sample
+     * code below. This method does not immediately perform any I/O or blocking work,
+     * so is safe to call on your main thread.
+     *
+     * <p>{@link #setBeamPushUris} and {@link #setBeamPushUrisCallback}
+     * have priority over both {@link #setNdefPushMessage} and
+     * {@link #setNdefPushMessageCallback}.
+     *
+     * <p>If {@link #setBeamPushUris} is called with a null Uri array,
+     * and/or {@link #setBeamPushUrisCallback} is called with a null callback,
+     * then the Uri push will be completely disabled for the specified activity(s).
+     *
+     * <p>Code example:
+     * <pre>
+     * protected void onCreate(Bundle savedInstanceState) {
+     *     super.onCreate(savedInstanceState);
+     *     NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+     *     if (nfcAdapter == null) return;  // NFC not available on this device
+     *     nfcAdapter.setBeamPushUris(new Uri[] {uri1, uri2}, this);
+     * }
+     * </pre>
+     * And that is it. Only one call per activity is necessary. The Android
+     * OS will automatically release its references to the Uri(s) and the
+     * Activity object when it is destroyed if you follow this pattern.
+     *
+     * <p>If your Activity wants to dynamically supply Uri(s),
+     * then set a callback using {@link #setBeamPushUrisCallback} instead
+     * of using this method.
+     *
+     * <p class="note">Do not pass in an Activity that has already been through
+     * {@link Activity#onDestroy}. This is guaranteed if you call this API
+     * during {@link Activity#onCreate}.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
+     * @param uris an array of Uri(s) to push over Android Beam
+     * @param activity activity for which the Uri(s) will be pushed
+     */
     public void setBeamPushUris(Uri[] uris, Activity activity) {
         if (activity == null) {
             throw new NullPointerException("activity cannot be null");
         }
+        if (uris != null) {
+            for (Uri uri : uris) {
+                if (uri == null) throw new NullPointerException("Uri not " +
+                        "allowed to be null");
+                String scheme = uri.getScheme();
+                if (scheme == null || (!scheme.equalsIgnoreCase("file") &&
+                        !scheme.equalsIgnoreCase("content"))) {
+                    throw new IllegalArgumentException("URI needs to have " +
+                            "either scheme file or scheme content");
+                }
+            }
+        }
         mNfcActivityManager.setNdefPushContentUri(activity, uris);
     }
 
-    // TODO javadoc
+    /**
+     * Set a callback that will dynamically generate one or more {@link Uri}s
+     * to send using Android Beam (TM). Every Uri the callback provides
+     * must have either scheme 'file' or scheme 'content'.
+     *
+     * <p>For the data provided through this callback, Android Beam tries to
+     * switch to alternate transports such as Bluetooth to achieve a fast
+     * transfer speed. Hence this method is very suitable
+     * for transferring large files such as pictures or songs.
+     *
+     * <p>The receiving side will store the content of each Uri in
+     * a file and present a notification to the user to open the file
+     * with a {@link android.content.Intent} with action
+     * {@link android.content.Intent#ACTION_VIEW}.
+     * If multiple URIs are sent, the {@link android.content.Intent} will refer
+     * to the first of the stored files.
+     *
+     * <p>This method may be called at any time before {@link Activity#onDestroy},
+     * but the URI(s) are only made available for Android Beam when the
+     * specified activity(s) are in resumed (foreground) state. The recommended
+     * approach is to call this method during your Activity's
+     * {@link Activity#onCreate} - see sample
+     * code below. This method does not immediately perform any I/O or blocking work,
+     * so is safe to call on your main thread.
+     *
+     * <p>{@link #setBeamPushUris} and {@link #setBeamPushUrisCallback}
+     * have priority over both {@link #setNdefPushMessage} and
+     * {@link #setNdefPushMessageCallback}.
+     *
+     * <p>If {@link #setBeamPushUris} is called with a null Uri array,
+     * and/or {@link #setBeamPushUrisCallback} is called with a null callback,
+     * then the Uri push will be completely disabled for the specified activity(s).
+     *
+     * <p>Code example:
+     * <pre>
+     * protected void onCreate(Bundle savedInstanceState) {
+     *     super.onCreate(savedInstanceState);
+     *     NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+     *     if (nfcAdapter == null) return;  // NFC not available on this device
+     *     nfcAdapter.setBeamPushUrisCallback(callback, this);
+     * }
+     * </pre>
+     * And that is it. Only one call per activity is necessary. The Android
+     * OS will automatically release its references to the Uri(s) and the
+     * Activity object when it is destroyed if you follow this pattern.
+     *
+     * <p class="note">Do not pass in an Activity that has already been through
+     * {@link Activity#onDestroy}. This is guaranteed if you call this API
+     * during {@link Activity#onCreate}.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
+     * @param callback callback, or null to disable
+     * @param activity activity for which the Uri(s) will be pushed
+     */
     public void setBeamPushUrisCallback(CreateBeamUrisCallback callback, Activity activity) {
         if (activity == null) {
             throw new NullPointerException("activity cannot be null");
@@ -662,6 +783,10 @@ public final class NfcAdapter {
      * <p class="note">Do not pass in an Activity that has already been through
      * {@link Activity#onDestroy}. This is guaranteed if you call this API
      * during {@link Activity#onCreate}.
+     *
+     * <p class="note">For sending large content such as pictures and songs,
+     * consider using {@link #setBeamPushUris}, which switches to alternate transports
+     * such as Bluetooth to achieve a fast transfer rate.
      *
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
@@ -753,7 +878,9 @@ public final class NfcAdapter {
      * <p class="note">Do not pass in an Activity that has already been through
      * {@link Activity#onDestroy}. This is guaranteed if you call this API
      * during {@link Activity#onCreate}.
-     *
+     * <p class="note">For sending large content such as pictures and songs,
+     * consider using {@link #setBeamPushUris}, which switches to alternate transports
+     * such as Bluetooth to achieve a fast transfer rate.
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param callback callback, or null to disable

@@ -299,7 +299,23 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
             callback = state.uriCallback;
         }
         if (callback != null) {
-            return callback.createBeamUris(mDefaultEvent);
+            uris = callback.createBeamUris(mDefaultEvent);
+            if (uris != null) {
+                for (Uri uri : uris) {
+                    if (uri == null) {
+                        Log.e(TAG, "Uri not allowed to be null.");
+                        return null;
+                    }
+                    String scheme = uri.getScheme();
+                    if (scheme == null || (!scheme.equalsIgnoreCase("file") &&
+                            !scheme.equalsIgnoreCase("content"))) {
+                        Log.e(TAG, "Uri needs to have " +
+                                "either scheme file or scheme content");
+                        return null;
+                    }
+                }
+            }
+            return uris;
         } else {
             return uris;
         }
