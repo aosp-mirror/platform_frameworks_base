@@ -35,6 +35,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
@@ -532,6 +533,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         for (int i = 0, count = installedServices.size(); i < count; i++) {
             ResolveInfo resolveInfo = installedServices.get(i);
+            ServiceInfo serviceInfo = resolveInfo.serviceInfo;
+            // For now we are enforcing this if the target version is JellyBean or
+            // higher and in a later release we will enforce this for everyone.
+            if (serviceInfo.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.JELLY_BEAN
+                    && !android.Manifest.permission.BIND_ACCESSIBILITY_SERVICE.equals(
+                    serviceInfo.permission)) {
+                Slog.w(LOG_TAG, "Skipping accessibilty service " + new ComponentName(
+                        serviceInfo.packageName, serviceInfo.name).flattenToShortString()
+                        + ": it does not require the permission "
+                        + android.Manifest.permission.BIND_ACCESSIBILITY_SERVICE);
+                continue;
+            }
             AccessibilityServiceInfo accessibilityServiceInfo;
             try {
                 accessibilityServiceInfo = new AccessibilityServiceInfo(resolveInfo, mContext);
