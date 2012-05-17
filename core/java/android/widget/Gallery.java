@@ -1369,11 +1369,13 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(Gallery.class.getName());
         info.setScrollable(mItemCount > 1);
-        if (mItemCount > 0 && mSelectedPosition < mItemCount - 1) {
-            info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
-        }
-        if (mItemCount > 0 && mSelectedPosition > 0) {
-            info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+        if (isEnabled()) {
+            if (mItemCount > 0 && mSelectedPosition < mItemCount - 1) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+            }
+            if (isEnabled() && mItemCount > 0 && mSelectedPosition > 0) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+            }
         }
     }
 
@@ -1384,13 +1386,13 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
         }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
-                if (mItemCount > 0 && mSelectedPosition < mItemCount - 1) {
+                if (isEnabled() && mItemCount > 0 && mSelectedPosition < mItemCount - 1) {
                     final int currentChildIndex = mSelectedPosition - mFirstPosition;
                     return scrollToChild(currentChildIndex + 1);
                 }
             } return false;
             case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
-                if (mItemCount > 0 && mSelectedPosition > 0) {
+                if (isEnabled() && mItemCount > 0 && mSelectedPosition > 0) {
                     final int currentChildIndex = mSelectedPosition - mFirstPosition;
                     return scrollToChild(currentChildIndex - 1);
                 }

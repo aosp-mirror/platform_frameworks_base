@@ -1470,11 +1470,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(AbsListView.class.getName());
-        if (getFirstVisiblePosition() > 0) {
-            info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
-        }
-        if (getLastVisiblePosition() < getCount() - 1) {
-            info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+        if (isEnabled()) {
+            if (getFirstVisiblePosition() > 0) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+            }
+            if (getLastVisiblePosition() < getCount() - 1) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+            }
         }
     }
 
@@ -1485,14 +1487,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
-                if (getLastVisiblePosition() < getCount() - 1) {
+                if (isEnabled() && getLastVisiblePosition() < getCount() - 1) {
                     final int viewportHeight = getHeight() - mListPadding.top - mListPadding.bottom;
                     smoothScrollBy(viewportHeight, PositionScroller.SCROLL_DURATION);
                     return true;
                 }
             } return false;
             case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
-                if (mFirstPosition > 0) {
+                if (isEnabled() && mFirstPosition > 0) {
                     final int viewportHeight = getHeight() - mListPadding.top - mListPadding.bottom;
                     smoothScrollBy(-viewportHeight, PositionScroller.SCROLL_DURATION);
                     return true;
@@ -2294,17 +2296,19 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 return;
             }
 
-            if (isClickable()) {
+            if (isClickable() && isEnabled()) {
                 info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
                 info.setClickable(true);
             }
 
-            if (isLongClickable()) {
+            if (isLongClickable() && isEnabled()) {
                 info.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
                 info.setLongClickable(true);
             }
 
-            info.addAction(AccessibilityNodeInfo.ACTION_SELECT);
+            if (isEnabled()) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SELECT);
+            }
 
             if (position == getSelectedItemPosition()) {
                 info.setSelected(true);
@@ -2313,34 +2317,40 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         @Override
         public boolean performAccessibilityAction(View host, int action, Bundle arguments) {
+            if (super.performAccessibilityAction(host, action, arguments)) {
+                return true;
+            }
+
             final int position = getPositionForView(host);
 
             if (position == INVALID_POSITION) {
                 return false;
             }
 
+            if (!isEnabled()) {
+                return false;
+            }
+
             final long id = getItemIdAtPosition(position);
 
             switch (action) {
-                case AccessibilityNodeInfo.ACTION_SELECT:
+                case AccessibilityNodeInfo.ACTION_SELECT: {
                     setSelection(position);
                     return true;
-                case AccessibilityNodeInfo.ACTION_CLICK:
-                    if (!super.performAccessibilityAction(host, action, arguments)) {
+                }
+                case AccessibilityNodeInfo.ACTION_CLICK: {
+                    if (isClickable()) {
                         return performItemClick(host, position, id);
                     }
-                    return true;
-                case AccessibilityNodeInfo.ACTION_LONG_CLICK:
-                    if (!super.performAccessibilityAction(host, action, arguments)) {
+                } return false;
+                case AccessibilityNodeInfo.ACTION_LONG_CLICK: {
+                    if (isLongClickable()) {
                         return performLongPress(host, position, id);
                     }
-                    return true;
-                case AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS:
-                    smoothScrollToPosition(position);
-                    break;
+                } return false;
             }
 
-            return super.performAccessibilityAction(host, action, arguments);
+            return false;
         }
     }
 

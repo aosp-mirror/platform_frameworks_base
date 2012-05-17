@@ -4776,11 +4776,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.addAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
         }
 
-        if (isClickable()) {
+        if (isClickable() && isEnabled()) {
             info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
         }
 
-        if (isLongClickable()) {
+        if (isLongClickable() && isEnabled()) {
             info.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
         }
 
