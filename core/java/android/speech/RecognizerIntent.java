@@ -115,6 +115,45 @@ public class RecognizerIntent {
     public static final String ACTION_WEB_SEARCH = "android.speech.action.WEB_SEARCH";
 
     /**
+     * Starts an activity that will prompt the user for speech without requiring the user's
+     * visual attention or touch input. It will send it through a speech recognizer,
+     * and either synthesize speech for a web search result or trigger
+     * another type of action based on the user's speech.
+     *
+     * This activity may be launched while device is locked in a secure mode.
+     * Special care must be taken to ensure that the voice actions that are performed while
+     * hands free cannot compromise the device's security.
+     * The activity should check the value of the {@link #EXTRA_SECURE} extra to determine
+     * whether the device has been securely locked. If so, the activity should either restrict
+     * the set of voice actions that are permitted or require some form of secure
+     * authentication before proceeding.
+     *
+     * To ensure that the activity's user interface is visible while the lock screen is showing,
+     * the activity should set the
+     * {@link android.view.WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED} window flag.
+     * Otherwise the activity's user interface may be hidden by the lock screen. The activity
+     * should take care not to leak private information when the device is securely locked.
+     *
+     * <p>Optional extras:
+     * <ul>
+     *   <li>{@link #EXTRA_SECURE}
+     * </ul>
+     */
+    public static final String ACTION_VOICE_SEARCH_HANDS_FREE =
+            "android.speech.action.VOICE_SEARCH_HANDS_FREE";
+
+    /**
+     * Optional boolean to indicate that a "hands free" voice search was performed while the device
+     * was in a secure mode. An example of secure mode is when the device's screen lock is active,
+     * and it requires some form of authentication to be unlocked.
+     *
+     * When the device is securely locked, the voice search activity should either restrict
+     * the set of voice actions that are permitted, or require some form of secure authentication
+     * before proceeding.
+     */
+    public static final String EXTRA_SECURE = "android.speech.extras.EXTRA_SECURE";
+
+    /**
      * The minimum length of an utterance. We will not stop recording before this amount of time.
      * 
      * Note that it is extremely rare you'd want to specify this value in an intent. If you don't
