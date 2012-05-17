@@ -996,6 +996,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
         
         mExpandedVisible = true;
+        mNotificationPanel.setVisibility(View.VISIBLE);
 
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
 
@@ -1089,7 +1090,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
         mExpandedVisible = false;
         visibilityChanged(false);
-        //mNotificationPanel.setVisibility(View.GONE);
+        mNotificationPanel.setVisibility(View.INVISIBLE);
 
         // Shrink the window to the size of the status bar only
         WindowManager.LayoutParams lp = (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
