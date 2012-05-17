@@ -261,8 +261,8 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      * server then the first protocol in the client's list will be selected.
      * The order of the client's protocols is otherwise insignificant.
      *
-     * @param npnProtocols a possibly-empty list of protocol byte arrays. All
-     *     arrays must be non-empty and of length less than 256.
+     * @param npnProtocols a non-empty list of protocol byte arrays. All arrays
+     *     must be non-empty and of length less than 256.
      */
     public void setNpnProtocols(byte[][] npnProtocols) {
         this.mNpnProtocols = toNpnProtocolsList(npnProtocols);
@@ -273,6 +273,9 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      * strings.
      */
     static byte[] toNpnProtocolsList(byte[]... npnProtocols) {
+        if (npnProtocols.length == 0) {
+            throw new IllegalArgumentException("npnProtocols.length == 0");
+        }
         int totalLength = 0;
         for (byte[] s : npnProtocols) {
             if (s.length == 0 || s.length > 255) {

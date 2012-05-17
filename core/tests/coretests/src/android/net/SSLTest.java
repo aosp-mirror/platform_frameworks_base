@@ -59,17 +59,20 @@ public class SSLTest extends TestCase {
                 new byte[] { 'h', 't', 't', 'p', '/', '1', '.', '1' })));
     }
 
+    public void testStringsToNpnBytesEmptyArray() {
+        try {
+            SSLCertificateSocketFactory.toNpnProtocolsList();
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
     public void testStringsToNpnBytesEmptyByteArray() {
         try {
             SSLCertificateSocketFactory.toNpnProtocolsList(new byte[0]);
             fail();
         } catch (IllegalArgumentException expected) {
         }
-    }
-
-    public void testStringsToNpnBytesEmptyArray() {
-        byte[] expected = {};
-        assertTrue(Arrays.equals(expected, SSLCertificateSocketFactory.toNpnProtocolsList()));
     }
 
     public void testStringsToNpnBytesOversizedInput() {
