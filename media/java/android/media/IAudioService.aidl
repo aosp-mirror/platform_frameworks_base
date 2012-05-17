@@ -109,6 +109,9 @@ interface IAudioService {
     oneway void registerMediaButtonIntent(in PendingIntent pi, in ComponentName c);
     oneway void unregisterMediaButtonIntent(in PendingIntent pi,  in ComponentName c);
 
+    oneway void registerMediaButtonEventReceiverForCalls(in ComponentName c);
+    oneway void unregisterMediaButtonEventReceiverForCalls();
+
     oneway void registerRemoteControlClient(in PendingIntent mediaIntent,
            in IRemoteControlClient rcClient, in String callingPackageName);
     oneway void unregisterRemoteControlClient(in PendingIntent mediaIntent,
