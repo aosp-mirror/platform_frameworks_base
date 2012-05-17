@@ -1076,7 +1076,7 @@ public final class ViewRootImpl implements ViewParent,
             if (baseSize != 0 && desiredWindowWidth > baseSize) {
                 childWidthMeasureSpec = getRootMeasureSpec(baseSize, lp.width);
                 childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
-                host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+                performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
                 if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": measured ("
                         + host.getMeasuredWidth() + "," + host.getMeasuredHeight() + ")");
                 if ((host.getMeasuredWidthAndState()&View.MEASURED_STATE_TOO_SMALL) == 0) {
@@ -1087,7 +1087,7 @@ public final class ViewRootImpl implements ViewParent,
                     if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": next baseSize="
                             + baseSize);
                     childWidthMeasureSpec = getRootMeasureSpec(baseSize, lp.width);
-                    host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+                    performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
                     if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": measured ("
                             + host.getMeasuredWidth() + "," + host.getMeasuredHeight() + ")");
                     if ((host.getMeasuredWidthAndState()&View.MEASURED_STATE_TOO_SMALL) == 0) {
@@ -1101,7 +1101,7 @@ public final class ViewRootImpl implements ViewParent,
         if (!goodMeasure) {
             childWidthMeasureSpec = getRootMeasureSpec(desiredWindowWidth, lp.width);
             childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
-            host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+            performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
             if (mWidth != host.getMeasuredWidth() || mHeight != host.getMeasuredHeight()) {
                 windowSizeMayChange = true;
             }
@@ -1650,7 +1650,7 @@ public final class ViewRootImpl implements ViewParent,
                             + " coveredInsetsChanged=" + contentInsetsChanged);
     
                      // Ask host how big it wants to be
-                    host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+                    performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
     
                     // Implementation of weights from WindowManager.LayoutParams
                     // We just grow the dimensions as needed and re-measure if
@@ -1676,7 +1676,7 @@ public final class ViewRootImpl implements ViewParent,
                         if (DEBUG_LAYOUT) Log.v(TAG,
                                 "And hey let's measure once more: width=" + width
                                 + " height=" + height);
-                        host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+                        performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
                     }
     
                     layoutRequested = true;
@@ -1688,28 +1688,7 @@ public final class ViewRootImpl implements ViewParent,
         boolean triggerGlobalLayoutListener = didLayout
                 || attachInfo.mRecomputeGlobalAttributes;
         if (didLayout) {
-            mLayoutRequested = false;
-            mScrollMayChange = true;
-            if (DEBUG_ORIENTATION || DEBUG_LAYOUT) Log.v(
-                TAG, "Laying out " + host + " to (" +
-                host.getMeasuredWidth() + ", " + host.getMeasuredHeight() + ")");
-            long startTime = 0L;
-            if (ViewDebug.DEBUG_PROFILE_LAYOUT) {
-                startTime = SystemClock.elapsedRealtime();
-            }
-            host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());
-
-            if (false && ViewDebug.consistencyCheckEnabled) {
-                if (!host.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_LAYOUT)) {
-                    throw new IllegalStateException("The view hierarchy is an inconsistent state,"
-                            + "please refer to the logs with the tag "
-                            + ViewDebug.CONSISTENCY_LOG_TAG + " for more infomation.");
-                }
-            }
-
-            if (ViewDebug.DEBUG_PROFILE_LAYOUT) {
-                EventLog.writeEvent(60001, SystemClock.elapsedRealtime() - startTime);
-            }
+            performLayout();
 
             // By this point all views have been sized and positionned
             // We can compute the transparent area
@@ -1863,6 +1842,49 @@ public final class ViewRootImpl implements ViewParent,
                     mPendingTransitions.get(i).endChangingAnimations();
                 }
                 mPendingTransitions.clear();
+            }
+        }
+    }
+
+    private void performMeasure(int childWidthMeasureSpec, int childHeightMeasureSpec) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "measure");
+        try {
+            mView.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        }
+    }
+
+    private void performLayout() {
+        mLayoutRequested = false;
+        mScrollMayChange = true;
+
+        final View host = mView;
+        if (DEBUG_ORIENTATION || DEBUG_LAYOUT) {
+            Log.v(TAG, "Laying out " + host + " to (" +
+                    host.getMeasuredWidth() + ", " + host.getMeasuredHeight() + ")");
+        }
+
+        final long startTime;
+        if (ViewDebug.DEBUG_PROFILE_LAYOUT) {
+            startTime = SystemClock.elapsedRealtime();
+        }
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "layout");
+        try {
+            host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        }
+
+        if (ViewDebug.DEBUG_PROFILE_LAYOUT) {
+            EventLog.writeEvent(60001, SystemClock.elapsedRealtime() - startTime);
+        }
+
+        if (false && ViewDebug.consistencyCheckEnabled) {
+            if (!host.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_LAYOUT)) {
+                throw new IllegalStateException("The view hierarchy is an inconsistent state,"
+                        + "please refer to the logs with the tag "
+                        + ViewDebug.CONSISTENCY_LOG_TAG + " for more infomation.");
             }
         }
     }
