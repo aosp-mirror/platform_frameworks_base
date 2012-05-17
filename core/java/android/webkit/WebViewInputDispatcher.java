@@ -399,7 +399,6 @@ final class WebViewInputDispatcher {
         unscheduleHideTapHighlightLocked();
         unscheduleShowTapHighlightLocked();
         mUiCallbacks.showTapHighlight(true);
-        scheduleHideTapHighlightLocked();
     }
 
     private void scheduleShowTapHighlightLocked() {
@@ -466,13 +465,13 @@ final class WebViewInputDispatcher {
                 return;
             }
             mPostClickScheduled = false;
-            showTapCandidateLocked();
 
             MotionEvent event = mPostTouchStream.getLastEvent();
             if (event == null || event.getAction() != MotionEvent.ACTION_UP) {
                 return;
             }
 
+            showTapCandidateLocked();
             MotionEvent eventToEnqueue = MotionEvent.obtainNoHistory(event);
             DispatchEvent d = obtainDispatchEventLocked(eventToEnqueue, EVENT_TYPE_CLICK, 0,
                     mPostLastWebKitXOffset, mPostLastWebKitYOffset, mPostLastWebKitScale);
@@ -511,6 +510,7 @@ final class WebViewInputDispatcher {
     }
 
     private void enqueueHitTestLocked(MotionEvent event) {
+        mUiCallbacks.clearPreviousHitTest();
         MotionEvent eventToEnqueue = MotionEvent.obtainNoHistory(event);
         DispatchEvent d = obtainDispatchEventLocked(eventToEnqueue, EVENT_TYPE_HIT_TEST, 0,
                 mPostLastWebKitXOffset, mPostLastWebKitYOffset, mPostLastWebKitScale);
@@ -666,6 +666,10 @@ final class WebViewInputDispatcher {
                 if (event != null && recycleEvent) {
                     event.recycle();
                 }
+
+                if (eventType == EVENT_TYPE_CLICK) {
+                    scheduleHideTapHighlightLocked();
+                }
             }
         }
     }
@@ -802,6 +806,10 @@ final class WebViewInputDispatcher {
                     d.mEvent = null; // retain ownership of event, don't recycle it yet
                 }
                 recycleDispatchEventLocked(d);
+
+                if (eventType == EVENT_TYPE_CLICK) {
+                    scheduleHideTapHighlightLocked();
+                }
             }
 
             // Handle the event.
@@ -1050,6 +1058,12 @@ final class WebViewInputDispatcher {
          * @param show True if it should show the highlight, false if it should hide it
          */
         public void showTapHighlight(boolean show);
+
+        /**
+         * Called when we are sending a new EVENT_TYPE_HIT_TEST to WebKit, so
+         * previous hit tests should be cleared as they are obsolete.
+         */
+        public void clearPreviousHitTest();
     }
 
     /* Implemented by {@link WebViewCore} to perform operations on the web kit thread. */
