@@ -26,6 +26,10 @@ import android.os.Message;
 import android.os.Process;
 import android.webkit.WebViewCore.EventHub;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 // A Runnable that will monitor if the WebCore thread is still
 // processing messages by pinging it every so often. It is safe
 // to call the public methods of this class from any thread.
@@ -51,25 +55,31 @@ class WebCoreThreadWatchdog implements Runnable {
     // After the first timeout, use a shorter period before re-prompting the user.
     private static final int SUBSEQUENT_TIMEOUT_PERIOD = 15 * 1000;
 
-    private Context mContext;
     private Handler mWebCoreThreadHandler;
     private Handler mHandler;
     private boolean mPaused;
 
+    private Set<WebViewClassic> mWebViews;
+
     private static WebCoreThreadWatchdog sInstance;
 
-    public synchronized static WebCoreThreadWatchdog start(Context context,
-            Handler webCoreThreadHandler) {
+    public synchronized static WebCoreThreadWatchdog start(Handler webCoreThreadHandler) {
         if (sInstance == null) {
-            sInstance = new WebCoreThreadWatchdog(context, webCoreThreadHandler);
+            sInstance = new WebCoreThreadWatchdog(webCoreThreadHandler);
             new Thread(sInstance, "WebCoreThreadWatchdog").start();
         }
         return sInstance;
     }
 
-    public synchronized static void updateContext(Context context) {
+    public synchronized static void registerWebView(WebViewClassic w) {
         if (sInstance != null) {
-            sInstance.setContext(context);
+            sInstance.addWebView(w);
+        }
+    }
+
+    public synchronized static void unregisterWebView(WebViewClassic w) {
+        if (sInstance != null) {
+            sInstance.removeWebView(w);
         }
     }
 
@@ -85,12 +95,18 @@ class WebCoreThreadWatchdog implements Runnable {
         }
     }
 
-    private void setContext(Context context) {
-        mContext = context;
+    private void addWebView(WebViewClassic w) {
+        if (mWebViews == null) {
+            mWebViews = new HashSet<WebViewClassic>();
+        }
+        mWebViews.add(w);
     }
 
-    private WebCoreThreadWatchdog(Context context, Handler webCoreThreadHandler) {
-        mContext = context;
+    private void removeWebView(WebViewClassic w) {
+        mWebViews.remove(w);
+    }
+
+    private WebCoreThreadWatchdog(Handler webCoreThreadHandler) {
         mWebCoreThreadHandler = webCoreThreadHandler;
     }
 
@@ -147,39 +163,41 @@ class WebCoreThreadWatchdog implements Runnable {
                         break;
 
                     case TIMED_OUT:
-                        if ((mContext == null) || !(mContext instanceof Activity)) return;
-                        new AlertDialog.Builder(mContext)
-                            .setMessage(com.android.internal.R.string.webpage_unresponsive)
-                            .setPositiveButton(com.android.internal.R.string.force_close,
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                        // User chose to force close.
-                                        Process.killProcess(Process.myPid());
+                        boolean postedDialog = false;
+                        synchronized (WebCoreThreadWatchdog.class) {
+                            Iterator<WebViewClassic> it = mWebViews.iterator();
+                            // Check each WebView we are aware of and find one that is capable of
+                            // showing the user a prompt dialog.
+                            while (it.hasNext()) {
+                                WebView activeView = it.next().getWebView();
+
+                                if (activeView.getWindowToken() != null &&
+                                        activeView.getViewRootImpl() != null) {
+                                    postedDialog = activeView.post(new PageNotRespondingRunnable(
+                                            activeView.getContext(), this));
+
+                                    if (postedDialog) {
+                                        // We placed the message into the UI thread for an attached
+                                        // WebView so we've made our best attempt to display the
+                                        // "page not responding" dialog to the user. Although the
+                                        // message is in the queue, there is no guarantee when/if
+                                        // the runnable will execute. In the case that the runnable
+                                        // never executes, the user will need to terminate the
+                                        // process manually.
+                                        break;
                                     }
-                                })
-                            .setNegativeButton(com.android.internal.R.string.wait,
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            // The user chose to wait. The last HEARTBEAT message
-                                            // will still be in the WebCore thread's queue, so all
-                                            // we need to do is post another TIMED_OUT so that the
-                                            // user will get prompted again if the WebCore thread
-                                            // doesn't sort itself out.
-                                            sendMessageDelayed(obtainMessage(TIMED_OUT),
-                                                    SUBSEQUENT_TIMEOUT_PERIOD);
-                                       }
-                                    })
-                            .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                                    @Override
-                                    public void onCancel(DialogInterface dialog) {
-                                        sendMessageDelayed(obtainMessage(TIMED_OUT),
-                                                SUBSEQUENT_TIMEOUT_PERIOD);
-                                    }
-                            })
-                            .setIcon(android.R.drawable.ic_dialog_alert)
-                            .show();
+                                }
+                            }
+
+                            if (!postedDialog) {
+                                // There's no active webview we can use to show the dialog, so
+                                // wait again. If we never get a usable view, the user will
+                                // never get the chance to terminate the process, and will
+                                // need to do it manually.
+                                sendMessageDelayed(obtainMessage(TIMED_OUT),
+                                        SUBSEQUENT_TIMEOUT_PERIOD);
+                            }
+                        }
                         break;
                     }
                 }
@@ -204,5 +222,56 @@ class WebCoreThreadWatchdog implements Runnable {
         }
 
         Looper.loop();
+    }
+
+    private class PageNotRespondingRunnable implements Runnable {
+        Context mContext;
+        private Handler mWatchdogHandler;
+
+        public PageNotRespondingRunnable(Context context, Handler watchdogHandler) {
+            mContext = context;
+            mWatchdogHandler = watchdogHandler;
+        }
+
+        @Override
+        public void run() {
+            // This must run on the UI thread as it is displaying an AlertDialog.
+            assert Looper.getMainLooper().getThread() == Thread.currentThread();
+            new AlertDialog.Builder(mContext)
+                    .setMessage(com.android.internal.R.string.webpage_unresponsive)
+                    .setPositiveButton(com.android.internal.R.string.force_close,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // User chose to force close.
+                                    Process.killProcess(Process.myPid());
+                                }
+                            })
+                    .setNegativeButton(com.android.internal.R.string.wait,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // The user chose to wait. The last HEARTBEAT message
+                                    // will still be in the WebCore thread's queue, so all
+                                    // we need to do is post another TIMED_OUT so that the
+                                    // user will get prompted again if the WebCore thread
+                                    // doesn't sort itself out.
+                                    mWatchdogHandler.sendMessageDelayed(
+                                            mWatchdogHandler.obtainMessage(TIMED_OUT),
+                                            SUBSEQUENT_TIMEOUT_PERIOD);
+                                }
+                            })
+                    .setOnCancelListener(
+                            new DialogInterface.OnCancelListener() {
+                                @Override
+                                public void onCancel(DialogInterface dialog) {
+                                    mWatchdogHandler.sendMessageDelayed(
+                                            mWatchdogHandler.obtainMessage(TIMED_OUT),
+                                            SUBSEQUENT_TIMEOUT_PERIOD);
+                                }
+                            })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
     }
 }
