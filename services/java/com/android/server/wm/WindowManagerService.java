@@ -1173,8 +1173,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_INPUT_METHOD) {
                 Slog.i(TAG, "isVisibleOrAdding " + w + ": " + w.isVisibleOrAdding());
                 if (!w.isVisibleOrAdding()) {
-                    Slog.i(TAG, "  mSurface=" + w.mWinAnimator.mSurface + " reportDestroy="
-                            + w.mWinAnimator.mReportDestroySurface
+                    Slog.i(TAG, "  mSurface=" + w.mWinAnimator.mSurface
                             + " relayoutCalled=" + w.mRelayoutCalled + " viewVis=" + w.mViewVisibility
                             + " policyVis=" + w.mPolicyVisibility + " attachHid=" + w.mAttachedHidden
                             + " exiting=" + w.mExiting + " destroying=" + w.mDestroying);
@@ -2651,7 +2650,7 @@ public class WindowManagerService extends IWindowManager.Stub
             int requestedHeight, int viewVisibility, int flags,
             Rect outFrame, Rect outContentInsets,
             Rect outVisibleInsets, Configuration outConfig, Surface outSurface) {
-        boolean displayed = false;
+        boolean toBeDisplayed = false;
         boolean inTouchMode;
         boolean configChanged;
         boolean surfaceChanged = false;
@@ -2754,7 +2753,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (viewVisibility == View.VISIBLE &&
                     (win.mAppToken == null || !win.mAppToken.clientHidden)) {
-                displayed = !win.isVisibleLw();
+                toBeDisplayed = !win.isVisibleLw();
                 if (win.mExiting) {
                     winAnimator.cancelExitAnimationForNextAnimationLocked();
                     win.mExiting = false;
@@ -2766,7 +2765,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (oldVisibility == View.GONE) {
                     winAnimator.mEnterAnimationPending = true;
                 }
-                if (displayed) {
+                if (toBeDisplayed) {
                     if (win.isDrawnLw() && okToDisplay()) {
                         winAnimator.applyEnterAnimationLocked();
                     }
@@ -2792,7 +2791,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if ((attrChanges&WindowManager.LayoutParams.FORMAT_CHANGED) != 0) {
                     // To change the format, we need to re-build the surface.
                     winAnimator.destroySurfaceLocked();
-                    displayed = true;
+                    toBeDisplayed = true;
                     surfaceChanged = true;
                 }
                 try {
@@ -2802,8 +2801,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     Surface surface = winAnimator.createSurfaceLocked();
                     if (surface != null) {
                         outSurface.copyFrom(surface);
-                        winAnimator.mReportDestroySurface = false;
-                        winAnimator.mSurfacePendingDestroy = false;
                         if (SHOW_TRANSACTIONS) Slog.i(TAG,
                                 "  OUT SURFACE " + outSurface + ": copied");
                     } else {
@@ -2820,7 +2817,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     Binder.restoreCallingIdentity(origId);
                     return 0;
                 }
-                if (displayed) {
+                if (toBeDisplayed) {
                     focusMayChange = true;
                 }
                 if (win.mAttrs.type == TYPE_INPUT_METHOD
@@ -2845,11 +2842,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 winAnimator.mEnterAnimationPending = false;
                 if (winAnimator.mSurface != null) {
                     if (DEBUG_VISIBILITY) Slog.i(TAG, "Relayout invis " + win
-                            + ": mExiting=" + win.mExiting
-                            + " mSurfacePendingDestroy=" + winAnimator.mSurfacePendingDestroy);
+                            + ": mExiting=" + win.mExiting);
                     // If we are not currently running the exit animation, we
                     // need to see about starting one.
-                    if (!win.mExiting || winAnimator.mSurfacePendingDestroy) {
+                    if (!win.mExiting) {
                         surfaceChanged = true;
                         // Try starting an animation; if there isn't one, we
                         // can destroy the surface right away.
@@ -2857,7 +2853,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (win.mAttrs.type == TYPE_APPLICATION_STARTING) {
                             transit = WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
                         }
-                        if (!winAnimator.mSurfacePendingDestroy && win.isWinVisibleLw() &&
+                        if (win.isWinVisibleLw() &&
                                 winAnimator.applyAnimationLocked(transit, false)) {
                             focusMayChange = true;
                             win.mExiting = true;
@@ -2880,22 +2876,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
 
-                if (winAnimator.mSurface == null || (win.getAttrs().flags
-                        & WindowManager.LayoutParams.FLAG_KEEP_SURFACE_WHILE_ANIMATING) == 0
-                        || winAnimator.mSurfacePendingDestroy) {
-                    // We could be called from a local process, which
-                    // means outSurface holds its current surface.  Ensure the
-                    // surface object is cleared, but we don't necessarily want
-                    // it actually destroyed at this point.
-                    winAnimator.mSurfacePendingDestroy = false;
-                    outSurface.release();
-                    if (DEBUG_VISIBILITY) Slog.i(TAG, "Releasing surface in: " + win);
-                } else if (winAnimator.mSurface != null) {
-                    if (DEBUG_VISIBILITY) Slog.i(TAG,
-                            "Keeping surface, will report destroy: " + win);
-                    winAnimator.mReportDestroySurface = true;
-                    outSurface.copyFrom(winAnimator.mSurface);
-                }
+                outSurface.release();
+                if (DEBUG_VISIBILITY) Slog.i(TAG, "Releasing surface in: " + win);
             }
 
             if (focusMayChange) {
@@ -2912,7 +2894,7 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean assignLayers = false;
 
             if (imMayMove) {
-                if (moveInputMethodWindowsIfNeededLocked(false) || displayed) {
+                if (moveInputMethodWindowsIfNeededLocked(false) || toBeDisplayed) {
                     // Little hack here -- we -should- be able to rely on the
                     // function to return true if the IME has moved and needs
                     // its layer recomputed.  However, if the IME was hidden
@@ -2934,7 +2916,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             configChanged = updateOrientationFromAppTokensLocked(false);
             performLayoutAndPlaceSurfacesLocked();
-            if (displayed && win.mIsWallpaper) {
+            if (toBeDisplayed && win.mIsWallpaper) {
                 updateWallpaperOffsetLocked(win, mAppDisplayWidth, mAppDisplayHeight, false);
             }
             if (win.mAppToken != null) {
@@ -2970,7 +2952,7 @@ public class WindowManagerService extends IWindowManager.Stub
         Binder.restoreCallingIdentity(origId);
 
         return (inTouchMode ? WindowManagerImpl.RELAYOUT_RES_IN_TOUCH_MODE : 0)
-                | (displayed ? WindowManagerImpl.RELAYOUT_RES_FIRST_TIME : 0)
+                | (toBeDisplayed ? WindowManagerImpl.RELAYOUT_RES_FIRST_TIME : 0)
                 | (surfaceChanged ? WindowManagerImpl.RELAYOUT_RES_SURFACE_CHANGED : 0)
                 | (animating ? WindowManagerImpl.RELAYOUT_RES_ANIMATING : 0);
     }
