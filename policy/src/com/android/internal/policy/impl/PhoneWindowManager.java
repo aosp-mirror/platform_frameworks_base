@@ -158,7 +158,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean DEBUG = false;
     static final boolean localLOGV = false;
     static final boolean DEBUG_LAYOUT = false;
-    static final boolean DEBUG_FALLBACK = false;
+    static final boolean DEBUG_INPUT = false;
     static final boolean SHOW_STARTING_ANIMATIONS = true;
     static final boolean SHOW_PROCESSES_ON_ALT_MENU = false;
 
@@ -504,6 +504,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     ShortcutManager mShortcutManager;
     PowerManager.WakeLock mBroadcastWakeLock;
+    boolean mHavePendingMediaKeyRepeatWithWakeLock;
 
     // Fallback actions by key code.
     private final SparseArray<KeyCharacterMap.FallbackAction> mFallbackActions =
@@ -511,6 +512,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private static final int MSG_ENABLE_POINTER_LOCATION = 1;
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
+    private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
+    private static final int MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK = 4;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -521,6 +524,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_DISABLE_POINTER_LOCATION:
                     disablePointerLocation();
+                    break;
+                case MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK:
+                    dispatchMediaKeyWithWakeLock((KeyEvent)msg.obj);
+                    break;
+                case MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK:
+                    dispatchMediaKeyRepeatWithWakeLock((KeyEvent)msg.obj);
                     break;
             }
         }
@@ -1692,7 +1701,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
         final boolean canceled = event.isCanceled();
 
-        if (false) {
+        if (DEBUG_INPUT) {
             Log.d(TAG, "interceptKeyTi keyCode=" + keyCode + " down=" + down + " repeatCount="
                     + repeatCount + " keyguardOn=" + keyguardOn + " mHomePressed=" + mHomePressed
                     + " canceled=" + canceled);
@@ -1942,7 +1951,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public KeyEvent dispatchUnhandledKey(WindowState win, KeyEvent event, int policyFlags) {
         // Note: This method is only called if the initial down was unhandled.
-        if (DEBUG_FALLBACK) {
+        if (DEBUG_INPUT) {
             Slog.d(TAG, "Unhandled key: win=" + win + ", action=" + event.getAction()
                     + ", flags=" + event.getFlags()
                     + ", keyCode=" + event.getKeyCode()
@@ -1969,7 +1978,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             if (fallbackAction != null) {
-                if (DEBUG_FALLBACK) {
+                if (DEBUG_INPUT) {
                     Slog.d(TAG, "Fallback: keyCode=" + fallbackAction.keyCode
                             + " metaState=" + Integer.toHexString(fallbackAction.metaState));
                 }
@@ -1996,7 +2005,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        if (DEBUG_FALLBACK) {
+        if (DEBUG_INPUT) {
             if (fallbackEvent == null) {
                 Slog.d(TAG, "No fallback.");
             } else {
@@ -3089,7 +3098,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return 0;
         }
 
-        if (false) {
+        if (DEBUG_INPUT) {
             Log.d(TAG, "interceptKeyTq keycode=" + keyCode
                   + " screenIsOn=" + isScreenOn + " keyguardActive=" + keyguardActive);
         }
@@ -3311,8 +3320,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // Only do this if we would otherwise not pass it to the user. In that
                     // case, the PhoneWindow class will do the same thing, except it will
                     // only do it if the showing app doesn't process the key on its own.
+                    // Note that we need to make a copy of the key event here because the
+                    // original key event will be recycled when we return.
                     mBroadcastWakeLock.acquire();
-                    mHandler.post(new PassHeadsetKey(new KeyEvent(event)));
+                    Message msg = mHandler.obtainMessage(MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK,
+                            new KeyEvent(event));
+                    msg.setAsynchronous(true);
+                    msg.sendToTarget();
                 }
                 break;
             }
@@ -3361,24 +3375,58 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return result;
     }
 
-    class PassHeadsetKey implements Runnable {
-        KeyEvent mKeyEvent;
-
-        PassHeadsetKey(KeyEvent keyEvent) {
-            mKeyEvent = keyEvent;
+    void dispatchMediaKeyWithWakeLock(KeyEvent event) {
+        if (DEBUG_INPUT) {
+            Slog.d(TAG, "dispatchMediaKeyWithWakeLock: " + event);
         }
 
-        public void run() {
-            if (ActivityManagerNative.isSystemReady()) {
-                IAudioService audioService = getAudioService();
-                if (audioService != null) {
-                    try {
-                        audioService.dispatchMediaKeyEventUnderWakelock(mKeyEvent);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "dispatchMediaKeyEvent threw exception " + e);
-                    }
+        if (mHavePendingMediaKeyRepeatWithWakeLock) {
+            if (DEBUG_INPUT) {
+                Slog.d(TAG, "dispatchMediaKeyWithWakeLock: canceled repeat");
+            }
+
+            mHandler.removeMessages(MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK);
+            mHavePendingMediaKeyRepeatWithWakeLock = false;
+            mBroadcastWakeLock.release(); // pending repeat was holding onto the wake lock
+        }
+
+        dispatchMediaKeyWithWakeLockToAudioService(event);
+
+        if (event.getAction() == KeyEvent.ACTION_DOWN
+                && event.getRepeatCount() == 0) {
+            mHavePendingMediaKeyRepeatWithWakeLock = true;
+
+            Message msg = mHandler.obtainMessage(
+                    MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK, event);
+            msg.setAsynchronous(true);
+            mHandler.sendMessageDelayed(msg, ViewConfiguration.getKeyRepeatTimeout());
+        } else {
+            mBroadcastWakeLock.release();
+        }
+    }
+
+    void dispatchMediaKeyRepeatWithWakeLock(KeyEvent event) {
+        mHavePendingMediaKeyRepeatWithWakeLock = false;
+
+        KeyEvent repeatEvent = KeyEvent.changeTimeRepeat(event,
+                SystemClock.uptimeMillis(), 1, event.getFlags() | KeyEvent.FLAG_LONG_PRESS);
+        if (DEBUG_INPUT) {
+            Slog.d(TAG, "dispatchMediaKeyRepeatWithWakeLock: " + repeatEvent);
+        }
+
+        dispatchMediaKeyWithWakeLockToAudioService(repeatEvent);
+        mBroadcastWakeLock.release();
+    }
+
+    void dispatchMediaKeyWithWakeLockToAudioService(KeyEvent event) {
+        if (ActivityManagerNative.isSystemReady()) {
+            IAudioService audioService = getAudioService();
+            if (audioService != null) {
+                try {
+                    audioService.dispatchMediaKeyEventUnderWakelock(event);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "dispatchMediaKeyEvent threw exception " + e);
                 }
-                mBroadcastWakeLock.release();
             }
         }
     }
