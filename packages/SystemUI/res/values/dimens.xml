@@ -132,10 +132,10 @@
     <!-- Height of the notification panel header bar -->
     <dimen name="notification_panel_header_height">48dp</dimen>
 
-    <!-- Height of the notification panel header bar -->
-    <dimen name="notification_panel_padding_top">@*android:dimen/status_bar_height</dimen>
+    <!-- Extra space above the panel -->
+    <dimen name="notification_panel_padding_top">4dp</dimen>
 
-    <!-- Extra space above the clock in the panel; half of (notification_panel_header_height - 32) -->
+    <!-- Extra space above the clock in the panel -->
     <dimen name="notification_panel_header_padding_top">0dp</dimen>
 
     <!-- Layout parameters for the notification panel -->
