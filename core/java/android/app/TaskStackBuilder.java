@@ -161,18 +161,12 @@ public class TaskStackBuilder {
             ActivityInfo info = pm.getActivityInfo(
                     new ComponentName(mSourceContext, sourceActivityClass), 0);
             String parentActivity = info.parentActivityName;
-            Intent parent = new Intent().setComponent(
-                    new ComponentName(mSourceContext, parentActivity));
-            while (parent != null) {
+            while (parentActivity != null) {
+                Intent parent = new Intent().setComponent(
+                        new ComponentName(mSourceContext, parentActivity));
                 mIntents.add(insertAt, parent);
                 info = pm.getActivityInfo(parent.getComponent(), 0);
                 parentActivity = info.parentActivityName;
-                if (parentActivity != null) {
-                    parent = new Intent().setComponent(
-                            new ComponentName(mSourceContext, parentActivity));
-                } else {
-                    parent = null;
-                }
             }
         } catch (NameNotFoundException e) {
             Log.e(TAG, "Bad ComponentName while traversing activity parent metadata");
