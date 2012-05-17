@@ -934,7 +934,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private static final int RELEASE_SINGLE_TAP         = 5;
     private static final int REQUEST_FORM_DATA          = 6;
     private static final int DRAG_HELD_MOTIONLESS       = 8;
-    private static final int AWAKEN_SCROLL_BARS         = 9;
     private static final int PREVENT_DEFAULT_TIMEOUT    = 10;
     private static final int SCROLL_SELECT_TEXT         = 11;
 
@@ -1002,7 +1001,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         "REQUEST_FORM_DATA", //              = 6;
         "RESUME_WEBCORE_PRIORITY", //        = 7;
         "DRAG_HELD_MOTIONLESS", //           = 8;
-        "AWAKEN_SCROLL_BARS", //             = 9;
+        "", //             = 9;
         "PREVENT_DEFAULT_TIMEOUT", //        = 10;
         "SCROLL_SELECT_TEXT" //              = 11;
     };
@@ -3773,7 +3772,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             //        Log.d(LOGTAG, "startScroll: " + dx + " " + dy);
             mScroller.startScroll(getScrollX(), getScrollY(), dx, dy,
                     animationDuration > 0 ? animationDuration : computeDuration(dx, dy));
-            mWebViewPrivate.awakenScrollBars(mScroller.getDuration());
             invalidate();
         } else {
             mWebView.scrollTo(x, y);
@@ -4156,15 +4154,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (mTouchMode == TOUCH_DRAG_MODE) {
             if (mHeldMotionless == MOTIONLESS_PENDING) {
                 mPrivateHandler.removeMessages(DRAG_HELD_MOTIONLESS);
-                mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
                 mHeldMotionless = MOTIONLESS_FALSE;
             }
             if (mHeldMotionless == MOTIONLESS_FALSE) {
                 mPrivateHandler.sendMessageDelayed(mPrivateHandler
                         .obtainMessage(DRAG_HELD_MOTIONLESS), MOTIONLESS_TIME);
-                mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                        .obtainMessage(AWAKEN_SCROLL_BARS),
-                            ViewConfiguration.getScrollDefaultDelay());
                 mHeldMotionless = MOTIONLESS_PENDING;
             }
         }
@@ -6047,27 +6041,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     }
                 }
 
-                // Turn off scrollbars when dragging a layer.
-                if (keepScrollBarsVisible &&
-                        mTouchMode != TOUCH_DRAG_LAYER_MODE &&
-                        mTouchMode != TOUCH_DRAG_TEXT_MODE) {
-                    if (mHeldMotionless != MOTIONLESS_TRUE) {
-                        mHeldMotionless = MOTIONLESS_TRUE;
-                        invalidate();
-                    }
-                    // keep the scrollbar on the screen even there is no scroll
-                    mWebViewPrivate.awakenScrollBars(ViewConfiguration.getScrollDefaultDelay(),
-                            false);
-                    // Post a message so that we'll keep them alive while we're not scrolling.
-                    mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                            .obtainMessage(AWAKEN_SCROLL_BARS),
-                            ViewConfiguration.getScrollDefaultDelay());
-                    // return false to indicate that we can't pan out of the
-                    // view space
-                    return;
-                } else {
-                    mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
-                }
                 break;
             }
             case MotionEvent.ACTION_UP: {
@@ -6115,7 +6088,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     case TOUCH_DRAG_LAYER_MODE:
                     case TOUCH_DRAG_TEXT_MODE:
                         mPrivateHandler.removeMessages(DRAG_HELD_MOTIONLESS);
-                        mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
                         // if the user waits a while w/o moving before the
                         // up, we don't want to do a fling
                         if (eventTime - mLastTouchTime <= MIN_FLING_TIME) {
@@ -6381,7 +6353,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
         mPrivateHandler.removeMessages(DRAG_HELD_MOTIONLESS);
-        mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
         removeTouchHighlight();
         mHeldMotionless = MOTIONLESS_TRUE;
         mTouchMode = TOUCH_DONE_MODE;
@@ -6813,17 +6784,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         // no horizontal overscroll if the content just fits
         mScroller.fling(scrollX, scrollY, -vx, -vy, 0, maxX, 0, maxY,
                 maxX == 0 ? 0 : overflingDistance, overflingDistance);
-        // Duration is calculated based on velocity. With range boundaries and overscroll
-        // we may not know how long the final animation will take. (Hence the deprecation
-        // warning on the call below.) It's not a big deal for scroll bars but if webcore
-        // resumes during this effect we will take a performance hit. See computeScroll;
-        // we resume webcore there when the animation is finished.
-        final int time = mScroller.getDuration();
-
-        // Suppress scrollbars for layer scrolling.
-        if (mTouchMode != TOUCH_DRAG_LAYER_MODE && mTouchMode != TOUCH_DRAG_TEXT_MODE) {
-            mWebViewPrivate.awakenScrollBars(time);
-        }
 
         invalidate();
     }
@@ -7361,17 +7321,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 case DRAG_HELD_MOTIONLESS:
                     mHeldMotionless = MOTIONLESS_TRUE;
                     invalidate();
-                    // fall through to keep scrollbars awake
-
-                case AWAKEN_SCROLL_BARS:
-                    if (mTouchMode == TOUCH_DRAG_MODE
-                            && mHeldMotionless == MOTIONLESS_TRUE) {
-                        mWebViewPrivate.awakenScrollBars(ViewConfiguration
-                                .getScrollDefaultDelay(), false);
-                        mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                                .obtainMessage(AWAKEN_SCROLL_BARS),
-                                ViewConfiguration.getScrollDefaultDelay());
-                    }
                     break;
 
                 case SCREEN_ON:
