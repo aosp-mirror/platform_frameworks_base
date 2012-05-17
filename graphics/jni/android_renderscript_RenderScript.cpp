@@ -489,7 +489,7 @@ nAllocationGetSurfaceTextureID2(JNIEnv *_env, jobject _this, RsContext con, jint
 static void
 nAllocationSetSurface(JNIEnv *_env, jobject _this, RsContext con, RsAllocation alloc, jobject sur)
 {
-    LOG_API("nAllocationSetSurfaceTexture, con(%p), alloc(%p), surface(%p)",
+    LOG_API("nAllocationSetSurface, con(%p), alloc(%p), surface(%p)",
             con, alloc, (Surface *)sur);
 
     sp<Surface> s;
