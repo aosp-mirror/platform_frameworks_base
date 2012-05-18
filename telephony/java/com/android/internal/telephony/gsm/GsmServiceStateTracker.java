@@ -111,7 +111,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
      * are in. Keep the time zone information from the NITZ string so
      * we can fix the time zone once know the country.
      */
-    private boolean mNeedFixZone = false;
+    private boolean mNeedFixZoneAfterNitz = false;
     private int mZoneOffset;
     private boolean mZoneDst;
     private long mZoneTime;
@@ -906,7 +906,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 }
 
                 if (shouldFixTimeZoneNow(phone, operatorNumeric, prevOperatorNumeric,
-                        mNeedFixZone)) {
+                        mNeedFixZoneAfterNitz)) {
                     // If the offset is (0, false) and the timezone property
                     // is set, use the timezone property rather than
                     // GMT.
@@ -917,25 +917,35 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                             " iso-cc='" + iso +
                             "' iso-cc-idx=" + Arrays.binarySearch(GMT_COUNTRY_CODES, iso));
                     }
+
+                    // "(mZoneOffset == 0) && (mZoneDst == false) &&
+                    //  (Arrays.binarySearch(GMT_COUNTRY_CODES, iso) < 0)"
+                    // means that we received a NITZ string telling
+                    // it is in GMT+0 w/ DST time zone
+                    // BUT iso tells is NOT, e.g, a wrong NITZ reporting
+                    // local time w/ 0 offset.
                     if ((mZoneOffset == 0) && (mZoneDst == false) &&
                         (zoneName != null) && (zoneName.length() > 0) &&
                         (Arrays.binarySearch(GMT_COUNTRY_CODES, iso) < 0)) {
                         zone = TimeZone.getDefault();
-                        // For NITZ string without timezone,
-                        // need adjust time to reflect default timezone setting
-                        long ctm = System.currentTimeMillis();
-                        long tzOffset = zone.getOffset(ctm);
-                        if (DBG) {
-                            log("pollStateDone: tzOffset=" + tzOffset + " ltod=" +
+                        if (mNeedFixZoneAfterNitz) {
+                            // For wrong NITZ reporting local time w/ 0 offset,
+                            // need adjust time to reflect default timezone setting
+                            long ctm = System.currentTimeMillis();
+                            long tzOffset = zone.getOffset(ctm);
+                            if (DBG) {
+                                log("pollStateDone: tzOffset=" + tzOffset + " ltod=" +
                                         TimeUtils.logTimeOfDay(ctm));
-                        }
-                        if (getAutoTime()) {
-                            long adj = ctm - tzOffset;
-                            if (DBG) log("pollStateDone: adj ltod=" + TimeUtils.logTimeOfDay(adj));
-                            setAndBroadcastNetworkSetTime(adj);
-                        } else {
-                            // Adjust the saved NITZ time to account for tzOffset.
-                            mSavedTime = mSavedTime - tzOffset;
+                            }
+                            if (getAutoTime()) {
+                                long adj = ctm - tzOffset;
+                                if (DBG) log("pollStateDone: adj ltod=" +
+                                        TimeUtils.logTimeOfDay(adj));
+                                setAndBroadcastNetworkSetTime(adj);
+                            } else {
+                                // Adjust the saved NITZ time to account for tzOffset.
+                                mSavedTime = mSavedTime - tzOffset;
+                            }
                         }
                         if (DBG) log("pollStateDone: using default TimeZone");
                     } else if (iso.equals("")){
@@ -948,7 +958,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                         if (DBG) log("pollStateDone: using getTimeZone(off, dst, time, iso)");
                     }
 
-                    mNeedFixZone = false;
+                    mNeedFixZoneAfterNitz = false;
 
                     if (zone != null) {
                         log("pollStateDone: zone != null zone.getID=" + zone.getID());
@@ -1440,7 +1450,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 // so we don't know how to identify the DST rules yet.  Save
                 // the information and hope to fix it up later.
 
-                mNeedFixZone = true;
+                mNeedFixZoneAfterNitz = true;
                 mZoneOffset  = tzOffset;
                 mZoneDst     = dst != 0;
                 mZoneTime    = c.getTimeInMillis();
@@ -1696,7 +1706,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         pw.println(" mGsmRoaming=" + mGsmRoaming);
         pw.println(" mDataRoaming=" + mDataRoaming);
         pw.println(" mEmergencyOnly=" + mEmergencyOnly);
-        pw.println(" mNeedFixZone=" + mNeedFixZone);
+        pw.println(" mNeedFixZoneAfterNitz=" + mNeedFixZoneAfterNitz);
         pw.println(" mZoneOffset=" + mZoneOffset);
         pw.println(" mZoneDst=" + mZoneDst);
         pw.println(" mZoneTime=" + mZoneTime);
