@@ -26,7 +26,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
-import android.content.res.Configuration;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Point;
@@ -36,16 +36,17 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.UserId;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1796,6 +1797,40 @@ public class ActivityManager {
             Log.w(TAG, "Could not query launch counts", e);
             return new HashMap<String, Integer>();
         }
+    }
+
+    /** @hide */
+    public static int checkComponentPermission(String permission, int uid,
+            int owningUid, boolean exported) {
+        // Root, system server get to do everything.
+        if (uid == 0 || uid == Process.SYSTEM_UID) {
+            return PackageManager.PERMISSION_GRANTED;
+        }
+        // Isolated processes don't get any permissions.
+        if (UserId.isIsolated(uid)) {
+            return PackageManager.PERMISSION_DENIED;
+        }
+        // If there is a uid that owns whatever is being accessed, it has
+        // blanket access to it regardless of the permissions it requires.
+        if (owningUid >= 0 && UserId.isSameApp(uid, owningUid)) {
+            return PackageManager.PERMISSION_GRANTED;
+        }
+        // If the target is not exported, then nobody else can get to it.
+        if (!exported) {
+            Slog.w(TAG, "Permission denied: checkComponentPermission() owningUid=" + owningUid);
+            return PackageManager.PERMISSION_DENIED;
+        }
+        if (permission == null) {
+            return PackageManager.PERMISSION_GRANTED;
+        }
+        try {
+            return AppGlobals.getPackageManager()
+                    .checkUidPermission(permission, uid);
+        } catch (RemoteException e) {
+            // Should never happen, but if it does... deny!
+            Slog.e(TAG, "PackageManager is dead?!?", e);
+        }
+        return PackageManager.PERMISSION_DENIED;
     }
 
     /**

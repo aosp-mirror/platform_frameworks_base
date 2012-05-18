@@ -4639,35 +4639,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             pid = tlsIdentity.pid;
         }
 
-        // Root, system server and our own process get to do everything.
-        if (uid == 0 || uid == Process.SYSTEM_UID || pid == MY_PID) {
+        if (pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
         }
-        // Isolated processes don't get any permissions.
-        if (UserId.isIsolated(uid)) {
-            return PackageManager.PERMISSION_DENIED;
-        }
-        // If there is a uid that owns whatever is being accessed, it has
-        // blanket access to it regardless of the permissions it requires.
-        if (owningUid >= 0 && UserId.isSameApp(uid, owningUid)) {
-            return PackageManager.PERMISSION_GRANTED;
-        }
-        // If the target is not exported, then nobody else can get to it.
-        if (!exported) {
-            Slog.w(TAG, "Permission denied: checkComponentPermission() owningUid=" + owningUid);
-            return PackageManager.PERMISSION_DENIED;
-        }
-        if (permission == null) {
-            return PackageManager.PERMISSION_GRANTED;
-        }
-        try {
-            return AppGlobals.getPackageManager()
-                    .checkUidPermission(permission, uid);
-        } catch (RemoteException e) {
-            // Should never happen, but if it does... deny!
-            Slog.e(TAG, "PackageManager is dead?!?", e);
-        }
-        return PackageManager.PERMISSION_DENIED;
+
+        return ActivityManager.checkComponentPermission(permission, uid,
+                owningUid, exported);
     }
 
     /**
@@ -13542,6 +13519,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             Binder.restoreCallingIdentity(origId);
             return foundParentInTask;
         }
+    }
+
+    public int getLaunchedFromUid(IBinder activityToken) {
+        ActivityRecord srec = ActivityRecord.forToken(activityToken);
+        if (srec == null) {
+            return -1;
+        }
+        return srec.launchedFromUid;
     }
 
     // =========================================================
