@@ -16,7 +16,11 @@
 
 package com.android.server.net;
 
+import static android.net.NetworkStats.SET_DEFAULT;
+import static android.net.NetworkStats.TAG_NONE;
+import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
+import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
 import android.content.res.Resources;
@@ -46,6 +50,14 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
 
     private static final String TEST_FILE = "test.bin";
     private static final String TEST_IMSI = "310260000000000";
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        // ignore any device overlay while testing
+        NetworkTemplate.forceAllNetworkTypes();
+    }
 
     public void testReadLegacyNetwork() throws Exception {
         final File testFile = new File(getContext().getFilesDir(), TEST_FILE);
@@ -123,6 +135,20 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
         collection.read(new ByteArrayInputStream(bos.toByteArray()));
         assertSummaryTotalIncludingTags(collection, buildTemplateMobileAll(TEST_IMSI),
                 77017831L, 100995L, 35436758L, 92344L);
+    }
+
+    public void testStartEndAtomicBuckets() throws Exception {
+        final NetworkStatsCollection collection = new NetworkStatsCollection(HOUR_IN_MILLIS);
+
+        // record empty data straddling between buckets
+        final NetworkStats.Entry entry = new NetworkStats.Entry();
+        entry.rxBytes = 32;
+        collection.recordData(null, UID_ALL, SET_DEFAULT, TAG_NONE, 30 * MINUTE_IN_MILLIS,
+                90 * MINUTE_IN_MILLIS, entry);
+
+        // assert that we report boundary in atomic buckets
+        assertEquals(0, collection.getStartMillis());
+        assertEquals(2 * HOUR_IN_MILLIS, collection.getEndMillis());
     }
 
     /**

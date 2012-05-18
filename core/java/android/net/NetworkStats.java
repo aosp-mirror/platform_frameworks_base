@@ -111,6 +111,14 @@ public class NetworkStats implements Parcelable {
                     && operations == 0;
         }
 
+        public void add(Entry another) {
+            this.rxBytes += another.rxBytes;
+            this.rxPackets += another.rxPackets;
+            this.txBytes += another.txBytes;
+            this.txPackets += another.txPackets;
+            this.operations += another.operations;
+        }
+
         @Override
         public String toString() {
             final StringBuilder builder = new StringBuilder();

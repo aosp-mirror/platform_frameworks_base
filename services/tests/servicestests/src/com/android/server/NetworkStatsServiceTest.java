@@ -777,10 +777,80 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
     }
 
+    public void testReportXtOverDev() throws Exception {
+        // bring mobile network online
+        expectCurrentTime();
+        expectDefaultSettings();
+        expectNetworkState(buildMobile3gState(IMSI_1));
+        expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
+
+        replay();
+        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION_IMMEDIATE));
+        verifyAndReset();
+
+        // create some traffic, but only for DEV, and across 1.5 buckets
+        incrementCurrentTime(90 * MINUTE_IN_MILLIS);
+        expectCurrentTime();
+        expectDefaultSettings();
+        expectNetworkStatsSummaryDev(new NetworkStats(getElapsedRealtime(), 1)
+                .addIfaceValues(TEST_IFACE, 6000L, 60L, 3000L, 30L));
+        expectNetworkStatsSummaryXt(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
+
+        replay();
+        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+
+        // verify service recorded history:
+        // 4000(dev) + 2000(dev)
+        assertNetworkTotal(sTemplateImsi1, 6000L, 60L, 3000L, 30L, 0);
+        verifyAndReset();
+
+        // create traffic on both DEV and XT, across two buckets
+        incrementCurrentTime(2 * HOUR_IN_MILLIS);
+        expectCurrentTime();
+        expectDefaultSettings();
+        expectNetworkStatsSummaryDev(new NetworkStats(getElapsedRealtime(), 1)
+                .addIfaceValues(TEST_IFACE, 6004L, 64L, 3004L, 34L));
+        expectNetworkStatsSummaryXt(new NetworkStats(getElapsedRealtime(), 1)
+                .addIfaceValues(TEST_IFACE, 10240L, 0L, 0L, 0L));
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
+
+        replay();
+        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+
+        // verify that we switching reporting at the first atomic XT bucket,
+        // which should give us:
+        // 4000(dev) + 2000(dev) + 1(dev) + 5120(xt) + 2560(xt)
+        assertNetworkTotal(sTemplateImsi1, 13681L, 61L, 3001L, 31L, 0);
+
+        // also test pure-DEV and pure-XT ranges
+        assertNetworkTotal(sTemplateImsi1, startTimeMillis(),
+                startTimeMillis() + 2 * HOUR_IN_MILLIS, 6001L, 61L, 3001L, 31L, 0);
+        assertNetworkTotal(sTemplateImsi1, startTimeMillis() + 2 * HOUR_IN_MILLIS,
+                startTimeMillis() + 4 * HOUR_IN_MILLIS, 7680L, 0L, 0L, 0L, 0);
+
+        verifyAndReset();
+    }
+
     private void assertNetworkTotal(NetworkTemplate template, long rxBytes, long rxPackets,
             long txBytes, long txPackets, int operations) throws Exception {
+        assertNetworkTotal(template, Long.MIN_VALUE, Long.MAX_VALUE, rxBytes, rxPackets, txBytes,
+                txPackets, operations);
+    }
+
+    private void assertNetworkTotal(NetworkTemplate template, long start, long end, long rxBytes,
+            long rxPackets, long txBytes, long txPackets, int operations) throws Exception {
+        // verify history API
         final NetworkStatsHistory history = mSession.getHistoryForNetwork(template, FIELD_ALL);
-        assertValues(history, Long.MIN_VALUE, Long.MAX_VALUE, rxBytes, rxPackets, txBytes,
+        assertValues(history, start, end, rxBytes, rxPackets, txBytes, txPackets, operations);
+
+        // verify summary API
+        final NetworkStats stats = mSession.getSummaryForNetwork(template, start, end);
+        assertValues(stats, IFACE_ALL, UID_ALL, SET_DEFAULT, TAG_NONE, rxBytes, rxPackets, txBytes,
                 txPackets, operations);
     }
 
@@ -791,10 +861,17 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
     private void assertUidTotal(NetworkTemplate template, int uid, int set, long rxBytes,
             long rxPackets, long txBytes, long txPackets, int operations) throws Exception {
+        // verify history API
         final NetworkStatsHistory history = mSession.getHistoryForUid(
                 template, uid, set, TAG_NONE, FIELD_ALL);
         assertValues(history, Long.MIN_VALUE, Long.MAX_VALUE, rxBytes, rxPackets, txBytes,
                 txPackets, operations);
+
+        // verify summary API
+        final NetworkStats stats = mSession.getSummaryForAllUid(
+                template, Long.MIN_VALUE, Long.MAX_VALUE, false);
+        assertValues(stats, IFACE_ALL, uid, set, TAG_NONE, rxBytes, rxPackets, txBytes, txPackets,
+                operations);
     }
 
     private void expectSystemReady() throws Exception {
@@ -819,7 +896,15 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     }
 
     private void expectNetworkStatsSummary(NetworkStats summary) throws Exception {
+        expectNetworkStatsSummaryDev(summary);
+        expectNetworkStatsSummaryXt(summary);
+    }
+
+    private void expectNetworkStatsSummaryDev(NetworkStats summary) throws Exception {
         expect(mNetManager.getNetworkStatsSummaryDev()).andReturn(summary).atLeastOnce();
+    }
+
+    private void expectNetworkStatsSummaryXt(NetworkStats summary) throws Exception {
         expect(mNetManager.getNetworkStatsSummaryXt()).andReturn(summary).atLeastOnce();
     }
 
@@ -847,6 +932,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expect(mSettings.getPollInterval()).andReturn(HOUR_IN_MILLIS).anyTimes();
         expect(mSettings.getTimeCacheMaxAge()).andReturn(DAY_IN_MILLIS).anyTimes();
         expect(mSettings.getSampleEnabled()).andReturn(true).anyTimes();
+        expect(mSettings.getReportXtOverDev()).andReturn(true).anyTimes();
 
         final Config config = new Config(bucketDuration, deleteAge, deleteAge);
         expect(mSettings.getDevConfig()).andReturn(config).anyTimes();
@@ -885,8 +971,20 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
     private static void assertValues(NetworkStats stats, String iface, int uid, int set,
             int tag, long rxBytes, long rxPackets, long txBytes, long txPackets, int operations) {
-        final int i = stats.findIndex(iface, uid, set, tag);
-        final NetworkStats.Entry entry = stats.getValues(i, null);
+        final NetworkStats.Entry entry = new NetworkStats.Entry();
+        if (set == SET_DEFAULT || set == SET_ALL) {
+            final int i = stats.findIndex(iface, uid, SET_DEFAULT, tag);
+            if (i != -1) {
+                entry.add(stats.getValues(i, null));
+            }
+        }
+        if (set == SET_FOREGROUND || set == SET_ALL) {
+            final int i = stats.findIndex(iface, uid, SET_FOREGROUND, tag);
+            if (i != -1) {
+                entry.add(stats.getValues(i, null));
+            }
+        }
+
         assertEquals("unexpected rxBytes", rxBytes, entry.rxBytes);
         assertEquals("unexpected rxPackets", rxPackets, entry.rxPackets);
         assertEquals("unexpected txBytes", txBytes, entry.txBytes);
