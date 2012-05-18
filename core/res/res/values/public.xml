@@ -2058,5 +2058,9 @@
   <eat-comment />
 
   <public type="attr" name="keyset" />
+  <public type="attr" name="targetID" />
+  <public type="attr" name="fromScene" />
+  <public type="attr" name="toScene" />
+  <public type="attr" name="transition" />
 
 </resources>

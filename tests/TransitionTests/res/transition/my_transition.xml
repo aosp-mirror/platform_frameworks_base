@@ -1,0 +1,20 @@
+<transitionGroup xmlns:android="http://schemas.android.com/apk/res/android">
+    <fade></fade>
+    <transitionGroup>
+        <move android:duration="500">
+            <targets>
+                <target android:targetID="@id/container"/>
+                <target android:targetID="@id/resultsList"/>
+            </targets>
+        </move>
+        <transitionGroup>
+            <targets>
+                <target android:targetID="@id/container"/>
+                <target android:targetID="@id/resultsList"/>
+            </targets>
+            <fade android:startOffset="25"/>
+        </transitionGroup>
+        <recolor/>
+    </transitionGroup>
+    <move/>
+</transitionGroup>

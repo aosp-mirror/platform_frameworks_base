@@ -4378,6 +4378,28 @@
     </declare-styleable>
 
     <!-- ========================== -->
+    <!-- State class attributes -->
+    <!-- ========================== -->
+    <eat-comment />
+
+    <declare-styleable name="Scene">
+        <attr name="layout" />
+    </declare-styleable>
+
+    <declare-styleable name="Transition">
+        <attr name="duration" />
+        <attr name="startOffset" />
+        <attr name="interpolator" />
+        <attr name="targetID" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="TransitionManager">
+        <attr name="transition" format="reference" />
+        <attr name="fromScene" format="reference" />
+        <attr name="toScene" format="reference" />
+    </declare-styleable>
+
+    <!-- ========================== -->
     <!-- ValueAnimator class attributes -->
     <!-- ========================== -->
     <eat-comment />

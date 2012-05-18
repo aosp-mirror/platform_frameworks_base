@@ -73,6 +73,7 @@ import android.view.animation.Transformation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.view.transition.Scene;
 import android.widget.ScrollBarDrawable;
 
 import static android.os.Build.VERSION_CODES.*;
@@ -1571,6 +1572,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #getTag()
      */
     protected Object mTag;
+
+    private Scene mCurrentScene = null;
 
     // for mPrivateFlags:
     /** {@hide} */
@@ -12037,6 +12040,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         mCurrentAnimation = null;
 
+        mCurrentScene = null;
+
         resetAccessibilityStateChanged();
     }
 
@@ -17755,6 +17760,31 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mAnimator = new ViewPropertyAnimator(this);
         }
         return mAnimator;
+    }
+
+    /**
+     * Set the current Scene that this view is in. The current scene is set only
+     * on the root view of a scene, not for every view in that hierarchy. This
+     * information is used by Scene to determine whether there is a previous
+     * scene which should be exited before the new scene is entered.
+     *
+     * @param scene The new scene being set on the view
+     *
+     * @hide
+     */
+    public void setCurrentScene(Scene scene) {
+        mCurrentScene = scene;
+    }
+
+    /**
+     * Gets the current {@link Scene} set on this view. A scene is set on a view
+     * only if that view is the scene root.
+     *
+     * @return The current Scene set on this view. A value of null indicates that
+     * no Scene is current set.
+     */
+    public Scene getCurrentScene() {
+        return mCurrentScene;
     }
 
     /**
