@@ -77,7 +77,8 @@ public final class InputManager {
      * The meta-data specifies a resource that contains a description of each keyboard
      * layout that is provided by the application.
      * <pre><code>
-     * &lt;receiver android:name=".InputDeviceReceiver">
+     * &lt;receiver android:name=".InputDeviceReceiver"
+     *         android:label="@string/keyboard_layouts_label">
      *     &lt;intent-filter>
      *         &lt;action android:name="android.hardware.input.action.QUERY_KEYBOARD_LAYOUTS" />
      *     &lt;/intent-filter>
@@ -90,7 +91,9 @@ public final class InputManager {
      * an XML resource whose root element is <code>&lt;keyboard-layouts></code> that
      * contains zero or more <code>&lt;keyboard-layout></code> elements.
      * Each <code>&lt;keyboard-layout></code> element specifies the name, label, and location
-     * of a key character map for a particular keyboard layout.
+     * of a key character map for a particular keyboard layout.  The label on the receiver
+     * is used to name the collection of keyboard layouts provided by this receiver in the
+     * keyboard layout settings.
      * <pre></code>
      * &lt;?xml version="1.0" encoding="utf-8"?>
      * &lt;keyboard-layouts xmlns:android="http://schemas.android.com/apk/res/android">
