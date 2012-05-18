@@ -22,6 +22,10 @@
 
 using namespace android;
 
+
+extern const char * const gDefaultIgnoreAssets;
+extern const char * gUserIgnoreAssets;
+
 bool valid_symbol_name(const String8& str);
 
 class AaptAssets;
