@@ -6653,17 +6653,20 @@ public class Intent implements Parcelable, Cloneable {
 
         final String action = getAction();
         if (ACTION_CHOOSER.equals(action)) {
-            // Inspect target intent to see if we need to migrate
-            final Intent target = getParcelableExtra(EXTRA_INTENT);
-            if (target.migrateExtraStreamToClipData()) {
-                // Since we migrated in child, we need to promote ClipData and
-                // flags to ourselves to grant.
-                setClipData(target.getClipData());
-                addFlags(target.getFlags()
-                        & (FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION));
-                return true;
-            } else {
-                return false;
+            try {
+                // Inspect target intent to see if we need to migrate
+                final Intent target = getParcelableExtra(EXTRA_INTENT);
+                if (target != null && target.migrateExtraStreamToClipData()) {
+                    // Since we migrated in child, we need to promote ClipData
+                    // and flags to ourselves to grant.
+                    setClipData(target.getClipData());
+                    addFlags(target.getFlags()
+                            & (FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION));
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (ClassCastException e) {
             }
 
         } else if (ACTION_SEND.equals(action)) {
