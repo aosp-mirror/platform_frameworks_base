@@ -281,9 +281,16 @@ public class ImageWallpaper extends WallpaperService {
                 return;
             }
 
-            if (mBackgroundWidth < 0 || mBackgroundHeight < 0) {
-                // If we don't yet know the size of the wallpaper bitmap,
-                // we need to get it now.
+            // If we don't yet know the size of the wallpaper bitmap,
+            // we need to get it now.
+            boolean updateWallpaper = mBackgroundWidth < 0 || mBackgroundHeight < 0 ;
+
+            // If we somehow got to this point after we have last flushed
+            // the wallpaper, well we really need it to draw again.  So
+            // seems like we need to reload it.  Ouch.
+            updateWallpaper = updateWallpaper || mBackground == null;
+
+            if (updateWallpaper) {
                 updateWallpaperLocked();
             }
 
