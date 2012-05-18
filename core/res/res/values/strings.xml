@@ -846,6 +846,12 @@
         interface of an input method. Should never be needed for normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindAccessibilityService">bind to an accessibility service</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindAccessibilityService">Allows the holder to bind to the top-level
+        interface of an accessibility service. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bindTextService">bind to a text service</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bindTextService">Allows the holder to bind to the top-level
