@@ -2257,7 +2257,7 @@ public final class ViewRootImpl implements ViewParent,
             mLayoutRequested = true;    // ask wm for a new surface next time.
             return false;
         } catch (IllegalArgumentException e) {
-            Log.e(TAG, "IllegalArgumentException locking surface", e);
+            Log.e(TAG, "Could not lock surface", e);
             // Don't assume this is due to out of memory, it could be
             // something else, and if it is something else then we could
             // kill stuff (or ourself) for no reason.
@@ -2343,7 +2343,14 @@ public final class ViewRootImpl implements ViewParent,
                 unlockCanvasAndPostStartTime = System.nanoTime();
             }
 
-            surface.unlockCanvasAndPost(canvas);
+            try {
+                surface.unlockCanvasAndPost(canvas);
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "Could not unlock surface", e);
+                mLayoutRequested = true;    // ask wm for a new surface next time.
+                //noinspection ReturnInsideFinallyBlock
+                return false;
+            }
 
             if (ViewDebug.DEBUG_LATENCY) {
                 long now = System.nanoTime();
