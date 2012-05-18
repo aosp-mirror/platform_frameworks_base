@@ -1686,6 +1686,10 @@ public class WebView extends AbsoluteLayout
             WebView.super.computeScroll();
         }
 
+        public boolean super_performAccessibilityAction(int action, Bundle arguments) {
+            return WebView.super.performAccessibilityAction(action, arguments);
+        }
+
         public boolean super_performLongClick() {
             return WebView.super.performLongClick();
         }
@@ -1936,6 +1940,11 @@ public class WebView extends AbsoluteLayout
         super.onInitializeAccessibilityEvent(event);
         event.setClassName(WebView.class.getName());
         mProvider.getViewDelegate().onInitializeAccessibilityEvent(event);
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        return mProvider.getViewDelegate().performAccessibilityAction(action, arguments);
     }
 
     /** @hide */
