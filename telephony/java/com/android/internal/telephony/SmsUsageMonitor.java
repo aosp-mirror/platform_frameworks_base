@@ -19,15 +19,21 @@ package com.android.internal.telephony;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.XmlResourceParser;
+import android.database.ContentObserver;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
 import android.telephony.PhoneNumberUtils;
 import android.util.Log;
 
 import com.android.internal.util.XmlUtils;
 
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,6 +51,8 @@ import java.util.regex.Pattern;
  */
 public class SmsUsageMonitor {
     private static final String TAG = "SmsUsageMonitor";
+    private static final boolean DBG = true;
+    private static final boolean VDBG = false;
 
     /** Default checking period for SMS sent without user permission. */
     private static final int DEFAULT_SMS_CHECK_PERIOD = 1800000;    // 30 minutes
@@ -69,6 +77,7 @@ public class SmsUsageMonitor {
 
     private final int mCheckPeriod;
     private final int mMaxAllowed;
+
     private final HashMap<String, ArrayList<Long>> mSmsStamp =
             new HashMap<String, ArrayList<Long>>();
 
@@ -86,6 +95,12 @@ public class SmsUsageMonitor {
 
     /** Cached short code pattern matcher for {@link #mCurrentCountry}. */
     private ShortCodePatternMatcher mCurrentPatternMatcher;
+
+    /** Cached short code regex patterns from secure settings for {@link #mCurrentCountry}. */
+    private String mSettingsShortCodePatterns;
+
+    /** Handler for responding to content observer updates. */
+    private final SettingsObserverHandler mSettingsObserverHandler;
 
     /** XML tag for root element. */
     private static final String TAG_SHORTCODES = "shortcodes";
@@ -149,6 +164,74 @@ public class SmsUsageMonitor {
     }
 
     /**
+     * Observe the secure setting for updated regex patterns.
+     */
+    private static class SettingsObserver extends ContentObserver {
+        private final int mWhat;
+        private final Handler mHandler;
+
+        SettingsObserver(Handler handler, int what) {
+            super(handler);
+            mHandler = handler;
+            mWhat = what;
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            mHandler.obtainMessage(mWhat).sendToTarget();
+        }
+    }
+
+    /**
+     * Handler to update regex patterns when secure setting for the current country is updated.
+     */
+    private class SettingsObserverHandler extends Handler {
+        /** Current content observer, or null. */
+        SettingsObserver mSettingsObserver;
+
+        /** Current country code to watch for settings updates. */
+        private String mCountryIso;
+
+        /** Request to start observing a secure setting. */
+        static final int OBSERVE_SETTING = 1;
+
+        /** Handler event for updated secure settings. */
+        static final int SECURE_SETTINGS_CHANGED = 2;
+
+        /** Send a message to this handler requesting to observe the setting for a new country. */
+        void observeSettingForCountry(String countryIso) {
+            obtainMessage(OBSERVE_SETTING, countryIso).sendToTarget();
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case OBSERVE_SETTING:
+                    if (msg.obj != null && msg.obj instanceof String) {
+                        mCountryIso = (String) msg.obj;
+                        String settingName = getSettingNameForCountry(mCountryIso);
+                        ContentResolver resolver = mContext.getContentResolver();
+
+                        if (mSettingsObserver != null) {
+                            if (VDBG) log("Unregistering old content observer");
+                            resolver.unregisterContentObserver(mSettingsObserver);
+                        }
+
+                        mSettingsObserver = new SettingsObserver(this, SECURE_SETTINGS_CHANGED);
+                        resolver.registerContentObserver(
+                                Settings.Secure.getUriFor(settingName), false, mSettingsObserver);
+                        if (VDBG) log("Registered content observer for " + settingName);
+                    }
+                    break;
+
+                case SECURE_SETTINGS_CHANGED:
+                    loadPatternsFromSettings(mCountryIso);
+                    break;
+            }
+        }
+    }
+
+    /**
      * Create SMS usage monitor.
      * @param context the context to use to load resources and get TelephonyManager service
      */
@@ -164,6 +247,8 @@ public class SmsUsageMonitor {
                 Settings.Secure.SMS_OUTGOING_CHECK_INTERVAL_MS,
                 DEFAULT_SMS_CHECK_PERIOD);
 
+        mSettingsObserverHandler = new SettingsObserverHandler();
+
         // system MMS app is always allowed to send to short codes
         mApprovedShortCodeSenders.add("com.android.mms");
     }
@@ -178,33 +263,67 @@ public class SmsUsageMonitor {
         XmlResourceParser parser = mContext.getResources().getXml(id);
 
         try {
-            XmlUtils.beginDocument(parser, TAG_SHORTCODES);
-
-            while (true) {
-                XmlUtils.nextElement(parser);
-
-                String element = parser.getName();
-                if (element == null) break;
-
-                if (element.equals(TAG_SHORTCODE)) {
-                    String currentCountry = parser.getAttributeValue(null, ATTR_COUNTRY);
-                    if (country.equals(currentCountry)) {
-                        String pattern = parser.getAttributeValue(null, ATTR_PATTERN);
-                        String premium = parser.getAttributeValue(null, ATTR_PREMIUM);
-                        String free = parser.getAttributeValue(null, ATTR_FREE);
-                        String standard = parser.getAttributeValue(null, ATTR_STANDARD);
-                        return new ShortCodePatternMatcher(pattern, premium, free, standard);
-                    }
-                } else {
-                    Log.e(TAG, "Error: skipping unknown XML tag " + element);
-                }
-            }
+            return getPatternMatcher(country, parser);
         } catch (XmlPullParserException e) {
             Log.e(TAG, "XML parser exception reading short code pattern resource", e);
         } catch (IOException e) {
             Log.e(TAG, "I/O exception reading short code pattern resource", e);
         } finally {
             parser.close();
+        }
+        return null;    // country not found
+    }
+
+    /**
+     * Return a pattern matcher object for the specified country from a secure settings string.
+     * @return a {@link ShortCodePatternMatcher} for the specified country, or null if not found
+     */
+    private static ShortCodePatternMatcher getPatternMatcher(String country, String settingsPattern) {
+        // embed pattern tag into an XML document.
+        String document = "<shortcodes>" + settingsPattern + "</shortcodes>";
+        if (VDBG) log("loading updated patterns from: " + document);
+
+        try {
+            XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+            XmlPullParser parser = factory.newPullParser();
+            parser.setInput(new StringReader(document));
+            return getPatternMatcher(country, parser);
+        } catch (XmlPullParserException e) {
+            Log.e(TAG, "XML parser exception reading short code pattern from settings", e);
+        } catch (IOException e) {
+            Log.e(TAG, "I/O exception reading short code pattern from settings", e);
+        }
+        return null;    // country not found
+    }
+
+    /**
+     * Return a pattern matcher object for the specified country and pattern XML parser.
+     * @param country the country to search for
+     * @return a {@link ShortCodePatternMatcher} for the specified country, or null if not found
+     */
+    private static ShortCodePatternMatcher getPatternMatcher(String country, XmlPullParser parser)
+            throws XmlPullParserException, IOException
+    {
+        XmlUtils.beginDocument(parser, TAG_SHORTCODES);
+
+        while (true) {
+            XmlUtils.nextElement(parser);
+
+            String element = parser.getName();
+            if (element == null) break;
+
+            if (element.equals(TAG_SHORTCODE)) {
+                String currentCountry = parser.getAttributeValue(null, ATTR_COUNTRY);
+                if (country.equals(currentCountry)) {
+                    String pattern = parser.getAttributeValue(null, ATTR_PATTERN);
+                    String premium = parser.getAttributeValue(null, ATTR_PREMIUM);
+                    String free = parser.getAttributeValue(null, ATTR_FREE);
+                    String standard = parser.getAttributeValue(null, ATTR_STANDARD);
+                    return new ShortCodePatternMatcher(pattern, premium, free, standard);
+                }
+            } else {
+                Log.e(TAG, "Error: skipping unknown XML tag " + element);
+            }
         }
         return null;    // country not found
     }
@@ -244,7 +363,9 @@ public class SmsUsageMonitor {
      * @return true if the app is approved; false if we need to confirm short code destinations
      */
     public boolean isApprovedShortCodeSender(String appName) {
-        return mApprovedShortCodeSenders.contains(appName);
+        synchronized (mApprovedShortCodeSenders) {
+            return mApprovedShortCodeSenders.contains(appName);
+        }
     }
 
     /**
@@ -252,8 +373,10 @@ public class SmsUsageMonitor {
      * @param appName the package name of the app to add
      */
     public void addApprovedShortCodeSender(String appName) {
-        Log.d(TAG, "Adding " + appName + " to list of approved short code senders.");
-        mApprovedShortCodeSenders.add(appName);
+        if (DBG) log("Adding " + appName + " to list of approved short code senders.");
+        synchronized (mApprovedShortCodeSenders) {
+            mApprovedShortCodeSenders.add(appName);
+        }
     }
 
     /**
@@ -271,32 +394,71 @@ public class SmsUsageMonitor {
      *  {@link #CATEGORY_POSSIBLE_PREMIUM_SHORT_CODE}, or {@link #CATEGORY_PREMIUM_SHORT_CODE}.
      */
     public int checkDestination(String destAddress, String countryIso) {
-        // always allow emergency numbers
-        if (PhoneNumberUtils.isEmergencyNumber(destAddress, countryIso)) {
-            return CATEGORY_NOT_SHORT_CODE;
-        }
+        synchronized (mSettingsObserverHandler) {
+            // always allow emergency numbers
+            if (PhoneNumberUtils.isEmergencyNumber(destAddress, countryIso)) {
+                return CATEGORY_NOT_SHORT_CODE;
+            }
 
-        ShortCodePatternMatcher patternMatcher = null;
+            ShortCodePatternMatcher patternMatcher = null;
 
-        if (countryIso != null) {
-            if (countryIso.equals(mCurrentCountry)) {
-                patternMatcher = mCurrentPatternMatcher;
+            if (countryIso != null) {
+                // query secure settings and initialize content observer for updated regex patterns
+                if (mCurrentCountry == null || !countryIso.equals(mCurrentCountry)) {
+                    loadPatternsFromSettings(countryIso);
+                    mSettingsObserverHandler.observeSettingForCountry(countryIso);
+                }
+
+                if (countryIso.equals(mCurrentCountry)) {
+                    patternMatcher = mCurrentPatternMatcher;
+                } else {
+                    patternMatcher = getPatternMatcher(countryIso);
+                    mCurrentCountry = countryIso;
+                    mCurrentPatternMatcher = patternMatcher;    // may be null if not found
+                }
+            }
+
+            if (patternMatcher != null) {
+                return patternMatcher.getNumberCategory(destAddress);
             } else {
-                patternMatcher = getPatternMatcher(countryIso);
-                mCurrentCountry = countryIso;
-                mCurrentPatternMatcher = patternMatcher;    // may be null if not found
+                // Generic rule: numbers of 5 digits or less are considered potential short codes
+                Log.e(TAG, "No patterns for \"" + countryIso + "\": using generic short code rule");
+                if (destAddress.length() <= 5) {
+                    return CATEGORY_POSSIBLE_PREMIUM_SHORT_CODE;
+                } else {
+                    return CATEGORY_NOT_SHORT_CODE;
+                }
             }
         }
+    }
 
-        if (patternMatcher != null) {
-            return patternMatcher.getNumberCategory(destAddress);
-        } else {
-            // Generic rule: numbers of 5 digits or less are considered potential short codes
-            Log.e(TAG, "No patterns for \"" + countryIso + "\": using generic short code rule");
-            if (destAddress.length() <= 5) {
-                return CATEGORY_POSSIBLE_PREMIUM_SHORT_CODE;
-            } else {
-                return CATEGORY_NOT_SHORT_CODE;
+    private static String getSettingNameForCountry(String countryIso) {
+        return Settings.Secure.SMS_SHORT_CODES_PREFIX + countryIso;
+    }
+
+    /**
+     * Load regex patterns from secure settings if present.
+     * @param countryIso the country to search for
+     */
+    void loadPatternsFromSettings(String countryIso) {
+        synchronized (mSettingsObserverHandler) {
+            if (VDBG) log("loadPatternsFromSettings(" + countryIso + ") called");
+            String settingsPatterns = Settings.Secure.getString(
+                    mContext.getContentResolver(), getSettingNameForCountry(countryIso));
+            if (settingsPatterns != null && !settingsPatterns.equals(
+                    mSettingsShortCodePatterns)) {
+                // settings pattern string has changed: update the pattern matcher
+                mSettingsShortCodePatterns = settingsPatterns;
+                ShortCodePatternMatcher matcher = getPatternMatcher(countryIso, settingsPatterns);
+                if (matcher != null) {
+                    mCurrentCountry = countryIso;
+                    mCurrentPatternMatcher = matcher;
+                }
+            } else if (settingsPatterns == null && mSettingsShortCodePatterns != null) {
+                // pattern string was removed: caller will load default patterns from XML resource
+                mCurrentCountry = null;
+                mCurrentPatternMatcher = null;
+                mSettingsShortCodePatterns = null;
             }
         }
     }
@@ -324,7 +486,7 @@ public class SmsUsageMonitor {
         Long ct = System.currentTimeMillis();
         long beginCheckPeriod = ct - mCheckPeriod;
 
-        Log.d(TAG, "SMS send size=" + sent.size() + " time=" + ct);
+        if (VDBG) log("SMS send size=" + sent.size() + " time=" + ct);
 
         while (!sent.isEmpty() && sent.get(0) < beginCheckPeriod) {
             sent.remove(0);
@@ -337,5 +499,9 @@ public class SmsUsageMonitor {
             return true;
         }
         return false;
+    }
+
+    private static void log(String msg) {
+        Log.d(TAG, msg);
     }
 }

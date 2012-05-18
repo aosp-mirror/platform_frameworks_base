@@ -4266,6 +4266,13 @@ public final class Settings {
                 "contacts_preauth_uri_expiration";
 
         /**
+         * Prefix for SMS short code regex patterns (country code is appended).
+         * @see com.android.internal.telephony.SmsUsageMonitor
+         * @hide
+         */
+        public static final String SMS_SHORT_CODES_PREFIX = "sms_short_codes_";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
