@@ -55,7 +55,7 @@
                 prvandroid:snapMargin="@dimen/navbar_search_snap_margin"
                 prvandroid:hitRadius="@dimen/navbar_search_hit_radius"
                 prvandroid:feedbackCount="0"
-                prvandroid:vibrationDuration="0"
+                prvandroid:vibrationDuration="@integer/config_vibration_duration"
                 prvandroid:alwaysTrackFinger="true"/>
 
         </RelativeLayout>
