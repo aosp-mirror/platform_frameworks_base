@@ -56,55 +56,92 @@ static bool validateFileName(const char* fileName)
     return true;
 }
 
+// The default to use if no other ignore pattern is defined.
+const char * const gDefaultIgnoreAssets =
+    "!.svn:!.git:.*:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*.scc:*~";
+// The ignore pattern that can be passed via --ignore-assets in Main.cpp
+const char * gUserIgnoreAssets = NULL;
+
 static bool isHidden(const char *root, const char *path)
 {
-    const char *ext  = NULL;
-    const char *type = NULL;
+    // Patterns syntax:
+    // - Delimiter is :
+    // - Entry can start with the flag ! to avoid printing a warning
+    //   about the file being ignored.
+    // - Entry can have the flag "<dir>" to match only directories
+    //   or <file> to match only files. Default is to match both.
+    // - Entry can be a simplified glob "<prefix>*" or "*<suffix>"
+    //   where prefix/suffix must have at least 1 character (so that
+    //   we don't match a '*' catch-all pattern.)
+    // - The special filenames "." and ".." are always ignored.
+    // - Otherwise the full string is matched.
+    // - match is not case-sensitive.
 
-    // Skip all hidden files.
-    if (path[0] == '.') {
-        // Skip ., .. and  .svn but don't chatter about it.
-        if (strcmp(path, ".") == 0
-            || strcmp(path, "..") == 0
-            || strcmp(path, ".svn") == 0) {
-            return true;
-        }
-        type = "hidden";
-    } else if (path[0] == '_') {
-        // skip directories starting with _ (don't chatter about it)
-        String8 subdirName(root);
-        subdirName.appendPath(path);
-        if (getFileType(subdirName.string()) == kFileTypeDirectory) {
-            return true;
-        }
-    } else if (strcmp(path, "CVS") == 0) {
-        // Skip CVS but don't chatter about it.
+    if (strcmp(path, ".") == 0 || strcmp(path, "..") == 0) {
         return true;
-    } else if (strcasecmp(path, "thumbs.db") == 0
-               || strcasecmp(path, "picasa.ini") == 0) {
-        // Skip suspected image indexes files.
-        type = "index";
-    } else if (path[strlen(path)-1] == '~') {
-        // Skip suspected emacs backup files.
-        type = "backup";
-    } else if ((ext = strrchr(path, '.')) != NULL && strcmp(ext, ".scc") == 0) {
-        // Skip VisualSourceSafe files and don't chatter about it
-        return true;
-    } else {
-        // Let everything else through.
-        return false;
     }
 
-    /* If we get this far, "type" should be set and the file
-     * should be skipped.
-     */
-    String8 subdirName(root);
-    subdirName.appendPath(path);
-    fprintf(stderr, "    (skipping %s %s '%s')\n", type,
-            getFileType(subdirName.string())==kFileTypeDirectory ? "dir":"file",
-            subdirName.string());
+    const char *delim = ":";
+    const char *p = gUserIgnoreAssets;
+    if (!p || !p[0]) {
+        p = getenv("ANDROID_AAPT_IGNORE");
+    }
+    if (!p || !p[0]) {
+        p = gDefaultIgnoreAssets;
+    }
+    char *patterns = strdup(p);
 
-    return true;
+    bool ignore = false;
+    bool chatty = true;
+    char *matchedPattern = NULL;
+
+    String8 fullPath(root);
+    fullPath.appendPath(path);
+    FileType type = getFileType(fullPath);
+
+    int plen = strlen(path);
+
+    // Note: we don't have strtok_r under mingw.
+    for(char *token = strtok(patterns, delim);
+            !ignore && token != NULL;
+            token = strtok(NULL, delim)) {
+        chatty = token[0] != '!';
+        if (!chatty) token++; // skip !
+        if (strncasecmp(token, "<dir>" , 5) == 0) {
+            if (type != kFileTypeDirectory) continue;
+            token += 5;
+        }
+        if (strncasecmp(token, "<file>", 6) == 0) {
+            if (type != kFileTypeRegular) continue;
+            token += 6;
+        }
+
+        matchedPattern = token;
+        int n = strlen(token);
+
+        if (token[0] == '*') {
+            // Match *suffix
+            token++;
+            if (n <= plen) {
+                ignore = strncasecmp(token, path + plen - n, n) == 0;
+            }
+        } else if (n > 1 && token[n - 1] == '*') {
+            // Match prefix*
+            ignore = strncasecmp(token, path, n - 1) == 0;
+        } else {
+            ignore = strcasecmp(token, path) == 0;
+        }
+    }
+
+    if (ignore && chatty) {
+        fprintf(stderr, "    (skipping %s '%s' due to ANDROID_AAPT_IGNORE pattern '%s')\n",
+                type == kFileTypeDirectory ? "dir" : "file",
+                path,
+                matchedPattern ? matchedPattern : "");
+    }
+
+    free(patterns);
+    return ignore;
 }
 
 // =========================================================================
