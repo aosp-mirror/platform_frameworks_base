@@ -42,17 +42,23 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public float fontScale;
 
     /**
-     * IMSI MCC (Mobile Country Code).  0 if undefined.
+     * IMSI MCC (Mobile Country Code), corresponding to
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#MccQualifier">mcc</a>
+     * resource qualifier.  0 if undefined.
      */
     public int mcc;
     
     /**
-     * IMSI MNC (Mobile Network Code).  0 if undefined.
+     * IMSI MNC (Mobile Network Code), corresponding to
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#MccQualifier">mnc</a>
+     * resource qualifier.  0 if undefined.
      */
     public int mnc;
     
     /**
-     * Current user preference for the locale.
+     * Current user preference for the locale, corresponding to
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#LocaleQualifier">locale</a>
+     * resource qualifier.
      */
     public Locale locale;
 
@@ -69,29 +75,52 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * value indicating that no size has been set. */
     public static final int SCREENLAYOUT_SIZE_UNDEFINED = 0x00;
     /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_SIZE_MASK}
-     * value indicating the screen is at least approximately 320x426 dp units.
+     * value indicating the screen is at least approximately 320x426 dp units,
+     * corresponds to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ScreenSizeQualifier">small</a>
+     * resource qualifier.
      * See <a href="{@docRoot}guide/practices/screens_support.html">Supporting
      * Multiple Screens</a> for more information. */
     public static final int SCREENLAYOUT_SIZE_SMALL = 0x01;
     /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_SIZE_MASK}
-     * value indicating the screen is at least approximately 320x470 dp units.
+     * value indicating the screen is at least approximately 320x470 dp units,
+     * corresponds to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ScreenSizeQualifier">normal</a>
+     * resource qualifier.
      * See <a href="{@docRoot}guide/practices/screens_support.html">Supporting
      * Multiple Screens</a> for more information. */
     public static final int SCREENLAYOUT_SIZE_NORMAL = 0x02;
     /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_SIZE_MASK}
-     * value indicating the screen is at least approximately 480x640 dp units.
+     * value indicating the screen is at least approximately 480x640 dp units,
+     * corresponds to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ScreenSizeQualifier">large</a>
+     * resource qualifier.
      * See <a href="{@docRoot}guide/practices/screens_support.html">Supporting
      * Multiple Screens</a> for more information. */
     public static final int SCREENLAYOUT_SIZE_LARGE = 0x03;
     /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_SIZE_MASK}
-     * value indicating the screen is at least approximately 720x960 dp units.
+     * value indicating the screen is at least approximately 720x960 dp units,
+     * corresponds to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ScreenSizeQualifier">xlarge</a>
+     * resource qualifier.
      * See <a href="{@docRoot}guide/practices/screens_support.html">Supporting
      * Multiple Screens</a> for more information.*/
     public static final int SCREENLAYOUT_SIZE_XLARGE = 0x04;
-    
+
+    /** Constant for {@link #screenLayout}: bits that encode the aspect ratio. */
     public static final int SCREENLAYOUT_LONG_MASK = 0x30;
+    /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_LONG_MASK}
+     * value indicating that no size has been set. */
     public static final int SCREENLAYOUT_LONG_UNDEFINED = 0x00;
+    /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_LONG_MASK}
+     * value that corresponds to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ScreenAspectQualifier">notlong</a>
+     * resource qualifier. */
     public static final int SCREENLAYOUT_LONG_NO = 0x10;
+    /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_LONG_MASK}
+     * value that corresponds to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ScreenAspectQualifier">long</a>
+     * resource qualifier. */
     public static final int SCREENLAYOUT_LONG_YES = 0x20;
     
     /**
@@ -135,21 +164,38 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         return cur >= size;
     }
 
+    /** Constant for {@link #touchscreen}: a value indicating that no value has been set. */
     public static final int TOUCHSCREEN_UNDEFINED = 0;
+    /** Constant for {@link #touchscreen}, value corresponding to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#TouchscreenQualifier">notouch</a>
+     * resource qualifier. */
     public static final int TOUCHSCREEN_NOTOUCH = 1;
-    public static final int TOUCHSCREEN_STYLUS = 2;
+    /** @deprecated Not currently supported or used. */
+    @Deprecated public static final int TOUCHSCREEN_STYLUS = 2;
+    /** Constant for {@link #touchscreen}, value corresponding to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#TouchscreenQualifier">finger</a>
+     * resource qualifier. */
     public static final int TOUCHSCREEN_FINGER = 3;
     
     /**
      * The kind of touch screen attached to the device.
-     * One of: {@link #TOUCHSCREEN_NOTOUCH}, {@link #TOUCHSCREEN_STYLUS}, 
-     * {@link #TOUCHSCREEN_FINGER}. 
+     * One of: {@link #TOUCHSCREEN_NOTOUCH}, {@link #TOUCHSCREEN_FINGER}.
      */
     public int touchscreen;
-    
+
+    /** Constant for {@link #keyboard}: a value indicating that no value has been set. */
     public static final int KEYBOARD_UNDEFINED = 0;
+    /** Constant for {@link #keyboard}, value corresponding to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ImeQualifier">nokeys</a>
+     * resource qualifier. */
     public static final int KEYBOARD_NOKEYS = 1;
+    /** Constant for {@link #keyboard}, value corresponding to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ImeQualifier">qwerty</a>
+     * resource qualifier. */
     public static final int KEYBOARD_QWERTY = 2;
+    /** Constant for {@link #keyboard}, value corresponding to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ImeQualifier">12key</a>
+     * resource qualifier. */
     public static final int KEYBOARD_12KEY = 3;
     
     /**
@@ -158,9 +204,16 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * {@link #KEYBOARD_12KEY}.
      */
     public int keyboard;
-    
+
+    /** Constant for {@link #keyboardHidden}: a value indicating that no value has been set. */
     public static final int KEYBOARDHIDDEN_UNDEFINED = 0;
+    /** Constant for {@link #keyboardHidden}, value corresponding to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#KeyboardAvailQualifier">keysexposed</a>
+     * resource qualifier. */
     public static final int KEYBOARDHIDDEN_NO = 1;
+    /** Constant for {@link #keyboardHidden}, value corresponding to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#KeyboardAvailQualifier">keyshidden</a>
+     * resource qualifier. */
     public static final int KEYBOARDHIDDEN_YES = 2;
     /** Constant matching actual resource implementation. {@hide} */
     public static final int KEYBOARDHIDDEN_SOFT = 3;
@@ -174,8 +227,13 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public int keyboardHidden;
     
+    /** Constant for {@link #hardKeyboardHidden}: a value indicating that no value has been set. */
     public static final int HARDKEYBOARDHIDDEN_UNDEFINED = 0;
+    /** Constant for {@link #hardKeyboardHidden}, value corresponding to the
+     * physical keyboard being exposed. */
     public static final int HARDKEYBOARDHIDDEN_NO = 1;
+    /** Constant for {@link #hardKeyboardHidden}, value corresponding to the
+     * physical keyboard being hidden. */
     public static final int HARDKEYBOARDHIDDEN_YES = 2;
     
     /**
@@ -186,10 +244,23 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public int hardKeyboardHidden;
     
+    /** Constant for {@link #navigation}: a value indicating that no value has been set. */
     public static final int NAVIGATION_UNDEFINED = 0;
+    /** Constant for {@link #navigation}, value corresponding to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#NavigationQualifier">nonav</a>
+     * resource qualifier. */
     public static final int NAVIGATION_NONAV = 1;
+    /** Constant for {@link #navigation}, value corresponding to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#NavigationQualifier">dpad</a>
+     * resource qualifier. */
     public static final int NAVIGATION_DPAD = 2;
+    /** Constant for {@link #navigation}, value corresponding to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#NavigationQualifier">trackball</a>
+     * resource qualifier. */
     public static final int NAVIGATION_TRACKBALL = 3;
+    /** Constant for {@link #navigation}, value corresponding to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#NavigationQualifier">wheel</a>
+     * resource qualifier. */
     public static final int NAVIGATION_WHEEL = 4;
     
     /**
@@ -199,8 +270,15 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public int navigation;
     
+    /** Constant for {@link #navigationHidden}: a value indicating that no value has been set. */
     public static final int NAVIGATIONHIDDEN_UNDEFINED = 0;
+    /** Constant for {@link #navigationHidden}, value corresponding to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#NavAvailQualifier">navexposed</a>
+     * resource qualifier. */
     public static final int NAVIGATIONHIDDEN_NO = 1;
+    /** Constant for {@link #navigationHidden}, value corresponding to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#NavAvailQualifier">navhidden</a>
+     * resource qualifier. */
     public static final int NAVIGATIONHIDDEN_YES = 2;
     
     /**
@@ -211,29 +289,70 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public int navigationHidden;
     
+    /** Constant for {@link #orientation}: a value indicating that no value has been set. */
     public static final int ORIENTATION_UNDEFINED = 0;
+    /** Constant for {@link #orientation}, value corresponding to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#OrientationQualifier">port</a>
+     * resource qualifier. */
     public static final int ORIENTATION_PORTRAIT = 1;
+    /** Constant for {@link #orientation}, value corresponding to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#OrientationQualifier">land</a>
+     * resource qualifier. */
     public static final int ORIENTATION_LANDSCAPE = 2;
-    public static final int ORIENTATION_SQUARE = 3;
+    /** @deprecated Not currently supported or used. */
+    @Deprecated public static final int ORIENTATION_SQUARE = 3;
     
     /**
      * Overall orientation of the screen.  May be one of
-     * {@link #ORIENTATION_LANDSCAPE}, {@link #ORIENTATION_PORTRAIT},
-     * or {@link #ORIENTATION_SQUARE}.
+     * {@link #ORIENTATION_LANDSCAPE}, {@link #ORIENTATION_PORTRAIT}.
      */
     public int orientation;
 
+    /** Constant for {@link #uiMode}: bits that encode the mode type. */
     public static final int UI_MODE_TYPE_MASK = 0x0f;
+    /** Constant for {@link #uiMode}: a {@link #UI_MODE_TYPE_MASK}
+     * value indicating that no mode type has been set. */
     public static final int UI_MODE_TYPE_UNDEFINED = 0x00;
+    /** Constant for {@link #uiMode}: a {@link #UI_MODE_TYPE_MASK}
+     * value that corresponds to
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#UiModeQualifier">no
+     * UI mode</a> resource qualifier specified. */
     public static final int UI_MODE_TYPE_NORMAL = 0x01;
+    /** Constant for {@link #uiMode}: a {@link #UI_MODE_TYPE_MASK}
+     * value that corresponds to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#UiModeQualifier">desk</a>
+     * resource qualifier. */
     public static final int UI_MODE_TYPE_DESK = 0x02;
+    /** Constant for {@link #uiMode}: a {@link #UI_MODE_TYPE_MASK}
+     * value that corresponds to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#UiModeQualifier">car</a>
+     * resource qualifier. */
     public static final int UI_MODE_TYPE_CAR = 0x03;
+    /** Constant for {@link #uiMode}: a {@link #UI_MODE_TYPE_MASK}
+     * value that corresponds to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#UiModeQualifier">television</a>
+     * resource qualifier. */
     public static final int UI_MODE_TYPE_TELEVISION = 0x04;
+    /** Constant for {@link #uiMode}: a {@link #UI_MODE_TYPE_MASK}
+     * value that corresponds to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#UiModeQualifier">appliance</a>
+     * resource qualifier. */
     public static final int UI_MODE_TYPE_APPLIANCE = 0x05;
 
+    /** Constant for {@link #uiMode}: bits that encode the night mode. */
     public static final int UI_MODE_NIGHT_MASK = 0x30;
+    /** Constant for {@link #uiMode}: a {@link #UI_MODE_NIGHT_MASK}
+     * value indicating that no mode type has been set. */
     public static final int UI_MODE_NIGHT_UNDEFINED = 0x00;
+    /** Constant for {@link #uiMode}: a {@link #UI_MODE_NIGHT_MASK}
+     * value that corresponds to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#NightQualifier">notnight</a>
+     * resource qualifier. */
     public static final int UI_MODE_NIGHT_NO = 0x10;
+    /** Constant for {@link #uiMode}: a {@link #UI_MODE_NIGHT_MASK}
+     * value that corresponds to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#NightQualifier">night</a>
+     * resource qualifier. */
     public static final int UI_MODE_NIGHT_YES = 0x20;
 
     /**
@@ -253,21 +372,30 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int SCREEN_WIDTH_DP_UNDEFINED = 0;
 
     /**
-     * The current width of the available screen space, in dp units.
+     * The current width of the available screen space, in dp units,
+     * corresponding to
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ScreenWidthQualifier">screen
+     * width</a> resource qualifier.
      */
     public int screenWidthDp;
 
     public static final int SCREEN_HEIGHT_DP_UNDEFINED = 0;
 
     /**
-     * The current height of the available screen space, in dp units.
+     * The current height of the available screen space, in dp units,
+     * corresponding to
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ScreenHeightQualifier">screen
+     * height</a> resource qualifier.
      */
     public int screenHeightDp;
 
     public static final int SMALLEST_SCREEN_WIDTH_DP_UNDEFINED = 0;
 
     /**
-     * The smallest screen size an application will see in normal operation.
+     * The smallest screen size an application will see in normal operation,
+     * corresponding to
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#SmallestScreenWidthQualifier">smallest
+     * screen width</a> resource qualifier.
      * This is the smallest value of both screenWidthDp and screenHeightDp
      * in both portrait and landscape.
      */

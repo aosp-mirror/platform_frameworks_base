@@ -534,6 +534,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     Display mDisplay;
 
+    boolean mIsTouchDevice;
+
     final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
     final DisplayMetrics mRealDisplayMetrics = new DisplayMetrics();
     final DisplayMetrics mTmpDisplayMetrics = new DisplayMetrics();
@@ -6391,8 +6393,12 @@ public class WindowManagerService extends IWindowManager.Stub
                             WindowManagerPolicy.PRESENCE_EXTERNAL :
                                     WindowManagerPolicy.PRESENCE_INTERNAL;
 
-                    if ((sources & InputDevice.SOURCE_TOUCHSCREEN) != 0) {
-                        config.touchscreen = Configuration.TOUCHSCREEN_FINGER;
+                    if (mIsTouchDevice) {
+                        if ((sources & InputDevice.SOURCE_TOUCHSCREEN) != 0) {
+                            config.touchscreen = Configuration.TOUCHSCREEN_FINGER;
+                        }
+                    } else {
+                        config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;
                     }
 
                     if ((sources & InputDevice.SOURCE_TRACKBALL) != 0) {
@@ -6626,6 +6632,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
             mDisplay = wm.getDefaultDisplay();
+            mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_TOUCHSCREEN);
             synchronized(mDisplaySizeLock) {
                 mInitialDisplayWidth = mDisplay.getRawWidth();
                 mInitialDisplayHeight = mDisplay.getRawHeight();

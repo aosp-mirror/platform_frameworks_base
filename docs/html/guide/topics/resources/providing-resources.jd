@@ -533,13 +533,19 @@ which indicates the current device orientation.</p>
       <td>
         <code>car</code><br/>
         <code>desk</code><br/>
-        <code>television</code>
+        <code>television<br/>
+        <code>appliance</code>
       </td>
       <td>
         <ul class="nolist">
           <li>{@code car}: Device is displaying in a car dock</li>
           <li>{@code desk}: Device is displaying in a desk dock</li>
-          <li>{@code television}: Device is displaying on a television</li>
+          <li>{@code television}: Device is displaying on a television, providing
+          a "ten foot" experience where its UI is on a large screen that the
+          user is far away from, primarily oriented around DPAD or other
+          non-pointer interaction</li>
+          <li>{@code appliance}: Device is serving as an appliance, with
+          no display</li>
         </ul>
         <p><em>Added in API level 8, television added in API 13.</em></p>
         <p>This can change during the life of your application if the user places the device in a
@@ -610,15 +616,13 @@ might scale your bitmaps to fit the current density.</p>
       <td>Touchscreen type</td>
       <td>
         <code>notouch</code><br/>
-        <code>stylus</code><br/>
         <code>finger</code>
       </td>
       <td>
         <ul class="nolist">
           <li>{@code notouch}: Device does not have a touchscreen.</li>
-          <li>{@code stylus}: Device has a resistive touchscreen that's suited for use with a
-stylus.</li>
-          <li>{@code finger}: Device has a touchscreen.</li>
+          <li>{@code finger}: Device has a touchscreen that is intended to
+          be used through direction interaction of the user's finger.</li>
         </ul>
         <p>Also see the {@link android.content.res.Configuration#touchscreen} configuration field,
 which indicates the type of touchscreen on the device.</p>
@@ -694,7 +698,7 @@ information about how this affects your application during runtime.</p>
 field, which indicates whether navigation keys are hidden.</p>
       </td>
     </tr>
-    <tr id="TouchQualifier">
+    <tr id="NavigationQualifier">
       <td>Primary non-touch navigation method</td>
       <td>
         <code>nonav</code><br/>
