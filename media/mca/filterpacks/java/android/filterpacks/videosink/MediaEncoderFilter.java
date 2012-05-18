@@ -376,8 +376,6 @@ public class MediaEncoderFilter extends Filter {
 
     @Override
     public void process(FilterContext context) {
-        if (mLogVerbose) Log.v(TAG, "Starting frame processing");
-
         GLEnvironment glEnv = context.getGLEnvironment();
         // Get input frame
         Frame input = pullInput("videoframe");
