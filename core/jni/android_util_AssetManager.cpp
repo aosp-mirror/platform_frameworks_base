@@ -703,7 +703,7 @@ static jint android_content_AssetManager_loadResourceValue(JNIEnv* env, jobject 
 #endif
     uint32_t ref = ident;
     if (resolve) {
-        block = res.resolveReference(&value, block, &ref);
+        block = res.resolveReference(&value, block, &ref, &typeSpecFlags, &config);
 #if THROW_ON_BAD_ID
         if (block == BAD_INDEX) {
             jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
