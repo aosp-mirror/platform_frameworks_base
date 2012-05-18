@@ -44,6 +44,7 @@ import static android.provider.Settings.Secure.NETSTATS_DEV_PERSIST_BYTES;
 import static android.provider.Settings.Secure.NETSTATS_DEV_ROTATE_AGE;
 import static android.provider.Settings.Secure.NETSTATS_GLOBAL_ALERT_BYTES;
 import static android.provider.Settings.Secure.NETSTATS_POLL_INTERVAL;
+import static android.provider.Settings.Secure.NETSTATS_REPORT_XT_OVER_DEV;
 import static android.provider.Settings.Secure.NETSTATS_SAMPLE_ENABLED;
 import static android.provider.Settings.Secure.NETSTATS_TIME_CACHE_MAX_AGE;
 import static android.provider.Settings.Secure.NETSTATS_UID_BUCKET_DURATION;
@@ -177,6 +178,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         public long getPollInterval();
         public long getTimeCacheMaxAge();
         public boolean getSampleEnabled();
+        public boolean getReportXtOverDev();
 
         public static class Config {
             public final long bucketDuration;
@@ -221,6 +223,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     /** Cached {@link #mDevRecorder} stats. */
     private NetworkStatsCollection mDevStatsCached;
+    /** Cached {@link #mXtRecorder} stats. */
+    private NetworkStatsCollection mXtStatsCached;
 
     /** Current counter sets for each UID. */
     private SparseIntArray mActiveUidCounterSet = new SparseIntArray();
@@ -295,6 +299,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // read historical network stats from disk, since policy service
             // might need them right away.
             mDevStatsCached = mDevRecorder.getOrLoadCompleteLocked();
+            mXtStatsCached = mXtRecorder.getOrLoadCompleteLocked();
 
             // bootstrap initial stats to prevent double-counting later
             bootstrapStatsLocked();
@@ -371,6 +376,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mUidTagRecorder = null;
 
         mDevStatsCached = null;
+        mXtStatsCached = null;
 
         mSystemReady = false;
     }
@@ -469,12 +475,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             @Override
             public NetworkStats getSummaryForNetwork(
                     NetworkTemplate template, long start, long end) {
-                return mDevStatsCached.getSummary(template, start, end);
+                return internalGetSummaryForNetwork(template, start, end);
             }
 
             @Override
             public NetworkStatsHistory getHistoryForNetwork(NetworkTemplate template, int fields) {
-                return mDevStatsCached.getHistory(template, UID_ALL, SET_ALL, TAG_NONE, fields);
+                return internalGetHistoryForNetwork(template, fields);
             }
 
             @Override
@@ -507,11 +513,56 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         };
     }
 
+    /**
+     * Return network summary, splicing between {@link #mDevStatsCached}
+     * and {@link #mXtStatsCached} when appropriate.
+     */
+    private NetworkStats internalGetSummaryForNetwork(
+            NetworkTemplate template, long start, long end) {
+        if (!mSettings.getReportXtOverDev()) {
+            // shortcut when XT reporting disabled
+            return mDevStatsCached.getSummary(template, start, end);
+        }
+
+        // splice stats between DEV and XT, switching over from DEV to XT at
+        // first atomic bucket.
+        final long firstAtomicBucket = mXtStatsCached.getFirstAtomicBucketMillis();
+        final NetworkStats dev = mDevStatsCached.getSummary(
+                template, Math.min(start, firstAtomicBucket), Math.min(end, firstAtomicBucket));
+        final NetworkStats xt = mXtStatsCached.getSummary(
+                template, Math.max(start, firstAtomicBucket), Math.max(end, firstAtomicBucket));
+
+        xt.combineAllValues(dev);
+        return xt;
+    }
+
+    /**
+     * Return network history, splicing between {@link #mDevStatsCached}
+     * and {@link #mXtStatsCached} when appropriate.
+     */
+    private NetworkStatsHistory internalGetHistoryForNetwork(NetworkTemplate template, int fields) {
+        if (!mSettings.getReportXtOverDev()) {
+            // shortcut when XT reporting disabled
+            return mDevStatsCached.getHistory(template, UID_ALL, SET_ALL, TAG_NONE, fields);
+        }
+
+        // splice stats between DEV and XT, switching over from DEV to XT at
+        // first atomic bucket.
+        final long firstAtomicBucket = mXtStatsCached.getFirstAtomicBucketMillis();
+        final NetworkStatsHistory dev = mDevStatsCached.getHistory(
+                template, UID_ALL, SET_ALL, TAG_NONE, fields, Long.MIN_VALUE, firstAtomicBucket);
+        final NetworkStatsHistory xt = mXtStatsCached.getHistory(
+                template, UID_ALL, SET_ALL, TAG_NONE, fields, firstAtomicBucket, Long.MAX_VALUE);
+
+        xt.recordEntireHistory(dev);
+        return xt;
+    }
+
     @Override
     public long getNetworkTotalBytes(NetworkTemplate template, long start, long end) {
         mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
         assertBandwidthControlEnabled();
-        return mDevStatsCached.getSummary(template, start, end).getTotalBytes();
+        return internalGetSummaryForNetwork(template, start, end).getTotalBytes();
     }
 
     @Override
@@ -1188,6 +1239,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         @Override
         public boolean getSampleEnabled() {
             return getSecureBoolean(NETSTATS_SAMPLE_ENABLED, true);
+        }
+        @Override
+        public boolean getReportXtOverDev() {
+            return getSecureBoolean(NETSTATS_REPORT_XT_OVER_DEV, true);
         }
         @Override
         public Config getDevConfig() {
