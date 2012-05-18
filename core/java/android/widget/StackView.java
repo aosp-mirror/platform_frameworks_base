@@ -1230,11 +1230,13 @@ public class StackView extends AdapterViewAnimator {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(StackView.class.getName());
         info.setScrollable(getChildCount() > 1);
-        if (getDisplayedChild() < getChildCount() - 1) {
-            info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
-        }
-        if (getDisplayedChild() > 0) {
-            info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+        if (isEnabled()) {
+            if (getDisplayedChild() < getChildCount() - 1) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+            }
+            if (getDisplayedChild() > 0) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+            }
         }
     }
 
@@ -1242,6 +1244,9 @@ public class StackView extends AdapterViewAnimator {
     public boolean performAccessibilityAction(int action, Bundle arguments) {
         if (super.performAccessibilityAction(action, arguments)) {
             return true;
+        }
+        if (!isEnabled()) {
+            return false;
         }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {

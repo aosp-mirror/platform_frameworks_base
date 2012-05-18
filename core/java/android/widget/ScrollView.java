@@ -745,6 +745,9 @@ public class ScrollView extends FrameLayout {
         if (super.performAccessibilityAction(action, arguments)) {
             return true;
         }
+        if (!isEnabled()) {
+            return false;
+        }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
                 final int viewportHeight = getHeight() - mPaddingBottom - mPaddingTop;
@@ -770,14 +773,16 @@ public class ScrollView extends FrameLayout {
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(ScrollView.class.getName());
-        final int scrollRange = getScrollRange();
-        if (scrollRange > 0) {
-            info.setScrollable(true);
-            if (mScrollY > 0) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
-            }
-            if (mScrollY < scrollRange) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+        if (isEnabled()) {
+            final int scrollRange = getScrollRange();
+            if (scrollRange > 0) {
+                info.setScrollable(true);
+                if (mScrollY > 0) {
+                    info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+                }
+                if (mScrollY < scrollRange) {
+                    info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                }
             }
         }
     }
