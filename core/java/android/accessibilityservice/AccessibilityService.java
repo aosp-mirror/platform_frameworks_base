@@ -60,8 +60,7 @@ import com.android.internal.os.HandlerCaller;
  * must also specify that it handles the "android.accessibilityservice.AccessibilityService"
  * {@link android.content.Intent}. Failure to declare this intent will cause the system to
  * ignore the accessibility service. Additionally an accessibility service must request
- * {@link android.Manifest.permission#BIND_ACCESSIBILITY_SERVICE
- * android.permission.BIND_ACCESSIBILITY_SERVICE} permission to ensure that only the system
+ * "android.permission.BIND_ACCESSIBILITY_SERVICE" permission to ensure that only the system
  * can bind to it. Failure to declare this intent will cause the system to ignore the
  * accessibility service. Following is an example declaration:
  * </p>
