@@ -1564,6 +1564,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_LAUNCHED_FROM_UID_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            int res = getLaunchedFromUid(token);
+            reply.writeNoException();
+            reply.writeInt(res);
+            return true;
+        }
+
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -3536,6 +3545,19 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+
+    public int getLaunchedFromUid(IBinder activityToken) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(activityToken);
+        mRemote.transact(GET_LAUNCHED_FROM_UID_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int result = reply.readInt();
+        data.recycle();
+        reply.recycle();
+        return result;
     }
 
     private IBinder mRemote;

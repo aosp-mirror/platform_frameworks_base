@@ -375,6 +375,10 @@ public interface IActivityManager extends IInterface {
 
     public void dismissKeyguardOnNextActivity() throws RemoteException;
 
+    // This is not public because you need to be very careful in how you
+    // manage your activity to make sure it is always the uid you expect.
+    public int getLaunchedFromUid(IBinder activityToken) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -607,4 +611,5 @@ public interface IActivityManager extends IInterface {
     int SHOW_BOOT_MESSAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+137;
     int DISMISS_KEYGUARD_ON_NEXT_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+138;
     int KILL_ALL_BACKGROUND_PROCESSES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+139;
+    int GET_LAUNCHED_FROM_UID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+149;
 }
