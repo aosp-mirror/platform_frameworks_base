@@ -30,8 +30,22 @@ class Record {
             "com.google.android.apps.maps\\u003Adriveabout",
             "com.google.android.apps.maps:LocationFriendService",
             "com.google.android.apps.maps\\u003ALocationFriendService",
+            "com.google.android.apps.maps:MapsBackgroundService",
+            "com.google.android.apps.maps\\u003AMapsBackgroundService",
             "com.google.android.apps.maps:NetworkLocationService",
             "com.google.android.apps.maps\\u003ANetworkLocationService",
+            "com.android.fakeoemfeatures:background",
+            "com.android.fakeoemfeatures\\u003Abackground",
+            "com.android.fakeoemfeatures:core",
+            "com.android.fakeoemfeatures\\u003Acore",
+            "com.google.android.music:main",
+            "com.google.android.music\\u003Amain",
+            "com.google.android.music:ui",
+            "com.google.android.music\\u003Aui",
+            "com.google.android.setupwarlock:broker",
+            "com.google.android.setupwarlock\\u003Abroker",
+            "android:ui",
+            "android\\u003Aui",
     };
 
     enum Type {
