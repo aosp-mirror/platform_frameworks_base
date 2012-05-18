@@ -249,6 +249,7 @@ key SPACE {
     label:                              ' '
     base:                               ' '
     alt, meta:                          fallback SEARCH
+    ctrl:                               fallback LANGUAGE_SWITCH
 }
 
 key ENTER {
