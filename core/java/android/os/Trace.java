@@ -43,7 +43,7 @@ public final class Trace {
     public static final int TRACE_FLAGS_START_BIT = 1;
     public static final String[] TRACE_TAGS = {
         "Graphics", "Input", "View", "WebView", "Window Manager",
-        "Activity Manager", "Sync Manager", "Audio"
+        "Activity Manager", "Sync Manager", "Audio", "Video",
     };
 
     public static final String PROPERTY_TRACE_TAG_ENABLEFLAGS = "debug.atrace.tags.enableflags";
