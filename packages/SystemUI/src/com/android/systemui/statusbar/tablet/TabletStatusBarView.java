@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.tablet;
 
+import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.DelegateViewHelper;
 
@@ -37,8 +38,7 @@ public class TabletStatusBarView extends FrameLayout {
     private DelegateViewHelper mDelegateHelper;
 
     public TabletStatusBarView(Context context) {
-        super(context);
-        mDelegateHelper = new DelegateViewHelper(this);
+        this(context, null);
     }
 
     public TabletStatusBarView(Context context, AttributeSet attrs) {
@@ -52,6 +52,20 @@ public class TabletStatusBarView extends FrameLayout {
 
     public void setBar(BaseStatusBar phoneStatusBar) {
         mDelegateHelper.setBar(phoneStatusBar);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        // Find the view we wish to grab events from in order to detect search gesture.
+        // Depending on the device, this will be one of the id's listed below.
+        // If we don't find one, we'll use the view provided in the constructor above (this view).
+        View view = null;
+        if ((view = findViewById(R.id.navigationArea)) != null) {
+            mDelegateHelper.setSourceView(view);
+        } else if ((view = findViewById(R.id.nav_buttons)) != null) {
+            mDelegateHelper.setSourceView(view);
+        }
     }
 
     @Override
