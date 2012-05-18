@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
@@ -23,6 +24,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.webkit.WebViewCore.EventHub;
 
 import java.util.ArrayList;
@@ -48,7 +50,7 @@ import java.util.Stack;
  * {@link #setCurrentAxis(int, boolean, String)}, or
  * {@link #traverseCurrentAxis(int, boolean, String)}
  * {@link #traverseGivenAxis(int, int, boolean, String)}
- * {@link #prefromAxisTransition(int, int, boolean, String)}
+ * {@link #performAxisTransition(int, int, boolean, String)}
  * referred via the values of:
  * {@link #ACTION_SET_CURRENT_AXIS},
  * {@link #ACTION_TRAVERSE_CURRENT_AXIS},
@@ -72,8 +74,22 @@ class AccessibilityInjectorFallback {
     private static final int ACTION_PERFORM_AXIS_TRANSITION = 3;
     private static final int ACTION_TRAVERSE_DEFAULT_WEB_VIEW_BEHAVIOR_AXIS = 4;
 
-    // the default WebView behavior abstracted as a navigation axis
+    // WebView navigation axes from WebViewCore.h, plus an additional axis for
+    // the default behavior.
+    private static final int NAVIGATION_AXIS_CHARACTER = 0;
+    private static final int NAVIGATION_AXIS_WORD = 1;
+    private static final int NAVIGATION_AXIS_SENTENCE = 2;
+    @SuppressWarnings("unused")
+    private static final int NAVIGATION_AXIS_HEADING = 3;
+    private static final int NAVIGATION_AXIS_SIBLING = 5;
+    @SuppressWarnings("unused")
+    private static final int NAVIGATION_AXIS_PARENT_FIRST_CHILD = 5;
+    private static final int NAVIGATION_AXIS_DOCUMENT = 6;
     private static final int NAVIGATION_AXIS_DEFAULT_WEB_VIEW_BEHAVIOR = 7;
+
+    // WebView navigation directions from WebViewCore.h.
+    private static final int NAVIGATION_DIRECTION_BACKWARD = 0;
+    private static final int NAVIGATION_DIRECTION_FORWARD = 1;
 
     // these are the same for all instances so make them process wide
     private static ArrayList<AccessibilityWebContentKeyBinding> sBindings =
@@ -81,6 +97,7 @@ class AccessibilityInjectorFallback {
 
     // handle to the WebViewClassic this injector is associated with.
     private final WebViewClassic mWebView;
+    private final WebView mWebViewInternal;
 
     // events scheduled for sending as soon as we receive the selected text
     private final Stack<AccessibilityEvent> mScheduledEventStack = new Stack<AccessibilityEvent>();
@@ -104,6 +121,7 @@ class AccessibilityInjectorFallback {
      */
     public AccessibilityInjectorFallback(WebViewClassic webView) {
         mWebView = webView;
+        mWebViewInternal = mWebView.getWebView();
         ensureWebContentKeyBindings();
     }
 
@@ -176,7 +194,7 @@ class AccessibilityInjectorFallback {
                     int fromAxis = binding.getFirstArgument(i);
                     int toAxis = binding.getSecondArgument(i);
                     sendEvent = (binding.getThirdArgument(i) == 1);
-                    prefromAxisTransition(fromAxis, toAxis, sendEvent, contentDescription);
+                    performAxisTransition(fromAxis, toAxis, sendEvent, contentDescription);
                     mLastDownEventHandled = true;
                     break;
                 case ACTION_TRAVERSE_DEFAULT_WEB_VIEW_BEHAVIOR_AXIS:
@@ -214,7 +232,8 @@ class AccessibilityInjectorFallback {
     private void setCurrentAxis(int axis, boolean sendEvent, String contentDescription) {
         mCurrentAxis = axis;
         if (sendEvent) {
-            AccessibilityEvent event = getPartialyPopulatedAccessibilityEvent();
+            final AccessibilityEvent event = getPartialyPopulatedAccessibilityEvent(
+                    AccessibilityEvent.TYPE_ANNOUNCEMENT);
             event.getText().add(String.valueOf(axis));
             event.setContentDescription(contentDescription);
             sendAccessibilityEvent(event);
@@ -229,7 +248,7 @@ class AccessibilityInjectorFallback {
      * @param sendEvent Flag if to send an event to announce successful transition.
      * @param contentDescription A description of the performed action.
      */
-    private void prefromAxisTransition(int fromAxis, int toAxis, boolean sendEvent,
+    private void performAxisTransition(int fromAxis, int toAxis, boolean sendEvent,
             String contentDescription) {
         if (mCurrentAxis == fromAxis) {
             setCurrentAxis(toAxis, sendEvent, contentDescription);
@@ -248,6 +267,62 @@ class AccessibilityInjectorFallback {
     private boolean traverseCurrentAxis(int direction, boolean sendEvent,
             String contentDescription) {
         return traverseGivenAxis(direction, mCurrentAxis, sendEvent, contentDescription);
+    }
+    
+    boolean performAccessibilityAction(int action, Bundle arguments) {
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY:
+            case AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY:
+                final int direction = getDirectionForAction(action);
+                final int axis = getAxisForGranularity(arguments.getInt(
+                        AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT));
+                return traverseGivenAxis(direction, axis, true, null);
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Returns the {@link WebView}-defined direction for the given
+     * {@link AccessibilityNodeInfo}-defined action.
+     * 
+     * @param action An accessibility action identifier.
+     * @return A web view navigation direction.
+     */
+    private static int getDirectionForAction(int action) {
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY:
+                return NAVIGATION_DIRECTION_FORWARD;
+            case AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY:
+                return NAVIGATION_DIRECTION_BACKWARD;
+            default:
+                return -1;
+        }
+    }
+
+    /**
+     * Returns the {@link WebView}-defined axis for the given
+     * {@link AccessibilityNodeInfo}-defined granularity.
+     * 
+     * @param granularity An accessibility granularity identifier.
+     * @return A web view navigation axis.
+     */
+    private static int getAxisForGranularity(int granularity) {
+        switch (granularity) {
+            case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER:
+                return NAVIGATION_AXIS_CHARACTER;
+            case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD:
+                return NAVIGATION_AXIS_WORD;
+            case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_LINE:
+                return NAVIGATION_AXIS_SENTENCE;
+            case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PARAGRAPH:
+                // TODO: Figure out what nextSibling() actually means.
+                return NAVIGATION_AXIS_SIBLING;
+            case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PAGE:
+                return NAVIGATION_AXIS_DOCUMENT;
+            default:
+                return -1;
+        }
     }
 
     /**
@@ -268,7 +343,8 @@ class AccessibilityInjectorFallback {
 
         AccessibilityEvent event = null;
         if (sendEvent) {
-            event = getPartialyPopulatedAccessibilityEvent();
+            event = getPartialyPopulatedAccessibilityEvent(
+                    AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY);
             // the text will be set upon receiving the selection string
             event.setContentDescription(contentDescription);
         }
@@ -296,8 +372,10 @@ class AccessibilityInjectorFallback {
             return;
         }
         AccessibilityEvent event = mScheduledEventStack.pop();
-        if (event != null) {
+        if ((event != null) && (selectionString != null)) {
             event.getText().add(selectionString);
+            event.setFromIndex(0);
+            event.setToIndex(selectionString.length());
             sendAccessibilityEvent(event);
         }
     }
@@ -323,11 +401,9 @@ class AccessibilityInjectorFallback {
      * @return An accessibility event whose members are populated except its
      *         text and content description.
      */
-    private AccessibilityEvent getPartialyPopulatedAccessibilityEvent() {
-        AccessibilityEvent event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_SELECTED);
-        event.setClassName(mWebView.getClass().getName());
-        event.setPackageName(mWebView.getContext().getPackageName());
-        event.setEnabled(mWebView.getWebView().isEnabled());
+    private AccessibilityEvent getPartialyPopulatedAccessibilityEvent(int eventType) {
+        AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
+        mWebViewInternal.onInitializeAccessibilityEvent(event);
         return event;
     }
 
