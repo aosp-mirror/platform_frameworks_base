@@ -1630,7 +1630,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mActionBar != null) {
             SparseArray<Parcelable> actionBarStates =
                     savedInstanceState.getSparseParcelableArray(ACTION_BAR_TAG);
-            mActionBar.restoreHierarchyState(actionBarStates);
+            if (actionBarStates != null) {
+                mActionBar.restoreHierarchyState(actionBarStates);
+            } else {
+                Log.w(TAG, "Missing saved instance states for action bar views! " +
+                        "State will not be restored.");
+            }
         }
     }
 
