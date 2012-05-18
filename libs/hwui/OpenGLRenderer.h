@@ -90,7 +90,7 @@ public:
     virtual int saveLayerAlpha(float left, float top, float right, float bottom,
             int alpha, int flags);
 
-    virtual void setAlpha(float alpha) {
+    void setAlpha(float alpha) {
         mSnapshot->alpha = alpha;
     }
 
