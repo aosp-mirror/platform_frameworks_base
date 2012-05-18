@@ -28,10 +28,10 @@
     <integer name="notification_panel_layout_gravity">0x31</integer>
 
     <!-- Diameter of outer shape drawable shown in navbar search-->
-    <dimen name="navbar_search_outerring_diameter">364dp</dimen>
+    <dimen name="navbar_search_outerring_diameter">430dip</dimen>
 
     <!-- Height of search panel including navigation bar height -->
-    <dimen name="navbar_search_panel_height">300dip</dimen>
+    <dimen name="navbar_search_panel_height">280dip</dimen>
 
     <!-- Extra space above the clock in the panel; on this device, zero -->
     <dimen name="notification_panel_header_padding_top">0dp</dimen>
