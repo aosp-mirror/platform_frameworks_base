@@ -287,11 +287,11 @@ public final class AccessibilityIterators {
                     }
                 }
             }
-            while (start < textLength && mText.charAt(start) == '\n') {
-                start++;
-            }
             if (start < 0) {
                 return null;
+            }
+            while (start < textLength && mText.charAt(start) == '\n') {
+                start++;
             }
             int end = start;
             for (int i = end + 1; i < textLength; i++) {
