@@ -525,6 +525,12 @@ status_t AAH_TXPlayer::play_l() {
         return INVALID_OPERATION;
     }
 
+    if (mFlags & AT_EOS) {
+        // Legacy behaviour, if a stream finishes playing and then
+        // is started again, we play from the start...
+        seekTo_l(0);
+    }
+
     mFlags |= PLAYING;
     updateClockTransform_l(false);
     postPumpAudioEvent_l(-1);
@@ -676,6 +682,7 @@ status_t AAH_TXPlayer::seekTo(int msec) {
 status_t AAH_TXPlayer::seekTo_l(int64_t timeUs) {
     mIsSeeking = true;
     mEOSResendTimeout.setTimeout(-1);
+    mFlags &= ~AT_EOS;
     mSeekTimeUs = timeUs;
 
     mCurrentClockTransformValid = false;
@@ -1199,8 +1206,10 @@ void AAH_TXPlayer::onPumpAudio() {
                 pause_l(false);
                 notifyListener_l(MEDIA_PLAYBACK_COMPLETE);
                 mEOSResendTimeout.setTimeout(-1);
+                mFlags |= AT_EOS;
 
                 // Return directly from here to avoid rescheduling ourselves.
+                mPumpAudioEventPending = false;
                 return;
             }
 
@@ -1255,6 +1264,7 @@ void AAH_TXPlayer::onPumpAudio() {
                     pause_l(false);
                     notifyListener_l(MEDIA_PLAYBACK_COMPLETE);
                     mEOSResendTimeout.setTimeout(-1);
+                    mFlags |= AT_EOS;
                 } else {
                     // Break out of the loop to reschude ourselves.
                     break;
@@ -1262,6 +1272,7 @@ void AAH_TXPlayer::onPumpAudio() {
             } else {
                 LOGE("*** %s read failed err=%d", __PRETTY_FUNCTION__, err);
             }
+            mPumpAudioEventPending = false;
             return;
         }
 
