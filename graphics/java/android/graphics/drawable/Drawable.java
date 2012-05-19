@@ -386,6 +386,7 @@ public abstract class Drawable {
 
     /**
      * Get the resolved layout direction of this Drawable.
+     * @hide
      */
     public int getResolvedLayoutDirectionSelf() {
         final Callback callback = getCallback();

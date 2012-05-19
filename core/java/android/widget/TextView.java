@@ -5625,6 +5625,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                       physicalWidth, false);
     }
 
+    /** @hide */
     @Override
     public void onResolvedLayoutDirectionReset() {
         if (mLayoutAlignment != null) {
@@ -8161,6 +8162,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mEditor.mInBatchEditControllers;
     }
 
+    /** @hide */
     @Override
     public void onResolvedTextDirectionChanged() {
         if (hasPasswordTransformationMethod()) {

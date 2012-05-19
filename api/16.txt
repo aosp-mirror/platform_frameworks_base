@@ -9243,7 +9243,6 @@ package android.graphics.drawable {
     method public int getMinimumWidth();
     method public abstract int getOpacity();
     method public boolean getPadding(android.graphics.Rect);
-    method public int getResolvedLayoutDirectionSelf();
     method public int[] getState();
     method public android.graphics.Region getTransparentRegion();
     method public void inflate(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
@@ -28620,8 +28619,6 @@ package android.widget {
     method public void onEndBatchEdit();
     method public boolean onPreDraw();
     method public boolean onPrivateIMECommand(java.lang.String, android.os.Bundle);
-    method public void onResolvedLayoutDirectionReset();
-    method public void onResolvedTextDirectionChanged();
     method public void onRestoreInstanceState(android.os.Parcelable);
     method public android.os.Parcelable onSaveInstanceState();
     method protected void onSelectionChanged(int, int);
