@@ -774,11 +774,12 @@ static void android_view_GLES20Canvas_updateTextureLayer(JNIEnv* env, jobject cl
     float transform[16];
     sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, surface));
 
-    surfaceTexture->updateTexImage();
-    surfaceTexture->getTransformMatrix(transform);
-    GLenum renderTarget = surfaceTexture->getCurrentTextureTarget();
+    if (surfaceTexture->updateTexImage() == NO_ERROR) {
+        surfaceTexture->getTransformMatrix(transform);
+        GLenum renderTarget = surfaceTexture->getCurrentTextureTarget();
 
-    LayerRenderer::updateTextureLayer(layer, width, height, isOpaque, renderTarget, transform);
+        LayerRenderer::updateTextureLayer(layer, width, height, isOpaque, renderTarget, transform);
+    }
 }
 
 static void android_view_GLES20Canvas_updateRenderLayer(JNIEnv* env, jobject clazz,
