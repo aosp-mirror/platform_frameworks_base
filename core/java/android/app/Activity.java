@@ -3273,7 +3273,7 @@ public class Activity extends ContextThemeWrapper
         if (mMenuInflater == null) {
             initActionBar();
             if (mActionBar != null) {
-                mMenuInflater = new MenuInflater(mActionBar.getThemedContext());
+                mMenuInflater = new MenuInflater(mActionBar.getThemedContext(), this);
             } else {
                 mMenuInflater = new MenuInflater(this);
             }

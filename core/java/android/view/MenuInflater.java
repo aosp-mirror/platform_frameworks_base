@@ -65,6 +65,7 @@ public class MenuInflater {
     private final Object[] mActionProviderConstructorArguments;
 
     private Context mContext;
+    private Object mRealOwner;
 
     /**
      * Constructs a menu inflater.
@@ -73,6 +74,20 @@ public class MenuInflater {
      */
     public MenuInflater(Context context) {
         mContext = context;
+        mRealOwner = context;
+        mActionViewConstructorArguments = new Object[] {context};
+        mActionProviderConstructorArguments = mActionViewConstructorArguments;
+    }
+
+    /**
+     * Constructs a menu inflater.
+     *
+     * @see Activity#getMenuInflater()
+     * @hide
+     */
+    public MenuInflater(Context context, Object realOwner) {
+        mContext = context;
+        mRealOwner = realOwner;
         mActionViewConstructorArguments = new Object[] {context};
         mActionProviderConstructorArguments = mActionViewConstructorArguments;
     }
@@ -190,12 +205,12 @@ public class MenuInflater {
             implements MenuItem.OnMenuItemClickListener {
         private static final Class<?>[] PARAM_TYPES = new Class[] { MenuItem.class };
         
-        private Context mContext;
+        private Object mRealOwner;
         private Method mMethod;
         
-        public InflatedOnMenuItemClickListener(Context context, String methodName) {
-            mContext = context;
-            Class<?> c = context.getClass();
+        public InflatedOnMenuItemClickListener(Object realOwner, String methodName) {
+            mRealOwner = realOwner;
+            Class<?> c = realOwner.getClass();
             try {
                 mMethod = c.getMethod(methodName, PARAM_TYPES);
             } catch (Exception e) {
@@ -210,9 +225,9 @@ public class MenuInflater {
         public boolean onMenuItemClick(MenuItem item) {
             try {
                 if (mMethod.getReturnType() == Boolean.TYPE) {
-                    return (Boolean) mMethod.invoke(mContext, item);
+                    return (Boolean) mMethod.invoke(mRealOwner, item);
                 } else {
-                    mMethod.invoke(mContext, item);
+                    mMethod.invoke(mRealOwner, item);
                     return true;
                 }
             } catch (Exception e) {
@@ -400,7 +415,7 @@ public class MenuInflater {
                             + "be used within a restricted context");
                 }
                 item.setOnMenuItemClickListener(
-                        new InflatedOnMenuItemClickListener(mContext, itemListenerMethodName));
+                        new InflatedOnMenuItemClickListener(mRealOwner, itemListenerMethodName));
             }
 
             if (item instanceof MenuItemImpl) {
