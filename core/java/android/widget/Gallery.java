@@ -57,9 +57,9 @@ import com.android.internal.R;
  * @attr ref android.R.styleable#Gallery_spacing
  * @attr ref android.R.styleable#Gallery_gravity
  * 
- * @deprecated This widget is not longer supported. Other horizontally scrolling
- * widgets include {@link HorizontalScrollView} and ViewPager from the support
- * library.
+ * @deprecated This widget is no longer supported. Other horizontally scrolling
+ * widgets include {@link HorizontalScrollView} and {@link android.support.v4.view.ViewPager}
+ * from the support library.
  */
 @Deprecated
 @Widget
