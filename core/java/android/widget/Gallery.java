@@ -56,7 +56,12 @@ import com.android.internal.R;
  * @attr ref android.R.styleable#Gallery_animationDuration
  * @attr ref android.R.styleable#Gallery_spacing
  * @attr ref android.R.styleable#Gallery_gravity
+ * 
+ * @deprecated This widget is not longer supported. Other horizontally scrolling
+ * widgets include {@link HorizontalScrollView} and ViewPager from the support
+ * library.
  */
+@Deprecated
 @Widget
 public class Gallery extends AbsSpinner implements GestureDetector.OnGestureListener {
 
