@@ -1065,7 +1065,9 @@ class MountService extends IMountService.Stub
     private static final String TAG_STORAGE_LIST = "StorageList";
     private static final String TAG_STORAGE = "storage";
 
-    private void readStorageList(Resources resources) {
+    private void readStorageList() {
+        Resources resources = mContext.getResources();
+
         int id = com.android.internal.R.xml.storage_list;
         XmlResourceParser parser = resources.getXml(id);
         AttributeSet attrs = Xml.asAttributeSet(parser);
@@ -1084,6 +1086,8 @@ class MountService extends IMountService.Stub
 
                     CharSequence path = a.getText(
                             com.android.internal.R.styleable.Storage_mountPoint);
+                    int descriptionId = a.getResourceId(
+                            com.android.internal.R.styleable.Storage_storageDescription, -1);
                     CharSequence description = a.getText(
                             com.android.internal.R.styleable.Storage_storageDescription);
                     boolean primary = a.getBoolean(
@@ -1110,7 +1114,7 @@ class MountService extends IMountService.Stub
                     } else {
                         String pathString = path.toString();
                         StorageVolume volume = new StorageVolume(pathString,
-                                description.toString(), removable, emulated,
+                                descriptionId, removable, emulated,
                                 mtpReserve, allowMassStorage, maxFileSize);
                         if (primary) {
                             if (mPrimaryVolume == null) {
@@ -1151,8 +1155,7 @@ class MountService extends IMountService.Stub
      */
     public MountService(Context context) {
         mContext = context;
-        Resources resources = context.getResources();
-        readStorageList(resources);
+        readStorageList();
 
         if (mPrimaryVolume != null) {
             mExternalStoragePath = mPrimaryVolume.getPath();

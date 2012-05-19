@@ -16,6 +16,7 @@
 
 package android.mtp;
 
+import android.content.Context;
 import android.os.storage.StorageVolume;
 
 /**
@@ -34,10 +35,10 @@ public class MtpStorage {
     private final boolean mRemovable;
     private final long mMaxFileSize;
 
-    public MtpStorage(StorageVolume volume) {
+    public MtpStorage(StorageVolume volume, Context context) {
         mStorageId = volume.getStorageId();
         mPath = volume.getPath();
-        mDescription = volume.getDescription();
+        mDescription = context.getResources().getString(volume.getDescriptionId());
         mReserveSpace = volume.getMtpReserveSpace();
         mRemovable = volume.isRemovable();
         mMaxFileSize = volume.getMaxFileSize();
