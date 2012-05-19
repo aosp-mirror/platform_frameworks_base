@@ -82,6 +82,7 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
         PLAYING             = 1,
         PREPARING           = 8,
         PREPARED            = 16,
+        AT_EOS              = 32,
         PREPARE_CANCELLED   = 64,
         CACHE_UNDERRUN      = 128,
 
