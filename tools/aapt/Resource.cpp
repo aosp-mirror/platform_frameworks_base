@@ -2089,6 +2089,23 @@ addProguardKeepRule(ProguardKeepSet* keep, const String8& inClassName,
     keep->add(rule, location);
 }
 
+void
+addProguardKeepMethodRule(ProguardKeepSet* keep, const String8& memberName,
+        const char* pkg, const String8& srcName, int line)
+{
+    String8 rule("-keepclassmembers class * { *** ");
+    rule += memberName;
+    rule += "(...); }";
+
+    String8 location("onClick ");
+    location += srcName;
+    char lineno[20];
+    sprintf(lineno, ":%d", line);
+    location += lineno;
+
+    keep->add(rule, location);
+}
+
 status_t
 writeProguardForAndroidManifest(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
 {
@@ -2251,6 +2268,13 @@ writeProguardForXml(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile,
                 }
             }
         }
+        ssize_t attrIndex = tree.indexOfAttribute(RESOURCES_ANDROID_NAMESPACE, "onClick");
+        if (attrIndex >= 0) {
+            size_t len;
+            addProguardKeepMethodRule(keep,
+                                String8(tree.getAttributeStringValue(attrIndex, &len)), NULL,
+                                layoutFile->getPrintableSource(), tree.getLineNumber());
+        }
     }
 
     return NO_ERROR;
@@ -2289,6 +2313,9 @@ writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
         } else if ((dirName == String8("xml")) || (strncmp(dirName.string(), "xml-", 4) == 0)) {
             startTag = "PreferenceScreen";
             tagAttrPairs = &kXmlTagAttrPairs;
+        } else if ((dirName == String8("menu")) || (strncmp(dirName.string(), "menu-", 5) == 0)) {
+            startTag = "menu";
+            tagAttrPairs = NULL;
         } else {
             continue;
         }
