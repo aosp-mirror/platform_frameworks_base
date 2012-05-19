@@ -538,8 +538,16 @@ public class WindowAnimator {
         if (mDimAnimator == null) {
             mDimAnimator = new DimAnimator(mService.mFxSession);
         }
-        mService.mH.sendMessage(mService.mH.obtainMessage(SET_DIM_PARAMETERS,
-                new DimAnimator.Parameters(winAnimator, width, height, target)));
+        // Only set dim params on the highest dimmed layer.
+        final WindowStateAnimator dimWinAnimator = mDimParams == null
+                ? null : mDimParams.mDimWinAnimator;
+        // Don't turn on for an unshown surface, or for any layer but the highest dimmed one.
+        if (winAnimator.mSurfaceShown &&
+                (dimWinAnimator == null || !dimWinAnimator.mSurfaceShown
+                || dimWinAnimator.mAnimLayer < winAnimator.mAnimLayer)) {
+            mService.mH.sendMessage(mService.mH.obtainMessage(SET_DIM_PARAMETERS,
+                    new DimAnimator.Parameters(winAnimator, width, height, target)));
+        }
     }
 
     // TODO(cmautner): Move into Handler
