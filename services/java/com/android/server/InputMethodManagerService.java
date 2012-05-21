@@ -195,6 +195,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private PendingIntent mImeSwitchPendingIntent;
     private boolean mShowOngoingImeSwitcherForPhones;
     private boolean mNotificationShown;
+    private final boolean mImeSelectedOnBoot;
 
     class SessionState {
         final ClientState client;
@@ -590,7 +591,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mImeSwitcherNotification.vibrate = null;
         Intent intent = new Intent(Settings.ACTION_SHOW_INPUT_METHOD_PICKER);
         mImeSwitchPendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
-        mLastSystemLocale = mRes.getConfiguration().locale;
 
         mShowOngoingImeSwitcherForPhones = false;
 
@@ -612,11 +612,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // mSettings should be created before buildInputMethodListLocked
         mSettings = new InputMethodSettings(
                 mRes, context.getContentResolver(), mMethodMap, mMethodList);
+
+        // Just checking if defaultImiId is empty or not
+        final String defaultImiId = Settings.Secure.getString(
+                mContext.getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
+        mImeSelectedOnBoot = !TextUtils.isEmpty(defaultImiId);
+
         buildInputMethodListLocked(mMethodList, mMethodMap);
         mSettings.enableAllIMEsIfThereIsNoEnabledIME();
 
-        if (TextUtils.isEmpty(Settings.Secure.getString(
-                mContext.getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD))) {
+        if (!mImeSelectedOnBoot) {
+            Slog.w(TAG, "No IME selected. Choose the most applicable IME.");
             resetDefaultImeLocked(context);
         }
 
@@ -639,6 +645,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     private void checkCurrentLocaleChangedLocked() {
+        if (!mSystemReady) {
+            // not system ready
+            return;
+        }
         final Locale newLocale = mRes.getConfiguration().locale;
         if (newLocale != null && !newLocale.equals(mLastSystemLocale)) {
             if (DEBUG) {
@@ -675,7 +685,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private static boolean isValidSystemDefaultIme(InputMethodInfo imi, Context context) {
+    private boolean isValidSystemDefaultIme(InputMethodInfo imi, Context context) {
+        if (!mSystemReady) {
+            return false;
+        }
         if (!isSystemIme(imi)) {
             return false;
         }
@@ -738,7 +751,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         mContext.getSystemService(Context.KEYGUARD_SERVICE);
                 mNotificationManager = (NotificationManager)
                         mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-                mLastSystemLocale = mContext.getResources().getConfiguration().locale;
                 mStatusBar = statusBar;
                 statusBar.setIconVisibility("ime", false);
                 updateImeWindowStatusLocked();
@@ -748,6 +760,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     mWindowManagerService.setOnHardKeyboardStatusChangeListener(
                             mHardKeyboardListener);
                 }
+                buildInputMethodListLocked(mMethodList, mMethodMap);
+                if (!mImeSelectedOnBoot) {
+                    Slog.w(TAG, "Reset the default IME as \"Resource\" is ready here.");
+                    checkCurrentLocaleChangedLocked();
+                }
+                mLastSystemLocale = mRes.getConfiguration().locale;
                 try {
                     startInputInnerLocked();
                 } catch (RuntimeException e) {
@@ -2137,7 +2155,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return subtypes;
     }
 
-
     private static ArrayList<InputMethodSubtype> getOverridingImplicitlyEnabledSubtypes(
             InputMethodInfo imi, String mode) {
         ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
@@ -2155,15 +2172,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         List<InputMethodInfo> enabled = mSettings.getEnabledInputMethodListLocked();
         if (enabled != null && enabled.size() > 0) {
             // We'd prefer to fall back on a system IME, since that is safer.
-            int i=enabled.size();
+            int i = enabled.size();
+            int firstFoundSystemIme = -1;
             while (i > 0) {
                 i--;
                 final InputMethodInfo imi = enabled.get(i);
-                if (isSystemIme(imi) && !imi.isAuxiliaryIme()) {
-                    break;
+                if (isSystemImeThatHasEnglishSubtype(imi) && !imi.isAuxiliaryIme()) {
+                    return imi;
+                }
+                if (firstFoundSystemIme < 0 && isSystemIme(imi) && !imi.isAuxiliaryIme()) {
+                    firstFoundSystemIme = i;
                 }
             }
-            return enabled.get(i);
+            return enabled.get(Math.max(firstFoundSystemIme, 0));
         }
         return null;
     }
@@ -2238,11 +2259,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
 
-        String defaultIme = Settings.Secure.getString(mContext
+        final String defaultImiId = Settings.Secure.getString(mContext
                 .getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
-        if (!TextUtils.isEmpty(defaultIme) && !map.containsKey(defaultIme)) {
-            if (chooseNewDefaultIMELocked()) {
-                updateFromSettingsLocked();
+        if (!TextUtils.isEmpty(defaultImiId)) {
+            if (!map.containsKey(defaultImiId)) {
+                Slog.w(TAG, "Default IME is uninstalled. Choose new default IME.");
+                if (chooseNewDefaultIMELocked()) {
+                    updateFromSettingsLocked();
+                }
+            } else {
+                // Double check that the default IME is certainly enabled.
+                setInputMethodEnabledLocked(defaultImiId, true);
             }
         }
     }
@@ -3007,8 +3034,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mContext = context;
             mPm = context.getPackageManager();
             mImms = imms;
-            mSystemLocaleStr =
-                    imms.mLastSystemLocale != null ? imms.mLastSystemLocale.toString() : "";
+            final Locale locale = context.getResources().getConfiguration().locale;
+            mSystemLocaleStr = locale != null ? locale.toString() : "";
         }
 
         private final TreeMap<InputMethodInfo, List<InputMethodSubtype>> mSortedImmis =
