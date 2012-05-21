@@ -376,7 +376,7 @@ public class WifiService extends IWifiManager.Stub {
                     @Override
                     public void onReceive(Context context, Intent intent) {
                         mAirplaneModeOn.set(isAirplaneModeOn());
-                        handleAirplaneModeToggled();
+                        handleAirplaneModeToggled(mAirplaneModeOn.get());
                         updateWifiState();
                     }
                 },
@@ -484,10 +484,10 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
-    private void handleWifiToggled(boolean enabled) {
-        boolean airplane = mAirplaneModeOn.get() && isAirplaneToggleable();
-        if (enabled) {
-            if (airplane) {
+    private void handleWifiToggled(boolean wifiEnabled) {
+        boolean airplaneEnabled = mAirplaneModeOn.get() && isAirplaneToggleable();
+        if (wifiEnabled) {
+            if (airplaneEnabled) {
                 persistWifiState(WIFI_ENABLED_AIRPLANE_OVERRIDE);
             } else {
                 persistWifiState(WIFI_ENABLED);
@@ -501,8 +501,8 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
-    private void handleAirplaneModeToggled() {
-        if (mAirplaneModeOn.get()) {
+    private void handleAirplaneModeToggled(boolean airplaneEnabled) {
+        if (airplaneEnabled) {
             // Wifi disabled due to airplane on
             if (mWifiEnabled) {
                 persistWifiState(WIFI_DISABLED_AIRPLANE_ON);
