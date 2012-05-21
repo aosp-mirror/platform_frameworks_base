@@ -57,8 +57,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="50dip"
                 android:layout_marginTop="50dip"
-                android:layout_marginBottom="100dip"
-                android:layout_marginRight="64dip"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentLeft="true"/>
 
