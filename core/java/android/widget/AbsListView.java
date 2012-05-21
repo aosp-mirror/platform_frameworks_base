@@ -2216,30 +2216,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         View child;
         if (scrapView != null) {
-            if (ViewDebug.TRACE_RECYCLER) {
-                ViewDebug.trace(scrapView, ViewDebug.RecyclerTraceType.RECYCLE_FROM_SCRAP_HEAP,
-                        position, -1);
-            }
-
             child = mAdapter.getView(position, scrapView, this);
 
             if (child.getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
                 child.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
             }
 
-            if (ViewDebug.TRACE_RECYCLER) {
-                ViewDebug.trace(child, ViewDebug.RecyclerTraceType.BIND_VIEW,
-                        position, getChildCount());
-            }
-
             if (child != scrapView) {
                 mRecycler.addScrapView(scrapView, position);
                 if (mCacheColorHint != 0) {
                     child.setDrawingCacheBackgroundColor(mCacheColorHint);
-                }
-                if (ViewDebug.TRACE_RECYCLER) {
-                    ViewDebug.trace(scrapView, ViewDebug.RecyclerTraceType.MOVE_TO_SCRAP_HEAP,
-                            position, -1);
                 }
             } else {
                 isScrap[0] = true;
@@ -2254,10 +2240,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
             if (mCacheColorHint != 0) {
                 child.setDrawingCacheBackgroundColor(mCacheColorHint);
-            }
-            if (ViewDebug.TRACE_RECYCLER) {
-                ViewDebug.trace(child, ViewDebug.RecyclerTraceType.NEW_VIEW,
-                        position, getChildCount());
             }
         }
 
@@ -4939,12 +4921,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     int position = firstPosition + i;
                     if (position >= headerViewsCount && position < footerViewsStart) {
                         mRecycler.addScrapView(child, position);
-
-                        if (ViewDebug.TRACE_RECYCLER) {
-                            ViewDebug.trace(child,
-                                    ViewDebug.RecyclerTraceType.MOVE_TO_SCRAP_HEAP,
-                                    firstPosition + i, -1);
-                        }
                     }
                 }
             }
@@ -4963,12 +4939,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     int position = firstPosition + i;
                     if (position >= headerViewsCount && position < footerViewsStart) {
                         mRecycler.addScrapView(child, position);
-
-                        if (ViewDebug.TRACE_RECYCLER) {
-                            ViewDebug.trace(child,
-                                    ViewDebug.RecyclerTraceType.MOVE_TO_SCRAP_HEAP,
-                                    firstPosition + i, -1);
-                        }
                     }
                 }
             }
@@ -5912,63 +5882,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         removeAllViewsInLayout();
     }
 
-    /**
-     * @hide
-     */
-    @Override
-    protected boolean onConsistencyCheck(int consistency) {
-        boolean result = super.onConsistencyCheck(consistency);
-
-        final boolean checkLayout = (consistency & ViewDebug.CONSISTENCY_LAYOUT) != 0;
-
-        if (checkLayout) {
-            // The active recycler must be empty
-            final View[] activeViews = mRecycler.mActiveViews;
-            int count = activeViews.length;
-            for (int i = 0; i < count; i++) {
-                if (activeViews[i] != null) {
-                    result = false;
-                    Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
-                            "AbsListView " + this + " has a view in its active recycler: " +
-                                    activeViews[i]);
-                }
-            }
-
-            // All views in the recycler must NOT be on screen and must NOT have a parent
-            final ArrayList<View> scrap = mRecycler.mCurrentScrap;
-            if (!checkScrap(scrap)) result = false;
-            final ArrayList<View>[] scraps = mRecycler.mScrapViews;
-            count = scraps.length;
-            for (int i = 0; i < count; i++) {
-                if (!checkScrap(scraps[i])) result = false;
-            }
-        }
-
-        return result;
-    }
-
-    private boolean checkScrap(ArrayList<View> scrap) {
-        if (scrap == null) return true;
-        boolean result = true;
-
-        final int count = scrap.size();
-        for (int i = 0; i < count; i++) {
-            final View view = scrap.get(i);
-            if (view.getParent() != null) {
-                result = false;
-                Log.d(ViewDebug.CONSISTENCY_LOG_TAG, "AbsListView " + this +
-                        " has a view in its scrap heap still attached to a parent: " + view);
-            }
-            if (indexOfChild(view) >= 0) {
-                result = false;
-                Log.d(ViewDebug.CONSISTENCY_LOG_TAG, "AbsListView " + this +
-                        " has a view in its scrap heap that is also a direct child: " + view);
-            }
-        }
-
-        return result;
-    }
-
     private void finishGlows() {
         if (mEdgeGlowTop != null) {
             mEdgeGlowTop.finish();
@@ -6523,12 +6436,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     victim.setAccessibilityDelegate(null);
                     if (hasListener) {
                         mRecyclerListener.onMovedToScrapHeap(victim);
-                    }
-
-                    if (ViewDebug.TRACE_RECYCLER) {
-                        ViewDebug.trace(victim,
-                                ViewDebug.RecyclerTraceType.MOVE_FROM_ACTIVE_TO_SCRAP_HEAP,
-                                mFirstActivePosition + i, -1);
                     }
                 }
             }

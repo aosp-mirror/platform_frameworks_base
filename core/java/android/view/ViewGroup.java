@@ -3949,10 +3949,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * the view hierarchy.
      */
     public final void invalidateChild(View child, final Rect dirty) {
-        if (ViewDebug.TRACE_HIERARCHY) {
-            ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE_CHILD);
-        }
-
         ViewParent parent = this;
 
         final AttachInfo attachInfo = mAttachInfo;
@@ -4045,10 +4041,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * does not intersect with this ViewGroup's bounds.
      */
     public ViewParent invalidateChildInParent(final int[] location, final Rect dirty) {
-        if (ViewDebug.TRACE_HIERARCHY) {
-            ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE_CHILD_IN_PARENT);
-        }
-
         if ((mPrivateFlags & DRAWN) == DRAWN ||
                 (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) {
             if ((mGroupFlags & (FLAG_OPTIMIZE_INVALIDATE | FLAG_ANIMATION_DONE)) !=
@@ -4628,61 +4620,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     protected LayoutParams generateDefaultLayoutParams() {
         return new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    protected boolean dispatchConsistencyCheck(int consistency) {
-        boolean result = super.dispatchConsistencyCheck(consistency);
-
-        final int count = mChildrenCount;
-        final View[] children = mChildren;
-        for (int i = 0; i < count; i++) {
-            if (!children[i].dispatchConsistencyCheck(consistency)) result = false;
-        }
-
-        return result;
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    protected boolean onConsistencyCheck(int consistency) {
-        boolean result = super.onConsistencyCheck(consistency);
-
-        final boolean checkLayout = (consistency & ViewDebug.CONSISTENCY_LAYOUT) != 0;
-        final boolean checkDrawing = (consistency & ViewDebug.CONSISTENCY_DRAWING) != 0;
-
-        if (checkLayout) {
-            final int count = mChildrenCount;
-            final View[] children = mChildren;
-            for (int i = 0; i < count; i++) {
-                if (children[i].getParent() != this) {
-                    result = false;
-                    android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
-                            "View " + children[i] + " has no parent/a parent that is not " + this);
-                }
-            }
-        }
-
-        if (checkDrawing) {
-            // If this group is dirty, check that the parent is dirty as well
-            if ((mPrivateFlags & DIRTY_MASK) != 0) {
-                final ViewParent parent = getParent();
-                if (parent != null && !(parent instanceof ViewRootImpl)) {
-                    if ((((View) parent).mPrivateFlags & DIRTY_MASK) == 0) {
-                        result = false;
-                        android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
-                                "ViewGroup " + this + " is dirty but its parent is not: " + this);
-                    }
-                }
-            }
-        }
-
-        return result;
     }
 
     /**

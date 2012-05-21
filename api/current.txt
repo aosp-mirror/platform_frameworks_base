@@ -24587,14 +24587,14 @@ package android.view {
   public class ViewDebug {
     ctor public ViewDebug();
     method public static void dumpCapturedView(java.lang.String, java.lang.Object);
-    method public static void startHierarchyTracing(java.lang.String, android.view.View);
-    method public static void startRecyclerTracing(java.lang.String, android.view.View);
-    method public static void stopHierarchyTracing();
-    method public static void stopRecyclerTracing();
-    method public static void trace(android.view.View, android.view.ViewDebug.RecyclerTraceType, int...);
-    method public static void trace(android.view.View, android.view.ViewDebug.HierarchyTraceType);
-    field public static final boolean TRACE_HIERARCHY = false;
-    field public static final boolean TRACE_RECYCLER = false;
+    method public static deprecated void startHierarchyTracing(java.lang.String, android.view.View);
+    method public static deprecated void startRecyclerTracing(java.lang.String, android.view.View);
+    method public static deprecated void stopHierarchyTracing();
+    method public static deprecated void stopRecyclerTracing();
+    method public static deprecated void trace(android.view.View, android.view.ViewDebug.RecyclerTraceType, int...);
+    method public static deprecated void trace(android.view.View, android.view.ViewDebug.HierarchyTraceType);
+    field public static final deprecated boolean TRACE_HIERARCHY = false;
+    field public static final deprecated boolean TRACE_RECYCLER = false;
   }
 
   public static abstract class ViewDebug.CapturedViewProperty implements java.lang.annotation.Annotation {
@@ -24606,7 +24606,7 @@ package android.view {
   public static abstract class ViewDebug.FlagToString implements java.lang.annotation.Annotation {
   }
 
-  public static final class ViewDebug.HierarchyTraceType extends java.lang.Enum {
+  public static final deprecated class ViewDebug.HierarchyTraceType extends java.lang.Enum {
     method public static android.view.ViewDebug.HierarchyTraceType valueOf(java.lang.String);
     method public static final android.view.ViewDebug.HierarchyTraceType[] values();
     enum_constant public static final android.view.ViewDebug.HierarchyTraceType BUILD_CACHE;
@@ -24622,7 +24622,7 @@ package android.view {
   public static abstract class ViewDebug.IntToString implements java.lang.annotation.Annotation {
   }
 
-  public static final class ViewDebug.RecyclerTraceType extends java.lang.Enum {
+  public static final deprecated class ViewDebug.RecyclerTraceType extends java.lang.Enum {
     method public static android.view.ViewDebug.RecyclerTraceType valueOf(java.lang.String);
     method public static final android.view.ViewDebug.RecyclerTraceType[] values();
     enum_constant public static final android.view.ViewDebug.RecyclerTraceType BIND_VIEW;
