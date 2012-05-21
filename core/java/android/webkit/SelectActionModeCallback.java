@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.app.Activity;
 import android.app.SearchManager;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -122,6 +123,9 @@ class SelectActionModeCallback implements ActionMode.Callback {
                 Intent i = new Intent(Intent.ACTION_WEB_SEARCH);
                 i.putExtra(SearchManager.EXTRA_NEW_SEARCH, true);
                 i.putExtra(SearchManager.QUERY, mWebView.getSelection());
+                if (!(mWebView.getContext() instanceof Activity)) {
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                }
                 mWebView.getContext().startActivity(i);
                 break;
 
