@@ -1623,7 +1623,7 @@ public class MediaScanner
                     if (line.startsWith("File")) {
                         int equals = line.indexOf('=');
                         if (equals > 0) {
-                            cachePlaylistEntry(line, playListDirectory);
+                            cachePlaylistEntry(line.substring(equals + 1), playListDirectory);
                         }
                     }
                     line = reader.readLine();
