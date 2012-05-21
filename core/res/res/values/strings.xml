@@ -3572,6 +3572,6 @@
 
     <!-- Title for a button to choose the currently selected activity
          from the activity resolver to use just this once. [CHAR LIMIT=25] -->
-    <string name="activity_resolver_use_once">Just Once</string>
+    <string name="activity_resolver_use_once">Just once</string>
 
 </resources>
