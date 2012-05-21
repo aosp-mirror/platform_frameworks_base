@@ -1050,6 +1050,17 @@ public abstract class PackageManager {
     public static final String FEATURE_WIFI_DIRECT = "android.hardware.wifi.direct";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: This is a device dedicated to showing UI
+     * on a television.  Television here is defined to be a typical living
+     * room television experience: displayed on a big screen, where the user
+     * is sitting far away from it, and the dominant form of input will be
+     * something like a DPAD, not through touch or mouse.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELEVISION = "android.hardware.type.television";
+
+    /**
      * Action to external storage service to clean out removed apps.
      * @hide
      */

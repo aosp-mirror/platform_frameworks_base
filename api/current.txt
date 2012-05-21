@@ -6528,6 +6528,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_TELEPHONY = "android.hardware.telephony";
     field public static final java.lang.String FEATURE_TELEPHONY_CDMA = "android.hardware.telephony.cdma";
     field public static final java.lang.String FEATURE_TELEPHONY_GSM = "android.hardware.telephony.gsm";
+    field public static final java.lang.String FEATURE_TELEVISION = "android.hardware.type.television";
     field public static final java.lang.String FEATURE_TOUCHSCREEN = "android.hardware.touchscreen";
     field public static final java.lang.String FEATURE_TOUCHSCREEN_MULTITOUCH = "android.hardware.touchscreen.multitouch";
     field public static final java.lang.String FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT = "android.hardware.touchscreen.multitouch.distinct";
@@ -6803,7 +6804,7 @@ package android.content.res {
     field public static final int NAVIGATION_WHEEL = 4; // 0x4
     field public static final int ORIENTATION_LANDSCAPE = 2; // 0x2
     field public static final int ORIENTATION_PORTRAIT = 1; // 0x1
-    field public static final int ORIENTATION_SQUARE = 3; // 0x3
+    field public static final deprecated int ORIENTATION_SQUARE = 3; // 0x3
     field public static final int ORIENTATION_UNDEFINED = 0; // 0x0
     field public static final int SCREENLAYOUT_LONG_MASK = 48; // 0x30
     field public static final int SCREENLAYOUT_LONG_NO = 16; // 0x10
@@ -6820,7 +6821,7 @@ package android.content.res {
     field public static final int SMALLEST_SCREEN_WIDTH_DP_UNDEFINED = 0; // 0x0
     field public static final int TOUCHSCREEN_FINGER = 3; // 0x3
     field public static final int TOUCHSCREEN_NOTOUCH = 1; // 0x1
-    field public static final int TOUCHSCREEN_STYLUS = 2; // 0x2
+    field public static final deprecated int TOUCHSCREEN_STYLUS = 2; // 0x2
     field public static final int TOUCHSCREEN_UNDEFINED = 0; // 0x0
     field public static final int UI_MODE_NIGHT_MASK = 48; // 0x30
     field public static final int UI_MODE_NIGHT_NO = 16; // 0x10
