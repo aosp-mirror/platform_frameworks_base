@@ -376,11 +376,7 @@ public class WifiService extends IWifiManager.Stub {
                     @Override
                     public void onReceive(Context context, Intent intent) {
                         mAirplaneModeOn.set(isAirplaneModeOn());
-                        /* On airplane mode disable, restore wifi state if necessary */
-                        if (!mAirplaneModeOn.get() && (testAndClearWifiSavedState() ||
-                            mPersistWifiState.get() == WIFI_ENABLED_AIRPLANE_OVERRIDE)) {
-                                persistWifiState(true);
-                        }
+                        handleAirplaneModeToggled();
                         updateWifiState();
                     }
                 },
@@ -447,7 +443,10 @@ public class WifiService extends IWifiManager.Stub {
         boolean wifiEnabled = shouldWifiBeEnabled() || testAndClearWifiSavedState();
         Slog.i(TAG, "WifiService starting up with Wi-Fi " +
                 (wifiEnabled ? "enabled" : "disabled"));
-        setWifiEnabled(wifiEnabled);
+
+        // If we are already disabled (could be due to airplane mode), avoid changing persist
+        // state here
+        if (wifiEnabled) setWifiEnabled(wifiEnabled);
 
         mWifiWatchdogStateMachine = WifiWatchdogStateMachine.
                makeWifiWatchdogStateMachine(mContext);
@@ -485,26 +484,43 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
-    private void persistWifiState(boolean enabled) {
-        final ContentResolver cr = mContext.getContentResolver();
+    private void handleWifiToggled(boolean enabled) {
         boolean airplane = mAirplaneModeOn.get() && isAirplaneToggleable();
         if (enabled) {
             if (airplane) {
-                mPersistWifiState.set(WIFI_ENABLED_AIRPLANE_OVERRIDE);
+                persistWifiState(WIFI_ENABLED_AIRPLANE_OVERRIDE);
             } else {
-                mPersistWifiState.set(WIFI_ENABLED);
+                persistWifiState(WIFI_ENABLED);
             }
         } else {
-            if (airplane) {
-                mPersistWifiState.set(WIFI_DISABLED_AIRPLANE_ON);
-            } else {
-                mPersistWifiState.set(WIFI_DISABLED);
-            }
+            // When wifi state is disabled, we do not care
+            // if airplane mode is on or not. The scenario of
+            // wifi being disabled due to airplane mode being turned on
+            // is handled handleAirplaneModeToggled()
+            persistWifiState(WIFI_DISABLED);
         }
-
-        Settings.Secure.putInt(cr, Settings.Secure.WIFI_ON, mPersistWifiState.get());
     }
 
+    private void handleAirplaneModeToggled() {
+        if (mAirplaneModeOn.get()) {
+            // Wifi disabled due to airplane on
+            if (mWifiEnabled) {
+                persistWifiState(WIFI_DISABLED_AIRPLANE_ON);
+            }
+        } else {
+            /* On airplane mode disable, restore wifi state if necessary */
+            if (testAndClearWifiSavedState() ||
+                    mPersistWifiState.get() == WIFI_ENABLED_AIRPLANE_OVERRIDE) {
+                persistWifiState(WIFI_ENABLED);
+            }
+        }
+    }
+
+    private void persistWifiState(int state) {
+        final ContentResolver cr = mContext.getContentResolver();
+        mPersistWifiState.set(state);
+        Settings.Secure.putInt(cr, Settings.Secure.WIFI_ON, state);
+    }
 
     /**
      * see {@link android.net.wifi.WifiManager#pingSupplicant()}
@@ -578,12 +594,9 @@ public class WifiService extends IWifiManager.Stub {
          * only CHANGE_WIFI_STATE is enforced
          */
 
-        /* Avoids overriding of airplane state when wifi is already in the expected state */
-        if (enable != mWifiEnabled) {
-            long ident = Binder.clearCallingIdentity();
-            persistWifiState(enable);
-            Binder.restoreCallingIdentity(ident);
-        }
+        long ident = Binder.clearCallingIdentity();
+        handleWifiToggled(enable);
+        Binder.restoreCallingIdentity(ident);
 
         if (enable) {
             if (!mIsReceiverRegistered) {
