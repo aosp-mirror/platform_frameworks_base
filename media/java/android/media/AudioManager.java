@@ -2007,6 +2007,37 @@ public class AudioManager {
     }
 
     /**
+     * @hide
+     * Used internally by telephony package to register an intent receiver for ACTION_MEDIA_BUTTON.
+     * @param eventReceiver the component that will receive the media button key events,
+     *          no-op if eventReceiver is null
+     */
+    public void registerMediaButtonEventReceiverForCalls(ComponentName eventReceiver) {
+        if (eventReceiver == null) {
+            return;
+        }
+        IAudioService service = getService();
+        try {
+            // eventReceiver != null
+            service.registerMediaButtonEventReceiverForCalls(eventReceiver);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in registerMediaButtonEventReceiverForCalls", e);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void unregisterMediaButtonEventReceiverForCalls() {
+        IAudioService service = getService();
+        try {
+            service.unregisterMediaButtonEventReceiverForCalls();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in unregisterMediaButtonEventReceiverForCalls", e);
+        }
+    }
+
+    /**
      * Unregister the receiver of MEDIA_BUTTON intents.
      * @param eventReceiver identifier of a {@link android.content.BroadcastReceiver}
      *      that was registered with {@link #registerMediaButtonEventReceiver(ComponentName)}.
