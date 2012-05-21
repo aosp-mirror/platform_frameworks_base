@@ -59,6 +59,7 @@ import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.System;
+import android.speech.RecognizerIntent;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -3818,43 +3819,37 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      * Tell the system to start voice-based interactions / voice commands
      */
     private void startVoiceBasedInteractions(boolean needWakeLock) {
-        Intent voiceIntent = new Intent(android.speech.RecognizerIntent.ACTION_WEB_SEARCH);
+        Intent voiceIntent = null;
+        // select which type of search to launch:
+        // - screen on and device unlocked: action is ACTION_WEB_SEARCH
+        // - device locked or screen off: action is ACTION_VOICE_SEARCH_HANDS_FREE
+        //    with EXTRA_SECURE set to true if the device is securely locked
+        PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+        boolean isLocked = mKeyguardManager != null && mKeyguardManager.isKeyguardLocked();
+        if (!isLocked && pm.isScreenOn()) {
+            voiceIntent = new Intent(android.speech.RecognizerIntent.ACTION_WEB_SEARCH);
+        } else {
+            voiceIntent = new Intent(RecognizerIntent.ACTION_VOICE_SEARCH_HANDS_FREE);
+            voiceIntent.putExtra(RecognizerIntent.EXTRA_SECURE,
+                    isLocked && mKeyguardManager.isKeyguardSecure());
+        }
+        // start the search activity
         if (needWakeLock) {
             mMediaEventWakeLock.acquire();
         }
-        voiceIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         try {
-            if (mKeyguardManager != null) {
-                // it's ok to start voice-based interactions when:
-                // - the device is locked but doesn't require a password to be unlocked
-                // - the device is not locked
-                if ((mKeyguardManager.isKeyguardLocked() && !mKeyguardManager.isKeyguardSecure())
-                        || !mKeyguardManager.isKeyguardLocked()) {
-                    mContext.startActivity(voiceIntent);
-                }
+            if (voiceIntent != null) {
+                voiceIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                mContext.startActivity(voiceIntent);
             }
         } catch (ActivityNotFoundException e) {
-            Log.e(TAG, "Error launching activity for ACTION_WEB_SEARCH: " + e);
+            Log.w(TAG, "No activity for search: " + e);
         } finally {
             if (needWakeLock) {
                 mMediaEventWakeLock.release();
             }
         }
-    }
-
-    /**
-     * Verify whether it is safe to start voice-based interactions given the state of the system
-     * @return false is the Keyguard is locked and secure, true otherwise
-     */
-    private boolean safeToStartVoiceBasedInteractions() {
-        KeyguardManager keyguard =
-                (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
-        if (keyguard == null) {
-            return false;
-        }
-        
-        return true;
     }
 
     private PowerManager.WakeLock mMediaEventWakeLock;
