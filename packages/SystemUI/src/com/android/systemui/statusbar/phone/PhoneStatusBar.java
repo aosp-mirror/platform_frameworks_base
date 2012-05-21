@@ -515,13 +515,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         public boolean onTouch(View v, MotionEvent event) {
             switch(event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    Slog.d(TAG, "showing search panel");
                     showSearchPanel();
-                break;
-
-                case MotionEvent.ACTION_UP:
-                    Slog.d(TAG, "hiding search panel");
-                    hideSearchPanel();
                 break;
             }
             return false;
@@ -533,8 +527,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mNavigationBarView.getRecentsButton().setOnClickListener(mRecentsClickListener);
         mNavigationBarView.getRecentsButton().setOnTouchListener(mRecentsPanel);
+        mNavigationBarView.getHomeButton().setOnTouchListener(mHomeSearchActionListener);
         updateSearchPanel();
-//        mNavigationBarView.getHomeButton().setOnTouchListener(mHomeSearchActionListener);
     }
 
     // For small-screen devices (read: phones) that lack hardware navigation buttons

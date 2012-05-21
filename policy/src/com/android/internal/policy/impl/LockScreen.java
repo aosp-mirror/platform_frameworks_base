@@ -401,6 +401,10 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         public void cleanUp() {
             mMultiWaveView.setOnTriggerListener(null);
         }
+
+        public void onFinishFinalAnimation() {
+
+        }
     }
 
     private void requestUnlockScreen() {
