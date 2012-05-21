@@ -55,7 +55,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
-import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TypedValue;
@@ -1865,27 +1864,11 @@ public final class ViewRootImpl implements ViewParent,
                     host.getMeasuredWidth() + ", " + host.getMeasuredHeight() + ")");
         }
 
-        final long startTime;
-        if (ViewDebug.DEBUG_PROFILE_LAYOUT) {
-            startTime = SystemClock.elapsedRealtime();
-        }
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "layout");
         try {
             host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-        }
-
-        if (ViewDebug.DEBUG_PROFILE_LAYOUT) {
-            EventLog.writeEvent(60001, SystemClock.elapsedRealtime() - startTime);
-        }
-
-        if (false && ViewDebug.consistencyCheckEnabled) {
-            if (!host.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_LAYOUT)) {
-                throw new IllegalStateException("The view hierarchy is an inconsistent state,"
-                        + "please refer to the logs with the tag "
-                        + ViewDebug.CONSISTENCY_LOG_TAG + " for more infomation.");
-            }
         }
     }
 
@@ -2272,11 +2255,6 @@ public final class ViewRootImpl implements ViewParent,
                 //canvas.drawARGB(255, 255, 0, 0);
             }
 
-            long startTime = 0L;
-            if (ViewDebug.DEBUG_PROFILE_DRAWING) {
-                startTime = SystemClock.elapsedRealtime();
-            }
-
             // If this bitmap's format includes an alpha channel, we
             // need to clear it before drawing so that the child will
             // properly re-composite its drawing on a transparent
@@ -2328,14 +2306,6 @@ public final class ViewRootImpl implements ViewParent,
                     // Only clear the flag if it was not set during the mView.draw() call
                     attachInfo.mIgnoreDirtyState = false;
                 }
-            }
-
-            if (false && ViewDebug.consistencyCheckEnabled) {
-                mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
-            }
-
-            if (ViewDebug.DEBUG_PROFILE_DRAWING) {
-                EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
             }
         } finally {
             final long unlockCanvasAndPostStartTime;

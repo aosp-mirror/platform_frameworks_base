@@ -9912,10 +9912,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @param dirty the rectangle representing the bounds of the dirty region
      */
     public void invalidate(Rect dirty) {
-        if (ViewDebug.TRACE_HIERARCHY) {
-            ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
-        }
-
         if (skipInvalidate()) {
             return;
         }
@@ -9959,10 +9955,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @param b the bottom position of the dirty region
      */
     public void invalidate(int l, int t, int r, int b) {
-        if (ViewDebug.TRACE_HIERARCHY) {
-            ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
-        }
-
         if (skipInvalidate()) {
             return;
         }
@@ -10015,10 +10007,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * View's contents or dimensions have not changed.
      */
     void invalidate(boolean invalidateCache) {
-        if (ViewDebug.TRACE_HIERARCHY) {
-            ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
-        }
-
         if (skipInvalidate()) {
             return;
         }
@@ -12391,10 +12379,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 mDrawingCache == null : mUnscaledDrawingCache == null)) {
             mCachingFailed = false;
 
-            if (ViewDebug.TRACE_HIERARCHY) {
-                ViewDebug.trace(this, ViewDebug.HierarchyTraceType.BUILD_CACHE);
-            }
-
             int width = mRight - mLeft;
             int height = mBottom - mTop;
 
@@ -12514,9 +12498,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             // Fast path for layouts with no backgrounds
             if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
-                if (ViewDebug.TRACE_HIERARCHY) {
-                    ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
-                }
                 mPrivateFlags &= ~DIRTY_MASK;
                 dispatchDraw(canvas);
             } else {
@@ -13130,9 +13111,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 if (!hasDisplayList) {
                     // Fast path for layouts with no backgrounds
                     if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
-                        if (ViewDebug.TRACE_HIERARCHY) {
-                            ViewDebug.trace(parent, ViewDebug.HierarchyTraceType.DRAW);
-                        }
                         mPrivateFlags &= ~DIRTY_MASK;
                         dispatchDraw(canvas);
                     } else {
@@ -13205,10 +13183,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @param canvas The Canvas to which the View is rendered.
      */
     public void draw(Canvas canvas) {
-        if (ViewDebug.TRACE_HIERARCHY) {
-            ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
-        }
-
         final int privateFlags = mPrivateFlags;
         final boolean dirtyOpaque = (privateFlags & DIRTY_MASK) == DIRTY_OPAQUE &&
                 (mAttachInfo == null || !mAttachInfo.mIgnoreDirtyState);
@@ -13552,10 +13526,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         int oldR = mRight;
         boolean changed = setFrame(l, t, r, b);
         if (changed || (mPrivateFlags & LAYOUT_REQUIRED) == LAYOUT_REQUIRED) {
-            if (ViewDebug.TRACE_HIERARCHY) {
-                ViewDebug.trace(this, ViewDebug.HierarchyTraceType.ON_LAYOUT);
-            }
-
             onLayout(changed, l, t, r, b);
             mPrivateFlags &= ~LAYOUT_REQUIRED;
 
@@ -14811,60 +14781,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * @param consistency The type of consistency. See ViewDebug for more information.
-     *
-     * @hide
-     */
-    protected boolean dispatchConsistencyCheck(int consistency) {
-        return onConsistencyCheck(consistency);
-    }
-
-    /**
-     * Method that subclasses should implement to check their consistency. The type of
-     * consistency check is indicated by the bit field passed as a parameter.
-     *
-     * @param consistency The type of consistency. See ViewDebug for more information.
-     *
-     * @throws IllegalStateException if the view is in an inconsistent state.
-     *
-     * @hide
-     */
-    protected boolean onConsistencyCheck(int consistency) {
-        boolean result = true;
-
-        final boolean checkLayout = (consistency & ViewDebug.CONSISTENCY_LAYOUT) != 0;
-        final boolean checkDrawing = (consistency & ViewDebug.CONSISTENCY_DRAWING) != 0;
-
-        if (checkLayout) {
-            if (getParent() == null) {
-                result = false;
-                android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
-                        "View " + this + " does not have a parent.");
-            }
-
-            if (mAttachInfo == null) {
-                result = false;
-                android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
-                        "View " + this + " is not attached to a window.");
-            }
-        }
-
-        if (checkDrawing) {
-            // Do not check the DIRTY/DRAWN flags because views can call invalidate()
-            // from their draw() method
-
-            if ((mPrivateFlags & DRAWN) != DRAWN &&
-                    (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) {
-                result = false;
-                android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
-                        "View " + this + " was invalidated but its drawing cache is valid.");
-            }
-        }
-
-        return result;
-    }
-
-    /**
      * Prints information about this view in the log output, with the tag
      * {@link #VIEW_LOG_TAG}.
      *
@@ -14977,10 +14893,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * tree.
      */
     public void requestLayout() {
-        if (ViewDebug.TRACE_HIERARCHY) {
-            ViewDebug.trace(this, ViewDebug.HierarchyTraceType.REQUEST_LAYOUT);
-        }
-
         mPrivateFlags |= FORCE_LAYOUT;
         mPrivateFlags |= INVALIDATED;
 
@@ -15030,10 +14942,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             // first clears the measured dimension flag
             mPrivateFlags &= ~MEASURED_DIMENSION_SET;
-
-            if (ViewDebug.TRACE_HIERARCHY) {
-                ViewDebug.trace(this, ViewDebug.HierarchyTraceType.ON_MEASURE);
-            }
 
             // measure ourselves, this should set the measured dimension flag back
             onMeasure(widthMeasureSpec, heightMeasureSpec);

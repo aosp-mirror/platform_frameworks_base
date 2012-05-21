@@ -647,15 +647,10 @@ public abstract class HardwareRenderer {
                 Log.d(LOG_TAG, "Disabling v-sync");
             }
 
-            //noinspection PointlessBooleanExpression,ConstantConditions
-            if (!ViewDebug.DEBUG_LATENCY) {
-                property = SystemProperties.get(PROFILE_PROPERTY, "false");
-                mProfileEnabled = "true".equalsIgnoreCase(property);
-                if (mProfileEnabled) {
-                    Log.d(LOG_TAG, "Profiling hardware renderer");
-                }
-            } else {
-                mProfileEnabled = true;
+            property = SystemProperties.get(PROFILE_PROPERTY, "false");
+            mProfileEnabled = "true".equalsIgnoreCase(property);
+            if (mProfileEnabled) {
+                Log.d(LOG_TAG, "Profiling hardware renderer");
             }
 
             if (mProfileEnabled) {
@@ -1132,11 +1127,6 @@ public abstract class HardwareRenderer {
                             float total = (now - getDisplayListStartTime) * 0.000001f;
                             //noinspection PointlessArithmeticExpression
                             mProfileData[mProfileCurrentFrame] = total;
-
-                            if (ViewDebug.DEBUG_LATENCY) {
-                                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- getDisplayList() took " +
-                                        total + "ms");
-                            }
                         }
 
                         if (displayList != null) {
@@ -1152,11 +1142,6 @@ public abstract class HardwareRenderer {
                                 long now = System.nanoTime();
                                 float total = (now - drawDisplayListStartTime) * 0.000001f;
                                 mProfileData[mProfileCurrentFrame + 1] = total;
-
-                                if (ViewDebug.DEBUG_LATENCY) {
-                                    Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- drawDisplayList() took " +
-                                            total + "ms, status=" + status);
-                                }
                             }
 
                             handleFunctorStatus(attachInfo, status);
@@ -1198,11 +1183,6 @@ public abstract class HardwareRenderer {
                         long now = System.nanoTime();
                         float total = (now - eglSwapBuffersStartTime) * 0.000001f;
                         mProfileData[mProfileCurrentFrame + 2] = total;
-
-                        if (ViewDebug.DEBUG_LATENCY) {
-                            Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- eglSwapBuffers() took " +
-                                    total + "ms");
-                        }
                     }
 
                     checkEglErrors();
