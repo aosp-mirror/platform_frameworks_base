@@ -1183,8 +1183,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Helper action to set compound drawables on a TextView. Supports relative
-     * (s/t/e/b) or cardinal (l/t/r/b) arrangement.
+     * Helper action to set text size on a TextView in any supported units.
      */
     private class TextViewSizeAction extends Action {
         public TextViewSizeAction(int viewId, int units, float size) {
@@ -1219,6 +1218,49 @@ public class RemoteViews implements Parcelable, Filter {
         float size;
 
         public final static int TAG = 13;
+    }
+
+    /**
+     * Helper action to set padding on a View.
+     */
+    private class ViewPaddingAction extends Action {
+        public ViewPaddingAction(int viewId, int left, int top, int right, int bottom) {
+            this.viewId = viewId;
+            this.left = left;
+            this.top = top;
+            this.right = right;
+            this.bottom = bottom;
+        }
+
+        public ViewPaddingAction(Parcel parcel) {
+            viewId = parcel.readInt();
+            left = parcel.readInt();
+            top = parcel.readInt();
+            right = parcel.readInt();
+            bottom = parcel.readInt();
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(TAG);
+            dest.writeInt(viewId);
+            dest.writeInt(left);
+            dest.writeInt(top);
+            dest.writeInt(right);
+            dest.writeInt(bottom);
+        }
+
+        @Override
+        public void apply(View root, ViewGroup rootParent) {
+            final Context context = root.getContext();
+            final View target = root.findViewById(viewId);
+            if (target == null) return;
+            target.setPadding(left, top, right, bottom);
+        }
+
+        int viewId;
+        int left, top, right, bottom;
+
+        public final static int TAG = 14;
     }
 
     /**
@@ -1376,6 +1418,9 @@ public class RemoteViews implements Parcelable, Filter {
                         break;
                     case TextViewSizeAction.TAG:
                         mActions.add(new TextViewSizeAction(parcel));
+                        break;
+                    case ViewPaddingAction.TAG:
+                        mActions.add(new ViewPaddingAction(parcel));
                         break;
                     case BitmapReflectionAction.TAG:
                         mActions.add(new BitmapReflectionAction(parcel));
@@ -1853,6 +1898,20 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setRelativeScrollPosition(int viewId, int offset) {
         setInt(viewId, "smoothScrollByOffset", offset);
+    }
+
+    /**
+     * @hide
+     * Equivalent to calling {@link View#setPadding(int, int, int, int)}.
+     *
+     * @param viewId The id of the view to change
+     * @param left the left padding in pixels
+     * @param top the top padding in pixels
+     * @param right the right padding in pixels
+     * @param bottom the bottom padding in pixels
+     */
+    public void setViewPadding(int viewId, int left, int top, int right, int bottom) {
+        addAction(new ViewPaddingAction(viewId, left, top, right, bottom));
     }
 
     /**
