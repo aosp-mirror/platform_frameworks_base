@@ -5240,12 +5240,25 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * which you would like to ensure are not being covered.
      *
      * <p>The default implementation of this method simply applies the content
-     * inset's to the view's padding.  This can be enabled through
-     * {@link #setFitsSystemWindows(boolean)}.  Alternatively, you can override
-     * the method and handle the insets however you would like.  Note that the
-     * insets provided by the framework are always relative to the far edges
-     * of the window, not accounting for the location of the called view within
-     * that window.  (In fact when this method is called you do not yet know
+     * inset's to the view's padding, consuming that content (modifying the
+     * insets to be 0), and returning true.  This behavior is off by default, but can
+     * be enabled through {@link #setFitsSystemWindows(boolean)}.
+     *
+     * <p>This function's traversal down the hierarchy is depth-first.  The same content
+     * insets object is propagated down the hierarchy, so any changes made to it will
+     * be seen by all following views (including potentially ones above in
+     * the hierarchy since this is a depth-first traversal).  The first view
+     * that returns true will abort the entire traversal.
+     *
+     * <p>The default implementation works well for a situation where it is
+     * used with a container that covers the entire window, allowing it to
+     * apply the appropriate insets to its content on all edges.  If you need
+     * a more complicated layout (such as two different views fitting system
+     * windows, one on the top of the window, and one on the bottom),
+     * you can override the method and handle the insets however you would like.
+     * Note that the insets provided by the framework are always relative to the
+     * far edges of the window, not accounting for the location of the called view
+     * within that window.  (In fact when this method is called you do not yet know
      * where the layout will place the view, as it is done before layout happens.)
      *
      * <p>Note: unlike many View methods, there is no dispatch phase to this
@@ -5266,6 +5279,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @return Return true if this view applied the insets and it should not
      * continue propagating further down the hierarchy, false otherwise.
+     * @see #getFitsSystemWindows()
+     * @see #setFitsSystemWindows()
+     * @see #setSystemUiVisibility(int)
      */
     protected boolean fitSystemWindows(Rect insets) {
         if ((mViewFlags & FITS_SYSTEM_WINDOWS) == FITS_SYSTEM_WINDOWS) {
@@ -5286,16 +5302,23 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * Set whether or not this view should account for system screen decorations
-     * such as the status bar and inset its content. This allows this view to be
-     * positioned in absolute screen coordinates and remain visible to the user.
+     * Sets whether or not this view should account for system screen decorations
+     * such as the status bar and inset its content; that is, controlling whether
+     * the default implementation of {@link #fitSystemWindows(Rect)} will be
+     * executed.  See that method for more details.
      *
-     * <p>This should only be used by top-level window decor views.
+     * <p>Note that if you are providing your own implementation of
+     * {@link #fitSystemWindows(Rect)}, then there is no need to set this
+     * flag to true -- your implementation will be overriding the default
+     * implementation that checks this flag.
      *
-     * @param fitSystemWindows true to inset content for system screen decorations, false for
-     *                         default behavior.
+     * @param fitSystemWindows If true, then the default implementation of
+     * {@link #fitSystemWindows(Rect)} will be executed.
      *
      * @attr ref android.R.styleable#View_fitsSystemWindows
+     * @see #getFitsSystemWindows()
+     * @see #fitSystemWindows(Rect)
+     * @see #setSystemUiVisibility(int)
      */
     public void setFitsSystemWindows(boolean fitSystemWindows) {
         setFlags(fitSystemWindows ? FITS_SYSTEM_WINDOWS : 0, FITS_SYSTEM_WINDOWS);
@@ -5303,14 +5326,16 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
     /**
      * Check for state of {@link #setFitsSystemWindows(boolean). If this method
-     * returns true, this view
-     * will account for system screen decorations such as the status bar and inset its
-     * content. This allows the view to be positioned in absolute screen coordinates
-     * and remain visible to the user.
+     * returns true, the default implementation of {@link #fitSystemWindows(Rect)}
+     * will be executed.
      *
-     * @return true if this view will adjust its content bounds for system screen decorations.
+     * @return Returns true if the default implementation of
+     * {@link #fitSystemWindows(Rect)} will be executed.
      *
      * @attr ref android.R.styleable#View_fitsSystemWindows
+     * @see #setFitsSystemWindows()
+     * @see #fitSystemWindows(Rect)
+     * @see #setSystemUiVisibility(int)
      */
     public boolean getFitsSystemWindows() {
         return (mViewFlags & FITS_SYSTEM_WINDOWS) == FITS_SYSTEM_WINDOWS;
