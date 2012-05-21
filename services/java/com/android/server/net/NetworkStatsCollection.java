@@ -71,7 +71,7 @@ public class NetworkStatsCollection implements FileRotator.Reader {
 
     private HashMap<Key, NetworkStatsHistory> mStats = Maps.newHashMap();
 
-    private long mBucketDuration;
+    private final long mBucketDuration;
 
     private long mStartMillis;
     private long mEndMillis;
@@ -93,6 +93,18 @@ public class NetworkStatsCollection implements FileRotator.Reader {
 
     public long getStartMillis() {
         return mStartMillis;
+    }
+
+    /**
+     * Return first atomic bucket in this collection, which is more conservative
+     * than {@link #mStartMillis}.
+     */
+    public long getFirstAtomicBucketMillis() {
+        if (mStartMillis == Long.MAX_VALUE) {
+            return Long.MAX_VALUE;
+        } else {
+            return mStartMillis + mBucketDuration;
+        }
     }
 
     public long getEndMillis() {
@@ -121,6 +133,15 @@ public class NetworkStatsCollection implements FileRotator.Reader {
      */
     public NetworkStatsHistory getHistory(
             NetworkTemplate template, int uid, int set, int tag, int fields) {
+        return getHistory(template, uid, set, tag, fields, Long.MIN_VALUE, Long.MAX_VALUE);
+    }
+
+    /**
+     * Combine all {@link NetworkStatsHistory} in this collection which match
+     * the requested parameters.
+     */
+    public NetworkStatsHistory getHistory(
+            NetworkTemplate template, int uid, int set, int tag, int fields, long start, long end) {
         final NetworkStatsHistory combined = new NetworkStatsHistory(
                 mBucketDuration, estimateBuckets(), fields);
         for (Map.Entry<Key, NetworkStatsHistory> entry : mStats.entrySet()) {
@@ -128,7 +149,7 @@ public class NetworkStatsCollection implements FileRotator.Reader {
             final boolean setMatches = set == SET_ALL || key.set == set;
             if (key.uid == uid && setMatches && key.tag == tag
                     && templateMatches(template, key.ident)) {
-                combined.recordEntireHistory(entry.getValue());
+                combined.recordHistory(entry.getValue(), start, end);
             }
         }
         return combined;
@@ -144,6 +165,9 @@ public class NetworkStatsCollection implements FileRotator.Reader {
         final NetworkStats stats = new NetworkStats(end - start, 24);
         final NetworkStats.Entry entry = new NetworkStats.Entry();
         NetworkStatsHistory.Entry historyEntry = null;
+
+        // shortcut when we know stats will be empty
+        if (start == end) return stats;
 
         for (Map.Entry<Key, NetworkStatsHistory> mapEntry : mStats.entrySet()) {
             final Key key = mapEntry.getKey();
@@ -175,8 +199,9 @@ public class NetworkStatsCollection implements FileRotator.Reader {
      */
     public void recordData(NetworkIdentitySet ident, int uid, int set, int tag, long start,
             long end, NetworkStats.Entry entry) {
-        noteRecordedHistory(start, end, entry.rxBytes + entry.txBytes);
-        findOrCreateHistory(ident, uid, set, tag).recordData(start, end, entry);
+        final NetworkStatsHistory history = findOrCreateHistory(ident, uid, set, tag);
+        history.recordData(start, end, entry);
+        noteRecordedHistory(history.getStart(), history.getEnd(), entry.rxBytes + entry.txBytes);
     }
 
     /**
