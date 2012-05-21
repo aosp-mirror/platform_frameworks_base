@@ -178,8 +178,10 @@ public final class WebViewCore {
 
                 // Start the singleton watchdog which will monitor the WebCore thread
                 // to verify it's still processing messages.
-                WebCoreThreadWatchdog.start(context, sWebCoreHandler);
+                WebCoreThreadWatchdog.start(sWebCoreHandler);
             }
+            // Make sure the Watchdog is aware of this new WebView.
+            WebCoreThreadWatchdog.registerWebView(w);
         }
         // Create an EventHub to handle messages before and after the thread is
         // ready.
@@ -1979,6 +1981,7 @@ public final class WebViewCore {
             mEventHub.sendMessageAtFrontOfQueue(
                     Message.obtain(null, EventHub.DESTROY));
             mEventHub.blockMessages();
+            WebCoreThreadWatchdog.unregisterWebView(mWebViewClassic);
         }
     }
 
