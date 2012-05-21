@@ -7477,6 +7477,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 invalidate();
             }
         }
+
+        @Override
+        public void clearPreviousHitTest() {
+            setHitTestResult(null);
+        }
     }
 
     private void setHitTestTypeFromUrl(String url) {
