@@ -69,25 +69,6 @@ public class ViewDebug {
     public static final boolean DEBUG_DRAG = false;
 
     /**
-     * Enables logging of factors that affect the latency and responsiveness of an application.
-     *
-     * Logs the relative difference between the time an event was created and the time it
-     * was delivered.
-     *
-     * Logs the time spent waiting for Surface.lockCanvas(), Surface.unlockCanvasAndPost()
-     * or eglSwapBuffers().  This is time that the event loop spends blocked and unresponsive.
-     * Ideally, drawing and animations should be perfectly synchronized with VSYNC so that
-     * dequeuing and queueing buffers is instantaneous.
-     *
-     * Logs the time spent in ViewRoot.performTraversals() and ViewRoot.performDraw().
-     * @hide
-     */
-    public static final boolean DEBUG_LATENCY = false;
-
-    /** @hide */
-    public static final String DEBUG_LATENCY_TAG = "ViewLatency";
-
-    /**
      * This annotation can be used to mark fields and methods to be dumped by
      * the view server. Only non-void methods with no arguments can be annotated
      * by this annotation.
