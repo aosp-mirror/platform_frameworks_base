@@ -1352,24 +1352,23 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             case ACCESSIBILITY_FOCUS_FORWARD: {
                 ViewRootImpl viewRootImpl = getViewRootImpl();
                 if (viewRootImpl == null) {
-                    break;
+                    return null;
                 }
                 View currentFocus = viewRootImpl.getAccessibilityFocusedHost();
                 if (currentFocus == null) {
-                    break;
+                    return super.focusSearch(this, direction);
                 }
                 // If we have the focus try giving it to the first child.
                 if (currentFocus == this) {
-                    final int firstVisiblePosition = getFirstVisiblePosition();
-                    if (firstVisiblePosition >= 0) {
+                    if (getChildCount() > 0) {
                         return getChildAt(0);
                     }
-                    return null;
+                    return super.focusSearch(this, direction);
                 }
                 // Find the item that has accessibility focus.
                 final int currentPosition = getPositionForView(currentFocus);
                 if (currentPosition < 0 || currentPosition >= getCount()) {
-                    break;
+                    return super.focusSearch(this, direction);
                 }
                 // Try to advance focus in the current item.
                 View currentItem = getChildAt(currentPosition - getFirstVisiblePosition());
@@ -1386,25 +1385,31 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 final int nextPosition = currentPosition - getFirstVisiblePosition() + 1;
                 if (nextPosition < getChildCount()) {
                     return getChildAt(nextPosition);
+                } else {
+                    return super.focusSearch(this, direction);
                 }
-            } break;
+            }
             case ACCESSIBILITY_FOCUS_BACKWARD: {
                 ViewRootImpl viewRootImpl = getViewRootImpl();
                 if (viewRootImpl == null) {
-                    break;
+                    return null;
                 }
                 View currentFocus = viewRootImpl.getAccessibilityFocusedHost();
                 if (currentFocus == null) {
-                    break;
+                    return super.focusSearch(this, direction);
                 }
                 // If we have the focus do a generic search.
                 if (currentFocus == this) {
+                    final int lastChildIndex = getChildCount() - 1;
+                    if (lastChildIndex >= 0) {
+                        return getChildAt(lastChildIndex);
+                    }
                     return super.focusSearch(this, direction);
                 }
                 // Find the item that has accessibility focus.
                 final int currentPosition = getPositionForView(currentFocus);
                 if (currentPosition < 0 || currentPosition >= getCount()) {
-                    break;
+                    return super.focusSearch(this, direction);
                 }
                 // Try to advance focus in the current item.
                 View currentItem = getChildAt(currentPosition - getFirstVisiblePosition());
@@ -1422,7 +1427,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 if (nextPosition >= 0) {
                     return getChildAt(nextPosition);
                 } else {
-                    return this;
+                    return super.focusSearch(this, direction);
                 }
             }
         }
