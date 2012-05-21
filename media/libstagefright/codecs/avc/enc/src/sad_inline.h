@@ -80,7 +80,7 @@ extern "C"
 
         x9 = 0x80808080; /* const. */
 
-        x8 = (uint32)ref & 0x3;
+        x8 = (intptr_t)ref & 0x3;
         if (x8 == 3)
             goto SadMBOffset3;
         if (x8 == 2)

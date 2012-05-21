@@ -198,7 +198,7 @@ void eCreateAlign(uint8 *ref, int picpitch, int y_pos,
     out_offset = 24 - blkwidth;
 
     //switch(x_pos&0x3){
-    switch (((uint32)ref)&0x3)
+    switch (((intptr_t)ref)&0x3)
     {
         case 1:
             offset =  picpitch - blkwidth - 3;
@@ -788,7 +788,7 @@ void eVertInterp1MC(uint8 *in, int inpitch, uint8 *out, int outpitch,
     uint8  tmp_in[24][24];
 
     /* not word-aligned */
-    if (((uint32)in)&0x3)
+    if (((intptr_t)in)&0x3)
     {
         eCreateAlign(in, inpitch, -2, &tmp_in[0][0], blkwidth, blkheight + 5);
         in = &tmp_in[2][0];
@@ -1461,7 +1461,7 @@ void eDiagonalInterpMC(uint8 *in1, uint8 *in2, int inpitch,
 
     /*  perform vertical interpolation */
     /* not word-aligned */
-    if (((uint32)in2)&0x3)
+    if (((intptr_t)in2)&0x3)
     {
         eCreateAlign(in2, inpitch, -2, &tmp_in[0][0], blkwidth, blkheight + 5);
         in2 = &tmp_in[2][0];
@@ -1655,7 +1655,7 @@ void eFullPelMC(uint8 *in, int inpitch, uint8 *out, int outpitch,
     uint32 temp;
     uint8 byte;
 
-    if (((uint32)in)&3)
+    if (((intptr_t)in)&3)
     {
         for (j = blkheight; j > 0; j--)
         {
@@ -1716,7 +1716,7 @@ void ePadChroma(uint8 *ref, int picwidth, int picheight, int picpitch, int x_pos
         else start = ref + x_pos;
 
         /* word-align start */
-        offset = (uint32)start & 0x3;
+        offset = (intptr_t)start & 0x3;
         if (offset) start -= offset;
 
         word1 = *((uint32*)start);
@@ -1742,7 +1742,7 @@ void ePadChroma(uint8 *ref, int picwidth, int picheight, int picpitch, int x_pos
         else    start = ref + picpitch * (picheight - 1) + x_pos;
 
         /* word-align start */
-        offset = (uint32)start & 0x3;
+        offset = (intptr_t)start & 0x3;
         if (offset) start -= offset;
 
         word1 = *((uint32*)start);
@@ -2117,7 +2117,7 @@ void eChromaFullMC_SIMD(uint8 *pRef, int srcPitch, int dx, int dy,
     uint16 temp;
     uint8 byte;
 
-    if (((uint32)pRef)&1)
+    if (((intptr_t)pRef)&1)
     {
         for (j = blkheight; j > 0; j--)
         {
