@@ -553,12 +553,17 @@ final class WebViewInputDispatcher {
             mIsTapCandidate = true;
             mInitialDownX = event.getX();
             mInitialDownY = event.getY();
-            scheduleShowTapHighlightLocked();
             enqueueHitTestLocked(event);
+            if (mIsDoubleTapCandidate) {
+                hideTapCandidateLocked();
+            } else {
+                scheduleShowTapHighlightLocked();
+            }
         } else if (action == MotionEvent.ACTION_UP) {
             unscheduleLongPressLocked();
             if (isClickCandidateLocked(event)) {
                 if (mIsDoubleTapCandidate) {
+                    hideTapCandidateLocked();
                     enqueueDoubleTapLocked(event);
                 } else {
                     scheduleClickLocked();
