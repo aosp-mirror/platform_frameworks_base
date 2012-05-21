@@ -1490,6 +1490,8 @@
   <java-symbol type="string" name="low_internal_storage_view_title" />
   <java-symbol type="string" name="report" />
   <java-symbol type="string" name="select_input_method" />
+  <java-symbol type="string" name="select_keyboard_layout_notification_title" />
+  <java-symbol type="string" name="select_keyboard_layout_notification_message" />
   <java-symbol type="string" name="smv_application" />
   <java-symbol type="string" name="smv_process" />
   <java-symbol type="string" name="tethered_notification_message" />
@@ -1581,6 +1583,7 @@
   <java-symbol type="drawable" name="expander_ic_minimized" />
   <java-symbol type="drawable" name="ic_menu_archive" />
   <java-symbol type="drawable" name="ic_menu_goto" />
+  <java-symbol type="drawable" name="ic_settings_language" />
   <java-symbol type="drawable" name="title_bar_medium" />
   <java-symbol type="id" name="body" />
   <java-symbol type="string" name="fast_scroll_alphabet" />

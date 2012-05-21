@@ -386,6 +386,12 @@ public interface WindowManagerPolicy {
          */
         public InputChannel monitorInput(String name);
 
+        /**
+         * Switch the keyboard layout for the given device.
+         * Direction should be +1 or -1 to go to the next or previous keyboard layout.
+         */
+        public void switchKeyboardLayout(int deviceId, int direction);
+
         public void shutdown();
         public void rebootSafeMode();
     }

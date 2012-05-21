@@ -41,8 +41,13 @@ interface IInputManager {
     // Keyboard layouts configuration.
     KeyboardLayout[] getKeyboardLayouts();
     KeyboardLayout getKeyboardLayout(String keyboardLayoutDescriptor);
-    String getKeyboardLayoutForInputDevice(String inputDeviceDescriptor);
-    void setKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
+    String getCurrentKeyboardLayoutForInputDevice(String inputDeviceDescriptor);
+    void setCurrentKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
+            String keyboardLayoutDescriptor);
+    String[] getKeyboardLayoutsForInputDevice(String inputDeviceDescriptor);
+    void addKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
+            String keyboardLayoutDescriptor);
+    void removeKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
             String keyboardLayoutDescriptor);
 
     // Registers an input devices changed listener.
