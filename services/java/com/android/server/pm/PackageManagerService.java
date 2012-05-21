@@ -204,7 +204,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      * The default maximum time to wait for the verification agent to return in
      * milliseconds.
      */
-    private static final long DEFAULT_VERIFICATION_TIMEOUT = 60 * 1000;
+    private static final long DEFAULT_VERIFICATION_TIMEOUT = 10 * 1000;
 
     static final String DEFAULT_CONTAINER_PACKAGE = "com.android.defcontainer";
 
