@@ -37,6 +37,8 @@ public class StatusBarWindowView extends FrameLayout
     private ExpandHelper mExpandHelper;
     private NotificationRowLayout latestItems;
 
+    private boolean mUniverseHandling = false;
+
     PhoneStatusBar mService;
 
     public StatusBarWindowView(Context context, AttributeSet attrs) {
@@ -71,19 +73,35 @@ public class StatusBarWindowView extends FrameLayout
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        MotionEvent cancellation = MotionEvent.obtain(ev);
-        cancellation.setAction(MotionEvent.ACTION_CANCEL);
+        if (mService.handleUniverseEvent(ev)) {
+            mUniverseHandling = true;
+            MotionEvent cancellation = MotionEvent.obtain(ev);
+            cancellation.setAction(MotionEvent.ACTION_CANCEL);
+            mExpandHelper.onInterceptTouchEvent(cancellation);
+            latestItems.onInterceptTouchEvent(cancellation);
+            cancellation.recycle();
+            return true;
+        }
 
         boolean intercept = mExpandHelper.onInterceptTouchEvent(ev) ||
                 super.onInterceptTouchEvent(ev);
         if (intercept) {
+            MotionEvent cancellation = MotionEvent.obtain(ev);
+            cancellation.setAction(MotionEvent.ACTION_CANCEL);
             latestItems.onInterceptTouchEvent(cancellation);
+            cancellation.recycle();
         }
         return intercept;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        if (mUniverseHandling) {
+            if (!mService.handleUniverseEvent(ev)) {
+                mUniverseHandling = false;
+            }
+            return true;
+        }
         boolean handled = mExpandHelper.onTouchEvent(ev) ||
                 super.onTouchEvent(ev);
         return handled;

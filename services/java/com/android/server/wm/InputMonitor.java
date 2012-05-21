@@ -128,7 +128,7 @@ final class InputMonitor implements InputManagerService.Callbacks {
         return 0; // abort dispatching
     }
 
-    private void addInputWindowHandleLw(InputWindowHandle windowHandle) {
+    private void addInputWindowHandleLw(final InputWindowHandle windowHandle) {
         if (mInputWindowHandles == null) {
             mInputWindowHandles = new InputWindowHandle[16];
         }
@@ -137,6 +137,44 @@ final class InputMonitor implements InputManagerService.Callbacks {
                     mInputWindowHandleCount * 2);
         }
         mInputWindowHandles[mInputWindowHandleCount++] = windowHandle;
+    }
+
+    private void addInputWindowHandleLw(final InputWindowHandle inputWindowHandle,
+            final WindowState child, final int flags, final int type,
+            final boolean isVisible, final boolean hasFocus, final boolean hasWallpaper) {
+        // Add a window to our list of input windows.
+        inputWindowHandle.name = child.toString();
+        inputWindowHandle.layoutParamsFlags = flags;
+        inputWindowHandle.layoutParamsType = type;
+        inputWindowHandle.dispatchingTimeoutNanos = child.getInputDispatchingTimeoutNanos();
+        inputWindowHandle.visible = isVisible;
+        inputWindowHandle.canReceiveKeys = child.canReceiveKeys();
+        inputWindowHandle.hasFocus = hasFocus;
+        inputWindowHandle.hasWallpaper = hasWallpaper;
+        inputWindowHandle.paused = child.mAppToken != null ? child.mAppToken.paused : false;
+        inputWindowHandle.layer = child.mLayer;
+        inputWindowHandle.ownerPid = child.mSession.mPid;
+        inputWindowHandle.ownerUid = child.mSession.mUid;
+        inputWindowHandle.inputFeatures = child.mAttrs.inputFeatures;
+
+        final Rect frame = child.mFrame;
+        inputWindowHandle.frameLeft = frame.left;
+        inputWindowHandle.frameTop = frame.top;
+        inputWindowHandle.frameRight = frame.right;
+        inputWindowHandle.frameBottom = frame.bottom;
+
+        if (child.mGlobalScale != 1) {
+            // If we are scaling the window, input coordinates need
+            // to be inversely scaled to map from what is on screen
+            // to what is actually being touched in the UI.
+            inputWindowHandle.scaleFactor = 1.0f/child.mGlobalScale;
+        } else {
+            inputWindowHandle.scaleFactor = 1;
+        }
+
+        child.getTouchableRegion(inputWindowHandle.touchableRegion);
+
+        addInputWindowHandleLw(inputWindowHandle);
     }
 
     private void clearInputWindowHandlesLw() {
@@ -164,6 +202,9 @@ final class InputMonitor implements InputManagerService.Callbacks {
         // out to be difficult because only the native code knows for sure which window
         // currently has touch focus.
         final ArrayList<WindowState> windows = mService.mWindows;
+        final WindowStateAnimator universeBackground = mService.mAnimator.mUniverseBackground;
+        final int aboveUniverseLayer = mService.mAnimator.mAboveUniverseLayer;
+        boolean addedUniverse = false;
 
         // If there's a drag in flight, provide a pseudowindow to catch drag input
         final boolean inDrag = (mService.mDragState != null);
@@ -209,39 +250,20 @@ final class InputMonitor implements InputManagerService.Callbacks {
                 mService.mDragState.sendDragStartedIfNeededLw(child);
             }
 
-            // Add a window to our list of input windows.
-            inputWindowHandle.name = child.toString();
-            inputWindowHandle.layoutParamsFlags = flags;
-            inputWindowHandle.layoutParamsType = type;
-            inputWindowHandle.dispatchingTimeoutNanos = child.getInputDispatchingTimeoutNanos();
-            inputWindowHandle.visible = isVisible;
-            inputWindowHandle.canReceiveKeys = child.canReceiveKeys();
-            inputWindowHandle.hasFocus = hasFocus;
-            inputWindowHandle.hasWallpaper = hasWallpaper;
-            inputWindowHandle.paused = child.mAppToken != null ? child.mAppToken.paused : false;
-            inputWindowHandle.layer = child.mLayer;
-            inputWindowHandle.ownerPid = child.mSession.mPid;
-            inputWindowHandle.ownerUid = child.mSession.mUid;
-            inputWindowHandle.inputFeatures = child.mAttrs.inputFeatures;
-
-            final Rect frame = child.mFrame;
-            inputWindowHandle.frameLeft = frame.left;
-            inputWindowHandle.frameTop = frame.top;
-            inputWindowHandle.frameRight = frame.right;
-            inputWindowHandle.frameBottom = frame.bottom;
-
-            if (child.mGlobalScale != 1) {
-                // If we are scaling the window, input coordinates need
-                // to be inversely scaled to map from what is on screen
-                // to what is actually being touched in the UI.
-                inputWindowHandle.scaleFactor = 1.0f/child.mGlobalScale;
-            } else {
-                inputWindowHandle.scaleFactor = 1;
+            if (universeBackground != null && !addedUniverse
+                    && child.mBaseLayer < aboveUniverseLayer) {
+                final WindowState u = universeBackground.mWin;
+                if (u.mInputChannel != null && u.mInputWindowHandle != null) {
+                    addInputWindowHandleLw(u.mInputWindowHandle, u, u.mAttrs.flags,
+                            u.mAttrs.type, true, u == mInputFocus, false);
+                }
+                addedUniverse = true;
             }
 
-            child.getTouchableRegion(inputWindowHandle.touchableRegion);
-
-            addInputWindowHandleLw(inputWindowHandle);
+            if (child.mWinAnimator != universeBackground) {
+                addInputWindowHandleLw(inputWindowHandle, child, flags, type,
+                        isVisible, hasFocus, hasWallpaper);
+            }
         }
 
         // Send windows to native code.

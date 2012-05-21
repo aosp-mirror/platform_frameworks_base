@@ -126,6 +126,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+import static android.view.WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
@@ -182,6 +183,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int LONG_PRESS_HOME_RECENT_SYSTEM_UI = 2;
 
     // wallpaper is at the bottom, though the window manager may move it.
+    static final int UNIVERSE_BACKGROUND_LAYER = 1;
     static final int WALLPAPER_LAYER = 2;
     static final int APPLICATION_LAYER = 2;
     static final int PHONE_LAYER = 3;
@@ -1374,6 +1376,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return HIDDEN_NAV_CONSUMER_LAYER;
         case TYPE_DREAM:
             return SCREENSAVER_LAYER;
+        case TYPE_UNIVERSE_BACKGROUND:
+            return UNIVERSE_BACKGROUND_LAYER;
         }
         Log.e(TAG, "Unknown window type: " + type);
         return APPLICATION_LAYER;
@@ -1398,6 +1402,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     public int getMaxWallpaperLayer() {
         return STATUS_BAR_LAYER;
+    }
+
+    public int getAboveUniverseLayer() {
+        return SYSTEM_ERROR_LAYER;
     }
 
     public boolean hasSystemNavBar() {
@@ -1453,7 +1461,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public boolean canBeForceHidden(WindowState win, WindowManager.LayoutParams attrs) {
         return attrs.type != WindowManager.LayoutParams.TYPE_STATUS_BAR
                 && attrs.type != WindowManager.LayoutParams.TYPE_NAVIGATION_BAR
-                && attrs.type != WindowManager.LayoutParams.TYPE_WALLPAPER;
+                && attrs.type != WindowManager.LayoutParams.TYPE_WALLPAPER
+                && attrs.type != WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND;
     }
 
     /** {@inheritDoc} */
@@ -2719,7 +2728,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     pf.top = df.top = mUnrestrictedScreenTop;
                     pf.right = df.right = mUnrestrictedScreenLeft+mUnrestrictedScreenWidth;
                     pf.bottom = df.bottom = mUnrestrictedScreenTop+mUnrestrictedScreenHeight;
-                } else if (attrs.type == TYPE_BOOT_PROGRESS) {
+                } else if (attrs.type == TYPE_BOOT_PROGRESS
+                        || attrs.type == TYPE_UNIVERSE_BACKGROUND) {
                     // Boot progress screen always covers entire display.
                     pf.left = df.left = cf.left = mUnrestrictedScreenLeft;
                     pf.top = df.top = cf.top = mUnrestrictedScreenTop;

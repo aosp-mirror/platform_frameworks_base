@@ -91,6 +91,9 @@ public class WindowAnimator {
 
     DimSurface mWindowAnimationBackgroundSurface = null;
 
+    WindowStateAnimator mUniverseBackground = null;
+    int mAboveUniverseLayer = 0;
+
     int mBulkUpdateParams = 0;
 
     DimAnimator mDimAnimator = null;
@@ -653,6 +656,9 @@ public class WindowAnimator {
     public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         if (mWindowDetachedWallpaper != null) {
             pw.print("  mWindowDetachedWallpaper="); pw.println(mWindowDetachedWallpaper);
+        }
+        if (mUniverseBackground != null) {
+            pw.print("  mUniverseBackground="); pw.println(mUniverseBackground);
         }
         if (mWindowAnimationBackgroundSurface != null) {
             pw.println("  mWindowAnimationBackgroundSurface:");

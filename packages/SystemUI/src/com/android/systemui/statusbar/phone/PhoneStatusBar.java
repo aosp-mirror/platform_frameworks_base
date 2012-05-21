@@ -75,6 +75,7 @@ import android.widget.TextView;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
+import com.android.systemui.UniverseBackground;
 import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.NotificationData;
@@ -153,6 +154,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     StatusBarWindowView mStatusBarWindow;
     PhoneStatusBarView mStatusBarView;
+
+    UniverseBackground mUniverseBackground;
 
     int mPixelFormat;
     Object mQueueLock = new Object();
@@ -318,6 +321,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         addNavigationBar();
 
         if (ENABLE_INTRUDERS) addIntruderView();
+
+        mUniverseBackground = new UniverseBackground(mContext);
+        mUniverseBackground.setVisibility(View.GONE);
+        WindowManagerImpl.getDefault().addView(mUniverseBackground,
+                mUniverseBackground.getLayoutParams(mDisplay));
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext);
@@ -1552,6 +1560,26 @@ public class PhoneStatusBar extends BaseStatusBar {
         stopTracking();
     }
 
+    boolean handleUniverseEvent(MotionEvent event) {
+        if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
+            return false;
+        }
+        if (mExpanded) {
+            return false;
+        }
+        if (mUniverseBackground.consumeEvent(event)) {
+            if (mTracking) {
+                // fling back to the top, starting from the last tracked position.
+                mFlingY = mTrackingPosition;
+                mViewDelta = 0;
+                mFlingVelocity = -1;
+                mHandler.post(mPerformFling);
+            }
+            return true;
+        }
+        return false;
+    }
+
     boolean interceptTouchEvent(MotionEvent event) {
         if (SPEW) {
             Slog.d(TAG, "Touch: rawY=" + event.getRawY() + " event=" + event + " mDisabled="
@@ -1569,10 +1597,10 @@ public class PhoneStatusBar extends BaseStatusBar {
             return false;
         }
 
+        final int y = (int)event.getRawY();
         final int action = event.getAction();
         final int statusBarSize = getStatusBarHeight();
         final int hitSize = statusBarSize*2;
-        final int y = (int)event.getRawY();
         if (action == MotionEvent.ACTION_DOWN) {
             if (!areLightsOn()) {
                 setLightsOn(true);
