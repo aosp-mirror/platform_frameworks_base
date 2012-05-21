@@ -121,6 +121,7 @@ public class SurfaceTextureTarget extends Filter {
     }
 
     public void updateRenderMode() {
+        if (mLogVerbose) Log.v(TAG, "updateRenderMode. Thread: " + Thread.currentThread());
         if (mRenderModeString != null) {
             if (mRenderModeString.equals("stretch")) {
                 mRenderMode = RENDERMODE_STRETCH;
@@ -139,6 +140,7 @@ public class SurfaceTextureTarget extends Filter {
 
     @Override
     public void prepare(FilterContext context) {
+        if (mLogVerbose) Log.v(TAG, "Prepare. Thread: " + Thread.currentThread());
         // Create identity shader to render, and make sure to render upside-down, as textures
         // are stored internally bottom-to-top.
         mProgram = ShaderProgram.createIdentity(context);
@@ -214,8 +216,10 @@ public class SurfaceTextureTarget extends Filter {
         float currentAspectRatio =
           (float)input.getFormat().getWidth() / input.getFormat().getHeight();
         if (currentAspectRatio != mAspectRatio) {
-            if (mLogVerbose) Log.v(TAG, "New aspect ratio: " + currentAspectRatio +
-                ", previously: " + mAspectRatio);
+            if (mLogVerbose) {
+                Log.v(TAG, "Process. New aspect ratio: " + currentAspectRatio +
+                    ", previously: " + mAspectRatio + ". Thread: " + Thread.currentThread());
+            }
             mAspectRatio = currentAspectRatio;
             updateTargetRect();
         }
@@ -249,6 +253,7 @@ public class SurfaceTextureTarget extends Filter {
 
     @Override
     public void fieldPortValueUpdated(String name, FilterContext context) {
+        if (mLogVerbose) Log.v(TAG, "FPVU. Thread: " + Thread.currentThread());
         updateRenderMode();
     }
 
@@ -260,16 +265,22 @@ public class SurfaceTextureTarget extends Filter {
     }
 
     private void updateTargetRect() {
+        if (mLogVerbose) Log.v(TAG, "updateTargetRect. Thread: " + Thread.currentThread());
         if (mScreenWidth > 0 && mScreenHeight > 0 && mProgram != null) {
             float screenAspectRatio = (float)mScreenWidth / mScreenHeight;
             float relativeAspectRatio = screenAspectRatio / mAspectRatio;
+            if (mLogVerbose) {
+                Log.v(TAG, "UTR. screen w = " + (float)mScreenWidth + " x screen h = " +
+                    (float)mScreenHeight + " Screen AR: " + screenAspectRatio +
+                    ", frame AR: "  + mAspectRatio + ", relative AR: " + relativeAspectRatio);
+            }
 
             if (relativeAspectRatio == 1.0f && mRenderMode != RENDERMODE_CUSTOMIZE) {
+                mProgram.setTargetRect(0, 0, 1, 1);
                 mProgram.setClearsOutput(false);
             } else {
                 switch (mRenderMode) {
                     case RENDERMODE_STRETCH:
-                        mProgram.setTargetRect(0, 0, 1, 1);
                         mTargetQuad.p0.set(0f, 0.0f);
                         mTargetQuad.p1.set(1f, 0.0f);
                         mTargetQuad.p2.set(0f, 1.0f);
@@ -313,6 +324,7 @@ public class SurfaceTextureTarget extends Filter {
                         ((ShaderProgram) mProgram).setSourceRegion(mSourceQuad);
                         break;
                 }
+                if (mLogVerbose) Log.v(TAG,  "UTR. quad: " + mTargetQuad);
                 ((ShaderProgram) mProgram).setTargetRegion(mTargetQuad);
             }
         }
