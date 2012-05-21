@@ -392,6 +392,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     private int mDeviceOrientation = Configuration.ORIENTATION_UNDEFINED;
 
+    // Request to override default use of A2DP for media.
+    private boolean mBluetoothA2dpEnabled;
+    private final Object mBluetoothA2dpEnabledLock = new Object();
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -481,6 +485,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
         mMasterVolumeRamp = context.getResources().getIntArray(
                 com.android.internal.R.array.config_masterVolumeRamp);
+
     }
 
     private void createAudioSystemThread() {
@@ -1651,6 +1656,21 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         return (mForcedUseForComm == AudioSystem.FORCE_BT_SCO);
     }
 
+    /** @see AudioManager#setBluetoothA2dpOn() */
+    public void setBluetoothA2dpOn(boolean on) {
+        if (!checkAudioSettingsPermission("setBluetoothA2dpOn()")) {
+            return;
+        }
+        setBluetoothA2dpOnInt(on);
+    }
+
+    /** @see AudioManager#isBluetoothA2dpOn() */
+    public boolean isBluetoothA2dpOn() {
+        synchronized (mBluetoothA2dpEnabledLock) {
+            return mBluetoothA2dpEnabled;
+        }
+    }
+
     /** @see AudioManager#startBluetoothSco() */
     public void startBluetoothSco(IBinder cb){
         if (!checkAudioSettingsPermission("startBluetoothSco()") ||
@@ -1672,6 +1692,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             client.decCount();
         }
     }
+
 
     private class ScoClient implements IBinder.DeathRecipient {
         private IBinder mCb; // To be notified of client's death
@@ -2894,6 +2915,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         setOrientationForAudioSystem();
                     }
 
+                    synchronized (mBluetoothA2dpEnabledLock) {
+                        AudioSystem.setForceUse(AudioSystem.FOR_MEDIA,
+                                mBluetoothA2dpEnabled ?
+                                        AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP);
+                    }
                     // indicate the end of reconfiguration phase to audio HAL
                     AudioSystem.setParameters("restarting=false");
                     break;
@@ -2976,6 +3002,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     // must be called synchronized on mConnectedDevices
     private void makeA2dpDeviceAvailable(String address) {
+        // enable A2DP before notifying A2DP connection to avoid unecessary processing in
+        // audio policy manager
+        setBluetoothA2dpOnInt(true);
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_AVAILABLE,
                 address);
@@ -3177,7 +3206,15 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 } else {
                     device = AudioSystem.DEVICE_OUT_WIRED_HEADPHONE;
                 }
+                // enable A2DP before notifying headset disconnection to avoid glitches
+                if (state == 0) {
+                    setBluetoothA2dpOnInt(true);
+                }
                 handleDeviceConnection((state == 1), device, "");
+                // disable A2DP after notifying headset connection to avoid glitches
+                if (state != 0) {
+                    setBluetoothA2dpOnInt(false);
+                }
             } else if (action.equals(Intent.ACTION_ANALOG_AUDIO_DOCK_PLUG)) {
                 state = intent.getIntExtra("state", 0);
                 Log.v(TAG, "Broadcast Receiver: Got ACTION_ANALOG_AUDIO_DOCK_PLUG, state = "+state);
@@ -4654,6 +4691,17 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     }
 
+
+    // Handles request to override default use of A2DP for media.
+    public void setBluetoothA2dpOnInt(boolean on) {
+        synchronized (mBluetoothA2dpEnabledLock) {
+            mBluetoothA2dpEnabled = on;
+            sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
+                    AudioSystem.FOR_MEDIA,
+                    mBluetoothA2dpEnabled ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP,
+                    null, 0);
+        }
+    }
 
     @Override
     public void setRingtonePlayer(IRingtonePlayer player) {

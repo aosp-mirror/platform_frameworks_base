@@ -318,7 +318,8 @@ public class AudioSystem
     public static final int FORCE_BT_DESK_DOCK = 7;
     public static final int FORCE_ANALOG_DOCK = 8;
     public static final int FORCE_DIGITAL_DOCK = 9;
-    private static final int NUM_FORCE_CONFIG = 10;
+    public static final int FORCE_NO_BT_A2DP = 10;
+    private static final int NUM_FORCE_CONFIG = 11;
     public static final int FORCE_DEFAULT = FORCE_NONE;
 
     // usage for setForceUse, must match AudioSystem::force_use
