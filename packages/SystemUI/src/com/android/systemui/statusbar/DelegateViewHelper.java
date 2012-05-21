@@ -33,11 +33,7 @@ public class DelegateViewHelper {
     private float mTriggerThreshhold;
 
     public DelegateViewHelper(View sourceView) {
-        mSourceView = sourceView;
-        if (mSourceView != null) {
-            mTriggerThreshhold = mSourceView.getContext().getResources()
-                    .getDimension(R.dimen.navbar_search_up_threshhold);
-        }
+        setSourceView(sourceView);
     }
 
     public void setDelegateView(View view) {
@@ -91,5 +87,13 @@ public class DelegateViewHelper {
             event.offsetLocation(-deltaX, -deltaY);
         }
         return false;
+    }
+
+    public void setSourceView(View view) {
+        mSourceView = view;
+        if (mSourceView != null) {
+            mTriggerThreshhold = mSourceView.getContext().getResources()
+                    .getDimension(R.dimen.navbar_search_up_threshhold);
+        }
     }
 }
