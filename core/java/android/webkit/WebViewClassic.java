@@ -4965,6 +4965,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     private void adjustSelectionCursors() {
         if (mIsCaretSelection) {
+            syncSelectionCursors();
             return; // no need to swap left and right handles.
         }
 
