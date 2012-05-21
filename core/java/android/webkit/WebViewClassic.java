@@ -5574,8 +5574,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (visibleRect.contains(mEditTextContentBounds)) {
             return; // no need to scroll
         }
-        nativeFindMaxVisibleRect(mNativeClass, mEditTextLayerId, visibleRect);
         syncSelectionCursors();
+        nativeFindMaxVisibleRect(mNativeClass, mEditTextLayerId, visibleRect);
         final int buffer = Math.max(1, viewToContentDimension(EDIT_RECT_BUFFER));
         Rect showRect = new Rect(
                 Math.max(0, mEditTextContentBounds.left - buffer),
@@ -5608,17 +5608,19 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             return; // no need to scroll
         }
 
-        int scrollX = visibleRect.left;
+        int scrollX = viewToContentX(getScrollX());
         if (visibleRect.left > showRect.left) {
-            scrollX = showRect.left;
+            // We are scrolled too far
+            scrollX += showRect.left - visibleRect.left;
         } else if (visibleRect.right < showRect.right) {
-            scrollX = Math.max(0, showRect.right - visibleRect.width());
+            // We aren't scrolled enough to include the right
+            scrollX += showRect.right - visibleRect.right;
         }
-        int scrollY = visibleRect.top;
+        int scrollY = viewToContentY(getScrollY());
         if (visibleRect.top > showRect.top) {
-            scrollY = showRect.top;
+            scrollY += showRect.top - visibleRect.top;
         } else if (visibleRect.bottom < showRect.bottom) {
-            scrollY = Math.max(0, showRect.bottom - visibleRect.height());
+            scrollY += showRect.bottom - visibleRect.bottom;
         }
 
         contentScrollTo(scrollX, scrollY, false);
