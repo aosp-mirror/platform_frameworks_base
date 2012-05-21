@@ -127,29 +127,17 @@ public class Looper {
                 return;
             }
 
-            long wallStart = 0;
-            long threadStart = 0;
-
             // This must be in a local variable, in case a UI event sets the logger
             Printer logging = me.mLogging;
             if (logging != null) {
                 logging.println(">>>>> Dispatching to " + msg.target + " " +
                         msg.callback + ": " + msg.what);
-                wallStart = SystemClock.currentTimeMicro();
-                threadStart = SystemClock.currentThreadTimeMicro();
             }
 
             msg.target.dispatchMessage(msg);
 
             if (logging != null) {
-                long wallTime = SystemClock.currentTimeMicro() - wallStart;
-                long threadTime = SystemClock.currentThreadTimeMicro() - threadStart;
-
                 logging.println("<<<<< Finished to " + msg.target + " " + msg.callback);
-                if (logging instanceof Profiler) {
-                    ((Profiler) logging).profile(msg, wallStart, wallTime,
-                            threadStart, threadTime);
-                }
             }
 
             // Make sure that during the course of dispatching the
@@ -289,13 +277,5 @@ public class Looper {
 
     public String toString() {
         return "Looper{" + Integer.toHexString(System.identityHashCode(this)) + "}";
-    }
-
-    /**
-     * @hide
-     */
-    public static interface Profiler {
-        void profile(Message message, long wallStart, long wallTime,
-                long threadStart, long threadTime);
     }
 }

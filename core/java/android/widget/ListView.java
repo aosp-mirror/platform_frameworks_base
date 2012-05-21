@@ -1557,10 +1557,6 @@ public class ListView extends AbsListView {
             if (dataChanged) {
                 for (int i = 0; i < childCount; i++) {
                     recycleBin.addScrapView(getChildAt(i), firstPosition+i);
-                    if (ViewDebug.TRACE_RECYCLER) {
-                        ViewDebug.trace(getChildAt(i),
-                                ViewDebug.RecyclerTraceType.MOVE_TO_SCRAP_HEAP, index, i);
-                    }
                 }
             } else {
                 recycleBin.fillActiveViews(childCount, firstPosition);
@@ -1757,11 +1753,6 @@ public class ListView extends AbsListView {
             // Try to use an existing view for this position
             child = mRecycler.getActiveView(position);
             if (child != null) {
-                if (ViewDebug.TRACE_RECYCLER) {
-                    ViewDebug.trace(child, ViewDebug.RecyclerTraceType.RECYCLE_FROM_ACTIVE_HEAP,
-                            position, getChildCount());
-                }
-
                 // Found it -- we're using an existing child
                 // This just needs to be positioned
                 setupChild(child, position, y, flow, childrenLeft, selected, true);

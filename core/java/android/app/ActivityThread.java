@@ -3751,9 +3751,6 @@ public final class ActivityThread {
         if (start) {
             try {
                 switch (profileType) {
-                    case 1:
-                        ViewDebug.startLooperProfiling(pcd.path, pcd.fd.getFileDescriptor());
-                        break;
                     default:                        
                         mProfiler.setProfiler(pcd.path, pcd.fd);
                         mProfiler.autoStopProfiler = false;
@@ -3772,9 +3769,6 @@ public final class ActivityThread {
             }
         } else {
             switch (profileType) {
-                case 1:
-                    ViewDebug.stopLooperProfiling();
-                    break;
                 default:
                     mProfiler.stopProfiling();
                     break;

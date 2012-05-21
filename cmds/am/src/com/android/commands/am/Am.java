@@ -645,10 +645,6 @@ public class Am {
         String process = null;
         
         String cmd = nextArgRequired();
-        if ("looper".equals(cmd)) {
-            cmd = nextArgRequired();
-            profileType = 1;
-        }
 
         if ("start".equals(cmd)) {
             start = true;
@@ -1295,8 +1291,8 @@ public class Am {
                 "       am broadcast <INTENT>\n" +
                 "       am instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]\n" +
                 "               [--no-window-animation] <COMPONENT>\n" +
-                "       am profile [looper] start <PROCESS> <FILE>\n" +
-                "       am profile [looper] stop [<PROCESS>]\n" +
+                "       am profile start <PROCESS> <FILE>\n" +
+                "       am profile stop [<PROCESS>]\n" +
                 "       am dumpheap [flags] <PROCESS> <FILE>\n" +
                 "       am set-debug-app [-w] [--persistent] <PACKAGE>\n" +
                 "       am clear-debug-app\n" +
