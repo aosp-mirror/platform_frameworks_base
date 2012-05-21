@@ -27408,7 +27408,7 @@ package android.widget {
     field public int gravity;
   }
 
-  public class Gallery extends android.widget.AbsSpinner implements android.view.GestureDetector.OnGestureListener {
+  public deprecated class Gallery extends android.widget.AbsSpinner implements android.view.GestureDetector.OnGestureListener {
     ctor public Gallery(android.content.Context);
     ctor public Gallery(android.content.Context, android.util.AttributeSet);
     ctor public Gallery(android.content.Context, android.util.AttributeSet, int);
