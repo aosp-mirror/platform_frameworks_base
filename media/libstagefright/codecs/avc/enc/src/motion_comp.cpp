@@ -268,9 +268,9 @@ void eCreateAlign(uint8 *ref, int picpitch, int y_pos,
 void eHorzInterp1MC(uint8 *in, int inpitch, uint8 *out, int outpitch,
                     int blkwidth, int blkheight, int dx)
 {
-    uint8 *p_ref;
+    uint8 *p_ref, *tmp;
     uint32 *p_cur;
-    uint32 tmp, pkres;
+    uint32 pkres;
     int result, curr_offset, ref_offset;
     int j;
     int32 r0, r1, r2, r3, r4, r5;
@@ -288,14 +288,14 @@ void eHorzInterp1MC(uint8 *in, int inpitch, uint8 *out, int outpitch,
         r13 = 0;
         for (j = blkheight; j > 0; j--)
         {
-            tmp = (uint32)(p_ref + blkwidth);
+            tmp = p_ref + blkwidth;
             r0 = p_ref[0];
             r1 = p_ref[2];
             r0 |= (r1 << 16);           /* 0,c,0,a */
             r1 = p_ref[1];
             r2 = p_ref[3];
             r1 |= (r2 << 16);           /* 0,d,0,b */
-            while ((uint32)p_ref < tmp)
+            while (p_ref < tmp)
             {
                 r2 = *(p_ref += 4); /* move pointer to e */
                 r3 = p_ref[2];
@@ -360,8 +360,8 @@ void eHorzInterp1MC(uint8 *in, int inpitch, uint8 *out, int outpitch,
                 p_ref -= (ref_offset + blkwidth);   /* input */
                 p_cur -= (outpitch >> 2);
 
-                tmp = (uint32)(p_ref + blkwidth);
-                for (; (uint32)p_ref < tmp;)
+                tmp = p_ref + blkwidth;
+                for (; p_ref < tmp;)
                 {
 
                     r0 = *p_ref++;
@@ -434,14 +434,14 @@ void eHorzInterp1MC(uint8 *in, int inpitch, uint8 *out, int outpitch,
         r13 = 0;
         for (j = blkheight; j > 0; j--)
         {
-            tmp = (uint32)(p_ref + blkwidth);
+            tmp = p_ref + blkwidth;
             r0 = p_ref[0];
             r1 = p_ref[2];
             r0 |= (r1 << 16);           /* 0,c,0,a */
             r1 = p_ref[1];
             r2 = p_ref[3];
             r1 |= (r2 << 16);           /* 0,d,0,b */
-            while ((uint32)p_ref < tmp)
+            while (p_ref < tmp)
             {
                 r2 = *(p_ref += 4); /* move pointer to e */
                 r3 = p_ref[2];
@@ -494,8 +494,8 @@ void eHorzInterp1MC(uint8 *in, int inpitch, uint8 *out, int outpitch,
                 p_ref -= (ref_offset + blkwidth);   /* input */
                 p_cur -= (outpitch >> 2);
 
-                tmp = (uint32)(p_ref + blkwidth);
-                for (; (uint32)p_ref < tmp;)
+                tmp = p_ref + blkwidth;
+                for (; p_ref < tmp;)
                 {
 
                     r0 = *p_ref++;
@@ -558,9 +558,9 @@ void eHorzInterp1MC(uint8 *in, int inpitch, uint8 *out, int outpitch,
 void eHorzInterp2MC(int *in, int inpitch, uint8 *out, int outpitch,
                     int blkwidth, int blkheight, int dx)
 {
-    int *p_ref;
+    int *p_ref, *tmp;
     uint32 *p_cur;
-    uint32 tmp, pkres;
+    uint32 pkres;
     int result, result2, curr_offset, ref_offset;
     int j, r0, r1, r2, r3, r4, r5;
 
@@ -575,8 +575,8 @@ void eHorzInterp2MC(int *in, int inpitch, uint8 *out, int outpitch,
 
         for (j = blkheight; j > 0 ; j--)
         {
-            tmp = (uint32)(p_ref + blkwidth);
-            for (; (uint32)p_ref < tmp;)
+            tmp = p_ref + blkwidth;
+            for (; p_ref < tmp;)
             {
 
                 r0 = p_ref[-2];
@@ -654,8 +654,8 @@ void eHorzInterp2MC(int *in, int inpitch, uint8 *out, int outpitch,
     {
         for (j = blkheight; j > 0 ; j--)
         {
-            tmp = (uint32)(p_ref + blkwidth);
-            for (; (uint32)p_ref < tmp;)
+            tmp = p_ref + blkwidth;
+            for (; p_ref < tmp;)
             {
 
                 r0 = p_ref[-2];
@@ -717,9 +717,8 @@ void eHorzInterp2MC(int *in, int inpitch, uint8 *out, int outpitch,
 void eHorzInterp3MC(uint8 *in, int inpitch, int *out, int outpitch,
                     int blkwidth, int blkheight)
 {
-    uint8 *p_ref;
+    uint8 *p_ref, *tmp;
     int   *p_cur;
-    uint32 tmp;
     int result, curr_offset, ref_offset;
     int j, r0, r1, r2, r3, r4, r5;
 
@@ -730,8 +729,8 @@ void eHorzInterp3MC(uint8 *in, int inpitch, int *out, int outpitch,
 
     for (j = blkheight; j > 0 ; j--)
     {
-        tmp = (uint32)(p_ref + blkwidth);
-        for (; (uint32)p_ref < tmp;)
+        tmp = p_ref + blkwidth;
+        for (; p_ref < tmp;)
         {
 
             r0 = p_ref[-2];
@@ -782,8 +781,7 @@ void eHorzInterp3MC(uint8 *in, int inpitch, int *out, int outpitch,
 void eVertInterp1MC(uint8 *in, int inpitch, uint8 *out, int outpitch,
                     int blkwidth, int blkheight, int dy)
 {
-    uint8 *p_cur, *p_ref;
-    uint32 tmp;
+    uint8 *p_cur, *p_ref, *tmp;
     int result, curr_offset, ref_offset;
     int j, i;
     int32 r0, r1, r2, r3, r4, r5, r6, r7, r8, r13;
@@ -811,8 +809,8 @@ void eVertInterp1MC(uint8 *in, int inpitch, uint8 *out, int outpitch,
             r13 = 0;
             p_ref = in;
             p_cur -= outpitch;  /* compensate for the first offset */
-            tmp = (uint32)(p_ref + ref_offset); /* limit */
-            while ((uint32)p_ref < tmp)  /* the loop un-rolled  */
+            tmp = p_ref + ref_offset; /* limit */
+            while (p_ref < tmp)  /* the loop un-rolled  */
             {
                 r0 = *((uint32*)(p_ref - (inpitch << 1))); /* load 4 bytes */
                 p_ref += inpitch;
@@ -885,8 +883,8 @@ void eVertInterp1MC(uint8 *in, int inpitch, uint8 *out, int outpitch,
                     p_ref = in + i;
                     p_cur -= outpitch;  /* compensate for the first offset */
 
-                    tmp = (uint32)(p_ref + ref_offset); /* limit */
-                    while ((uint32)p_ref < tmp)
+                    tmp = p_ref + ref_offset; /* limit */
+                    while (p_ref < tmp)
                     {                           /* loop un-rolled */
                         r0 = *(p_ref - (inpitch << 1));
                         r1 = *(p_ref - inpitch);
@@ -959,8 +957,8 @@ void eVertInterp1MC(uint8 *in, int inpitch, uint8 *out, int outpitch,
             r13 = 0;
             p_ref = in;
             p_cur -= outpitch;  /* compensate for the first offset */
-            tmp = (uint32)(p_ref + ref_offset); /* limit */
-            while ((uint32)p_ref < tmp)  /* the loop un-rolled  */
+            tmp = p_ref + ref_offset; /* limit */
+            while (p_ref < tmp)  /* the loop un-rolled  */
             {
                 r0 = *((uint32*)(p_ref - (inpitch << 1))); /* load 4 bytes */
                 p_ref += inpitch;
@@ -1023,8 +1021,8 @@ void eVertInterp1MC(uint8 *in, int inpitch, uint8 *out, int outpitch,
                 {
                     p_ref = in + i;
                     p_cur -= outpitch;  /* compensate for the first offset */
-                    tmp = (uint32)(p_ref + ref_offset); /* limit */
-                    while ((uint32)p_ref < tmp)
+                    tmp = p_ref + ref_offset; /* limit */
+                    while (p_ref < tmp)
                     {                           /* loop un-rolled */
                         r0 = *(p_ref - (inpitch << 1));
                         r1 = *(p_ref - inpitch);
@@ -1086,8 +1084,7 @@ void eVertInterp2MC(uint8 *in, int inpitch, int *out, int outpitch,
                     int blkwidth, int blkheight)
 {
     int *p_cur;
-    uint8 *p_ref;
-    uint32 tmp;
+    uint8 *p_ref, *tmp;
     int result, curr_offset, ref_offset;
     int j, r0, r1, r2, r3, r4, r5;
 
@@ -1100,8 +1097,8 @@ void eVertInterp2MC(uint8 *in, int inpitch, int *out, int outpitch,
         p_cur -= outpitch; /* compensate for the first offset */
         p_ref = in++;
 
-        tmp = (uint32)(p_ref + ref_offset); /* limit */
-        while ((uint32)p_ref < tmp)
+        tmp = p_ref + ref_offset; /* limit */
+        while (p_ref < tmp)
         {                           /* loop un-rolled */
             r0 = *(p_ref - (inpitch << 1));
             r1 = *(p_ref - inpitch);
@@ -1152,8 +1149,7 @@ void eVertInterp3MC(int *in, int inpitch, uint8 *out, int outpitch,
                     int blkwidth, int blkheight, int dy)
 {
     uint8 *p_cur;
-    int *p_ref;
-    uint32 tmp;
+    int *p_ref, *tmp;
     int result, result2, curr_offset, ref_offset;
     int j, r0, r1, r2, r3, r4, r5;
 
@@ -1170,8 +1166,8 @@ void eVertInterp3MC(int *in, int inpitch, uint8 *out, int outpitch,
             p_cur -= outpitch; /* compensate for the first offset */
             p_ref = in++;
 
-            tmp = (uint32)(p_ref + ref_offset); /* limit */
-            while ((uint32)p_ref < tmp)
+            tmp = p_ref + ref_offset; /* limit */
+            while (p_ref < tmp)
             {                           /* loop un-rolled */
                 r0 = *(p_ref - (inpitch << 1));
                 r1 = *(p_ref - inpitch);
@@ -1250,8 +1246,8 @@ void eVertInterp3MC(int *in, int inpitch, uint8 *out, int outpitch,
             p_cur -= outpitch; /* compensate for the first offset */
             p_ref = in++;
 
-            tmp = (uint32)(p_ref + ref_offset); /* limit */
-            while ((uint32)p_ref < tmp)
+            tmp = p_ref + ref_offset; /* limit */
+            while (p_ref < tmp)
             {                           /* loop un-rolled */
                 r0 = *(p_ref - (inpitch << 1));
                 r1 = *(p_ref - inpitch);
@@ -1313,11 +1309,11 @@ void eDiagonalInterpMC(uint8 *in1, uint8 *in2, int inpitch,
 {
     int j, i;
     int result;
-    uint8 *p_cur, *p_ref, *p_tmp8;
+    uint8 *p_cur, *p_ref, *p_tmp8, *tmp;
     int curr_offset, ref_offset;
     uint8 tmp_res[24][24], tmp_in[24][24];
     uint32 *p_tmp;
-    uint32 tmp, pkres, tmp_result;
+    uint32 pkres, tmp_result;
     int32 r0, r1, r2, r3, r4, r5;
     int32 r6, r7, r8, r9, r10, r13;
 
@@ -1337,7 +1333,7 @@ void eDiagonalInterpMC(uint8 *in1, uint8 *in2, int inpitch,
     for (j = blkheight; j > 0; j--)
     {
         r13 = 0;
-        tmp = (uint32)(p_ref + blkwidth);
+        tmp = p_ref + blkwidth;
 
         //r0 = *((uint32*)p_ref);   /* d,c,b,a */
         //r1 = (r0>>8)&0xFF00FF;    /* 0,d,0,b */
@@ -1350,7 +1346,7 @@ void eDiagonalInterpMC(uint8 *in1, uint8 *in2, int inpitch,
         r2 = p_ref[3];
         r1 |= (r2 << 16);           /* 0,d,0,b */
 
-        while ((uint32)p_ref < tmp)
+        while (p_ref < tmp)
         {
             //r2 = *((uint32*)(p_ref+=4));/* h,g,f,e */
             //r3 = (r2>>8)&0xFF00FF;  /* 0,h,0,f */
@@ -1406,8 +1402,8 @@ void eDiagonalInterpMC(uint8 *in1, uint8 *in2, int inpitch,
             /* move back to the beginning of the line */
             p_ref -= (ref_offset + blkwidth);   /* input */
             p_tmp -= 6; /* intermediate output */
-            tmp = (uint32)(p_ref + blkwidth);
-            while ((uint32)p_ref < tmp)
+            tmp = p_ref + blkwidth;
+            while (p_ref < tmp)
             {
                 r0 = *p_ref++;
                 r1 = *p_ref++;
@@ -1485,8 +1481,8 @@ void eDiagonalInterpMC(uint8 *in1, uint8 *in2, int inpitch,
         p_tmp8 = &(tmp_res[0][j]); /* intermediate result */
         p_tmp8 -= 24;  /* compensate for the first offset */
         p_cur -= outpitch;  /* compensate for the first offset */
-        tmp = (uint32)(p_ref + pkres); /* limit */
-        while ((uint32)p_ref < tmp)  /* the loop un-rolled  */
+        tmp = p_ref + pkres; /* limit */
+        while (p_ref < tmp)  /* the loop un-rolled  */
         {
             /* Read 1 byte at a time is too slow, too many read and pack ops, need to call CreateAlign */
             /*p_ref8 = p_ref-(inpitch<<1);          r0 = p_ref8[0];         r1 = p_ref8[2];
@@ -1579,8 +1575,8 @@ void eDiagonalInterpMC(uint8 *in1, uint8 *in2, int inpitch,
                 p_tmp8 = &(tmp_res[0][j+i]); /* intermediate result */
                 p_tmp8 -= 24;  /* compensate for the first offset */
                 p_cur -= outpitch;  /* compensate for the first offset */
-                tmp = (uint32)(p_ref + pkres); /* limit */
-                while ((uint32)p_ref < tmp)  /* the loop un-rolled  */
+                tmp = p_ref + pkres; /* limit */
+                while (p_ref < tmp)  /* the loop un-rolled  */
                 {
                     r0 = *(p_ref - (inpitch << 1));
                     r1 = *(p_ref - inpitch);
