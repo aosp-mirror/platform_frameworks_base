@@ -4255,6 +4255,9 @@ public final class Settings {
         /** Timeout for package verification. {@hide} */
         public static final String PACKAGE_VERIFIER_TIMEOUT = "verifier_timeout";
 
+        /** Default response code for package verification. {@hide} */
+        public static final String PACKAGE_VERIFIER_DEFAULT_RESPONSE = "verifier_default_response";
+
         /** {@hide} */
         public static final String
                 READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT = "read_external_storage_enforced_default";

@@ -206,6 +206,14 @@ public class PackageManagerService extends IPackageManager.Stub {
      */
     private static final long DEFAULT_VERIFICATION_TIMEOUT = 10 * 1000;
 
+    /**
+     * The default response for package verification timeout.
+     *
+     * This can be either PackageManager.VERIFICATION_ALLOW or
+     * PackageManager.VERIFICATION_REJECT.
+     */
+    private static final int DEFAULT_VERIFICATION_RESPONSE = PackageManager.VERIFICATION_ALLOW;
+
     static final String DEFAULT_CONTAINER_PACKAGE = "com.android.defcontainer";
 
     static final ComponentName DEFAULT_CONTAINER_COMPONENT = new ComponentName(
@@ -765,7 +773,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                         Slog.i(TAG, "Verification timed out for " + args.packageURI.toString());
                         mPendingVerification.remove(verificationId);
 
-                        int ret = PackageManager.INSTALL_FAILED_VERIFICATION_TIMEOUT;
+                        int ret = PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
+
+                        if (getDefaultVerificationResponse() == PackageManager.VERIFICATION_ALLOW) {
+                          Slog.i(TAG, "Continuing with installation of " + args.packageURI.toString());
+                          state.setVerifierResponse(Binder.getCallingUid(), PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT);
+                          try {
+                              ret = args.copyApk(mContainerService, true);
+                          } catch (RemoteException e) {
+                              Slog.e(TAG, "Could not contact the ContainerService");
+                          }
+                        }
+
                         processPendingInstall(args, ret);
 
                         mHandler.sendEmptyMessage(MCS_UNBIND);
@@ -5415,6 +5434,17 @@ public class PackageManagerService extends IPackageManager.Stub {
         return android.provider.Settings.Secure.getLong(mContext.getContentResolver(),
                 android.provider.Settings.Secure.PACKAGE_VERIFIER_TIMEOUT,
                 DEFAULT_VERIFICATION_TIMEOUT);
+    }
+
+    /**
+     * Get the default verification agent response code.
+     *
+     * @return default verification response code
+     */
+    private int getDefaultVerificationResponse() {
+        return android.provider.Settings.Secure.getInt(mContext.getContentResolver(),
+                android.provider.Settings.Secure.PACKAGE_VERIFIER_DEFAULT_RESPONSE,
+                DEFAULT_VERIFICATION_RESPONSE);
     }
 
     /**
