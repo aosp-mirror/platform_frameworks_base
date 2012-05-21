@@ -178,7 +178,11 @@ void usage(void)
         "   --non-constant-id\n"
         "       Make the resources ID non constant. This is required to make an R java class\n"
         "       that does not contain the final value but is used to make reusable compiled\n"
-        "       libraries that need to access resources.\n");
+        "       libraries that need to access resources.\n"
+        "   --ignore-assets\n"
+        "       Assets to be ignored. Default pattern is:\n"
+        "       %s\n",
+        gDefaultIgnoreAssets);
 }
 
 /*
@@ -556,7 +560,16 @@ int main(int argc, char* const argv[])
                     bundle.setNonConstantId(true);
                 } else if (strcmp(cp, "-no-crunch") == 0) {
                     bundle.setUseCrunchCache(true);
-                }else {
+                } else if (strcmp(cp, "-ignore-assets") == 0) {
+                    argc--;
+                    argv++;
+                    if (!argc) {
+                        fprintf(stderr, "ERROR: No argument supplied for '--ignore-assets' option\n");
+                        wantUsage = true;
+                        goto bail;
+                    }
+                    gUserIgnoreAssets = argv[0];
+                } else {
                     fprintf(stderr, "ERROR: Unknown option '-%s'\n", cp);
                     wantUsage = true;
                     goto bail;
