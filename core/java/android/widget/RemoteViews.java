@@ -37,6 +37,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.LayoutInflater.Filter;
 import android.view.RemotableViewMethod;
@@ -1182,6 +1183,45 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Helper action to set compound drawables on a TextView. Supports relative
+     * (s/t/e/b) or cardinal (l/t/r/b) arrangement.
+     */
+    private class TextViewSizeAction extends Action {
+        public TextViewSizeAction(int viewId, int units, float size) {
+            this.viewId = viewId;
+            this.units = units;
+            this.size = size;
+        }
+
+        public TextViewSizeAction(Parcel parcel) {
+            viewId = parcel.readInt();
+            units = parcel.readInt();
+            size  = parcel.readFloat();
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(TAG);
+            dest.writeInt(viewId);
+            dest.writeInt(units);
+            dest.writeFloat(size);
+        }
+
+        @Override
+        public void apply(View root, ViewGroup rootParent) {
+            final Context context = root.getContext();
+            final TextView target = (TextView) root.findViewById(viewId);
+            if (target == null) return;
+            target.setTextSize(units, size);
+        }
+
+        int viewId;
+        int units;
+        float size;
+
+        public final static int TAG = 13;
+    }
+
+    /**
      * Simple class used to keep track of memory usage in a RemoteViews.
      *
      */
@@ -1333,6 +1373,9 @@ public class RemoteViews implements Parcelable, Filter {
                         break;
                     case TextViewDrawableAction.TAG:
                         mActions.add(new TextViewDrawableAction(parcel));
+                        break;
+                    case TextViewSizeAction.TAG:
+                        mActions.add(new TextViewSizeAction(parcel));
                         break;
                     case BitmapReflectionAction.TAG:
                         mActions.add(new BitmapReflectionAction(parcel));
@@ -1541,7 +1584,19 @@ public class RemoteViews implements Parcelable, Filter {
     public void setTextViewText(int viewId, CharSequence text) {
         setCharSequence(viewId, "setText", text);
     }
-    
+
+    /**
+     * @hide
+     * Equivalent to calling {@link TextView#setTextSize(int, float)}
+     * 
+     * @param viewId The id of the view whose text size should change
+     * @param units The units of size (e.g. COMPLEX_UNIT_SP)
+     * @param size The size of the text
+     */
+    public void setTextViewTextSize(int viewId, int units, float size) {
+        addAction(new TextViewSizeAction(viewId, units, size));
+    }
+
     /**
      * Equivalent to calling 
      * {@link TextView#setCompoundDrawablesWithIntrinsicBounds(int, int, int, int)}.
