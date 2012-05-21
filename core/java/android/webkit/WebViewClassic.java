@@ -431,14 +431,18 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             boolean isCharacterDelete = false;
             int textLength = text.length();
             int originalLength = original.length();
-            if (textLength > originalLength) {
-                isCharacterAdd = (textLength == originalLength + 1)
-                        && TextUtils.regionMatches(text, 0, original, 0,
-                                originalLength);
-            } else if (originalLength > textLength) {
-                isCharacterDelete = (textLength == originalLength - 1)
-                        && TextUtils.regionMatches(text, 0, original, 0,
-                                textLength);
+            int selectionStart = Selection.getSelectionStart(editable);
+            int selectionEnd = Selection.getSelectionEnd(editable);
+            if (selectionStart == selectionEnd) {
+                if (textLength > originalLength) {
+                    isCharacterAdd = (textLength == originalLength + 1)
+                            && TextUtils.regionMatches(text, 0, original, 0,
+                                    originalLength);
+                } else if (originalLength > textLength) {
+                    isCharacterDelete = (textLength == originalLength - 1)
+                            && TextUtils.regionMatches(text, 0, original, 0,
+                                    textLength);
+                }
             }
             if (isCharacterAdd) {
                 sendCharacter(text.charAt(textLength - 1));
@@ -7482,6 +7486,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     int cursorPosition = start + text.length();
                     replaceTextfieldText(start, end, text,
                             cursorPosition, cursorPosition);
+                    selectionDone();
                     break;
                 }
 
