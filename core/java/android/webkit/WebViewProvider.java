@@ -276,6 +276,8 @@ public interface WebViewProvider {
 
         public void onInitializeAccessibilityEvent(AccessibilityEvent event);
 
+        public boolean performAccessibilityAction(int action, Bundle arguments);
+
         public void setOverScrollMode(int mode);
 
         public void setScrollBarStyle(int style);
