@@ -19705,6 +19705,7 @@ package android.speech {
     method public static final android.content.Intent getVoiceDetailsIntent(android.content.Context);
     field public static final java.lang.String ACTION_GET_LANGUAGE_DETAILS = "android.speech.action.GET_LANGUAGE_DETAILS";
     field public static final java.lang.String ACTION_RECOGNIZE_SPEECH = "android.speech.action.RECOGNIZE_SPEECH";
+    field public static final java.lang.String ACTION_VOICE_SEARCH_HANDS_FREE = "android.speech.action.VOICE_SEARCH_HANDS_FREE";
     field public static final java.lang.String ACTION_WEB_SEARCH = "android.speech.action.WEB_SEARCH";
     field public static final java.lang.String DETAILS_META_DATA = "android.speech.DETAILS";
     field public static final java.lang.String EXTRA_CALLING_PACKAGE = "calling_package";
@@ -19720,6 +19721,7 @@ package android.speech {
     field public static final java.lang.String EXTRA_RESULTS = "android.speech.extra.RESULTS";
     field public static final java.lang.String EXTRA_RESULTS_PENDINGINTENT = "android.speech.extra.RESULTS_PENDINGINTENT";
     field public static final java.lang.String EXTRA_RESULTS_PENDINGINTENT_BUNDLE = "android.speech.extra.RESULTS_PENDINGINTENT_BUNDLE";
+    field public static final java.lang.String EXTRA_SECURE = "android.speech.extras.EXTRA_SECURE";
     field public static final java.lang.String EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS = "android.speech.extras.SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS";
     field public static final java.lang.String EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS = "android.speech.extras.SPEECH_INPUT_MINIMUM_LENGTH_MILLIS";
     field public static final java.lang.String EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS = "android.speech.extras.SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS";
