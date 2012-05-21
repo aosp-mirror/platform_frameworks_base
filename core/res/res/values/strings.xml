@@ -3092,6 +3092,11 @@
     <!-- Title of the physical keyboard category in the input method selector [CHAR LIMIT=10] -->
     <string name="hardware">Hardware</string>
 
+    <!-- Title of the notification to prompt the user to select a keyboard layout. -->
+    <string name="select_keyboard_layout_notification_title">Select keyboard layout</string>
+    <!-- Message of the notification to prompt the user to select a keyboard layout. -->
+    <string name="select_keyboard_layout_notification_message">Touch to select a keyboard layout.</string>
+
     <string name="fast_scroll_alphabet">\u0020ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
     <string name="fast_scroll_numeric_alphabet">\u00200123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
 

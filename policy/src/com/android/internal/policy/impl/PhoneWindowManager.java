@@ -326,6 +326,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     RecentApplicationsDialog mRecentAppsDialog;
     int mRecentAppsDialogHeldModifiers;
+    boolean mLanguageSwitchKeyPressed;
 
     int mLidState = LID_ABSENT;
     boolean mHaveBuiltInKeyboard;
@@ -1941,6 +1942,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mRecentAppsDialogHeldModifiers = 0;
             showOrHideRecentAppsDialog(keyguardOn ? RECENT_APPS_BEHAVIOR_DISMISS :
                     RECENT_APPS_BEHAVIOR_DISMISS_AND_SWITCH);
+        }
+
+        // Handle keyboard language switching.
+        if (down && repeatCount == 0
+                && (keyCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH
+                        || (keyCode == KeyEvent.KEYCODE_SPACE
+                                && (metaState & KeyEvent.META_CTRL_MASK) != 0))) {
+            int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
+            mWindowManagerFuncs.switchKeyboardLayout(event.getDeviceId(), direction);
+            return -1;
+        }
+        if (mLanguageSwitchKeyPressed && !down
+                && (keyCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH
+                        || keyCode == KeyEvent.KEYCODE_SPACE)) {
+            mLanguageSwitchKeyPressed = false;
+            return -1;
         }
 
         // Let the application handle the key.
