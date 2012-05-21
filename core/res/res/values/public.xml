@@ -208,6 +208,9 @@
   <java-symbol type="id" name="inbox_text2" />
   <java-symbol type="id" name="inbox_text3" />
   <java-symbol type="id" name="inbox_text4" />
+  <java-symbol type="id" name="inbox_text5" />
+  <java-symbol type="id" name="inbox_text6" />
+  <java-symbol type="id" name="inbox_more" />
   <java-symbol type="id" name="status_bar_latest_event_content" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
