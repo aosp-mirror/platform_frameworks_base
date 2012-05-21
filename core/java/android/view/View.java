@@ -4310,7 +4310,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         if (gainFocus) {
             if (AccessibilityManager.getInstance(mContext).isEnabled()) {
                 sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
-                requestAccessibilityFocus();
             }
         }
 
@@ -6163,8 +6162,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             invalidate();
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
             notifyAccessibilityStateChanged();
-            // Try to give input focus to this view - not a descendant.
-            requestFocusNoSearch(View.FOCUS_DOWN, null);
             return true;
         }
         return false;
@@ -6210,11 +6207,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     private void requestAccessibilityFocusFromHover() {
         if (includeForAccessibility() && isActionableForAccessibility()) {
             requestAccessibilityFocus();
+            requestFocusNoSearch(View.FOCUS_DOWN, null);
         } else {
             if (mParent != null) {
                 View nextFocus = mParent.findViewToTakeAccessibilityFocusFromHover(this, this);
                 if (nextFocus != null) {
                     nextFocus.requestAccessibilityFocus();
+                    nextFocus.requestFocusNoSearch(View.FOCUS_DOWN, null);
                 }
             }
         }
