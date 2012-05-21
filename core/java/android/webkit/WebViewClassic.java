@@ -60,9 +60,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.security.KeyChain;
-import android.speech.tts.TextToSpeech;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.Selection;
@@ -871,14 +869,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private static final int MOTIONLESS_IGNORE          = 3;
     private int mHeldMotionless;
 
-    // An instance for injecting accessibility in WebViews with disabled
-    // JavaScript or ones for which no accessibility script exists
+    // Lazily-instantiated instance for injecting accessibility.
     private AccessibilityInjector mAccessibilityInjector;
-
-    // flag indicating if accessibility script is injected so we
-    // know to handle Shift and arrows natively first
-    private boolean mAccessibilityScriptInjected;
-
 
     /**
      * How long the caret handle will last without being touched.
@@ -1087,34 +1079,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private static final int SCROLLBAR_ALWAYSON = 2;
     private int mHorizontalScrollBarMode = SCROLLBAR_AUTO;
     private int mVerticalScrollBarMode = SCROLLBAR_AUTO;
-
-    // constants for determining script injection strategy
-    private static final int ACCESSIBILITY_SCRIPT_INJECTION_UNDEFINED = -1;
-    private static final int ACCESSIBILITY_SCRIPT_INJECTION_OPTED_OUT = 0;
-    private static final int ACCESSIBILITY_SCRIPT_INJECTION_PROVIDED = 1;
-
-    // the alias via which accessibility JavaScript interface is exposed
-    private static final String ALIAS_ACCESSIBILITY_JS_INTERFACE = "accessibility";
-
-    // Template for JavaScript that injects a screen-reader.
-    private static final String ACCESSIBILITY_SCREEN_READER_JAVASCRIPT_TEMPLATE =
-        "javascript:(function() {" +
-        "    var chooser = document.createElement('script');" +
-        "    chooser.type = 'text/javascript';" +
-        "    chooser.src = '%1s';" +
-        "    document.getElementsByTagName('head')[0].appendChild(chooser);" +
-        "  })();";
-
-    // Regular expression that matches the "axs" URL parameter.
-    // The value of 0 means the accessibility script is opted out
-    // The value of 1 means the accessibility script is already injected
-    private static final String PATTERN_MATCH_AXS_URL_PARAMETER = "(\\?axs=(0|1))|(&axs=(0|1))";
-
-    // TextToSpeech instance exposed to JavaScript to the injected screenreader.
-    private TextToSpeech mTextToSpeech;
-
-    // variable to cache the above pattern in case accessibility is enabled.
-    private Pattern mMatchAxsUrlParameterPattern;
 
     /**
      * Max distance to overscroll by in pixels.
@@ -1634,40 +1598,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         return true;
     }
 
-    /**
-     * Adds accessibility APIs to JavaScript.
-     *
-     * Note: This method is responsible to performing the necessary
-     *       check if the accessibility APIs should be exposed.
-     */
-    private void addAccessibilityApisToJavaScript() {
-        if (AccessibilityManager.getInstance(mContext).isEnabled()
-                && getSettings().getJavaScriptEnabled()) {
-            // exposing the TTS for now ...
-            final Context ctx = mContext;
-            if (ctx != null) {
-                final String packageName = ctx.getPackageName();
-                if (packageName != null) {
-                    mTextToSpeech = new TextToSpeech(ctx, null, null,
-                            packageName + ".**webview**", true);
-                    addJavascriptInterface(mTextToSpeech, ALIAS_ACCESSIBILITY_JS_INTERFACE);
-                }
-            }
-        }
-    }
-
-    /**
-     * Removes accessibility APIs from JavaScript.
-     */
-    private void removeAccessibilityApisFromJavaScript() {
-        // exposing the TTS for now ...
-        if (mTextToSpeech != null) {
-            removeJavascriptInterface(ALIAS_ACCESSIBILITY_JS_INTERFACE);
-            mTextToSpeech.shutdown();
-            mTextToSpeech = null;
-        }
-    }
-
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         info.setScrollable(isScrollableForAccessibility());
@@ -1686,6 +1616,17 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         final int adjustedViewHeight = getHeight() - mWebView.getPaddingTop()
                 - mWebView.getPaddingBottom();
         event.setMaxScrollY(Math.max(convertedContentHeight - adjustedViewHeight, 0));
+    }
+
+    private boolean isAccessibilityEnabled() {
+        return AccessibilityManager.getInstance(mContext).isEnabled();
+    }
+
+    private AccessibilityInjector getAccessibilityInjector() {
+        if (mAccessibilityInjector == null) {
+            mAccessibilityInjector = new AccessibilityInjector(this);
+        }
+        return mAccessibilityInjector;
     }
 
     private boolean isScrollableForAccessibility() {
@@ -3823,7 +3764,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
         // reset the flag since we set to true in if need after
         // loading is see onPageFinished(Url)
-        mAccessibilityScriptInjected = false;
+        if (isAccessibilityEnabled()) {
+            getAccessibilityInjector().onPageStarted(url);
+        }
 
         // Don't start out editing.
         mIsEditingText = false;
@@ -3835,114 +3778,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     /* package */ void onPageFinished(String url) {
         mZoomManager.onPageFinished(url);
-        injectAccessibilityForUrl(url);
-    }
 
-    /**
-     * This method injects accessibility in the loaded document if accessibility
-     * is enabled. If JavaScript is enabled we try to inject a URL specific script.
-     * If no URL specific script is found or JavaScript is disabled we fallback to
-     * the default {@link AccessibilityInjector} implementation.
-     * </p>
-     * If the URL has the "axs" paramter set to 1 it has already done the
-     * script injection so we do nothing. If the parameter is set to 0
-     * the URL opts out accessibility script injection so we fall back to
-     * the default {@link AccessibilityInjector}.
-     * </p>
-     * Note: If the user has not opted-in the accessibility script injection no scripts
-     * are injected rather the default {@link AccessibilityInjector} implementation
-     * is used.
-     *
-     * @param url The URL loaded by this {@link WebView}.
-     */
-    private void injectAccessibilityForUrl(String url) {
-        if (mWebViewCore == null) {
-            return;
+        if (isAccessibilityEnabled()) {
+            getAccessibilityInjector().onPageFinished(url);
         }
-        AccessibilityManager accessibilityManager = AccessibilityManager.getInstance(mContext);
-
-        if (!accessibilityManager.isEnabled()) {
-            // it is possible that accessibility was turned off between reloads
-            ensureAccessibilityScriptInjectorInstance(false);
-            return;
-        }
-
-        if (!getSettings().getJavaScriptEnabled()) {
-            // no JS so we fallback to the basic buil-in support
-            ensureAccessibilityScriptInjectorInstance(true);
-            return;
-        }
-
-        // check the URL "axs" parameter to choose appropriate action
-        int axsParameterValue = getAxsUrlParameterValue(url);
-        if (axsParameterValue == ACCESSIBILITY_SCRIPT_INJECTION_UNDEFINED) {
-            boolean onDeviceScriptInjectionEnabled = (Settings.Secure.getInt(mContext
-                    .getContentResolver(), Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION, 0) == 1);
-            if (onDeviceScriptInjectionEnabled) {
-                ensureAccessibilityScriptInjectorInstance(false);
-                // neither script injected nor script injection opted out => we inject
-                mWebView.loadUrl(getScreenReaderInjectingJs());
-                // TODO: Set this flag after successfull script injection. Maybe upon injection
-                // the chooser should update the meta tag and we check it to declare success
-                mAccessibilityScriptInjected = true;
-            } else {
-                // injection disabled so we fallback to the basic built-in support
-                ensureAccessibilityScriptInjectorInstance(true);
-            }
-        } else if (axsParameterValue == ACCESSIBILITY_SCRIPT_INJECTION_OPTED_OUT) {
-            // injection opted out so we fallback to the basic buil-in support
-            ensureAccessibilityScriptInjectorInstance(true);
-        } else if (axsParameterValue == ACCESSIBILITY_SCRIPT_INJECTION_PROVIDED) {
-            ensureAccessibilityScriptInjectorInstance(false);
-            // the URL provides accessibility but we still need to add our generic script
-            mWebView.loadUrl(getScreenReaderInjectingJs());
-        } else {
-            Log.e(LOGTAG, "Unknown URL value for the \"axs\" URL parameter: " + axsParameterValue);
-        }
-    }
-
-    /**
-     * Ensures the instance of the {@link AccessibilityInjector} to be present ot not.
-     *
-     * @param present True to ensure an insance, false to ensure no instance.
-     */
-    private void ensureAccessibilityScriptInjectorInstance(boolean present) {
-        if (present) {
-            if (mAccessibilityInjector == null) {
-                mAccessibilityInjector = new AccessibilityInjector(this);
-            }
-        } else {
-            mAccessibilityInjector = null;
-        }
-    }
-
-    /**
-     * Gets JavaScript that injects a screen-reader.
-     *
-     * @return The JavaScript snippet.
-     */
-    private String getScreenReaderInjectingJs() {
-        String screenReaderUrl = Settings.Secure.getString(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_SCREEN_READER_URL);
-        return String.format(ACCESSIBILITY_SCREEN_READER_JAVASCRIPT_TEMPLATE, screenReaderUrl);
-    }
-
-    /**
-     * Gets the "axs" URL parameter value.
-     *
-     * @param url A url to fetch the paramter from.
-     * @return The parameter value if such, -1 otherwise.
-     */
-    private int getAxsUrlParameterValue(String url) {
-        if (mMatchAxsUrlParameterPattern == null) {
-            mMatchAxsUrlParameterPattern = Pattern.compile(PATTERN_MATCH_AXS_URL_PARAMETER);
-        }
-        Matcher matcher = mMatchAxsUrlParameterPattern.matcher(url);
-        if (matcher.find()) {
-            String keyValuePair = url.substring(matcher.start(), matcher.end());
-            return Integer.parseInt(keyValuePair.split("=")[1]);
-        }
-        return -1;
     }
 
     // scale from content to view coordinates, and pin
@@ -4900,30 +4739,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             return false;
         }
 
-        // accessibility support
-        if (accessibilityScriptInjected()) {
-            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-                // if an accessibility script is injected we delegate to it the key handling.
-                // this script is a screen reader which is a fully fledged solution for blind
-                // users to navigate in and interact with web pages.
-                sendBatchableInputMessage(EventHub.KEY_DOWN, 0, 0, event);
-                return true;
-            } else {
-                // Clean up if accessibility was disabled after loading the current URL.
-                mAccessibilityScriptInjected = false;
-            }
-        } else if (mAccessibilityInjector != null) {
-            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-                if (mAccessibilityInjector.onKeyEvent(event)) {
-                    // if an accessibility injector is present (no JavaScript enabled or the site
-                    // opts out injecting our JavaScript screen reader) we let it decide whether
-                    // to act on and consume the event.
-                    return true;
-                }
-            } else {
-                // Clean up if accessibility was disabled after loading the current URL.
-                mAccessibilityInjector = null;
-            }
+        // See if the accessibility injector needs to handle this event.
+        if (isAccessibilityEnabled()
+                && getAccessibilityInjector().handleKeyEventIfNecessary(event)) {
+            return true;
         }
 
         if (keyCode == KeyEvent.KEYCODE_PAGE_UP) {
@@ -5027,30 +4846,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             return false;
         }
 
-        // accessibility support
-        if (accessibilityScriptInjected()) {
-            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-                // if an accessibility script is injected we delegate to it the key handling.
-                // this script is a screen reader which is a fully fledged solution for blind
-                // users to navigate in and interact with web pages.
-                sendBatchableInputMessage(EventHub.KEY_UP, 0, 0, event);
-                return true;
-            } else {
-                // Clean up if accessibility was disabled after loading the current URL.
-                mAccessibilityScriptInjected = false;
-            }
-        } else if (mAccessibilityInjector != null) {
-            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-                if (mAccessibilityInjector.onKeyEvent(event)) {
-                    // if an accessibility injector is present (no JavaScript enabled or the site
-                    // opts out injecting our JavaScript screen reader) we let it decide whether to
-                    // act on and consume the event.
-                    return true;
-                }
-            } else {
-                // Clean up if accessibility was disabled after loading the current URL.
-                mAccessibilityInjector = null;
-            }
+        // See if the accessibility injector needs to handle this event.
+        if (isAccessibilityEnabled()
+                && getAccessibilityInjector().handleKeyEventIfNecessary(event)) {
+            return true;
         }
 
         if (isEnterActionKey(keyCode)) {
@@ -5351,7 +5150,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     public void onAttachedToWindow() {
         if (mWebView.hasWindowFocus()) setActive(true);
 
-        addAccessibilityApisToJavaScript();
+        if (isAccessibilityEnabled()) {
+            getAccessibilityInjector().addAccessibilityApisIfNecessary();
+        }
 
         updateHwAccelerated();
     }
@@ -5362,7 +5163,14 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         mZoomManager.dismissZoomPicker();
         if (mWebView.hasWindowFocus()) setActive(false);
 
-        removeAccessibilityApisFromJavaScript();
+        if (isAccessibilityEnabled()) {
+            getAccessibilityInjector().removeAccessibilityApisIfNecessary();
+        } else {
+            // Ensure the injector is cleared if we're detaching from the window
+            // and accessibility is disabled.
+            mAccessibilityInjector = null;
+        }
+
         updateHwAccelerated();
 
         if (mWebView.isHardwareAccelerated()) {
@@ -7415,9 +7223,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     break;
 
                 case SELECTION_STRING_CHANGED:
-                    if (mAccessibilityInjector != null) {
-                        String selectionString = (String) msg.obj;
-                        mAccessibilityInjector.onSelectionStringChange(selectionString);
+                    if (isAccessibilityEnabled()) {
+                        getAccessibilityInjector()
+                                .handleSelectionChangedIfNecessary((String) msg.obj);
                     }
                     break;
 
@@ -7976,7 +7784,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         mIsBatchingTextChanges = false;
     }
 
-    private void sendBatchableInputMessage(int what, int arg1, int arg2,
+    void sendBatchableInputMessage(int what, int arg1, int arg2,
             Object obj) {
         if (mWebViewCore == null) {
             return;
@@ -8394,16 +8202,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             }
         }
         sendBatchableInputMessage(eventHubAction, direction, 0, event);
-    }
-
-    /**
-     * @return Whether accessibility script has been injected.
-     */
-    private boolean accessibilityScriptInjected() {
-        // TODO: Maybe the injected script should announce its presence in
-        // the page meta-tag so the nativePageShouldHandleShiftAndArrows
-        // will check that as one of the conditions it looks for
-        return mAccessibilityScriptInjected;
     }
 
     /**
