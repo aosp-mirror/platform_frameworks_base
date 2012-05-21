@@ -300,7 +300,18 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
      * onServiceConnected() callback is received.
      */
     void handleServiceConnected() {
-        if (DEBUG) Log.d(TAG, "handleServiceConnected()");
+        Log.d(TAG, "handleServiceConnected()");
+
+        // It is possible that an unbind has occurred in the time between the bind and when this
+        // function is reached.  If an unbind has already occurred, proceeding on to call startUi()
+        // can result in a fatal error.  Note that the onServiceConnected() callback is
+        // asynchronous, so this possibility would still exist if we executed this directly in
+        // onServiceConnected() rather than using a handler.
+        if (!mBoundToService) {
+            Log.d(TAG, "Dropping startUi() in handleServiceConnected() because no longer bound");
+            return;
+        }
+
         try {
             mService.registerCallback(mFaceUnlockCallback);
         } catch (RemoteException e) {
@@ -452,25 +463,12 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
      * Tells the Face Unlock service to start displaying its UI and start processing.
      */
     private void startUi(IBinder windowToken, int x, int y, int w, int h) {
-        Log.d(TAG, "startUi()");
+        if (DEBUG) Log.d(TAG, "startUi()");
         synchronized (mServiceRunningLock) {
             if (!mServiceRunning) {
-                if (DEBUG) Log.d(TAG, "Starting Face Unlock");
+                Log.d(TAG, "Starting Face Unlock");
                 try {
-                    // TODO: these checks and logs are for tracking down bug 6409767 and can be
-                    // removed when that bug is fixed.
-                    if (mService == null) {
-                        Log.d(TAG, "mService is null");
-                    }
-                    if (windowToken == null) {
-                        Log.d(TAG, "windowToken is null");
-                    }
-                    if (mLockPatternUtils == null) {
-                        Log.d(TAG, "mLockPatternUtils is null");
-                    }
-                    Log.d(TAG, "x,y,w,h,live: " + x + "," + y + "," + w + "," + h + ", no");
                     mService.startUi(windowToken, x, y, w, h, false);
-                    Log.d(TAG, "mService.startUi() called");
                 } catch (RemoteException e) {
                     Log.e(TAG, "Caught exception starting Face Unlock: " + e.toString());
                     return;
@@ -492,7 +490,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         // screen is turned off.  That's why we check.
         synchronized (mServiceRunningLock) {
             if (mServiceRunning) {
-                if (DEBUG) Log.d(TAG, "Stopping Face Unlock");
+                Log.d(TAG, "Stopping Face Unlock");
                 try {
                     mService.stopUi();
                 } catch (RemoteException e) {
