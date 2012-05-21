@@ -657,6 +657,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             buildInputMethodListLocked(mMethodList, mMethodMap);
             // Reset the current ime to the proper one
             resetDefaultImeLocked(mContext);
+            updateFromSettingsLocked();
             mLastSystemLocale = newLocale;
         }
     }
@@ -1439,34 +1440,41 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             throw new IllegalArgumentException("Unknown id: " + id);
         }
 
+        // See if we need to notify a subtype change within the same IME.
         if (id.equals(mCurMethodId)) {
-            InputMethodSubtype subtype = null;
-            if (subtypeId >= 0 && subtypeId < info.getSubtypeCount()) {
-                subtype = info.getSubtypeAt(subtypeId);
+            final int subtypeCount = info.getSubtypeCount();
+            if (subtypeCount <= 0) {
+                return;
             }
-            if (subtype != mCurrentSubtype) {
-                synchronized (mMethodMap) {
-                    if (subtype != null) {
-                        setSelectedInputMethodAndSubtypeLocked(info, subtypeId, true);
-                    }
-                    if (mCurMethod != null) {
-                        try {
-                            refreshImeWindowVisibilityLocked();
-                            // If subtype is null, try to find the most applicable one from
-                            // getCurrentInputMethodSubtype.
-                            if (subtype == null) {
-                                subtype = getCurrentInputMethodSubtype();
-                            }
-                            mCurMethod.changeInputMethodSubtype(subtype);
-                        } catch (RemoteException e) {
-                            return;
-                        }
+            final InputMethodSubtype oldSubtype = mCurrentSubtype;
+            final InputMethodSubtype newSubtype;
+            if (subtypeId >= 0 && subtypeId < subtypeCount) {
+                newSubtype = info.getSubtypeAt(subtypeId);
+            } else {
+                // If subtype is null, try to find the most applicable one from
+                // getCurrentInputMethodSubtype.
+                newSubtype = getCurrentInputMethodSubtype();
+            }
+            if (newSubtype == null || oldSubtype == null) {
+                Slog.w(TAG, "Illegal subtype state: old subtype = " + oldSubtype
+                        + ", new subtype = " + newSubtype);
+                return;
+            }
+            if (newSubtype != oldSubtype) {
+                setSelectedInputMethodAndSubtypeLocked(info, subtypeId, true);
+                if (mCurMethod != null) {
+                    try {
+                        refreshImeWindowVisibilityLocked();
+                        mCurMethod.changeInputMethodSubtype(newSubtype);
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Failed to call changeInputMethodSubtype");
                     }
                 }
             }
             return;
         }
 
+        // Changing to a different IME.
         final long ident = Binder.clearCallingIdentity();
         try {
             // Set a subtype to this input method.
@@ -2653,7 +2661,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mCurrentSubtype = subtype;
             } else {
                 mSettings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
-                mCurrentSubtype = null;
+                // If the subtype is not specified, choose the most applicable one
+                mCurrentSubtype = getCurrentInputMethodSubtype();
             }
         }
 
