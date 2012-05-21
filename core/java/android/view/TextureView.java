@@ -23,6 +23,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -353,7 +354,12 @@ public class TextureView extends View {
                     synchronized (mLock) {
                         mUpdateLayer = true;
                     }
-                    postInvalidate();
+
+                    if (Looper.myLooper() == Looper.getMainLooper()) {
+                        invalidate();
+                    } else {
+                        postInvalidate();
+                    }
                 }
             };
             mSurface.setOnFrameAvailableListener(mUpdateListener);
