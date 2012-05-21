@@ -22,24 +22,14 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Debug;
-import android.os.Environment;
-import android.os.Looper;
-import android.os.Message;
-import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Printer;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -51,14 +41,8 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -67,53 +51,16 @@ import java.util.concurrent.TimeUnit;
  */
 public class ViewDebug {
     /**
-     * Log tag used to log errors related to the consistency of the view hierarchy.
-     *
-     * @hide
+     * @deprecated This flag is now unused
      */
-    public static final String CONSISTENCY_LOG_TAG = "ViewConsistency";
-
-    /**
-     * Flag indicating the consistency check should check layout-related properties.
-     *
-     * @hide
-     */
-    public static final int CONSISTENCY_LAYOUT = 0x1;
-
-    /**
-     * Flag indicating the consistency check should check drawing-related properties.
-     *
-     * @hide
-     */
-    public static final int CONSISTENCY_DRAWING = 0x2;
-
-    /**
-     * Enables or disables view hierarchy tracing. Any invoker of
-     * {@link #trace(View, android.view.ViewDebug.HierarchyTraceType)} should first
-     * check that this value is set to true as not to affect performance.
-     */
+    @Deprecated
     public static final boolean TRACE_HIERARCHY = false;
 
     /**
-     * Enables or disables view recycler tracing. Any invoker of
-     * {@link #trace(View, android.view.ViewDebug.RecyclerTraceType, int[])} should first
-     * check that this value is set to true as not to affect performance.
+     * @deprecated This flag is now unused
      */
+    @Deprecated
     public static final boolean TRACE_RECYCLER = false;
-
-    /**
-     * Profiles drawing times in the events log.
-     *
-     * @hide
-     */
-    public static final boolean DEBUG_PROFILE_DRAWING = false;
-
-    /**
-     * Profiles layout times in the events log.
-     *
-     * @hide
-     */
-    public static final boolean DEBUG_PROFILE_LAYOUT = false;
 
     /**
      * Enables detailed logging of drag/drop operations.
@@ -139,33 +86,6 @@ public class ViewDebug {
 
     /** @hide */
     public static final String DEBUG_LATENCY_TAG = "ViewLatency";
-
-    /**
-     * Enables detailed logging of accessibility focus operations.
-     * @hide
-     */
-    public static final boolean DEBUG_ACCESSIBILITY_FOCUS = false;
-
-    /**
-     * Tag for logging of accessibility focus operations
-     * @hide
-     */
-    public static final String DEBUG_ACCESSIBILITY_FOCUS_TAG = "AccessibilityFocus";
-
-    /**
-     * <p>Enables or disables views consistency check. Even when this property is enabled,
-     * view consistency checks happen only if {@link false} is set
-     * to true. The value of this property can be configured externally in one of the
-     * following files:</p>
-     * <ul>
-     *  <li>/system/debug.prop</li>
-     *  <li>/debug.prop</li>
-     *  <li>/data/debug.prop</li>
-     * </ul>
-     * @hide
-     */
-    @Debug.DebugProperty
-    public static boolean consistencyCheckEnabled = false;
 
     /**
      * This annotation can be used to mark fields and methods to be dumped by
@@ -373,8 +293,9 @@ public class ViewDebug {
     private static HashMap<AccessibleObject, ExportedProperty> sAnnotations;
 
     /**
-     * Defines the type of hierarhcy trace to output to the hierarchy traces file.
+     * @deprecated This enum is now unused
      */
+    @Deprecated
     public enum HierarchyTraceType {
         INVALIDATE,
         INVALIDATE_CHILD,
@@ -386,13 +307,10 @@ public class ViewDebug {
         BUILD_CACHE
     }
 
-    private static BufferedWriter sHierarchyTraces;
-    private static ViewRootImpl sHierarchyRoot;
-    private static String sHierarchyTracePrefix;
-
     /**
-     * Defines the type of recycler trace to output to the recycler traces file.
+     * @deprecated This enum is now unused
      */
+    @Deprecated
     public enum RecyclerTraceType {
         NEW_VIEW,
         BIND_VIEW,
@@ -401,21 +319,6 @@ public class ViewDebug {
         MOVE_TO_SCRAP_HEAP,
         MOVE_FROM_ACTIVE_TO_SCRAP_HEAP
     }
-
-    private static class RecyclerTrace {
-        public int view;
-        public RecyclerTraceType type;
-        public int position;
-        public int indexOnScreen;
-    }
-
-    private static View sRecyclerOwnerView;
-    private static List<View> sRecyclerViews;
-    private static List<RecyclerTrace> sRecyclerTraces;
-    private static String sRecyclerTracePrefix;
-
-    private static final ThreadLocal<LooperProfiler> sLooperProfilerStorage =
-            new ThreadLocal<LooperProfiler>();
 
     /**
      * Returns the number of instanciated Views.
@@ -440,511 +343,50 @@ public class ViewDebug {
     }
 
     /**
-     * Starts profiling the looper associated with the current thread.
-     * You must call {@link #stopLooperProfiling} to end profiling
-     * and obtain the traces. Both methods must be invoked on the
-     * same thread.
-     * 
-     * @hide
+     * @deprecated This method is now unused and invoking it is a no-op
      */
-    public static void startLooperProfiling(String path, FileDescriptor fileDescriptor) {
-        if (sLooperProfilerStorage.get() == null) {
-            LooperProfiler profiler = new LooperProfiler(path, fileDescriptor);
-            sLooperProfilerStorage.set(profiler);
-            Looper.myLooper().setMessageLogging(profiler);
-        }
-    }    
-
-    /**
-     * Stops profiling the looper associated with the current thread.
-     * 
-     * @see #startLooperProfiling(String, java.io.FileDescriptor) 
-     * 
-     * @hide
-     */
-    public static void stopLooperProfiling() {
-        LooperProfiler profiler = sLooperProfilerStorage.get();
-        if (profiler != null) {
-            sLooperProfilerStorage.remove();
-            Looper.myLooper().setMessageLogging(null);
-            profiler.save();
-        }
-    }
-
-    private static class LooperProfiler implements Looper.Profiler, Printer {
-        private static final String LOG_TAG = "LooperProfiler";
-
-        private static final int TRACE_VERSION_NUMBER = 3;
-        private static final int ACTION_EXIT_METHOD = 0x1;
-        private static final int HEADER_SIZE = 32;
-        private static final String HEADER_MAGIC = "SLOW";
-        private static final short HEADER_RECORD_SIZE = (short) 14;
-
-        private final long mTraceWallStart;
-        private final long mTraceThreadStart;
-        
-        private final ArrayList<Entry> mTraces = new ArrayList<Entry>(512);
-
-        private final HashMap<String, Integer> mTraceNames = new HashMap<String, Integer>(32);
-        private int mTraceId = 0;
-
-        private final String mPath;
-        private ParcelFileDescriptor mFileDescriptor;
-
-        LooperProfiler(String path, FileDescriptor fileDescriptor) {
-            mPath = path;
-            try {
-                mFileDescriptor = ParcelFileDescriptor.dup(fileDescriptor);
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "Could not write trace file " + mPath, e);
-                throw new RuntimeException(e);
-            }
-            mTraceWallStart = SystemClock.currentTimeMicro();
-            mTraceThreadStart = SystemClock.currentThreadTimeMicro();            
-        }
-
-        @Override
-        public void println(String x) {
-            // Ignore messages
-        }
-
-        @Override
-        public void profile(Message message, long wallStart, long wallTime,
-                long threadStart, long threadTime) {
-            Entry entry = new Entry();
-            entry.traceId = getTraceId(message);
-            entry.wallStart = wallStart;
-            entry.wallTime = wallTime;
-            entry.threadStart = threadStart;
-            entry.threadTime = threadTime;
-
-            mTraces.add(entry);
-        }
-
-        private int getTraceId(Message message) {
-            String name = message.getTarget().getMessageName(message);
-            Integer traceId = mTraceNames.get(name);
-            if (traceId == null) {
-                traceId = mTraceId++ << 4;
-                mTraceNames.put(name, traceId);
-            }
-            return traceId;
-        }
-
-        void save() {
-            // Don't block the UI thread
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    saveTraces();
-                }
-            }, "LooperProfiler[" + mPath + "]").start();
-        }
-
-        private void saveTraces() {
-            FileOutputStream fos = new FileOutputStream(mFileDescriptor.getFileDescriptor());
-            DataOutputStream out = new DataOutputStream(new BufferedOutputStream(fos));
-
-            try {
-                writeHeader(out, mTraceWallStart, mTraceNames, mTraces);
-                out.flush();
-
-                writeTraces(fos, out.size(), mTraceWallStart, mTraceThreadStart, mTraces);
-
-                Log.d(LOG_TAG, "Looper traces ready: " + mPath);
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "Could not write trace file " + mPath, e);
-            } finally {
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    Log.e(LOG_TAG, "Could not write trace file " + mPath, e);
-                }
-                try {
-                    mFileDescriptor.close();
-                } catch (IOException e) {
-                    Log.e(LOG_TAG, "Could not write trace file " + mPath, e);
-                }
-            }
-        }
-        
-        private static void writeTraces(FileOutputStream out, long offset, long wallStart,
-                long threadStart, ArrayList<Entry> entries) throws IOException {
-    
-            FileChannel channel = out.getChannel();
-    
-            // Header
-            ByteBuffer buffer = ByteBuffer.allocateDirect(HEADER_SIZE);
-            buffer.put(HEADER_MAGIC.getBytes());
-            buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
-            buffer.putShort((short) TRACE_VERSION_NUMBER);    // version
-            buffer.putShort((short) HEADER_SIZE);             // offset to data
-            buffer.putLong(wallStart);                        // start time in usec
-            buffer.putShort(HEADER_RECORD_SIZE);              // size of a record in bytes
-            // padding to 32 bytes
-            for (int i = 0; i < HEADER_SIZE - 18; i++) {
-                buffer.put((byte) 0);
-            }
-    
-            buffer.flip();
-            channel.position(offset).write(buffer);
-            
-            buffer = ByteBuffer.allocateDirect(14).order(ByteOrder.LITTLE_ENDIAN);
-            for (Entry entry : entries) {
-                buffer.putShort((short) 1);   // we simulate only one thread
-                buffer.putInt(entry.traceId); // entering method
-                buffer.putInt((int) (entry.threadStart - threadStart));
-                buffer.putInt((int) (entry.wallStart - wallStart));
-    
-                buffer.flip();
-                channel.write(buffer);
-                buffer.clear();
-    
-                buffer.putShort((short) 1);
-                buffer.putInt(entry.traceId | ACTION_EXIT_METHOD); // exiting method
-                buffer.putInt((int) (entry.threadStart + entry.threadTime - threadStart));
-                buffer.putInt((int) (entry.wallStart + entry.wallTime - wallStart));
-    
-                buffer.flip();
-                channel.write(buffer);
-                buffer.clear();
-            }
-    
-            channel.close();
-        }
-    
-        private static void writeHeader(DataOutputStream out, long start,
-                HashMap<String, Integer> names, ArrayList<Entry> entries) throws IOException {
-    
-            Entry last = entries.get(entries.size() - 1);
-            long wallTotal = (last.wallStart + last.wallTime) - start;
-    
-            startSection("version", out);
-            addValue(null, Integer.toString(TRACE_VERSION_NUMBER), out);
-            addValue("data-file-overflow", "false", out);
-            addValue("clock", "dual", out);
-            addValue("elapsed-time-usec", Long.toString(wallTotal), out);
-            addValue("num-method-calls", Integer.toString(entries.size()), out);
-            addValue("clock-call-overhead-nsec", "1", out);
-            addValue("vm", "dalvik", out);
-    
-            startSection("threads", out);
-            addThreadId(1, "main", out);
-    
-            startSection("methods", out);
-            addMethods(names, out);
-    
-            startSection("end", out);
-        }
-    
-        private static void addMethods(HashMap<String, Integer> names, DataOutputStream out)
-                throws IOException {
-    
-            for (Map.Entry<String, Integer> name : names.entrySet()) {
-                out.writeBytes(String.format("0x%08x\tEventQueue\t%s\t()V\tLooper\t-2\n",
-                        name.getValue(), name.getKey()));
-            }
-        }
-    
-        private static void addThreadId(int id, String name, DataOutputStream out)
-                throws IOException {
-
-            out.writeBytes(Integer.toString(id) + '\t' + name + '\n');
-        }
-    
-        private static void addValue(String name, String value, DataOutputStream out)
-                throws IOException {
-    
-            if (name != null) {
-                out.writeBytes(name + "=");
-            }
-            out.writeBytes(value + '\n');
-        }
-    
-        private static void startSection(String name, DataOutputStream out) throws IOException {
-            out.writeBytes("*" + name + '\n');
-        }
-
-        static class Entry {
-            int traceId;
-            long wallStart;
-            long wallTime;
-            long threadStart;
-            long threadTime;
-        }
-    }
-
-    /**
-     * Outputs a trace to the currently opened recycler traces. The trace records the type of
-     * recycler action performed on the supplied view as well as a number of parameters.
-     *
-     * @param view the view to trace
-     * @param type the type of the trace
-     * @param parameters parameters depending on the type of the trace
-     */
+    @Deprecated
+    @SuppressWarnings({ "UnusedParameters", "deprecation" })
     public static void trace(View view, RecyclerTraceType type, int... parameters) {
-        if (sRecyclerOwnerView == null || sRecyclerViews == null) {
-            return;
-        }
-
-        if (!sRecyclerViews.contains(view)) {
-            sRecyclerViews.add(view);
-        }
-
-        final int index = sRecyclerViews.indexOf(view);
-
-        RecyclerTrace trace = new RecyclerTrace();
-        trace.view = index;
-        trace.type = type;
-        trace.position = parameters[0];
-        trace.indexOnScreen = parameters[1];
-
-        sRecyclerTraces.add(trace);
     }
 
     /**
-     * Starts tracing the view recycler of the specified view. The trace is identified by a prefix,
-     * used to build the traces files names: <code>/EXTERNAL/view-recycler/PREFIX.traces</code> and
-     * <code>/EXTERNAL/view-recycler/PREFIX.recycler</code>.
-     *
-     * Only one view recycler can be traced at the same time. After calling this method, any
-     * other invocation will result in a <code>IllegalStateException</code> unless
-     * {@link #stopRecyclerTracing()} is invoked before.
-     *
-     * Traces files are created only after {@link #stopRecyclerTracing()} is invoked.
-     *
-     * This method will return immediately if TRACE_RECYCLER is false.
-     *
-     * @param prefix the traces files name prefix
-     * @param view the view whose recycler must be traced
-     *
-     * @see #stopRecyclerTracing()
-     * @see #trace(View, android.view.ViewDebug.RecyclerTraceType, int[])
+     * @deprecated This method is now unused and invoking it is a no-op
      */
+    @Deprecated
+    @SuppressWarnings("UnusedParameters")
     public static void startRecyclerTracing(String prefix, View view) {
-        //noinspection PointlessBooleanExpression,ConstantConditions
-        if (!TRACE_RECYCLER) {
-            return;
-        }
-
-        if (sRecyclerOwnerView != null) {
-            throw new IllegalStateException("You must call stopRecyclerTracing() before running" +
-                " a new trace!");
-        }
-
-        sRecyclerTracePrefix = prefix;
-        sRecyclerOwnerView = view;
-        sRecyclerViews = new ArrayList<View>();
-        sRecyclerTraces = new LinkedList<RecyclerTrace>();
     }
 
     /**
-     * Stops the current view recycer tracing.
-     *
-     * Calling this method creates the file <code>/EXTERNAL/view-recycler/PREFIX.traces</code>
-     * containing all the traces (or method calls) relative to the specified view's recycler.
-     *
-     * Calling this method creates the file <code>/EXTERNAL/view-recycler/PREFIX.recycler</code>
-     * containing all of the views used by the recycler of the view supplied to
-     * {@link #startRecyclerTracing(String, View)}.
-     *
-     * This method will return immediately if TRACE_RECYCLER is false.
-     *
-     * @see #startRecyclerTracing(String, View)
-     * @see #trace(View, android.view.ViewDebug.RecyclerTraceType, int[])
+     * @deprecated This method is now unused and invoking it is a no-op
      */
+    @Deprecated
+    @SuppressWarnings("UnusedParameters")
     public static void stopRecyclerTracing() {
-        //noinspection PointlessBooleanExpression,ConstantConditions
-        if (!TRACE_RECYCLER) {
-            return;
-        }
-
-        if (sRecyclerOwnerView == null || sRecyclerViews == null) {
-            throw new IllegalStateException("You must call startRecyclerTracing() before" +
-                " stopRecyclerTracing()!");
-        }
-
-        File recyclerDump = new File(Environment.getExternalStorageDirectory(), "view-recycler/");
-        //noinspection ResultOfMethodCallIgnored
-        recyclerDump.mkdirs();
-
-        recyclerDump = new File(recyclerDump, sRecyclerTracePrefix + ".recycler");
-        try {
-            final BufferedWriter out = new BufferedWriter(new FileWriter(recyclerDump), 8 * 1024);
-
-            for (View view : sRecyclerViews) {
-                final String name = view.getClass().getName();
-                out.write(name);
-                out.newLine();
-            }
-
-            out.close();
-        } catch (IOException e) {
-            Log.e("View", "Could not dump recycler content");
-            return;
-        }
-
-        recyclerDump = new File(Environment.getExternalStorageDirectory(), "view-recycler/");
-        recyclerDump = new File(recyclerDump, sRecyclerTracePrefix + ".traces");
-        try {
-            if (recyclerDump.exists()) {
-                //noinspection ResultOfMethodCallIgnored
-                recyclerDump.delete();
-            }
-            final FileOutputStream file = new FileOutputStream(recyclerDump);
-            final DataOutputStream out = new DataOutputStream(file);
-
-            for (RecyclerTrace trace : sRecyclerTraces) {
-                out.writeInt(trace.view);
-                out.writeInt(trace.type.ordinal());
-                out.writeInt(trace.position);
-                out.writeInt(trace.indexOnScreen);
-                out.flush();
-            }
-
-            out.close();
-        } catch (IOException e) {
-            Log.e("View", "Could not dump recycler traces");
-            return;
-        }
-
-        sRecyclerViews.clear();
-        sRecyclerViews = null;
-
-        sRecyclerTraces.clear();
-        sRecyclerTraces = null;
-
-        sRecyclerOwnerView = null;
     }
 
     /**
-     * Outputs a trace to the currently opened traces file. The trace contains the class name
-     * and instance's hashcode of the specified view as well as the supplied trace type.
-     *
-     * @param view the view to trace
-     * @param type the type of the trace
+     * @deprecated This method is now unused and invoking it is a no-op
      */
+    @Deprecated
+    @SuppressWarnings({ "UnusedParameters", "deprecation" })
     public static void trace(View view, HierarchyTraceType type) {
-        if (sHierarchyTraces == null) {
-            return;
-        }
-
-        try {
-            sHierarchyTraces.write(type.name());
-            sHierarchyTraces.write(' ');
-            sHierarchyTraces.write(view.getClass().getName());
-            sHierarchyTraces.write('@');
-            sHierarchyTraces.write(Integer.toHexString(view.hashCode()));
-            sHierarchyTraces.newLine();
-        } catch (IOException e) {
-            Log.w("View", "Error while dumping trace of type " + type + " for view " + view);
-        }
     }
 
     /**
-     * Starts tracing the view hierarchy of the specified view. The trace is identified by a prefix,
-     * used to build the traces files names: <code>/EXTERNAL/view-hierarchy/PREFIX.traces</code> and
-     * <code>/EXTERNAL/view-hierarchy/PREFIX.tree</code>.
-     *
-     * Only one view hierarchy can be traced at the same time. After calling this method, any
-     * other invocation will result in a <code>IllegalStateException</code> unless
-     * {@link #stopHierarchyTracing()} is invoked before.
-     *
-     * Calling this method creates the file <code>/EXTERNAL/view-hierarchy/PREFIX.traces</code>
-     * containing all the traces (or method calls) relative to the specified view's hierarchy.
-     *
-     * This method will return immediately if TRACE_HIERARCHY is false.
-     *
-     * @param prefix the traces files name prefix
-     * @param view the view whose hierarchy must be traced
-     *
-     * @see #stopHierarchyTracing()
-     * @see #trace(View, android.view.ViewDebug.HierarchyTraceType)
+     * @deprecated This method is now unused and invoking it is a no-op
      */
+    @Deprecated
+    @SuppressWarnings("UnusedParameters")
     public static void startHierarchyTracing(String prefix, View view) {
-        //noinspection PointlessBooleanExpression,ConstantConditions
-        if (!TRACE_HIERARCHY) {
-            return;
-        }
-
-        if (sHierarchyRoot != null) {
-            throw new IllegalStateException("You must call stopHierarchyTracing() before running" +
-                " a new trace!");
-        }
-
-        File hierarchyDump = new File(Environment.getExternalStorageDirectory(), "view-hierarchy/");
-        //noinspection ResultOfMethodCallIgnored
-        hierarchyDump.mkdirs();
-
-        hierarchyDump = new File(hierarchyDump, prefix + ".traces");
-        sHierarchyTracePrefix = prefix;
-
-        try {
-            sHierarchyTraces = new BufferedWriter(new FileWriter(hierarchyDump), 8 * 1024);
-        } catch (IOException e) {
-            Log.e("View", "Could not dump view hierarchy");
-            return;
-        }
-
-        sHierarchyRoot = view.getViewRootImpl();
     }
 
     /**
-     * Stops the current view hierarchy tracing. This method closes the file
-     * <code>/EXTERNAL/view-hierarchy/PREFIX.traces</code>.
-     *
-     * Calling this method creates the file <code>/EXTERNAL/view-hierarchy/PREFIX.tree</code>
-     * containing the view hierarchy of the view supplied to
-     * {@link #startHierarchyTracing(String, View)}.
-     *
-     * This method will return immediately if TRACE_HIERARCHY is false.
-     *
-     * @see #startHierarchyTracing(String, View)
-     * @see #trace(View, android.view.ViewDebug.HierarchyTraceType)
+     * @deprecated This method is now unused and invoking it is a no-op
      */
+    @Deprecated
     public static void stopHierarchyTracing() {
-        //noinspection PointlessBooleanExpression,ConstantConditions
-        if (!TRACE_HIERARCHY) {
-            return;
-        }
-
-        if (sHierarchyRoot == null || sHierarchyTraces == null) {
-            throw new IllegalStateException("You must call startHierarchyTracing() before" +
-                " stopHierarchyTracing()!");
-        }
-
-        try {
-            sHierarchyTraces.close();
-        } catch (IOException e) {
-            Log.e("View", "Could not write view traces");
-        }
-        sHierarchyTraces = null;
-
-        File hierarchyDump = new File(Environment.getExternalStorageDirectory(), "view-hierarchy/");
-        //noinspection ResultOfMethodCallIgnored
-        hierarchyDump.mkdirs();
-        hierarchyDump = new File(hierarchyDump, sHierarchyTracePrefix + ".tree");
-
-        BufferedWriter out;
-        try {
-            out = new BufferedWriter(new FileWriter(hierarchyDump), 8 * 1024);
-        } catch (IOException e) {
-            Log.e("View", "Could not dump view hierarchy");
-            return;
-        }
-
-        View view = sHierarchyRoot.getView();
-        if (view instanceof ViewGroup) {
-            ViewGroup group = (ViewGroup) view;
-            dumpViewHierarchy(group, out, 0);
-            try {
-                out.close();
-            } catch (IOException e) {
-                Log.e("View", "Could not dump view hierarchy");
-            }
-        }
-
-        sHierarchyRoot = null;
     }
 
     static void dispatchCommand(View view, String command, String parameters,
@@ -1725,38 +1167,6 @@ public class ViewDebug {
         }
     }
 
-    private static void dumpViewHierarchy(ViewGroup group, BufferedWriter out, int level) {
-        if (!dumpView(group, out, level)) {
-            return;
-        }
-
-        final int count = group.getChildCount();
-        for (int i = 0; i < count; i++) {
-            final View view = group.getChildAt(i);
-            if (view instanceof ViewGroup) {
-                dumpViewHierarchy((ViewGroup) view, out, level + 1);
-            } else {
-                dumpView(view, out, level + 1);
-            }
-        }
-    }
-
-    private static boolean dumpView(Object view, BufferedWriter out, int level) {
-        try {
-            for (int i = 0; i < level; i++) {
-                out.write(' ');
-            }
-            out.write(view.getClass().getName());
-            out.write('@');
-            out.write(Integer.toHexString(view.hashCode()));
-            out.newLine();
-        } catch (IOException e) {
-            Log.w("View", "Error while dumping hierarchy tree");
-            return false;
-        }
-        return true;
-    }
-
     private static Field[] capturedViewGetPropertyFields(Class<?> klass) {
         if (mCapturedViewFieldsForClasses == null) {
             mCapturedViewFieldsForClasses = new HashMap<Class<?>, Field[]>();
@@ -1863,7 +1273,6 @@ public class ViewDebug {
     }
 
     private static String capturedViewExportFields(Object obj, Class<?> klass, String prefix) {
-
         if (obj == null) {
             return "null";
         }
