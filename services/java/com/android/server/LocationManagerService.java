@@ -105,6 +105,12 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     private static final String INSTALL_LOCATION_PROVIDER =
         android.Manifest.permission.INSTALL_LOCATION_PROVIDER;
 
+    // Location Providers may sometimes deliver location updates
+    // slightly faster that requested - provide grace period so
+    // we don't unnecessarily filter events that are otherwise on
+    // time
+    private static final int MAX_PROVIDER_SCHEDULING_JITTER = 100;
+
     // Set of providers that are explicitly enabled
     private final Set<String> mEnabledProviders = new HashSet<String>();
 
@@ -194,8 +200,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         final PendingIntent mPendingIntent;
         final Object mKey;
         final HashMap<String,UpdateRecord> mUpdateRecords = new HashMap<String,UpdateRecord>();
+
         int mPendingBroadcasts;
-        String requiredPermissions;
+        String mRequiredPermissions;
 
         Receiver(ILocationListener listener) {
             mListener = listener;
@@ -286,7 +293,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                         // synchronize to ensure incrementPendingBroadcastsLocked()
                         // is called before decrementPendingBroadcasts()
                         mPendingIntent.send(mContext, 0, statusChanged, this, mLocationHandler,
-                                requiredPermissions);
+                                mRequiredPermissions);
                         // call this after broadcasting so we do not increment
                         // if we throw an exeption.
                         incrementPendingBroadcastsLocked();
@@ -322,7 +329,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                         // synchronize to ensure incrementPendingBroadcastsLocked()
                         // is called before decrementPendingBroadcasts()
                         mPendingIntent.send(mContext, 0, locationChanged, this, mLocationHandler,
-                                requiredPermissions);
+                                mRequiredPermissions);
                         // call this after broadcasting so we do not increment
                         // if we throw an exeption.
                         incrementPendingBroadcastsLocked();
@@ -362,7 +369,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                         // synchronize to ensure incrementPendingBroadcastsLocked()
                         // is called before decrementPendingBroadcasts()
                         mPendingIntent.send(mContext, 0, providerIntent, this, mLocationHandler,
-                                requiredPermissions);
+                                mRequiredPermissions);
                         // call this after broadcasting so we do not increment
                         // if we throw an exeption.
                         incrementPendingBroadcastsLocked();
@@ -374,6 +381,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             return true;
         }
 
+        @Override
         public void binderDied() {
             if (LOCAL_LOGV) {
                 Slog.v(TAG, "Location listener died");
@@ -1026,7 +1034,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                     + Integer.toHexString(System.identityHashCode(this))
                     + " mProvider: " + mProvider + " mUid: " + mUid + "}";
         }
-        
+
         void dump(PrintWriter pw, String prefix) {
             pw.println(prefix + this);
             pw.println(prefix + "mProvider=" + mProvider + " mReceiver=" + mReceiver);
@@ -1155,10 +1163,11 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
         LocationProviderInterface p = mProvidersByName.get(provider);
         if (p == null) {
-            throw new IllegalArgumentException("provider=" + provider);
+            throw new IllegalArgumentException("requested provider " + provider +
+                    " doesn't exisit");
         }
-        receiver.requiredPermissions = checkPermissionsSafe(provider,
-                receiver.requiredPermissions);
+        receiver.mRequiredPermissions = checkPermissionsSafe(provider,
+                receiver.mRequiredPermissions);
 
         // so wakelock calls will succeed
         final int callingPid = Binder.getCallingPid();
@@ -1752,9 +1761,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             return true;
         }
 
-        // Don't broadcast same location again regardless of condition
-        // TODO - we should probably still rebroadcast if user explicitly sets a minTime > 0
-        if (loc.getTime() == lastLoc.getTime()) {
+        // Check whether sufficient time has passed
+        long minTime = record.mMinTime;
+        if (loc.getTime() - lastLoc.getTime() < minTime - MAX_PROVIDER_SCHEDULING_JITTER) {
             return false;
         }
 
