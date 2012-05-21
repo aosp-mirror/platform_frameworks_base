@@ -33,9 +33,6 @@
     <!-- Height of search panel including navigation bar height -->
     <dimen name="navbar_search_panel_height">300dip</dimen>
 
-    <!-- Extra space above the clock in the panel; on this device, zero -->
-    <dimen name="notification_panel_header_padding_top">0dp</dimen>
-
     <!-- Size of application thumbnail -->
     <dimen name="status_bar_recents_thumbnail_width">200dp</dimen>
     <dimen name="status_bar_recents_thumbnail_height">177dp</dimen>
