@@ -170,9 +170,10 @@ public:
     }
 
     void setAlpha(float alpha) {
+        alpha = fminf(1.0f, fmaxf(0.0f, alpha));
         if (alpha != mAlpha) {
             mAlpha = alpha;
-            mMultipliedAlpha = (int)(255 * alpha);
+            mMultipliedAlpha = (int) (255 * alpha);
         }
     }
 
@@ -184,7 +185,7 @@ public:
         if (translationX != mTranslationX) {
             mTranslationX = translationX;
             mMatrixDirty = true;
-            if (ALMOST_EQUAL(mTranslationX, 0) && ALMOST_EQUAL(mTranslationY, 0)) {
+            if (mTranslationX == 0.0f && mTranslationY == 0.0f) {
                 mMatrixFlags &= ~TRANSLATION;
             } else {
                 mMatrixFlags |= TRANSLATION;
@@ -196,7 +197,7 @@ public:
         if (translationY != mTranslationY) {
             mTranslationY = translationY;
             mMatrixDirty = true;
-            if (ALMOST_EQUAL(mTranslationX, 0) && ALMOST_EQUAL(mTranslationY, 0)) {
+            if (mTranslationX == 0.0f && mTranslationY == 0.0f) {
                 mMatrixFlags &= ~TRANSLATION;
             } else {
                 mMatrixFlags |= TRANSLATION;
@@ -208,7 +209,7 @@ public:
         if (rotation != mRotation) {
             mRotation = rotation;
             mMatrixDirty = true;
-            if (ALMOST_EQUAL(mRotation, 0)) {
+            if (mRotation == 0.0f) {
                 mMatrixFlags &= ~ROTATION;
             } else {
                 mMatrixFlags |= ROTATION;
@@ -220,7 +221,7 @@ public:
         if (rotationX != mRotationX) {
             mRotationX = rotationX;
             mMatrixDirty = true;
-            if (ALMOST_EQUAL(mRotationX, 0) && ALMOST_EQUAL(mRotationY, 0)) {
+            if (mRotationX == 0.0f && mRotationY == 0.0f) {
                 mMatrixFlags &= ~ROTATION_3D;
             } else {
                 mMatrixFlags |= ROTATION_3D;
@@ -232,7 +233,7 @@ public:
         if (rotationY != mRotationY) {
             mRotationY = rotationY;
             mMatrixDirty = true;
-            if (ALMOST_EQUAL(mRotationX, 0) && ALMOST_EQUAL(mRotationY, 0)) {
+            if (mRotationX == 0.0f && mRotationY == 0.0f) {
                 mMatrixFlags &= ~ROTATION_3D;
             } else {
                 mMatrixFlags |= ROTATION_3D;
@@ -244,7 +245,7 @@ public:
         if (scaleX != mScaleX) {
             mScaleX = scaleX;
             mMatrixDirty = true;
-            if (ALMOST_EQUAL(mScaleX, 1) && ALMOST_EQUAL(mScaleY, 1)) {
+            if (mScaleX == 1.0f && mScaleY == 1.0f) {
                 mMatrixFlags &= ~SCALE;
             } else {
                 mMatrixFlags |= SCALE;
@@ -267,7 +268,7 @@ public:
     void setPivotX(float pivotX) {
         mPivotX = pivotX;
         mMatrixDirty = true;
-        if (ALMOST_EQUAL(mPivotX, 0) && ALMOST_EQUAL(mPivotY, 0)) {
+        if (mPivotX == 0.0f && mPivotY == 0.0f) {
             mMatrixFlags &= ~PIVOT;
         } else {
             mMatrixFlags |= PIVOT;
@@ -278,7 +279,7 @@ public:
     void setPivotY(float pivotY) {
         mPivotY = pivotY;
         mMatrixDirty = true;
-        if (ALMOST_EQUAL(mPivotX, 0) && ALMOST_EQUAL(mPivotY, 0)) {
+        if (mPivotX == 0.0f && mPivotY == 0.0f) {
             mMatrixFlags &= ~PIVOT;
         } else {
             mMatrixFlags |= PIVOT;
