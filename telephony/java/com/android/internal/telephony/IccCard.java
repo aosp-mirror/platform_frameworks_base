@@ -579,10 +579,14 @@ public class IccCard {
             mHandler.sendMessage(mHandler.obtainMessage(EVENT_CARD_ADDED, null));
         }
 
-        // Call onReady only when SIM or RUIM card becomes ready (not NV)
+        // Call onReady Record(s) on the IccCard becomes ready (not NV)
         if (oldState != State.READY && newState == State.READY &&
                 (is3gpp || isSubscriptionFromIccCard)) {
-            mIccFileHandler.setAid(getAid());
+            if (!(mIccFileHandler instanceof CdmaLteUiccFileHandler)) {
+                // CdmaLteUicc File Handler deals with both USIM and CSIM.
+                // Do not lock onto one AID for now.
+                mIccFileHandler.setAid(getAid());
+            }
             mIccRecords.onReady();
         }
     }
