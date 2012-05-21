@@ -21,8 +21,6 @@ import com.android.internal.util.XmlUtils;
 import com.android.server.Watchdog;
 
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import android.Manifest;
 import android.app.Notification;
@@ -82,7 +80,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -94,7 +91,7 @@ import libcore.util.Objects;
  */
 public class InputManagerService extends IInputManager.Stub implements Watchdog.Monitor {
     static final String TAG = "InputManager";
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
 
     private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
 
