@@ -20,6 +20,7 @@ import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -34,6 +35,9 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PatternMatcher;
+import android.os.Process;
+import android.os.RemoteException;
+import android.os.UserId;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,6 +65,7 @@ import java.util.Set;
 public class ResolverActivity extends AlertActivity implements AdapterView.OnItemClickListener {
     private static final String TAG = "ResolverActivity";
 
+    private int mLaunchedFromUid;
     private ResolveListAdapter mAdapter;
     private PackageManager mPm;
     private boolean mAlwaysUseOption;
@@ -102,6 +107,12 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
             boolean alwaysUseOption) {
         setTheme(R.style.Theme_DeviceDefault_Light_Dialog_Alert);
         super.onCreate(savedInstanceState);
+        try {
+            mLaunchedFromUid = ActivityManagerNative.getDefault().getLaunchedFromUid(
+                    getActivityToken());
+        } catch (RemoteException e) {
+            mLaunchedFromUid = -1;
+        }
         mPm = getPackageManager();
         mAlwaysUseOption = alwaysUseOption;
         mMaxColumns = getResources().getInteger(R.integer.config_maxResolverActivityColumns);
@@ -118,9 +129,14 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
         mIconDpi = am.getLauncherLargeIconDensity();
         mIconSize = am.getLauncherLargeIconSize();
 
-        mAdapter = new ResolveListAdapter(this, intent, initialIntents, rList);
+        mAdapter = new ResolveListAdapter(this, intent, initialIntents, rList,
+                mLaunchedFromUid);
         int count = mAdapter.getCount();
-        if (count > 1) {
+        if (mLaunchedFromUid < 0 || UserId.isIsolated(mLaunchedFromUid)) {
+            // Gulp!
+            finish();
+            return;
+        } else if (count > 1) {
             ap.mView = getLayoutInflater().inflate(R.layout.resolver_grid, null);
             mGrid = (GridView) ap.mView.findViewById(R.id.resolver_grid);
             mGrid.setAdapter(mAdapter);
@@ -146,9 +162,13 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
 
         if (alwaysUseOption) {
             final ViewGroup buttonLayout = (ViewGroup) findViewById(R.id.button_bar);
-            buttonLayout.setVisibility(View.VISIBLE);
-            mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
-            mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
+            if (buttonLayout != null) {
+                buttonLayout.setVisibility(View.VISIBLE);
+                mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
+                mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
+            } else {
+                mAlwaysUseOption = false;
+            }
         }
     }
 
@@ -206,6 +226,18 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
         if (mRegistered) {
             mPackageMonitor.unregister();
             mRegistered = false;
+        }
+        if ((getIntent().getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
+            // This resolver is in the unusual situation where it has been
+            // launched at the top of a new task.  We don't let it be added
+            // to the recent tasks shown to the user, and we need to make sure
+            // that each time we are launched we get the correct launching
+            // uid (not re-using the same resolver from an old launching uid),
+            // so we will now finish ourself since being no longer visible,
+            // the user probably can't get back to us.
+            if (!isChangingConfigurations()) {
+                finish();
+            }
         }
     }
 
@@ -363,17 +395,19 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
         private final Intent[] mInitialIntents;
         private final List<ResolveInfo> mBaseResolveList;
         private final Intent mIntent;
+        private final int mLaunchedFromUid;
         private final LayoutInflater mInflater;
 
         private List<ResolveInfo> mCurrentResolveList;
         private List<DisplayResolveInfo> mList;
 
         public ResolveListAdapter(Context context, Intent intent,
-                Intent[] initialIntents, List<ResolveInfo> rList) {
+                Intent[] initialIntents, List<ResolveInfo> rList, int launchedFromUid) {
             mIntent = new Intent(intent);
             mIntent.setComponent(null);
             mInitialIntents = initialIntents;
             mBaseResolveList = rList;
+            mLaunchedFromUid = launchedFromUid;
             mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             rebuildList();
         }
@@ -400,6 +434,23 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
                 mCurrentResolveList = mPm.queryIntentActivities(
                         mIntent, PackageManager.MATCH_DEFAULT_ONLY
                         | (mAlwaysUseOption ? PackageManager.GET_RESOLVED_FILTER : 0));
+                // Filter out any activities that the launched uid does not
+                // have permission for.  We don't do this when we have an explicit
+                // list of resolved activities, because that only happens when
+                // we are being subclassed, so we can safely launch whatever
+                // they gave us.
+                if (mCurrentResolveList != null) {
+                    for (int i=mCurrentResolveList.size()-1; i >= 0; i--) {
+                        ActivityInfo ai = mCurrentResolveList.get(i).activityInfo;
+                        int granted = ActivityManager.checkComponentPermission(
+                                ai.permission, mLaunchedFromUid,
+                                ai.applicationInfo.uid, ai.exported);
+                        if (granted != PackageManager.PERMISSION_GRANTED) {
+                            // Access not allowed!
+                            mCurrentResolveList.remove(i);
+                        }
+                    }
+                }
             }
             int N;
             if ((mCurrentResolveList != null) && ((N = mCurrentResolveList.size()) > 0)) {
