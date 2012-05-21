@@ -39,6 +39,7 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.text.BoringLayout;
 import android.text.DynamicLayout;
 import android.text.Editable;
@@ -7693,12 +7694,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         super.onPopulateAccessibilityEvent(event);
 
         final boolean isPassword = hasPasswordTransformationMethod();
-        if (!isPassword) {
-            CharSequence text = getTextForAccessibility();
+        if (!isPassword || shouldSpeakPasswordsForAccessibility()) {
+            final CharSequence text = getTextForAccessibility();
             if (!TextUtils.isEmpty(text)) {
                 event.getText().add(text);
             }
         }
+    }
+
+    /**
+     * @return true if the user has explicitly allowed accessibility services
+     * to speak passwords.
+     */
+    private boolean shouldSpeakPasswordsForAccessibility() {
+        return (Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0) == 1);
     }
 
     @Override
