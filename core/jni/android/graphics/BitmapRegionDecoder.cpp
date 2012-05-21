@@ -29,6 +29,7 @@
 #include "CreateJavaOutputStreamAdaptor.h"
 #include "Utils.h"
 #include "JNIHelp.h"
+#include "SkTScopedPtr.h"
 
 #include <android_runtime/AndroidRuntime.h>
 #include "android_util_Binder.h"
@@ -180,7 +181,8 @@ static jobject nativeNewInstanceFromAsset(JNIEnv* env, jobject clazz,
  * reportSizeToVM not supported
  */
 static jobject nativeDecodeRegion(JNIEnv* env, jobject, SkBitmapRegionDecoder *brd,
-        int start_x, int start_y, int width, int height, jobject options) {
+                                int start_x, int start_y, int width, int height, jobject options) {
+    jobject tileBitmap = NULL;
     SkImageDecoder *decoder = brd->getDecoder();
     int sampleSize = 1;
     SkBitmap::Config prefConfig = SkBitmap::kNo_Config;
@@ -199,12 +201,12 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, SkBitmapRegionDecoder *b
         doDither = env->GetBooleanField(options, gOptions_ditherFieldID);
         preferQualityOverSpeed = env->GetBooleanField(options,
                 gOptions_preferQualityOverSpeedFieldID);
+        // Get the bitmap for re-use if it exists.
+        tileBitmap = env->GetObjectField(options, gOptions_bitmapFieldID);
     }
 
     decoder->setDitherImage(doDither);
     decoder->setPreferQualityOverSpeed(preferQualityOverSpeed);
-    SkBitmap*           bitmap = new SkBitmap;
-    SkAutoTDelete<SkBitmap>       adb(bitmap);
     AutoDecoderCancel   adc(options, decoder);
 
     // To fix the race condition in case "requestCancelDecode"
@@ -219,6 +221,17 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, SkBitmapRegionDecoder *b
     region.fTop = start_y;
     region.fRight = start_x + width;
     region.fBottom = start_y + height;
+    SkBitmap* bitmap = NULL;
+    SkTScopedPtr<SkBitmap> adb;
+
+    if (tileBitmap != NULL) {
+        // Re-use bitmap.
+        bitmap = GraphicsJNI::getNativeBitmap(env, tileBitmap);
+    }
+    if (bitmap == NULL) {
+        bitmap = new SkBitmap;
+        adb.reset(bitmap);
+    }
 
     if (!brd->decodeRegion(bitmap, region, prefConfig, sampleSize)) {
         return nullObjectReturn("decoder->decodeRegion returned false");
@@ -235,12 +248,12 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, SkBitmapRegionDecoder *b
                             getMimeTypeString(env, decoder->getFormat()));
     }
 
-    // detach bitmap from its autodeleter, since we want to own it now
-    adb.detach();
+    if (tileBitmap != NULL) {
+        return tileBitmap;
+    }
 
-    SkPixelRef* pr = bitmap->pixelRef();
-    // promise we will never change our pixels (great for sharing and pictures)
-    pr->setImmutable();
+    // detach bitmap from its autodeleter, since we want to own it now
+    adb.release();
 
     JavaPixelAllocator* allocator = (JavaPixelAllocator*) decoder->getAllocator();
     jbyteArray buff = allocator->getStorageObjAndReset();
