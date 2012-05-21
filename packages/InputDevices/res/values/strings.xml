@@ -3,6 +3,9 @@
     <!-- Name of the application. [CHAR LIMIT=35] -->
     <string name="app_label">Input Devices</string>
 
+    <!-- Keyboard layouts label, used to describe the set of all built-in layouts in the UI. [CHAR LIMIT=35] -->
+    <string name="keyboard_layouts_label">Android keyboard</string>
+
     <!-- US English keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_english_us_label">English (US)</string>
 
