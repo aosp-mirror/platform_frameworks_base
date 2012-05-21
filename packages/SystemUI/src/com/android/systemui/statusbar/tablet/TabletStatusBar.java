@@ -188,6 +188,17 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     public Context getContext() { return mContext; }
 
+    private View.OnTouchListener mHomeSearchActionListener = new View.OnTouchListener() {
+        public boolean onTouch(View v, MotionEvent event) {
+            switch(event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    showSearchPanel();
+                break;
+            }
+            return false;
+        }
+    };
+
     @Override
     protected void createAndAddWindows() {
         addStatusBarWindow();
@@ -290,6 +301,7 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         // Search Panel
         mStatusBarView.setBar(this);
+        mHomeButton.setOnTouchListener(mHomeSearchActionListener);
         updateSearchPanel();
 
         // Input methods Panel

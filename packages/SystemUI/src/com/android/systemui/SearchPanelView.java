@@ -18,6 +18,8 @@ package com.android.systemui;
 
 import android.animation.Animator;
 import android.animation.LayoutTransition;
+import android.app.ActivityManagerNative;
+import android.app.ActivityOptions;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -36,6 +38,7 @@ import android.widget.FrameLayout;
 
 import com.android.internal.widget.multiwaveview.MultiWaveView;
 import com.android.internal.widget.multiwaveview.MultiWaveView.OnTriggerListener;
+import com.android.server.am.ActivityManagerService;
 import com.android.systemui.R;
 import com.android.systemui.recent.StatusBarTouchProxy;
 import com.android.systemui.statusbar.BaseStatusBar;
@@ -103,25 +106,19 @@ public class SearchPanelView extends FrameLayout implements
     }
 
     private void startAssistActivity() {
-        if (mSearchManager != null) {
-            ComponentName globalSearchActivity = mSearchManager.getGlobalSearchActivity();
-            if (globalSearchActivity != null) {
-                Intent intent = new Intent(Intent.ACTION_ASSIST);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.setPackage(globalSearchActivity.getPackageName());
-                try {
-                    mContext.startActivity(intent);
-                } catch (ActivityNotFoundException e) {
-                    Slog.w(TAG, "Activity not found for " + intent.getAction());
-                }
-            } else {
-                Slog.w(TAG, "No global search activity");
-            }
+        Intent intent = getAssistIntent();
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        try {
+            mContext.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Slog.w(TAG, "Activity not found for " + intent.getAction());
         }
     }
 
     final MultiWaveView.OnTriggerListener mMultiWaveViewListener
             = new MultiWaveView.OnTriggerListener() {
+
+        private int mTarget = -1;
 
         public void onGrabbed(View v, int handle) {
         }
@@ -136,11 +133,18 @@ public class SearchPanelView extends FrameLayout implements
         }
 
         public void onTrigger(View v, int target) {
-            final int resId = mMultiWaveView.getResourceIdForTarget(target);
-            switch (resId) {
-                case com.android.internal.R.drawable.ic_lockscreen_search:
-                    startAssistActivity();
-                break;
+            mTarget = target;
+        }
+
+        public void onFinishFinalAnimation() {
+            if (mTarget != -1) {
+                final int resId = mMultiWaveView.getResourceIdForTarget(mTarget);
+                mTarget = -1; // a safety to make sure we never launch w/o prior call to onTrigger
+                switch (resId) {
+                    case com.android.internal.R.drawable.ic_lockscreen_search:
+                        startAssistActivity();
+                    break;
+                }
             }
             mBar.hideSearchPanel();
         }
