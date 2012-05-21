@@ -573,7 +573,7 @@ OSCL_EXPORT_REF AVCEnc_Status PVAVCEncGetRecon(AVCHandle *avcHandle, AVCFrameIO 
     recon->pitch = currFS->frame.pitch;
     recon->disp_order = currFS->PicOrderCnt;
     recon->coding_order = currFS->FrameNum;
-    recon->id = (uint32) currFS->base_dpb; /* use the pointer as the id */
+    recon->id = (intptr_t) currFS->base_dpb; /* use the pointer as the id */
 
     currFS->IsOutputted |= 1;
 
