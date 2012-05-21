@@ -374,6 +374,14 @@ public class TextureView extends View {
             // tell mLayer about it and set the SurfaceTexture to use the
             // current view size.
             mUpdateSurface = false;
+
+            // Since we are updating the layer, force an update to ensure its
+            // parameters are correct (width, height, transform, etc.)
+            synchronized (mLock) {
+                mUpdateLayer = true;
+            }
+            mMatrixChanged = true;
+
             mAttachInfo.mHardwareRenderer.setSurfaceTexture(mLayer, mSurface);
             nSetDefaultBufferSize(mSurface, getWidth(), getHeight());
         }
@@ -471,7 +479,7 @@ public class TextureView extends View {
     }
 
     private void applyTransformMatrix() {
-        if (mMatrixChanged) {
+        if (mMatrixChanged && mLayer != null) {
             mLayer.setTransform(mMatrix);
             mMatrixChanged = false;
         }
