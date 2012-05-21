@@ -100,7 +100,6 @@ import android.webkit.WebViewCore.DrawData;
 import android.webkit.WebViewCore.EventHub;
 import android.webkit.WebViewCore.TextFieldInitData;
 import android.webkit.WebViewCore.TextSelectionData;
-import android.webkit.WebViewCore.TouchHighlightData;
 import android.webkit.WebViewCore.WebKitHitTest;
 import android.widget.AbsoluteLayout;
 import android.widget.Adapter;
@@ -274,6 +273,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 newCursorPosition -= text.length() - limitedText.length();
             }
             super.setComposingText(limitedText, newCursorPosition);
+            updateSelection();
             if (limitedText != text) {
                 restartInput();
                 int lastCaret = start + limitedText.length();
@@ -286,19 +286,44 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         @Override
         public boolean commitText(CharSequence text, int newCursorPosition) {
             setComposingText(text, newCursorPosition);
-            int cursorPosition = Selection.getSelectionEnd(getEditable());
-            setComposingRegion(cursorPosition, cursorPosition);
+            finishComposingText();
             return true;
         }
 
         @Override
         public boolean deleteSurroundingText(int leftLength, int rightLength) {
-            Editable editable = getEditable();
-            int cursorPosition = Selection.getSelectionEnd(editable);
-            int startDelete = Math.max(0, cursorPosition - leftLength);
-            int endDelete = Math.min(editable.length(),
-                    cursorPosition + rightLength);
-            setNewText(startDelete, endDelete, "");
+            // This code is from BaseInputConnection#deleteSurroundText.
+            // We have to delete the same text in webkit.
+            Editable content = getEditable();
+            int a = Selection.getSelectionStart(content);
+            int b = Selection.getSelectionEnd(content);
+
+            if (a > b) {
+                int tmp = a;
+                a = b;
+                b = tmp;
+            }
+
+            int ca = getComposingSpanStart(content);
+            int cb = getComposingSpanEnd(content);
+            if (cb < ca) {
+                int tmp = ca;
+                ca = cb;
+                cb = tmp;
+            }
+            if (ca != -1 && cb != -1) {
+                if (ca < a) a = ca;
+                if (cb > b) b = cb;
+            }
+
+            int endDelete = Math.min(content.length(), b + rightLength);
+            if (endDelete > b) {
+                setNewText(b, endDelete, "");
+            }
+            int startDelete = Math.max(0, a - leftLength);
+            if (startDelete < a) {
+                setNewText(startDelete, a, "");
+            }
             return super.deleteSurroundingText(leftLength, rightLength);
         }
 
@@ -411,6 +436,46 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             outAttrs.imeOptions = mImeOptions;
             outAttrs.hintText = mHint;
             outAttrs.initialCapsMode = getCursorCapsMode(InputType.TYPE_CLASS_TEXT);
+
+            Editable editable = getEditable();
+            int selectionStart = Selection.getSelectionStart(editable);
+            int selectionEnd = Selection.getSelectionEnd(editable);
+            if (selectionStart < 0 || selectionEnd < 0) {
+                selectionStart = editable.length();
+                selectionEnd = selectionStart;
+            }
+            outAttrs.initialSelStart = selectionStart;
+            outAttrs.initialSelEnd = selectionEnd;
+        }
+
+        @Override
+        public boolean setSelection(int start, int end) {
+            boolean result = super.setSelection(start, end);
+            updateSelection();
+            return result;
+        }
+
+        @Override
+        public boolean setComposingRegion(int start, int end) {
+            boolean result = super.setComposingRegion(start, end);
+            updateSelection();
+            return result;
+        }
+
+        /**
+         * Send the selection and composing spans to the IME.
+         */
+        private void updateSelection() {
+            Editable editable = getEditable();
+            int selectionStart = Selection.getSelectionStart(editable);
+            int selectionEnd = Selection.getSelectionEnd(editable);
+            int composingStart = getComposingSpanStart(editable);
+            int composingEnd = getComposingSpanEnd(editable);
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null) {
+                imm.updateSelection(mWebView, selectionStart, selectionEnd,
+                        composingStart, composingEnd);
+            }
         }
 
         /**
