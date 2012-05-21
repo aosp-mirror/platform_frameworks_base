@@ -63,7 +63,7 @@ class AccessibilityInjector {
 
     // Lazily loaded helper objects.
     private AccessibilityManager mAccessibilityManager;
-    private AccessibilityInjectorFallback mAccessibilityInjector;
+    private AccessibilityInjectorFallback mAccessibilityInjectorFallback;
     private JSONObject mAccessibilityJSONObject;
 
     // Whether the accessibility script has been injected into the current page.
@@ -200,10 +200,9 @@ class AccessibilityInjector {
         if (mAccessibilityScriptInjected) {
             return sendActionToAndroidVox(action, arguments);
         }
-
-        if (mAccessibilityInjector != null) {
-            // TODO: Implement actions for non-JS handler.
-            return false;
+        
+        if (mAccessibilityInjectorFallback != null) {
+            return mAccessibilityInjectorFallback.performAccessibilityAction(action, arguments);
         }
 
         return false;
@@ -238,11 +237,11 @@ class AccessibilityInjector {
             return true;
         }
 
-        if (mAccessibilityInjector != null) {
+        if (mAccessibilityInjectorFallback != null) {
             // if an accessibility injector is present (no JavaScript enabled or
             // the site opts out injecting our JavaScript screen reader) we let
             // it decide whether to act on and consume the event.
-            return mAccessibilityInjector.onKeyEvent(event);
+            return mAccessibilityInjectorFallback.onKeyEvent(event);
         }
 
         return false;
@@ -255,8 +254,8 @@ class AccessibilityInjector {
      * @param selectionString The selection string.
      */
     public void handleSelectionChangedIfNecessary(String selectionString) {
-        if (mAccessibilityInjector != null) {
-            mAccessibilityInjector.onSelectionStringChange(selectionString);
+        if (mAccessibilityInjectorFallback != null) {
+            mAccessibilityInjectorFallback.onSelectionStringChange(selectionString);
         }
     }
 
@@ -304,10 +303,10 @@ class AccessibilityInjector {
      *            {@code false} to disable it.
      */
     private void toggleFallbackAccessibilityInjector(boolean enabled) {
-        if (enabled && (mAccessibilityInjector == null)) {
-            mAccessibilityInjector = new AccessibilityInjectorFallback(mWebViewClassic);
+        if (enabled && (mAccessibilityInjectorFallback == null)) {
+            mAccessibilityInjectorFallback = new AccessibilityInjectorFallback(mWebViewClassic);
         } else {
-            mAccessibilityInjector = null;
+            mAccessibilityInjectorFallback = null;
         }
     }
 
