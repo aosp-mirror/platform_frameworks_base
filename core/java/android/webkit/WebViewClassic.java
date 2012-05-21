@@ -7513,7 +7513,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 }
 
                 case CLEAR_CARET_HANDLE:
-                    selectionDone();
+                    if (mIsCaretSelection) {
+                        selectionDone();
+                    }
                     break;
 
                 case KEY_PRESS:
