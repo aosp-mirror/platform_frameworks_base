@@ -217,8 +217,6 @@ public final class ViewRootImpl implements ViewParent,
 
     boolean mTraversalScheduled;
     int mTraversalBarrier;
-    long mLastTraversalFinishedTimeNanos;
-    long mLastDrawFinishedTimeNanos;
     boolean mWillDrawSoon;
     boolean mFitSystemWindowsRequested;
     boolean mLayoutRequested;
@@ -986,31 +984,11 @@ public final class ViewRootImpl implements ViewParent,
                 Debug.startMethodTracing("ViewAncestor");
             }
 
-            final long traversalStartTime;
-            if (ViewDebug.DEBUG_LATENCY) {
-                traversalStartTime = System.nanoTime();
-                if (mLastTraversalFinishedTimeNanos != 0) {
-                    Log.d(ViewDebug.DEBUG_LATENCY_TAG, "Starting performTraversals(); it has been "
-                            + ((traversalStartTime - mLastTraversalFinishedTimeNanos) * 0.000001f)
-                            + "ms since the last traversals finished.");
-                } else {
-                    Log.d(ViewDebug.DEBUG_LATENCY_TAG, "Starting performTraversals().");
-                }
-            }
-
             Trace.traceBegin(Trace.TRACE_TAG_VIEW, "performTraversals");
             try {
                 performTraversals();
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-            }
-
-            if (ViewDebug.DEBUG_LATENCY) {
-                long now = System.nanoTime();
-                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "performTraversals() took "
-                        + ((now - traversalStartTime) * 0.000001f)
-                        + "ms.");
-                mLastTraversalFinishedTimeNanos = now;
             }
 
             if (mProfile) {
@@ -2013,18 +1991,6 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
 
-        final long drawStartTime;
-        if (ViewDebug.DEBUG_LATENCY) {
-            drawStartTime = System.nanoTime();
-            if (mLastDrawFinishedTimeNanos != 0) {
-                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "Starting draw(); it has been "
-                        + ((drawStartTime - mLastDrawFinishedTimeNanos) * 0.000001f)
-                        + "ms since the last draw finished.");
-            } else {
-                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "Starting draw().");
-            }
-        }
-
         final boolean fullRedrawNeeded = mFullRedrawNeeded;
         mFullRedrawNeeded = false;
 
@@ -2035,14 +2001,6 @@ public final class ViewRootImpl implements ViewParent,
         } finally {
             mIsDrawing = false;
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-        }
-
-        if (ViewDebug.DEBUG_LATENCY) {
-            long now = System.nanoTime();
-            Log.d(ViewDebug.DEBUG_LATENCY_TAG, "performDraw() took "
-                    + ((now - drawStartTime) * 0.000001f)
-                    + "ms.");
-            mLastDrawFinishedTimeNanos = now;
         }
 
         if (mReportNextDraw) {
@@ -2208,18 +2166,7 @@ public final class ViewRootImpl implements ViewParent,
             int right = dirty.right;
             int bottom = dirty.bottom;
 
-            final long lockCanvasStartTime;
-            if (ViewDebug.DEBUG_LATENCY) {
-                lockCanvasStartTime = System.nanoTime();
-            }
-
             canvas = mSurface.lockCanvas(dirty);
-
-            if (ViewDebug.DEBUG_LATENCY) {
-                long now = System.nanoTime();
-                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- lockCanvas() took "
-                        + ((now - lockCanvasStartTime) * 0.000001f) + "ms");
-            }
 
             if (left != dirty.left || top != dirty.top || right != dirty.right ||
                     bottom != dirty.bottom) {
@@ -2287,20 +2234,9 @@ public final class ViewRootImpl implements ViewParent,
                         ? DisplayMetrics.DENSITY_DEVICE : 0);
                 attachInfo.mSetIgnoreDirtyState = false;
 
-                final long drawStartTime;
-                if (ViewDebug.DEBUG_LATENCY) {
-                    drawStartTime = System.nanoTime();
-                }
-
                 mView.draw(canvas);
 
                 drawAccessibilityFocusedDrawableIfNeeded(canvas);
-
-                if (ViewDebug.DEBUG_LATENCY) {
-                    long now = System.nanoTime();
-                    Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- draw() took "
-                            + ((now - drawStartTime) * 0.000001f) + "ms");
-                }
             } finally {
                 if (!attachInfo.mSetIgnoreDirtyState) {
                     // Only clear the flag if it was not set during the mView.draw() call
@@ -2308,11 +2244,6 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
         } finally {
-            final long unlockCanvasAndPostStartTime;
-            if (ViewDebug.DEBUG_LATENCY) {
-                unlockCanvasAndPostStartTime = System.nanoTime();
-            }
-
             try {
                 surface.unlockCanvasAndPost(canvas);
             } catch (IllegalArgumentException e) {
@@ -2320,12 +2251,6 @@ public final class ViewRootImpl implements ViewParent,
                 mLayoutRequested = true;    // ask wm for a new surface next time.
                 //noinspection ReturnInsideFinallyBlock
                 return false;
-            }
-
-            if (ViewDebug.DEBUG_LATENCY) {
-                long now = System.nanoTime();
-                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- unlockCanvasAndPost() took "
-                        + ((now - unlockCanvasAndPostStartTime) * 0.000001f) + "ms");
             }
 
             if (LOCAL_LOGV) {
@@ -3186,10 +3111,6 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void deliverInputEvent(QueuedInputEvent q) {
-        if (ViewDebug.DEBUG_LATENCY) {
-            q.mDeliverTimeNanos = System.nanoTime();
-        }
-
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "deliverInputEvent");
         try {
             if (q.mEvent instanceof KeyEvent) {
@@ -3637,9 +3558,6 @@ public final class ViewRootImpl implements ViewParent,
 
     private void deliverKeyEventPostIme(QueuedInputEvent q) {
         final KeyEvent event = (KeyEvent)q.mEvent;
-        if (ViewDebug.DEBUG_LATENCY) {
-            q.mDeliverPostImeTimeNanos = System.nanoTime();
-        }
 
         // If the view went away, then the event will not be handled.
         if (mView == null || !mAdded) {
@@ -4162,11 +4080,6 @@ public final class ViewRootImpl implements ViewParent,
         public InputEvent mEvent;
         public InputEventReceiver mReceiver;
         public int mFlags;
-
-        // Used for latency calculations.
-        public long mReceiveTimeNanos;
-        public long mDeliverTimeNanos;
-        public long mDeliverPostImeTimeNanos;
     }
 
     private QueuedInputEvent obtainQueuedInputEvent(InputEvent event,
@@ -4204,12 +4117,6 @@ public final class ViewRootImpl implements ViewParent,
     void enqueueInputEvent(InputEvent event,
             InputEventReceiver receiver, int flags, boolean processImmediately) {
         QueuedInputEvent q = obtainQueuedInputEvent(event, receiver, flags);
-
-        if (ViewDebug.DEBUG_LATENCY) {
-            q.mReceiveTimeNanos = System.nanoTime();
-            q.mDeliverTimeNanos = 0;
-            q.mDeliverPostImeTimeNanos = 0;
-        }
 
         // Always enqueue the input event in order, regardless of its time stamp.
         // We do this because the application or the IME may inject key events
@@ -4262,42 +4169,6 @@ public final class ViewRootImpl implements ViewParent,
     private void finishInputEvent(QueuedInputEvent q, boolean handled) {
         if (q != mCurrentInputEvent) {
             throw new IllegalStateException("finished input event out of order");
-        }
-
-        if (ViewDebug.DEBUG_LATENCY) {
-            final long now = System.nanoTime();
-            final long eventTime = q.mEvent.getEventTimeNano();
-            final StringBuilder msg = new StringBuilder();
-            msg.append("Spent ");
-            msg.append((now - q.mReceiveTimeNanos) * 0.000001f);
-            msg.append("ms processing ");
-            if (q.mEvent instanceof KeyEvent) {
-                final KeyEvent  keyEvent = (KeyEvent)q.mEvent;
-                msg.append("key event, action=");
-                msg.append(KeyEvent.actionToString(keyEvent.getAction()));
-            } else {
-                final MotionEvent motionEvent = (MotionEvent)q.mEvent;
-                msg.append("motion event, action=");
-                msg.append(MotionEvent.actionToString(motionEvent.getAction()));
-                msg.append(", historySize=");
-                msg.append(motionEvent.getHistorySize());
-            }
-            msg.append(", handled=");
-            msg.append(handled);
-            msg.append(", received at +");
-            msg.append((q.mReceiveTimeNanos - eventTime) * 0.000001f);
-            if (q.mDeliverTimeNanos != 0) {
-                msg.append("ms, delivered at +");
-                msg.append((q.mDeliverTimeNanos - eventTime) * 0.000001f);
-            }
-            if (q.mDeliverPostImeTimeNanos != 0) {
-                msg.append("ms, delivered post IME at +");
-                msg.append((q.mDeliverPostImeTimeNanos - eventTime) * 0.000001f);
-            }
-            msg.append("ms, finished at +");
-            msg.append((now - eventTime) * 0.000001f);
-            msg.append("ms.");
-            Log.d(ViewDebug.DEBUG_LATENCY_TAG, msg.toString());
         }
 
         if (q.mReceiver != null) {
