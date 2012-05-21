@@ -146,6 +146,7 @@ public abstract class ServiceStateTracker extends Handler {
         "ci", // Cote d'Ivoire
         "eh", // Western Sahara
         "fo", // Faroe Islands, Denmark
+        "gb", // United Kingdom of Great Britain and Northern Ireland
         "gh", // Ghana
         "gm", // Gambia
         "gn", // Guinea
@@ -161,7 +162,6 @@ public abstract class ServiceStateTracker extends Handler {
         "sn", // Senegal
         "st", // Sao Tome and Principe
         "tg", // Togo
-        "uk", // U.K
     };
 
     /** Reason for registration denial. */
