@@ -585,8 +585,12 @@ public class GestureDetector {
             }
             // Hold the event we obtained above - listeners may have changed the original.
             mPreviousUpEvent = currentUpEvent;
-            mVelocityTracker.recycle();
-            mVelocityTracker = null;
+            if (mVelocityTracker != null) {
+                // This may have been cleared when we called out to the
+                // application above.
+                mVelocityTracker.recycle();
+                mVelocityTracker = null;
+            }
             mIsDoubleTapping = false;
             mHandler.removeMessages(SHOW_PRESS);
             mHandler.removeMessages(LONG_PRESS);
