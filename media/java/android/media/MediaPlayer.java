@@ -737,7 +737,7 @@ public class MediaPlayer
      * @see MediaPlayer#VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
      */
     public void setVideoScalingMode(int mode) {
-        if (isVideoScalingModeSupported(mode)) {
+        if (!isVideoScalingModeSupported(mode)) {
             final String msg = "Scaling mode " + mode + " is not supported";
             throw new IllegalArgumentException(msg);
         }
