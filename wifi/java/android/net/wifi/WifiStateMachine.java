@@ -120,6 +120,7 @@ public class WifiStateMachine extends StateMachine {
     private ConnectivityManager mCm;
 
     private final boolean mP2pSupported;
+    private final String mPrimaryDeviceType;
 
     /* Scan results handling */
     private List<ScanResult> mScanResults;
@@ -589,6 +590,9 @@ public class WifiStateMachine extends StateMachine {
 
         mBackgroundScanSupported = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_wifi_background_scan_support);
+
+        mPrimaryDeviceType = mContext.getResources().getString(
+                com.android.internal.R.string.config_wifi_p2p_device_type);
 
         mContext.registerReceiver(
             new BroadcastReceiver() {
@@ -2214,6 +2218,37 @@ public class WifiStateMachine extends StateMachine {
             if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
+
+        private void initializeWpsDetails() {
+            String detail;
+            detail = SystemProperties.get("ro.product.name", "");
+            if (!mWifiNative.setDeviceName(detail)) {
+                loge("Failed to set device name " +  detail);
+            }
+            detail = SystemProperties.get("ro.product.manufacturer", "");
+            if (!mWifiNative.setManufacturer(detail)) {
+                loge("Failed to set manufacturer " + detail);
+            }
+            detail = SystemProperties.get("ro.product.model", "");
+            if (!mWifiNative.setModelName(detail)) {
+                loge("Failed to set model name " + detail);
+            }
+            detail = SystemProperties.get("ro.product.model", "");
+            if (!mWifiNative.setModelNumber(detail)) {
+                loge("Failed to set model number " + detail);
+            }
+            detail = SystemProperties.get("ro.serialno", "");
+            if (!mWifiNative.setSerialNumber(detail)) {
+                loge("Failed to set serial number " + detail);
+            }
+            if (!mWifiNative.setConfigMethods("physical_display virtual_push_button keypad")) {
+                loge("Failed to set WPS config methods");
+            }
+            if (!mWifiNative.setDeviceType(mPrimaryDeviceType)) {
+                loge("Failed to set primary device type " + mPrimaryDeviceType);
+            }
+        }
+
         @Override
         public boolean processMessage(Message message) {
             if (DBG) log(getName() + message.toString() + "\n");
@@ -2231,8 +2266,8 @@ public class WifiStateMachine extends StateMachine {
                     mLastSignalLevel = -1;
 
                     mWifiInfo.setMacAddress(mWifiNative.getMacAddress());
-
                     mWifiConfigStore.initialize();
+                    initializeWpsDetails();
 
                     sendSupplicantConnectionChangedBroadcast(true);
                     transitionTo(mDriverStartedState);
