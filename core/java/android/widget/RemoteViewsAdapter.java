@@ -614,7 +614,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                     maxDistIndexNonRequested = i;
                     maxDistNonRequested = dist;
                 }
-                if (dist > maxDist) {
+                if (dist >= maxDist) {
                     // maxDist/maxDistIndex will store the index of the farthest position
                     // regardless of whether it was directly requested or not
                     maxDistIndex = i;
