@@ -5248,9 +5248,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     // TODO: more accounting of which pid(s) turned it on, keep count,
     // only allow disables from pids which have count on, etc.
+    @Override
     public void showStrictModeViolation(boolean on) {
         if (mHeadless) return;
+        mH.sendMessage(mH.obtainMessage(H.SHOW_STRICT_MODE_VIOLATION, on ? 1 : 0, 0));
+    }
 
+    private void showStrictModeViolation(int arg) {
+        final boolean on = arg != 0;
         int pid = Binder.getCallingPid();
         synchronized(mWindowMap) {
             // Ignoring requests to enable the red border from clients
@@ -6714,6 +6719,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int BOOT_TIMEOUT = 23;
         public static final int WAITING_FOR_DRAWN_TIMEOUT = 24;
         public static final int BULK_UPDATE_PARAMETERS = 25;
+        public static final int SHOW_STRICT_MODE_VIOLATION = 26;
 
         public static final int ANIMATOR_WHAT_OFFSET = 100000;
         public static final int SET_TRANSPARENT_REGION = ANIMATOR_WHAT_OFFSET + 1;
@@ -7176,6 +7182,11 @@ public class WindowManagerService extends IWindowManager.Stub
                             performLayoutAndPlaceSurfacesLocked();
                         }
                     }
+                    break;
+                }
+
+                case SHOW_STRICT_MODE_VIOLATION: {
+                    showStrictModeViolation(msg.arg1);
                     break;
                 }
 
