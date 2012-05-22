@@ -745,13 +745,19 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     private void loadNotificationShade() {
+        if (mPile == null) return;
+
         int N = mNotificationData.size();
 
         ArrayList<View> toShow = new ArrayList<View>();
 
+        final boolean provisioned = isDeviceProvisioned();
+        // If the device hasn't been through Setup, we only show system notifications
         for (int i=0; i<N; i++) {
-            View row = mNotificationData.get(N-i-1).row;
-            toShow.add(row);
+            Entry ent = mNotificationData.get(N-i-1);
+            if (provisioned || "android".equals(ent.notification.pkg)) {
+                toShow.add(ent.row);
+            }
         }
 
         ArrayList<View> toRemove = new ArrayList<View>();
@@ -772,6 +778,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                 mPile.addView(v, i);
             }
         }
+
+        mSettingsButton.setEnabled(isDeviceProvisioned());
     }
 
     private void reloadAllNotificationIcons() {
@@ -782,6 +790,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     @Override
     protected void updateNotificationIcons() {
+        if (mNotificationIcons == null) return;
+
         loadNotificationShade();
 
         final LinearLayout.LayoutParams params
@@ -795,9 +805,12 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         ArrayList<View> toShow = new ArrayList<View>();
 
+        final boolean provisioned = isDeviceProvisioned();
+        // If the device hasn't been through Setup, we only show system notifications
         for (int i=0; i<N; i++) {
             Entry ent = mNotificationData.get(N-i-1);
-            if (ent.notification.score >= HIDE_ICONS_BELOW_SCORE) {
+            if ((provisioned && ent.notification.score >= HIDE_ICONS_BELOW_SCORE)
+                    || "android".equals(ent.notification.pkg)) {
                 toShow.add(ent.icon);
             }
         }
@@ -1657,6 +1670,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         // no ticking in lights-out mode
         if (!areLightsOn()) return;
 
+        // no ticking in Setup
+        if (!isDeviceProvisioned()) return;
+
         // Show the ticker if one is requested. Also don't do this
         // until status bar window is attached to the window manager,
         // because...  well, what's the point otherwise?  And trying to
@@ -2025,6 +2041,9 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private View.OnClickListener mSettingsButtonListener = new View.OnClickListener() {
         public void onClick(View v) {
+            // We take this as a good indicator that Setup is running and we shouldn't
+            // allow you to go somewhere else
+            if (!isDeviceProvisioned()) return;
             try {
                 // Dismiss the lock screen when Settings starts.
                 ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
