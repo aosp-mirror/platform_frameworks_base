@@ -539,24 +539,22 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mCanOpenWindows = true;
     }
 
-    /**
-     * Sets the Geolocation permission state to be used for all future requests.
-     */
+    @Override
+    public void setMockGeolocationPosition(double latitude, double longitude, double accuracy) {
+        WebViewClassic.fromWebView(mWebView).setMockGeolocationPosition(latitude,
+                                                                        longitude,
+                                                                        accuracy);
+    }
+
+    @Override
+    public void setMockGeolocationError(int code, String message) {
+        WebViewClassic.fromWebView(mWebView).setMockGeolocationError(code, message);
+    }
+
     @Override
     public void setGeolocationPermission(boolean allow) {
-        mIsGeolocationPermissionSet = true;
-        mGeolocationPermission = allow;
-
-        if (mPendingGeolocationPermissionCallbacks != null) {
-            Iterator iter = mPendingGeolocationPermissionCallbacks.keySet().iterator();
-            while (iter.hasNext()) {
-                GeolocationPermissions.Callback callback =
-                        (GeolocationPermissions.Callback) iter.next();
-                String origin = (String) mPendingGeolocationPermissionCallbacks.get(callback);
-                callback.invoke(origin, mGeolocationPermission, false);
-            }
-            mPendingGeolocationPermissionCallbacks = null;
-        }
+        Log.v(LOGTAG, "setGeolocationPermission() allow=" + allow);
+        WebViewClassic.fromWebView(mWebView).setMockGeolocationPermission(allow);
     }
 
     @Override
@@ -749,22 +747,11 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             callback.updateQuota(currentQuota + 1024 * 1024 * 5);
         }
 
-        /**
-         * Instructs the client to show a prompt to ask the user to set the
-         * Geolocation permission state for the specified origin.
-         */
         @Override
         public void onGeolocationPermissionsShowPrompt(String origin,
                 GeolocationPermissions.Callback callback) {
-            if (mIsGeolocationPermissionSet) {
-                callback.invoke(origin, mGeolocationPermission, false);
-                return;
-            }
-            if (mPendingGeolocationPermissionCallbacks == null) {
-                mPendingGeolocationPermissionCallbacks =
-                        new HashMap<GeolocationPermissions.Callback, String>();
-            }
-            mPendingGeolocationPermissionCallbacks.put(callback, origin);
+            throw new RuntimeException(
+                    "The WebCore mock used by DRT should bypass the usual permissions flow.");
         }
 
         @Override
@@ -849,9 +836,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mPageFinished = false;
         mDumpWebKitData = false;
         setDefaultWebSettings(mWebView);
-        mIsGeolocationPermissionSet = false;
-        mPendingGeolocationPermissionCallbacks = null;
         CookieManager.getInstance().removeAllCookie();
+        mWebViewClassic.setUseMockGeolocation();
     }
 
     private boolean canMoveToNextTest() {
@@ -958,8 +944,4 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     static final int DRAW_RUNS = 5;
     static final String DRAW_TIME_LOG = Environment.getExternalStorageDirectory() +
         "/android/page_draw_time.txt";
-
-    private boolean mIsGeolocationPermissionSet;
-    private boolean mGeolocationPermission;
-    private Map mPendingGeolocationPermissionCallbacks;
 }

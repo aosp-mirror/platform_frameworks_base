@@ -19,7 +19,6 @@ package com.android.dumprendertree;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.webkit.MockGeolocation;
 import android.webkit.WebStorage;
 
 import java.util.HashMap;
@@ -48,7 +47,6 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     private static final int EVENT_CLEAR_TOUCH_POINTS = 17;
     private static final int EVENT_CANCEL_TOUCH_POINT = 18;
     private static final int EVENT_SET_TOUCH_MODIFIER = 19;
-    
     private static final int LAYOUT_CLEAR_LIST = 20;
     private static final int LAYOUT_DISPLAY = 21;
     private static final int LAYOUT_DUMP_TEXT = 22;
@@ -72,10 +70,9 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     private static final int LAYOUT_WAIT_UNTIL_DONE = 40;
     private static final int LAYOUT_DUMP_DATABASE_CALLBACKS = 41;
     private static final int LAYOUT_SET_CAN_OPEN_WINDOWS = 42;
-    private static final int SET_GEOLOCATION_PERMISSION = 43;
-    private static final int OVERRIDE_PREFERENCE = 44;
-    private static final int LAYOUT_DUMP_CHILD_FRAMES_TEXT = 45;
-    private static final int SET_XSS_AUDITOR_ENABLED = 46;
+    private static final int OVERRIDE_PREFERENCE = 43;
+    private static final int LAYOUT_DUMP_CHILD_FRAMES_TEXT = 44;
+    private static final int SET_XSS_AUDITOR_ENABLED = 45;
     
     CallbackProxy(EventSender eventSender, 
             LayoutTestController layoutTestController) {
@@ -267,11 +264,6 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
 
         case LAYOUT_SET_CAN_OPEN_WINDOWS:
             mLayoutTestController.setCanOpenWindows();
-            break;
-
-        case SET_GEOLOCATION_PERMISSION:
-            mLayoutTestController.setGeolocationPermission(
-                    msg.arg1 == 1 ? true : false);
             break;
 
         case OVERRIDE_PREFERENCE:
@@ -497,17 +489,23 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     public void setMockGeolocationPosition(double latitude,
                                            double longitude,
                                            double accuracy) {
-        MockGeolocation.getInstance().setPosition(latitude,
-                                                  longitude,
-                                                  accuracy);
+        // Configuration is in WebKit, so stay on WebCore thread, but go via the TestShellActivity
+        // as we need access to the Webview.
+        mLayoutTestController.setMockGeolocationPosition(latitude,
+                                                         longitude,
+                                                         accuracy);
     }
 
     public void setMockGeolocationError(int code, String message) {
-        MockGeolocation.getInstance().setError(code, message);
+        // Configuration is in WebKit, so stay on WebCore thread, but go via the TestShellActivity
+        // as we need access to the Webview.
+        mLayoutTestController.setMockGeolocationError(code, message);
     }
 
     public void setGeolocationPermission(boolean allow) {
-        obtainMessage(SET_GEOLOCATION_PERMISSION, allow ? 1 : 0, 0).sendToTarget();
+        // Configuration is in WebKit, so stay on WebCore thread, but go via the TestShellActivity
+        // as we need access to the Webview.
+        mLayoutTestController.setGeolocationPermission(allow);
     }
 
     public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
