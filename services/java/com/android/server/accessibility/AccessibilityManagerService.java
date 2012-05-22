@@ -1068,7 +1068,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         /**
          * Handler for delayed event dispatch.
          */
-        public Handler mHandler = new Handler() {
+        public Handler mHandler = new Handler(mMainHandler.getLooper()) {
             @Override
             public void handleMessage(Message message) {
                 final int type = message.what;
