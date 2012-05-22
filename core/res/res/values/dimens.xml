@@ -227,4 +227,11 @@
          action bar tabs from becoming too wide on a wide screen when only
          a few are present. -->
     <dimen name="action_bar_stacked_tab_max_width">180dp</dimen>
+
+	<!-- Size of notification text (see TextAppearance.StatusBar.EventContent) -->
+    <dimen name="notification_text_size">14dp</dimen>
+	<!-- Size of notification text titles (see TextAppearance.StatusBar.EventContent.Title) -->
+    <dimen name="notification_title_text_size">18dp</dimen>
+	<!-- Size of smaller notification text (see TextAppearance.StatusBar.EventContent.Line2, Info, Time) -->
+    <dimen name="notification_subtext_size">12dp</dimen>
 </resources>

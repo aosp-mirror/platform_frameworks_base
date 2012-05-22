@@ -36,9 +36,9 @@
         android:orientation="vertical"
         android:paddingLeft="12dp"
         android:paddingRight="12dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
-        android:gravity="center_vertical"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:gravity="top"
         >
         <LinearLayout
             android:layout_width="match_parent"
@@ -50,6 +50,7 @@
                 android:id="@+id/line1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingTop="6dp"
                 android:orientation="horizontal"
                 android:layout_gravity="top"
                 android:layout_weight="0"
@@ -92,11 +93,18 @@
                 android:layout_weight="0"
                 android:visibility="gone"
                 />
+            <ProgressBar
+                android:id="@android:id/progress"
+                android:layout_width="match_parent"
+                android:layout_height="12dp"
+                android:visibility="gone"
+                android:layout_weight="0"
+                style="?android:attr/progressBarStyleHorizontal"
+                />
             <TextView android:id="@+id/big_text"
                 android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginTop="2dp"
                 android:layout_marginBottom="2dp"
                 android:singleLine="false"
                 android:visibility="gone"
@@ -113,7 +121,7 @@
             android:layout_weight="1"
             />
         <TextView android:id="@+id/overflow_title"
-            android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Title"
+            android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
@@ -127,7 +135,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_weight="1"
+            android:layout_weight="0"
             >
             <TextView android:id="@+id/text"
                 android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
@@ -151,22 +159,14 @@
                 />
             <ImageView android:id="@+id/right_icon"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layout_weight="0"
-                android:scaleType="center"
+                android:scaleType="centerInside"
                 android:paddingLeft="8dp"
                 android:visibility="gone"
                 android:drawableAlpha="180"
                 />
         </LinearLayout>
-        <ProgressBar
-            android:id="@android:id/progress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:layout_weight="0"
-            style="?android:attr/progressBarStyleHorizontal"
-            />
     </LinearLayout>
 </FrameLayout>
