@@ -24,12 +24,15 @@ import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -58,7 +61,9 @@ import android.view.IWindow;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
@@ -66,8 +71,8 @@ import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 
+import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
-import com.android.server.accessibility.TouchExplorer.GestureListener;
 import com.android.server.wm.WindowManagerService;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -90,8 +95,7 @@ import java.util.Set;
  *
  * @hide
  */
-public class AccessibilityManagerService extends IAccessibilityManager.Stub
-        implements GestureListener {
+public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private static final boolean DEBUG = false;
 
@@ -101,6 +105,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         "registerUiTestAutomationService";
 
     private static final int OWN_PROCESS_ID = android.os.Process.myPid();
+
+    private static final int MSG_SHOW_ENABLE_TOUCH_EXPLORATION_DIALOG = 1;
 
     private static int sIdCounter = 0;
 
@@ -128,6 +134,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private final SimpleStringSplitter mStringColonSplitter = new SimpleStringSplitter(':');
 
+    private final Rect mTempRect = new Rect();
+
     private PackageManager mPackageManager;
 
     private int mHandledFeedbackTypes = 0;
@@ -146,23 +154,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private final SecurityPolicy mSecurityPolicy;
 
+    private final MainHanler mMainHandler;
+
     private Service mUiAutomationService;
 
-    /**
-     * Handler for delayed event dispatch.
-     */
-    private Handler mHandler = new Handler() {
+    private Service mQueryBridge;
 
-        @Override
-        public void handleMessage(Message message) {
-            Service service = (Service) message.obj;
-            int eventType = message.arg1;
+    private boolean mTouchExplorationGestureEnded;
 
-            synchronized (mLock) {
-                notifyAccessibilityEventLocked(service, eventType);
-            }
-        }
-    };
+    private boolean mTouchExplorationGestureStarted;
 
     /**
      * Creates a new instance.
@@ -175,7 +175,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mWindowManagerService = (WindowManagerService) ServiceManager.getService(
                 Context.WINDOW_SERVICE);
         mSecurityPolicy = new SecurityPolicy();
-
+        mMainHandler = new MainHanler();
         registerPackageChangeAndBootCompletedBroadcastReceiver();
         registerSettingsContentObservers();
     }
@@ -349,15 +349,37 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     public boolean sendAccessibilityEvent(AccessibilityEvent event) {
+        // The event for gesture start should be strictly before the
+        // first hover enter event for the gesture.
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_HOVER_ENTER
+                && mTouchExplorationGestureStarted) {
+            mTouchExplorationGestureStarted = false;
+            AccessibilityEvent gestureStartEvent = AccessibilityEvent.obtain(
+                    AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START);
+            sendAccessibilityEvent(gestureStartEvent);
+        }
+
         synchronized (mLock) {
             if (mSecurityPolicy.canDispatchAccessibilityEvent(event)) {
-                mSecurityPolicy.updateRetrievalAllowingWindowAndEventSourceLocked(event);
+                mSecurityPolicy.updateActiveWindowAndEventSourceLocked(event);
                 notifyAccessibilityServicesDelayedLocked(event, false);
                 notifyAccessibilityServicesDelayedLocked(event, true);
             }
         }
+
+        // The event for gesture end should be strictly after the
+        // last hover exit event for the gesture.
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_HOVER_EXIT
+                && mTouchExplorationGestureEnded) {
+            mTouchExplorationGestureEnded = false;
+            AccessibilityEvent gestureEndEvent = AccessibilityEvent.obtain(
+                    AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END);
+            sendAccessibilityEvent(gestureEndEvent);
+        }
+
         event.recycle();
         mHandledFeedbackTypes = 0;
+
         return (OWN_PROCESS_ID != Binder.getCallingPid());
     }
 
@@ -472,8 +494,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    @Override
-    public boolean onGesture(int gestureId) {
+    boolean onGesture(int gestureId) {
         synchronized (mLock) {
             boolean handled = notifyGestureLocked(gestureId, false);
             if (!handled) {
@@ -481,6 +502,65 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
             return handled;
         }
+    }
+
+    /**
+     * Gets the bounds of the accessibility focus if the provided,
+     * point coordinates are within the currently active window
+     * and accessibility focus is found within the latter.
+     *
+     * @param x X coordinate.
+     * @param y Y coordinate
+     * @param outBounds The output to which to write the focus bounds.
+     * @return The accessibility focus rectangle if the point is in the
+     *     window and the window has accessibility focus.
+     */
+    boolean getAccessibilityFocusBounds(int x, int y, Rect outBounds) {
+        // Instead of keeping track of accessibility focus events per
+        // window to be able to find the focus in the active window,
+        // we take a stateless approach and look it up. This is fine
+        // since we do this only when the user clicks/long presses.
+        Service service = getQueryBridge();
+        final int connectionId = service.mId;
+        AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
+        client.addConnection(connectionId, service);
+        try {
+            AccessibilityNodeInfo root = AccessibilityInteractionClient.getInstance()
+                    .getRootInActiveWindow(connectionId);
+            if (root == null) {
+                return false;
+            }
+            Rect bounds = mTempRect;
+            root.getBoundsInScreen(bounds);
+            if (!bounds.contains(x, y)) {
+                return false;
+            }
+            AccessibilityNodeInfo focus = root.findFocus(
+                    AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
+            if (focus == null) {
+                return false;
+            }
+            focus.getBoundsInScreen(outBounds);
+            return true;
+        } finally {
+            client.removeConnection(connectionId);
+        }
+    }
+
+    private Service getQueryBridge() {
+        if (mQueryBridge == null) {
+            AccessibilityServiceInfo info = new AccessibilityServiceInfo();
+            mQueryBridge = new Service(null, info, true);
+        }
+        return mQueryBridge;
+    }
+
+    public void touchExplorationGestureEnded() {
+        mTouchExplorationGestureEnded = true;
+    }
+
+    public void touchExplorationGestureStarted() {
+        mTouchExplorationGestureStarted = true;
     }
 
     private boolean notifyGestureLocked(int gestureId, boolean isDefault) {
@@ -496,12 +576,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         for (int i = mServices.size() - 1; i >= 0; i--) {
             Service service = mServices.get(i);
             if (service.mReqeustTouchExplorationMode && service.mIsDefault == isDefault) {
-                try {
-                    service.mServiceInterface.onGesture(gestureId);
-                } catch (RemoteException re) {
-                    Slog.e(LOG_TAG, "Error during sending gesture " + gestureId
-                            + " to " + service.mService, re);
-                }
+                service.notifyGesture(gestureId);
                 return true;
             }
         }
@@ -573,7 +648,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (service.mIsDefault == isDefault) {
                     if (canDispathEventLocked(service, event, mHandledFeedbackTypes)) {
                         mHandledFeedbackTypes |= service.mFeedbackType;
-                        notifyAccessibilityServiceDelayedLocked(service, event);
+                        service.notifyAccessibilityEvent(event);
                     }
                 }
             }
@@ -582,90 +657,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // as the for loop is running. If that happens, just bail because
             // there are no more services to notify.
             return;
-        }
-    }
-
-    /**
-     * Performs an {@link AccessibilityService} delayed notification. The delay is configurable
-     * and denotes the period after the last event before notifying the service.
-     *
-     * @param service The service.
-     * @param event The event.
-     */
-    private void notifyAccessibilityServiceDelayedLocked(Service service,
-            AccessibilityEvent event) {
-        synchronized (mLock) {
-            final int eventType = event.getEventType();
-            // Make a copy since during dispatch it is possible the event to
-            // be modified to remove its source if the receiving service does
-            // not have permission to access the window content.
-            AccessibilityEvent newEvent = AccessibilityEvent.obtain(event);
-            AccessibilityEvent oldEvent = service.mPendingEvents.get(eventType);
-            service.mPendingEvents.put(eventType, newEvent);
-
-            final int what = eventType | (service.mId << 16);
-            if (oldEvent != null) {
-                mHandler.removeMessages(what);
-                oldEvent.recycle();
-            }
-
-            Message message = mHandler.obtainMessage(what, service);
-            message.arg1 = eventType;
-            mHandler.sendMessageDelayed(message, service.mNotificationTimeout);
-        }
-    }
-
-    /**
-     * Notifies an accessibility service client for a scheduled event given the event type.
-     *
-     * @param service The service client.
-     * @param eventType The type of the event to dispatch.
-     */
-    private void notifyAccessibilityEventLocked(Service service, int eventType) {
-        IAccessibilityServiceClient listener = service.mServiceInterface;
-
-        // If the service died/was disabled while the message for dispatching
-        // the accessibility event was propagating the listener may be null.
-        if (listener == null) {
-            return;
-        }
-
-        AccessibilityEvent event = service.mPendingEvents.get(eventType);
-
-        // Check for null here because there is a concurrent scenario in which this
-        // happens: 1) A binder thread calls notifyAccessibilityServiceDelayedLocked
-        // which posts a message for dispatching an event. 2) The message is pulled
-        // from the queue by the handler on the service thread and the latter is
-        // just about to acquire the lock and call this method. 3) Now another binder
-        // thread acquires the lock calling notifyAccessibilityServiceDelayedLocked
-        // so the service thread waits for the lock; 4) The binder thread replaces
-        // the event with a more recent one (assume the same event type) and posts a
-        // dispatch request releasing the lock. 5) Now the main thread is unblocked and
-        // dispatches the event which is removed from the pending ones. 6) And ... now
-        // the service thread handles the last message posted by the last binder call
-        // but the event is already dispatched and hence looking it up in the pending
-        // ones yields null. This check is much simpler that keeping count for each
-        // event type of each service to catch such a scenario since only one message
-        // is processed at a time.
-        if (event == null) {
-            return;
-        }
-
-        service.mPendingEvents.remove(eventType);
-        try {
-            if (mSecurityPolicy.canRetrieveWindowContent(service)) {
-                event.setConnectionId(service.mId);
-            } else {
-                event.setSource(null);
-            }
-            event.setSealed(true);
-            listener.onAccessibilityEvent(event);
-            event.recycle();
-            if (DEBUG) {
-                Slog.i(LOG_TAG, "Event " + event + " sent to " + listener);
-            }
-        } catch (RemoteException re) {
-            Slog.e(LOG_TAG, "Error during sending " + event + " to " + service.mService, re);
         }
     }
 
@@ -683,6 +674,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mServices.add(service);
             mComponentNameToServiceMap.put(service.mComponentName, service);
             updateInputFilterLocked();
+            tryEnableTouchExploration(service);
         } catch (RemoteException e) {
             /* do nothing */
         }
@@ -700,10 +692,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return false;
         }
         mComponentNameToServiceMap.remove(service.mComponentName);
-        mHandler.removeMessages(service.mId);
         service.unlinkToOwnDeath();
         service.dispose();
         updateInputFilterLocked();
+        tryDisableTouchExploration(service);
         return removed;
     }
 
@@ -932,6 +924,29 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 Settings.Secure.TOUCH_EXPLORATION_ENABLED, 0) == 1;
     }
 
+    private void tryEnableTouchExploration(final Service service) {
+        if (!mIsTouchExplorationEnabled && service.mRequestTouchExplorationMode) {
+            mMainHandler.obtainMessage(MSG_SHOW_ENABLE_TOUCH_EXPLORATION_DIALOG,
+                    service).sendToTarget();
+        }
+    }
+
+    private void tryDisableTouchExploration(Service service) {
+        if (mIsTouchExplorationEnabled && service.mReqeustTouchExplorationMode) {
+            synchronized (mLock) {
+                final int serviceCount = mServices.size();
+                for (int i = 0; i < serviceCount; i++) {
+                    Service other = mServices.get(i);
+                    if (other != service && other.mRequestTouchExplorationMode) {
+                        return;
+                    }
+                }
+                Settings.Secure.putInt(mContext.getContentResolver(),
+                        Settings.Secure.TOUCH_EXPLORATION_ENABLED, 0);
+            }
+        }
+    }
+
     private class AccessibilityConnectionWrapper implements DeathRecipient {
         private final int mWindowId;
         private final IAccessibilityInteractionConnection mConnection;
@@ -959,6 +974,42 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    private class MainHanler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            final int type = msg.what;
+            switch (type) {
+                case MSG_SHOW_ENABLE_TOUCH_EXPLORATION_DIALOG: {
+                    Service service = (Service) msg.obj;
+                    String label = service.mResolveInfo.loadLabel(
+                            mContext.getPackageManager()).toString();
+                    final AlertDialog dialog = new AlertDialog.Builder(mContext)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setPositiveButton(android.R.string.ok, new OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Settings.Secure.putInt(mContext.getContentResolver(),
+                                        Settings.Secure.TOUCH_EXPLORATION_ENABLED, 1);
+                            }
+                        })
+                        .setNegativeButton(android.R.string.cancel, new OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .setTitle(R.string.enable_explore_by_touch_warning_title)
+                        .setMessage(mContext.getString(
+                            R.string.enable_explore_by_touch_warning_message, label))
+                        .create();
+                    dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG);
+                    dialog.setCanceledOnTouchOutside(true);
+                    dialog.show();
+                }
+            }
+        }
+    }
+
     /**
      * This class represents an accessibility service. It stores all per service
      * data required for the service management, provides API for starting/stopping the
@@ -969,6 +1020,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     class Service extends IAccessibilityServiceConnection.Stub
             implements ServiceConnection, DeathRecipient {
+
+        // We pick the MSB to avoid collision since accessibility event types are
+        // used as message types allowing us to remove messages per event type. 
+        private static final int MSG_ON_GESTURE = 0x80000000;
+
         int mId = 0;
 
         AccessibilityServiceInfo mAccessibilityServiceInfo;
@@ -984,6 +1040,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         Set<String> mPackageNames = new HashSet<String>();
 
         boolean mIsDefault;
+
+        boolean mRequestTouchExplorationMode;
 
         boolean mIncludeNotImportantViews;
 
@@ -1001,12 +1059,35 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         final Rect mTempBounds = new Rect();
 
+        final ResolveInfo mResolveInfo;
+
         // the events pending events to be dispatched to this service
         final SparseArray<AccessibilityEvent> mPendingEvents =
             new SparseArray<AccessibilityEvent>();
 
+        /**
+         * Handler for delayed event dispatch.
+         */
+        public Handler mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message message) {
+                final int type = message.what;
+                switch (type) {
+                    case MSG_ON_GESTURE: {
+                        final int gestureId = message.arg1;
+                        notifyGestureInternal(gestureId);
+                    } break;
+                    default: {
+                        final int eventType = type;
+                        notifyAccessibilityEventInternal(eventType);
+                    } break;
+                }
+            }
+        };
+
         public Service(ComponentName componentName,
                 AccessibilityServiceInfo accessibilityServiceInfo, boolean isAutomation) {
+            mResolveInfo = accessibilityServiceInfo.getResolveInfo();
             mId = sIdCounter++;
             mComponentName = componentName;
             mAccessibilityServiceInfo = accessibilityServiceInfo;
@@ -1042,6 +1123,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mIncludeNotImportantViews =
                     (info.flags & FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0;
             }
+
+            mRequestTouchExplorationMode = (info.flags
+                    & AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE) != 0;
 
             synchronized (mLock) {
                 tryAddServiceLocked(this);
@@ -1403,6 +1487,108 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
         }
 
+        /**
+         * Performs a notification for an {@link AccessibilityEvent}.
+         *
+         * @param event The event.
+         */
+        public void notifyAccessibilityEvent(AccessibilityEvent event) {
+            synchronized (mLock) {
+                final int eventType = event.getEventType();
+                // Make a copy since during dispatch it is possible the event to
+                // be modified to remove its source if the receiving service does
+                // not have permission to access the window content.
+                AccessibilityEvent newEvent = AccessibilityEvent.obtain(event);
+                AccessibilityEvent oldEvent = mPendingEvents.get(eventType);
+                mPendingEvents.put(eventType, newEvent);
+
+                final int what = eventType;
+                if (oldEvent != null) {
+                    mHandler.removeMessages(what);
+                    oldEvent.recycle();
+                }
+
+                Message message = mHandler.obtainMessage(what);
+                mHandler.sendMessageDelayed(message, mNotificationTimeout);
+            }
+        }
+
+        /**
+         * Notifies an accessibility service client for a scheduled event given the event type.
+         *
+         * @param eventType The type of the event to dispatch.
+         */
+        private void notifyAccessibilityEventInternal(int eventType) {
+            IAccessibilityServiceClient listener;
+            AccessibilityEvent event;
+
+            synchronized (mLock) {
+                listener = mServiceInterface;
+
+                // If the service died/was disabled while the message for dispatching
+                // the accessibility event was propagating the listener may be null.
+                if (listener == null) {
+                    return;
+                }
+
+                event = mPendingEvents.get(eventType);
+
+                // Check for null here because there is a concurrent scenario in which this
+                // happens: 1) A binder thread calls notifyAccessibilityServiceDelayedLocked
+                // which posts a message for dispatching an event. 2) The message is pulled
+                // from the queue by the handler on the service thread and the latter is
+                // just about to acquire the lock and call this method. 3) Now another binder
+                // thread acquires the lock calling notifyAccessibilityServiceDelayedLocked
+                // so the service thread waits for the lock; 4) The binder thread replaces
+                // the event with a more recent one (assume the same event type) and posts a
+                // dispatch request releasing the lock. 5) Now the main thread is unblocked and
+                // dispatches the event which is removed from the pending ones. 6) And ... now
+                // the service thread handles the last message posted by the last binder call
+                // but the event is already dispatched and hence looking it up in the pending
+                // ones yields null. This check is much simpler that keeping count for each
+                // event type of each service to catch such a scenario since only one message
+                // is processed at a time.
+                if (event == null) {
+                    return;
+                }
+
+                mPendingEvents.remove(eventType);
+                if (mSecurityPolicy.canRetrieveWindowContent(this)) {
+                    event.setConnectionId(mId);
+                } else {
+                    event.setSource(null);
+                }
+                event.setSealed(true);
+            }
+
+            try {
+                listener.onAccessibilityEvent(event);
+                if (DEBUG) {
+                    Slog.i(LOG_TAG, "Event " + event + " sent to " + listener);
+                }
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Error during sending " + event + " to " + listener, re);
+            } finally {
+                event.recycle();
+            }
+        }
+
+        public void notifyGesture(int gestureId) {
+            mHandler.obtainMessage(MSG_ON_GESTURE, gestureId, 0).sendToTarget();
+        }
+
+        private void notifyGestureInternal(int gestureId) {
+            IAccessibilityServiceClient listener = mServiceInterface;
+            if (listener != null) {
+                try {
+                    listener.onGesture(gestureId);
+                } catch (RemoteException re) {
+                    Slog.e(LOG_TAG, "Error during sending gesture " + gestureId
+                            + " to " + mService, re);
+                }
+            }
+        }
+
         private void sendDownAndUpKeyEvents(int keyCode) {
             final long token = Binder.clearCallingIdentity();
 
@@ -1454,7 +1640,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         private int resolveAccessibilityWindowId(int accessibilityWindowId) {
             if (accessibilityWindowId == AccessibilityNodeInfo.ACTIVE_WINDOW_ID) {
-                return mSecurityPolicy.mRetrievalAlowingWindowId;
+                return mSecurityPolicy.mActiveWindowId;
             }
             return accessibilityWindowId;
         }
@@ -1497,24 +1683,35 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED
             | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED;
 
-        private static final int RETRIEVAL_ALLOWING_WINDOW_CHANGE_EVENT_TYPES =
-            AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
-            | AccessibilityEvent.TYPE_VIEW_HOVER_ENTER
-            | AccessibilityEvent.TYPE_VIEW_HOVER_EXIT;
-
-        private int mRetrievalAlowingWindowId;
+        private int mActiveWindowId;
 
         private boolean canDispatchAccessibilityEvent(AccessibilityEvent event) {
             // Send window changed event only for the retrieval allowing window.
             return (event.getEventType() != AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
-                    || event.getWindowId() == mRetrievalAlowingWindowId);
+                    || event.getWindowId() == mActiveWindowId);
         }
 
-        public void updateRetrievalAllowingWindowAndEventSourceLocked(AccessibilityEvent event) {
+        public void updateActiveWindowAndEventSourceLocked(AccessibilityEvent event) {
+            // The active window is either the window that has input focus or
+            // the window that the user is currently touching. If the user is
+            // touching a window that does not have input focus as soon as the
+            // the user stops touching that window the focused window becomes
+            // the active one.
             final int windowId = event.getWindowId();
             final int eventType = event.getEventType();
-            if ((eventType & RETRIEVAL_ALLOWING_WINDOW_CHANGE_EVENT_TYPES) != 0) {
-                mRetrievalAlowingWindowId = windowId;
+            switch (eventType) {
+                case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
+                    if (getFocusedWindowId() == windowId) {
+                        mActiveWindowId = windowId;
+                    }
+                } break;
+                case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER:
+                case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT: {
+                    mActiveWindowId = windowId;
+                } break;
+                case AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END: {
+                    mActiveWindowId = getFocusedWindowId();
+                } break;
             }
             if ((eventType & RETRIEVAL_ALLOWING_EVENT_TYPES) == 0) {
                 event.setSource(null);
@@ -1522,7 +1719,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         public int getRetrievalAllowingWindowLocked() {
-            return mRetrievalAlowingWindowId;
+            return mActiveWindowId;
         }
 
         public boolean canGetAccessibilityNodeInfoLocked(Service service, int windowId) {
@@ -1550,7 +1747,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         private boolean isRetrievalAllowingWindow(int windowId) {
-            return (mRetrievalAlowingWindowId == windowId);
+            return (mActiveWindowId == windowId);
         }
 
         private boolean isActionPermitted(int action) {
@@ -1566,6 +1763,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 throw new SecurityException("You do not have " + permission
                         + " required to call " + function);
             }
+        }
+
+        private int getFocusedWindowId() {
+            // We call this only on window focus change or after touch
+            // exploration gesture end and the shown windows are not that
+            // many, so the linear look up is just fine.
+            IBinder token = mWindowManagerService.getFocusedWindowClientToken();
+            if (token != null) {
+                SparseArray<IBinder> windows = mWindowIdToWindowTokenMap;
+                final int windowCount = windows.size();
+                for (int i = 0; i < windowCount; i++) {
+                    if (windows.valueAt(i) == token) {
+                        return windows.keyAt(i);
+                    }
+                }
+            }
+            return -1;
         }
     }
 }
