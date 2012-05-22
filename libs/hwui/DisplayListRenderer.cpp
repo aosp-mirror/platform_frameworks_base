@@ -296,7 +296,8 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
         indent[i] = ' ';
     }
     indent[count] = '\0';
-    ALOGD("%sStart display list (%p, %s)", (char*) indent + 2, this, mName.string());
+    ALOGD("%sStart display list (%p, %s, render=%d)", (char*) indent + 2, this,
+            mName.string(), isRenderable());
 
     ALOGD("%s%s %d", indent, "Save", SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     int saveCount = renderer.getSaveCount() - 1;
