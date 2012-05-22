@@ -20,6 +20,7 @@ import com.android.internal.R;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -31,6 +32,8 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.IntProperty;
 import android.util.Log;
+import android.util.Slog;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
@@ -1378,8 +1381,8 @@ public class Notification implements Parcelable
 
         private RemoteViews applyStandardTemplate(int resId) {
             RemoteViews contentView = new RemoteViews(mContext.getPackageName(), resId);
-            boolean hasLine3 = false;
-            boolean hasLine2 = false;
+            boolean showLine3 = false;
+            boolean showLine2 = false;
             int smallIconImageViewId = R.id.icon;
             if (mLargeIcon != null) {
                 contentView.setImageViewBitmap(R.id.icon, mLargeIcon);
@@ -1401,15 +1404,13 @@ public class Notification implements Parcelable
                 contentView.setTextViewText(R.id.title, mContentTitle);
             }
             if (mContentText != null) {
-                contentView.setTextViewText(
-                        (mSubText != null) ? R.id.text2 : R.id.text, 
-                        mContentText);
-                hasLine3 = true;
+                contentView.setTextViewText(R.id.text, mContentText);
+                showLine3 = true;
             }
             if (mContentInfo != null) {
                 contentView.setTextViewText(R.id.info, mContentInfo);
                 contentView.setViewVisibility(R.id.info, View.VISIBLE);
-                hasLine3 = true;
+                showLine3 = true;
             } else if (mNumber > 0) {
                 final int tooBig = mContext.getResources().getInteger(
                         R.integer.status_bar_notification_info_maxnum);
@@ -1421,25 +1422,42 @@ public class Notification implements Parcelable
                     contentView.setTextViewText(R.id.info, f.format(mNumber));
                 }
                 contentView.setViewVisibility(R.id.info, View.VISIBLE);
-                hasLine3 = true;
+                showLine3 = true;
             } else {
                 contentView.setViewVisibility(R.id.info, View.GONE);
             }
 
+            // Need to show three lines?
             if (mSubText != null) {
                 contentView.setTextViewText(R.id.text, mSubText);
-                contentView.setViewVisibility(R.id.text2,
-                        mContentText != null ? View.VISIBLE : View.GONE);
+                if (mContentText != null) {
+                    contentView.setTextViewText(R.id.text2, mContentText);
+                    // need to shrink all the type to make sure everything fits
+                    contentView.setViewVisibility(R.id.text2, View.VISIBLE);
+                    showLine2 = true;
+                } else {
+                    contentView.setViewVisibility(R.id.text2, View.GONE);
+                }
             } else {
                 contentView.setViewVisibility(R.id.text2, View.GONE);
                 if (mProgressMax != 0 || mProgressIndeterminate) {
                     contentView.setProgressBar(
                             R.id.progress, mProgressMax, mProgress, mProgressIndeterminate);
                     contentView.setViewVisibility(R.id.progress, View.VISIBLE);
+                    showLine2 = true;
                 } else {
                     contentView.setViewVisibility(R.id.progress, View.GONE);
                 }
             }
+            if (showLine2) {
+                final Resources res = mContext.getResources();
+                final float subTextSize = res.getDimensionPixelSize(
+                        R.dimen.notification_subtext_size);
+                contentView.setTextViewTextSize(R.id.text, TypedValue.COMPLEX_UNIT_PX, subTextSize);
+                // vertical centering
+                contentView.setViewPadding(R.id.line1, 0, 0, 0, 0);
+            }
+
             if (mWhen != 0) {
                 if (mUseChronometer) {
                     contentView.setViewVisibility(R.id.chronometer, View.VISIBLE);
@@ -1451,7 +1469,7 @@ public class Notification implements Parcelable
                     contentView.setLong(R.id.time, "setTime", mWhen);
                 }
             }
-            contentView.setViewVisibility(R.id.line3, hasLine3 ? View.VISIBLE : View.GONE);
+            contentView.setViewVisibility(R.id.line3, showLine3 ? View.VISIBLE : View.GONE);
             return contentView;
         }
 
@@ -1629,17 +1647,7 @@ public class Notification implements Parcelable
                 mBuilder.setContentTitle(mBigContentTitle);
             }
 
-            if (mBuilder.mSubText == null) {
-                mBuilder.setContentText(null);
-            }
-
             RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(layoutId);
-
-            if (mBuilder.mSubText == null) {
-                contentView.setViewVisibility(R.id.line3, View.GONE);
-            } else {
-                contentView.setViewVisibility(R.id.line3, View.VISIBLE);
-            }
 
             if (mBigContentTitle != null && mBigContentTitle.equals("")) {
                 contentView.setViewVisibility(R.id.line1, View.GONE);
@@ -1650,8 +1658,10 @@ public class Notification implements Parcelable
             if (mSummaryText != null && !mSummaryText.equals("")) {
                 contentView.setViewVisibility(R.id.overflow_title, View.VISIBLE);
                 contentView.setTextViewText(R.id.overflow_title, mSummaryText);
+                contentView.setViewVisibility(R.id.line3, View.GONE);
             } else {
                 contentView.setViewVisibility(R.id.overflow_title, View.GONE);
+                contentView.setViewVisibility(R.id.line3, View.VISIBLE);
             }
 
             return contentView;
