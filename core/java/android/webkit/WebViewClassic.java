@@ -1670,8 +1670,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             return mWebViewPrivate.super_performAccessibilityAction(action, arguments);
         }
 
-        if (mAccessibilityInjector.supportsAccessibilityAction(action)) {
-            return mAccessibilityInjector.performAccessibilityAction(action, arguments);
+        if (getAccessibilityInjector().supportsAccessibilityAction(action)) {
+            return getAccessibilityInjector().performAccessibilityAction(action, arguments);
         }
 
         switch (action) {
@@ -1722,7 +1722,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
         }
 
-        mAccessibilityInjector.onInitializeAccessibilityNodeInfo(info);
+        getAccessibilityInjector().onInitializeAccessibilityNodeInfo(info);
     }
 
     @Override
