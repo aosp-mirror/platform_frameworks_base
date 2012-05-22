@@ -2503,6 +2503,25 @@
     <!-- SearchView accessibility description for voice button [CHAR LIMIT=NONE] -->
     <string name="searchview_description_voice">Voice search</string>
 
+    <!-- Title for a warning message about the interaction model changes after allowing an accessibility
+         service to put the device into explore by touch mode, displayed as a dialog message when
+         the user selects to enables the service. (default). [CHAR LIMIT=35] -->
+    <string name="enable_explore_by_touch_warning_title">Enable Explore by Touch?</string>
+    <!-- Summary for a warning message about the interaction model changes after allowing an accessibility
+         service to put the device into explore by touch mode, displayed as a dialog message when
+         the user selects to enables the service. (tablet). [CHAR LIMIT=NONE] -->
+    <string name="enable_explore_by_touch_warning_message" product="tablet">
+            <xliff:g id="accessibility_service_name">%1$s</xliff:g> wants to enable Explore by Touch.
+            When Explore by Touch is turned on, you can hear or see descriptions of what\'s under
+            your finger or perform gestures to interact with the tablet.</string>
+    <!-- Summary for a warning message about the interaction model changes after allowing an accessibility
+         service to put the device into explore by touch mode, displayed as a dialog message when
+         the user selects to enables the service. (default). [CHAR LIMIT=NONE] -->
+    <string name="enable_explore_by_touch_warning_message" product="default">
+            <xliff:g id="accessibility_service_name">%1$s</xliff:g> wants to enable Explore by Touch.
+            When Explore by Touch is turned on, you can hear or see descriptions of what\'s under
+            your finger or perform gestures to interact with the phone.</string>
+
     <!-- String used to display the date. This is the string to say something happened 1 month ago. -->
     <string name="oneMonthDurationPast">1 month ago</string>
     <!-- String used to display the date. This is the string to say something happened more than 1 month ago. -->
