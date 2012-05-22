@@ -5504,6 +5504,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (visibleRect.contains(mEditTextContentBounds)) {
             return; // no need to scroll
         }
+        nativeFindMaxVisibleRect(mNativeClass, mEditTextLayerId, visibleRect);
         syncSelectionCursors();
         final int buffer = Math.max(1, viewToContentDimension(EDIT_RECT_BUFFER));
         Rect showRect = new Rect(
@@ -8537,4 +8538,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             Rect rect);
     // Returns 1 if a layer sync is needed, else 0
     private static native int nativeSetHwAccelerated(int instance, boolean hwAccelerated);
+    private static native void nativeFindMaxVisibleRect(int instance, int layerId,
+            Rect visibleContentRect);
 }
