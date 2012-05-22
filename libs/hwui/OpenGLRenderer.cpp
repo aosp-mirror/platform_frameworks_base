@@ -262,6 +262,7 @@ void OpenGLRenderer::resume() {
 }
 
 void OpenGLRenderer::detachFunctor(Functor* functor) {
+    ALOGD("opengl renderer %p detaching functor %p", this, functor);
     mFunctors.remove(functor);
 }
 
@@ -309,7 +310,7 @@ status_t OpenGLRenderer::invokeFunctors(Rect& dirty) {
 
 status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     interrupt();
-    detachFunctor(functor);
+    mFunctors.remove(functor);
 
     if (mDirtyClip) {
         setScissorFromClip();
