@@ -176,14 +176,26 @@ void OpenGLRenderer::prepareDirty(float left, float top, float right, float bott
     mSnapshot->fbo = getTargetFbo();
     mSaveCount = 1;
 
-    glViewport(0, 0, mWidth, mHeight);
-    mCaches.setScissor(left, mSnapshot->height - bottom, right - left, bottom - top);
-
     mSnapshot->setClip(left, top, right, bottom);
-    mDirtyClip = false;
+    mDirtyClip = opaque;
+
+    syncState();
 
     if (!opaque) {
+        mCaches.setScissor(left, mSnapshot->height - bottom, right - left, bottom - top);
         glClear(GL_COLOR_BUFFER_BIT);
+    } else {
+        mCaches.resetScissor();
+    }
+}
+
+void OpenGLRenderer::syncState() {
+    glViewport(0, 0, mWidth, mHeight);
+
+    if (mCaches.blend) {
+        glEnable(GL_BLEND);
+    } else {
+        glDisable(GL_BLEND);
     }
 }
 
@@ -289,11 +301,6 @@ status_t OpenGLRenderer::invokeFunctors(Rect& dirty) {
             }
         }
     }
-
-    // Restore state possibly changed by the functors in process mode
-    GLboolean value;
-    glGetBooleanv(GL_BLEND, &value);
-    mCaches.blend = value;
 
     mCaches.activeTexture(0);
 

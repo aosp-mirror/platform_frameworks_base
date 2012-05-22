@@ -215,6 +215,12 @@ protected:
 
 private:
     /**
+     * Ensures the state of the renderer is the same as the state of
+     * the GL context.
+     */
+    void syncState();
+
+    /**
      * Saves the current state of the renderer as a new snapshot.
      * The new snapshot is saved in mSnapshot and the previous snapshot
      * is linked from mSnapshot->previous.
