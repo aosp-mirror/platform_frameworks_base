@@ -438,6 +438,22 @@ public class WifiNative {
         return doBooleanCommand("SET config_methods " + cfg);
     }
 
+    public boolean setManufacturer(String value) {
+        return doBooleanCommand("SET manufacturer " + value);
+    }
+
+    public boolean setModelName(String value) {
+        return doBooleanCommand("SET model_name " + value);
+    }
+
+    public boolean setModelNumber(String value) {
+        return doBooleanCommand("SET model_number " + value);
+    }
+
+    public boolean setSerialNumber(String value) {
+        return doBooleanCommand("SET serial_number " + value);
+    }
+
     public boolean setP2pSsidPostfix(String postfix) {
         return doBooleanCommand("SET p2p_ssid_postfix " + postfix);
     }
