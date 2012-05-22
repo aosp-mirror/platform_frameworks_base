@@ -111,12 +111,12 @@ public class MediaEncoderFilter extends Filter {
     /** Frame width to be encoded, defaults to 320.
      * Actual received frame size has to match this */
     @GenerateFieldPort(name = "width", hasDefault = true)
-    private int mWidth = 320;
+    private int mWidth = 0;
 
     /** Frame height to to be encoded, defaults to 240.
      * Actual received frame size has to match */
     @GenerateFieldPort(name = "height", hasDefault = true)
-    private int mHeight = 240;
+    private int mHeight = 0;
 
     /** Stream framerate to encode the frames at.
      * By default, frames are encoded at 30 FPS*/
@@ -245,6 +245,11 @@ public class MediaEncoderFilter extends Filter {
         if (mProfile != null) {
             mMediaRecorder.setProfile(mProfile);
             mFps = mProfile.videoFrameRate;
+            // If width and height are set larger than 0, then those
+            // overwrite the ones in the profile.
+            if (mWidth > 0 && mHeight > 0) {
+                mMediaRecorder.setVideoSize(mWidth, mHeight);
+            }
         } else {
             mMediaRecorder.setOutputFormat(mOutputFormat);
             mMediaRecorder.setVideoEncoder(mVideoEncoder);
@@ -298,7 +303,10 @@ public class MediaEncoderFilter extends Filter {
         screenFormat.setBytesPerSample(4);
 
         int width, height;
-        if (mProfile != null) {
+        boolean widthHeightSpecified = mWidth > 0 && mHeight > 0;
+        // If width and height are specified, then use those instead
+        // of that in the profile.
+        if (mProfile != null && !widthHeightSpecified) {
             width = mProfile.videoFrameWidth;
             height = mProfile.videoFrameHeight;
         } else {
@@ -410,7 +418,6 @@ public class MediaEncoderFilter extends Filter {
         // And swap buffers
         glEnv.swapBuffers();
         mNumFramesEncoded++;
-        if (mLogVerbose) Log.v(TAG, "numFramesEncoded = " + mNumFramesEncoded);
     }
 
     private void stopRecording(FilterContext context) {
