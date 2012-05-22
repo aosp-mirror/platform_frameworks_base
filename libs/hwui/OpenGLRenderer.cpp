@@ -170,7 +170,6 @@ void OpenGLRenderer::prepare(bool opaque) {
 
 void OpenGLRenderer::prepareDirty(float left, float top, float right, float bottom, bool opaque) {
     mCaches.clearGarbage();
-    mFunctors.clear();
 
     mSnapshot = new Snapshot(mFirstSnapshot,
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
@@ -303,6 +302,8 @@ status_t OpenGLRenderer::invokeFunctors(Rect& dirty) {
 
 status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     interrupt();
+    detachFunctor(functor);
+
     if (mDirtyClip) {
         setScissorFromClip();
     }
