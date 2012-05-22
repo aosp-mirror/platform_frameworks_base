@@ -2895,20 +2895,6 @@ public final class ViewRootImpl implements ViewParent,
                         if (hasWindowFocus) {
                             mView.sendAccessibilityEvent(
                                     AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-                            // Give accessibility focus to the view that has input
-                            // focus if such, otherwise to the first one.
-                            if (mView instanceof ViewGroup) {
-                                ViewGroup viewGroup = (ViewGroup) mView;
-                                View focused = viewGroup.findFocus();
-                                if (focused != null) {
-                                    focused.requestAccessibilityFocus();
-                                }
-                            }
-                            // There is no accessibility focus, despite our effort
-                            // above, now just give it to the first view.
-                            if (mAccessibilityFocusedHost == null) {
-                                mView.requestAccessibilityFocus();
-                            }
                         }
                     }
                 }
