@@ -53,7 +53,6 @@
         <include
             layout="@layout/notification_action_list"
             android:id="@+id/actions"
-            android:layout_marginLeft="8dp"
             android:layout_gravity="bottom"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

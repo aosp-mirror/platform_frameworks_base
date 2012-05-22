@@ -34,8 +34,6 @@
         android:layout_gravity="fill_vertical"
         android:layout_marginLeft="@dimen/notification_large_icon_width"
         android:orientation="vertical"
-        android:paddingLeft="12dp"
-        android:paddingRight="12dp"
         android:paddingTop="2dp"
         android:paddingBottom="2dp"
         android:gravity="top"
@@ -44,6 +42,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:layout_weight="1"
             >
             <LinearLayout
@@ -87,6 +87,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="-2dp"
                 android:layout_marginBottom="-2dp"
+                android:layout_marginRight="8dp"
                 android:singleLine="true"
                 android:fadingEdge="horizontal"
                 android:ellipsize="marquee"
@@ -97,6 +98,8 @@
                 android:id="@android:id/progress"
                 android:layout_width="match_parent"
                 android:layout_height="12dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginRight="8dp"
                 android:visibility="gone"
                 android:layout_weight="0"
                 style="?android:attr/progressBarStyleHorizontal"
@@ -105,7 +108,8 @@
                 android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginBottom="2dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginRight="8dp"
                 android:singleLine="false"
                 android:visibility="gone"
                 android:maxLines="8"
@@ -113,6 +117,13 @@
                 android:layout_weight="1"
                 />
         </LinearLayout>
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="1dip"
+            android:layout_marginTop="-1px"
+            android:id="@+id/action_divider"
+            android:visibility="gone"
+            android:background="?android:attr/dividerHorizontal" />
         <include
             layout="@layout/notification_action_list"
             android:layout_width="match_parent"
@@ -120,22 +131,23 @@
             android:visibility="gone"
             android:layout_weight="1"
             />
-        <TextView android:id="@+id/overflow_title"
-            android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
+        <ImageView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:ellipsize="marquee"
-            android:fadingEdge="horizontal"
-            android:visibility="gone"
-            android:layout_weight="0"
-            />
+            android:layout_height="1px"
+            android:id="@+id/overflow_divider"
+            android:layout_marginBottom="8dp"
+            android:visibility="visible"
+            android:background="?android:attr/dividerHorizontal" />
         <LinearLayout
             android:id="@+id/line3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginRight="8dp"
             android:orientation="horizontal"
             android:layout_weight="0"
+            android:gravity="center_vertical"
             >
             <TextView android:id="@+id/text"
                 android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
@@ -158,14 +170,14 @@
                 android:paddingLeft="8dp"
                 />
             <ImageView android:id="@+id/right_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
                 android:layout_gravity="center"
                 android:layout_weight="0"
+                android:layout_marginLeft="8dp"
                 android:scaleType="centerInside"
-                android:paddingLeft="8dp"
                 android:visibility="gone"
-                android:drawableAlpha="180"
+                android:drawableAlpha="153"
                 />
         </LinearLayout>
     </LinearLayout>

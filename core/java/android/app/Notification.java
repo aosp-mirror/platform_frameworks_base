@@ -1379,7 +1379,7 @@ public class Notification implements Parcelable
             }
         }
 
-        private RemoteViews applyStandardTemplate(int resId) {
+        private RemoteViews applyStandardTemplate(int resId, boolean fitIn1U) {
             RemoteViews contentView = new RemoteViews(mContext.getPackageName(), resId);
             boolean showLine3 = false;
             boolean showLine2 = false;
@@ -1432,7 +1432,6 @@ public class Notification implements Parcelable
                 contentView.setTextViewText(R.id.text, mSubText);
                 if (mContentText != null) {
                     contentView.setTextViewText(R.id.text2, mContentText);
-                    // need to shrink all the type to make sure everything fits
                     contentView.setViewVisibility(R.id.text2, View.VISIBLE);
                     showLine2 = true;
                 } else {
@@ -1450,10 +1449,13 @@ public class Notification implements Parcelable
                 }
             }
             if (showLine2) {
-                final Resources res = mContext.getResources();
-                final float subTextSize = res.getDimensionPixelSize(
-                        R.dimen.notification_subtext_size);
-                contentView.setTextViewTextSize(R.id.text, TypedValue.COMPLEX_UNIT_PX, subTextSize);
+                if (fitIn1U) {
+                    // need to shrink all the type to make sure everything fits
+                    final Resources res = mContext.getResources();
+                    final float subTextSize = res.getDimensionPixelSize(
+                            R.dimen.notification_subtext_size);
+                    contentView.setTextViewTextSize(R.id.text, TypedValue.COMPLEX_UNIT_PX, subTextSize);
+                }
                 // vertical centering
                 contentView.setViewPadding(R.id.line1, 0, 0, 0, 0);
             }
@@ -1470,16 +1472,18 @@ public class Notification implements Parcelable
                 }
             }
             contentView.setViewVisibility(R.id.line3, showLine3 ? View.VISIBLE : View.GONE);
+            contentView.setViewVisibility(R.id.overflow_divider, showLine3 ? View.VISIBLE : View.GONE);
             return contentView;
         }
 
         private RemoteViews applyStandardTemplateWithActions(int layoutId) {
-            RemoteViews big = applyStandardTemplate(layoutId);
+            RemoteViews big = applyStandardTemplate(layoutId, false);
 
             int N = mActions.size();
             if (N > 0) {
                 // Log.d("Notification", "has actions: " + mContentText);
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
+                big.setViewVisibility(R.id.action_divider, View.VISIBLE);
                 if (N>MAX_ACTION_BUTTONS) N=MAX_ACTION_BUTTONS;
                 big.removeAllViews(R.id.actions);
                 for (int i=0; i<N; i++) {
@@ -1495,7 +1499,7 @@ public class Notification implements Parcelable
             if (mContentView != null) {
                 return mContentView;
             } else {
-                return applyStandardTemplate(R.layout.notification_template_base); // no more special large_icon flavor
+                return applyStandardTemplate(R.layout.notification_template_base, true); // no more special large_icon flavor
             }
         }
 
@@ -1506,7 +1510,7 @@ public class Notification implements Parcelable
                 if (mContentView == null) {
                     return applyStandardTemplate(mLargeIcon == null
                             ? R.layout.status_bar_latest_event_ticker
-                            : R.layout.status_bar_latest_event_ticker_large_icon);
+                            : R.layout.status_bar_latest_event_ticker_large_icon, true);
                 } else {
                     return null;
                 }
@@ -1655,12 +1659,9 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.line1, View.VISIBLE);
             }
 
+            // The last line defaults to the content text or subtext, but can be replaced by mSummaryText
             if (mSummaryText != null && !mSummaryText.equals("")) {
-                contentView.setViewVisibility(R.id.overflow_title, View.VISIBLE);
-                contentView.setTextViewText(R.id.overflow_title, mSummaryText);
-                contentView.setViewVisibility(R.id.line3, View.GONE);
-            } else {
-                contentView.setViewVisibility(R.id.overflow_title, View.GONE);
+                contentView.setTextViewText(R.id.text, mSummaryText);
                 contentView.setViewVisibility(R.id.line3, View.VISIBLE);
             }
 
@@ -1801,6 +1802,8 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews makeBigContentView() {
+            // Remove the content text so line3 disappears entirely
+            mBuilder.mContentText = null;
             RemoteViews contentView = getStandardView(R.layout.notification_template_big_text);
             contentView.setTextViewText(R.id.big_text, mBigText);
             contentView.setViewVisibility(R.id.big_text, View.VISIBLE);
