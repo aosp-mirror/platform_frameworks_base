@@ -19,28 +19,25 @@ package android.view;
 import android.content.Context;
 
 /**
- * This class is a mediator for accomplishing a given task, for example sharing a file.
- * It is responsible for creating a view that performs an action that accomplishes the task.
- * This class also implements other functions such a performing a default action.
- * <p>
- * An ActionProvider can be optionally specified for a {@link MenuItem} and in such a
- * case it will be responsible for creating the action view that appears in the
- * {@link android.app.ActionBar} as a substitute for the menu item when the item is
- * displayed as an action item. Also the provider is responsible for performing a
- * default action if a menu item placed on the overflow menu of the ActionBar is
- * selected and none of the menu item callbacks has handled the selection. For this
- * case the provider can also optionally provide a sub-menu for accomplishing the
- * task at hand.
- * </p>
- * <p>
- * There are two ways for using an action provider for creating and handling of action views:
+ * An ActionProvider defines rich menu interaction in a single component.
+ * ActionProvider can generate action views for use in the action bar,
+ * dynamically populate submenus of a MenuItem, and handle default menu
+ * item invocations.
+ *
+ * <p>An ActionProvider can be optionally specified for a {@link MenuItem} and will be
+ * responsible for creating the action view that appears in the {@link android.app.ActionBar}
+ * in place of a simple button in the bar. When the menu item is presented in a way that
+ * does not allow custom action views, (e.g. in an overflow menu,) the ActionProvider
+ * can perform a default action.</p>
+ *
+ * <p>There are two ways to use an action provider:
  * <ul>
  * <li>
- * Setting the action provider on a {@link MenuItem} directly by calling
+ * Set the action provider on a {@link MenuItem} directly by calling
  * {@link MenuItem#setActionProvider(ActionProvider)}.
  * </li>
  * <li>
- * Declaring the action provider in the menu XML resource. For example:
+ * Declare the action provider in an XML menu resource. For example:
  * <pre>
  * <code>
  *   &lt;item android:id="@+id/my_menu_item"

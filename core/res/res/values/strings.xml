@@ -3102,6 +3102,11 @@
     <!-- Description of an application permission,  used to invoke default container service to copy content. -->
     <string name="permdesc_copyProtectedData">Allows the app to invoke default container service to copy content. Not for use by normal apps.</string>
 
+    <!-- Title of an application permission that lets an application route media output. -->
+    <string name="permlab_route_media_output">Route media output</string>
+    <!-- Description of an application permission that lets an application route media output. -->
+    <string name="permdesc_route_media_output">Allows an application to route media output to other external devices.</string>
+
     <!-- Shown in the tutorial for tap twice for zoom control. -->
     <string name="tutorial_double_tap_to_zoom_message_short">Touch twice for zoom control</string>
 
@@ -3515,5 +3520,26 @@
     <!-- Title for a button to choose the currently selected activity
          from the activity resolver to use just this once. [CHAR LIMIT=25] -->
     <string name="activity_resolver_use_once">Just once</string>
+
+    <!-- Name of the default audio route when nothing is connected to
+         a headphone or other wired audio output jack. [CHAR LIMIT=25] -->
+    <string name="default_audio_route_name">Phone speaker</string>
+
+    <!-- Name of the default audio route for tablets when nothing
+         is connected to a headphone or other wired audio output jack. [CHAR LIMIT=25] -->
+    <string name="default_audio_route_name" product="tablet">Tablet speakers</string>
+
+    <!-- Name of the default audio route when wired headphones are
+         connected. [CHAR LIMIT=25] -->
+    <string name="default_audio_route_name_headphones">Headphones</string>
+
+    <!-- Name of the default audio route when an audio dock is connected. [CHAR LIMIT=25] -->
+    <string name="default_audio_route_name_dock_speakers">Dock speakers</string>
+
+    <!-- Name of the default audio route when HDMI is connected. [CHAR LIMIT=25] -->
+    <string name="default_audio_route_name_hdmi">HDMI audio</string>
+
+    <!-- Name of the default audio route category. [CHAR LIMIT=25] -->
+    <string name="default_audio_route_category_name">System</string>
 
 </resources>

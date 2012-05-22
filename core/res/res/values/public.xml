@@ -881,6 +881,11 @@
   <java-symbol type="string" name="granularity_label_word" />
   <java-symbol type="string" name="granularity_label_link" />
   <java-symbol type="string" name="granularity_label_line" />
+  <java-symbol type="string" name="default_audio_route_name" />
+  <java-symbol type="string" name="default_audio_route_name_headphones" />
+  <java-symbol type="string" name="default_audio_route_name_dock_speakers" />
+  <java-symbol type="string" name="default_audio_route_name_hdmi" />
+  <java-symbol type="string" name="default_audio_route_category_name" />
 
   <java-symbol type="plurals" name="abbrev_in_num_days" />
   <java-symbol type="plurals" name="abbrev_in_num_hours" />
