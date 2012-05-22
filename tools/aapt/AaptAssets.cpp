@@ -122,6 +122,7 @@ static bool isHidden(const char *root, const char *path)
         if (token[0] == '*') {
             // Match *suffix
             token++;
+            n--;
             if (n <= plen) {
                 ignore = strncasecmp(token, path + plen - n, n) == 0;
             }
