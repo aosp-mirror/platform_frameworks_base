@@ -1177,7 +1177,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (!w.isVisibleOrAdding()) {
                     Slog.i(TAG, "  mSurface=" + w.mWinAnimator.mSurface
                             + " relayoutCalled=" + w.mRelayoutCalled + " viewVis=" + w.mViewVisibility
-                            + " policyVis=" + w.mPolicyVisibility + " attachHid=" + w.mAttachedHidden
+                            + " policyVis=" + w.mPolicyVisibility
+                            + " policyVisAfterAnim=" + w.mPolicyVisibilityAfterAnim
+                            + " attachHid=" + w.mAttachedHidden
                             + " exiting=" + w.mExiting + " destroying=" + w.mDestroying);
                     if (w.mAppToken != null) {
                         Slog.i(TAG, "  mAppToken.hiddenRequested=" + w.mAppToken.hiddenRequested);
@@ -7234,9 +7236,11 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowState imFocus;
             if (idx > 0) {
                 imFocus = mWindows.get(idx-1);
-                //Log.i(TAG, "Desired input method target: " + imFocus);
-                //Log.i(TAG, "Current focus: " + this.mCurrentFocus);
-                //Log.i(TAG, "Last focus: " + this.mLastFocus);
+                if (DEBUG_INPUT_METHOD) {
+                    Slog.i(TAG, "Desired input method target: " + imFocus);
+                    Slog.i(TAG, "Current focus: " + this.mCurrentFocus);
+                    Slog.i(TAG, "Last focus: " + this.mLastFocus);
+                }
                 if (imFocus != null) {
                     // This may be a starting window, in which case we still want
                     // to count it as okay.
@@ -7247,17 +7251,20 @@ public class WindowManagerService extends IWindowManager.Stub
                         for (int i=0; i<imFocus.mAppToken.windows.size(); i++) {
                             WindowState w = imFocus.mAppToken.windows.get(i);
                             if (w != imFocus) {
-                                //Log.i(TAG, "Switching to real app window: " + w);
+                                Log.i(TAG, "Switching to real app window: " + w);
                                 imFocus = w;
                                 break;
                             }
                         }
                     }
-                    //Log.i(TAG, "IM target client: " + imFocus.mSession.mClient);
-                    //if (imFocus.mSession.mClient != null) {
-                    //    Log.i(TAG, "IM target client binder: " + imFocus.mSession.mClient.asBinder());
-                    //    Log.i(TAG, "Requesting client binder: " + client.asBinder());
-                    //}
+                    if (DEBUG_INPUT_METHOD) {
+                        Slog.i(TAG, "IM target client: " + imFocus.mSession.mClient);
+                        if (imFocus.mSession.mClient != null) {
+                            Slog.i(TAG, "IM target client binder: "
+                                    + imFocus.mSession.mClient.asBinder());
+                            Slog.i(TAG, "Requesting client binder: " + client.asBinder());
+                        }
+                    }
                     if (imFocus.mSession.mClient != null &&
                             imFocus.mSession.mClient.asBinder() == client.asBinder()) {
                         return true;
