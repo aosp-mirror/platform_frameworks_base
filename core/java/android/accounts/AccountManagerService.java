@@ -163,7 +163,8 @@ public class AccountManagerService
                 new HashMap<Account, Integer>();
         private final Object cacheLock = new Object();
         /** protected by the {@link #cacheLock} */
-        private final HashMap<String, Account[]> accountCache = new HashMap<String, Account[]>();
+        private final HashMap<String, Account[]> accountCache =
+                new LinkedHashMap<String, Account[]>();
         /** protected by the {@link #cacheLock} */
         private HashMap<Account, HashMap<String, String>> userDataCache =
                 new HashMap<Account, HashMap<String, String>>();
@@ -296,7 +297,7 @@ public class AccountManagerService
             try {
                 accounts.accountCache.clear();
                 final HashMap<String, ArrayList<String>> accountNamesByType =
-                        new HashMap<String, ArrayList<String>>();
+                        new LinkedHashMap<String, ArrayList<String>>();
                 while (cursor.moveToNext()) {
                     final long accountId = cursor.getLong(0);
                     final String accountType = cursor.getString(1);
