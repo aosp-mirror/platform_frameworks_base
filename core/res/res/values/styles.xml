@@ -240,23 +240,23 @@ please see styles_device_defaults.xml.
     <!-- Notification content styles -->
     <style name="TextAppearance.StatusBar.EventContent">
         <item name="android:textColor">#808080</item>
-        <item name="android:textSize">14dp</item>
+        <item name="android:textSize">@dimen/notification_text_size</item>
     </style>
     <style name="TextAppearance.StatusBar.EventContent.Title">
         <item name="android:textColor">#ffffff</item>
         <item name="android:fontFamily">sans-serif-light</item>
-        <item name="android:textSize">18dp</item>
+        <item name="android:textSize">@dimen/notification_title_text_size</item>
         <item name="android:textStyle">bold</item>
     </style>
     <style name="TextAppearance.StatusBar.EventContent.Line2">
-        <!-- inherit all -->
+        <item name="android:textSize">@dimen/notification_subtext_size</item>
     </style>
     <style name="TextAppearance.StatusBar.EventContent.Info">
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">@dimen/notification_subtext_size</item>
         <item name="android:textColor">#666666</item>
     </style>
     <style name="TextAppearance.StatusBar.EventContent.Time">
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">@dimen/notification_subtext_size</item>
         <item name="android:textColor">#666666</item>
     </style>
 
