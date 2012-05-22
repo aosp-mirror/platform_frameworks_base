@@ -2318,7 +2318,6 @@ public final class WebViewCore {
                     Log.w(LOGTAG, "Cannot pauseUpdatePicture, core destroyed or not initialized!");
                     return;
                 }
-                core.nativeSetIsPaused(core.mNativeClass, true);
                 core.mDrawIsPaused = true;
             }
         }
@@ -2336,7 +2335,6 @@ public final class WebViewCore {
                     Log.w(LOGTAG, "Cannot resumeUpdatePicture, core destroyed!");
                     return;
                 }
-                core.nativeSetIsPaused(core.mNativeClass, false);
                 core.mDrawIsPaused = false;
                 // always redraw on resume to reenable gif animations
                 core.mDrawIsScheduled = false;
@@ -3084,7 +3082,6 @@ public final class WebViewCore {
         return mDeviceOrientationService;
     }
 
-    private native void nativeSetIsPaused(int nativeClass, boolean isPaused);
     private native void nativePause(int nativeClass);
     private native void nativeResume(int nativeClass);
     private native void nativeFreeMemory(int nativeClass);
