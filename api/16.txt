@@ -22737,6 +22737,17 @@ package android.view {
     method public void onPrepareSubMenu(android.view.SubMenu);
   }
 
+  public final class Choreographer {
+    method public static android.view.Choreographer getInstance();
+    method public void postFrameCallback(android.view.Choreographer.FrameCallback);
+    method public void postFrameCallbackDelayed(android.view.Choreographer.FrameCallback, long);
+    method public void removeFrameCallback(android.view.Choreographer.FrameCallback);
+  }
+
+  public static abstract interface Choreographer.FrameCallback {
+    method public abstract void doFrame(long);
+  }
+
   public abstract interface CollapsibleActionView {
     method public abstract void onActionViewCollapsed();
     method public abstract void onActionViewExpanded();
