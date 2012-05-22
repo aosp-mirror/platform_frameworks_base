@@ -75,6 +75,7 @@ public class SettingsView extends LinearLayout implements View.OnClickListener {
         super.onDetachedFromWindow();
         mAirplane.release();
         mDoNotDisturb.release();
+        mRotate.release();
     }
 
     public void onClick(View v) {
