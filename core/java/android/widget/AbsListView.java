@@ -1456,7 +1456,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final int lastVisiblePosition = getLastVisiblePosition();
             if (mLastAccessibilityScrollEventFromIndex == firstVisiblePosition
                     && mLastAccessibilityScrollEventToIndex == lastVisiblePosition) {
-                return;   
+                return;
             } else {
                 mLastAccessibilityScrollEventFromIndex = firstVisiblePosition;
                 mLastAccessibilityScrollEventToIndex = lastVisiblePosition;
@@ -2278,28 +2278,37 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             super.onInitializeAccessibilityNodeInfo(host, info);
 
             final int position = getPositionForView(host);
+            final ListAdapter adapter = getAdapter();
 
-            if (position == INVALID_POSITION) {
+            if ((position == INVALID_POSITION) || (adapter == null)) {
+                // Cannot perform actions on invalid items.
+                info.setEnabled(false);
                 return;
             }
 
-            if (isClickable() && isEnabled()) {
-                info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
-                info.setClickable(true);
-            }
-
-            if (isLongClickable() && isEnabled()) {
-                info.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
-                info.setLongClickable(true);
-            }
-
-            if (isEnabled()) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SELECT);
+            if (!isEnabled() || !adapter.isEnabled(position)) {
+                // Cannot perform actions on invalid items.
+                info.setEnabled(false);
+                return;
             }
 
             if (position == getSelectedItemPosition()) {
                 info.setSelected(true);
+                info.addAction(AccessibilityNodeInfo.ACTION_CLEAR_SELECTION);
+            } else {
+                info.addAction(AccessibilityNodeInfo.ACTION_SELECT);
             }
+
+            if (isClickable()) {
+                info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
+                info.setClickable(true);
+            }
+
+            if (isLongClickable()) {
+                info.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
+                info.setLongClickable(true);
+            }
+
         }
 
         @Override
@@ -2309,22 +2318,33 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
 
             final int position = getPositionForView(host);
+            final ListAdapter adapter = getAdapter();
 
-            if (position == INVALID_POSITION) {
+            if ((position == INVALID_POSITION) || (adapter == null)) {
+                // Cannot perform actions on invalid items.
                 return false;
             }
 
-            if (!isEnabled()) {
+            if (!isEnabled() || !adapter.isEnabled(position)) {
+                // Cannot perform actions on disabled items.
                 return false;
             }
 
             final long id = getItemIdAtPosition(position);
 
             switch (action) {
+                case AccessibilityNodeInfo.ACTION_CLEAR_SELECTION: {
+                    if (getSelectedItemPosition() == position) {
+                        setSelection(INVALID_POSITION);
+                        return true;
+                    }
+                } return false;
                 case AccessibilityNodeInfo.ACTION_SELECT: {
-                    setSelection(position);
-                    return true;
-                }
+                    if (getSelectedItemPosition() != position) {
+                        setSelection(position);
+                        return true;
+                    }
+                } return false;
                 case AccessibilityNodeInfo.ACTION_CLICK: {
                     if (isClickable()) {
                         return performItemClick(host, position, id);
