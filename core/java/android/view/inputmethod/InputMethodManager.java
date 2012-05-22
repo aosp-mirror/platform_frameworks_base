@@ -283,6 +283,7 @@ public final class InputMethodManager {
      * The InputConnection that was last retrieved from the served view.
      */
     InputConnection mServedInputConnection;
+    ControlledInputConnectionWrapper mServedInputConnectionWrapper;
     /**
      * The completions that were last provided by the served view.
      */
@@ -418,16 +419,22 @@ public final class InputMethodManager {
     
     private static class ControlledInputConnectionWrapper extends IInputConnectionWrapper {
         private final InputMethodManager mParentInputMethodManager;
+        private boolean mActive;
 
         public ControlledInputConnectionWrapper(final Looper mainLooper, final InputConnection conn,
                 final InputMethodManager inputMethodManager) {
             super(mainLooper, conn);
             mParentInputMethodManager = inputMethodManager;
+            mActive = true;
         }
 
         @Override
         public boolean isActive() {
-            return mParentInputMethodManager.mActive;
+            return mParentInputMethodManager.mActive && mActive;
+        }
+
+        void deactivate() {
+            mActive = false;
         }
     }
     
@@ -666,6 +673,10 @@ public final class InputMethodManager {
     void clearConnectionLocked() {
         mCurrentTextBoxAttribute = null;
         mServedInputConnection = null;
+        if (mServedInputConnectionWrapper != null) {
+            mServedInputConnectionWrapper.deactivate();
+            mServedInputConnectionWrapper = null;
+        }
     }
     
     /**
@@ -1060,7 +1071,7 @@ public final class InputMethodManager {
             // Notify the served view that its previous input connection is finished
             notifyInputConnectionFinished();
             mServedInputConnection = ic;
-            IInputContext servedContext;
+            ControlledInputConnectionWrapper servedContext;
             if (ic != null) {
                 mCursorSelStart = tba.initialSelStart;
                 mCursorSelEnd = tba.initialSelEnd;
@@ -1071,6 +1082,10 @@ public final class InputMethodManager {
             } else {
                 servedContext = null;
             }
+            if (mServedInputConnectionWrapper != null) {
+                mServedInputConnectionWrapper.deactivate();
+            }
+            mServedInputConnectionWrapper = servedContext;
             
             try {
                 if (DEBUG) Log.v(TAG, "START INPUT: " + view + " ic="
@@ -1286,6 +1301,7 @@ public final class InputMethodManager {
         // we'll just do a window focus gain and call it a day.
         synchronized (mH) {
             try {
+                if (DEBUG) Log.v(TAG, "Reporting focus gain, without startInput");
                 mService.windowGainedFocus(mClient, rootView.getWindowToken(),
                         controlFlags, softInputMode, windowFlags, null, null);
             } catch (RemoteException e) {

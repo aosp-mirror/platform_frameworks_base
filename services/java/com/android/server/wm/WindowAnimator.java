@@ -269,9 +269,19 @@ public class WindowAnimator {
                                 mPendingLayoutChanges);
                         }
                         mService.mFocusMayChange = true;
-                    } else if (win.isReadyForDisplay()) {
+                    }
+                    if (win.isReadyForDisplay()) {
                         mForceHiding = true;
                     }
+                    if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
+                            "Force hide " + mForceHiding
+                            + " hasSurface=" + win.mHasSurface
+                            + " policyVis=" + win.mPolicyVisibility
+                            + " destroying=" + win.mDestroying
+                            + " attHidden=" + win.mAttachedHidden
+                            + " vis=" + win.mViewVisibility
+                            + " hidden=" + win.mRootToken.hidden
+                            + " anim=" + win.mWinAnimator.mAnimation);
                 } else if (mPolicy.canBeForceHidden(win, win.mAttrs)) {
                     final boolean changed;
                     if (mForceHiding) {
