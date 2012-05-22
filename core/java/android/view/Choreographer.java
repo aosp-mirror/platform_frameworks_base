@@ -24,16 +24,46 @@ import android.os.SystemProperties;
 import android.util.Log;
 
 /**
- * Coordinates animations and drawing for UI on a particular thread.
- *
- * This object is thread-safe.  Other threads can post callbacks to run at a later time
- * on the UI thread.
- *
- * Ensuring thread-safety is a little tricky because the {@link DisplayEventReceiver}
- * can only be accessed from the UI thread so operations that touch the event receiver
- * are posted to the UI thread if needed.
- *
- * @hide
+ * Coordinates the timing of animations, input and drawing.
+ * <p>
+ * The choreographer receives timing pulses (such as vertical synchronization)
+ * from the display subsystem then schedules work to occur as part of rendering
+ * the next display frame.
+ * </p><p>
+ * Applications typically interact with the choreographer indirectly using
+ * higher level abstractions in the animation framework or the view hierarchy.
+ * Here are some examples of things you can do using the higher-level APIs.
+ * </p>
+ * <ul>
+ * <li>To post an animation to be processed on a regular time basis synchronized with
+ * display frame rendering, use {@link android.animation.ValueAnimator#start}.</li>
+ * <li>To post a {@link Runnable} to be invoked once at the beginning of the next display
+ * frame, use {@link View#postOnAnimation}.</li>
+ * <li>To post a {@link Runnable} to be invoked once at the beginning of the next display
+ * frame after a delay, use {@link View#postOnAnimationDelayed}.</li>
+ * <li>To post a call to {@link View#invalidate()} to occur once at the beginning of the
+ * next display frame, use {@link View#postInvalidateOnAnimation()} or
+ * {@link View#postInvalidateOnAnimation(int, int, int, int)}.</li>
+ * <li>To ensure that the contents of a {@link View} scroll smoothly and are drawn in
+ * sync with display frame rendering, do nothing.  This already happens automatically.
+ * {@link View#onDraw} will be called at the appropriate time.</li>
+ * </ul>
+ * <p>
+ * However, there are a few cases where you might want to use the functions of the
+ * choreographer directly in your application.  Here are some examples.
+ * </p>
+ * <ul>
+ * <li>If your application does its rendering in a different thread, possibly using GL,
+ * or does not use the animation framework or view hierarchy at all
+ * and you want to ensure that it is appropriately synchronized with the display, then use
+ * {@link Choreographer#postFrameCallback}.</li>
+ * <li>... and that's about it.</li>
+ * </ul>
+ * <p>
+ * Each {@link Looper} thread has its own choreographer.  Other threads can
+ * post callbacks to run on the choreographer but they will run on the {@link Looper}
+ * to which the choreographer belongs.
+ * </p>
  */
 public final class Choreographer {
     private static final String TAG = "Choreographer";
@@ -79,13 +109,22 @@ public final class Choreographer {
     private static final int MSG_DO_SCHEDULE_VSYNC = 1;
     private static final int MSG_DO_SCHEDULE_CALLBACK = 2;
 
+    // All frame callbacks posted by applications have this token.
+    private static final Object FRAME_CALLBACK_TOKEN = new Object() {
+        public String toString() { return "FRAME_CALLBACK_TOKEN"; }
+    };
+
     private final Object mLock = new Object();
 
     private final Looper mLooper;
     private final FrameHandler mHandler;
+
+    // The display event receiver can only be accessed by the looper thread to which
+    // it is attached.  We take care to ensure that we post message to the looper
+    // if appropriate when interacting with the display event receiver.
     private final FrameDisplayEventReceiver mDisplayEventReceiver;
 
-    private Callback mCallbackPool;
+    private CallbackRecord mCallbackPool;
 
     private final CallbackQueue[] mCallbackQueues;
 
@@ -96,17 +135,20 @@ public final class Choreographer {
 
     /**
      * Callback type: Input callback.  Runs first.
+     * @hide
      */
     public static final int CALLBACK_INPUT = 0;
 
     /**
      * Callback type: Animation callback.  Runs before traversals.
+     * @hide
      */
     public static final int CALLBACK_ANIMATION = 1;
 
     /**
      * Callback type: Traversal callback.  Handles layout and draw.  Runs last
      * after all other asynchronous messages have been handled.
+     * @hide
      */
     public static final int CALLBACK_TRAVERSAL = 2;
 
@@ -138,32 +180,38 @@ public final class Choreographer {
     }
 
     /**
-     * The amount of time, in milliseconds, between each frame of the animation. This is a
-     * requested time that the animation will attempt to honor, but the actual delay between
-     * frames may be different, depending on system load and capabilities. This is a static
+     * The amount of time, in milliseconds, between each frame of the animation.
+     * <p>
+     * This is a requested time that the animation will attempt to honor, but the actual delay
+     * between frames may be different, depending on system load and capabilities. This is a static
      * function because the same delay will be applied to all animations, since they are all
      * run off of a single timing loop.
-     *
+     * </p><p>
      * The frame delay may be ignored when the animation system uses an external timing
      * source, such as the display refresh rate (vsync), to govern animations.
+     * </p>
      *
      * @return the requested time between frames, in milliseconds
+     * @hide
      */
     public static long getFrameDelay() {
         return sFrameDelay;
     }
 
     /**
-     * The amount of time, in milliseconds, between each frame of the animation. This is a
-     * requested time that the animation will attempt to honor, but the actual delay between
-     * frames may be different, depending on system load and capabilities. This is a static
+     * The amount of time, in milliseconds, between each frame of the animation.
+     * <p>
+     * This is a requested time that the animation will attempt to honor, but the actual delay
+     * between frames may be different, depending on system load and capabilities. This is a static
      * function because the same delay will be applied to all animations, since they are all
      * run off of a single timing loop.
-     *
+     * </p><p>
      * The frame delay may be ignored when the animation system uses an external timing
      * source, such as the display refresh rate (vsync), to govern animations.
+     * </p>
      *
      * @param frameDelay the requested time between frames, in milliseconds
+     * @hide
      */
     public static void setFrameDelay(long frameDelay) {
         sFrameDelay = frameDelay;
@@ -171,23 +219,25 @@ public final class Choreographer {
 
     /**
      * Subtracts typical frame delay time from a delay interval in milliseconds.
-     *
+     * <p>
      * This method can be used to compensate for animation delay times that have baked
      * in assumptions about the frame delay.  For example, it's quite common for code to
      * assume a 60Hz frame time and bake in a 16ms delay.  When we call
      * {@link #postAnimationCallbackDelayed} we want to know how long to wait before
      * posting the animation callback but let the animation timer take care of the remaining
      * frame delay time.
-     *
+     * </p><p>
      * This method is somewhat conservative about how much of the frame delay it
      * subtracts.  It uses the same value returned by {@link #getFrameDelay} which by
      * default is 10ms even though many parts of the system assume 16ms.  Consequently,
      * we might still wait 6ms before posting an animation callback that we want to run
      * on the next frame, but this is much better than waiting a whole 16ms and likely
      * missing the deadline.
+     * </p>
      *
      * @param delayMillis The original delay time including an assumed frame delay.
      * @return The adjusted delay time with the assumed frame delay subtracted out.
+     * @hide
      */
     public static long subtractFrameDelay(long delayMillis) {
         final long frameDelay = sFrameDelay;
@@ -196,21 +246,26 @@ public final class Choreographer {
 
     /**
      * Posts a callback to run on the next frame.
-     * The callback only runs once and then is automatically removed.
+     * <p>
+     * The callback runs once then is automatically removed.
+     * </p>
      *
      * @param callbackType The callback type.
      * @param action The callback action to run during the next frame.
      * @param token The callback token, or null if none.
      *
      * @see #removeCallbacks
+     * @hide
      */
     public void postCallback(int callbackType, Runnable action, Object token) {
         postCallbackDelayed(callbackType, action, token, 0);
     }
 
     /**
-     * Posts a callback to run on the next frame following the specified delay.
-     * The callback only runs once and then is automatically removed.
+     * Posts a callback to run on the next frame after the specified delay.
+     * <p>
+     * The callback runs once then is automatically removed.
+     * </p>
      *
      * @param callbackType The callback type.
      * @param action The callback action to run during the next frame after the specified delay.
@@ -218,6 +273,7 @@ public final class Choreographer {
      * @param delayMillis The delay time in milliseconds.
      *
      * @see #removeCallback
+     * @hide
      */
     public void postCallbackDelayed(int callbackType,
             Runnable action, Object token, long delayMillis) {
@@ -228,6 +284,11 @@ public final class Choreographer {
             throw new IllegalArgumentException("callbackType is invalid");
         }
 
+        postCallbackDelayedInternal(callbackType, action, token, delayMillis);
+    }
+
+    private void postCallbackDelayedInternal(int callbackType,
+            Object action, Object token, long delayMillis) {
         if (DEBUG) {
             Log.d(TAG, "PostCallback: type=" + callbackType
                     + ", action=" + action + ", token=" + token
@@ -261,12 +322,17 @@ public final class Choreographer {
      *
      * @see #postCallback
      * @see #postCallbackDelayed
+     * @hide
      */
     public void removeCallbacks(int callbackType, Runnable action, Object token) {
         if (callbackType < 0 || callbackType > CALLBACK_LAST) {
             throw new IllegalArgumentException("callbackType is invalid");
         }
 
+        removeCallbacksInternal(callbackType, action, token);
+    }
+
+    private void removeCallbacksInternal(int callbackType, Object action, Object token) {
         if (DEBUG) {
             Log.d(TAG, "RemoveCallbacks: type=" + callbackType
                     + ", action=" + action + ", token=" + token);
@@ -281,17 +347,81 @@ public final class Choreographer {
     }
 
     /**
-     * Gets the time when the current frame started.  The frame time should be used
-     * instead of {@link SystemClock#uptimeMillis()} to synchronize animations.
-     * This helps to reduce inter-frame jitter because the frame time is fixed at the
-     * time the frame was scheduled to start, regardless of when the animations or
-     * drawing code actually ran.
+     * Posts a frame callback to run on the next frame.
+     * <p>
+     * The callback runs once then is automatically removed.
+     * </p>
      *
+     * @param callback The frame callback to run during the next frame.
+     *
+     * @see #postFrameCallbackDelayed
+     * @see #removeFrameCallback
+     */
+    public void postFrameCallback(FrameCallback callback) {
+        postFrameCallbackDelayed(callback, 0);
+    }
+
+    /**
+     * Posts a frame callback to run on the next frame after the specified delay.
+     * <p>
+     * The callback runs once then is automatically removed.
+     * </p>
+     *
+     * @param callback The frame callback to run during the next frame.
+     * @param delayMillis The delay time in milliseconds.
+     *
+     * @see #postFrameCallback
+     * @see #removeFrameCallback
+     */
+    public void postFrameCallbackDelayed(FrameCallback callback, long delayMillis) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback must not be null");
+        }
+
+        postCallbackDelayedInternal(CALLBACK_ANIMATION,
+                callback, FRAME_CALLBACK_TOKEN, delayMillis);
+    }
+
+    /**
+     * Removes a previously posted frame callback.
+     *
+     * @param callback The frame callback to remove.
+     *
+     * @see #postFrameCallback
+     * @see #postFrameCallbackDelayed
+     */
+    public void removeFrameCallback(FrameCallback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback must not be null");
+        }
+
+        removeCallbacksInternal(CALLBACK_ANIMATION, callback, FRAME_CALLBACK_TOKEN);
+    }
+
+    /**
+     * Gets the time when the current frame started.
+     * <p>
+     * This method provides the time in nanoseconds when the frame started being rendered.
+     * The frame time provides a stable time base for synchronizing animations
+     * and drawing.  It should be used instead of {@link SystemClock#uptimeMillis()}
+     * or {@link System#nanoTime()} for animations and drawing in the UI.  Using the frame
+     * time helps to reduce inter-frame jitter because the frame time is fixed at the time
+     * the frame was scheduled to start, regardless of when the animations or drawing
+     * callback actually runs.  All callbacks that run as part of rendering a frame will
+     * observe the same frame time so using the frame time also helps to synchronize effects
+     * that are performed by different callbacks.
+     * </p><p>
+     * Please note that the framework already takes care to process animations and
+     * drawing using the frame time as a stable time base.  Most applications should
+     * not need to use the frame time information directly.
+     * </p><p>
      * This method should only be called from within a callback.
+     * </p>
      *
      * @return The frame start time, in the {@link SystemClock#uptimeMillis()} time base.
      *
      * @throws IllegalStateException if no frame is in progress.
+     * @hide
      */
     public long getFrameTime() {
         return getFrameTimeNanos() / NANOS_PER_MS;
@@ -303,6 +433,7 @@ public final class Choreographer {
      * @return The frame start time, in the {@link System#nanoTime()} time base.
      *
      * @throws IllegalStateException if no frame is in progress.
+     * @hide
      */
     public long getFrameTimeNanos() {
         synchronized (mLock) {
@@ -345,7 +476,7 @@ public final class Choreographer {
         }
     }
 
-    void doFrame(long timestampNanos, int frame) {
+    void doFrame(long frameTimeNanos, int frame) {
         final long startNanos;
         synchronized (mLock) {
             if (!mFrameScheduled) {
@@ -353,7 +484,7 @@ public final class Choreographer {
             }
 
             startNanos = System.nanoTime();
-            final long jitterNanos = startNanos - timestampNanos;
+            final long jitterNanos = startNanos - frameTimeNanos;
             if (jitterNanos >= mFrameIntervalNanos) {
                 final long lastFrameOffset = jitterNanos % mFrameIntervalNanos;
                 if (DEBUG) {
@@ -363,10 +494,10 @@ public final class Choreographer {
                             + "Setting frame time to " + (lastFrameOffset * 0.000001f)
                             + " ms in the past.");
                 }
-                timestampNanos = startNanos - lastFrameOffset;
+                frameTimeNanos = startNanos - lastFrameOffset;
             }
 
-            if (timestampNanos < mLastFrameTimeNanos) {
+            if (frameTimeNanos < mLastFrameTimeNanos) {
                 if (DEBUG) {
                     Log.d(TAG, "Frame time appears to be going backwards.  May be due to a "
                             + "previously skipped frame.  Waiting for next vsync");
@@ -376,24 +507,27 @@ public final class Choreographer {
             }
 
             mFrameScheduled = false;
-            mLastFrameTimeNanos = timestampNanos;
+            mLastFrameTimeNanos = frameTimeNanos;
         }
 
-        doCallbacks(Choreographer.CALLBACK_INPUT);
-        doCallbacks(Choreographer.CALLBACK_ANIMATION);
-        doCallbacks(Choreographer.CALLBACK_TRAVERSAL);
+        doCallbacks(Choreographer.CALLBACK_INPUT, frameTimeNanos);
+        doCallbacks(Choreographer.CALLBACK_ANIMATION, frameTimeNanos);
+        doCallbacks(Choreographer.CALLBACK_TRAVERSAL, frameTimeNanos);
 
         if (DEBUG) {
             final long endNanos = System.nanoTime();
             Log.d(TAG, "Frame " + frame + ": Finished, took "
                     + (endNanos - startNanos) * 0.000001f + " ms, latency "
-                    + (startNanos - timestampNanos) * 0.000001f + " ms.");
+                    + (startNanos - frameTimeNanos) * 0.000001f + " ms.");
         }
     }
 
-    void doCallbacks(int callbackType) {
-        Callback callbacks;
+    void doCallbacks(int callbackType, long frameTimeNanos) {
+        CallbackRecord callbacks;
         synchronized (mLock) {
+            // We use "now" to determine when callbacks become due because it's possible
+            // for earlier processing phases in a frame to post callbacks that should run
+            // in a following phase, such as an input event that causes an animation to start.
             final long now = SystemClock.uptimeMillis();
             callbacks = mCallbackQueues[callbackType].extractDueCallbacksLocked(now);
             if (callbacks == null) {
@@ -402,19 +536,19 @@ public final class Choreographer {
             mCallbacksRunning = true;
         }
         try {
-            for (Callback c = callbacks; c != null; c = c.next) {
+            for (CallbackRecord c = callbacks; c != null; c = c.next) {
                 if (DEBUG) {
                     Log.d(TAG, "RunCallback: type=" + callbackType
                             + ", action=" + c.action + ", token=" + c.token
                             + ", latencyMillis=" + (SystemClock.uptimeMillis() - c.dueTime));
                 }
-                c.action.run();
+                c.run(frameTimeNanos);
             }
         } finally {
             synchronized (mLock) {
                 mCallbacksRunning = false;
                 do {
-                    final Callback next = callbacks.next;
+                    final CallbackRecord next = callbacks.next;
                     recycleCallbackLocked(callbacks);
                     callbacks = next;
                 } while (callbacks != null);
@@ -449,10 +583,10 @@ public final class Choreographer {
         return Looper.myLooper() == mLooper;
     }
 
-    private Callback obtainCallbackLocked(long dueTime, Runnable action, Object token) {
-        Callback callback = mCallbackPool;
+    private CallbackRecord obtainCallbackLocked(long dueTime, Object action, Object token) {
+        CallbackRecord callback = mCallbackPool;
         if (callback == null) {
-            callback = new Callback();
+            callback = new CallbackRecord();
         } else {
             mCallbackPool = callback.next;
             callback.next = null;
@@ -463,11 +597,42 @@ public final class Choreographer {
         return callback;
     }
 
-    private void recycleCallbackLocked(Callback callback) {
+    private void recycleCallbackLocked(CallbackRecord callback) {
         callback.action = null;
         callback.token = null;
         callback.next = mCallbackPool;
         mCallbackPool = callback;
+    }
+
+    /**
+     * Implement this interface to receive a callback when a new display frame is
+     * being rendered.  The callback is invoked on the {@link Looper} thread to
+     * which the {@link Choreographer} is attached.
+     */
+    public interface FrameCallback {
+        /**
+         * Called when a new display frame is being rendered.
+         * <p>
+         * This method provides the time in nanoseconds when the frame started being rendered.
+         * The frame time provides a stable time base for synchronizing animations
+         * and drawing.  It should be used instead of {@link SystemClock#uptimeMillis()}
+         * or {@link System#nanoTime()} for animations and drawing in the UI.  Using the frame
+         * time helps to reduce inter-frame jitter because the frame time is fixed at the time
+         * the frame was scheduled to start, regardless of when the animations or drawing
+         * callback actually runs.  All callbacks that run as part of rendering a frame will
+         * observe the same frame time so using the frame time also helps to synchronize effects
+         * that are performed by different callbacks.
+         * </p><p>
+         * Please note that the framework already takes care to process animations and
+         * drawing using the frame time as a stable time base.  Most applications should
+         * not need to use the frame time information directly.
+         * </p>
+         *
+         * @param frameTimeNanos The time in nanoseconds when the frame started being rendered,
+         * in the {@link System#nanoTime()} timebase.  Divide this value by {@code 1000000}
+         * to convert it to the {@link SystemClock#uptimeMillis()} time base.
+         */
+        public void doFrame(long frameTimeNanos);
     }
 
     private final class FrameHandler extends Handler {
@@ -520,28 +685,36 @@ public final class Choreographer {
         }
     }
 
-    private static final class Callback {
-        public Callback next;
+    private static final class CallbackRecord {
+        public CallbackRecord next;
         public long dueTime;
-        public Runnable action;
+        public Object action; // Runnable or FrameCallback
         public Object token;
+
+        public void run(long frameTimeNanos) {
+            if (token == FRAME_CALLBACK_TOKEN) {
+                ((FrameCallback)action).doFrame(frameTimeNanos);
+            } else {
+                ((Runnable)action).run();
+            }
+        }
     }
 
     private final class CallbackQueue {
-        private Callback mHead;
+        private CallbackRecord mHead;
 
         public boolean hasDueCallbacksLocked(long now) {
             return mHead != null && mHead.dueTime <= now;
         }
 
-        public Callback extractDueCallbacksLocked(long now) {
-            Callback callbacks = mHead;
+        public CallbackRecord extractDueCallbacksLocked(long now) {
+            CallbackRecord callbacks = mHead;
             if (callbacks == null || callbacks.dueTime > now) {
                 return null;
             }
 
-            Callback last = callbacks;
-            Callback next = last.next;
+            CallbackRecord last = callbacks;
+            CallbackRecord next = last.next;
             while (next != null) {
                 if (next.dueTime > now) {
                     last.next = null;
@@ -554,9 +727,9 @@ public final class Choreographer {
             return callbacks;
         }
 
-        public void addCallbackLocked(long dueTime, Runnable action, Object token) {
-            Callback callback = obtainCallbackLocked(dueTime, action, token);
-            Callback entry = mHead;
+        public void addCallbackLocked(long dueTime, Object action, Object token) {
+            CallbackRecord callback = obtainCallbackLocked(dueTime, action, token);
+            CallbackRecord entry = mHead;
             if (entry == null) {
                 mHead = callback;
                 return;
@@ -576,10 +749,10 @@ public final class Choreographer {
             entry.next = callback;
         }
 
-        public void removeCallbacksLocked(Runnable action, Object token) {
-            Callback predecessor = null;
-            for (Callback callback = mHead; callback != null;) {
-                final Callback next = callback.next;
+        public void removeCallbacksLocked(Object action, Object token) {
+            CallbackRecord predecessor = null;
+            for (CallbackRecord callback = mHead; callback != null;) {
+                final CallbackRecord next = callback.next;
                 if ((action == null || callback.action == action)
                         && (token == null || callback.token == token)) {
                     if (predecessor != null) {
