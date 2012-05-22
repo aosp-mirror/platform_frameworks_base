@@ -193,19 +193,12 @@ public class ViewConfiguration {
     private static final int MAXIMUM_FLING_VELOCITY = 8000;
 
     /**
-     * Distance in dips between a touch up event denoting the end of a touch exploration
-     * gesture and the touch up event of a subsequent tap for the latter tap to be
-     * considered as a tap i.e. to perform a click.
-     */
-    private static final int TOUCH_EXPLORE_TAP_SLOP = 80;
-
-    /**
      * Delay before dispatching a recurring accessibility event in milliseconds.
      * This delay guarantees that a recurring event will be send at most once
      * during the {@link #SEND_RECURRING_ACCESSIBILITY_EVENTS_INTERVAL_MILLIS} time
      * frame.
      */
-    private static final long SEND_RECURRING_ACCESSIBILITY_EVENTS_INTERVAL_MILLIS = 400;
+    private static final long SEND_RECURRING_ACCESSIBILITY_EVENTS_INTERVAL_MILLIS = 100;
 
     /**
      * The maximum size of View's drawing cache, expressed in bytes. This size
@@ -238,7 +231,6 @@ public class ViewConfiguration {
     private final int mDoubleTapTouchSlop;
     private final int mPagingTouchSlop;
     private final int mDoubleTapSlop;
-    private final int mScaledTouchExploreTapSlop;
     private final int mWindowTouchSlop;
     private final int mMaximumDrawingCacheSize;
     private final int mOverscrollDistance;
@@ -265,7 +257,6 @@ public class ViewConfiguration {
         mDoubleTapTouchSlop = DOUBLE_TAP_TOUCH_SLOP;
         mPagingTouchSlop = PAGING_TOUCH_SLOP;
         mDoubleTapSlop = DOUBLE_TAP_SLOP;
-        mScaledTouchExploreTapSlop = TOUCH_EXPLORE_TAP_SLOP;
         mWindowTouchSlop = WINDOW_TOUCH_SLOP;
         //noinspection deprecation
         mMaximumDrawingCacheSize = MAXIMUM_DRAWING_CACHE_SIZE;
@@ -302,7 +293,6 @@ public class ViewConfiguration {
         mMaximumFlingVelocity = (int) (density * MAXIMUM_FLING_VELOCITY + 0.5f);
         mScrollbarSize = (int) (density * SCROLL_BAR_SIZE + 0.5f);
         mDoubleTapSlop = (int) (sizeAndDensity * DOUBLE_TAP_SLOP + 0.5f);
-        mScaledTouchExploreTapSlop = (int) (density * TOUCH_EXPLORE_TAP_SLOP + 0.5f);
         mWindowTouchSlop = (int) (sizeAndDensity * WINDOW_TOUCH_SLOP + 0.5f);
 
         final Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
@@ -550,17 +540,6 @@ public class ViewConfiguration {
      */
     public int getScaledDoubleTapSlop() {
         return mDoubleTapSlop;
-    }
-
-    /**
-     * @return Distance in pixels between a touch up event denoting the end of a touch exploration
-     * gesture and the touch up event of a subsequent tap for the latter tap to be
-     * considered as a tap i.e. to perform a click.
-     *
-     * @hide
-     */
-    public int getScaledTouchExploreTapSlop() {
-        return mScaledTouchExploreTapSlop;
     }
 
     /**
