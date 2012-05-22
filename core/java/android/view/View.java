@@ -6212,15 +6212,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             // Clear the text navigation state.
             setAccessibilityCursorPosition(-1);
-
-            // Try to move accessibility focus to the input focus.
-            View rootView = getRootView();
-            if (rootView != null) {
-                View inputFocus = rootView.findFocus();
-                if (inputFocus != null) {
-                    inputFocus.requestAccessibilityFocus();
-                }
-            }
         }
     }
 
