@@ -1412,11 +1412,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     }
                 }
             }
+            final int flags = (mIncludeNotImportantViews) ?
+                    AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
+            final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
-                final int flags = (mIncludeNotImportantViews) ?
-                        AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
-                final int interrogatingPid = Binder.getCallingPid();
                 connection.performAccessibilityAction(accessibilityNodeId, action, arguments,
                         interactionId, callback, flags, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
