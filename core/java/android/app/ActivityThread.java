@@ -140,6 +140,7 @@ public final class ActivityThread {
     private static final boolean DEBUG_CONFIGURATION = false;
     private static final boolean DEBUG_SERVICE = false;
     private static final boolean DEBUG_MEMORY_TRIM = false;
+    private static final boolean DEBUG_PROVIDER = false;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
     private static final Pattern PATTERN_SEMICOLON = Pattern.compile(";");
     private static final int SQLITE_MEM_RELEASED_EVENT_LOG_TAG = 75003;
@@ -210,6 +211,8 @@ public final class ActivityThread {
         = new HashMap<IBinder, ProviderRefCount>();
     final HashMap<IBinder, ProviderClientRecord> mLocalProviders
         = new HashMap<IBinder, ProviderClientRecord>();
+    final HashMap<ComponentName, ProviderClientRecord> mLocalProvidersByName
+            = new HashMap<ComponentName, ProviderClientRecord>();
 
     final HashMap<Activity, ArrayList<OnActivityPausedListener>> mOnPauseListeners
         = new HashMap<Activity, ArrayList<OnActivityPausedListener>>();
@@ -284,20 +287,19 @@ public final class ActivityThread {
         }
     }
 
-    final class ProviderClientRecord implements IBinder.DeathRecipient {
-        final String mName;
+    final class ProviderClientRecord {
+        final String[] mNames;
         final IContentProvider mProvider;
         final ContentProvider mLocalProvider;
+        final IActivityManager.ContentProviderHolder mHolder;
 
-        ProviderClientRecord(String name, IContentProvider provider,
-                ContentProvider localProvider) {
-            mName = name;
+        ProviderClientRecord(String[] names, IContentProvider provider,
+                ContentProvider localProvider,
+                IActivityManager.ContentProviderHolder holder) {
+            mNames = names;
             mProvider = provider;
             mLocalProvider = localProvider;
-        }
-
-        public void binderDied() {
-            removeDeadProvider(mName, mProvider);
+            mHolder = holder;
         }
     }
 
@@ -1061,6 +1063,11 @@ public final class ActivityThread {
             pw.flush();
         }
 
+        @Override
+        public void unstableProviderDied(IBinder provider) {
+            queueOrSendMessage(H.UNSTABLE_PROVIDER_DIED, provider);
+        }
+
         private void printRow(PrintWriter pw, String format, Object...objs) {
             pw.println(String.format(format, objs));
         }
@@ -1125,6 +1132,7 @@ public final class ActivityThread {
         public static final int UPDATE_PACKAGE_COMPATIBILITY_INFO = 139;
         public static final int TRIM_MEMORY             = 140;
         public static final int DUMP_PROVIDER           = 141;
+        public static final int UNSTABLE_PROVIDER_DIED  = 142;
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
                 switch (code) {
@@ -1170,6 +1178,7 @@ public final class ActivityThread {
                     case UPDATE_PACKAGE_COMPATIBILITY_INFO: return "UPDATE_PACKAGE_COMPATIBILITY_INFO";
                     case TRIM_MEMORY: return "TRIM_MEMORY";
                     case DUMP_PROVIDER: return "DUMP_PROVIDER";
+                    case UNSTABLE_PROVIDER_DIED: return "UNSTABLE_PROVIDER_DIED";
                 }
             }
             return Integer.toString(code);
@@ -1337,7 +1346,7 @@ public final class ActivityThread {
                     break;
                 case REMOVE_PROVIDER:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "providerRemove");
-                    completeRemoveProvider((IContentProvider)msg.obj);
+                    completeRemoveProvider((ProviderRefCount)msg.obj);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case ENABLE_JIT:
@@ -1376,6 +1385,9 @@ public final class ActivityThread {
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "trimMemory");
                     handleTrimMemory(msg.arg1);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    break;
+                case UNSTABLE_PROVIDER_DIED:
+                    handleUnstableProviderDied((IBinder)msg.obj, false);
                     break;
             }
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + codeToString(msg.what));
@@ -2867,10 +2879,24 @@ public final class ActivityThread {
     }
 
     private static final class ProviderRefCount {
-        public int count;
+        public final IActivityManager.ContentProviderHolder holder;
+        public final ProviderClientRecord client;
+        public int stableCount;
+        public int unstableCount;
 
-        ProviderRefCount(int pCount) {
-            count = pCount;
+        // When this is set, the stable and unstable ref counts are 0 and
+        // we have a pending operation scheduled to remove the ref count
+        // from the activity manager.  On the activity manager we are still
+        // holding an unstable ref, though it is not reflected in the counts
+        // here.
+        public boolean removePending;
+
+        ProviderRefCount(IActivityManager.ContentProviderHolder inHolder,
+                ProviderClientRecord inClient, int sCount, int uCount) {
+            holder = inHolder;
+            client = inClient;
+            stableCount = sCount;
+            unstableCount = uCount;
         }
     }
 
@@ -4080,15 +4106,6 @@ public final class ActivityThread {
                 Debug.startMethodTracing(file.toString(), 8 * 1024 * 1024);
             }
 
-            try {
-                mInstrumentation.onCreate(data.instrumentationArgs);
-            }
-            catch (Exception e) {
-                throw new RuntimeException(
-                    "Exception thrown in onCreate() of "
-                    + data.instrumentationName + ": " + e.toString(), e);
-            }
-
         } else {
             mInstrumentation = new Instrumentation();
         }
@@ -4117,6 +4134,17 @@ public final class ActivityThread {
                     // ensure that the JIT is enabled "at some point".
                     mH.sendEmptyMessageDelayed(H.ENABLE_JIT, 10*1000);
                 }
+            }
+
+            // Do this after providers, since instrumentation tests generally start their
+            // test thread at this point, and we don't want that racing.
+            try {
+                mInstrumentation.onCreate(data.instrumentationArgs);
+            }
+            catch (Exception e) {
+                throw new RuntimeException(
+                    "Exception thrown in onCreate() of "
+                    + data.instrumentationName + ": " + e.toString(), e);
             }
 
             try {
@@ -4159,12 +4187,9 @@ public final class ActivityThread {
             buf.append(": ");
             buf.append(cpi.name);
             Log.i(TAG, buf.toString());
-            IContentProvider cp = installProvider(context, null, cpi,
-                    false /*noisy*/, true /*noReleaseNeeded*/);
-            if (cp != null) {
-                IActivityManager.ContentProviderHolder cph =
-                        new IActivityManager.ContentProviderHolder(cpi);
-                cph.provider = cp;
+            IActivityManager.ContentProviderHolder cph = installProvider(context, null, cpi,
+                    false /*noisy*/, true /*noReleaseNeeded*/, true /*stable*/);
+            if (cph != null) {
                 cph.noReleaseNeeded = true;
                 results.add(cph);
             }
@@ -4177,8 +4202,8 @@ public final class ActivityThread {
         }
     }
 
-    public final IContentProvider acquireProvider(Context c, String name) {
-        IContentProvider provider = acquireExistingProvider(c, name);
+    public final IContentProvider acquireProvider(Context c, String name, boolean stable) {
+        IContentProvider provider = acquireExistingProvider(c, name, stable);
         if (provider != null) {
             return provider;
         }
@@ -4192,7 +4217,7 @@ public final class ActivityThread {
         IActivityManager.ContentProviderHolder holder = null;
         try {
             holder = ActivityManagerNative.getDefault().getContentProvider(
-                    getApplicationThread(), name);
+                    getApplicationThread(), name, stable);
         } catch (RemoteException ex) {
         }
         if (holder == null) {
@@ -4202,23 +4227,79 @@ public final class ActivityThread {
 
         // Install provider will increment the reference count for us, and break
         // any ties in the race.
-        provider = installProvider(c, holder.provider, holder.info,
-                true /*noisy*/, holder.noReleaseNeeded);
-        if (holder.provider != null && provider != holder.provider) {
-            if (localLOGV) {
-                Slog.v(TAG, "acquireProvider: lost the race, releasing extraneous "
-                        + "reference to the content provider");
-            }
-            try {
-                ActivityManagerNative.getDefault().removeContentProvider(
-                        getApplicationThread(), name);
-            } catch (RemoteException ex) {
-            }
-        }
-        return provider;
+        holder = installProvider(c, holder, holder.info,
+                true /*noisy*/, holder.noReleaseNeeded, stable);
+        return holder.provider;
     }
 
-    public final IContentProvider acquireExistingProvider(Context c, String name) {
+    private final void incProviderRefLocked(ProviderRefCount prc, boolean stable) {
+        if (stable) {
+            prc.stableCount += 1;
+            if (prc.stableCount == 1) {
+                // We are acquiring a new stable reference on the provider.
+                int unstableDelta;
+                if (prc.removePending) {
+                    // We have a pending remove operation, which is holding the
+                    // last unstable reference.  At this point we are converting
+                    // that unstable reference to our new stable reference.
+                    unstableDelta = -1;
+                    // Cancel the removal of the provider.
+                    if (DEBUG_PROVIDER) {
+                        Slog.v(TAG, "incProviderRef: stable "
+                                + "snatched provider from the jaws of death");
+                    }
+                    prc.removePending = false;
+                    mH.removeMessages(H.REMOVE_PROVIDER, prc);
+                } else {
+                    unstableDelta = 0;
+                }
+                try {
+                    if (DEBUG_PROVIDER) {
+                        Slog.v(TAG, "incProviderRef Now stable - "
+                                + prc.holder.info.name + ": unstableDelta="
+                                + unstableDelta);
+                    }
+                    ActivityManagerNative.getDefault().refContentProvider(
+                            prc.holder.connection, 1, unstableDelta);
+                } catch (RemoteException e) {
+                    //do nothing content provider object is dead any way
+                }
+            }
+        } else {
+            prc.unstableCount += 1;
+            if (prc.unstableCount == 1) {
+                // We are acquiring a new unstable reference on the provider.
+                if (prc.removePending) {
+                    // Oh look, we actually have a remove pending for the
+                    // provider, which is still holding the last unstable
+                    // reference.  We just need to cancel that to take new
+                    // ownership of the reference.
+                    if (DEBUG_PROVIDER) {
+                        Slog.v(TAG, "incProviderRef: unstable "
+                                + "snatched provider from the jaws of death");
+                    }
+                    prc.removePending = false;
+                    mH.removeMessages(H.REMOVE_PROVIDER, prc);
+                } else {
+                    // First unstable ref, increment our count in the
+                    // activity manager.
+                    try {
+                        if (DEBUG_PROVIDER) {
+                            Slog.v(TAG, "incProviderRef: Now unstable - "
+                                    + prc.holder.info.name);
+                        }
+                        ActivityManagerNative.getDefault().refContentProvider(
+                                prc.holder.connection, 0, 1);
+                    } catch (RemoteException e) {
+                        //do nothing content provider object is dead any way
+                    }
+                }
+            }
+        }
+    }
+
+    public final IContentProvider acquireExistingProvider(Context c, String name,
+            boolean stable) {
         synchronized (mProviderMap) {
             ProviderClientRecord pr = mProviderMap.get(name);
             if (pr == null) {
@@ -4232,23 +4313,14 @@ public final class ActivityThread {
             // provider is not reference counted and never needs to be released.
             ProviderRefCount prc = mProviderRefCountMap.get(jBinder);
             if (prc != null) {
-                prc.count += 1;
-                if (prc.count == 1) {
-                    if (localLOGV) {
-                        Slog.v(TAG, "acquireExistingProvider: "
-                                + "snatched provider from the jaws of death");
-                    }
-                    // Because the provider previously had a reference count of zero,
-                    // it was scheduled to be removed.  Cancel that.
-                    mH.removeMessages(H.REMOVE_PROVIDER, provider);
-                }
+                incProviderRefLocked(prc, stable);
             }
             return provider;
         }
     }
 
-    public final boolean releaseProvider(IContentProvider provider) {
-        if(provider == null) {
+    public final boolean releaseProvider(IContentProvider provider, boolean stable) {
+        if (provider == null) {
             return false;
         }
 
@@ -4260,55 +4332,98 @@ public final class ActivityThread {
                 return false;
             }
 
-            if (prc.count == 0) {
-                if (localLOGV) Slog.v(TAG, "releaseProvider: ref count already 0, how?");
-                return false;
+            boolean lastRef = false;
+            if (stable) {
+                if (prc.stableCount == 0) {
+                    if (DEBUG_PROVIDER) Slog.v(TAG,
+                            "releaseProvider: stable ref count already 0, how?");
+                    return false;
+                }
+                prc.stableCount -= 1;
+                if (prc.stableCount == 0) {
+                    // What we do at this point depends on whether there are
+                    // any unstable refs left: if there are, we just tell the
+                    // activity manager to decrement its stable count; if there
+                    // aren't, we need to enqueue this provider to be removed,
+                    // and convert to holding a single unstable ref while
+                    // doing so.
+                    lastRef = prc.unstableCount == 0;
+                    try {
+                        if (DEBUG_PROVIDER) {
+                            Slog.v(TAG, "releaseProvider: No longer stable w/lastRef="
+                                    + lastRef + " - " + prc.holder.info.name);
+                        }
+                        ActivityManagerNative.getDefault().refContentProvider(
+                                prc.holder.connection, -1, lastRef ? 1 : 0);
+                    } catch (RemoteException e) {
+                        //do nothing content provider object is dead any way
+                    }
+                }
+            } else {
+                if (prc.unstableCount == 0) {
+                    if (DEBUG_PROVIDER) Slog.v(TAG,
+                            "releaseProvider: unstable ref count already 0, how?");
+                    return false;
+                }
+                prc.unstableCount -= 1;
+                if (prc.unstableCount == 0) {
+                    // If this is the last reference, we need to enqueue
+                    // this provider to be removed instead of telling the
+                    // activity manager to remove it at this point.
+                    lastRef = prc.stableCount == 0;
+                    if (!lastRef) {
+                        try {
+                            if (DEBUG_PROVIDER) {
+                                Slog.v(TAG, "releaseProvider: No longer unstable - "
+                                        + prc.holder.info.name);
+                            }
+                            ActivityManagerNative.getDefault().refContentProvider(
+                                    prc.holder.connection, 0, -1);
+                        } catch (RemoteException e) {
+                            //do nothing content provider object is dead any way
+                        }
+                    }
+                }
             }
 
-            prc.count -= 1;
-            if (prc.count == 0) {
-                // Schedule the actual remove asynchronously, since we don't know the context
-                // this will be called in.
-                // TODO: it would be nice to post a delayed message, so
-                // if we come back and need the same provider quickly
-                // we will still have it available.
-                Message msg = mH.obtainMessage(H.REMOVE_PROVIDER, provider);
-                mH.sendMessage(msg);
+            if (lastRef) {
+                if (!prc.removePending) {
+                    // Schedule the actual remove asynchronously, since we don't know the context
+                    // this will be called in.
+                    // TODO: it would be nice to post a delayed message, so
+                    // if we come back and need the same provider quickly
+                    // we will still have it available.
+                    if (DEBUG_PROVIDER) {
+                        Slog.v(TAG, "releaseProvider: Enqueueing pending removal - "
+                                + prc.holder.info.name);
+                    }
+                    prc.removePending = true;
+                    Message msg = mH.obtainMessage(H.REMOVE_PROVIDER, prc);
+                    mH.sendMessage(msg);
+                } else {
+                    Slog.w(TAG, "Duplicate remove pending of provider " + prc.holder.info.name);
+                }
             }
             return true;
         }
     }
 
-    public final IContentProvider acquireUnstableProvider(Context c, String name) {
-        return acquireProvider(c, name);
-    }
-
-    public final boolean releaseUnstableProvider(IContentProvider provider) {
-        return releaseProvider(provider);
-    }
-
-    final void completeRemoveProvider(IContentProvider provider) {
-        IBinder jBinder = provider.asBinder();
-        String remoteProviderName = null;
-        synchronized(mProviderMap) {
-            ProviderRefCount prc = mProviderRefCountMap.get(jBinder);
-            if (prc == null) {
-                // Either no release is needed (so we shouldn't be here) or the
-                // provider was already released.
-                if (localLOGV) Slog.v(TAG, "completeRemoveProvider: release not needed");
-                return;
-            }
-
-            if (prc.count != 0) {
+    final void completeRemoveProvider(ProviderRefCount prc) {
+        synchronized (mProviderMap) {
+            if (!prc.removePending) {
                 // There was a race!  Some other client managed to acquire
                 // the provider before the removal was completed.
                 // Abort the removal.  We will do it later.
-                if (localLOGV) Slog.v(TAG, "completeRemoveProvider: lost the race, "
+                if (DEBUG_PROVIDER) Slog.v(TAG, "completeRemoveProvider: lost the race, "
                         + "provider still in use");
                 return;
             }
 
-            mProviderRefCountMap.remove(jBinder);
+            final IBinder jBinder = prc.holder.provider.asBinder();
+            ProviderRefCount existingPrc = mProviderRefCountMap.get(jBinder);
+            if (existingPrc == prc) {
+                mProviderRefCountMap.remove(jBinder);
+            }
 
             Iterator<ProviderClientRecord> iter = mProviderMap.values().iterator();
             while (iter.hasNext()) {
@@ -4316,41 +4431,70 @@ public final class ActivityThread {
                 IBinder myBinder = pr.mProvider.asBinder();
                 if (myBinder == jBinder) {
                     iter.remove();
-                    if (pr.mLocalProvider == null) {
-                        myBinder.unlinkToDeath(pr, 0);
-                        if (remoteProviderName == null) {
-                            remoteProviderName = pr.mName;
+                }
+            }
+        }
+
+        try {
+            if (DEBUG_PROVIDER) {
+                Slog.v(TAG, "removeProvider: Invoking ActivityManagerNative."
+                        + "removeContentProvider(" + prc.holder.info.name + ")");
+            }
+            ActivityManagerNative.getDefault().removeContentProvider(
+                    prc.holder.connection, false);
+        } catch (RemoteException e) {
+            //do nothing content provider object is dead any way
+        }
+    }
+
+    final void handleUnstableProviderDied(IBinder provider, boolean fromClient) {
+        synchronized(mProviderMap) {
+            ProviderRefCount prc = mProviderRefCountMap.get(provider);
+            if (prc != null) {
+                if (DEBUG_PROVIDER) Slog.v(TAG, "Cleaning up dead provider "
+                        + provider + " " + prc.holder.info.name);
+                mProviderRefCountMap.remove(provider);
+                if (prc.client != null && prc.client.mNames != null) {
+                    for (String name : prc.client.mNames) {
+                        ProviderClientRecord pr = mProviderMap.get(name);
+                        if (pr != null && pr.mProvider.asBinder() == provider) {
+                            Slog.i(TAG, "Removing dead content provider: " + name);
+                            mProviderMap.remove(name);
                         }
+                    }
+                }
+                if (fromClient) {
+                    // We found out about this due to execution in our client
+                    // code.  Tell the activity manager about it now, to ensure
+                    // that the next time we go to do anything with the provider
+                    // it knows it is dead (so we don't race with its death
+                    // notification).
+                    try {
+                        ActivityManagerNative.getDefault().unstableProviderDied(
+                                prc.holder.connection);
+                    } catch (RemoteException e) {
+                        //do nothing content provider object is dead any way
                     }
                 }
             }
         }
-
-        if (remoteProviderName != null) {
-            try {
-                if (localLOGV) {
-                    Slog.v(TAG, "removeProvider: Invoking ActivityManagerNative."
-                            + "removeContentProvider(" + remoteProviderName + ")");
-                }
-                ActivityManagerNative.getDefault().removeContentProvider(
-                        getApplicationThread(), remoteProviderName);
-            } catch (RemoteException e) {
-                //do nothing content provider object is dead any way
-            }
-        }
     }
 
-    final void removeDeadProvider(String name, IContentProvider provider) {
-        synchronized(mProviderMap) {
-            ProviderClientRecord pr = mProviderMap.get(name);
-            if (pr != null && pr.mProvider.asBinder() == provider.asBinder()) {
-                Slog.i(TAG, "Removing dead content provider: " + name);
-                ProviderClientRecord removed = mProviderMap.remove(name);
-                if (removed != null) {
-                    removed.mProvider.asBinder().unlinkToDeath(removed, 0);
-                }
+    private ProviderClientRecord installProviderAuthoritiesLocked(IContentProvider provider,
+            ContentProvider localProvider,IActivityManager.ContentProviderHolder holder) {
+        String names[] = PATTERN_SEMICOLON.split(holder.info.authority);
+        ProviderClientRecord pcr = new ProviderClientRecord(names, provider,
+                localProvider, holder);
+        for (int i = 0; i < names.length; i++) {
+            ProviderClientRecord existing = mProviderMap.get(names[i]);
+            if (existing != null) {
+                Slog.w(TAG, "Content provider " + pcr.mHolder.info.name
+                        + " already published as " + names[i]);
+            } else {
+                mProviderMap.put(names[i], pcr);
             }
         }
+        return pcr;
     }
 
     /**
@@ -4367,12 +4511,13 @@ public final class ActivityThread {
      * and returns the existing provider.  This can happen due to concurrent
      * attempts to acquire the same provider.
      */
-    private IContentProvider installProvider(Context context,
-            IContentProvider provider, ProviderInfo info,
-            boolean noisy, boolean noReleaseNeeded) {
+    private IActivityManager.ContentProviderHolder installProvider(Context context,
+            IActivityManager.ContentProviderHolder holder, ProviderInfo info,
+            boolean noisy, boolean noReleaseNeeded, boolean stable) {
         ContentProvider localProvider = null;
-        if (provider == null) {
-            if (noisy) {
+        IContentProvider provider;
+        if (holder == null) {
+            if (DEBUG_PROVIDER || noisy) {
                 Slog.d(TAG, "Loading provider " + info.authority + ": "
                         + info.name);
             }
@@ -4409,7 +4554,7 @@ public final class ActivityThread {
                           info.applicationInfo.sourceDir);
                     return null;
                 }
-                if (false) Slog.v(
+                if (DEBUG_PROVIDER) Slog.v(
                     TAG, "Instantiating local provider " + info.name);
                 // XXX Need to create the correct context for this provider.
                 localProvider.attachInfo(c, info);
@@ -4421,76 +4566,72 @@ public final class ActivityThread {
                 }
                 return null;
             }
-        } else if (localLOGV) {
-            Slog.v(TAG, "Installing external provider " + info.authority + ": "
+        } else {
+            provider = holder.provider;
+            if (DEBUG_PROVIDER) Slog.v(TAG, "Installing external provider " + info.authority + ": "
                     + info.name);
         }
 
-        synchronized (mProviderMap) {
-            // There is a possibility that this thread raced with another thread to
-            // add the provider.  If we find another thread got there first then we
-            // just get out of the way and return the original provider.
-            IBinder jBinder = provider.asBinder();
-            String names[] = PATTERN_SEMICOLON.split(info.authority);
-            for (int i = 0; i < names.length; i++) {
-                ProviderClientRecord pr = mProviderMap.get(names[i]);
-                if (pr != null) {
-                    if (localLOGV) {
-                        Slog.v(TAG, "installProvider: lost the race, "
-                                + "using existing named provider");
-                    }
-                    provider = pr.mProvider;
-                } else {
-                    pr = new ProviderClientRecord(names[i], provider, localProvider);
-                    if (localProvider == null) {
-                        try {
-                            jBinder.linkToDeath(pr, 0);
-                        } catch (RemoteException e) {
-                            // Provider already dead.  Bail out of here without making
-                            // any changes to the provider map or other data structures.
-                            return null;
-                        }
-                    }
-                    mProviderMap.put(names[i], pr);
-                }
-            }
+        IActivityManager.ContentProviderHolder retHolder;
 
+        synchronized (mProviderMap) {
+            if (DEBUG_PROVIDER) Slog.v(TAG, "Checking to add " + provider
+                    + " / " + info.name);
+            IBinder jBinder = provider.asBinder();
             if (localProvider != null) {
-                ProviderClientRecord pr = mLocalProviders.get(jBinder);
+                ComponentName cname = new ComponentName(info.packageName, info.name);
+                ProviderClientRecord pr = mLocalProvidersByName.get(cname);
                 if (pr != null) {
-                    if (localLOGV) {
+                    if (DEBUG_PROVIDER) {
                         Slog.v(TAG, "installProvider: lost the race, "
                                 + "using existing local provider");
                     }
                     provider = pr.mProvider;
                 } else {
-                    pr = new ProviderClientRecord(null, provider, localProvider);
+                    holder = new IActivityManager.ContentProviderHolder(info);
+                    holder.provider = provider;
+                    holder.noReleaseNeeded = true;
+                    pr = installProviderAuthoritiesLocked(provider, localProvider, holder);
                     mLocalProviders.put(jBinder, pr);
+                    mLocalProvidersByName.put(cname, pr);
                 }
-            }
-
-            if (!noReleaseNeeded) {
+                retHolder = pr.mHolder;
+            } else {
                 ProviderRefCount prc = mProviderRefCountMap.get(jBinder);
                 if (prc != null) {
-                    if (localLOGV) {
-                        Slog.v(TAG, "installProvider: lost the race, incrementing ref count");
+                    if (DEBUG_PROVIDER) {
+                        Slog.v(TAG, "installProvider: lost the race, updating ref count");
                     }
-                    prc.count += 1;
-                    if (prc.count == 1) {
-                        if (localLOGV) {
-                            Slog.v(TAG, "installProvider: "
-                                    + "snatched provider from the jaws of death");
+                    // We need to transfer our new reference to the existing
+                    // ref count, releasing the old one...  but only if
+                    // release is needed (that is, it is not running in the
+                    // system process).
+                    if (!noReleaseNeeded) {
+                        incProviderRefLocked(prc, stable);
+                        try {
+                            ActivityManagerNative.getDefault().removeContentProvider(
+                                    holder.connection, stable);
+                        } catch (RemoteException e) {
+                            //do nothing content provider object is dead any way
                         }
-                        // Because the provider previously had a reference count of zero,
-                        // it was scheduled to be removed.  Cancel that.
-                        mH.removeMessages(H.REMOVE_PROVIDER, provider);
                     }
                 } else {
-                    mProviderRefCountMap.put(jBinder, new ProviderRefCount(1));
+                    ProviderClientRecord client = installProviderAuthoritiesLocked(
+                            provider, localProvider, holder);
+                    if (noReleaseNeeded) {
+                        prc = new ProviderRefCount(holder, client, 1000, 1000);
+                    } else {
+                        prc = stable
+                                ? new ProviderRefCount(holder, client, 1, 0)
+                                : new ProviderRefCount(holder, client, 0, 1);
+                    }
+                    mProviderRefCountMap.put(jBinder, prc);
                 }
+                retHolder = prc.holder;
             }
         }
-        return provider;
+
+        return retHolder;
     }
 
     private void attach(boolean system) {

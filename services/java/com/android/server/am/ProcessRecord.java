@@ -125,8 +125,8 @@ class ProcessRecord {
     final HashMap<String, ContentProviderRecord> pubProviders
             = new HashMap<String, ContentProviderRecord>(); 
     // All ContentProviderRecord process is using
-    final HashMap<ContentProviderRecord, Integer> conProviders
-            = new HashMap<ContentProviderRecord, Integer>(); 
+    final ArrayList<ContentProviderConnection> conProviders
+            = new ArrayList<ContentProviderConnection>();
     
     boolean persistent;         // always keep this application running?
     boolean crashing;           // are we in the process of crashing?
@@ -257,25 +257,47 @@ class ProcessRecord {
                     pw.println();
         }
         if (activities.size() > 0) {
-            pw.print(prefix); pw.print("activities="); pw.println(activities);
+            pw.print(prefix); pw.println("Activities:");
+            for (int i=0; i<activities.size(); i++) {
+                pw.print(prefix); pw.print("  - "); pw.println(activities.get(i));
+            }
         }
         if (services.size() > 0) {
-            pw.print(prefix); pw.print("services="); pw.println(services);
+            pw.print(prefix); pw.println("Services:");
+            for (ServiceRecord sr : services) {
+                pw.print(prefix); pw.print("  - "); pw.println(sr);
+            }
         }
         if (executingServices.size() > 0) {
-            pw.print(prefix); pw.print("executingServices="); pw.println(executingServices);
+            pw.print(prefix); pw.println("Executing Services:");
+            for (ServiceRecord sr : executingServices) {
+                pw.print(prefix); pw.print("  - "); pw.println(sr);
+            }
         }
         if (connections.size() > 0) {
-            pw.print(prefix); pw.print("connections="); pw.println(connections);
+            pw.print(prefix); pw.println("Connections:");
+            for (ConnectionRecord cr : connections) {
+                pw.print(prefix); pw.print("  - "); pw.println(cr);
+            }
         }
         if (pubProviders.size() > 0) {
-            pw.print(prefix); pw.print("pubProviders="); pw.println(pubProviders);
+            pw.print(prefix); pw.println("Published Providers:");
+            for (HashMap.Entry<String, ContentProviderRecord> ent : pubProviders.entrySet()) {
+                pw.print(prefix); pw.print("  - "); pw.println(ent.getKey());
+                pw.print(prefix); pw.print("    -> "); pw.println(ent.getValue());
+            }
         }
         if (conProviders.size() > 0) {
-            pw.print(prefix); pw.print("conProviders="); pw.println(conProviders);
+            pw.print(prefix); pw.println("Connected Providers:");
+            for (int i=0; i<conProviders.size(); i++) {
+                pw.print(prefix); pw.print("  - "); pw.println(conProviders.get(i).toShortString());
+            }
         }
         if (receivers.size() > 0) {
-            pw.print(prefix); pw.print("receivers="); pw.println(receivers);
+            pw.print(prefix); pw.println("Receivers:");
+            for (ReceiverList rl : receivers) {
+                pw.print(prefix); pw.print("  - "); pw.println(rl);
+            }
         }
     }
     

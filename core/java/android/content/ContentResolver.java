@@ -20,27 +20,24 @@ import dalvik.system.CloseGuard;
 
 import android.accounts.Account;
 import android.app.ActivityManagerNative;
-import android.app.ActivityThread;
 import android.app.AppGlobals;
-import android.content.ContentProvider.Transport;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.CrossProcessCursorWrapper;
 import android.database.Cursor;
-import android.database.CursorWrapper;
 import android.database.IContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.DeadObjectException;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.StrictMode;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.EventLog;
@@ -202,6 +199,8 @@ public abstract class ContentResolver {
     protected abstract IContentProvider acquireUnstableProvider(Context c, String name);
     /** @hide */
     public abstract boolean releaseUnstableProvider(IContentProvider icp);
+    /** @hide */
+    public abstract void unstableProviderDied(IContentProvider icp);
 
     /**
      * Return the MIME type of the given content URL.
@@ -211,6 +210,7 @@ public abstract class ContentResolver {
      * @return A MIME type for the content, or null if the URL is invalid or the type is unknown
      */
     public final String getType(Uri url) {
+        // XXX would like to have an acquireExistingUnstableProvider for this.
         IContentProvider provider = acquireExistingProvider(url);
         if (provider != null) {
             try {
@@ -351,23 +351,37 @@ public abstract class ContentResolver {
     public final Cursor query(final Uri uri, String[] projection,
             String selection, String[] selectionArgs, String sortOrder,
             CancellationSignal cancellationSignal) {
-        IContentProvider provider = acquireProvider(uri);
-        if (provider == null) {
+        IContentProvider unstableProvider = acquireUnstableProvider(uri);
+        if (unstableProvider == null) {
             return null;
         }
+        IContentProvider stableProvider = null;
         try {
             long startTime = SystemClock.uptimeMillis();
 
             ICancellationSignal remoteCancellationSignal = null;
             if (cancellationSignal != null) {
                 cancellationSignal.throwIfCanceled();
-                remoteCancellationSignal = provider.createCancellationSignal();
+                remoteCancellationSignal = unstableProvider.createCancellationSignal();
                 cancellationSignal.setRemote(remoteCancellationSignal);
             }
-            Cursor qCursor = provider.query(uri, projection,
-                    selection, selectionArgs, sortOrder, remoteCancellationSignal);
+            Cursor qCursor;
+            try {
+                qCursor = unstableProvider.query(uri, projection,
+                        selection, selectionArgs, sortOrder, remoteCancellationSignal);
+            } catch (DeadObjectException e) {
+                // The remote process has died...  but we only hold an unstable
+                // reference though, so we might recover!!!  Let's try!!!!
+                // This is exciting!!1!!1!!!!1
+                unstableProviderDied(unstableProvider);
+                stableProvider = acquireProvider(uri);
+                if (stableProvider == null) {
+                    return null;
+                }
+                qCursor = stableProvider.query(uri, projection,
+                        selection, selectionArgs, sortOrder, remoteCancellationSignal);
+            }
             if (qCursor == null) {
-                releaseProvider(provider);
                 return null;
             }
             // force query execution
@@ -375,16 +389,21 @@ public abstract class ContentResolver {
             long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogQueryToEventLog(durationMillis, uri, projection, selection, sortOrder);
             // Wrap the cursor object into CursorWrapperInner object
-            return new CursorWrapperInner(qCursor, provider);
+            CursorWrapperInner wrapper = new CursorWrapperInner(qCursor,
+                    stableProvider != null ? stableProvider : acquireProvider(uri));
+            stableProvider = null;
+            return wrapper;
         } catch (RemoteException e) {
-            releaseProvider(provider);
-
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.
             return null;
-        } catch (RuntimeException e) {
-            releaseProvider(provider);
-            throw e;
+        } finally {
+            if (unstableProvider != null) {
+                releaseUnstableProvider(unstableProvider);
+            }
+            if (stableProvider != null) {
+                releaseProvider(stableProvider);
+            }
         }
     }
 
@@ -592,48 +611,62 @@ public abstract class ContentResolver {
             if ("r".equals(mode)) {
                 return openTypedAssetFileDescriptor(uri, "*/*", null);
             } else {
-                int n = 0;
-                while (true) {
-                    n++;
-                    IContentProvider provider = acquireUnstableProvider(uri);
-                    if (provider == null) {
-                        throw new FileNotFoundException("No content provider: " + uri);
-                    }
+                IContentProvider unstableProvider = acquireUnstableProvider(uri);
+                if (unstableProvider == null) {
+                    throw new FileNotFoundException("No content provider: " + uri);
+                }
+                IContentProvider stableProvider = null;
+                AssetFileDescriptor fd = null;
+
+                try {
                     try {
-                        AssetFileDescriptor fd = provider.openAssetFile(uri, mode);
+                        fd = unstableProvider.openAssetFile(uri, mode);
                         if (fd == null) {
                             // The provider will be released by the finally{} clause
                             return null;
                         }
-                        ParcelFileDescriptor pfd = new ParcelFileDescriptorInner(
-                                fd.getParcelFileDescriptor(), provider);
-
-                        // Success!  Don't release the provider when exiting, let
-                        // ParcelFileDescriptorInner do that when it is closed.
-                        provider = null;
-
-                        return new AssetFileDescriptor(pfd, fd.getStartOffset(),
-                                fd.getDeclaredLength());
-                    } catch (RemoteException e) {
-                        // The provider died for some reason.  Since we are
-                        // acquiring it unstable, its process could have gotten
-                        // killed and need to be restarted.  We'll retry a couple
-                        // times and if still can't succeed then fail.
-                        if (n <= 2) {
-                            try {
-                                Thread.sleep(100);
-                            } catch (InterruptedException e1) {
-                            }
-                            continue;
+                    } catch (DeadObjectException e) {
+                        // The remote process has died...  but we only hold an unstable
+                        // reference though, so we might recover!!!  Let's try!!!!
+                        // This is exciting!!1!!1!!!!1
+                        unstableProviderDied(unstableProvider);
+                        stableProvider = acquireProvider(uri);
+                        if (stableProvider == null) {
+                            throw new FileNotFoundException("No content provider: " + uri);
                         }
-                        // Whatever, whatever, we'll go away.
-                        throw new FileNotFoundException("Dead content provider: " + uri);
-                    } catch (FileNotFoundException e) {
-                        throw e;
-                    } finally {
-                        if (provider != null) {
-                            releaseUnstableProvider(provider);
+                        fd = stableProvider.openAssetFile(uri, mode);
+                        if (fd == null) {
+                            // The provider will be released by the finally{} clause
+                            return null;
                         }
+                    }
+
+                    if (stableProvider == null) {
+                        stableProvider = acquireProvider(uri);
+                    }
+                    releaseUnstableProvider(unstableProvider);
+                    ParcelFileDescriptor pfd = new ParcelFileDescriptorInner(
+                            fd.getParcelFileDescriptor(), stableProvider);
+
+                    // Success!  Don't release the provider when exiting, let
+                    // ParcelFileDescriptorInner do that when it is closed.
+                    stableProvider = null;
+
+                    return new AssetFileDescriptor(pfd, fd.getStartOffset(),
+                            fd.getDeclaredLength());
+
+                } catch (RemoteException e) {
+                    // Whatever, whatever, we'll go away.
+                    throw new FileNotFoundException(
+                            "Failed opening content provider: " + uri);
+                } catch (FileNotFoundException e) {
+                    throw e;
+                } finally {
+                    if (stableProvider != null) {
+                        releaseProvider(stableProvider);
+                    }
+                    if (unstableProvider != null) {
+                        releaseUnstableProvider(unstableProvider);
                     }
                 }
             }
@@ -670,48 +703,62 @@ public abstract class ContentResolver {
      */
     public final AssetFileDescriptor openTypedAssetFileDescriptor(Uri uri,
             String mimeType, Bundle opts) throws FileNotFoundException {
-        int n = 0;
-        while (true) {
-            n++;
-            IContentProvider provider = acquireUnstableProvider(uri);
-            if (provider == null) {
-                throw new FileNotFoundException("No content provider: " + uri);
-            }
+        IContentProvider unstableProvider = acquireUnstableProvider(uri);
+        if (unstableProvider == null) {
+            throw new FileNotFoundException("No content provider: " + uri);
+        }
+        IContentProvider stableProvider = null;
+        AssetFileDescriptor fd = null;
+
+        try {
             try {
-                AssetFileDescriptor fd = provider.openTypedAssetFile(uri, mimeType, opts);
+                fd = unstableProvider.openTypedAssetFile(uri, mimeType, opts);
                 if (fd == null) {
                     // The provider will be released by the finally{} clause
                     return null;
                 }
-                ParcelFileDescriptor pfd = new ParcelFileDescriptorInner(
-                        fd.getParcelFileDescriptor(), provider);
-
-                // Success!  Don't release the provider when exiting, let
-                // ParcelFileDescriptorInner do that when it is closed.
-                provider = null;
-
-                return new AssetFileDescriptor(pfd, fd.getStartOffset(),
-                        fd.getDeclaredLength());
-            } catch (RemoteException e) {
-                // The provider died for some reason.  Since we are
-                // acquiring it unstable, its process could have gotten
-                // killed and need to be restarted.  We'll retry a couple
-                // times and if still can't succeed then fail.
-                if (n <= 2) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e1) {
-                    }
-                    continue;
+            } catch (DeadObjectException e) {
+                // The remote process has died...  but we only hold an unstable
+                // reference though, so we might recover!!!  Let's try!!!!
+                // This is exciting!!1!!1!!!!1
+                unstableProviderDied(unstableProvider);
+                stableProvider = acquireProvider(uri);
+                if (stableProvider == null) {
+                    throw new FileNotFoundException("No content provider: " + uri);
                 }
-                // Whatever, whatever, we'll go away.
-                throw new FileNotFoundException("Dead content provider: " + uri);
-            } catch (FileNotFoundException e) {
-                throw e;
-            } finally {
-                if (provider != null) {
-                    releaseUnstableProvider(provider);
+                fd = stableProvider.openTypedAssetFile(uri, mimeType, opts);
+                if (fd == null) {
+                    // The provider will be released by the finally{} clause
+                    return null;
                 }
+            }
+
+            if (stableProvider == null) {
+                stableProvider = acquireProvider(uri);
+            }
+            releaseUnstableProvider(unstableProvider);
+            ParcelFileDescriptor pfd = new ParcelFileDescriptorInner(
+                    fd.getParcelFileDescriptor(), stableProvider);
+
+            // Success!  Don't release the provider when exiting, let
+            // ParcelFileDescriptorInner do that when it is closed.
+            stableProvider = null;
+
+            return new AssetFileDescriptor(pfd, fd.getStartOffset(),
+                    fd.getDeclaredLength());
+
+        } catch (RemoteException e) {
+            // Whatever, whatever, we'll go away.
+            throw new FileNotFoundException(
+                    "Failed opening content provider: " + uri);
+        } catch (FileNotFoundException e) {
+            throw e;
+        } finally {
+            if (stableProvider != null) {
+                releaseProvider(stableProvider);
+            }
+            if (unstableProvider != null) {
+                releaseUnstableProvider(unstableProvider);
             }
         }
     }
@@ -1061,7 +1108,7 @@ public abstract class ContentResolver {
         if (name == null) {
             return null;
         }
-        return acquireProvider(mContext, name);
+        return acquireUnstableProvider(mContext, name);
     }
 
     /**
@@ -1113,10 +1160,15 @@ public abstract class ContentResolver {
      * use it as needed and it won't disappear, even if your process is in the
      * background.  If using this method, you need to take care to deal with any
      * failures when communicating with the provider, and be sure to close it
-     * so that it can be re-opened later.
+     * so that it can be re-opened later.  In particular, catching a
+     * {@link android.os.DeadObjectException} from the calls there will let you
+     * know that the content provider has gone away; at that point the current
+     * ContentProviderClient object is invalid, and you should release it.  You
+     * can acquire a new one if you would like to try to restart the provider
+     * and perform new operations on it.
      */
     public final ContentProviderClient acquireUnstableContentProviderClient(Uri uri) {
-        IContentProvider provider = acquireProvider(uri);
+        IContentProvider provider = acquireUnstableProvider(uri);
         if (provider != null) {
             return new ContentProviderClient(this, provider, false);
         }
@@ -1133,10 +1185,15 @@ public abstract class ContentResolver {
      * use it as needed and it won't disappear, even if your process is in the
      * background.  If using this method, you need to take care to deal with any
      * failures when communicating with the provider, and be sure to close it
-     * so that it can be re-opened later.
+     * so that it can be re-opened later.  In particular, catching a
+     * {@link android.os.DeadObjectException} from the calls there will let you
+     * know that the content provider has gone away; at that point the current
+     * ContentProviderClient object is invalid, and you should release it.  You
+     * can acquire a new one if you would like to try to restart the provider
+     * and perform new operations on it.
      */
     public final ContentProviderClient acquireUnstableContentProviderClient(String name) {
-        IContentProvider provider = acquireProvider(name);
+        IContentProvider provider = acquireUnstableProvider(name);
         if (provider != null) {
             return new ContentProviderClient(this, provider, false);
         }
@@ -1780,7 +1837,6 @@ public abstract class ContentResolver {
 
     private final class ParcelFileDescriptorInner extends ParcelFileDescriptor {
         private final IContentProvider mContentProvider;
-        public static final String TAG="ParcelFileDescriptorInner";
         private boolean mReleaseProviderFlag = false;
 
         ParcelFileDescriptorInner(ParcelFileDescriptor pfd, IContentProvider icp) {
@@ -1792,7 +1848,7 @@ public abstract class ContentResolver {
         public void close() throws IOException {
             if(!mReleaseProviderFlag) {
                 super.close();
-                ContentResolver.this.releaseUnstableProvider(mContentProvider);
+                ContentResolver.this.releaseProvider(mContentProvider);
                 mReleaseProviderFlag = true;
             }
         }
