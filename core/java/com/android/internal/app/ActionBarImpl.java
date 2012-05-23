@@ -708,7 +708,15 @@ public class ActionBarImpl extends ActionBar {
             anim.start();
         } else {
             mTopVisibilityView.setAlpha(1);
-            mContainerView.setTranslationY(0);
+            mTopVisibilityView.setTranslationY(0);
+            if (mContentView != null) {
+                mContentView.setTranslationY(0);
+            }
+            if (mSplitView != null && mContextDisplayMode == CONTEXT_DISPLAY_SPLIT) {
+                mSplitView.setAlpha(1);
+                mSplitView.setTranslationY(0);
+                mSplitView.setVisibility(View.VISIBLE);
+            }
             mShowListener.onAnimationEnd(null);
         }
         if (mOverlayLayout != null) {
