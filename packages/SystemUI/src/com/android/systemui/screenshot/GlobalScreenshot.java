@@ -22,6 +22,7 @@ import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.Notification;
+import android.app.Notification.BigPictureStyle;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
@@ -31,9 +32,13 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
+import android.graphics.RectF;
 import android.media.MediaActionSound;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -85,6 +90,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
     private String mImageFileName;
     private String mImageFilePath;
     private long mImageTime;
+    private BigPictureStyle mNotificationStyle;
 
     // WORKAROUND: We want the same notification across screenshots that we update so that we don't
     // spam a user's notification drawer.  However, we only show the ticker for the saving state
@@ -109,16 +115,22 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         // Create the large notification icon
         int imageWidth = data.image.getWidth();
         int imageHeight = data.image.getHeight();
-        int iconWidth = data.iconSize;
-        int iconHeight = data.iconSize;
-        if (imageWidth > imageHeight) {
-            iconWidth = (int) (((float) iconHeight / imageHeight) * imageWidth);
-        } else {
-            iconHeight = (int) (((float) iconWidth / imageWidth) * imageHeight);
-        }
-        Bitmap rawIcon = Bitmap.createScaledBitmap(data.image, iconWidth, iconHeight, true);
-        Bitmap croppedIcon = Bitmap.createBitmap(rawIcon, (iconWidth - data.iconSize) / 2,
-                (iconHeight - data.iconSize) / 2, data.iconSize, data.iconSize);
+        int iconSize = data.iconSize;
+
+        final int shortSide = imageWidth < imageHeight ? imageWidth : imageHeight;
+        Bitmap preview = Bitmap.createBitmap(shortSide, shortSide, data.image.getConfig());
+        Canvas c = new Canvas(preview);
+        Paint paint = new Paint();
+        ColorMatrix desat = new ColorMatrix();
+        desat.setSaturation(0.25f);
+        paint.setColorFilter(new ColorMatrixColorFilter(desat));
+        Matrix matrix = new Matrix();
+        matrix.postTranslate((shortSide - imageWidth) / 2,
+                            (shortSide - imageHeight) / 2);
+        c.drawBitmap(data.image, matrix, paint);
+        c.drawColor(0x40FFFFFF);
+
+        Bitmap croppedIcon = Bitmap.createScaledBitmap(preview, iconSize, iconSize, true);
 
         // Show the intermediate notification
         mTickerAddSpace = !mTickerAddSpace;
@@ -131,7 +143,12 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             .setContentText(r.getString(R.string.screenshot_saving_text))
             .setSmallIcon(R.drawable.stat_notify_image)
             .setWhen(System.currentTimeMillis());
-        Notification n = mNotificationBuilder.getNotification();
+
+        mNotificationStyle = new Notification.BigPictureStyle()
+            .bigPicture(preview);
+        mNotificationBuilder.setStyle(mNotificationStyle);
+
+        Notification n = mNotificationBuilder.build();
         n.flags |= Notification.FLAG_NO_CLEAR;
         mNotificationManager.notify(nId, n);
 
@@ -139,6 +156,8 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         // on small devices, the large icon is not shown) so defer showing the large icon until
         // we compose the final post-save notification below.
         mNotificationBuilder.setLargeIcon(croppedIcon);
+        // But we still don't set it for the expanded view, allowing the smallIcon to show here.
+        mNotificationStyle.bigLargeIcon(null);
     }
 
     @Override
@@ -151,6 +170,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
 
         Context context = params[0].context;
         Bitmap image = params[0].image;
+        Resources r = context.getResources();
 
         try {
             // Save the screenshot to the MediaStore
@@ -164,6 +184,14 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             values.put(MediaStore.Images.ImageColumns.DATE_MODIFIED, mImageTime);
             values.put(MediaStore.Images.ImageColumns.MIME_TYPE, "image/png");
             Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+            Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+            sharingIntent.setType("image/png");
+            sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
+            sharingIntent.setFlags(Intent.FLAG_ACTIVITY_CLOSE_SYSTEM_DIALOGS);
+            mNotificationBuilder.addAction(R.drawable.ic_menu_share,
+                     r.getString(com.android.internal.R.string.share),
+                     PendingIntent.getActivity(context, 0, sharingIntent, 0));
 
             OutputStream out = resolver.openOutputStream(uri);
             image.compress(Bitmap.CompressFormat.PNG, 100, out);
@@ -207,7 +235,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
                 .setWhen(System.currentTimeMillis())
                 .setAutoCancel(true);
 
-            Notification n = mNotificationBuilder.getNotification();
+            Notification n = mNotificationBuilder.build();
             n.flags &= ~Notification.FLAG_NO_CLEAR;
             mNotificationManager.notify(mNotificationId, n);
         }
