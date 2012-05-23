@@ -3154,8 +3154,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Adds a child view. If no layout parameters are already set on the child, the
-     * default parameters for this ViewGroup are set on the child.
+     * <p>Adds a child view. If no layout parameters are already set on the child, the
+     * default parameters for this ViewGroup are set on the child.</p>
+     * 
+     * <p><strong>Note:</strong> do not invoke this method from
+     * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+     * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
      *
      * @param child the child view to add
      *
@@ -3168,6 +3172,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * Adds a child view. If no layout parameters are already set on the child, the
      * default parameters for this ViewGroup are set on the child.
+     * 
+     * <p><strong>Note:</strong> do not invoke this method from
+     * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+     * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
      *
      * @param child the child view to add
      * @param index the position at which to add the child
@@ -3189,6 +3197,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Adds a child view with this ViewGroup's default layout parameters and the
      * specified width and height.
      *
+     * <p><strong>Note:</strong> do not invoke this method from
+     * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+     * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
+     *
      * @param child the child view to add
      */
     public void addView(View child, int width, int height) {
@@ -3201,6 +3213,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * Adds a child view with the specified layout parameters.
      *
+     * <p><strong>Note:</strong> do not invoke this method from
+     * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+     * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
+     *
      * @param child the child view to add
      * @param params the layout parameters to set on the child
      */
@@ -3210,6 +3226,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /**
      * Adds a child view with the specified layout parameters.
+     *
+     * <p><strong>Note:</strong> do not invoke this method from
+     * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+     * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
      *
      * @param child the child view to add
      * @param index the position at which to add the child
@@ -3528,6 +3548,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /**
      * {@inheritDoc}
+     * 
+     * <p><strong>Note:</strong> do not invoke this method from
+     * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+     * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
      */
     public void removeView(View view) {
         removeViewInternal(view);
@@ -3539,6 +3563,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Removes a view during layout. This is useful if in your onLayout() method,
      * you need to remove more views.
      *
+     * <p><strong>Note:</strong> do not invoke this method from
+     * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+     * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
+     * 
      * @param view the view to remove from the group
      */
     public void removeViewInLayout(View view) {
@@ -3548,6 +3576,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * Removes a range of views during layout. This is useful if in your onLayout() method,
      * you need to remove more views.
+     *
+     * <p><strong>Note:</strong> do not invoke this method from
+     * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+     * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
      *
      * @param start the index of the first view to remove from the group
      * @param count the number of views to remove from the group
@@ -3559,6 +3591,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * Removes the view at the specified position in the group.
      *
+     * <p><strong>Note:</strong> do not invoke this method from
+     * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+     * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
+     * 
      * @param index the position in the group of the view to remove
      */
     public void removeViewAt(int index) {
@@ -3569,6 +3605,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /**
      * Removes the specified range of views from the group.
+     *
+     * <p><strong>Note:</strong> do not invoke this method from
+     * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+     * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
      *
      * @param start the first position in the group of the range of views to remove
      * @param count the number of views to remove
@@ -3715,6 +3755,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * Call this method to remove all child views from the
      * ViewGroup.
+     * 
+     * <p><strong>Note:</strong> do not invoke this method from
+     * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+     * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
      */
     public void removeAllViews() {
         removeAllViewsInLayout();
@@ -3730,6 +3774,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * that can currently fit inside the object on screen. Do not call
      * this method unless you are extending ViewGroup and understand the
      * view measuring and layout pipeline.
+     *
+     * <p><strong>Note:</strong> do not invoke this method from
+     * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+     * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
      */
     public void removeAllViewsInLayout() {
         final int count = mChildrenCount;
