@@ -1253,13 +1253,13 @@ public class PopupWindow {
             unregisterForScrollChanged();
 
             try {
-                mWindowManager.removeView(mPopupView);                
+                mWindowManager.removeViewImmediate(mPopupView);
             } finally {
                 if (mPopupView != mContentView && mPopupView instanceof ViewGroup) {
                     ((ViewGroup) mPopupView).removeView(mContentView);
                 }
                 mPopupView = null;
-    
+
                 if (mOnDismissListener != null) {
                     mOnDismissListener.onDismiss();
                 }
