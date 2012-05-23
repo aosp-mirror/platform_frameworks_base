@@ -400,6 +400,9 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         if (viewTreeObserver.isAlive()) {
             viewTreeObserver.removeOnGlobalLayoutListener(mOnGlobalLayoutListener);
         }
+        if (isShowingPopup()) {
+            dismissPopup();
+        }
         mIsAttachedToWindow = false;
     }
 
@@ -420,9 +423,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         mActivityChooserContent.layout(0, 0, right - left, bottom - top);
-        if (getListPopupWindow().isShowing()) {
-            showPopupUnchecked(mAdapter.getMaxActivityCount());
-        } else {
+        if (!isShowingPopup()) {
             dismissPopup();
         }
     }
