@@ -33,6 +33,7 @@ import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -1434,8 +1435,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 && attrs.type != WindowManager.LayoutParams.TYPE_NAVIGATION_BAR
                 && attrs.type != WindowManager.LayoutParams.TYPE_WALLPAPER;
     }
-    
+
     /** {@inheritDoc} */
+    @Override
     public View addStartingWindow(IBinder appToken, String packageName, int theme,
             CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
             int icon, int windowFlags) {
@@ -1445,7 +1447,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (packageName == null) {
             return null;
         }
-        
+
         try {
             Context context = mContext;
             //Log.i(TAG, "addStartingWindow " + packageName + ": nonLocalizedLabel="
@@ -1458,16 +1460,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // Ignore
                 }
             }
-            
+
             Window win = PolicyManager.makeNewWindow(context);
-            if (win.getWindowStyle().getBoolean(
-                    com.android.internal.R.styleable.Window_windowDisablePreview, false)) {
+            final TypedArray ta = win.getWindowStyle();
+            if (ta.getBoolean(
+                        com.android.internal.R.styleable.Window_windowDisablePreview, false)
+                || ta.getBoolean(
+                        com.android.internal.R.styleable.Window_windowShowWallpaper,false)) {
                 return null;
             }
-            
+
             Resources r = context.getResources();
             win.setTitle(r.getText(labelRes, nonLocalizedLabel));
-    
+
             win.setType(
                 WindowManager.LayoutParams.TYPE_APPLICATION_STARTING);
             // Force the window flags: this is a fake window, so it is not really
@@ -1483,14 +1488,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE|
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
                 WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-    
+
             if (!compatInfo.supportsScreen()) {
                 win.addFlags(WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW);
             }
 
             win.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.MATCH_PARENT);
-    
+
             final WindowManager.LayoutParams params = win.getAttributes();
             params.token = appToken;
             params.packageName = packageName;
@@ -1512,7 +1517,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // earlier.)
                 return null;
             }
-            
+
             if (localLOGV) Log.v(
                 TAG, "Adding starting window for " + packageName
                 + " / " + appToken + ": "

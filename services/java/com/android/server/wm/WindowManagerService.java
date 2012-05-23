@@ -1636,7 +1636,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     continue;
                 }
             }
-            if (DEBUG_WALLPAPER) Slog.v(TAG, "Win " + w + ": readyfordisplay="
+            if (DEBUG_WALLPAPER) Slog.v(TAG, "Win #" + i + " " + w + ": readyfordisplay="
                     + w.isReadyForDisplay() + " mDrawState=" + w.mWinAnimator.mDrawState);
             if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0 && w.isReadyForDisplay()
                     && (mWallpaperTarget == w || w.isDrawnLw())) {
@@ -1729,12 +1729,15 @@ public class WindowManagerService extends IWindowManager.Stub
                                 Slog.v(TAG, "Old wallpaper still the target.");
                             }
                             mWallpaperTarget = oldW;
-                        }
-
+                            foundW = oldW;
+                            foundI = oldI;
+                            mLowerWallpaperTarget = null;
+                            mUpperWallpaperTarget = null;
+                        } 
                         // Now set the upper and lower wallpaper targets
                         // correctly, and make sure that we are positioning
                         // the wallpaper below the lower.
-                        if (foundI > oldI) {
+                        else if (foundI > oldI) {
                             // The new target is on top of the old one.
                             if (DEBUG_WALLPAPER) {
                                 Slog.v(TAG, "Found target above old target.");
