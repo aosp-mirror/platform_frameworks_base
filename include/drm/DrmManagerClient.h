@@ -81,6 +81,16 @@ public:
     sp<DecryptHandle> openDecryptSession(const char* uri);
 
     /**
+     * Open the decrypt session to decrypt the given protected content
+     *
+     * @param[in] buf Data to initiate decrypt session
+     * @param[in] mimeType Mime type of the protected content
+     * @return
+     *     Handle for the decryption session
+     */
+    sp<DecryptHandle> openDecryptSession(const DrmBuffer& buf, const String8& mimeType);
+
+    /**
      * Close the decrypt session for the given handle
      *
      * @param[in] decryptHandle Handle for the decryption session

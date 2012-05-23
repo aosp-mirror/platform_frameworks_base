@@ -640,6 +640,33 @@ DecryptHandle* BpDrmManagerService::openDecryptSession(int uniqueId, const char*
     return handle;
 }
 
+DecryptHandle* BpDrmManagerService::openDecryptSession(
+            int uniqueId, const DrmBuffer& buf, const String8& mimeType) {
+    ALOGV("Entering BpDrmManagerService::openDecryptSession");
+    Parcel data, reply;
+
+    data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
+    data.writeInt32(uniqueId);
+    if (buf.data != NULL && buf.length > 0) {
+        data.writeInt32(buf.length);
+        data.write(buf.data, buf.length);
+    } else {
+        data.writeInt32(0);
+    }
+    data.writeString8(mimeType);
+
+    remote()->transact(OPEN_DECRYPT_SESSION_FOR_STREAMING, data, &reply);
+
+    DecryptHandle* handle = NULL;
+    if (0 != reply.dataAvail()) {
+        handle = new DecryptHandle();
+        readDecryptHandleFromParcelData(handle, reply);
+    } else {
+        ALOGV("no decryptHandle is generated in service side");
+    }
+    return handle;
+}
+
 status_t BpDrmManagerService::closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle) {
     ALOGV("closeDecryptSession");
     Parcel data, reply;
@@ -1291,6 +1318,30 @@ status_t BnDrmManagerService::onTransact(
 
             clearDecryptHandle(handle);
             delete handle; handle = NULL;
+        } else {
+            ALOGV("NULL decryptHandle is returned");
+        }
+        return DRM_NO_ERROR;
+    }
+
+    case OPEN_DECRYPT_SESSION_FOR_STREAMING:
+    {
+        ALOGV("BnDrmManagerService::onTransact :OPEN_DECRYPT_SESSION_FOR_STREAMING");
+        CHECK_INTERFACE(IDrmManagerService, data, reply);
+
+        const int uniqueId = data.readInt32();
+        const int bufferSize = data.readInt32();
+        DrmBuffer buf((bufferSize > 0) ? (char *)data.readInplace(bufferSize) : NULL,
+                bufferSize);
+        const String8 mimeType(data.readString8());
+
+        DecryptHandle* handle = openDecryptSession(uniqueId, buf, mimeType);
+
+        if (handle != NULL) {
+            writeDecryptHandleToParcelData(handle, reply);
+            clearDecryptHandle(handle);
+            delete handle;
+            handle = NULL;
         } else {
             ALOGV("NULL decryptHandle is returned");
         }

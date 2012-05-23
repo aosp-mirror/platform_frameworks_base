@@ -102,6 +102,9 @@ public:
 
     DecryptHandle* openDecryptSession(int uniqueId, const char* uri);
 
+    DecryptHandle* openDecryptSession(int uniqueId, const DrmBuffer& buf,
+            const String8& mimeType);
+
     status_t closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle);
 
     status_t initializeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle,
