@@ -1208,6 +1208,9 @@ public class LayoutTransition {
      * affect CHANGE_APPEARING or CHANGE_DISAPPEARING animations.
      */
     private void addChild(ViewGroup parent, View child, boolean changesLayout) {
+        if (parent.getWindowVisibility() != View.VISIBLE) {
+            return;
+        }
         if ((mTransitionTypes & FLAG_APPEARING) == FLAG_APPEARING) {
             // Want disappearing animations to finish up before proceeding
             cancel(DISAPPEARING);
@@ -1243,6 +1246,9 @@ public class LayoutTransition {
      * @hide
      */
     public void layoutChange(ViewGroup parent) {
+        if (parent.getWindowVisibility() != View.VISIBLE) {
+            return;
+        }
         if ((mTransitionTypes & FLAG_CHANGING) == FLAG_CHANGING  && !isRunning()) {
             // This method is called for all calls to layout() in the container, including
             // those caused by add/remove/hide/show events, which will already have set up
@@ -1301,6 +1307,9 @@ public class LayoutTransition {
      * affect CHANGE_APPEARING or CHANGE_DISAPPEARING animations.
      */
     private void removeChild(ViewGroup parent, View child, boolean changesLayout) {
+        if (parent.getWindowVisibility() != View.VISIBLE) {
+            return;
+        }
         if ((mTransitionTypes & FLAG_DISAPPEARING) == FLAG_DISAPPEARING) {
             // Want appearing animations to finish up before proceeding
             cancel(APPEARING);
