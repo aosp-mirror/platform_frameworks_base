@@ -1444,7 +1444,9 @@ public class MediaScanner
         String where;
         String[] selectionArgs;
         if (mCaseInsensitivePaths) {
-            where = Files.FileColumns.DATA + " LIKE ?";
+            // the 'like' makes it use the index, the 'lower()' makes it correct
+            // when the path contains sqlite wildcard characters
+            where = "_data LIKE ?1 AND lower(_data)=lower(?1)";
             selectionArgs = new String[] { path };
         } else {
             where = Files.FileColumns.DATA + "=?";
