@@ -785,6 +785,7 @@
   <java-symbol type="string" name="serviceNotProvisioned" />
   <java-symbol type="string" name="serviceRegistered" />
   <java-symbol type="string" name="setup_autofill" />
+  <java-symbol type="string" name="share" />
   <java-symbol type="string" name="shareactionprovider_share_with" />
   <java-symbol type="string" name="shareactionprovider_share_with_application" />
   <java-symbol type="string" name="short_format_month" />

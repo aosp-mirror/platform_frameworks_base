@@ -1689,6 +1689,8 @@ public class Notification implements Parcelable
      */
     public static class BigPictureStyle extends Style {
         private Bitmap mPicture;
+        private Bitmap mBigLargeIcon;
+        private boolean mBigLargeIconSet = false;
 
         public BigPictureStyle() {
         }
@@ -1719,6 +1721,16 @@ public class Notification implements Parcelable
             return this;
         }
 
+        /**
+         * @hide
+         * Override the large icon when the big notification is shown.
+         */
+        public BigPictureStyle bigLargeIcon(Bitmap b) {
+            mBigLargeIconSet = true;
+            mBigLargeIcon = b;
+            return this;
+        }
+
         private RemoteViews makeBigContentView() {
             RemoteViews contentView = getStandardView(R.layout.notification_template_big_picture);
 
@@ -1731,6 +1743,9 @@ public class Notification implements Parcelable
         public Notification build() {
             checkBuilder();
             Notification wip = mBuilder.buildUnstyled();
+            if (mBigLargeIconSet ) {
+                mBuilder.mLargeIcon = mBigLargeIcon;
+            }
             wip.bigContentView = makeBigContentView();
             return wip;
         }
