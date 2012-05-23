@@ -19,6 +19,7 @@ package android.view.animation;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.RectF;
+import android.os.Handler;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -207,6 +208,11 @@ public abstract class Animation implements Cloneable {
 
     private final CloseGuard guard = CloseGuard.get();
 
+    private Handler mListenerHandler;
+    private Runnable mOnStart;
+    private Runnable mOnRepeat;
+    private Runnable mOnEnd;
+
     /**
      * Creates a new animation with a duration of 0ms, the default interpolator, with
      * fillBefore set to true and fillAfter set to false
@@ -275,6 +281,7 @@ public abstract class Animation implements Cloneable {
         mRepeated = 0;
         mMore = true;
         mOneMoreTime = true;
+        mListenerHandler = null;
     }
 
     /**
@@ -290,7 +297,7 @@ public abstract class Animation implements Cloneable {
      */
     public void cancel() {
         if (mStarted && !mEnded) {
-            if (mListener != null) mListener.onAnimationEnd(this);
+            fireAnimationEnd();
             mEnded = true;
             guard.close();
         }
@@ -306,7 +313,7 @@ public abstract class Animation implements Cloneable {
         if (mStarted && !mEnded) {
             mEnded = true;
             guard.close();
-            if (mListener != null) mListener.onAnimationEnd(this);
+            fireAnimationEnd();
         }
     }
 
@@ -338,6 +345,38 @@ public abstract class Animation implements Cloneable {
     public void initialize(int width, int height, int parentWidth, int parentHeight) {
         reset();
         mInitialized = true;
+    }
+
+    /**
+     * Sets the handler used to invoke listeners.
+     * 
+     * @hide
+     */
+    public void setListenerHandler(Handler handler) {
+        if (mListenerHandler == null) {
+            mOnStart = new Runnable() {
+                public void run() {
+                    if (mListener != null) {
+                        mListener.onAnimationStart(Animation.this);
+                    }
+                }
+            };
+            mOnRepeat = new Runnable() {
+                public void run() {
+                    if (mListener != null) {
+                        mListener.onAnimationRepeat(Animation.this);
+                    }
+                }
+            };
+            mOnEnd = new Runnable() {
+                public void run() {
+                    if (mListener != null) {
+                        mListener.onAnimationEnd(Animation.this);
+                    }
+                }
+            };
+        }
+        mListenerHandler = handler;
     }
 
     /**
@@ -792,7 +831,6 @@ public abstract class Animation implements Cloneable {
      * @return True if the animation is still running
      */
     public boolean getTransformation(long currentTime, Transformation outTransformation) {
-
         if (mStartTime == -1) {
             mStartTime = currentTime;
         }
@@ -815,9 +853,7 @@ public abstract class Animation implements Cloneable {
 
         if ((normalizedTime >= 0.0f || mFillBefore) && (normalizedTime <= 1.0f || mFillAfter)) {
             if (!mStarted) {
-                if (mListener != null) {
-                    mListener.onAnimationStart(this);
-                }
+                fireAnimationStart();
                 mStarted = true;
                 if (USE_CLOSEGUARD) {
                     guard.open("cancel or detach or getTransformation");
@@ -839,9 +875,7 @@ public abstract class Animation implements Cloneable {
                 if (!mEnded) {
                     mEnded = true;
                     guard.close();
-                    if (mListener != null) {
-                        mListener.onAnimationEnd(this);
-                    }
+                    fireAnimationEnd();
                 }
             } else {
                 if (mRepeatCount > 0) {
@@ -855,9 +889,7 @@ public abstract class Animation implements Cloneable {
                 mStartTime = -1;
                 mMore = true;
 
-                if (mListener != null) {
-                    mListener.onAnimationRepeat(this);
-                }
+                fireAnimationRepeat();
             }
         }
 
@@ -868,7 +900,28 @@ public abstract class Animation implements Cloneable {
 
         return mMore;
     }
-    
+
+    private void fireAnimationStart() {
+        if (mListener != null) {
+            if (mListenerHandler == null) mListener.onAnimationStart(this);
+            else mListenerHandler.postAtFrontOfQueue(mOnStart);
+        }
+    }
+
+    private void fireAnimationRepeat() {
+        if (mListener != null) {
+            if (mListenerHandler == null) mListener.onAnimationRepeat(this);
+            else mListenerHandler.postAtFrontOfQueue(mOnRepeat);
+        }
+    }
+
+    private void fireAnimationEnd() {
+        if (mListener != null) {
+            if (mListenerHandler == null) mListener.onAnimationEnd(this);
+            else mListenerHandler.postAtFrontOfQueue(mOnEnd);
+        }
+    }
+
     /**
      * Gets the transformation to apply at a specified point in time. Implementations of this
      * method should always replace the specified Transformation or document they are doing

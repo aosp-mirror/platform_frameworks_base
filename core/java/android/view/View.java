@@ -12697,6 +12697,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         if (!initialized) {
             a.initialize(mRight - mLeft, mBottom - mTop, parent.getWidth(), parent.getHeight());
             a.initializeInvalidateRegion(0, 0, mRight - mLeft, mBottom - mTop);
+            if (mAttachInfo != null) a.setListenerHandler(mAttachInfo.mHandler);
             onAnimationStart();
         }
 
@@ -12710,6 +12711,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         } else {
             invalidationTransform = parent.mChildTransformation;
         }
+
         if (more) {
             if (!a.willChangeBounds()) {
                 if ((flags & (parent.FLAG_OPTIMIZE_INVALIDATE | parent.FLAG_ANIMATION_DONE)) ==
