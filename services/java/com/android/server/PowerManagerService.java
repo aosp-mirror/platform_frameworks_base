@@ -178,6 +178,8 @@ public class PowerManagerService extends IPowerManager.Stub
     static final int ANIM_STEPS = 60; // nominal # of frames at 60Hz
     // Slower animation for autobrightness changes
     static final int AUTOBRIGHTNESS_ANIM_STEPS = 2 * ANIM_STEPS;
+    // Even slower animation for autodimness changes
+    static final int AUTODIMNESS_ANIM_STEPS = 15 * ANIM_STEPS;
     // Number of steps when performing a more immediate brightness change.
     static final int IMMEDIATE_ANIM_STEPS = 4;
 
@@ -1745,7 +1747,6 @@ public class PowerManagerService extends IPowerManager.Stub
                             + Integer.toHexString(mPowerState)
                             + " mSkippedScreenOn=" + mSkippedScreenOn);
                 }
-                mScreenBrightnessHandler.removeMessages(ScreenBrightnessAnimator.ANIMATE_LIGHTS);
                 mScreenBrightnessAnimator.animateTo(PowerManager.BRIGHTNESS_OFF, SCREEN_BRIGHT_BIT, 0);
             }
         }
@@ -2159,6 +2160,8 @@ public class PowerManagerService extends IPowerManager.Stub
         static final int ANIMATE_POWER_OFF = 11;
         volatile int startValue;
         volatile int endValue;
+        volatile int startSensorValue;
+        volatile int endSensorValue;
         volatile int currentValue;
         private int currentMask;
         private int duration;
@@ -2182,7 +2185,7 @@ public class PowerManagerService extends IPowerManager.Stub
                         int value = msg.arg2;
                         long tStart = SystemClock.uptimeMillis();
                         if ((mask & SCREEN_BRIGHT_BIT) != 0) {
-                            if (mDebugLightAnimation) Log.v(TAG, "Set brightness: " + value);
+                            if (mDebugLightAnimation) Slog.v(TAG, "Set brightness: " + value);
                             mLcdLight.setBrightness(value, brightnessMode);
                         }
                         long elapsed = SystemClock.uptimeMillis() - tStart;
@@ -2194,12 +2197,12 @@ public class PowerManagerService extends IPowerManager.Stub
                         }
 
                         if (elapsed > 100) {
-                            Log.e(TAG, "Excessive delay setting brightness: " + elapsed
+                            Slog.e(TAG, "Excessive delay setting brightness: " + elapsed
                                     + "ms, mask=" + mask);
                         }
 
                         // Throttle brightness updates to frame refresh rate
-                        int delay = elapsed < NOMINAL_FRAME_TIME_MS ? NOMINAL_FRAME_TIME_MS : 0;
+                        int delay = elapsed < NOMINAL_FRAME_TIME_MS ? NOMINAL_FRAME_TIME_MS : 1;
                         synchronized(this) {
                             currentValue = value;
                         }
@@ -2227,25 +2230,41 @@ public class PowerManagerService extends IPowerManager.Stub
                         newValue = startValue + delta * elapsed / duration;
                         newValue = Math.max(PowerManager.BRIGHTNESS_OFF, newValue);
                         newValue = Math.min(PowerManager.BRIGHTNESS_ON, newValue);
+                        // Optimization to delay next step until a change will occur.
+                        if (delay > 0 && newValue == currentValue) {
+                            final int timePerStep = duration / Math.abs(delta);
+                            delay = Math.min(duration - elapsed, timePerStep);
+                            newValue += delta < 0 ? -1 : 1;
+                        }
+                        // adjust the peak sensor value until we get to the target sensor value
+                        delta = endSensorValue - startSensorValue;
+                        mHighestLightSensorValue = startSensorValue + delta * elapsed / duration;
                     } else {
                         newValue = endValue;
+                        mHighestLightSensorValue = endSensorValue;
                         mInitialAnimation = false;
                     }
 
                     if (mDebugLightAnimation) {
-                        Log.v(TAG, "Animating light: " + "start:" + startValue
+                        Slog.v(TAG, "Animating light: " + "start:" + startValue
                                 + ", end:" + endValue + ", elapsed:" + elapsed
                                 + ", duration:" + duration + ", current:" + currentValue
-                                + ", delay:" + delay);
+                                + ", newValue:" + newValue
+                                + ", delay:" + delay
+                                + ", highestSensor:" + mHighestLightSensorValue);
                     }
 
                     if (turningOff && !mHeadless && !mAnimateScreenLights) {
                         int mode = mScreenOffReason == OFF_BECAUSE_OF_PROX_SENSOR
                                 ? 0 : mAnimationSetting;
-                        if (mDebugLightAnimation) Log.v(TAG, "Doing power-off anim, mode=" + mode);
+                        if (mDebugLightAnimation) {
+                            Slog.v(TAG, "Doing power-off anim, mode=" + mode);
+                        }
                         mScreenBrightnessHandler.obtainMessage(ANIMATE_POWER_OFF, mode, 0)
                                 .sendToTarget();
                     }
+                    mScreenBrightnessHandler.removeMessages(
+                            ScreenBrightnessAnimator.ANIMATE_LIGHTS);
                     Message msg = mScreenBrightnessHandler
                             .obtainMessage(ANIMATE_LIGHTS, mask, newValue);
                     mScreenBrightnessHandler.sendMessageDelayed(msg, delay);
@@ -2259,16 +2278,24 @@ public class PowerManagerService extends IPowerManager.Stub
         }
 
         public void animateTo(int target, int mask, int animationDuration) {
+            animateTo(target, mHighestLightSensorValue, mask, animationDuration);
+        }
+
+        public void animateTo(int target, int sensorTarget, int mask, int animationDuration) {
             synchronized(this) {
                 startValue = currentValue;
                 endValue = target;
+                startSensorValue = mHighestLightSensorValue;
+                endSensorValue = sensorTarget;
                 currentMask = mask;
                 duration = (int) (mWindowScaleAnimation * animationDuration);
                 startTimeMillis = SystemClock.elapsedRealtime();
                 mInitialAnimation = currentValue == 0 && target > 0;
 
                 if (mDebugLightAnimation) {
-                    Log.v(TAG, "animateTo(target=" + target + ", mask=" + mask
+                    Slog.v(TAG, "animateTo(target=" + target
+                            + ", sensor=" + sensorTarget
+                            + ", mask=" + mask
                             + ", duration=" + animationDuration +")"
                             + ", currentValue=" + currentValue
                             + ", startTime=" + startTimeMillis);
@@ -2612,9 +2639,11 @@ public class PowerManagerService extends IPowerManager.Stub
             return;
         }
 
-        // do not allow light sensor value to decrease
-        if (mHighestLightSensorValue < value) {
-            mHighestLightSensorValue = value;
+        final int stepsToTargetLevel;
+        if (mHighestLightSensorValue <= value) {
+            stepsToTargetLevel = AUTOBRIGHTNESS_ANIM_STEPS;
+        } else {
+            stepsToTargetLevel = AUTODIMNESS_ANIM_STEPS;
         }
 
         if (mLightSensorValue != value) {
@@ -2623,9 +2652,7 @@ public class PowerManagerService extends IPowerManager.Stub
                 // use maximum light sensor value seen since screen went on for LCD to avoid flicker
                 // we only do this if we are undocked, since lighting should be stable when
                 // stationary in a dock.
-                int lcdValue = getAutoBrightnessValue(
-                        (mIsDocked ? value : mHighestLightSensorValue),
-                        mLcdBacklightValues);
+                int lcdValue = getAutoBrightnessValue(value, mLcdBacklightValues);
                 int buttonValue = getAutoBrightnessValue(value, mButtonBacklightValues);
                 int keyboardValue;
                 if (mKeyboardVisible) {
@@ -2645,9 +2672,8 @@ public class PowerManagerService extends IPowerManager.Stub
 
                 if (mAutoBrightessEnabled && mScreenBrightnessOverride < 0) {
                     if (!mSkippedScreenOn && !mInitialAnimation) {
-                        int steps = immediate ? IMMEDIATE_ANIM_STEPS : AUTOBRIGHTNESS_ANIM_STEPS;
-                        mScreenBrightnessAnimator.cancelAnimation();
-                        mScreenBrightnessAnimator.animateTo(lcdValue,
+                        int steps = immediate ? IMMEDIATE_ANIM_STEPS : stepsToTargetLevel;
+                        mScreenBrightnessAnimator.animateTo(lcdValue, value,
                                 SCREEN_BRIGHT_BIT, steps * NOMINAL_FRAME_TIME_MS);
                     }
                 }
