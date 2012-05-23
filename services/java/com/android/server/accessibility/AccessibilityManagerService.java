@@ -191,8 +191,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             @Override
             public void onSomePackagesChanged() {
                 synchronized (mLock) {
-                    populateAccessibilityServiceListLocked();
-                    manageServicesLocked();
+                    // We will update when the automation service dies.
+                    if (mUiAutomationService == null) {
+                        populateAccessibilityServiceListLocked();
+                        manageServicesLocked();
+                    }
                 }
             }
 
@@ -242,11 +245,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction() == Intent.ACTION_BOOT_COMPLETED) {
                     synchronized (mLock) {
-                        populateAccessibilityServiceListLocked();
-                        handleAccessibilityEnabledSettingChangedLocked();
-                        handleTouchExplorationEnabledSettingChangedLocked();
-                        updateInputFilterLocked();
-                        sendStateToClientsLocked();
+                        // We will update when the automation service dies.
+                        if (mUiAutomationService == null) {
+                            populateAccessibilityServiceListLocked();
+                            handleAccessibilityEnabledSettingChangedLocked();
+                            handleTouchExplorationEnabledSettingChangedLocked();
+                            updateInputFilterLocked();
+                            sendStateToClientsLocked();
+                        }
                     }
 
                     return;
@@ -294,9 +300,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 public void onChange(boolean selfChange) {
                     super.onChange(selfChange);
                     synchronized (mLock) {
-                        handleAccessibilityEnabledSettingChangedLocked();
-                        updateInputFilterLocked();
-                        sendStateToClientsLocked();
+                        // We will update when the automation service dies.
+                        if (mUiAutomationService == null) {
+                            handleAccessibilityEnabledSettingChangedLocked();
+                            updateInputFilterLocked();
+                            sendStateToClientsLocked();
+                        }
                     }
                 }
             });
@@ -309,9 +318,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     public void onChange(boolean selfChange) {
                         super.onChange(selfChange);
                         synchronized (mLock) {
-                            handleTouchExplorationEnabledSettingChangedLocked();
-                            updateInputFilterLocked();
-                            sendStateToClientsLocked();
+                            // We will update when the automation service dies.
+                            if (mUiAutomationService == null) {
+                                handleTouchExplorationEnabledSettingChangedLocked();
+                                updateInputFilterLocked();
+                                sendStateToClientsLocked();
+                            }
                         }
                     }
                 });
@@ -324,7 +336,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 public void onChange(boolean selfChange) {
                     super.onChange(selfChange);
                     synchronized (mLock) {
-                        manageServicesLocked();
+                        // We will update when the automation service dies.
+                        if (mUiAutomationService == null) {
+                            manageServicesLocked();
+                        }
                     }
                 }
             });
@@ -747,10 +762,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      * Manages services by starting enabled ones and stopping disabled ones.
      */
     private void manageServicesLocked() {
-        // While the UI automation service is running it takes over.
-        if (mUiAutomationService != null) {
-            return;
-        }
         populateEnabledServicesLocked(mEnabledServices);
         final int enabledInstalledServicesCount = updateServicesStateLocked(mInstalledServices,
                 mEnabledServices);
@@ -926,8 +937,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private void tryEnableTouchExploration(final Service service) {
         if (!mIsTouchExplorationEnabled && service.mRequestTouchExplorationMode) {
-            mMainHandler.obtainMessage(MSG_SHOW_ENABLE_TOUCH_EXPLORATION_DIALOG,
-                    service).sendToTarget();
+            if (!service.mIsAutomation) {
+                mMainHandler.obtainMessage(MSG_SHOW_ENABLE_TOUCH_EXPLORATION_DIALOG,
+                        service).sendToTarget();
+            } else {
+                Settings.Secure.putInt(mContext.getContentResolver(),
+                        Settings.Secure.TOUCH_EXPLORATION_ENABLED, 1);
+            }
         }
     }
 
@@ -1479,10 +1495,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // the state based on values in the settings database.
                 if (mIsAutomation) {
                     mUiAutomationService = null;
+
                     handleAccessibilityEnabledSettingChangedLocked();
+                    sendStateToClientsLocked();
+
                     handleTouchExplorationEnabledSettingChangedLocked();
                     updateInputFilterLocked();
-                    sendStateToClientsLocked();
+
+                    populateAccessibilityServiceListLocked();
+                    manageServicesLocked();
                 }
             }
         }
