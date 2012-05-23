@@ -932,8 +932,11 @@ public class MtpDatabase {
             if (format == MtpConstants.FORMAT_ASSOCIATION) {
                 // recursive case - delete all children first
                 Uri uri = Files.getMtpObjectsUri(mVolumeName);
-                int count = mMediaProvider.delete(uri, "_data LIKE ?",
-                        new String[] { path + "/%"});
+                int count = mMediaProvider.delete(uri,
+                        // the 'like' makes it use the index, the 'lower()' makes it correct
+                        // when the path contains sqlite wildcard characters
+                        "_data LIKE ? AND lower(substr(_data,?))=lower(?)",
+                        new String[] { path + "/%", "" + path.length() + 1, path + "/"});
             }
 
             Uri uri = Files.getMtpObjectsUri(mVolumeName, handle);
