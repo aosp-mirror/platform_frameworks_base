@@ -81,6 +81,10 @@ public class BeanBag extends Activity {
             return (float) Math.sqrt(x*x+y*y);
         }
 
+        static float clamp(float x, float a, float b) {
+            return ((x<a)?a:((x>b)?b:x));
+        }
+
         static float dot(float x1, float y1, float x2, float y2) {
             return x1*x2+y1+y2;
         }
@@ -149,6 +153,7 @@ public class BeanBag extends Activity {
             public boolean grabbed;
             public float grabx, graby;
             public long grabtime;
+            private float grabx_offset, graby_offset;
 
             public Bean(Context context, AttributeSet as) {
                 super(context, as);
@@ -236,17 +241,20 @@ public class BeanBag extends Activity {
                 switch (e.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         grabbed = true;
+                        grabx_offset = e.getRawX() - x;
+                        graby_offset = e.getRawY() - y;
                         va = 0;
                         // fall
                     case MotionEvent.ACTION_MOVE:
-                        grabx = e.getRawX();
-                        graby = e.getRawY();
+                        grabx = e.getRawX() - grabx_offset;
+                        graby = e.getRawY() - graby_offset;
                         grabtime = e.getEventTime();
                         break;
                     case MotionEvent.ACTION_CANCEL:
                     case MotionEvent.ACTION_UP:
                         grabbed = false;
-                        va = randfrange(-5,5);
+                        float a = randsign() * clamp(mag(vx, vy) * 0.33f, 0, 1080f);
+                        va = randfrange(a*0.5f, a);
                         break;
                 }
                 return true;
@@ -308,47 +316,6 @@ public class BeanBag extends Activity {
                             if (!(v2 instanceof Bean)) continue;
                             Bean nv2 = (Bean) v2;
                             final float overlap = nv.overlap(nv2);
-                            if (false && overlap < 0) {
-                                // angle pointing from nv2 to nv
-                                final float dx = nv.x - nv2.x;
-                                final float dy = nv.y - nv2.y;
-                                final float ang = (float) Math.atan2(dx, dy);
-
-                                if (false) {
-                                nv.vx -= Math.cos(ang) * overlap * 0.5f;
-                                nv.vy -= Math.sin(ang) * overlap * 0.5f;
-                                nv2.vx += Math.cos(ang) * overlap * 0.5f;
-                                nv2.vy += Math.sin(ang) * overlap * 0.5f;
-                                }
-
-
-                                // first, move them apart
-                                nv.x -= Math.cos(ang) * overlap/2;
-                                nv.y -= Math.sin(ang) * overlap/2;
-                                nv2.x += Math.cos(ang) * overlap/2;
-                                nv2.y += Math.sin(ang) * overlap/2;
-
-                                // next, figure out velocities
-                                final float sap = 0f; // randfrange(0,0.25f);
-
-                                final float mag1 = mag(nv.vx, nv.vy) * (1f-sap);
-                                final float mag2 = mag(nv2.vx, nv2.vy) * (1f-sap);
-
-
-                                // hacky way to transfer "momentum"
-                                nv.vx = mag2 * (float)Math.cos(ang);
-                                nv.vy = mag2 * (float)Math.sin(ang);
-                                nv2.vx = -mag1 * (float)Math.cos(ang);
-                                nv2.vy = -mag1 * (float)Math.sin(ang);
-
-                                final float totalva = nv.va + nv2.va;
-                                final float frac = randfrange(0.25f,0.75f);
-                                nv.va = totalva * frac;
-                                nv2.va = totalva * (1f-frac);
-//                                nv.va += randfrange(-20,20);
-//                                nv2.va += randfrange(-20,20);
-
-                            }
                         }
 
                         nv.setRotation(nv.a);
@@ -375,17 +342,28 @@ public class BeanBag extends Activity {
             boardWidth = w;
             boardHeight = h;
 //            android.util.Log.d("Nyandroid", "resized: " + w + "x" + h);
-            post(new Runnable() { public void run() {
-                reset();
-                mAnim.start();
-            } });
         }
 
+        public void startAnimation() {
+            stopAnimation();
+            if (mAnim == null) {
+                post(new Runnable() { public void run() {
+                    reset();
+                    startAnimation();
+                } });
+            } else {
+                mAnim.start();
+            }
+        }
+
+        public void stopAnimation() {
+            if (mAnim != null) mAnim.cancel();
+        }
 
         @Override
         protected void onDetachedFromWindow() {
             super.onDetachedFromWindow();
-            mAnim.cancel();
+            stopAnimation();
         }
 
         @Override
@@ -428,12 +406,19 @@ public class BeanBag extends Activity {
                   WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                 );
+        mBoard = new Board(this, null);
+        setContentView(mBoard);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mBoard.stopAnimation();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mBoard = new Board(this, null);
-        setContentView(mBoard);
+        mBoard.startAnimation();
     }
 }
