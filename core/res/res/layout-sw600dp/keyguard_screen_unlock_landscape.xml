@@ -39,6 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dip">
 
+            <!-- Status -->
             <include layout="@layout/keyguard_screen_status_land"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -49,6 +50,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_alignParentLeft="true"/>
 
+            <!-- Music transport control -->
             <include android:id="@+id/transport"
                 layout="@layout/keyguard_transport_control"
                 android:layout_row="0"

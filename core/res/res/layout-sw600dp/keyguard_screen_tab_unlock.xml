@@ -40,6 +40,15 @@
             android:layout_height="wrap_content"
             android:gravity="center">
 
+            <!-- Status -->
+            <include layout="@layout/keyguard_screen_status_port"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="50dip"
+                android:layout_marginTop="50dip"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"/>
+
             <!-- Music transport control -->
             <include android:id="@+id/transport"
                 layout="@layout/keyguard_transport_control"
@@ -51,14 +60,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="512dip"
                 />
-
-            <include layout="@layout/keyguard_screen_status_port"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="50dip"
-                android:layout_marginTop="50dip"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentLeft="true"/>
 
         </RelativeLayout>
 
