@@ -698,6 +698,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 // Remove the replaced package's older resources safely now
                                 deleteOld = true;
                             }
+
+                            // Log current value of "unknown sources" setting
+                            EventLog.writeEvent(EventLogTags.UNKNOWN_SOURCES_ENABLED,
+                                getUnknownSourcesSettings());
                         }
                         // Force a gc to clear up things
                         Runtime.getRuntime().gc();
@@ -5456,6 +5460,17 @@ public class PackageManagerService extends IPackageManager.Stub {
         return android.provider.Settings.Secure.getInt(mContext.getContentResolver(),
                 android.provider.Settings.Secure.PACKAGE_VERIFIER_ENABLE,
                 DEFAULT_VERIFY_ENABLE ? 1 : 0) == 1 ? true : false;
+    }
+
+    /**
+     * Get the "allow unknown sources" setting.
+     *
+     * @return the current "allow unknown sources" setting
+     */
+    private int getUnknownSourcesSettings() {
+        return android.provider.Settings.Secure.getInt(mContext.getContentResolver(),
+                android.provider.Settings.Secure.INSTALL_NON_MARKET_APPS,
+                -1);
     }
 
     public void setInstallerPackageName(String targetPackage, String installerPackageName) {
