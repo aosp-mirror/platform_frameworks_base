@@ -786,7 +786,10 @@ generate_result_dispatcher_method(const method_type* method,
     }
 
     // Call the callback method
-    dispatchMethod->statements->Add(realCall);
+    IfStatement* ifst = new IfStatement;
+        ifst->expression = new Comparison(new FieldVariable(THIS_VALUE, "callback"), "!=", NULL_VALUE);
+    dispatchMethod->statements->Add(ifst);
+    ifst->statements->Add(realCall);
 }
 
 static void
