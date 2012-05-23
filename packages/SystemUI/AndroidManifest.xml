@@ -55,7 +55,7 @@
         android:allowBackup="false"
         android:hardwareAccelerated="true"
         android:label="@string/app_label"
-        android:icon="@drawable/ic_launcher_settings">
+        android:icon="@*android:drawable/platlogo">
 
         <!-- Broadcast receiver that gets the broadcast at boot time and starts
              up everything else.
