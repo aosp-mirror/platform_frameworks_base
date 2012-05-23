@@ -6196,22 +6196,22 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @hide
      */
     public void clearAccessibilityFocus() {
-        ViewRootImpl viewRootImpl = getViewRootImpl();
-        if (viewRootImpl != null) {
-            View focusHost = viewRootImpl.getAccessibilityFocusedHost();
-            if (focusHost != null && focusHost != this
-                    && ViewRootImpl.isViewDescendantOf(focusHost, this)) {
-                viewRootImpl.setAccessibilityFocusedHost(null);
-            }
-        }
         if ((mPrivateFlags2 & ACCESSIBILITY_FOCUSED) != 0) {
             mPrivateFlags2 &= ~ACCESSIBILITY_FOCUSED;
             invalidate();
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
             notifyAccessibilityStateChanged();
-
             // Clear the text navigation state.
             setAccessibilityCursorPosition(-1);
+        }
+        // Clear the global reference of accessibility focus if this
+        // view or any of its descendants had accessibility focus.
+        ViewRootImpl viewRootImpl = getViewRootImpl();
+        if (viewRootImpl != null) {
+            View focusHost = viewRootImpl.getAccessibilityFocusedHost();
+            if (focusHost != null && ViewRootImpl.isViewDescendantOf(focusHost, this)) {
+                viewRootImpl.setAccessibilityFocusedHost(null);
+            }
         }
     }
 
