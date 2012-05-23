@@ -38,8 +38,25 @@
         android:scaleType="fitXY"
         android:src="@drawable/title_bar_shadow"
         />
-    <include layout="@layout/notification_template_base" 
+    <include layout="@layout/notification_template_base"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         />
+  <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="208dp"
+        android:layout_marginLeft="64dp"
+        android:layout_gravity="bottom"
+        android:background="#CC111111"
+        >
+        <include
+            layout="@layout/notification_action_list"
+            android:id="@+id/actions"
+            android:layout_marginLeft="8dp"
+            android:layout_gravity="bottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+    </FrameLayout>
 </FrameLayout>
