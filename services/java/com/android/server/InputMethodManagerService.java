@@ -139,6 +139,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     static final int MSG_UNBIND_METHOD = 3000;
     static final int MSG_BIND_METHOD = 3010;
+    static final int MSG_SET_ACTIVE = 3020;
 
     static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
 
@@ -413,13 +414,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
 
             // Inform the current client of the change in active status
-            try {
-                if (mCurClient != null && mCurClient.client != null) {
-                    mCurClient.client.setActive(mScreenOn);
-                }
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Got RemoteException sending 'screen on/off' notification to pid "
-                        + mCurClient.pid + " uid " + mCurClient.uid);
+            if (mCurClient != null && mCurClient.client != null) {
+                executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
+                        MSG_SET_ACTIVE, mScreenOn ? 1 : 0, mCurClient));
             }
         }
     }
@@ -882,17 +879,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             MSG_UNBIND_INPUT, mCurMethod));
                 }
             }
+
+            executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
+                    MSG_SET_ACTIVE, 0, mCurClient));
             executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
                     MSG_UNBIND_METHOD, mCurSeq, mCurClient.client));
             mCurClient.sessionRequested = false;
-
-            // Call setActive(false) on the old client
-            try {
-                mCurClient.client.setActive(false);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Got RemoteException sending setActive(false) notification to pid "
-                        + mCurClient.pid + " uid " + mCurClient.uid);
-            }
             mCurClient = null;
 
             hideInputMethodMenuLocked();
@@ -987,12 +979,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             // If the screen is on, inform the new client it is active
             if (mScreenOn) {
-                try {
-                    cs.client.setActive(mScreenOn);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Got RemoteException sending setActive notification to pid "
-                            + cs.pid + " uid " + cs.uid);
-                }
+                executeOrSendMessage(cs.client, mCaller.obtainMessageIO(
+                        MSG_SET_ACTIVE, mScreenOn ? 1 : 0, cs));
             }
         }
 
@@ -2138,6 +2126,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             (InputBindResult)args.arg2);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Client died receiving input method " + args.arg2);
+                }
+                return true;
+            case MSG_SET_ACTIVE:
+                try {
+                    ((ClientState)msg.obj).client.setActive(msg.arg1 != 0);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Got RemoteException sending setActive(false) notification to pid "
+                            + ((ClientState)msg.obj).pid + " uid "
+                            + ((ClientState)msg.obj).uid);
                 }
                 return true;
 
