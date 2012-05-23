@@ -7909,7 +7909,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         nativeSetTextSelection(mNativeClass, data.mSelectTextPtr);
 
         if ((data.mSelectionReason == TextSelectionData.REASON_ACCESSIBILITY_INJECTOR)
-                || (!mSelectingText
+                || (!mSelectingText && data.mStart != data.mEnd
                         && data.mSelectionReason != TextSelectionData.REASON_SELECT_WORD)) {
             selectionDone();
             mShowTextSelectionExtra = true;
