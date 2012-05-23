@@ -26,7 +26,7 @@
     <!-- top: status -->
     <RelativeLayout
         android:layout_height="0dip"
-        android:layout_weight="1"
+        android:layout_weight="0.40"
         android:layout_width="match_parent"
         android:gravity="center">
 
@@ -34,6 +34,14 @@
             android:layout_width="512dip"
             android:layout_height="wrap_content"
             android:gravity="center">
+
+            <include layout="@layout/keyguard_screen_status_land"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="50dip"
+                android:layout_marginTop="50dip"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"/>
 
             <!-- Music transport control -->
             <include android:id="@+id/transport"
@@ -47,23 +55,13 @@
                 android:layout_height="512dip"
                 />
 
-            <include layout="@layout/keyguard_screen_status_land"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="50dip"
-                android:layout_marginTop="50dip"
-                android:layout_marginBottom="100dip"
-                android:layout_marginRight="64dip"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentLeft="true"/>
-
         </RelativeLayout>
 
     </RelativeLayout>
 
     <!-- bottom: lock pattern, emergency dialer and forgot pattern button -->
     <RelativeLayout
-        android:layout_weight="1"
+        android:layout_weight="0.60"
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:gravity="center">
@@ -77,7 +75,6 @@
             <com.android.internal.widget.LockPatternView android:id="@+id/lockPattern"
                 android:layout_width="354dip"
                 android:layout_height="354dip"
-                android:layout_marginTop="50dip"
             />
 
             <!-- Emergency and forgot pattern buttons. -->
