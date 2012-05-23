@@ -94,6 +94,16 @@ public class Environment {
     }
 
     /**
+     * Return directory used for internal media storage, which is protected by
+     * {@link android.Manifest.permission#WRITE_MEDIA_STORAGE}.
+     *
+     * @hide
+     */
+    public static File getMediaStorageDirectory() {
+        return MEDIA_STORAGE_DIRECTORY;
+    }
+
+    /**
      * Returns whether the Encrypted File System feature is enabled on the device or not.
      * @return <code>true</code> if Encrypted File System feature is enabled, <code>false</code>
      * if disabled.
@@ -111,6 +121,10 @@ public class Environment {
      */
     private static final File SECURE_DATA_DIRECTORY
             = getDirectory("ANDROID_SECURE_DATA", "/data/secure");
+
+    /** @hide */
+    private static final File MEDIA_STORAGE_DIRECTORY
+            = getDirectory("MEDIA_STORAGE", "/data/media");
 
     private static final File EXTERNAL_STORAGE_DIRECTORY
             = getDirectory("EXTERNAL_STORAGE", "/storage/sdcard0");
