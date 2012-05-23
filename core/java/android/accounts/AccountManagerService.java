@@ -985,21 +985,25 @@ public class AccountManagerService
         }
     }
 
-    void getAuthTokenLabel(final IAccountManagerResponse response,
-            final Account account,
-            final String authTokenType, int uid) {
-        if (account == null) throw new IllegalArgumentException("account is null");
+    public void getAuthTokenLabel(IAccountManagerResponse response, final String accountType,
+                                  final String authTokenType)
+            throws RemoteException {
+        if (accountType == null) throw new IllegalArgumentException("accountType is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
 
-        checkBinderPermission(Manifest.permission.USE_CREDENTIALS);
-        UserAccounts accounts = getUserAccounts(UserId.getUserId(uid));
+        final int callingUid = getCallingUid();
+        clearCallingIdentity();
+        if (callingUid != android.os.Process.SYSTEM_UID) {
+            throw new SecurityException("can only call from system");
+        }
+        UserAccounts accounts = getUserAccounts(UserId.getUserId(callingUid));
         long identityToken = clearCallingIdentity();
         try {
-            new Session(accounts, response, account.type, false,
+            new Session(accounts, response, accountType, false,
                     false /* stripAuthTokenFromResult */) {
                 protected String toDebugString(long now) {
                     return super.toDebugString(now) + ", getAuthTokenLabel"
-                            + ", " + account
+                            + ", " + accountType
                             + ", authTokenType " + authTokenType;
                 }
 
@@ -2230,6 +2234,21 @@ public class AccountManagerService
                 Manifest.permission.USE_CREDENTIALS);
     }
 
+    public void updateAppPermission(Account account, String authTokenType, int uid, boolean value)
+            throws RemoteException {
+        final int callingUid = getCallingUid();
+
+        if (callingUid != android.os.Process.SYSTEM_UID) {
+            throw new SecurityException();
+        }
+
+        if (value) {
+            grantAppPermission(account, authTokenType, uid);
+        } else {
+            revokeAppPermission(account, authTokenType, uid);
+        }
+    }
+
     /**
      * Allow callers with the given uid permission to get credentials for account/authTokenType.
      * <p>
@@ -2237,7 +2256,7 @@ public class AccountManagerService
      * which is in the system. This means we don't need to protect it with permissions.
      * @hide
      */
-    public void grantAppPermission(Account account, String authTokenType, int uid) {
+    private void grantAppPermission(Account account, String authTokenType, int uid) {
         if (account == null || authTokenType == null) {
             Log.e(TAG, "grantAppPermission: called with invalid arguments", new Exception());
             return;
@@ -2271,7 +2290,7 @@ public class AccountManagerService
      * which is in the system. This means we don't need to protect it with permissions.
      * @hide
      */
-    public void revokeAppPermission(Account account, String authTokenType, int uid) {
+    private void revokeAppPermission(Account account, String authTokenType, int uid) {
         if (account == null || authTokenType == null) {
             Log.e(TAG, "revokeAppPermission: called with invalid arguments", new Exception());
             return;
