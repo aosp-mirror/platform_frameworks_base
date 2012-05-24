@@ -499,6 +499,7 @@ public abstract class DataConnectionTracker extends Handler {
      */
     protected DataConnectionTracker(PhoneBase phone) {
         super();
+        if (DBG) log("DCT.constructor");
         mPhone = phone;
 
         IntentFilter filter = new IntentFilter();
@@ -534,6 +535,7 @@ public abstract class DataConnectionTracker extends Handler {
     }
 
     public void dispose() {
+        if (DBG) log("DCT.dispose");
         for (DataConnectionAc dcac : mDataConnectionAsyncChannels.values()) {
             dcac.disconnect();
         }
@@ -1256,7 +1258,6 @@ public abstract class DataConnectionTracker extends Handler {
             Set<Entry<String, ApnContext>> mApnContextsSet = mApnContexts.entrySet();
             pw.println(" mApnContexts size=" + mApnContextsSet.size());
             for (Entry<String, ApnContext> entry : mApnContextsSet) {
-                pw.printf(" *** mApnContexts[%s]:\n", entry.getKey());
                 entry.getValue().dump(fd, pw, args);
             }
             pw.println(" ***************************************");
