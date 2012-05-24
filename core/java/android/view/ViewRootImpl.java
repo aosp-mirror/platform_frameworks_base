@@ -2335,7 +2335,9 @@ public final class ViewRootImpl implements ViewParent,
         final int count = displayLists.size();
 
         for (int i = 0; i < count; i++) {
-            displayLists.get(i).invalidate();
+            final DisplayList displayList = displayLists.get(i);
+            displayList.invalidate();
+            displayList.clear();
         }
 
         displayLists.clear();
