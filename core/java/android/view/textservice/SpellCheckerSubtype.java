@@ -146,7 +146,10 @@ public final class SpellCheckerSubtype implements Parcelable {
         return false;
     }
 
-    private static Locale constructLocaleFromString(String localeStr) {
+    /**
+     * @hide
+     */
+    public static Locale constructLocaleFromString(String localeStr) {
         if (TextUtils.isEmpty(localeStr))
             return null;
         String[] localeParams = localeStr.split("_", 3);
