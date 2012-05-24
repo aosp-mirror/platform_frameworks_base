@@ -579,6 +579,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private InputConnectionWrapper mPublicInputConnection;
 
     private Runnable mClearScrollingCache;
+    Runnable mPositionScrollAfterLayout;
     private int mMinimumVelocity;
     private int mMaximumVelocity;
     private float mVelocityScale = 1.0f;
@@ -1910,6 +1911,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         removeAllViewsInLayout();
         mFirstPosition = 0;
         mDataChanged = false;
+        mPositionScrollAfterLayout = null;
         mNeedSync = false;
         mOldSelectedPosition = INVALID_POSITION;
         mOldSelectedRowId = INVALID_ROW_ID;
@@ -4248,11 +4250,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
             if (mDataChanged) {
                 // Wait until we're back in a stable state to try this.
-                post(new Runnable() {
+                mPositionScrollAfterLayout = new Runnable() {
                     @Override public void run() {
                         start(position);
                     }
-                });
+                };
                 return;
             }
 
@@ -4299,11 +4301,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
             if (mDataChanged) {
                 // Wait until we're back in a stable state to try this.
-                post(new Runnable() {
+                mPositionScrollAfterLayout = new Runnable() {
                     @Override public void run() {
                         start(position, boundPosition);
                     }
-                });
+                };
                 return;
             }
 
@@ -4376,11 +4378,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (mDataChanged) {
                 // Wait until we're back in a stable state to try this.
                 final int postOffset = offset;
-                post(new Runnable() {
+                mPositionScrollAfterLayout = new Runnable() {
                     @Override public void run() {
                         startWithOffset(position, postOffset, duration);
                     }
-                });
+                };
                 return;
             }
 
