@@ -239,7 +239,7 @@ provides a purchase token back to the purchasing app through the In-app Billing
 API. For details, see <a href="#token">Purchase token</a>, below. Your apps can
 store the token locally or pass it to your backend servers, which can then use
 it to validate or cancel the subscription remotely using the <a
-href="#play_dev_api">Google Play Android Developer API</a>.</p>
+href="#play-dev-api">Google Play Android Developer API</a>.</p>
 
 <p>In the case of billing errors, such as could happen if the customer’s credit
 card becomes invalid, Google Play notifies your app of the change in purchase
