@@ -1275,6 +1275,10 @@ public class GridView extends AbsListView {
 
             mLayoutMode = LAYOUT_NORMAL;
             mDataChanged = false;
+            if (mPositionScrollAfterLayout != null) {
+                post(mPositionScrollAfterLayout);
+                mPositionScrollAfterLayout = null;
+            }
             mNeedSync = false;
             setNextSelectedPositionInt(mSelectedPosition);
 
