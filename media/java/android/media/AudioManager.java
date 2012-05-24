@@ -1270,25 +1270,42 @@ public class AudioManager {
     }
 
     /**
-     * @param on set <var>true</var> to route A2DP audio to/from Bluetooth
-     *           headset; <var>false</var> disable A2DP audio
+     * Allow or disallow use of Bluetooth A2DP for media.
+     * <p>The default behavior of the system is to use A2DP for media playback whenever an A2DP sink
+     * is connected. Applications can use this method to override this behavior.
+     * Note that the request will not persist after a wired headset or an A2DP sink is connected or
+     * disconnected:
+     * - Connection of an A2DP sink automatically enables use of A2DP.
+     * - Connection of a wired headset automatically disables use of A2DP.
+     * - Disconnection of a wired headset automatically enables use of A2DP if an A2DP sink is
+     * connected.
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}.
+     * @param on set <var>true</var> to allow use of A2DP for media (default).
+     *               <var>false</var> to disallow use of A2DP for media.
      * @deprecated Do not use.
      */
     @Deprecated public void setBluetoothA2dpOn(boolean on){
+        IAudioService service = getService();
+        try {
+            service.setBluetoothA2dpOn(on);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in setBluetoothA2dpOn", e);
+        }
     }
 
     /**
-     * Checks whether A2DP audio routing to the Bluetooth headset is on or off.
+     * Checks whether use of A2DP sinks is enabled for media.
      *
-     * @return true if A2DP audio is being routed to/from Bluetooth headset;
-     *         false if otherwise
+     * @return true if use of A2DP is enabled for media, false otherwise.
      */
     public boolean isBluetoothA2dpOn() {
-        if (AudioSystem.getDeviceConnectionState(DEVICE_OUT_BLUETOOTH_A2DP,"")
-            == AudioSystem.DEVICE_STATE_UNAVAILABLE) {
+        IAudioService service = getService();
+        try {
+            return service.isBluetoothA2dpOn();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in isBluetoothA2dpOn", e);
             return false;
-        } else {
-            return true;
         }
     }
 

@@ -96,6 +96,10 @@ interface IAudioService {
 
     boolean isBluetoothScoOn();
 
+    oneway void setBluetoothA2dpOn(boolean on);
+
+    boolean isBluetoothA2dpOn();
+
     int requestAudioFocus(int mainStreamType, int durationHint, IBinder cb, IAudioFocusDispatcher l,
             String clientId, String callingPackageName);
 
