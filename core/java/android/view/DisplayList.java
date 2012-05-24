@@ -83,6 +83,12 @@ public abstract class DisplayList {
     public abstract void invalidate();
 
     /**
+     * Clears additional resources held onto by this display list. You should
+     * only invoke this method after {@link #invalidate()}.
+     */
+    public abstract void clear();
+
+    /**
      * Returns whether the display list is currently usable. If this returns false,
      * the display list should be re-recorded prior to replaying it.
      *
