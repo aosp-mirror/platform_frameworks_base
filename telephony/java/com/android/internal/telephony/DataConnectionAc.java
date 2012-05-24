@@ -580,6 +580,11 @@ public class DataConnectionAc extends AsyncChannel {
         }
     }
 
+    @Override
+    public String toString() {
+        return dataConnection.getName();
+    }
+
     private void log(String s) {
         android.util.Log.d(mLogTag, "DataConnectionAc " + s);
     }
