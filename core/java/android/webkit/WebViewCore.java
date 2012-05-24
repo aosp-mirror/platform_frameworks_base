@@ -660,7 +660,7 @@ public final class WebViewCore {
             int x, int y);
     private native boolean nativeMouseClick(int nativeClass);
 
-    private native boolean nativeHandleTouchEvent(int nativeClass, int action,
+    private native int nativeHandleTouchEvent(int nativeClass, int action,
             int[] idArray, int[] xArray, int[] yArray, int count,
             int actionIndex, int metaState);
 
@@ -958,6 +958,9 @@ public final class WebViewCore {
     // last two bytes or one of the following values
     static final int ACTION_LONGPRESS = 0x100;
     static final int ACTION_DOUBLETAP = 0x200;
+
+    private static final int TOUCH_FLAG_HIT_HANDLER = 0x1;
+    private static final int TOUCH_FLAG_PREVENT_DEFAULT = 0x2;
 
     static class TouchEventData {
         int mAction;
@@ -1775,7 +1778,8 @@ public final class WebViewCore {
         }
 
         @Override
-        public boolean dispatchWebKitEvent(MotionEvent event, int eventType, int flags) {
+        public boolean dispatchWebKitEvent(WebViewInputDispatcher dispatcher,
+                MotionEvent event, int eventType, int flags) {
             if (mNativeClass == 0) {
                 return false;
             }
@@ -1802,10 +1806,16 @@ public final class WebViewCore {
                         xArray[i] = (int) event.getX(i);
                         yArray[i] = (int) event.getY(i);
                     }
-                    return nativeHandleTouchEvent(mNativeClass,
+                    int touchFlags = nativeHandleTouchEvent(mNativeClass,
                             event.getActionMasked(),
                             idArray, xArray, yArray, count,
                             event.getActionIndex(), event.getMetaState());
+                    if (touchFlags == 0
+                            && event.getActionMasked() != MotionEvent.ACTION_CANCEL
+                            && (flags & WebViewInputDispatcher.FLAG_PRIVATE) == 0) {
+                        dispatcher.skipWebkitForRemainingTouchStream();
+                    }
+                    return (touchFlags & TOUCH_FLAG_PREVENT_DEFAULT) > 0;
                 }
 
                 default:
