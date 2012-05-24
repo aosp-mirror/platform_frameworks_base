@@ -6780,6 +6780,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     public void dispatchStartTemporaryDetach() {
         clearAccessibilityFocus();
+        clearDisplayList();
+
         onStartTemporaryDetach();
     }
 
@@ -11427,10 +11429,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             }
             mAttachInfo.mViewRootImpl.cancelInvalidate(this);
         } else {
-            if (mDisplayList != null) {
-                // Should never happen
-                mDisplayList.invalidate();
-            }
+            // Should never happen
+            clearDisplayList();
         }
 
         mCurrentAnimation = null;
@@ -12206,6 +12206,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public DisplayList getDisplayList() {
         mDisplayList = getDisplayList(mDisplayList, false);
         return mDisplayList;
+    }
+
+    private void clearDisplayList() {
+        if (mDisplayList != null) {
+            mDisplayList.invalidate();
+            mDisplayList.clear();
+        }
     }
 
     /**
