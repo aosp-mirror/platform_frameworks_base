@@ -34,7 +34,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
-        View.OnLongClickListener, View.OnClickListener {
+        View.OnClickListener {
     private View mCustomView;
     private EditText mEditText;
     private TextView mMatches;
@@ -51,9 +51,7 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
                 com.android.internal.R.layout.webview_find, null);
         mEditText = (EditText) mCustomView.findViewById(
                 com.android.internal.R.id.edit);
-        // Override long click so that select ActionMode is not opened, which
-        // would exit find ActionMode.
-        mEditText.setOnLongClickListener(this);
+        mEditText.setCustomSelectionActionModeCallback(new NoAction());
         mEditText.setOnClickListener(this);
         setText("");
         mMatches = (TextView) mCustomView.findViewById(
@@ -174,11 +172,6 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         mMatches.setVisibility(View.VISIBLE);
     }
 
-    // OnLongClickListener implementation
-
-    @Override
-    public boolean onLongClick(View v) { return true; }
-
     // OnClickListener implementation
 
     @Override
@@ -280,4 +273,24 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         return mGlobalVisibleRect.bottom;
     }
 
+    public static class NoAction implements ActionMode.Callback {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+        }
+    }
 }
