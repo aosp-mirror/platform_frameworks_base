@@ -120,9 +120,10 @@ public class GsmDataConnection extends DataConnection {
 
     @Override
     public String toString() {
-        return "State=" + getCurrentState().getName() + " Apn=" + mApn +
-               " create=" + createTime + " lastFail=" + lastFailTime +
-               " lastFailCause=" + lastFailCause;
+        return "{" + getName() + ": State=" + getCurrentState().getName() +
+                " apnSetting=" + mApn + " apnList= " + mApnList + " RefCount=" + mRefCount +
+                " cid=" + cid + " create=" + createTime + " lastFail=" + lastFailTime +
+                " lastFailCause=" + lastFailCause + "}";
     }
 
     @Override

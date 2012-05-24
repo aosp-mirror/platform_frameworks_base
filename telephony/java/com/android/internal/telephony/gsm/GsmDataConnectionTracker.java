@@ -175,7 +175,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     public GsmDataConnectionTracker(PhoneBase p) {
         super(p);
-
+        if (DBG) log("GsmDCT.constructor");
         p.mCM.registerForAvailable (this, EVENT_RADIO_AVAILABLE, null);
         p.mCM.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
         p.mIccRecords.registerForRecordsLoaded(this, EVENT_RECORDS_LOADED, null);
@@ -212,6 +212,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     public void dispose() {
+        if (DBG) log("GsmDCT.dispose");
         cleanUpAllConnections(false, null);
 
         super.dispose();
@@ -835,10 +836,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             return;
         }
 
-        if (DBG) {
-            log("cleanUpConnection: tearDown=" + tearDown + " reason=" + apnContext.getReason());
-        }
         DataConnectionAc dcac = apnContext.getDataConnectionAc();
+        if (DBG) {
+            log("cleanUpConnection: E tearDown=" + tearDown + " reason=" + apnContext.getReason() +
+                    " apnContext=" + apnContext);
+        }
         if (tearDown) {
             if (apnContext.isDisconnected()) {
                 // The request is tearDown and but ApnContext is not connected.
@@ -900,6 +902,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (apnList.isEmpty()) {
                 cancelReconnectAlarm(dcac);
             }
+        }
+        if (DBG) {
+            log("cleanUpConnection: X tearDown=" + tearDown + " reason=" + apnContext.getReason() +
+                    " apnContext=" + apnContext + " dc=" + apnContext.getDataConnection());
         }
     }
 
@@ -986,8 +992,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     private GsmDataConnection findFreeDataConnection() {
         for (DataConnectionAc dcac : mDataConnectionAsyncChannels.values()) {
             if (dcac.isInactiveSync() && dataConnectionNotInUse(dcac)) {
-                log("findFreeDataConnection: found free GsmDataConnection");
-                return (GsmDataConnection) dcac.dataConnection;
+                DataConnection dc = dcac.dataConnection;
+                if (DBG) {
+                    log("findFreeDataConnection: found free GsmDataConnection=" +
+                        " dcac=" + dcac + " dc=" + dc);
+                }
+                return (GsmDataConnection) dc;
             }
         }
         log("findFreeDataConnection: NO free GsmDataConnection");
@@ -995,11 +1005,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     protected GsmDataConnection findReadyDataConnection(ApnSetting apn) {
-        if (DBG)
-            log("findReadyDataConnection: apn string <" +
-                (apn!=null?(apn.toString()):"null") +">");
         if (apn == null) {
             return null;
+        }
+        if (DBG) {
+            log("findReadyDataConnection: apn string <" + apn + ">" +
+                    " dcacs.size=" + mDataConnectionAsyncChannels.size());
         }
         for (DataConnectionAc dcac : mDataConnectionAsyncChannels.values()) {
             ApnSetting apnSetting = dcac.getApnSettingSync();
@@ -1008,7 +1019,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                          (apnSetting != null ? (apnSetting.toString()) : "null") + ">");
             }
             if ((apnSetting != null) && TextUtils.equals(apnSetting.toString(), apn.toString())) {
-                return (GsmDataConnection) dcac.dataConnection;
+                DataConnection dc = dcac.dataConnection;
+                if (DBG) {
+                    log("findReadyDataConnection: found ready GsmDataConnection=" +
+                        " dcac=" + dcac + " dc=" + dc);
+                }
+                return (GsmDataConnection) dc;
             }
         }
         return null;
@@ -1129,6 +1145,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     private List<ApnContext> findApnContextToClean(Collection<DataConnectionAc> dcacs) {
         if (dcacs == null) return null;
 
+        if (DBG) log("findApnContextToClean(ar): E dcacs=" + dcacs);
+
         ArrayList<ApnContext> list = new ArrayList<ApnContext>();
         for (ApnContext apnContext : mApnContexts.values()) {
             if (apnContext.getState() == State.CONNECTED) {
@@ -1144,7 +1162,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     // ApnContext does not have dcac reported in data call list.
                     // Fetch all the ApnContexts that map to this dcac which are in
                     // INITING state too.
-                    if (DBG) log("onDataStateChanged(ar): Connected apn not found in the list (" +
+                    if (DBG) log("findApnContextToClean(ar): Connected apn not found in the list (" +
                                  apnContext.toString() + ")");
                     if (apnContext.getDataConnectionAc() != null) {
                         list.addAll(apnContext.getDataConnectionAc().getApnListSync());
@@ -1154,6 +1172,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 }
             }
         }
+        if (DBG) log("findApnContextToClean(ar): X list=" + list);
         return list;
     }
 
@@ -1236,6 +1255,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                                 // If the same address type was removed and added we need to cleanup
                                 CompareResult<LinkAddress> car =
                                     result.oldLp.compareAddresses(result.newLp);
+                                if (DBG) {
+                                    log("onDataStateChanged: oldLp=" + result.oldLp +
+                                            " newLp=" + result.newLp + " car=" + car);
+                                }
                                 boolean needToClean = false;
                                 for (LinkAddress added : car.added) {
                                     for (LinkAddress removed : car.removed) {
@@ -1249,7 +1272,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                                 if (needToClean) {
                                     if (DBG) {
                                         log("onDataStateChanged(ar): addr change, cleanup apns=" +
-                                                connectedApns);
+                                                connectedApns + " oldLp=" + result.oldLp +
+                                                " newLp=" + result.newLp);
                                     }
                                     apnsToCleanup.addAll(connectedApns);
                                 } else {
@@ -1285,6 +1309,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
 
         // Cleanup those dropped connections
+        if (DBG) log("onDataStateChange(ar): apnsToCleanup=" + apnsToCleanup);
         for (ApnContext apnContext : apnsToCleanup) {
             cleanUpConnection(true, apnContext);
         }
@@ -2256,7 +2281,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         filter.addAction(INTENT_RECONNECT_ALARM + '.' + id);
         mPhone.getContext().registerReceiver(mIntentReceiver, filter, null, mPhone);
 
-        if (DBG) log("createDataConnection() X id=" + id);
+        if (DBG) log("createDataConnection() X id=" + id + " dc=" + conn);
         return conn;
     }
 
