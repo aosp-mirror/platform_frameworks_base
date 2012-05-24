@@ -8531,6 +8531,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         mWebView.postInvalidate();
     }
 
+    // Note: must be called before first WebViewClassic is created.
+    public static void setShouldMonitorWebCoreThread() {
+        WebViewCore.setShouldMonitorWebCoreThread();
+    }
+
     private native void     nativeCreate(int ptr, String drawableDir, boolean isHighEndGfx);
     private native void     nativeDebugDump();
     private native void     nativeDestroy();
