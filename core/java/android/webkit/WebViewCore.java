@@ -144,6 +144,11 @@ public final class WebViewCore {
     private int mChromeCanFocusDirection;
     private int mTextSelectionChangeReason = TextSelectionData.REASON_UNKNOWN;
 
+    // Used to determine if we should monitor the WebCore thread for responsiveness.
+    // If it "hangs", for example a web page enters a while(true) loop, we will
+    // prompt the user with a dialog allowing them to terminate the process.
+    private static boolean sShouldMonitorWebCoreThread;
+
     // The thread name used to identify the WebCore thread and for use in
     // debugging other classes that require operation within the WebCore thread.
     /* package */ static final String THREAD_NAME = "WebViewCoreThread";
@@ -176,9 +181,13 @@ public final class WebViewCore {
                     Log.e(LOGTAG, Log.getStackTraceString(e));
                 }
 
-                // Start the singleton watchdog which will monitor the WebCore thread
-                // to verify it's still processing messages.
-                WebCoreThreadWatchdog.start(sWebCoreHandler);
+                if (sShouldMonitorWebCoreThread) {
+                    // Start the singleton watchdog which will monitor the WebCore thread
+                    // to verify it's still processing messages. Note that this is the only
+                    // time we need to check the value as all the other public methods on
+                    // the WebCoreThreadWatchdog are no-ops if start() is not called.
+                    WebCoreThreadWatchdog.start(sWebCoreHandler);
+                }
             }
             // Make sure the Watchdog is aware of this new WebView.
             WebCoreThreadWatchdog.registerWebView(w);
@@ -3059,6 +3068,10 @@ public final class WebViewCore {
                     new DeviceOrientationService(mDeviceMotionAndOrientationManager, mContext);
         }
         return mDeviceOrientationService;
+    }
+
+    static void setShouldMonitorWebCoreThread() {
+        sShouldMonitorWebCoreThread = true;
     }
 
     private native void nativeSetIsPaused(int nativeClass, boolean isPaused);
