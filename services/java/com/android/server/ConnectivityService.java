@@ -66,6 +66,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -995,120 +996,136 @@ private NetworkStateTracker makeWimaxStateTracker() {
     // javadoc from interface
     public int startUsingNetworkFeature(int networkType, String feature,
             IBinder binder) {
+        long startTime = 0;
+        if (DBG) {
+            startTime = SystemClock.elapsedRealtime();
+        }
         if (VDBG) {
             log("startUsingNetworkFeature for net " + networkType + ": " + feature + ", uid="
                     + Binder.getCallingUid());
         }
         enforceChangePermission();
-        if (!ConnectivityManager.isNetworkTypeValid(networkType) ||
-                mNetConfigs[networkType] == null) {
-            return Phone.APN_REQUEST_FAILED;
-        }
+        try {
+            if (!ConnectivityManager.isNetworkTypeValid(networkType) ||
+                    mNetConfigs[networkType] == null) {
+                return Phone.APN_REQUEST_FAILED;
+            }
 
-        FeatureUser f = new FeatureUser(networkType, feature, binder);
+            FeatureUser f = new FeatureUser(networkType, feature, binder);
 
-        // TODO - move this into individual networktrackers
-        int usedNetworkType = convertFeatureToNetworkType(networkType, feature);
+            // TODO - move this into individual networktrackers
+            int usedNetworkType = convertFeatureToNetworkType(networkType, feature);
 
-        if (mProtectedNetworks.contains(usedNetworkType)) {
-            enforceConnectivityInternalPermission();
-        }
+            if (mProtectedNetworks.contains(usedNetworkType)) {
+                enforceConnectivityInternalPermission();
+            }
 
-        // if UID is restricted, don't allow them to bring up metered APNs
-        final boolean networkMetered = isNetworkMeteredUnchecked(usedNetworkType);
-        final int uidRules;
-        synchronized (mRulesLock) {
-            uidRules = mUidRules.get(Binder.getCallingUid(), RULE_ALLOW_ALL);
-        }
-        if (networkMetered && (uidRules & RULE_REJECT_METERED) != 0) {
-            return Phone.APN_REQUEST_FAILED;
-        }
+            // if UID is restricted, don't allow them to bring up metered APNs
+            final boolean networkMetered = isNetworkMeteredUnchecked(usedNetworkType);
+            final int uidRules;
+            synchronized (mRulesLock) {
+                uidRules = mUidRules.get(Binder.getCallingUid(), RULE_ALLOW_ALL);
+            }
+            if (networkMetered && (uidRules & RULE_REJECT_METERED) != 0) {
+                return Phone.APN_REQUEST_FAILED;
+            }
 
-        NetworkStateTracker network = mNetTrackers[usedNetworkType];
-        if (network != null) {
-            Integer currentPid = new Integer(getCallingPid());
-            if (usedNetworkType != networkType) {
-                NetworkInfo ni = network.getNetworkInfo();
+            NetworkStateTracker network = mNetTrackers[usedNetworkType];
+            if (network != null) {
+                Integer currentPid = new Integer(getCallingPid());
+                if (usedNetworkType != networkType) {
+                    NetworkInfo ni = network.getNetworkInfo();
 
-                if (ni.isAvailable() == false) {
-                    if (!TextUtils.equals(feature,Phone.FEATURE_ENABLE_DUN_ALWAYS)) {
-                        if (DBG) log("special network not available ni=" + ni.getTypeName());
-                        return Phone.APN_TYPE_NOT_AVAILABLE;
-                    } else {
-                        // else make the attempt anyway - probably giving REQUEST_STARTED below
-                        if (DBG) {
-                            log("special network not available, but try anyway ni=" +
-                                    ni.getTypeName());
-                        }
-                    }
-                }
-
-                int restoreTimer = getRestoreDefaultNetworkDelay(usedNetworkType);
-
-                synchronized(this) {
-                    boolean addToList = true;
-                    if (restoreTimer < 0) {
-                        // In case there is no timer is specified for the feature,
-                        // make sure we don't add duplicate entry with the same request.
-                        for (FeatureUser u : mFeatureUsers) {
-                            if (u.isSameUser(f)) {
-                                // Duplicate user is found. Do not add.
-                                addToList = false;
-                                break;
+                    if (ni.isAvailable() == false) {
+                        if (!TextUtils.equals(feature,Phone.FEATURE_ENABLE_DUN_ALWAYS)) {
+                            if (DBG) log("special network not available ni=" + ni.getTypeName());
+                            return Phone.APN_TYPE_NOT_AVAILABLE;
+                        } else {
+                            // else make the attempt anyway - probably giving REQUEST_STARTED below
+                            if (DBG) {
+                                log("special network not available, but try anyway ni=" +
+                                        ni.getTypeName());
                             }
                         }
                     }
 
-                    if (addToList) mFeatureUsers.add(f);
-                    if (!mNetRequestersPids[usedNetworkType].contains(currentPid)) {
-                        // this gets used for per-pid dns when connected
-                        mNetRequestersPids[usedNetworkType].add(currentPid);
-                    }
-                }
+                    int restoreTimer = getRestoreDefaultNetworkDelay(usedNetworkType);
 
-                if (restoreTimer >= 0) {
-                    mHandler.sendMessageDelayed(
-                            mHandler.obtainMessage(EVENT_RESTORE_DEFAULT_NETWORK, f), restoreTimer);
-                }
-
-                if ((ni.isConnectedOrConnecting() == true) &&
-                        !network.isTeardownRequested()) {
-                    if (ni.isConnected() == true) {
-                        final long token = Binder.clearCallingIdentity();
-                        try {
-                            // add the pid-specific dns
-                            handleDnsConfigurationChange(usedNetworkType);
-                            if (VDBG) log("special network already active");
-                        } finally {
-                            Binder.restoreCallingIdentity(token);
+                    synchronized(this) {
+                        boolean addToList = true;
+                        if (restoreTimer < 0) {
+                            // In case there is no timer is specified for the feature,
+                            // make sure we don't add duplicate entry with the same request.
+                            for (FeatureUser u : mFeatureUsers) {
+                                if (u.isSameUser(f)) {
+                                    // Duplicate user is found. Do not add.
+                                    addToList = false;
+                                    break;
+                                }
+                            }
                         }
-                        return Phone.APN_ALREADY_ACTIVE;
+
+                        if (addToList) mFeatureUsers.add(f);
+                        if (!mNetRequestersPids[usedNetworkType].contains(currentPid)) {
+                            // this gets used for per-pid dns when connected
+                            mNetRequestersPids[usedNetworkType].add(currentPid);
+                        }
                     }
-                    if (VDBG) log("special network already connecting");
+
+                    if (restoreTimer >= 0) {
+                        mHandler.sendMessageDelayed(mHandler.obtainMessage(
+                                EVENT_RESTORE_DEFAULT_NETWORK, f), restoreTimer);
+                    }
+
+                    if ((ni.isConnectedOrConnecting() == true) &&
+                            !network.isTeardownRequested()) {
+                        if (ni.isConnected() == true) {
+                            final long token = Binder.clearCallingIdentity();
+                            try {
+                                // add the pid-specific dns
+                                handleDnsConfigurationChange(usedNetworkType);
+                                if (VDBG) log("special network already active");
+                            } finally {
+                                Binder.restoreCallingIdentity(token);
+                            }
+                            return Phone.APN_ALREADY_ACTIVE;
+                        }
+                        if (VDBG) log("special network already connecting");
+                        return Phone.APN_REQUEST_STARTED;
+                    }
+
+                    // check if the radio in play can make another contact
+                    // assume if cannot for now
+
+                    if (DBG) {
+                        log("startUsingNetworkFeature reconnecting to " + networkType + ": " +
+                                feature);
+                    }
+                    network.reconnect();
                     return Phone.APN_REQUEST_STARTED;
-                }
-
-                // check if the radio in play can make another contact
-                // assume if cannot for now
-
-                if (DBG) {
-                    log("startUsingNetworkFeature reconnecting to " + networkType + ": " + feature);
-                }
-                network.reconnect();
-                return Phone.APN_REQUEST_STARTED;
-            } else {
-                // need to remember this unsupported request so we respond appropriately on stop
-                synchronized(this) {
-                    mFeatureUsers.add(f);
-                    if (!mNetRequestersPids[usedNetworkType].contains(currentPid)) {
-                        // this gets used for per-pid dns when connected
-                        mNetRequestersPids[usedNetworkType].add(currentPid);
+                } else {
+                    // need to remember this unsupported request so we respond appropriately on stop
+                    synchronized(this) {
+                        mFeatureUsers.add(f);
+                        if (!mNetRequestersPids[usedNetworkType].contains(currentPid)) {
+                            // this gets used for per-pid dns when connected
+                            mNetRequestersPids[usedNetworkType].add(currentPid);
+                        }
                     }
+                    return -1;
                 }
-                return -1;
             }
-        }
-        return Phone.APN_TYPE_NOT_AVAILABLE;
+            return Phone.APN_TYPE_NOT_AVAILABLE;
+         } finally {
+            if (DBG) {
+                final long execTime = SystemClock.elapsedRealtime() - startTime;
+                if (execTime > 250) {
+                    loge("startUsingNetworkFeature took too long: " + execTime + "ms");
+                } else {
+                    if (VDBG) log("startUsingNetworkFeature took " + execTime + "ms");
+                }
+            }
+         }
     }
 
     // javadoc from interface
