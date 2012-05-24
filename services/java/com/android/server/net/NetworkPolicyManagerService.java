@@ -118,7 +118,6 @@ import android.telephony.TelephonyManager;
 import android.text.format.Formatter;
 import android.text.format.Time;
 import android.util.Log;
-import android.util.MathUtils;
 import android.util.NtpTrustedTime;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -225,6 +224,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_PROCESS_DIED = 4;
     private static final int MSG_LIMIT_REACHED = 5;
     private static final int MSG_RESTRICT_BACKGROUND_CHANGED = 6;
+    private static final int MSG_ADVISE_PERSIST_THRESHOLD = 7;
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -1032,14 +1032,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
 
-        try {
-            // make sure stats are recorded frequently enough; we aim for 2MB
-            // threshold for 2GB/month rules.
-            final long persistThreshold = lowestRule / 1000;
-            mNetworkStats.advisePersistThreshold(persistThreshold);
-        } catch (RemoteException e) {
-            // ignored; service lives in system_server
-        }
+        mHandler.obtainMessage(MSG_ADVISE_PERSIST_THRESHOLD, lowestRule).sendToTarget();
 
         // remove quota on any trailing interfaces
         for (String iface : mMeteredIfaces) {
@@ -1861,6 +1854,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         }
                     }
                     mListeners.finishBroadcast();
+                    return true;
+                }
+                case MSG_ADVISE_PERSIST_THRESHOLD: {
+                    final long lowestRule = (Long) msg.obj;
+                    try {
+                        // make sure stats are recorded frequently enough; we aim
+                        // for 2MB threshold for 2GB/month rules.
+                        final long persistThreshold = lowestRule / 1000;
+                        mNetworkStats.advisePersistThreshold(persistThreshold);
+                    } catch (RemoteException e) {
+                        // ignored; service lives in system_server
+                    }
+                    return true;
                 }
                 default: {
                     return false;
