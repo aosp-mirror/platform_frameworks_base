@@ -254,10 +254,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                         return scs;
                     } else if (candidate == null) {
                         final String scsLocale = scs.getLocale();
-                        if (candidateLocale.length() >= 2
-                                && scsLocale.length() >= 2
-                                && candidateLocale.substring(0, 2).equals(
-                                        scsLocale.substring(0, 2))) {
+                        if (candidateLocale.length() >= 2 && scsLocale.length() >= 2
+                                && candidateLocale.startsWith(scsLocale)) {
                             // Fall back to the applicable language
                             candidate = scs;
                         }
