@@ -69,7 +69,7 @@ public abstract class DataConnection extends StateMachine {
     protected static int mCount;
     protected AsyncChannel mAc;
 
-    private List<ApnContext> mApnList = null;
+    protected List<ApnContext> mApnList = null;
     PendingIntent mReconnectIntent = null;
 
     private DataConnectionTracker mDataConnectionTracker = null;
@@ -247,7 +247,7 @@ public abstract class DataConnection extends StateMachine {
     protected FailCause lastFailCause;
     protected int mRetryOverride = -1;
     protected static final String NULL_IP = "0.0.0.0";
-    private int mRefCount;
+    protected int mRefCount;
     Object userData;
 
     //***** Abstract methods
@@ -600,9 +600,8 @@ public abstract class DataConnection extends StateMachine {
         result.newLp.setHttpProxy(mLinkProperties.getHttpProxy());
 
         if (DBG && (! result.oldLp.equals(result.newLp))) {
-            if (DBG) log("updateLinkProperty old != new");
-            if (VDBG) log("updateLinkProperty old LP=" + result.oldLp);
-            if (VDBG) log("updateLinkProperty new LP=" + result.newLp);
+            log("updateLinkProperty old LP=" + result.oldLp);
+            log("updateLinkProperty new LP=" + result.newLp);
         }
         mLinkProperties = result.newLp;
 
