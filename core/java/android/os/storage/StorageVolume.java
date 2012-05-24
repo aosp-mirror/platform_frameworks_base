@@ -16,6 +16,7 @@
 
 package android.os.storage;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -28,7 +29,7 @@ public class StorageVolume implements Parcelable {
     //private static final String TAG = "StorageVolume";
 
     private final String mPath;
-    private final String mDescription;
+    private final int mDescriptionId;
     private final boolean mRemovable;
     private final boolean mEmulated;
     private final int mMtpReserveSpace;
@@ -42,10 +43,10 @@ public class StorageVolume implements Parcelable {
     // ACTION_MEDIA_BAD_REMOVAL, ACTION_MEDIA_UNMOUNTABLE and ACTION_MEDIA_EJECT broadcasts.
     public static final String EXTRA_STORAGE_VOLUME = "storage_volume";
 
-    public StorageVolume(String path, String description, boolean removable,
+    public StorageVolume(String path, int descriptionId, boolean removable,
             boolean emulated, int mtpReserveSpace, boolean allowMassStorage, long maxFileSize) {
         mPath = path;
-        mDescription = description;
+        mDescriptionId = descriptionId;
         mRemovable = removable;
         mEmulated = emulated;
         mMtpReserveSpace = mtpReserveSpace;
@@ -54,11 +55,11 @@ public class StorageVolume implements Parcelable {
     }
 
     // for parcelling only
-    private StorageVolume(String path, String description, boolean removable,
+    private StorageVolume(String path, int descriptionId, boolean removable,
             boolean emulated, int mtpReserveSpace, int storageId,
             boolean allowMassStorage, long maxFileSize) {
         mPath = path;
-        mDescription = description;
+        mDescriptionId = descriptionId;
         mRemovable = removable;
         mEmulated = emulated;
         mMtpReserveSpace = mtpReserveSpace;
@@ -81,8 +82,12 @@ public class StorageVolume implements Parcelable {
      *
      * @return the volume description
      */
-    public String getDescription() {
-        return mDescription;
+    public String getDescription(Context context) {
+        return context.getResources().getString(mDescriptionId);
+    }
+
+    public int getDescriptionId() {
+        return mDescriptionId;
     }
 
     /**
@@ -172,8 +177,8 @@ public class StorageVolume implements Parcelable {
 
     @Override
     public String toString() {
-        return "StorageVolume [mAllowMassStorage=" + mAllowMassStorage + ", mDescription="
-                + mDescription + ", mEmulated=" + mEmulated + ", mMaxFileSize=" + mMaxFileSize
+        return "StorageVolume [mAllowMassStorage=" + mAllowMassStorage + ", mDescriptionId="
+                + mDescriptionId + ", mEmulated=" + mEmulated + ", mMaxFileSize=" + mMaxFileSize
                 + ", mMtpReserveSpace=" + mMtpReserveSpace + ", mPath=" + mPath + ", mRemovable="
                 + mRemovable + ", mStorageId=" + mStorageId + "]";
     }
@@ -182,14 +187,14 @@ public class StorageVolume implements Parcelable {
         new Parcelable.Creator<StorageVolume>() {
         public StorageVolume createFromParcel(Parcel in) {
             String path = in.readString();
-            String description = in.readString();
+            int descriptionId = in.readInt();
             int removable = in.readInt();
             int emulated = in.readInt();
             int storageId = in.readInt();
             int mtpReserveSpace = in.readInt();
             int allowMassStorage = in.readInt();
             long maxFileSize = in.readLong();
-            return new StorageVolume(path, description,
+            return new StorageVolume(path, descriptionId,
                     removable == 1, emulated == 1, mtpReserveSpace,
                     storageId, allowMassStorage == 1, maxFileSize);
         }
@@ -205,7 +210,7 @@ public class StorageVolume implements Parcelable {
 
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeString(mPath);
-        parcel.writeString(mDescription);
+        parcel.writeInt(mDescriptionId);
         parcel.writeInt(mRemovable ? 1 : 0);
         parcel.writeInt(mEmulated ? 1 : 0);
         parcel.writeInt(mStorageId);
