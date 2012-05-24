@@ -841,7 +841,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
-    /** Returns true if this window desires key events. */
+    /** Returns true if this window desires key events.
+     * TODO(cmautner): Is this the same as {@link WindowManagerService#canBeImeTarget}
+     */
     public final boolean canReceiveKeys() {
         return     isVisibleOrAdding()
                 && (mViewVisibility == View.VISIBLE)

@@ -71,10 +71,6 @@ class WindowToken {
     // windows will be put to the bottom of the list.
     boolean sendingToBottom;
 
-    // Set to true when this token is in a pending transaction where its
-    // windows will be put to the top of the list.
-    boolean sendingToTop;
-
     WindowToken(WindowManagerService _service, IBinder _token, int type, boolean _explicit) {
         service = _service;
         token = _token;
@@ -88,11 +84,10 @@ class WindowToken {
         pw.print(prefix); pw.print("windowType="); pw.print(windowType);
                 pw.print(" hidden="); pw.print(hidden);
                 pw.print(" hasVisible="); pw.println(hasVisible);
-        if (waitingToShow || waitingToHide || sendingToBottom || sendingToTop) {
+        if (waitingToShow || waitingToHide || sendingToBottom) {
             pw.print(prefix); pw.print("waitingToShow="); pw.print(waitingToShow);
                     pw.print(" waitingToHide="); pw.print(waitingToHide);
                     pw.print(" sendingToBottom="); pw.print(sendingToBottom);
-                    pw.print(" sendingToTop="); pw.println(sendingToTop);
         }
     }
 

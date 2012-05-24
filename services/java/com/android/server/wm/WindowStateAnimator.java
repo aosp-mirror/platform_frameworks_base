@@ -403,8 +403,8 @@ class WindowStateAnimator {
 
     boolean finishDrawingLocked() {
         if (mDrawState == DRAW_PENDING) {
-            if (DEBUG_ANIM || SHOW_TRANSACTIONS || DEBUG_ORIENTATION) Slog.v(
-                TAG, "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING " + this + " in "
+            if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
+                Slog.v(TAG, "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING " + this + " in "
                         + mSurface);
             mDrawState = COMMIT_DRAW_PENDING;
             return true;
@@ -417,7 +417,7 @@ class WindowStateAnimator {
         if (mDrawState != COMMIT_DRAW_PENDING) {
             return false;
         }
-        if (DEBUG_ANIM)
+        if (DEBUG_SURFACE_TRACE || DEBUG_ANIM)
             Slog.i(TAG, "commitFinishDrawingLocked: mDrawState=READY_TO_SHOW " + mSurface);
         mDrawState = READY_TO_SHOW;
         final boolean starting = mWin.mAttrs.type == TYPE_APPLICATION_STARTING;
@@ -504,7 +504,9 @@ class WindowStateAnimator {
         @Override
         public void setWindowCrop(Rect crop) {
             super.setWindowCrop(crop);
-            mWindowCrop.set(crop);
+            if (crop != null) {
+                mWindowCrop.set(crop);
+            }
             Slog.v(SURFACE_TAG, "setWindowCrop: " + this + ". Called by "
                     + Debug.getCallers(3));
         }
@@ -1232,7 +1234,8 @@ class WindowStateAnimator {
 
             // Force the show in the next prepareSurfaceLocked() call.
             mLastAlpha = -1;
-            if (DEBUG_ANIM) Slog.v(TAG, "performShowLocked: mDrawState=HAS_DRAWN");
+            if (DEBUG_SURFACE_TRACE || DEBUG_ANIM)
+                Slog.v(TAG, "performShowLocked: mDrawState=HAS_DRAWN in " + this);
             mDrawState = HAS_DRAWN;
             mService.scheduleAnimationLocked();
 
