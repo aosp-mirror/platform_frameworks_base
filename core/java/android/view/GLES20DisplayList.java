@@ -72,6 +72,13 @@ class GLES20DisplayList extends DisplayList {
     }
 
     @Override
+    public void clear() {
+        if (!mValid) {
+            mBitmaps.clear();
+        }
+    }
+
+    @Override
     public boolean isValid() {
         return mValid;
     }
@@ -343,7 +350,6 @@ class GLES20DisplayList extends DisplayList {
     private static native void nSetPivotX(int displayList, float pivotX);
     private static native void nSetCaching(int displayList, boolean caching);
     private static native void nSetClipChildren(int displayList, boolean clipChildren);
-    private static native void nSetApplicationScale(int displayList, float scale);
     private static native void nSetAlpha(int displayList, float alpha);
     private static native void nSetHasOverlappingRendering(int displayList,
             boolean hasOverlappingRendering);
