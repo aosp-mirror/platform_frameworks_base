@@ -1000,7 +1000,7 @@ public class NetworkController extends BroadcastReceiver {
             mContentDescriptionPhoneSignal = mContext.getString(
                     R.string.accessibility_airplane_mode);
             mAirplaneIconId = R.drawable.stat_sys_signal_flightmode;
-            mDataTypeIconId = 0;
+            mPhoneSignalIconId = mDataSignalIconId = mDataTypeIconId = 0;
 
             // combined values from connected wifi take precedence over airplane mode
             if (mWifiConnected) {
