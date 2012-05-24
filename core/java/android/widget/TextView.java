@@ -7678,7 +7678,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mContext.getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
         final SpellCheckerSubtype subtype = textServicesManager.getCurrentSpellCheckerSubtype(true);
         if (subtype != null) {
-            locale = new Locale(subtype.getLocale());
+            locale = SpellCheckerSubtype.constructLocaleFromString(subtype.getLocale());
         }
         return locale;
     }
