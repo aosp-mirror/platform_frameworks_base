@@ -58,6 +58,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     private AtomicInteger mSequenceNumber;
 
     private static final int DEFAULT_TIMEOUT = 1 * 60 * 1000; /* 1 minute */
+    private static final long WARN_EXECUTE_DELAY_MS = 500; /* .5 sec */
 
     /** Lock held whenever communicating with native daemon. */
     private final Object mDaemonLock = new Object();
@@ -148,7 +149,6 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                                 mCallbackHandler.sendMessage(mCallbackHandler.obtainMessage(
                                         event.getCode(), event.getRawEvent()));
                             } else {
-                                log("POST<- {" + rawEvent + "}");
                                 mResponseQueue.add(event.getCmdNumber(), event);
                             }
                         } catch (IllegalArgumentException e) {
@@ -300,6 +300,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
         final int sequenceNumber = mSequenceNumber.incrementAndGet();
         final StringBuilder cmdBuilder =
                 new StringBuilder(Integer.toString(sequenceNumber)).append(' ');
+        final long startTime = SystemClock.elapsedRealtime();
 
         makeCommand(cmdBuilder, cmd, args);
 
@@ -332,6 +333,11 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
             events.add(event);
         } while (event.isClassContinue());
 
+        final long endTime = SystemClock.elapsedRealtime();
+        if (endTime - startTime > WARN_EXECUTE_DELAY_MS) {
+            loge("NDC Command {" + logCmd + "} took too long (" + (endTime - startTime) + "ms)");
+        }
+
         if (event.isClassClientError()) {
             throw new NativeDaemonArgumentException(logCmd, event);
         }
@@ -339,7 +345,6 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
             throw new NativeDaemonFailureException(logCmd, event);
         }
 
-        log("RTN <- {" + logCmd + "}");
         return events.toArray(new NativeDaemonEvent[events.size()]);
     }
 
