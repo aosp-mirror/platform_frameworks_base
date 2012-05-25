@@ -65,7 +65,7 @@
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Guardando captura..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Guardando captura..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"La captura de pantalla se está guardando."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Captura de pantalla guardada"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Captura guardada"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Toca para ver la captura de pantalla"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"No se ha podido guardar la captura de pantalla."</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"No se ha podido guardar la captura de pantalla. Puede que el almacenamiento esté en uso."</string>
