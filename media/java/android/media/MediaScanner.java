@@ -314,6 +314,7 @@ public class MediaScanner
     private int mMtpObjectHandle;
 
     private final String mExternalStoragePath;
+    private final boolean mExternalIsEmulated;
 
     /** whether to use bulk inserts or individual inserts for each item */
     private static final boolean ENABLE_BULK_INSERTS = true;
@@ -392,6 +393,7 @@ public class MediaScanner
         setDefaultRingtoneFileNames();
 
         mExternalStoragePath = Environment.getExternalStorageDirectory().getAbsolutePath();
+        mExternalIsEmulated = Environment.isExternalStorageEmulated();
         //mClient.testGenreNameConverter();
     }
 
@@ -543,13 +545,28 @@ public class MediaScanner
                         boolean music = (lowpath.indexOf(MUSIC_DIR) > 0) ||
                             (!ringtones && !notifications && !alarms && !podcasts);
 
+                        boolean isaudio = MediaFile.isAudioFileType(mFileType);
+                        boolean isvideo = MediaFile.isVideoFileType(mFileType);
+                        boolean isimage = MediaFile.isImageFileType(mFileType);
+
+                        if (isaudio || isvideo || isimage) {
+                            if (mExternalIsEmulated && path.startsWith(mExternalStoragePath)) {
+                                // try to rewrite the path to bypass the sd card fuse layer
+                                String directPath = Environment.getMediaStorageDirectory() +
+                                        path.substring(mExternalStoragePath.length());
+                                File f = new File(directPath);
+                                if (f.exists()) {
+                                    path = directPath;
+                                }
+                            }
+                        }
+
                         // we only extract metadata for audio and video files
-                        if (MediaFile.isAudioFileType(mFileType)
-                                || MediaFile.isVideoFileType(mFileType)) {
+                        if (isaudio || isvideo) {
                             processFile(path, mimeType, this);
                         }
 
-                        if (MediaFile.isImageFileType(mFileType)) {
+                        if (isimage) {
                             processImageFile(path);
                         }
 
@@ -972,7 +989,6 @@ public class MediaScanner
                     }
                     values.put(FileColumns.MEDIA_TYPE, mediaType);
                 }
-
                 mMediaProvider.update(result, values, null, null);
             }
 
