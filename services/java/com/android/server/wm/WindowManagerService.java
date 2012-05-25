@@ -6621,15 +6621,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void setEventDispatching(boolean enabled) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "resumeKeyDispatching()")) {
+                "setEventDispatching()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized (mWindowMap) {
             mInputMonitor.setEventDispatchingLw(enabled);
+            sendScreenStatusToClientsLocked();
         }
-
-        sendScreenStatusToClients();
     }
 
     public IBinder getFocusedWindowClientToken() {
@@ -6735,7 +6734,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.systemReady();
     }
 
-    private void sendScreenStatusToClients() {
+    private void sendScreenStatusToClientsLocked() {
         final ArrayList<WindowState> windows = mWindows;
         final int count = windows.size();
         boolean on = mPowerManager.isScreenOn();
