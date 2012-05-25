@@ -145,7 +145,7 @@
     <string name="shutdown_progress" msgid="2281079257329981203">"Arrêt en cours..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Votre tablette va s\'éteindre."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Votre téléphone va s\'éteindre."</string>
-    <string name="shutdown_confirm_question" msgid="2906544768881136183">"Voulez-vous éteindre le téléphone ?"</string>
+    <string name="shutdown_confirm_question" msgid="2906544768881136183">"Voulez-vous éteindre l\'appareil ?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Redémarrer en mode sans échec"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"Voulez-vous redémarrer en mode sans échec ? Cette opération aura pour effet de désactiver toutes les applications tierces que vous avez installées. Elles seront réactivées au prochain redémarrage."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Récentes"</string>
@@ -317,6 +317,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Permet à l\'application d\'identifier les touches sur lesquelles vous appuyez, même lorsque vous utilisez une autre application (lors de la saisie d\'un mot de passe, par exemple). Les applications standards ne devraient jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"Association à un mode de saisie"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un mode de saisie. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"associer à un service d\'accessibilité"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service d\'accessibilité. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"associer à un service de texte"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Permet à l\'application de s\'associer à l\'interface de haut niveau d\'un service de texte (par exemple, SpellCheckerService). Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"associer à un service VPN"</string>
@@ -853,6 +855,12 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Effacer la requête"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Envoyer la requête"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Recherche vocale"</string>
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Il y a 1 mois"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Il y a plus d\'un mois"</string>
   <plurals name="num_seconds_ago">
@@ -1119,6 +1127,10 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"Configurer les modes de saisie"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Clavier physique"</string>
     <string name="hardware" msgid="7517821086888990278">"Matériel"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidats"</u></string>
@@ -1312,5 +1324,6 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Lancer le navigateur ?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Prendre l\'appel ?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Toujours"</string>
-    <string name="activity_resolver_use_once" msgid="405646673463328329">"Une seule fois"</string>
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
+    <skip />
 </resources>

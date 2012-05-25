@@ -474,6 +474,10 @@
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"associar cun ina metoda d\'endataziun"</string>
     <!-- no translation found for permdesc_bindInputMethod (3250440322807286331) -->
     <skip />
+    <!-- no translation found for permlab_bindAccessibilityService (5357733942556031593) -->
+    <skip />
+    <!-- no translation found for permdesc_bindAccessibilityService (7034615928609331368) -->
+    <skip />
     <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
     <skip />
     <!-- no translation found for permdesc_bindTextService (8151968910973998670) -->
@@ -1358,6 +1362,12 @@
     <skip />
     <!-- no translation found for searchview_description_voice (2453203695674994440) -->
     <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Avant 1 mais"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Avant dapli ch\'in mais"</string>
   <plurals name="num_seconds_ago">
@@ -1732,6 +1742,10 @@
     <skip />
     <!-- no translation found for hardware (7517821086888990278) -->
     <skip />
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidats"</u></string>
@@ -2071,6 +2085,6 @@
     <skip />
     <!-- no translation found for activity_resolver_use_always (8017770747801494933) -->
     <skip />
-    <!-- no translation found for activity_resolver_use_once (405646673463328329) -->
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
     <skip />
 </resources>

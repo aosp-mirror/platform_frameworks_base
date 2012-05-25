@@ -125,7 +125,7 @@
     <string name="httpErrorFile" msgid="2170788515052558676">"Do souboru nelze získat přístup."</string>
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"Požadovaný soubor nelze najít."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Je zpracováváno příliš mnoho požadavků. Opakujte akci později."</string>
-    <string name="notification_title" msgid="8967710025036163822">"Chyba přihlášení do účtu <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
+    <string name="notification_title" msgid="8967710025036163822">"Chyba přihlášení k účtu <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"Synchronizace"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synchronizace"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Příliš mnoho smazaných položek služby <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
@@ -317,6 +317,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Umožňuje aplikaci sledovat, které klávesy stisknete, a to i při interakci s jinou aplikací (např. zadávání hesla). Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"vazba k metodě zadávání dat"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Umožňuje držiteli vázat se na nejvyšší úroveň rozhraní pro zadávání dat. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"navázat se na službu usnadnění přístupu"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní služby usnadnění přístupu. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"navázat se na textovou službu"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Umožňuje držiteli připojit se k nejvyšší úrovni rozhraní textové služby (např. SpellCheckerService). Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"navázat se na službu VPN"</string>
@@ -730,7 +732,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Zkusit znovu"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Zkusit znovu"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Překročili jste maximální povolený počet pokusů o odemknutí obličejem."</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Nabíjení, <xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Nabíjení - <xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"nabito"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Připojte dobíjecí zařízení."</string>
@@ -853,15 +855,21 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Smazat dotaz"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Odeslat dotaz"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Hlasové vyhledávání"</string>
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"před 1 měsícem"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Déle než před 1 měsícem"</string>
   <plurals name="num_seconds_ago">
     <item quantity="one" msgid="4869870056547896011">"před 1 sekundou"</item>
-    <item quantity="other" msgid="3903706804349556379">"před <xliff:g id="COUNT">%d</xliff:g> sek."</item>
+    <item quantity="other" msgid="3903706804349556379">"před <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
   <plurals name="num_minutes_ago">
     <item quantity="one" msgid="3306787433088810191">"před 1 minutou"</item>
-    <item quantity="other" msgid="2176942008915455116">"před <xliff:g id="COUNT">%d</xliff:g> min."</item>
+    <item quantity="other" msgid="2176942008915455116">"před <xliff:g id="COUNT">%d</xliff:g> min"</item>
   </plurals>
   <plurals name="num_hours_ago">
     <item quantity="one" msgid="9150797944610821849">"před 1 hodinou"</item>
@@ -882,7 +890,7 @@
   </plurals>
   <plurals name="in_num_minutes">
     <item quantity="one" msgid="8793095251325200395">"za 1 minutu"</item>
-    <item quantity="other" msgid="3330713936399448749">"za <xliff:g id="COUNT">%d</xliff:g> min."</item>
+    <item quantity="other" msgid="3330713936399448749">"za <xliff:g id="COUNT">%d</xliff:g> min"</item>
   </plurals>
   <plurals name="in_num_hours">
     <item quantity="one" msgid="7164353342477769999">"za 1 hodinu"</item>
@@ -897,8 +905,8 @@
     <item quantity="other" msgid="3699169366650930415">"před <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
   <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one" msgid="6361490147113871545">"před 1 min."</item>
-    <item quantity="other" msgid="851164968597150710">"před <xliff:g id="COUNT">%d</xliff:g> min."</item>
+    <item quantity="one" msgid="6361490147113871545">"před 1 min"</item>
+    <item quantity="other" msgid="851164968597150710">"před <xliff:g id="COUNT">%d</xliff:g> min"</item>
   </plurals>
   <plurals name="abbrev_num_hours_ago">
     <item quantity="one" msgid="4796212039724722116">"před 1 hodinou"</item>
@@ -913,8 +921,8 @@
     <item quantity="other" msgid="5495880108825805108">"za <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
   <plurals name="abbrev_in_num_minutes">
-    <item quantity="one" msgid="562786149928284878">"za 1 min."</item>
-    <item quantity="other" msgid="4216113292706568726">"za <xliff:g id="COUNT">%d</xliff:g> min."</item>
+    <item quantity="one" msgid="562786149928284878">"za 1 min"</item>
+    <item quantity="other" msgid="4216113292706568726">"za <xliff:g id="COUNT">%d</xliff:g> min"</item>
   </plurals>
   <plurals name="abbrev_in_num_hours">
     <item quantity="one" msgid="3274708118124045246">"za 1 hodinu"</item>
@@ -931,8 +939,8 @@
     <string name="days" msgid="4774547661021344602">"d."</string>
     <string name="hour" msgid="2126771916426189481">"hodina"</string>
     <string name="hours" msgid="894424005266852993">"hod."</string>
-    <string name="minute" msgid="9148878657703769868">"min."</string>
-    <string name="minutes" msgid="5646001005827034509">"min."</string>
+    <string name="minute" msgid="9148878657703769868">"min"</string>
+    <string name="minutes" msgid="5646001005827034509">"min"</string>
     <string name="second" msgid="3184235808021478">"s"</string>
     <string name="seconds" msgid="3161515347216589235">"s"</string>
     <string name="week" msgid="5617961537173061583">"týden"</string>
@@ -976,7 +984,7 @@
     <string name="capital_off" msgid="6815870386972805832">"O"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Dokončit akci pomocí aplikace"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Použít jako výchozí nastavení pro tuto činnost."</string>
-    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Výchozí nastavení vymažete v části Nastavení systému &gt; Aplikace &gt; Stažené."</string>
+    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Výchozí nastavení vymažete v sekci Nastavení systému &gt; Aplikace &gt; Stažené."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Vyberte činnost"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Vyberte aplikaci pro zařízení USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"Tuto činnost nemohou provádět žádné aplikace."</string>
@@ -997,7 +1005,7 @@
     <string name="launch_warning_original" msgid="188102023021668683">"Původně byla spuštěna aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Měřítko"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Vždy zobrazovat"</string>
-    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Tento režim znovu povolíte v části Nastavení systému &gt; Aplikace &gt; Stažené."</string>
+    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Tento režim znovu povolíte v sekci Nastavení systému &gt; Aplikace &gt; Stažené."</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplikace <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) porušila své vlastní vynucené zásady StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> porušil své vlastní vynucené zásady StrictMode."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android se upgraduje..."</string>
@@ -1083,7 +1091,7 @@
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NOVÉ: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Poskytuje: <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Nejsou vyžadována žádná oprávnění"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"Velkokapacitní paměťové zařízení USB"</string>
+    <string name="usb_storage_activity_title" msgid="4465055157209648641">"Velkokapacitní úložiště USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB připojeno"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Připojili jste se k počítači pomocí rozhraní USB. Chcete-li kopírovat soubory z počítače do úložiště USB v zařízení Android či obráceně, klepněte na tlačítko níže."</string>
     <string name="usb_storage_message" product="default" msgid="805351000446037811">"Připojili jste se k počítači pomocí rozhraní USB. Chcete-li kopírovat soubory z počítače na kartu SD v zařízení Android či obráceně, stiskněte tlačítko níže."</string>
@@ -1115,10 +1123,14 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formátovat"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladění přes rozhraní USB připojeno"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotykem zakážete ladění USB."</string>
-    <string name="select_input_method" msgid="4653387336791222978">"Vybrat metodu vstupu"</string>
-    <string name="configure_input_methods" msgid="9091652157722495116">"Nastavit metody vstupu"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Vybrat metodu zadávání"</string>
+    <string name="configure_input_methods" msgid="9091652157722495116">"Nastavit metody zadávání"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Fyzická klávesnice"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AÁBCČDĎEÉĚFGHCHIÍJKLMNŇOÓPQRŘSŠTŤUÚVWXYÝZŽ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789AÁBCČDĎEÉĚFGHCHIÍJKLMNŇOÓPQRŘSŠTŤUÚVWXYÝZŽ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidáti"</u></string>
@@ -1312,5 +1324,6 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Spustit prohlížeč?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Přijmout hovor?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Vždy"</string>
-    <string name="activity_resolver_use_once" msgid="405646673463328329">"Pouze jednou"</string>
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
+    <skip />
 </resources>

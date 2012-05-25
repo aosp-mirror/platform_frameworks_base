@@ -317,6 +317,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Pozwala aplikacji na śledzenie naciskanych klawiszy, nawet podczas pracy z innym programem (na przykład podczas wpisywania hasła). Nigdy nie powinno być potrzebne normalnym aplikacjom."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"powiązanie ze sposobem wprowadzania tekstu"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Pozwala na powiązanie wybranego sposobu wprowadzania tekstu z interfejsem najwyższego poziomu. To uprawnienie nie powinno być nigdy wymagane przez zwykłe aplikacje."</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"tworzenie powiązania z usługą ułatwień dostępu"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Zezwala na tworzenie powiązania z interfejsem najwyższego poziomu usługi ułatwień dostępu. Nieprzeznaczone dla zwykłych aplikacji."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"tworzenie powiązania z usługą tekstową"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Pozwala na tworzenie powiązania z interfejsem najwyższego poziomu usługi tekstowej (np. SpellCheckerService). Nie powinno być nigdy potrzebne w przypadku zwykłych aplikacji."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"tworzenie powiązania z usługą VPN"</string>
@@ -853,6 +855,12 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Wyczyść zapytanie"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Wyślij zapytanie"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Wyszukiwanie głosowe"</string>
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 miesiąc temu"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Ponad 1 miesiąc temu"</string>
   <plurals name="num_seconds_ago">
@@ -974,8 +982,8 @@
     <string name="loading" msgid="7933681260296021180">"Wczytywanie…"</string>
     <string name="capital_on" msgid="1544682755514494298">"Wł."</string>
     <string name="capital_off" msgid="6815870386972805832">"Wył."</string>
-    <string name="whichApplication" msgid="4533185947064773386">"Zakończ czynność korzystając z"</string>
-    <string name="alwaysUse" msgid="4583018368000610438">"Używaj domyślnie dla tej czynności."</string>
+    <string name="whichApplication" msgid="4533185947064773386">"Zakończ czynność przez..."</string>
+    <string name="alwaysUse" msgid="4583018368000610438">"Domyślne dla tej czynności"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Wyczyść wartości domyślne w: Ustawienia systemu &gt; Aplikacje &gt; Pobrane."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Wybierz czynność"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Wybierz aplikację dla urządzenia USB"</string>
@@ -1119,6 +1127,10 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"Konfiguruj metody wprowadzania"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Klawiatura fizyczna"</string>
     <string name="hardware" msgid="7517821086888990278">"Sprzęt"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandydaci"</u></string>
@@ -1312,5 +1324,6 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Uruchomić przeglądarkę?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Odebrać połączenie?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Zawsze"</string>
-    <string name="activity_resolver_use_once" msgid="405646673463328329">"Tylko raz"</string>
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
+    <skip />
 </resources>

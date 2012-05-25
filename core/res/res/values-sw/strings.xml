@@ -317,6 +317,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Inaruhusu programu kuangalia vibonye unavyo bonyeza hata wakati unapo shirikiana na programu nyingine (kama vile kuweka neno). Kamwe isihitajike na programu za kawaida."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"funganisha kwa mbinu ya uingizaji"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Inaruhusu mmiliki kushurutisha kwenye kusano ya kiwango cha juu ya mbinu ya ingizo. Haipaswi kuhitajika kwa programu za kawaida."</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"funga kwa huduma ya afikiaji"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Inamuruhusu mmiliki kufunga kipengee kinachojitokeza katika nyanja mbalimbali za kiwango cha juu cha huduma ya afikiaji. Hapaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"Imefungwa kwa huduma ya maandishi"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Inaruhusu kishikiliaji kushurutisha kusano ya kiwango cha juu ya huduma ya matini(k.m.SpellCheckerService). Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"funga kwa huduma ya VPN"</string>
@@ -853,6 +855,12 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Futa swali"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Wasilisha hoja"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Utafutaji wa sauti"</string>
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Mwezi 1 uliopita"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Kabla ya mwezi 1 uliopita"</string>
   <plurals name="num_seconds_ago">
@@ -1081,7 +1089,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Weka"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Imekamilika"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">" MPYA: "</font></string>
-    <string name="perms_description_app" msgid="5139836143293299417">"Zinatolewa na <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="perms_description_app" msgid="5139836143293299417">"Imetolewa na <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Hakuna vibali vinavyohitajika"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Hifadhi kubwa ya USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB imeunganishwa"</string>
@@ -1119,6 +1127,10 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"Weka mbinu za ingizo"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Kibodi halisi"</string>
     <string name="hardware" msgid="7517821086888990278">"Maunzi"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"wagombeaji"</u></string>
@@ -1312,5 +1324,6 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Zindua Kivinjari?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Kubali simu?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Kila mara"</string>
-    <string name="activity_resolver_use_once" msgid="405646673463328329">"Mara Moja tu"</string>
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
+    <skip />
 </resources>
