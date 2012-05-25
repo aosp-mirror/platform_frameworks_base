@@ -23,20 +23,20 @@
     <alpha android:fromAlpha="0" android:toAlpha="1.0"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
             android:interpolator="@interpolator/decelerate_quad"
-            android:startOffset="300"
+            android:startOffset="500"
             android:duration="400"/>
 
-    <translate android:fromYDelta="-120%" android:toYDelta="0"
+    <translate android:fromYDelta="-50%" android:toYDelta="0"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
             android:interpolator="@interpolator/decelerate_quint"
-            android:startOffset="300"
+            android:startOffset="500"
             android:duration="400" />
 
-    <scale android:fromXScale=".5" android:toXScale="1.0"
-            android:fromYScale=".5" android:toYScale="1.0"
+    <scale android:fromXScale=".8" android:toXScale="1.0"
+            android:fromYScale=".8" android:toYScale="1.0"
             android:pivotX="50%p" android:pivotY="0%p"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
             android:interpolator="@interpolator/decelerate_quad"
-            android:startOffset="300"
+            android:startOffset="500"
             android:duration="400" />
 </set>
