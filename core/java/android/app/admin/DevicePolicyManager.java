@@ -1008,13 +1008,15 @@ public class DevicePolicyManager {
     /**
      * Ask the user date be wiped.  This will cause the device to reboot,
      * erasing all user data while next booting up.  External storage such
-     * as SD cards will not be erased.
+     * as SD cards will be also erased if the flag {@link #WIPE_EXTERNAL_STORAGE}
+     * is set.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} to be able to call
      * this method; if it has not, a security exception will be thrown.
      *
-     * @param flags Bit mask of additional options: currently must be 0.
+     * @param flags Bit mask of additional options: currently 0 and
+     *              {@link #WIPE_EXTERNAL_STORAGE} are supported.
      */
     public void wipeData(int flags) {
         if (mService != null) {
