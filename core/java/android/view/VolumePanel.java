@@ -103,6 +103,9 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     private boolean mShowCombinedVolumes;
     private boolean mVoiceCapable;
 
+    // True if we want to play tones on the system stream when the master stream is specified.
+    private final boolean mPlayMasterStreamTones;
+
     /** Dialog containing all the sliders */
     private final Dialog mDialog;
     /** Dialog's content view */
@@ -274,6 +277,13 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         } else {
             mMoreButton.setOnClickListener(this);
         }
+
+        boolean masterVolumeOnly = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_useMasterVolume);
+        boolean masterVolumeKeySounds = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_useVolumeKeySounds);
+
+        mPlayMasterStreamTones = masterVolumeOnly && masterVolumeKeySounds;
 
         listenToRingerMode();
     }
@@ -657,7 +667,16 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
      * Lock on this VolumePanel instance as long as you use the returned ToneGenerator.
      */
     private ToneGenerator getOrCreateToneGenerator(int streamType) {
-        if (streamType == STREAM_MASTER) return null;
+        if (streamType == STREAM_MASTER) {
+            // For devices that use the master volume setting only but still want to
+            // play a volume-changed tone, direct the master volume pseudostream to
+            // the system stream's tone generator.
+            if (mPlayMasterStreamTones) {
+                streamType = AudioManager.STREAM_SYSTEM;
+            } else {
+                return null;
+            }
+        }
         synchronized (this) {
             if (mToneGenerators[streamType] == null) {
                 try {
