@@ -4403,8 +4403,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (mNativeClass == 0)
             return;
         boolean queueFull;
+        final int scrollingLayer = (mTouchMode == TOUCH_DRAG_LAYER_MODE)
+                ? mCurrentScrollingLayerId : 0;
         queueFull = nativeSetBaseLayer(mNativeClass, layer,
-                                       showVisualIndicator, isPictureAfterFirstLayout);
+                                       showVisualIndicator, isPictureAfterFirstLayout,
+                                       scrollingLayer);
 
         if (queueFull) {
             mWebViewCore.pauseWebKitDraw();
@@ -8552,7 +8555,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private native String   nativeGetSelection();
     private native void     nativeSetHeightCanMeasure(boolean measure);
     private native boolean  nativeSetBaseLayer(int nativeInstance,
-            int layer, boolean showVisualIndicator, boolean isPictureAfterFirstLayout);
+            int layer, boolean showVisualIndicator, boolean isPictureAfterFirstLayout,
+            int scrollingLayer);
     private native int      nativeGetBaseLayer(int nativeInstance);
     private native void     nativeCopyBaseContentToPicture(Picture pict);
     private native boolean  nativeHasContent();
