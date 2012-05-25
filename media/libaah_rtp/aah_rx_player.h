@@ -34,7 +34,7 @@
 
 namespace android {
 
-class AAH_RXPlayer : public MediaPlayerInterface {
+class AAH_RXPlayer : public MediaPlayerHWInterface {
   public:
     AAH_RXPlayer();
 
@@ -61,6 +61,9 @@ class AAH_RXPlayer : public MediaPlayerInterface {
     virtual status_t    setParameter(int key, const Parcel &request);
     virtual status_t    getParameter(int key, Parcel *reply);
     virtual status_t    invoke(const Parcel& request, Parcel *reply);
+
+    virtual status_t    setVolume(float leftVolume, float rightVolume);
+    virtual status_t    setAudioStreamType(int streamType);
 
   protected:
     virtual ~AAH_RXPlayer();
@@ -196,6 +199,9 @@ class AAH_RXPlayer : public MediaPlayerInterface {
         uint32_t getSSRC()      const { return ssrc_; }
         uint8_t  getProgramID() const { return (ssrc_ >> 5) & 0x1F; }
         status_t getStatus() const { return status_; }
+        void     setAudioSpecificParams(float left_vol,
+                                        float right_vol,
+                                        int stream_type);
 
         void clearInactivityTimeout() {
             inactivity_timeout_.setTimeout(-1);
@@ -226,6 +232,7 @@ class AAH_RXPlayer : public MediaPlayerInterface {
         bool                    setupAACSubstreamMeta();
         bool                    setupSubstreamType(uint8_t substream_type,
                                                    uint8_t codec_type);
+        void                    applyVolume();
 
         uint32_t                ssrc_;
         bool                    waiting_for_rap_;
@@ -247,6 +254,11 @@ class AAH_RXPlayer : public MediaPlayerInterface {
         sp<AAH_DecoderPump>     decoder_;
         Timeout                 inactivity_timeout_;
         bool                    eos_reached_;
+
+        float                   audio_volume_local_left_;
+        float                   audio_volume_local_right_;
+        uint8_t                 audio_volume_remote_;
+        int                     audio_stream_type_;
 
         static const int64_t    kAboutToUnderflowThreshold;
         static const int        kInactivityTimeoutMsec;
@@ -302,6 +314,12 @@ class AAH_RXPlayer : public MediaPlayerInterface {
     SubstreamVec        substreams_;
     OMXClient           omx_;
     CCHelper            cc_helper_;
+
+    Mutex               audio_param_lock_;
+    float               audio_volume_left_;
+    float               audio_volume_right_;
+    int                 audio_stream_type_;
+    bool                audio_params_dirty_;
 
     // Connection to audio flinger used to hack a path to setMasterVolume.
     sp<IAudioFlinger>   audio_flinger_;

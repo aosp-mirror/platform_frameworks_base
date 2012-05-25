@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,9 @@ AAH_DecoderPump::AAH_DecoderPump(OMXClient& omx)
     , last_queued_pts_valid_(false)
     , last_queued_pts_(0)
     , last_ts_transform_valid_(false)
-    , last_volume_(0xFF) {
+    , last_left_volume_(1.0f)
+    , last_right_volume_(1.0f)
+    , last_stream_type_(AUDIO_STREAM_DEFAULT) {
     thread_ = new ThreadWrapper(this);
 }
 
@@ -102,13 +104,13 @@ void AAH_DecoderPump::queueToRenderer(MediaBuffer* decoded_sample) {
             if (NULL != renderer_) {
                 int frameCount;
                 AudioTrack::getMinFrameCount(&frameCount,
-                        AUDIO_STREAM_DEFAULT,
+                        last_stream_type_,
                         static_cast<int>(format_sample_rate_));
                 int ch_format = (format_channels_ == 1)
                     ? AUDIO_CHANNEL_OUT_MONO
                     : AUDIO_CHANNEL_OUT_STEREO;
 
-                res = renderer_->set(AUDIO_STREAM_DEFAULT,
+                res = renderer_->set(last_stream_type_,
                         format_sample_rate_,
                         AUDIO_FORMAT_PCM_16_BIT,
                         ch_format,
@@ -128,9 +130,8 @@ void AAH_DecoderPump::queueToRenderer(MediaBuffer* decoded_sample) {
                         delete renderer_;
                         renderer_ = NULL;
                     } else {
-                        float volume = static_cast<float>(last_volume_)
-                                     / 255.0f;
-                        if (renderer_->setVolume(volume, volume) != OK) {
+                        if (renderer_->setVolume(last_left_volume_,
+                                                 last_right_volume_) != OK) {
                             LOGW("%s: setVolume failed", __FUNCTION__);
                         }
 
@@ -204,20 +205,39 @@ void AAH_DecoderPump::setRenderTSTransform(const LinearTransform& trans) {
     }
 }
 
-void AAH_DecoderPump::setRenderVolume(uint8_t volume) {
+void AAH_DecoderPump::setRenderVolume(float left, float right) {
     Mutex::Autolock lock(&render_lock_);
 
-    if (volume == last_volume_) {
+    if ((left == last_left_volume_) && (right == last_right_volume_)) {
         return;
     }
 
-    last_volume_ = volume;
+    last_left_volume_  = left;
+    last_right_volume_ = right;
+
     if (renderer_ != NULL) {
-        float volume = static_cast<float>(last_volume_) / 255.0f;
-        if (renderer_->setVolume(volume, volume) != OK) {
+        if (renderer_->setVolume(left, right) != OK) {
             LOGW("%s: setVolume failed", __FUNCTION__);
         }
     }
+}
+
+void AAH_DecoderPump::setRenderStreamType(int stream_type) {
+    Mutex::Autolock lock(&render_lock_);
+
+    if (last_stream_type_ == stream_type) {
+        return;
+    }
+
+    // TODO: figure out if changing stream type dynamically will ever be a
+    // requirement.  If it is not, we probably want to refactor this such that
+    // stream type is only passed during construction.
+    if (renderer_ != NULL) {
+        LOGW("Attempting to change stream type (%d -> %d) after rendering has"
+             " started", last_stream_type_, stream_type);
+    }
+
+    last_stream_type_ = stream_type;
 }
 
 // isAboutToUnderflow is something of a hack used to figure out when it might be
@@ -509,7 +529,8 @@ status_t AAH_DecoderPump::shutdown_l() {
 
     last_queued_pts_valid_   = false;
     last_ts_transform_valid_ = false;
-    last_volume_             = 0xFF;
+    last_left_volume_        = 1.0f;
+    last_right_volume_       = 1.0f;
     thread_status_           = OK;
 
     decoder_ = NULL;

@@ -316,7 +316,30 @@ bool AAH_RXPlayer::threadLoop() {
         clearEventFD(wakeup_work_thread_evt_fd_);
         process_more_right_now = false;
 
-        // Step 2: Do we have data waiting in the socket?  If so, drain the
+        // Step 2: Do we have a change of audio parameters (volume/stream_type)
+        // to apply to our current substreams?  If so, go ahead and take care of
+        // it.
+        if (audio_params_dirty_) {
+            float latched_left_volume, latched_right_volume;
+            int latched_stream_type;
+            {  // explicit scope for autolock pattern
+                AutoMutex api_lock(&audio_param_lock_);
+                latched_left_volume  = audio_volume_left_;
+                latched_right_volume = audio_volume_right_;
+                latched_stream_type  = audio_stream_type_;
+                audio_params_dirty_  = false;
+            }
+
+            for (size_t i = 0; i < substreams_.size(); ++i) {
+                CHECK(substreams_.valueAt(i) != NULL);
+                substreams_.valueAt(i)->setAudioSpecificParams(
+                        latched_left_volume,
+                        latched_right_volume,
+                        latched_stream_type);
+            }
+        }
+
+        // Step 3: Do we have data waiting in the socket?  If so, drain the
         // socket moving valid RTP information into the ring buffer to be
         // processed.
         if (poll_fds[1].revents) {
@@ -403,13 +426,13 @@ bool AAH_RXPlayer::threadLoop() {
             }
         }
 
-        // Step 3: Process any data we mave have accumulated in the ring buffer
+        // Step 4: Process any data we mave have accumulated in the ring buffer
         // so far.
         if (!thread_wrapper_->exitPending()) {
             processRingBuffer();
         }
 
-        // Step 4: At this point in time, the ring buffer should either be
+        // Step 5: At this point in time, the ring buffer should either be
         // empty, or stalled in front of a gap caused by some dropped packets.
         // Check on the current gap situation and deal with it in an appropriate
         // fashion.  If processGaps returns true, it means that it has given up
@@ -419,7 +442,7 @@ bool AAH_RXPlayer::threadLoop() {
             process_more_right_now = processGaps();
         }
 
-        // Step 5: Check for fatal errors.  If any of our substreams has
+        // Step 6: Check for fatal errors.  If any of our substreams has
         // encountered a fatal, unrecoverable, error, then propagate the error
         // up to user level and shut down.
         for (size_t i = 0; i < substreams_.size(); ++i) {

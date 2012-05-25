@@ -46,6 +46,10 @@ AAH_RXPlayer::AAH_RXPlayer()
     current_epoch_known_ = false;
     data_source_set_     = false;
     sock_fd_             = -1;
+    audio_volume_left_   = 1.0;
+    audio_volume_right_  = 1.0;
+    audio_stream_type_   = AUDIO_STREAM_DEFAULT;
+    audio_params_dirty_  = false;
 
     substreams_.setCapacity(4);
 
@@ -296,6 +300,40 @@ void AAH_RXPlayer::fetchAudioFlinger() {
 
         audio_flinger_ = interface_cast<IAudioFlinger>(binder);
     }
+}
+
+status_t AAH_RXPlayer::setVolume(float leftVolume, float rightVolume) {
+    AutoMutex api_lock(&api_lock_);
+
+    {  // explicit scope for autolock pattern
+        AutoMutex api_lock(&audio_param_lock_);
+        if ((leftVolume  == audio_volume_left_) &&
+            (rightVolume == audio_volume_right_)) {
+            return OK;
+        }
+
+        audio_volume_left_  = leftVolume;
+        audio_volume_right_ = rightVolume;
+        audio_params_dirty_ = true;
+    }
+
+    signalEventFD(wakeup_work_thread_evt_fd_);
+
+    return OK;
+}
+
+status_t AAH_RXPlayer::setAudioStreamType(int streamType) {
+    AutoMutex api_lock(&api_lock_);
+
+    {  // explicit scope for autolock pattern
+        AutoMutex api_lock(&audio_param_lock_);
+        audio_stream_type_  = streamType;
+        audio_params_dirty_ = true;
+    }
+
+    signalEventFD(wakeup_work_thread_evt_fd_);
+
+    return OK;
 }
 
 }  // namespace android

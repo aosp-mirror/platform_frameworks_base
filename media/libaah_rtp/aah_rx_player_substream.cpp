@@ -44,6 +44,10 @@ AAH_RXPlayer::Substream::Substream(uint32_t ssrc, OMXClient& omx) {
     status_ = OK;
     codec_mime_type_ = "";
     eos_reached_ = false;
+    audio_volume_local_left_ = 1.0f;
+    audio_volume_local_right_ = 1.0f;
+    audio_volume_remote_ = 0xFF;
+    audio_stream_type_ = AUDIO_STREAM_DEFAULT;
 
     decoder_ = new AAH_DecoderPump(omx);
     if (decoder_ == NULL) {
@@ -242,8 +246,9 @@ void AAH_RXPlayer::Substream::processPayloadStart(uint8_t* buf,
         return;
     }
 
-    if (decoder_ != NULL) {
-        decoder_->setRenderVolume(volume);
+    if (audio_volume_remote_ != volume) {
+        audio_volume_remote_ = volume;
+        applyVolume();
     }
 
     // TODO : move all of the constant flag and offset definitions for TRTP up
@@ -697,6 +702,33 @@ bool AAH_RXPlayer::Substream::setupSubstreamType(uint8_t substream_type,
     substream_details_known_ = true;
 
     return true;
+}
+
+void AAH_RXPlayer::Substream::setAudioSpecificParams(float left_vol,
+                                                     float right_vol,
+                                                     int stream_type) {
+    if ((audio_volume_local_left_  != left_vol) ||
+        (audio_volume_local_right_ != right_vol)) {
+        audio_volume_local_left_  = left_vol;
+        audio_volume_local_right_ = right_vol;
+        applyVolume();
+    }
+
+    if (audio_stream_type_ != stream_type) {
+        audio_stream_type_ = stream_type;
+        if (decoder_ != NULL) {
+            decoder_->setRenderStreamType(audio_stream_type_);
+        }
+    }
+}
+
+void AAH_RXPlayer::Substream::applyVolume() {
+    if (decoder_ != NULL) {
+        float remote_vol = static_cast<float>(audio_volume_remote_) /
+                           255.0f;
+        decoder_->setRenderVolume(audio_volume_local_left_  * remote_vol,
+                                  audio_volume_local_right_ * remote_vol);
+    }
 }
 
 }  // namespace android

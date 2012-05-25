@@ -42,7 +42,8 @@ class AAH_DecoderPump : public MediaSource {
     status_t shutdown();
 
     void setRenderTSTransform(const LinearTransform& trans);
-    void setRenderVolume(uint8_t volume);
+    void setRenderVolume(float left, float right);
+    void setRenderStreamType(int stream_type);
     bool isAboutToUnderflow(int64_t threshold);
     bool getStatus() const { return thread_status_; }
 
@@ -93,7 +94,9 @@ class AAH_DecoderPump : public MediaSource {
     int64_t             last_queued_pts_;
     bool                last_ts_transform_valid_;
     LinearTransform     last_ts_transform_;
-    uint8_t             last_volume_;
+    float               last_left_volume_;
+    float               last_right_volume_;
+    int                 last_stream_type_;
     CCHelper            cc_helper_;
 
     // protected by the thread_lock_
