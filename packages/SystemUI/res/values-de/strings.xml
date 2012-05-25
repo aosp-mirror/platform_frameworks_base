@@ -47,7 +47,7 @@
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Benachrichtigungen"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth-Tethering aktiv"</string>
-    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Eingabemethoden einrichten"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Eingabemethoden festlegen"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Physische Tastatur"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"App <xliff:g id="APPLICATION">%1$s</xliff:g> Zugriff auf USB-Gerät gewähren?"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"App <xliff:g id="APPLICATION">%1$s</xliff:g> Zugriff auf USB-Zubehör gewähren?"</string>
