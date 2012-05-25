@@ -462,8 +462,6 @@ public class AudioManager {
                  * responsive to the user.
                  */
                 int flags = FLAG_SHOW_UI | FLAG_VIBRATE;
-                // if there is no volume key-up sound, apply the new volume immediately
-                if (!mUseVolumeKeySounds) flags |= FLAG_PLAY_SOUND;
 
                 if (mUseMasterVolume) {
                     adjustMasterVolume(
@@ -506,9 +504,7 @@ public class AudioManager {
                  */
                 if (mUseVolumeKeySounds) {
                     if (mUseMasterVolume) {
-                        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-                            adjustMasterVolume(ADJUST_SAME, FLAG_PLAY_SOUND);
-                        }
+                        adjustMasterVolume(ADJUST_SAME, FLAG_PLAY_SOUND);
                     } else {
                         int flags = FLAG_PLAY_SOUND;
                         adjustSuggestedStreamVolume(
