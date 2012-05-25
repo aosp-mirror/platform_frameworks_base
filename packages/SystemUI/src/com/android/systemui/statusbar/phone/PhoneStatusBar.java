@@ -360,6 +360,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mClearButton = mStatusBarWindow.findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);
         mClearButton.setAlpha(0f);
+        mClearButton.setVisibility(View.INVISIBLE);
         mClearButton.setEnabled(false);
         mDateView = (DateView)mStatusBarWindow.findViewById(R.id.date);
         mSettingsButton = mStatusBarWindow.findViewById(R.id.settings_button);
@@ -816,16 +817,31 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         if (mClearButton.isShown()) {
             if (clearable != (mClearButton.getAlpha() == 1.0f)) {
-                ObjectAnimator.ofFloat(mClearButton, "alpha",
-                        clearable ? 1.0f : 0.0f)
-                    .setDuration(250)
-                    .start();
+                ObjectAnimator clearAnimation = ObjectAnimator.ofFloat(
+                        mClearButton, "alpha", clearable ? 1.0f : 0.0f).setDuration(250);
+                clearAnimation.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        if (mClearButton.getAlpha() <= 0.0f) {
+                            mClearButton.setVisibility(View.INVISIBLE);
+                        }
+                    }
+
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        if (mClearButton.getAlpha() <= 0.0f) {
+                            mClearButton.setVisibility(View.VISIBLE);
+                        }
+                    }
+                });
+                clearAnimation.start();
             }
         } else {
             mClearButton.setAlpha(clearable ? 1.0f : 0.0f);
+            mClearButton.setVisibility(clearable ? View.VISIBLE : View.INVISIBLE);
         }
         mClearButton.setEnabled(clearable);
-        
+
         final View nlo = mStatusBarView.findViewById(R.id.notification_lights_out);
         final boolean showDot = (any&&!areLightsOn());
         if (showDot != (nlo.getAlpha() == 1.0f)) {
