@@ -3506,6 +3506,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         if (screenOnListener != null) {
             if (mKeyguardMediator != null) {
+                try {
+                    mWindowManager.setEventDispatching(true);
+                } catch (RemoteException unhandled) {
+                }
                 mKeyguardMediator.onScreenTurnedOn(new KeyguardViewManager.ShowListener() {
                     @Override public void onShown(IBinder windowToken) {
                         if (windowToken != null) {
