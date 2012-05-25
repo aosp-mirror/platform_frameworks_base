@@ -47,7 +47,7 @@
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTOM."</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Oznámení"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Datové připojení Bluetooth se sdílí"</string>
-    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Nastavit metody vstupu"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Nastavit metody zadávání"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Fyzická klávesnice"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"Povolit aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g> přístup k zařízení USB?"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Povolit aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g> přístup k perifernímu zařízení USB?"</string>
@@ -77,7 +77,7 @@
     <string name="accessibility_home" msgid="8217216074895377641">"Domů"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
     <string name="accessibility_recent" msgid="8571350598987952883">"Nové aplikace"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Tlačítko přepnutí metody vstupu"</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Tlačítko přepnutí metody zadávání"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Tlačítko úpravy velikosti z důvodu kompatibility"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zvětšit menší obrázek na větší obrazovku."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Rozhraní Bluetooth je připojeno."</string>
