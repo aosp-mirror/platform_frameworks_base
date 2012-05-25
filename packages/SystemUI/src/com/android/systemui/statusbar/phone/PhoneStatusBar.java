@@ -45,7 +45,6 @@ import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
-import android.util.TypedValue;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.Gravity;
@@ -56,20 +55,16 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RemoteViews;
 import android.widget.ScrollView;
 import android.widget.TextView;
-
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
@@ -80,7 +75,6 @@ import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.RotationToggle;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
-import com.android.systemui.statusbar.policy.AutoRotateController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.IntruderAlertView;
@@ -224,6 +218,18 @@ public class PhoneStatusBar extends BaseStatusBar {
     DisplayMetrics mDisplayMetrics = new DisplayMetrics();
 
     private int mNavigationIconHints = 0;
+    private final Animator.AnimatorListener mMakeIconsInvisible = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            mIcons.setVisibility(View.INVISIBLE);
+        }
+    };
+    private final Animator.AnimatorListener mMakeIconsVisible = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            mIcons.setVisibility(View.VISIBLE);
+        }
+    };
 
     private class ExpandedDialog extends Dialog {
         ExpandedDialog(Context context) {
@@ -884,9 +890,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         if ((diff & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
             mIcons.animate().cancel();
             if ((state & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
-                mIcons.animate().alpha(0f).setStartDelay(100).setDuration(200).start();
+                mIcons.animate().alpha(0f).setStartDelay(100).setDuration(200).
+                        setListener(mMakeIconsInvisible).start();
             } else {
-                mIcons.animate().alpha(1f).setStartDelay(0).setDuration(300).start();
+                mIcons.animate().alpha(1f).setStartDelay(0).setDuration(300).
+                        setListener(mMakeIconsVisible).start();
             }
         }
 
@@ -1792,7 +1800,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         int panelh = 0;
-        final boolean portrait = mDisplayMetrics.heightPixels > mDisplayMetrics.widthPixels;
         
         final int disph = getExpandedViewMaxHeight();
 
