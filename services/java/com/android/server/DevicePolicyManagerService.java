@@ -1684,6 +1684,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // Note: we can only do the wipe via ExternalStorageFormatter if the volume is not emulated.
         if ((forceExtWipe || wipeExtRequested) && !Environment.isExternalStorageEmulated()) {
             Intent intent = new Intent(ExternalStorageFormatter.FORMAT_AND_FACTORY_RESET);
+            intent.putExtra(ExternalStorageFormatter.EXTRA_ALWAYS_RESET, true);
             intent.setComponent(ExternalStorageFormatter.COMPONENT_NAME);
             mWakeLock.acquire(10000);
             mContext.startService(intent);
