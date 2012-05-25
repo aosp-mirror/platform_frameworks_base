@@ -175,7 +175,7 @@ public class SizeAdaptiveLayout extends ViewGroup {
             height = Math.min(height, lp.maxHeight);
         }
 
-        if (heightIn != height) {
+        if (DEBUG && heightIn != height) {
             Log.d(TAG, this + "child view " + child + " " +
                   "measured out of bounds at " + heightIn +"px " +
                   "clamped to " + height + "px");
