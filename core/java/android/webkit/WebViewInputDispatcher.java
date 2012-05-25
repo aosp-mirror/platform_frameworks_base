@@ -686,7 +686,7 @@ final class WebViewInputDispatcher {
                     + ", eventType=" + eventType + ", flags=" + flags);
         }
         boolean preventDefault = mWebKitCallbacks.dispatchWebKitEvent(
-                event, eventType, flags);
+                this, event, eventType, flags);
         if (DEBUG) {
             Log.d(TAG, "dispatchWebKitEvent: preventDefault=" + preventDefault);
         }
@@ -708,6 +708,12 @@ final class WebViewInputDispatcher {
             d = next;
         }
         mWebKitDispatchEventQueue.mHead = d;
+    }
+
+    // Called by WebKit when it doesn't care about the rest of the touch stream
+    public void skipWebkitForRemainingTouchStream() {
+        // Just treat this like a timeout
+        handleWebKitTimeout();
     }
 
     // Runs on UI thread in response to the web kit thread appearing to be unresponsive.
@@ -1081,12 +1087,14 @@ final class WebViewInputDispatcher {
 
         /**
          * Dispatches an event to web kit.
+         * @param dispatcher The WebViewInputDispatcher sending the event
          * @param event The event.
          * @param eventType The event type.
          * @param flags The event's dispatch flags.
          * @return True if web kit wants to prevent default event handling.
          */
-        public boolean dispatchWebKitEvent(MotionEvent event, int eventType, int flags);
+        public boolean dispatchWebKitEvent(WebViewInputDispatcher dispatcher,
+                MotionEvent event, int eventType, int flags);
     }
 
     // Runs on UI thread.
