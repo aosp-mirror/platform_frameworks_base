@@ -476,19 +476,12 @@ public class MultiWaveView extends View {
 
     /**
      * Dispatches a trigger event to listener. Ignored if a listener is not set.
-     * @param whichHandle the handle that triggered the event.
+     * @param whichTarget the target that was triggered.
      */
-    private void dispatchTriggerEvent(int whichHandle) {
+    private void dispatchTriggerEvent(int whichTarget) {
         vibrate();
         if (mOnTriggerListener != null) {
-            mOnTriggerListener.onTrigger(this, whichHandle);
-        }
-    }
-
-    private void dispatchGrabbedEvent(int whichHandler) {
-        vibrate();
-        if (mOnTriggerListener != null) {
-            mOnTriggerListener.onGrabbed(this, whichHandler);
+            mOnTriggerListener.onTrigger(this, whichTarget);
         }
     }
 
@@ -514,7 +507,7 @@ public class MultiWaveView extends View {
 
             // Inform listener of any active targets.  Typically only one will be active.
             if (DEBUG) Log.v(TAG, "Finish with target hit = " + targetHit);
-            dispatchTriggerEvent(mActiveTarget);
+            dispatchTriggerEvent(activeTarget);
         }
 
         // Animate handle back to the center based on current state.
@@ -791,7 +784,7 @@ public class MultiWaveView extends View {
     }
 
     private void handleDown(MotionEvent event) {
-       if (!trySwitchToFirstTouchState(event.getX(), event.getY())) {
+        if (!trySwitchToFirstTouchState(event.getX(), event.getY())) {
             mDragging = false;
             mTargetAnimations.cancel();
             ping();
@@ -903,7 +896,6 @@ public class MultiWaveView extends View {
                 if (target.hasState(TargetDrawable.STATE_FOCUSED)) {
                     target.setState(TargetDrawable.STATE_FOCUSED);
                 }
-                dispatchGrabbedEvent(activeTarget);
                 if (AccessibilityManager.getInstance(mContext).isEnabled()) {
                     String targetContentDescription = getTargetDescription(activeTarget);
                     announceText(targetContentDescription);
@@ -950,7 +942,7 @@ public class MultiWaveView extends View {
                 } else {
                     mOnTriggerListener.onGrabbed(this, OnTriggerListener.CENTER_HANDLE);
                 }
-                mOnTriggerListener.onGrabbedStateChange(this, mGrabbedState);
+                mOnTriggerListener.onGrabbedStateChange(this, newState);
             }
         }
     }
