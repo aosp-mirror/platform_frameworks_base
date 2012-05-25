@@ -344,8 +344,8 @@ static const Word32 pow2Table[POW2_TABLE_SIZE] = {
 */
 Word32 pow2_xy(Word32 x, Word32 y)
 {
-  Word32 iPart;
-  Word32 fPart;
+  UWord32 iPart;
+  UWord32 fPart;
   Word32 res;
   Word32 tmp, tmp2;
   Word32 shift, shift2;
