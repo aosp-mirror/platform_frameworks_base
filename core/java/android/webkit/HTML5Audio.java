@@ -67,6 +67,8 @@ class HTML5Audio extends Handler
 
     private String mUrl;
     private boolean mAskToPlay = false;
+    private boolean mLoopEnabled = false;
+    private boolean mProcessingOnEnd = false;
     private Context mContext;
 
     // Timer thread -> UI thread
@@ -143,7 +145,13 @@ class HTML5Audio extends Handler
     // MediaPlayer.OnCompletionListener;
     public void onCompletion(MediaPlayer mp) {
         mState = COMPLETE;
+        mProcessingOnEnd = true;
         nativeOnEnded(mNativePointer);
+        mProcessingOnEnd = false;
+        if (mLoopEnabled == true) {
+            nativeOnRequestPlay(mNativePointer);
+            mLoopEnabled = false;
+        }
     }
 
     // MediaPlayer.OnErrorListener
@@ -264,14 +272,10 @@ class HTML5Audio extends Handler
 
 
     private void play() {
-        if (mState == COMPLETE) {
+        if (mState == COMPLETE && mLoopEnabled == true) {
             // Play it again, Sam
-            mTimer.cancel();
-            mTimer = new Timer();
-            mAskToPlay = true;
-            mMediaPlayer.stop();
-            mState = STOPPED;
-            mMediaPlayer.prepareAsync();
+            mMediaPlayer.start();
+            mState = STARTED;
             return;
         }
 
@@ -304,14 +308,11 @@ class HTML5Audio extends Handler
     }
 
     private void seek(int msec) {
+        if (mProcessingOnEnd == true && mState == COMPLETE && msec == 0) {
+            mLoopEnabled = true;
+        }
         if (mState >= PREPARED) {
             mMediaPlayer.seekTo(msec);
-            if (mState == COMPLETE) {
-                // Seeking after the stream had completed will
-                // cause us to start playing again. This is to
-                // support audio tags that specify loop=true.
-                play();
-            }
         }
     }
 
@@ -336,6 +337,7 @@ class HTML5Audio extends Handler
 
     private native void nativeOnBuffering(int percent, int nativePointer);
     private native void nativeOnEnded(int nativePointer);
+    private native void nativeOnRequestPlay(int nativePointer);
     private native void nativeOnPrepared(int duration, int width, int height, int nativePointer);
     private native void nativeOnTimeupdate(int position, int nativePointer);
 
