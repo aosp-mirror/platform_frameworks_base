@@ -317,6 +317,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"एप्लिकेशन को अन्य एप्लिकेशन के साथ सहभागिता करते समय भी आपके द्वारा दबाई जाने वाली कुंजियां देखने देता है (जैसे कोई पासवर्ड लिखना). सामान्‍य एप्‍लिकेशन के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"किसी इनपुट विधि से आबद्ध करें"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"धारक को किसी इनपुट विधि के शीर्ष-स्‍तर इंटरफ़ेस से आबद्ध होने देता है. सामान्‍य एप्‍लिकेशन के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"पहुंच-योग्‍यता सेवा से आबद्ध करें"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"धारक को किसी पहुंच-योग्यता सेवा के शीर्ष-स्‍तर इंटरफ़ेस से आबद्ध होने देता है. सामान्‍य एप्‍लिकेशन के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"किसी पाठ सेवा पर बने रहें"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"धारक को किसी पाठ सेवा (उदा. SpellCheckerService) के शीर्ष-स्‍तर इंटरफ़ेस पर आबद्ध होने देता है. सामान्‍य एप्‍लिकेशन के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"किसी VPN सेवा से आबद्ध करें"</string>
@@ -853,6 +855,12 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"क्‍वेरी साफ़ करें"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"क्वेरी सबमिट करें"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"ध्वनि खोज"</string>
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 माह पहले"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1 माह से पहले"</string>
   <plurals name="num_seconds_ago">
@@ -1119,6 +1127,10 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"इनपुट पद्धतियां सेट करें"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"भौतिक कीबोर्ड"</string>
     <string name="hardware" msgid="7517821086888990278">"हार्डवेयर"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"उम्‍मीदवार"</u></string>
@@ -1312,5 +1324,6 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ब्राउज़र लॉन्च करें?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"कॉल स्वीकार करें?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"हमेशा"</string>
-    <string name="activity_resolver_use_once" msgid="405646673463328329">"बस एक बार"</string>
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
+    <skip />
 </resources>

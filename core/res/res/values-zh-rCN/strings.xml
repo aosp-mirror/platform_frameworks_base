@@ -170,7 +170,7 @@
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"您的个人信息"</string>
     <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"直接访问您存储在名片上的信息。"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"您的社交信息"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"直接访问与您的联系人和社交关系相关的信息。"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"直接访问与您的联系人和社交人脉相关的信息。"</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"您的位置"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"监视您的实际位置。"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"网络通信"</string>
@@ -196,9 +196,9 @@
     <string name="permgrouplab_voicemail" msgid="4162237145027592133">"语音信箱"</string>
     <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"直接访问语音信箱。"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"麦克风"</string>
-    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"直接访问麦克风以录制音频。"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"直接使用麦克风以录制音频。"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"相机"</string>
-    <string name="permgroupdesc_camera" msgid="2933667372289567714">"直接访问相机以拍摄图片或视频。"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"直接使用相机以拍摄图片或视频。"</string>
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"您的应用信息"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"能够影响设备上其他应用的行为。"</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"壁纸"</string>
@@ -317,10 +317,12 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"允许应用记录您所按的键，包括与其他应用进行交互（如输入密码）时按的键。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"绑定至输入法"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"允许用户绑定至输入法的顶级接口。普通应用绝不需要此权限。"</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"绑定至辅助服务"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"允许应用绑定至辅助服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"绑定至文字服务"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"允许用户绑定至文字服务（如 SpellCheckerService）的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"绑定到 VPN 服务"</string>
-    <string name="permdesc_bindVpnService" msgid="2067845564581693905">"允许用户绑定到 VPN 服务的顶级接口。普通应用从不需要此权限。"</string>
+    <string name="permdesc_bindVpnService" msgid="2067845564581693905">"允许用户绑定到 VPN 服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"绑定到壁纸"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"允许用户绑定到壁纸的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"绑定到窗口小部件服务"</string>
@@ -460,9 +462,9 @@
     <string name="permlab_hardware_test" msgid="4148290860400659146">"测试硬件"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"允许应用控制各种外围设备以进行硬件测试。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"直接拨打电话号码"</string>
-    <string name="permdesc_callPhone" msgid="6396463004110544744">"允许应用在没有您干预的情况下呼叫电话号码。恶意应用可能会产生意料之外的话费。请注意，此权限不允许应用呼叫紧急电话。"</string>
+    <string name="permdesc_callPhone" msgid="6396463004110544744">"允许应用在没有您干预的情况下拨打电话号码。恶意应用可能会产生您意料之外的话费。请注意，此权限不允许应用拨打紧急呼救电话。"</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"直接呼叫任何电话号码"</string>
-    <string name="permdesc_callPrivileged" msgid="1689024901509996810">"允许应用在没有您干预的情况下呼叫任何电话号码，包括紧急呼叫号码。恶意应用可能会向紧急服务进行多余以及非法呼叫。"</string>
+    <string name="permdesc_callPrivileged" msgid="1689024901509996810">"允许应用在没有您干预的情况下拨打任何电话号码，包括紧急呼救号码。恶意应用可能会多余以及非法地拨打紧急服务的号码。"</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"直接启动 CDMA 平板电脑设置"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"直接启动 CDMA 电话设置"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"允许应用启动 CDMA 配置。恶意应用可能会无端启动 CDMA 配置。"</string>
@@ -746,7 +748,7 @@
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"“暂停”按钮"</string>
     <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"“播放”按钮"</string>
     <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"“停止”按钮"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"只能使用紧急呼叫"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"只能使用紧急呼救"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"网络已锁定"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM 卡已用 PUK 码锁定"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"请参阅《用户指南》或与客服人员联系。"</string>
@@ -839,7 +841,7 @@
     <string name="save_password_message" msgid="767344687139195790">"是否希望浏览器记住此密码？"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"暂不保存"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"记住"</string>
-    <string name="save_password_never" msgid="8274330296785855105">"从不"</string>
+    <string name="save_password_never" msgid="8274330296785855105">"永不"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"您无权打开此网页。"</string>
     <string name="text_copied" msgid="4985729524670131385">"文本已复制到剪贴板。"</string>
     <string name="more_item_label" msgid="4650918923083320495">"更多"</string>
@@ -853,6 +855,12 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"清除查询"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"提交查询"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"语音搜索"</string>
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 个月前"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1 个月前"</string>
   <plurals name="num_seconds_ago">
@@ -1093,7 +1101,7 @@
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB 已连接"</string>
     <string name="usb_storage_notification_message" msgid="939822783828183763">"触摸可将文件复制到计算机或从计算机复制到存储设备。"</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"关闭 USB 存储设备"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"触摸以关闭 USB 存储设备。"</string>
+    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"触摸可关闭 USB 存储设备。"</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB 存储设备正在使用中"</string>
     <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"在关闭 USB 存储设备前，请从计算机中卸载（“弹出”）Android 设备的 USB 存储设备。"</string>
     <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"在关闭 USB 存储设备前，请从计算机中卸载（“弹出”）Android 设备的 SD 卡。"</string>
@@ -1114,11 +1122,15 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"您卡上的所有数据都会丢失。"</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"格式化"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"已连接 USB 调试"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"触摸以停用 USB 调试。"</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"触摸可停用 USB 调试。"</string>
     <string name="select_input_method" msgid="4653387336791222978">"选择输入法"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"设置输入法"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"物理键盘"</string>
     <string name="hardware" msgid="7517821086888990278">"硬件"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"候选"</u></string>
@@ -1166,7 +1178,7 @@
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"访问权限请求"</string>
     <string name="allow" msgid="7225948811296386551">"允许"</string>
     <string name="deny" msgid="2081879885755434506">"拒绝"</string>
-    <string name="permission_request_notification_title" msgid="6486759795926237907">"许可权限请求"</string>
+    <string name="permission_request_notification_title" msgid="6486759795926237907">"权限请求"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"应用对帐户 <xliff:g id="ACCOUNT">%s</xliff:g>"\n" 提出权限请求。"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"输入法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同步"</string>
@@ -1175,7 +1187,7 @@
     <string name="chooser_wallpaper" msgid="7873476199295190279">"更改壁纸"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN 已激活"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"“<xliff:g id="APP">%s</xliff:g>”已激活 VPN"</string>
-    <string name="vpn_text" msgid="3011306607126450322">"触摸以管理网络。"</string>
+    <string name="vpn_text" msgid="3011306607126450322">"触摸可管理网络。"</string>
     <string name="vpn_text_long" msgid="6407351006249174473">"已连接到“<xliff:g id="SESSION">%s</xliff:g>”。触摸可管理网络。"</string>
     <string name="upload_file" msgid="2897957172366730416">"选择文件"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"未选定任何文件"</string>
@@ -1184,14 +1196,14 @@
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"已启用车载模式"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"触摸可退出车载模式。"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"网络共享或热点已启用"</string>
-    <string name="tethered_notification_message" msgid="6857031760103062982">"触摸以设置。"</string>
+    <string name="tethered_notification_message" msgid="6857031760103062982">"触摸可进行设置。"</string>
     <string name="back_button_label" msgid="2300470004503343439">"上一步"</string>
     <string name="next_button_label" msgid="1080555104677992408">"下一步"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"跳过"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"手机流量过多"</string>
-    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"触摸以了解有关移动数据使用的详情。"</string>
+    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"触摸可了解有关移动数据使用的详情。"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"已超出手机数据上限"</string>
-    <string name="throttled_notification_message" msgid="5443457321354907181">"触摸以了解有关移动数据使用的详情。"</string>
+    <string name="throttled_notification_message" msgid="5443457321354907181">"触摸可了解有关移动数据使用的详情。"</string>
     <string name="no_matches" msgid="8129421908915840737">"无匹配项"</string>
     <string name="find_on_page" msgid="1946799233822820384">"在网页上查找"</string>
   <plurals name="matches_found">
@@ -1281,14 +1293,14 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G 数据已停用"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"移动数据已停用"</string>
     <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fi 数据网络已停用"</string>
-    <string name="data_usage_limit_body" msgid="3317964706973601386">"触摸以启用。"</string>
+    <string name="data_usage_limit_body" msgid="3317964706973601386">"触摸可启用。"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"已超出 2G-3G 数据流量限制"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"已超出 4G 数据使用上限"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"已超出移动数据流量上限"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"超出了 Wi-Fi 数据流量上限"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"超出规定上限 <xliff:g id="SIZE">%s</xliff:g>。"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"后台数据受限制"</string>
-    <string name="data_usage_restricted_body" msgid="6741521330997452990">"触摸以删除限制。"</string>
+    <string name="data_usage_restricted_body" msgid="6741521330997452990">"触摸可去除限制。"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"安全证书"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"该证书有效。"</string>
     <string name="issued_to" msgid="454239480274921032">"颁发给："</string>
@@ -1312,5 +1324,6 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"要启动浏览器吗？"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"要接听电话吗？"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"始终"</string>
-    <string name="activity_resolver_use_once" msgid="405646673463328329">"仅此一次"</string>
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
+    <skip />
 </resources>

@@ -317,6 +317,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Pinapayagan ang app na tingnan ang mga key na iyong pinipindot kahit na nakikipag-ugnayan sa isa pang app (gaya ng pag-type ng password). Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"sumailalim sa isang pamamaraan ng pag-input"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Pinapayagan ang may-hawak na sumailalim sa nangungunang interface ng pamamaraan ng pag-input. Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"sumailalim sa isang serbisyo sa accessibility"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Binibigyang-daan ang may-ari na sumailalim sa nasa nangungunang antas na interface ng isang serbisyo sa accessibility. Hindi dapat kailanman kailanganin para sa normal na apps."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"sumailalim sa serbisyo ng teksto"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Pinapayagan ang may-hawak na sumailalim sa nangungunang antas na interface (hal. SpellCheckerService). Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"sumailalim sa isang serbisyo ng VPN"</string>
@@ -853,6 +855,12 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"I-clear ang query"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Isumite ang query"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Paghahanap gamit ang boses"</string>
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 buwan ang nakalipas"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Bago ang nakalipas na 1 buwan"</string>
   <plurals name="num_seconds_ago">
@@ -1119,6 +1127,10 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"I-set up paraan ng pag-input"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Aktwal na keyboard"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"mga kandidato"</u></string>
@@ -1312,5 +1324,6 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Ilunsad ang Browser?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Tanggapin ang tawag?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Palagi"</string>
-    <string name="activity_resolver_use_once" msgid="405646673463328329">"Isang Beses Lang"</string>
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
+    <skip />
 </resources>

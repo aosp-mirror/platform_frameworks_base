@@ -317,6 +317,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"允許應用程式監看您的按鍵操作，包括使用其他應用程式時的按鍵操作，例如輸入密碼 (一般應用程式不需使用)。"</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"連結至輸入法"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"允許應用程式繫結至輸入法的頂層介面 (一般應用程式不需使用)。"</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"繫結至協助工具服務"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"允許應用程式繫結至協助工具服務的頂層介面 (一般應用程式不需使用)。"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"繫結至文字服務"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"允許應用程式繫結至文字服務 (例如 SpellCheckerService) 的頂層介面 (一般應用程式不需使用)。"</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"繫結至 VPN 服務"</string>
@@ -853,6 +855,12 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"清除查詢"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"提交查詢"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"語音搜尋"</string>
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 個月以前"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1 個月前"</string>
   <plurals name="num_seconds_ago">
@@ -1113,12 +1121,16 @@
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB 儲存裝置上儲存的所有檔案即將遭到清除。這項動作無法復原！"</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"儲存卡上的所有資料都會消失。"</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"格式化"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB 偵錯模式已啟用"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"已連接 USB 偵錯工具"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"輕觸即可停用 USB 偵錯。"</string>
     <string name="select_input_method" msgid="4653387336791222978">"選擇輸入法"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"設定輸入法"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"實體鍵盤"</string>
     <string name="hardware" msgid="7517821086888990278">"硬體"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"待選項目"</u></string>
@@ -1312,5 +1324,6 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"啟動「瀏覽器」嗎？"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"接聽電話嗎？"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"一律採用"</string>
-    <string name="activity_resolver_use_once" msgid="405646673463328329">"僅此一次"</string>
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
+    <skip />
 </resources>

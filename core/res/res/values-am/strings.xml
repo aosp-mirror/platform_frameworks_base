@@ -317,6 +317,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"ከሌላ መተግበሪያ( ልክ እንደ የይለፍ ቃል መጫን) ጋር በምትገናኝበት ጊዜ እንኳን የተጫንካቸውን ቁልፎች ለማየት ለመተግበሪያው ይፈቅዳሉ፡፡ ለመደበኛ መተግበሪያዎች መቼም ቢሆን አያስፈልግም፡፡"</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"በግቤት ሜተድ ጠርዝ"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"ያዡ ግቤት ስልቱን ወደ ከፍተኛ-ደረጃ በይነገጽ ለመጠረዝ ይፈቅዳሉ። ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"ከአንድ የተደራሽነት አገልግሎት ጋር እሰር"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"ያዢው ወደ የአንድ ተደራሽነት አገልግሎት ከፍተኛ-ደረጃ በይነገጽ እንዲያስር ይፈቅድለታል። ለመደበኛ መተግበሪያዎች መቼም ቢሆን ሊያስፈልግ አይገባም።"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"ለፅሁፍ አገልግሎት አሰረ"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"ያዡ ግቤት ለከፍተኛ-ደረጃ የፅሁፍ አገልግሎት ገፅታ ለመጠረዝ ይፈቅዳል። ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"ለVPN አገልግሎት ተገዛ"</string>
@@ -853,6 +855,12 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"ጥያቄ አጥራ"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"ጥያቄ አስረክብ"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"የድምፅ ፍለጋ"</string>
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"ከ1 ወር በፊት"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"ከ1 ወር በፊት"</string>
   <plurals name="num_seconds_ago">
@@ -1119,6 +1127,10 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"የግቤት ስልቶችን አዘጋጅ"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"የሚዳሰስ የቁልፍ ሰሌዳ"</string>
     <string name="hardware" msgid="7517821086888990278">"ሃርድዌር"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"ዕጩዎች"</u></string>
@@ -1312,5 +1324,6 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ማሰሺያን አስነሳ?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"ጥሪ ተቀበል?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ዘወትር"</string>
-    <string name="activity_resolver_use_once" msgid="405646673463328329">"አንዴ ብቻ"</string>
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
+    <skip />
 </resources>

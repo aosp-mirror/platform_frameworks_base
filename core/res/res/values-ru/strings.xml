@@ -317,6 +317,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Приложение сможет отслеживать нажатие пользователем клавиш даже при работе с другими программами (например, при вводе пароля). Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"связывать с методом ввода"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Приложение сможет подключаться к базовому интерфейсу системы ввода. Это разрешение не используется обычными приложениями."</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"подключаться к службе спецвозможностей"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Приложение сможет подключаться к базовому интерфейсу службы специальных возможностей. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"привязка к службе текстовых сообщений"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Позволяет подключаться к базовому интерфейсу службы текстовых сообщений (например, SpellCheckerService). Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"подключаться к VPN-службе"</string>
@@ -853,6 +855,12 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Удалить запрос"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Отправить запрос"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Голосовой поиск"</string>
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 месяц назад"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Более месяца назад"</string>
   <plurals name="num_seconds_ago">
@@ -1119,6 +1127,10 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"Настройка способов ввода"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Физическая клавиатура"</string>
     <string name="hardware" msgid="7517821086888990278">"Аппаратура"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"варианты"</u></string>
@@ -1312,5 +1324,6 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Запустить браузер?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Ответить?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Всегда"</string>
-    <string name="activity_resolver_use_once" msgid="405646673463328329">"Только сейчас"</string>
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
+    <skip />
 </resources>
