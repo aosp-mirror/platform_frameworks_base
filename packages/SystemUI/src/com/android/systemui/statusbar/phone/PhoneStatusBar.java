@@ -33,8 +33,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.Message;
@@ -313,8 +317,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         if (!ActivityManager.isHighEndGfx(mDisplay)) {
             mStatusBarWindow.setBackground(null);
-            mNotificationPanel.setBackgroundColor(context.getResources().getColor(
-                    R.color.notification_panel_solid_background));
+            mNotificationPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
+                    R.color.notification_panel_solid_background)));
         }
 
         if (ENABLE_INTRUDERS) {
@@ -2127,5 +2131,38 @@ public class PhoneStatusBar extends BaseStatusBar {
     protected boolean shouldDisableNavbarGestures() {
         return mExpanded || (mDisabled & StatusBarManager.DISABLE_HOME) != 0;
     }
-}
 
+    private static class FastColorDrawable extends Drawable {
+        private final int mColor;
+
+        public FastColorDrawable(int color) {
+            mColor = 0xff000000 | color;
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            canvas.drawColor(mColor, PorterDuff.Mode.SRC);
+        }
+
+        @Override
+        public void setAlpha(int alpha) {
+        }
+
+        @Override
+        public void setColorFilter(ColorFilter cf) {
+        }
+
+        @Override
+        public int getOpacity() {
+            return PixelFormat.OPAQUE;
+        }
+
+        @Override
+        public void setBounds(int left, int top, int right, int bottom) {
+        }
+
+        @Override
+        public void setBounds(Rect bounds) {
+        }
+    }
+}
