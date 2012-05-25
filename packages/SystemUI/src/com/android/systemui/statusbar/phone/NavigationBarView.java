@@ -23,6 +23,7 @@ import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
@@ -110,6 +111,14 @@ public class NavigationBarView extends LinearLayout {
 
     public void setBar(BaseStatusBar phoneStatusBar) {
         mDelegateHelper.setBar(phoneStatusBar);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (mDelegateHelper != null) {
+            mDelegateHelper.onInterceptTouchEvent(event);
+        }
+        return true;
     }
 
     @Override
@@ -292,6 +301,7 @@ public class NavigationBarView extends LinearLayout {
         setLowProfile(false);
     }
 
+    @Override
     public void onFinishInflate() {
         mRotatedViews[Surface.ROTATION_0] = 
         mRotatedViews[Surface.ROTATION_180] = findViewById(R.id.rot0);
@@ -327,6 +337,12 @@ public class NavigationBarView extends LinearLayout {
         }
 
         setNavigationIconHints(mNavigationIconHints, true);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        mDelegateHelper.setInitialTouchRegion(getHomeButton(), getBackButton(), getRecentsButton());
     }
 
     @Override

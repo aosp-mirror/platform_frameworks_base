@@ -55,17 +55,25 @@ public class TabletStatusBarView extends FrameLayout {
     }
 
     @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
+    public boolean onTouchEvent(MotionEvent event) {
+        if (mDelegateHelper != null) {
+            mDelegateHelper.onInterceptTouchEvent(event);
+        }
+        return true;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
         // Find the view we wish to grab events from in order to detect search gesture.
         // Depending on the device, this will be one of the id's listed below.
         // If we don't find one, we'll use the view provided in the constructor above (this view).
-        View view = null;
-        if ((view = findViewById(R.id.navigationArea)) != null) {
-            mDelegateHelper.setSourceView(view);
-        } else if ((view = findViewById(R.id.nav_buttons)) != null) {
-            mDelegateHelper.setSourceView(view);
+        View view = findViewById(R.id.navigationArea);
+        if (view == null) {
+            view = findViewById(R.id.nav_buttons);
         }
+        mDelegateHelper.setSourceView(view);
+        mDelegateHelper.setInitialTouchRegion(view);
     }
 
     @Override
@@ -100,8 +108,8 @@ public class TabletStatusBarView extends FrameLayout {
         if (TabletStatusBar.DEBUG) {
             Slog.d(TabletStatusBar.TAG, "TabletStatusBarView not intercepting event");
         }
-        if (mDelegateHelper != null) {
-            return mDelegateHelper.onInterceptTouchEvent(ev);
+        if (mDelegateHelper != null && mDelegateHelper.onInterceptTouchEvent(ev)) {
+            return true;
         }
         return super.onInterceptTouchEvent(ev);
     }

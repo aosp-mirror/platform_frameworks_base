@@ -129,7 +129,7 @@ public class SearchPanelView extends FrameLayout implements
         }
 
         public void onGrabbedStateChange(View v, int handle) {
-            if (OnTriggerListener.NO_HANDLE == handle) {
+            if (mTarget == -1 && OnTriggerListener.NO_HANDLE == handle) {
                 mBar.hideSearchPanel();
             }
         }
@@ -147,8 +147,8 @@ public class SearchPanelView extends FrameLayout implements
                         startAssistActivity();
                     break;
                 }
+                mBar.hideSearchPanel();
             }
-            mBar.hideSearchPanel();
         }
     };
 
