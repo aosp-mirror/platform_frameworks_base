@@ -425,6 +425,12 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
                 case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                 case WifiMonitor.P2P_GROUP_REMOVED_EVENT:
+                case WifiMonitor.P2P_DEVICE_FOUND_EVENT:
+                case WifiMonitor.P2P_DEVICE_LOST_EVENT:
+                case WifiMonitor.P2P_FIND_STOPPED_EVENT:
+                case WifiMonitor.P2P_SERV_DISC_RESP_EVENT:
+                case WifiStateMachine.CMD_ENABLE_P2P:
+                case WifiStateMachine.CMD_DISABLE_P2P:
                 case PEER_CONNECTION_USER_ACCEPT:
                 case PEER_CONNECTION_USER_REJECT:
                 case GROUP_CREATING_TIMED_OUT:
@@ -837,6 +843,13 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         transitionTo(mUserAuthorizingInvitationState);
                     }
                     break;
+                case WifiMonitor.P2P_FIND_STOPPED_EVENT:
+                    // When discovery stops in inactive state, flush to clear
+                    // state peer data
+                    mWifiNative.p2pFlush();
+                    mServiceDiscReqId = null;
+                    sendP2pDiscoveryChangedBroadcast(false);
+                    break;
                 case WifiMonitor.P2P_PROV_DISC_PBC_REQ_EVENT:
                 case WifiMonitor.P2P_PROV_DISC_ENTER_PIN_EVENT:
                 case WifiMonitor.P2P_PROV_DISC_SHOW_PIN_EVENT:
@@ -873,6 +886,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         @Override
         public boolean processMessage(Message message) {
             if (DBG) logd(getName() + message.toString());
+            boolean ret = HANDLED;
             switch (message.what) {
                case GROUP_CREATING_TIMED_OUT:
                     if (mGroupCreatingTimeoutIndex == message.arg1) {
@@ -880,6 +894,16 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         handleGroupCreationFailure();
                         transitionTo(mInactiveState);
                     }
+                    break;
+                case WifiMonitor.P2P_DEVICE_LOST_EVENT:
+                    WifiP2pDevice device = (WifiP2pDevice) message.obj;
+                    if (!mSavedPeerConfig.deviceAddress.equals(device.deviceAddress)) {
+                        // Do the regular device lost handling
+                        ret = NOT_HANDLED;
+                        break;
+                    }
+                    // Do nothing
+                    if (DBG) logd("Retain connecting device " + device);
                     break;
                 case WifiP2pManager.DISCOVER_PEERS:
                     /* Discovery will break negotiation */
@@ -898,9 +922,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     replyToMessage(message, WifiP2pManager.CANCEL_CONNECT_SUCCEEDED);
                     break;
                 default:
-                    return NOT_HANDLED;
+                    ret = NOT_HANDLED;
             }
-            return HANDLED;
+            return ret;
         }
     }
 
