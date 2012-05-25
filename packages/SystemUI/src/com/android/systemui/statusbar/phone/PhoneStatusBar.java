@@ -1049,6 +1049,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
             mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
         }
+        mHandler.removeMessages(MSG_CLOSE_SEARCH_PANEL);
+        mHandler.sendEmptyMessage(MSG_CLOSE_SEARCH_PANEL);
 
         if (!mExpandedVisible) {
             return;
