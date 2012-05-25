@@ -614,6 +614,41 @@
         </ul>
       </li>
 
+
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot
+?>training/graphics/opengl/index.html">
+            <span class="en">Displaying Graphics with OpenGL ES</span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/graphics/opengl/environment.html">
+            <span class="en">Building an OpenGL ES Environment</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/graphics/opengl/shapes.html">
+            <span class="en">Defining Shapes</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/graphics/opengl/draw.html">
+            <span class="en">Drawing Shapes</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/graphics/opengl/projection.html">
+            <span class="en">Applying Projection and Camera Views</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/graphics/opengl/motion.html">
+            <span class="en">Adding Motion</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/graphics/opengl/touch.html">
+            <span class="en">Responding to Touch Events</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+
+
     </ul>
   </li>
 </ul><!-- nav -->

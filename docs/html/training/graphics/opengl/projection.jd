@@ -1,0 +1,152 @@
+page.title=Applying Projection and Camera Views
+parent.title=Displaying Graphics with OpenGL ES
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Drawing Shapes
+previous.link=draw.html
+next.title=Applying Projection and Camera Views
+next.link=projection.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#projection">Define a Projection</a></li>
+  <li><a href="#camera-view">Define a Camera View</a></li>
+  <li><a href="#transform">Apply Projection and Camera Transformations</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL</a></li>
+</ul>
+
+<div class="download-box">
+ <a href="{@docRoot}shareables/training/OpenGLES.zip"
+class="button">Download the sample</a>
+ <p class="filename">OpenGLES.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>In the OpenGL ES environment, projection and camera views allow you to display drawn objects in a
+way that more closely resembles how you see physical objects with your eyes. This simulation of
+physical viewing is done with mathematical transformations of drawn object coordinates:</p>
+
+<ul>
+  <li><em>Projection</em> - This transformation adjusts the coordinates of drawn objects based on
+the width and height of the {@link android.opengl.GLSurfaceView} where they are displayed. Without
+this calculation, objects drawn by OpenGL ES are skewed by the unequal proportions of the view
+window. A projection transformation typically only has to be calculated when the proportions of the
+OpenGL view are established or changed in the {@link
+android.opengl.GLSurfaceView.Renderer#onSurfaceChanged
+onSurfaceChanged()} method of your renderer. For more information about OpenGL ES projections and
+coordinate mapping, see <a
+href="{@docRoot}guide/topics/graphics/opengl.html#coordinate-mapping">Mapping Coordinates for Drawn
+Objects</a>.</li>
+  <li><em>Camera View</em> - This transformation adjusts the coordinates of drawn objects based on a
+virtual camera position. It’s important to note that OpenGL ES does not define an actual camera
+object, but instead provides utility methods that simulate a camera by transforming the display of
+drawn objects. A camera view transformation might be calculated only once when you establish your
+{@link android.opengl.GLSurfaceView}, or might change dynamically based on user actions or your
+application’s function.</li>
+</ul>
+
+<p>This lesson describes how to create a projection and camera view and apply it to shapes drawn in
+your {@link android.opengl.GLSurfaceView}.</p>
+
+
+<h2 id="projection">Define a Projection</h2>
+
+<p>The data for a projection transformation is calculated in the {@link
+android.opengl.GLSurfaceView.Renderer#onSurfaceChanged onSurfaceChanged()}
+method of your {@link android.opengl.GLSurfaceView.Renderer} class. The following example code
+takes the height and width of the {@link android.opengl.GLSurfaceView} and uses it to populate a
+projection transformation {@link android.opengl.Matrix} using the {@link
+android.opengl.Matrix#frustumM Matrix.frustumM()} method:</p>
+
+<pre>
+&#64;Override
+public void onSurfaceChanged(GL10 unused, int width, int height) {
+    GLES20.glViewport(0, 0, width, height);
+
+    float ratio = (float) width / height;
+
+    // this projection matrix is applied to object coordinates
+    // in the onDrawFrame() method
+    Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+}
+</pre>
+
+<p>This code populates a projection matrix, {@code mProjMatrix} which you can then combine with a
+camera view transformation in the {@link android.opengl.GLSurfaceView.Renderer#onDrawFrame
+onDrawFrame()} method, which is shown in the next section.</p>
+
+<p class="note"><strong>Note:</strong> Just applying a projection transformation to your
+drawing objects typically results in a very empty display. In general, you must also apply a camera
+view transformation in order for anything to show up on screen.</p>
+
+
+<h2 id="camera-view">Define a Camera View</h2>
+
+<p>Complete the process of transforming your drawn objects by adding a camera view transformation as
+part of the drawing process. In the following example code, the camera view transformation is
+calculated using the {@link android.opengl.Matrix#setLookAtM Matrix.setLookAtM()} method and then
+combined with the previously calculated projection matrix. The combined transformation matrices
+are then passed to the drawn shape.</p>
+
+<pre>
+&#64;Override
+public void onDrawFrame(GL10 unused) {
+    ...
+
+    // Set the camera position (View matrix)
+    Matrix.setLookAtM(mVMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+
+    // Calculate the projection and view transformation
+    Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mVMatrix, 0);
+
+    // Draw shape
+    mTriangle.draw(mMVPMatrix);
+}
+</pre>
+
+
+<h2 id="#transform">Apply Projection and Camera Transformations</h2>
+
+<p>In order to use the combined projection and camera view transformation matrix shown in the
+previews sections, modify the {@code draw()} method of your graphic objects to accept the combined
+transformation matrix and apply it to the shape:</p>
+
+<pre>
+public void draw(float[] mvpMatrix) { // pass in the calculated transformation matrix
+    ...
+
+    // get handle to shape's transformation matrix
+    mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+
+    // Apply the projection and view transformation
+    GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+
+    // Draw the triangle
+    GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
+    ...
+}
+</pre>
+
+<p>Once you have correctly calulated and applied the projection and camera view transformations,
+your graphic objects are drawn in correct proportions and should look like this:</p>
+
+
+<img src="{@docRoot}images/opengl/ogl-triangle-projected.png">
+<p class="img-caption">
+<strong>Figure 1.</strong> Triangle drawn with a projection and camera view applied.</p>
+
+
+<p>Now that you have an application that displays your shapes in correct proportions, it's time to
+add motion to your shapes.</p>
