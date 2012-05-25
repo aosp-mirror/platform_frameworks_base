@@ -106,6 +106,9 @@ public class SearchPanelView extends FrameLayout implements
     }
 
     private void startAssistActivity() {
+        // Close Recent Apps if needed
+        mBar.animateCollapse();
+        // Launch Assist
         Intent intent = getAssistIntent();
         try {
             ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
