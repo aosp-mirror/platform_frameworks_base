@@ -317,6 +317,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Ermöglicht der App, die von Ihnen gedrückten Tasten zu überwachen, etwa bei der Eingabe eines Passworts. Dies gilt auch für die Interaktion mit anderen Apps. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"An eine Eingabemethode binden"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Ermöglicht dem Halter, sich an die Oberfläche einer Eingabemethode auf oberster Ebene zu binden. Sollte nie für normale Apps benötigt werden."</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"An eine Bedienungshilfe binden"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Ermöglicht dem Halter, sich an die Oberfläche einer Bedienungshilfe auf oberster Ebene zu binden. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"An einen Textdienst binden"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Ermöglicht dem Halter, sich an die Oberfläche eines Textdienstes auf oberster Ebene zu binden, z. B. eines Rechtschreibprüfungsdienstes. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"An einen VPN-Dienst binden"</string>
@@ -409,10 +411,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6737736970602176133">"Ermöglicht der App, auf zusätzliche Standortanbieterbefehle zuzugreifen. Schädliche Apps können so die Funktionsweise von GPS oder anderen Standortquellen beeinträchtigen."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"Berechtigung zur Installation eines Standortanbieters"</string>
     <string name="permdesc_installLocationProvider" msgid="1742577679350078373">"Erstellt simulierte Standortquellen für Testzwecke. Schädliche Apps können so den von echten Standortquellen wie GPS oder Netzwerkanbietern zurückgegebenen Standort und/oder Status überschreiben oder Ihren Standort überwachen und an eine externe Quelle weitergeben."</string>
-    <string name="permlab_accessFineLocation" msgid="8116127007541369477">"genauer (GPS-) Standort"</string>
+    <string name="permlab_accessFineLocation" msgid="8116127007541369477">"Genauer (GPS-) Standort"</string>
     <string name="permdesc_accessFineLocation" product="tablet" msgid="5326423948268164934">"Ermöglicht Zugriff auf genaue Standortquellen wie GPS auf dem Tablet (falls verfügbar). Schädliche Apps können damit bestimmen, wo Sie sich befinden, und so Ihren Akku zusätzlich belasten."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7130267914433890869">"Ermöglicht Zugriff auf genaue Standortquellen wie GPS auf dem Telefon (falls verfügbar). Schädliche Apps können damit bestimmen, wo Sie sich befinden, und so Ihren Akku zusätzlich belasten."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"ungefährer (netzwerkbasierter) Standort"</string>
+    <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"Ungefährer (netzwerkbasierter) Standort"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="5460726396318105483">"Ermöglicht Zugriff auf Quellen mit ungefähren Standortbestimmungen wie die Datenbank des Mobilfunknetzes, um falls möglich den ungefähren Standort des Tablets zu bestimmen. Schädliche Apps können so herausfinden, wo Sie sich ungefähr befinden."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8900795778057579522">"Ermöglicht Zugriff auf Quellen mit ungefähren Standortbestimmungen wie die Datenbank des Mobilfunknetzes, um falls möglich den ungefähren Standort des Telefons zu bestimmen. Schädliche Apps können so herauszufinden, wo Sie sich ungefähr befinden."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"Auf SurfaceFlinger zugreifen"</string>
@@ -548,9 +550,9 @@
     <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"Ermöglicht der App, die Synchronisierungseinstellungen zu ändern, etwa ob die Synchronisierung für die App \"Personen\" aktiviert ist oder nicht"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"Synchronisierungsstatistiken lesen"</string>
     <string name="permdesc_readSyncStats" msgid="3801971839939951678">"Ermöglicht der App, die Synchronisierungsstatistiken zu lesen, etwa den Verlauf der bereits durchgeführten Synchronisierungen"</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"abonnierte Feeds lesen"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"Abonnierte Feeds lesen"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Ermöglicht der App, Details zu den zurzeit synchronisierten Feeds abzurufen"</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"abonnierte Feeds schreiben"</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"Abonnierte Feeds schreiben"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Ermöglicht der App, Änderungen an kürzlich synchronisierten Feeds vorzunehmen. Schädliche Apps können so Ihre synchronisierten Feeds ändern."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"Begriffe lesen, die Sie zum Wörterbuch hinzugefügt haben"</string>
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Ermöglicht der App, alle privaten Wörter, Namen und Ausdrücke zu lesen, die ein Nutzer in seinem Wörterbuch gespeichert hat"</string>
@@ -853,6 +855,12 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Anfrage löschen"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Anfrage senden"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Sprachsuche"</string>
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Vor 1 Monat"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Vor mehr als 1 Monat"</string>
   <plurals name="num_seconds_ago">
@@ -1119,6 +1127,10 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"Eingabemethoden einrichten"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Physische Tastatur"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"Kandidaten"</u></string>
@@ -1193,7 +1205,7 @@
     <string name="throttled_notification_title" msgid="6269541897729781332">"Mobildatenlimit überschritten"</string>
     <string name="throttled_notification_message" msgid="5443457321354907181">"Durch Berühren weitere Informationen zum Mobildatenverbrauch aufrufen"</string>
     <string name="no_matches" msgid="8129421908915840737">"Keine Treffer"</string>
-    <string name="find_on_page" msgid="1946799233822820384">"Suchen"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"Auf Seite suchen"</string>
   <plurals name="matches_found">
     <item quantity="one" msgid="8167147081136579439">"1 Treffer"</item>
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> von <xliff:g id="TOTAL">%d</xliff:g>"</item>
@@ -1312,5 +1324,6 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Browser starten?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Anruf annehmen?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Immer"</string>
-    <string name="activity_resolver_use_once" msgid="405646673463328329">"Nur einmal"</string>
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
+    <skip />
 </resources>

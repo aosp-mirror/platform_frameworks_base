@@ -317,6 +317,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"อนุญาตให้แอปพลิเคชันดูแป้นที่คุณกดแม้ในขณะที่กำลังโต้ตอบกับแอปพลิเคชันอื่น (เช่น ขณะพิมพ์รหัสผ่าน) ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"เชื่อมโยงกับวิธีป้อนข้อมูล"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"อนุญาตให้ผู้ใช้เชื่อมโยงกับส่วนติดต่อผู้ใช้ระดับสูงสุดของวิธีการป้อนข้อมูล ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"เชื่อมโยงกับบริการการเข้าถึง"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"อนุญาตให้เจ้าของเชื่อมโยงกับส่วนติดต่อระดับบนสุดของบริการการเข้าถึง ซึ่งแอปพลิเคชันทั่วไปไม่จำเป็นต้องใช้"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"เชื่อมโยงกับบริการข้อความ"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"อนุญาตให้ผู้ใช้เชื่อมโยงกับส่วนติดต่อผู้ใช้ระดับสูงสุดของบริการข้อความ (เช่น บริการเครื่องตรวจตัวสะกด) ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"เชื่อมโยงกับบริการ VPN"</string>
@@ -853,6 +855,12 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"ล้างข้อความค้นหา"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"ส่งข้อความค้นหา"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"ค้นหาด้วยเสียง"</string>
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 เดือนที่ผ่านมา"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"ก่อน 1 เดือนที่แล้ว"</string>
   <plurals name="num_seconds_ago">
@@ -1119,6 +1127,10 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"ตั้งค่าวิธีการป้อนข้อมูล"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"แป้นพิมพ์บนเครื่อง"</string>
     <string name="hardware" msgid="7517821086888990278">"ฮาร์ดแวร์"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"ตัวเลือก"</u></string>
@@ -1312,5 +1324,6 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"เปิดเบราว์เซอร์หรือไม่"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"รับสายหรือไม่"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ทุกครั้ง"</string>
-    <string name="activity_resolver_use_once" msgid="405646673463328329">"เพียงแค่ครั้งเดียว"</string>
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
+    <skip />
 </resources>
