@@ -1013,6 +1013,8 @@ public class TabletStatusBar extends BaseStatusBar implements
         mHandler.sendEmptyMessage(MSG_CLOSE_INPUT_METHODS_PANEL);
         mHandler.removeMessages(MSG_CLOSE_COMPAT_MODE_PANEL);
         mHandler.sendEmptyMessage(MSG_CLOSE_COMPAT_MODE_PANEL);
+        mHandler.removeMessages(MSG_CLOSE_SEARCH_PANEL);
+        mHandler.sendEmptyMessage(MSG_CLOSE_SEARCH_PANEL);
     }
 
     @Override // CommandQueue
