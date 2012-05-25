@@ -317,6 +317,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Permite que la aplicación observe las teclas que presionas, incluso al interactuar con otra aplicación (como cuando escribes una contraseña). Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"vincular a un método de entrada"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Permite al propietario vincularse a la interfaz de nivel superior de un método de entrada. Las aplicaciones normales no deberían necesitar este permiso."</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"vincular a un servicio de accesibilidad"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Permite al propietario vincularse a la interfaz de nivel superior de un servicio de accesibilidad. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"vincular a un servicio de texto"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Permite al titular vincularse a la interfaz de nivel superior de un servicio de texto (p. ej., SpellCheckerService). Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"vincular con un servicio de VPN"</string>
@@ -731,7 +733,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Volver a intentarlo"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Se superó el máximo de intentos permitido para el desbloqueo facial del dispositivo."</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Cargando <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Cargada."</string>
+    <string name="lockscreen_charged" msgid="4938930459620989972">"Cargado."</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Conecta tu cargador."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"No hay tarjeta SIM."</string>
@@ -853,6 +855,12 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Eliminar la consulta"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Enviar consulta"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Búsqueda por voz"</string>
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"hace 1 mes"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Anterior a 1 mes atrás"</string>
   <plurals name="num_seconds_ago">
@@ -1081,7 +1089,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Establecer"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Listo"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NUEVO: "</font></string>
-    <string name="perms_description_app" msgid="5139836143293299417">"Proporcionado por <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="perms_description_app" msgid="5139836143293299417">"Proporcionado por <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="no_permissions" msgid="7283357728219338112">"No se requieren permisos"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Almacenamiento USB masivo"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Conectado al USB"</string>
@@ -1115,10 +1123,14 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formato"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuración de USB conectada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca para desactivar la depuración de USB."</string>
-    <string name="select_input_method" msgid="4653387336791222978">"Selecciona el método de introducción"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Selecciona el método de entrada"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Configurar métodos de introducción"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Teclado físico"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidatos"</u></string>
@@ -1312,5 +1324,6 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"¿Deseas iniciar el navegador?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"¿Aceptar la llamada?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Siempre"</string>
-    <string name="activity_resolver_use_once" msgid="405646673463328329">"Solo una vez"</string>
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
+    <skip />
 </resources>

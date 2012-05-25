@@ -317,6 +317,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Uygulamaya, başka bir uygulama ile etkileşim halindeyken dahi (örneğin, şifre yazarken) bastığınız tuşları izleme izni verir. Normal uygulamalar için gerekli değildir."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"bir giriş yöntemine bağla"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Cihazın sahibine, bir giriş yönteminin en üst düzey arayüzüne bağlanma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"erişilebilirlik hizmetine bağlan"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"İzin sahibine bir erişilebilirlik hizmetinin en üst düzey arayüzüne bağlanma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"kısa mesaj hizmetine bağla"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Cihazın sahibine, bir metin hizmetinin (ör. SpellCheckerService) en üst düzey arayüzüne bağlanma izni verir. Normal uygulamalarda hiçbir zaman gerekmez."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"VPN hizmetine bağlan"</string>
@@ -853,6 +855,12 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Sorguyu temizle"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Sorguyu gönder"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Sesli arama"</string>
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 ay önce"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1 ay önce"</string>
   <plurals name="num_seconds_ago">
@@ -1119,6 +1127,10 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"Giriş yöntemlerini ayarla"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Fiziksel klavye"</string>
     <string name="hardware" msgid="7517821086888990278">"Donanım"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"adaylar"</u></string>
@@ -1312,5 +1324,6 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Tarayıcı Başlatılsın mı?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Çağrı kabul edilsin mi?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Her zaman"</string>
-    <string name="activity_resolver_use_once" msgid="405646673463328329">"Sadece Bir Defa"</string>
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
+    <skip />
 </resources>

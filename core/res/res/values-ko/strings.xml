@@ -317,6 +317,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"앱이 다른 앱과 상호작용할 때에도 사용자가 누르는 키(예: 비밀번호 입력)를 볼 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"입력 방법 연결"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"권한을 가진 프로그램이 입력 방법에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"접근성 서비스와 연결"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"권한을 가진 프로그램이 접근성 서비스에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"텍스트 서비스 연결"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"권한을 가진 프로그램이 텍스트 서비스(예: SpellCheckerService)에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"VPN 서비스와 연결"</string>
@@ -853,6 +855,12 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"검색어 삭제"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"검색어 보내기"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"음성 검색"</string>
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"한 달 전"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"한 달 전"</string>
   <plurals name="num_seconds_ago">
@@ -1119,6 +1127,10 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"입력 방법 설정"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"물리적 키보드"</string>
     <string name="hardware" msgid="7517821086888990278">"하드웨어"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"가능한 원인"</u></string>
@@ -1312,5 +1324,6 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"브라우저를 실행하시겠습니까?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"통화를 수락하시겠습니까?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"항상"</string>
-    <string name="activity_resolver_use_once" msgid="405646673463328329">"한 번만"</string>
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
+    <skip />
 </resources>

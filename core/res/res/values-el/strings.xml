@@ -317,6 +317,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Επιτρέπει στην εφαρμογή να παρακολουθεί τα πλήκτρα που πατάτε, ακόμη και σε μια άλλη εφαρμογή (όπως π.χ. η καταχώρηση ενός κωδικού πρόσβασης). Δεν απαιτείται για συνήθεις εφαρμογές."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"δέσμευση σε μέθοδο εισόδου"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας μεθόδου εισόδου. Δεν απαιτείται για συνήθεις εφαρμογές."</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"δέσμευση σε υπηρεσία προσβασιμότητας"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανώτατου επιπέδου μιας υπηρεσίας προσβασιμότητας. Δεν απαιτείται σε κανονικές εφαρμογές."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"δέσμευση σε υπηρεσία ανταλλαγής μηνυμάτων"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Επιτρέπει στον κάτοχο τη σύνδεση με τη διεπαφή ανωτέρου επιπέδου μιας υπηρεσίας ανταλλαγής μηνυμάτων (π.χ. SpellCheckerService). Δεν είναι απαραίτητο για κανονικές εφαρμογές."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"δέσμευση σε υπηρεσία VPN"</string>
@@ -853,6 +855,12 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Απαλοιφή ερωτήματος"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Υποβολή ερωτήματος"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Φωνητική αναζήτηση"</string>
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"πριν από 1 μήνα"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Παλαιότερα από 1 μήνα"</string>
   <plurals name="num_seconds_ago">
@@ -1119,6 +1127,10 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"Ρύθμιση μεθόδων εισαγωγής"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Φυσικό πληκτρολόγιο"</string>
     <string name="hardware" msgid="7517821086888990278">"Υλικό"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"υποψήφιοι"</u></string>
@@ -1312,5 +1324,6 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Εκκίνηση προγράμματος περιήγησης;"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Αποδοχή κλήσης;"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Πάντα"</string>
-    <string name="activity_resolver_use_once" msgid="405646673463328329">"Μόνο μία φορά"</string>
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
+    <skip />
 </resources>

@@ -317,6 +317,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Permet que les aplicacions facin un seguiment de les tecles que prems, fins i tot quan s\'interactua amb una altra aplicació (com ara introduir una contrasenya). No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"vincular a un mètode d\'entrada"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Permet que el titular vinculi a la interfície de nivell superior d\'un mètode d\'entrada. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"vincular amb un servei d\'accessibilitat"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Permet vincular amb la interfície de nivell superior d\'un servei d\'accessibilitat. Les aplicacions normals no haurien de necessitar-ho."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"vincula a un servei de text"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Permet al titular vincular amb la interfície de nivell superior d\'un servei de text (per exemple, SpellCheckerService). Les aplicacions normals mai no ho haurien de necessitar."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"vincula a un servei de VPN"</string>
@@ -529,15 +531,15 @@
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"permetre la recepció de multidifusió Wi-fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="7633598524564320817">"Permet que l\'aplicació rebi paquets que no estiguin adreçats directament al teu dispositiu. Pot ser útil en detectar els serveis que s\'ofereixen a prop. Consumeix més energia que el mode que no utilitza la multidestinació."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"accés a la configuració de Bluetooth"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permet que l\'aplicació configuri la tauleta Bluetooth local i que cerqui i emparelli dispositius remots."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permet que l\'aplicació configuri el telèfon Bluetooth local i que cerqui i emparelli dispositius remots."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permet que l\'aplicació configuri la tauleta Bluetooth local i que cerqui i sincronitzi dispositius remots."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permet que l\'aplicació configuri el telèfon Bluetooth local i que cerqui i sincronitzi dispositius remots."</string>
     <string name="permlab_accessWimaxState" msgid="7436749103151096452">"Visualització de les connexions WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="5914958077555177749">"Permet que l\'aplicació visualitzi la informació sobre l\'estat de WiMAX."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Canvia l\'estat de WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="3328853825006455912">"Permet que l\'aplicació es connecti i es desconnecti de la xarxa WiMAX."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"sincronització amb dispositius Bluetooth"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Permet que l\'aplicació mostri la configuració de la tauleta Bluetooth local i que estableixi i accepti connexions amb dispositius emparellats."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Permet que una aplicació visualitzi la configuració del telèfon Bluetooth local i que estableixi i accepti connexions amb els dispositius emparellats."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Permet que l\'aplicació mostri la configuració de la tauleta Bluetooth local i que estableixi i accepti connexions amb dispositius sincronitzats."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Permet que una aplicació visualitzi la configuració del telèfon Bluetooth local i que estableixi i accepti connexions amb els dispositius sincronitzats."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controla Near Field Communication (NFC)"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permet que l\'aplicació es comuniqui amb les etiquetes, les targetes i els lectors de Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"desactivació del bloqueig de pantalla"</string>
@@ -853,6 +855,12 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Neteja la consulta"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Envia la consulta"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Cerca per veu"</string>
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Fa 1 mes"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Fa menys d\'1 mes"</string>
   <plurals name="num_seconds_ago">
@@ -1119,6 +1127,10 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"Configura els mètodes d\'entrada"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Teclat físic"</string>
     <string name="hardware" msgid="7517821086888990278">"Maquinari"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidats"</u></string>
@@ -1312,5 +1324,6 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Vols iniciar el navegador?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Vols acceptar la trucada?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Sempre"</string>
-    <string name="activity_resolver_use_once" msgid="405646673463328329">"Només una vegada"</string>
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
+    <skip />
 </resources>

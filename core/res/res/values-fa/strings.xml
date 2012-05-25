@@ -317,6 +317,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"به برنامه اجازه می‎دهد تا کلیدهایی را که هنگام تعامل با برنامه دیگر فشار می‎دهید ببیند (مانند تایپ کردن گذرواژه). برای برنامه‎های عادی مورد نیاز نیست."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"پیوند شده به روش ورودی"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"به دارنده این دستگاه اجازه می‎دهد تا به رابط سطح بالای یک روش ورودی متصل شود. این ویژگی هیچگاه برای برنامه‎های معمولی ضروری نمی‎باشد."</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"اتصال به سرویس دسترسی"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"به دارنده اجازه می‌دهد که به رابط سطح بالای سرویس دسترسی متصل شود. هرگز برای برنامه‌های معمولی مورد نیاز نیست."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"اتصال به یک سرویس متنی"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"به دارنده اجازه می‌دهد خود را به یک رابط سطح بالای خدمات متنی مرتبط کند (برای مثال SpellCheckerService). هرگز برای برنامه‌های عادی لازم نیست."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"اتصال به یک سرویس VPN"</string>
@@ -853,6 +855,12 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"پاک کردن عبارت جستجو"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"ارسال عبارت جستجو"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"جستجوی صوتی"</string>
+    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
+    <skip />
+    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 ماه قبل"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"قبل از 1 ماه گذشته"</string>
   <plurals name="num_seconds_ago">
@@ -1119,6 +1127,10 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"تنظیم روش‌های ورودی"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"صفحه کلید فیزیکی"</string>
     <string name="hardware" msgid="7517821086888990278">"سخت‌افزار"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"داوطلبین"</u></string>
@@ -1312,5 +1324,6 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"مرورگر راه‌اندازی شود؟"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"تماس را می‌پذیرید؟"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"همیشه"</string>
-    <string name="activity_resolver_use_once" msgid="405646673463328329">"فقط یکبار"</string>
+    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
+    <skip />
 </resources>
