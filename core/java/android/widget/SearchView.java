@@ -511,7 +511,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     public void setQuery(CharSequence query, boolean submit) {
         mQueryTextView.setText(query);
         if (query != null) {
-            mQueryTextView.setSelection(query.length());
+            mQueryTextView.setSelection(mQueryTextView.length());
             mUserQuery = query;
         }
 
