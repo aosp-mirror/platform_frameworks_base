@@ -6,6 +6,7 @@
     <View
         android:id="@+id/top_glow"
         android:alpha="0"
+        android:visibility="invisible"
         android:layout_width="match_parent"
         android:layout_height="@dimen/notification_divider_height"
         android:layout_gravity="top|center_horizontal"
@@ -41,6 +42,7 @@
     <View
         android:id="@+id/bottom_glow"
         android:alpha="0"
+        android:visibility="invisible"
         android:layout_width="match_parent"
         android:layout_height="@dimen/notification_divider_height"
         android:layout_gravity="bottom|center_horizontal"
