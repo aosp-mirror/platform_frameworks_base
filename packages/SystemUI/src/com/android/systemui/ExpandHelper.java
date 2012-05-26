@@ -17,17 +17,17 @@
 
 package com.android.systemui;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.graphics.RectF;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
-import com.android.internal.widget.SizeAdaptiveLayout;
 
 public class ExpandHelper implements Gefingerpoken, OnClickListener {
     public interface Callback {
@@ -130,8 +130,28 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         mScaleAnimation = ObjectAnimator.ofFloat(mScaler, "height", 0f);
         mScaleAnimation.setDuration(EXPAND_DURATION);
 
+        AnimatorListenerAdapter glowVisibilityController = new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                View target = (View) ((ObjectAnimator) animation).getTarget();
+                if (target.getAlpha() <= 0.0f) {
+                    target.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                View target = (View) ((ObjectAnimator) animation).getTarget();
+                if (target.getAlpha() <= 0.0f) {
+                    target.setVisibility(View.INVISIBLE);
+                }
+            }
+        };
+
         mGlowTopAnimation = ObjectAnimator.ofFloat(null, "alpha", 0f);
+        mGlowTopAnimation.addListener(glowVisibilityController);
         mGlowBottomAnimation = ObjectAnimator.ofFloat(null, "alpha", 0f);
+        mGlowBottomAnimation.addListener(glowVisibilityController);
         mGlowAnimationSet = new AnimatorSet();
         mGlowAnimationSet.play(mGlowTopAnimation).with(mGlowBottomAnimation);
         mGlowAnimationSet.setDuration(GLOW_DURATION);
@@ -225,10 +245,19 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
                     // set it explicitly in reponse to touches.
                     mCurrViewTopGlow.setAlpha(glow);
                     mCurrViewBottomGlow.setAlpha(glow);
+                    handleGlowVisibility();
                 }
             }
         }
     }
+
+    private void handleGlowVisibility() {
+        mCurrViewTopGlow.setVisibility(mCurrViewTopGlow.getAlpha() <= 0.0f ?
+                View.INVISIBLE : View.VISIBLE);
+        mCurrViewBottomGlow.setVisibility(mCurrViewBottomGlow.getAlpha() <= 0.0f ?
+                View.INVISIBLE : View.VISIBLE);
+    }
+
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (DEBUG) Log.d(TAG, "interceptTouch: act=" + (ev.getAction()) +
                          " stretching=" + mStretching);
