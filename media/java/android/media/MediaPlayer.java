@@ -746,6 +746,7 @@ public class MediaPlayer
         try {
             request.writeInterfaceToken(IMEDIA_PLAYER);
             request.writeInt(INVOKE_ID_SET_VIDEO_SCALE_MODE);
+            request.writeInt(mode);
             invoke(request, reply);
         } finally {
             request.recycle();
