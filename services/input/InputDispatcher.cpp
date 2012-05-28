@@ -1390,28 +1390,35 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
             // New window supports splitting.
             isSplit = true;
         } else if (isSplit) {
-            // New window does not support splitting but we have already split events.
-            // Assign the pointer to the first foreground window we find.
-            // (May be NULL which is why we put this code block before the next check.)
-            newTouchedWindowHandle = mTempTouchState.getFirstForegroundWindowHandle();
+            // Ignore the new window.
+            newTouchedWindowHandle = NULL;
         }
 
-        // If we did not find a touched window then fail.
+        // Handle the case where we did not find a window.
         if (newTouchedWindowHandle == NULL) {
-            if (mFocusedApplicationHandle != NULL) {
+            // Try to assign the pointer to the first foreground window we find, if there is one.
+            newTouchedWindowHandle = mTempTouchState.getFirstForegroundWindowHandle();
+            if (newTouchedWindowHandle == NULL) {
+                // There is no touched window.  If this is an initial down event
+                // then wait for a window to appear that will handle the touch.  This is
+                // to ensure that we report an ANR in the case where an application has started
+                // but not yet put up a window and the user is starting to get impatient.
+                if (maskedAction == AMOTION_EVENT_ACTION_DOWN
+                        && mFocusedApplicationHandle != NULL) {
 #if DEBUG_FOCUS
-                ALOGD("Waiting because there is no touched window but there is a "
-                        "focused application that may eventually add a new window: %s.",
-                        getApplicationWindowLabelLocked(mFocusedApplicationHandle, NULL).string());
+                    ALOGD("Waiting because there is no touched window but there is a "
+                            "focused application that may eventually add a new window: %s.",
+                            getApplicationWindowLabelLocked(
+                                    mFocusedApplicationHandle, NULL).string());
 #endif
-                injectionResult = handleTargetsNotReadyLocked(currentTime, entry,
-                        mFocusedApplicationHandle, NULL, nextWakeupTime);
-                goto Unresponsive;
+                    injectionResult = handleTargetsNotReadyLocked(currentTime, entry,
+                            mFocusedApplicationHandle, NULL, nextWakeupTime);
+                    goto Unresponsive;
+                }
+                ALOGI("Dropping event because there is no touched window.");
+                injectionResult = INPUT_EVENT_INJECTION_FAILED;
+                goto Failed;
             }
-
-            ALOGI("Dropping event because there is no touched window or focused application.");
-            injectionResult = INPUT_EVENT_INJECTION_FAILED;
-            goto Failed;
         }
 
         // Set target flags.
