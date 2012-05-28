@@ -26252,7 +26252,7 @@ package android.webkit {
     method public boolean onJsBeforeUnload(android.webkit.WebView, java.lang.String, java.lang.String, android.webkit.JsResult);
     method public boolean onJsConfirm(android.webkit.WebView, java.lang.String, java.lang.String, android.webkit.JsResult);
     method public boolean onJsPrompt(android.webkit.WebView, java.lang.String, java.lang.String, java.lang.String, android.webkit.JsPromptResult);
-    method public boolean onJsTimeout();
+    method public deprecated boolean onJsTimeout();
     method public void onProgressChanged(android.webkit.WebView, int);
     method public void onReachedMaxAppCacheSize(long, long, android.webkit.WebStorage.QuotaUpdater);
     method public void onReceivedIcon(android.webkit.WebView, android.graphics.Bitmap);
