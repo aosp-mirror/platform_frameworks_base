@@ -17,7 +17,6 @@
 package com.android.internal.telephony;
 
 
-import com.android.internal.telephony.DataCallState.SetupResult;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
@@ -39,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * {@hide}
@@ -65,8 +65,7 @@ public abstract class DataConnection extends StateMachine {
     protected static final boolean DBG = true;
     protected static final boolean VDBG = false;
 
-    protected static Object mCountLock = new Object();
-    protected static int mCount;
+    protected static AtomicInteger mCount = new AtomicInteger(0);
     protected AsyncChannel mAc;
 
     protected List<ApnContext> mApnList = null;
@@ -260,7 +259,6 @@ public abstract class DataConnection extends StateMachine {
 
     protected abstract void log(String s);
 
-
    //***** Constructor
     protected DataConnection(PhoneBase phone, String name, int id, RetryManager rm,
             DataConnectionTracker dct) {
@@ -284,6 +282,27 @@ public abstract class DataConnection extends StateMachine {
 
         mApnList = new ArrayList<ApnContext>();
         if (DBG) log("DataConnection constructor X");
+    }
+
+    /**
+     * Shut down this instance and its state machine.
+     */
+    private void shutDown() {
+        if (DBG) log("shutDown");
+
+        if (mAc != null) {
+            mAc.disconnected();
+            mAc = null;
+        }
+        mApnList = null;
+        mReconnectIntent = null;
+        mDataConnectionTracker = null;
+        mApn = null;
+        phone = null;
+        mLinkProperties = null;
+        mCapabilities = null;
+        lastFailCause = null;
+        userData = null;
     }
 
     /**
@@ -619,9 +638,11 @@ public abstract class DataConnection extends StateMachine {
         @Override
         public void exit() {
             phone.mCM.unregisterForRilConnected(getHandler());
+            shutDown();
         }
         @Override
         public boolean processMessage(Message msg) {
+            boolean retVal = HANDLED;
             AsyncResult ar;
 
             switch (msg.what) {
@@ -639,14 +660,9 @@ public abstract class DataConnection extends StateMachine {
                     }
                     break;
                 }
-                case AsyncChannel.CMD_CHANNEL_DISCONNECT: {
-                    if (VDBG) log("CMD_CHANNEL_DISCONNECT");
-                    mAc.disconnect();
-                    break;
-                }
                 case AsyncChannel.CMD_CHANNEL_DISCONNECTED: {
                     if (VDBG) log("CMD_CHANNEL_DISCONNECTED");
-                    mAc = null;
+                    quit();
                     break;
                 }
                 case DataConnectionAc.REQ_IS_INACTIVE: {
@@ -784,7 +800,7 @@ public abstract class DataConnection extends StateMachine {
                     break;
             }
 
-            return HANDLED;
+            return retVal;
         }
     }
     private DcDefaultState mDefaultState = new DcDefaultState();

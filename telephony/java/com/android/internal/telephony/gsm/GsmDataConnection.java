@@ -56,10 +56,8 @@ public class GsmDataConnection extends DataConnection {
      */
     static GsmDataConnection makeDataConnection(PhoneBase phone, int id, RetryManager rm,
             DataConnectionTracker dct) {
-        synchronized (mCountLock) {
-            mCount += 1;
-        }
-        GsmDataConnection gsmDc = new GsmDataConnection(phone, "GsmDC-" + mCount, id, rm, dct);
+        GsmDataConnection gsmDc = new GsmDataConnection(phone,
+                "GsmDC-" + mCount.incrementAndGet(), id, rm, dct);
         gsmDc.start();
         if (DBG) gsmDc.log("Made " + gsmDc.getName());
         return gsmDc;
