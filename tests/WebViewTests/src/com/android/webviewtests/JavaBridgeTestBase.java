@@ -106,7 +106,12 @@ public class JavaBridgeTestBase extends ActivityInstrumentationTestCase2<WebView
         runTestOnUiThread(new Runnable() {
             @Override
             public void run() {
-                getWebView().loadUrl("javascript:" + script);
+                // When a JavaScript URL is executed, if the value of the last
+                // expression evaluated is not 'undefined', this value is
+                // converted to a string and used as the new document for the
+                // frame. We don't want this behaviour, so wrap the script in
+                // an anonymous function.
+                getWebView().loadUrl("javascript:(function() { " + script + " })()");
             }
         });
     }
