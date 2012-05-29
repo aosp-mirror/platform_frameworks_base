@@ -317,8 +317,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Programu omogoča spremljanje tipk, ki jih pritisnete med interakcijo z drugim programom (na primer vnos gesla). Navadni programi tega nikoli ne potrebujejo."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"povezovanje z načinom vnosa"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Lastniku omogoča, da se poveže z vmesnikom načina vnosa najvišje ravni. Tega nikoli ni treba uporabiti za navadne programe."</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"vezano na storitev za ljudi s posebnimi potrebami"</string>
-    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Lastniku omogoča povezovanje z vmesnikom storitve za ljudi s posebnimi potrebami najvišje ravni. Tega nikoli ni treba uporabiti za navadne aplikacije."</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"povezovanje s storitvijo za ljudi s posebnimi potrebami"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Lastniku omogoča povezovanje z vmesnikom najvišje ravni storitve za ljudi s posebnimi potrebami. Tega nikoli ni treba uporabiti za navadne aplikacije."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"poveži z besedilno storitvijo"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Dovoljuje, da se lastnik poveže z vmesnikom besedilne storitve najvišje ravni (npr. SpellCheckerService). Tega nikoli ni treba uporabiti za navadne programe."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"povezava s storitvijo navideznega zasebnega omrežja"</string>
