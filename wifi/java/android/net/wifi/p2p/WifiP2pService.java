@@ -1163,7 +1163,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     } else {
                         if (DBG) logd("stop DHCP client");
                         mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_STOP_DHCP);
-                        mDhcpStateMachine.quit();
+                        mDhcpStateMachine.doQuit();
                         mDhcpStateMachine = null;
                     }
 
