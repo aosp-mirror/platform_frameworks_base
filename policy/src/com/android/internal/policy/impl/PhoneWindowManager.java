@@ -1798,7 +1798,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
             if (down) {
-                if (!mHomePressed) {
+                if (!mHomePressed && mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
                     try {
                         mStatusBarService.preloadRecentApps();
                     } catch (RemoteException e) {
