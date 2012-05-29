@@ -185,10 +185,10 @@
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"使用耗电量较大的功能。"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"日历"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"直接访问日历和活动。"</string>
-    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"读取用户字典"</string>
-    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"读取用户字典中的字词。"</string>
-    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"写入用户字典"</string>
-    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"将字词添加到用户字典。"</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"读取用户词典"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"读取用户词典中的字词。"</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"写入用户词典"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"将字词添加到用户词典。"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"书签和历史记录"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"直接访问书签和浏览器历史记录。"</string>
     <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"闹钟"</string>
@@ -211,7 +211,7 @@
     <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"访问同步设置。"</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"您的帐户"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"访问可用的帐户。"</string>
-    <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"硬件控件"</string>
+    <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"硬件控制"</string>
     <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"直接访问手机上的硬件。"</string>
     <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"手机通话"</string>
     <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"监管、记录和处理电话呼叫。"</string>
@@ -554,7 +554,7 @@
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"允许应用获取有关当前同步的 Feed 的详情。"</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"写入订阅的供稿"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"允许应用修改您当前同步的 Feed。恶意应用可能会更改您的同步 Feed。"</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"读取您添加到字典的字词"</string>
+    <string name="permlab_readDictionary" msgid="4107101525746035718">"读取您添加到词典的字词"</string>
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"允许应用读取用户可能在用户词典中已存储的任意私有字词、名称和短语。"</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"写入用户定义的词典"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"允许应用向用户词典中写入新词。"</string>
@@ -1111,7 +1111,7 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"如果您打开 USB 存储设备，您正在使用的某些应用将会停止，并且在您关闭 USB 存储设备前都将无法使用。"</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB 操作失败"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"确定"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"作为媒体设备连接"</string>
+    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"已作为媒体设备连接"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"作为相机连接"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"作为安装程序连接"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"已连接到 USB 配件"</string>

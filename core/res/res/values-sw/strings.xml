@@ -855,12 +855,9 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Futa swali"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Wasilisha hoja"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Utafutaji wa sauti"</string>
-    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
-    <skip />
-    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
-    <skip />
-    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
-    <skip />
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Wezesha Kuchunguza kwa Kugusa?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> inataka kuwezesha Kuchunguza kwa Kugusa. Wakati Kuchunguza kwa Kugusa kumewezeshwa, unaweza kusikia au kuona maelezo ya ni nini kilichochini ya kidole chako au kufanya ishara za kuingiliana na kumpyuta ndogo."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> inataka kuwezesha Kuchunguza kwa Kugusa. Wakati Kuchunguza kwa Kugusa kumewezeshwa, unaweza kusikia au kuona maelezo ya ni nini kilichochini ya kidole chako au kufanya ishara za kuingiliana na simu."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Mwezi 1 uliopita"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Kabla ya mwezi 1 uliopita"</string>
   <plurals name="num_seconds_ago">
@@ -1127,10 +1124,8 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"Weka mbinu za ingizo"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Kibodi halisi"</string>
     <string name="hardware" msgid="7517821086888990278">"Maunzi"</string>
-    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
-    <skip />
-    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
-    <skip />
+    <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Teua mpangilio wa kibodi"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Gusa kuchagua mpangilio wa kibodi."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"wagombeaji"</u></string>
@@ -1324,6 +1319,5 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Zindua Kivinjari?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Kubali simu?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Kila mara"</string>
-    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
-    <skip />
+    <string name="activity_resolver_use_once" msgid="2404644797149173758">"Mara moja tu"</string>
 </resources>

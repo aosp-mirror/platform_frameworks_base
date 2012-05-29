@@ -318,7 +318,7 @@
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"seo sisestusmeetodiga"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Lubab omanikul siduda sisestusmeetodi ülataseme liidesega. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"sidumine juurdepääsuteenusega"</string>
-    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Lubab omanikul luua sideme juurdepääsuteenuseteenuse ülataseme liidesega. Tavarakenduste puhul ei tohiks seda kunagi vaja minna."</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Lubab omanikul luua sideme juurdepääsuteenuse ülataseme liidesega. Tavarakenduste puhul ei tohiks seda kunagi vaja minna."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"tekstiteenusega sidumine"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Võimaldab omanikul siduda tekstiteenuse (nt SpellCheckerService) ülataseme liidesega. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"seo VPN-teenusega"</string>
