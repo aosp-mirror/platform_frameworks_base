@@ -265,7 +265,7 @@ public abstract class DataConnection extends StateMachine {
     protected DataConnection(PhoneBase phone, String name, int id, RetryManager rm,
             DataConnectionTracker dct) {
         super(name);
-        setProcessedMessagesSize(100);
+        setLogRecSize(100);
         if (DBG) log("DataConnection constructor E");
         this.phone = phone;
         this.mDataConnectionTracker = dct;
@@ -1215,11 +1215,11 @@ public abstract class DataConnection extends StateMachine {
      * @return the string for msg.what as our info.
      */
     @Override
-    protected String getMessageInfo(Message msg) {
+    protected String getWhatToString(int what) {
         String info = null;
-        info = cmdToString(msg.what);
+        info = cmdToString(what);
         if (info == null) {
-            info = DataConnectionAc.cmdToString(msg.what);
+            info = DataConnectionAc.cmdToString(what);
         }
         return info;
     }

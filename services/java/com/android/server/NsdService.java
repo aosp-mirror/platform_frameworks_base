@@ -109,8 +109,8 @@ public class NsdService extends INsdManager.Stub {
         private final EnabledState mEnabledState = new EnabledState();
 
         @Override
-        protected String getMessageInfo(Message msg) {
-            return cmdToString(msg.what);
+        protected String getWhatToString(int what) {
+            return cmdToString(what);
         }
 
         NsdStateMachine(String name) {
@@ -123,7 +123,7 @@ public class NsdService extends INsdManager.Stub {
             } else {
                 setInitialState(mDisabledState);
             }
-            setProcessedMessagesSize(25);
+            setLogRecSize(25);
         }
 
         class DefaultState extends State {

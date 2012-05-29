@@ -80,9 +80,9 @@ import java.util.Vector;
  * and invoke <code>halting</code>. Any message subsequently received by the state
  * machine will cause <code>haltedProcessMessage</code> to be invoked.</p>
  *
- * <p>If it is desirable to completely stop the state machine call <code>quit</code>. This
- * will exit the current state and its parent and then exit from the controlling thread
- * and no further messages will be processed.</p>
+ * <p>If it is desirable to completely stop the state machine call <code>quit</code> or
+ * <code>abort</code>. These will call <code>exit</code> of the current state and its parents, call
+ * <code>onQuiting</code> and then exit Thread/Loopers.</p>
  *
  * <p>In addition to <code>processMessage</code> each <code>State</code> has
  * an <code>enter</code> method and <code>exit</exit> method which may be overridden.</p>
@@ -362,7 +362,7 @@ class Hsm1 extends StateMachine {
     }
 
     &#64;Override
-    void halting() {
+    void onHalting() {
         Log.d(TAG, "halting");
         synchronized (this) {
             this.notifyAll();
@@ -423,10 +423,10 @@ public class StateMachine {
     private String mName;
 
     /** Message.what value when quitting */
-    public static final int SM_QUIT_CMD = -1;
+    private static final int SM_QUIT_CMD = -1;
 
     /** Message.what value when initializing */
-    public static final int SM_INIT_CMD = -2;
+    private static final int SM_INIT_CMD = -2;
 
     /**
      * Convenience constant that maybe returned by processMessage
@@ -443,11 +443,10 @@ public class StateMachine {
     public static final boolean NOT_HANDLED = false;
 
     /**
+     * StateMachine logging record.
      * {@hide}
-     *
-     * The information maintained for a processed message.
      */
-    public static class ProcessedMessageInfo {
+    public static class LogRec {
         private long mTime;
         private int mWhat;
         private String mInfo;
@@ -456,12 +455,13 @@ public class StateMachine {
 
         /**
          * Constructor
-         * @param message
+         *
+         * @param msg
          * @param state that handled the message
          * @param orgState is the first state the received the message but
          * did not processes the message.
          */
-        ProcessedMessageInfo(Message msg, String info, State state, State orgState) {
+        LogRec(Message msg, String info, State state, State orgState) {
             update(msg, info, state, orgState);
         }
 
@@ -473,7 +473,7 @@ public class StateMachine {
          */
         public void update(Message msg, String info, State state, State orgState) {
             mTime = System.currentTimeMillis();
-            mWhat = msg.what;
+            mWhat = (msg != null) ? msg.what : 0;
             mInfo = info;
             mState = state;
             mOrgState = orgState;
@@ -517,8 +517,7 @@ public class StateMachine {
         /**
          * @return as string
          */
-        @Override
-        public String toString() {
+        public String toString(StateMachine sm) {
             StringBuilder sb = new StringBuilder();
             sb.append("time=");
             Calendar c = Calendar.getInstance();
@@ -529,10 +528,15 @@ public class StateMachine {
             sb.append(" orgState=");
             sb.append(mOrgState == null ? "<null>" : mOrgState.getName());
             sb.append(" what=");
-            sb.append(mWhat);
-            sb.append("(0x");
-            sb.append(Integer.toHexString(mWhat));
-            sb.append(")");
+            String what = sm.getWhatToString(mWhat);
+            if (TextUtils.isEmpty(what)) {
+                sb.append(mWhat);
+                sb.append("(0x");
+                sb.append(Integer.toHexString(mWhat));
+                sb.append(")");
+            } else {
+                sb.append(what);
+            }
             if ( ! TextUtils.isEmpty(mInfo)) {
                 sb.append(" ");
                 sb.append(mInfo);
@@ -542,21 +546,21 @@ public class StateMachine {
     }
 
     /**
-     * A list of messages recently processed by the state machine.
+     * A list of log records including messages recently processed by the state machine.
      *
-     * The class maintains a list of messages that have been most
+     * The class maintains a list of log records including messages
      * recently processed. The list is finite and may be set in the
      * constructor or by calling setSize. The public interface also
-     * includes size which returns the number of recent messages,
-     * count which is the number of message processed since the
-     * the last setSize, get which returns a processed message and
-     * add which adds a processed messaged.
+     * includes size which returns the number of recent records,
+     * count which is the number of records processed since the
+     * the last setSize, get which returns a record and
+     * add which adds a record.
      */
-    private static class ProcessedMessages {
+    private static class LogRecords {
 
         private static final int DEFAULT_SIZE = 20;
 
-        private Vector<ProcessedMessageInfo> mMessages = new Vector<ProcessedMessageInfo>();
+        private Vector<LogRec> mLogRecords = new Vector<LogRec>();
         private int mMaxSize = DEFAULT_SIZE;
         private int mOldestIndex = 0;
         private int mCount = 0;
@@ -564,39 +568,39 @@ public class StateMachine {
         /**
          * private constructor use add
          */
-        private ProcessedMessages() {
+        private LogRecords() {
         }
 
         /**
-         * Set size of messages to maintain and clears all current messages.
+         * Set size of messages to maintain and clears all current records.
          *
-         * @param maxSize number of messages to maintain at anyone time.
+         * @param maxSize number of records to maintain at anyone time.
         */
-        void setSize(int maxSize) {
+        synchronized void setSize(int maxSize) {
             mMaxSize = maxSize;
             mCount = 0;
-            mMessages.clear();
+            mLogRecords.clear();
         }
 
         /**
-         * @return the number of recent messages.
+         * @return the number of recent records.
          */
-        int size() {
-            return mMessages.size();
+        synchronized int size() {
+            return mLogRecords.size();
         }
 
         /**
-         * @return the total number of messages processed since size was set.
+         * @return the total number of records processed since size was set.
          */
-        int count() {
+        synchronized int count() {
             return mCount;
         }
 
         /**
-         * Clear the list of Processed Message Info.
+         * Clear the list of records.
          */
-        void cleanup() {
-            mMessages.clear();
+        synchronized void cleanup() {
+            mLogRecords.clear();
         }
 
         /**
@@ -604,7 +608,7 @@ public class StateMachine {
          * record and size()-1 is the newest record. If the index is to
          * large null is returned.
          */
-        ProcessedMessageInfo get(int index) {
+        synchronized LogRec get(int index) {
             int nextIndex = mOldestIndex + index;
             if (nextIndex >= mMaxSize) {
                 nextIndex -= mMaxSize;
@@ -612,7 +616,7 @@ public class StateMachine {
             if (nextIndex >= size()) {
                 return null;
             } else {
-                return mMessages.get(nextIndex);
+                return mLogRecords.get(nextIndex);
             }
         }
 
@@ -625,12 +629,12 @@ public class StateMachine {
          * @param orgState is the first state the received the message but
          * did not processes the message.
          */
-        void add(Message msg, String messageInfo, State state, State orgState) {
+        synchronized void add(Message msg, String messageInfo, State state, State orgState) {
             mCount += 1;
-            if (mMessages.size() < mMaxSize) {
-                mMessages.add(new ProcessedMessageInfo(msg, messageInfo, state, orgState));
+            if (mLogRecords.size() < mMaxSize) {
+                mLogRecords.add(new LogRec(msg, messageInfo, state, orgState));
             } else {
-                ProcessedMessageInfo pmi = mMessages.get(mOldestIndex);
+                LogRec pmi = mLogRecords.get(mOldestIndex);
                 mOldestIndex += 1;
                 if (mOldestIndex >= mMaxSize) {
                     mOldestIndex = 0;
@@ -652,8 +656,8 @@ public class StateMachine {
         /** The current message */
         private Message mMsg;
 
-        /** A list of messages that this state machine has processed */
-        private ProcessedMessages mProcessedMessages = new ProcessedMessages();
+        /** A list of log records including messages this state machine has processed */
+        private LogRecords mLogRecords = new LogRecords();
 
         /** true if construction of the state machine has not been completed */
         private boolean mIsConstructionCompleted;
@@ -814,15 +818,18 @@ public class StateMachine {
              */
             if (destState != null) {
                 if (destState == mQuittingState) {
+                    /**
+                     * Call onQuitting to let subclasses cleanup.
+                     */
+                    mSm.onQuitting();
                     cleanupAfterQuitting();
-
                 } else if (destState == mHaltingState) {
                     /**
-                     * Call halting() if we've transitioned to the halting
+                     * Call onHalting() if we've transitioned to the halting
                      * state. All subsequent messages will be processed in
                      * in the halting state which invokes haltedProcessMessage(msg);
                      */
-                    mSm.halting();
+                    mSm.onHalting();
                 }
             }
         }
@@ -831,7 +838,6 @@ public class StateMachine {
          * Cleanup all the static variables and the looper after the SM has been quit.
          */
         private final void cleanupAfterQuitting() {
-            mSm.quitting();
             if (mSm.mSmThread != null) {
                 // If we made the thread then quit looper which stops the thread.
                 getLooper().quit();
@@ -841,7 +847,7 @@ public class StateMachine {
             mSm.mSmHandler = null;
             mSm = null;
             mMsg = null;
-            mProcessedMessages.cleanup();
+            mLogRecords.cleanup();
             mStateStack = null;
             mTempStateStack = null;
             mStateInfo.clear();
@@ -892,36 +898,38 @@ public class StateMachine {
             if (mDbg) {
                 Log.d(TAG, "processMsg: " + curStateInfo.state.getName());
             }
-            while (!curStateInfo.state.processMessage(msg)) {
-                /**
-                 * Not processed
-                 */
-                curStateInfo = curStateInfo.parentStateInfo;
-                if (curStateInfo == null) {
-                    /**
-                     * No parents left so it's not handled
-                     */
-                    mSm.unhandledMessage(msg);
-                    if (isQuit(msg)) {
-                        transitionTo(mQuittingState);
-                    }
-                    break;
-                }
-                if (mDbg) {
-                    Log.d(TAG, "processMsg: " + curStateInfo.state.getName());
-                }
-            }
 
-            /**
-             * Record that we processed the message
-             */
-            if (mSm.recordProcessedMessage(msg)) {
-                if (curStateInfo != null) {
-                    State orgState = mStateStack[mStateStackTopIndex].state;
-                    mProcessedMessages.add(msg, mSm.getMessageInfo(msg), curStateInfo.state,
-                            orgState);
-                } else {
-                    mProcessedMessages.add(msg, mSm.getMessageInfo(msg), null, null);
+            if (isQuit(msg)) {
+                transitionTo(mQuittingState);
+            } else {
+                while (!curStateInfo.state.processMessage(msg)) {
+                    /**
+                     * Not processed
+                     */
+                    curStateInfo = curStateInfo.parentStateInfo;
+                    if (curStateInfo == null) {
+                        /**
+                         * No parents left so it's not handled
+                         */
+                        mSm.unhandledMessage(msg);
+                        break;
+                    }
+                    if (mDbg) {
+                        Log.d(TAG, "processMsg: " + curStateInfo.state.getName());
+                    }
+                }
+
+                /**
+                 * Record that we processed the message
+                 */
+                if (mSm.recordLogRec(msg)) {
+                    if (curStateInfo != null) {
+                        State orgState = mStateStack[mStateStackTopIndex].state;
+                        mLogRecords.add(msg, mSm.getLogRecString(msg), curStateInfo.state,
+                                orgState);
+                    } else {
+                        mLogRecords.add(msg, mSm.getLogRecString(msg), null, null);
+                    }
                 }
             }
         }
@@ -1141,13 +1149,19 @@ public class StateMachine {
             mDeferredMessages.add(newMsg);
         }
 
-        /** @see StateMachine#deferMessage(Message) */
+        /** @see StateMachine#quit() */
         private final void quit() {
             if (mDbg) Log.d(TAG, "quit:");
             sendMessage(obtainMessage(SM_QUIT_CMD, mSmHandlerObj));
         }
 
-        /** @see StateMachine#isQuit(Message) */
+        /** @see StateMachine#quitNow() */
+        private final void quitNow() {
+            if (mDbg) Log.d(TAG, "abort:");
+            sendMessageAtFrontOfQueue(obtainMessage(SM_QUIT_CMD, mSmHandlerObj));
+        }
+
+        /** Validate that the message was sent by quit or abort. */
         private final boolean isQuit(Message msg) {
             return (msg.what == SM_QUIT_CMD) && (msg.obj == mSmHandlerObj);
         }
@@ -1160,26 +1174,6 @@ public class StateMachine {
         /** @see StateMachine#setDbg(boolean) */
         private final void setDbg(boolean dbg) {
             mDbg = dbg;
-        }
-
-        /** @see StateMachine#setProcessedMessagesSize(int) */
-        private final void setProcessedMessagesSize(int maxSize) {
-            mProcessedMessages.setSize(maxSize);
-        }
-
-        /** @see StateMachine#getProcessedMessagesSize() */
-        private final int getProcessedMessagesSize() {
-            return mProcessedMessages.size();
-        }
-
-        /** @see StateMachine#getProcessedMessagesCount() */
-        private final int getProcessedMessagesCount() {
-            return mProcessedMessages.count();
-        }
-
-        /** @see StateMachine#getProcessedMessageInfo(int) */
-        private final ProcessedMessageInfo getProcessedMessageInfo(int index) {
-            return mProcessedMessages.get(index);
         }
 
     }
@@ -1282,8 +1276,8 @@ public class StateMachine {
     /**
      * transition to halt state. Upon returning
      * from processMessage we will exit all current
-     * states, execute the halting() method and then
-     * all subsequent messages haltedProcessMesage
+     * states, execute the onHalting() method and then
+     * for all subsequent messages haltedProcessMessage
      * will be called.
      */
     protected final void transitionToHaltingState() {
@@ -1302,7 +1296,6 @@ public class StateMachine {
     protected final void deferMessage(Message msg) {
         mSmHandler.deferMessage(msg);
     }
-
 
     /**
      * Called when message wasn't handled
@@ -1325,7 +1318,7 @@ public class StateMachine {
      * transitionToHalting. All subsequent messages will invoke
      * {@link StateMachine#haltedProcessMessage(Message)}
      */
-    protected void halting() {
+    protected void onHalting() {
     }
 
     /**
@@ -1334,7 +1327,7 @@ public class StateMachine {
      * ignored. In addition, if this StateMachine created the thread, the thread will
      * be stopped after this method returns.
      */
-    protected void quitting() {
+    protected void onQuitting() {
     }
 
     /**
@@ -1345,33 +1338,77 @@ public class StateMachine {
     }
 
     /**
-     * Set size of messages to maintain and clears all current messages.
+     * Set number of log records to maintain and clears all current records.
      *
      * @param maxSize number of messages to maintain at anyone time.
      */
-    public final void setProcessedMessagesSize(int maxSize) {
-        mSmHandler.setProcessedMessagesSize(maxSize);
+    public final void setLogRecSize(int maxSize) {
+        mSmHandler.mLogRecords.setSize(maxSize);
     }
 
     /**
-     * @return number of messages processed
+     * @return number of log records
      */
-    public final int getProcessedMessagesSize() {
-        return mSmHandler.getProcessedMessagesSize();
+    public final int getLogRecSize() {
+        return mSmHandler.mLogRecords.size();
     }
 
     /**
-     * @return the total number of messages processed
+     * @return the total number of records processed
      */
-    public final int getProcessedMessagesCount() {
-        return mSmHandler.getProcessedMessagesCount();
+    public final int getLogRecCount() {
+        return mSmHandler.mLogRecords.count();
     }
 
     /**
-     * @return a processed message information
+     * @return a log record
      */
-    public final ProcessedMessageInfo getProcessedMessageInfo(int index) {
-        return mSmHandler.getProcessedMessageInfo(index);
+    public final LogRec getLogRec(int index) {
+        return mSmHandler.mLogRecords.get(index);
+    }
+
+    /**
+     * Add the string to LogRecords.
+     *
+     * @param string
+     */
+    protected void addLogRec(String string) {
+        mSmHandler.mLogRecords.add(null, string, null, null);
+    }
+
+    /**
+     * Add the string and state to LogRecords
+     *
+     * @param string
+     * @param state current state
+     */
+    protected void addLogRec(String string, State state) {
+        mSmHandler.mLogRecords.add(null, string, state, null);
+    }
+
+    /**
+     * @return true if msg should be saved in the log, default is true.
+     */
+    protected boolean recordLogRec(Message msg) {
+        return true;
+    }
+
+    /**
+     * Return a string to be logged by LogRec, default
+     * is an empty string. Override if additional information is desired.
+     *
+     * @param msg that was processed
+     * @return information to be logged as a String
+     */
+    protected String getLogRecString(Message msg) {
+        return "";
+    }
+
+    /**
+     * @return the string for msg.what
+     */
+    protected String getWhatToString(int what) {
+        return null;
     }
 
     /**
@@ -1548,43 +1585,23 @@ public class StateMachine {
     }
 
     /**
-     * Conditionally quit the looper and stop execution.
-     *
-     * This sends the SM_QUIT_MSG to the state machine and
-     * if not handled by any state's processMessage then the
-     * state machine will be stopped and no further messages
-     * will be processed.
+     * Quit the state machine after all currently queued up messages are processed.
      */
-    public final void quit() {
-        // mSmHandler can be null if the state machine has quit.
+    protected final void quit() {
+        // mSmHandler can be null if the state machine is already stopped.
         if (mSmHandler == null) return;
 
         mSmHandler.quit();
     }
 
     /**
-     * @return ture if msg is quit
+     * Quit the state machine immediately all currently queued messages will be discarded.
      */
-    protected final boolean isQuit(Message msg) {
-        return mSmHandler.isQuit(msg);
-    }
+    protected final void quitNow() {
+        // mSmHandler can be null if the state machine is already stopped.
+        if (mSmHandler == null) return;
 
-    /**
-     * @return true if msg should be saved in ProcessedMessage, default is true.
-     */
-    protected boolean recordProcessedMessage(Message msg) {
-        return true;
-    }
-
-    /**
-     * Return message info to be logged by ProcessedMessageInfo, default
-     * is an empty string. Override if additional information is desired.
-     *
-     * @param msg that was processed
-     * @return information to be logged as a String
-     */
-    protected String getMessageInfo(Message msg) {
-        return "";
+        mSmHandler.quitNow();
     }
 
     /**
@@ -1629,9 +1646,9 @@ public class StateMachine {
      */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(getName() + ":");
-        pw.println(" total messages=" + getProcessedMessagesCount());
-        for (int i=0; i < getProcessedMessagesSize(); i++) {
-            pw.printf(" msg[%d]: %s\n", i, getProcessedMessageInfo(i));
+        pw.println(" total records=" + getLogRecCount());
+        for (int i=0; i < getLogRecSize(); i++) {
+            pw.printf(" rec[%d]: %s\n", i, getLogRec(i).toString(this));
             pw.flush();
         }
         pw.println("curState=" + getCurrentState().getName());

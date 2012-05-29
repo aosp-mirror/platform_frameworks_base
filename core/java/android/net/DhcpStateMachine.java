@@ -163,7 +163,20 @@ public class DhcpStateMachine extends StateMachine {
         mRegisteredForPreDhcpNotification = true;
     }
 
+    /**
+     * Quit the DhcpStateMachine.
+     *
+     * @hide
+     */
+    public void doQuit() {
+        quit();
+    }
+
     class DefaultState extends State {
+        @Override
+        public void exit() {
+            mContext.unregisterReceiver(mBroadcastReceiver);
+        }
         @Override
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
@@ -172,10 +185,6 @@ public class DhcpStateMachine extends StateMachine {
                     Log.e(TAG, "Error! Failed to handle a DHCP renewal on " + mInterfaceName);
                     mDhcpRenewWakeLock.release();
                     break;
-                case SM_QUIT_CMD:
-                    mContext.unregisterReceiver(mBroadcastReceiver);
-                    //let parent kill the state machine
-                    return NOT_HANDLED;
                 default:
                     Log.e(TAG, "Error! unhandled message  " + message);
                     break;
