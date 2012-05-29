@@ -116,14 +116,16 @@ public interface IActivityManager extends IInterface {
     public void reportThumbnail(IBinder token,
             Bitmap thumbnail, CharSequence description) throws RemoteException;
     public ContentProviderHolder getContentProvider(IApplicationThread caller,
-            String name) throws RemoteException;
+            String name, boolean stable) throws RemoteException;
     public ContentProviderHolder getContentProviderExternal(String name, IBinder token)
             throws RemoteException;
-    public void removeContentProvider(IApplicationThread caller,
-            String name) throws RemoteException;
+    public void removeContentProvider(IBinder connection, boolean stable) throws RemoteException;
     public void removeContentProviderExternal(String name, IBinder token) throws RemoteException;
     public void publishContentProviders(IApplicationThread caller,
             List<ContentProviderHolder> providers) throws RemoteException;
+    public boolean refContentProvider(IBinder connection, int stableDelta, int unstableDelta)
+            throws RemoteException;
+    public void unstableProviderDied(IBinder connection) throws RemoteException;
     public PendingIntent getRunningServiceControlPanel(ComponentName service)
             throws RemoteException;
     public ComponentName startService(IApplicationThread caller, Intent service,
@@ -363,6 +365,7 @@ public interface IActivityManager extends IInterface {
     public static class ContentProviderHolder implements Parcelable {
         public final ProviderInfo info;
         public IContentProvider provider;
+        public IBinder connection;
         public boolean noReleaseNeeded;
 
         public ContentProviderHolder(ProviderInfo _info) {
@@ -380,6 +383,7 @@ public interface IActivityManager extends IInterface {
             } else {
                 dest.writeStrongBinder(null);
             }
+            dest.writeStrongBinder(connection);
             dest.writeInt(noReleaseNeeded ? 1:0);
         }
 
@@ -398,6 +402,7 @@ public interface IActivityManager extends IInterface {
             info = ProviderInfo.CREATOR.createFromParcel(source);
             provider = ContentProviderNative.asInterface(
                 source.readStrongBinder());
+            connection = source.readStrongBinder();
             noReleaseNeeded = source.readInt() != 0;
         }
     }
@@ -476,7 +481,7 @@ public interface IActivityManager extends IInterface {
     int REPORT_THUMBNAIL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+27;
     int GET_CONTENT_PROVIDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+28;
     int PUBLISH_CONTENT_PROVIDERS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+29;
-    
+    int REF_CONTENT_PROVIDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+30;
     int FINISH_SUB_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+31;
     int GET_RUNNING_SERVICE_CONTROL_PANEL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+32;
     int START_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+33;
@@ -597,4 +602,5 @@ public interface IActivityManager extends IInterface {
     int SET_LOCK_SCREEN_SHOWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+147;
     int FINISH_ACTIVITY_AFFINITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+148;
     int GET_LAUNCHED_FROM_UID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+149;
+    int UNSTABLE_PROVIDER_DIED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+150;
 }

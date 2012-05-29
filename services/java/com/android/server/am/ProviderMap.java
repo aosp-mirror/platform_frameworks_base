@@ -177,27 +177,9 @@ public class ProviderMap {
         while (it.hasNext()) {
             Map.Entry<ComponentName, ContentProviderRecord> e = it.next();
             ContentProviderRecord r = e.getValue();
-            if (dumpAll) {
-                pw.print("  * ");
-                pw.println(r);
-                r.dump(pw, "    ");
-            } else {
-                pw.print("  * ");
-                pw.println(r);
-                if (r.proc != null) {
-                    pw.print("    proc=");
-                    pw.println(r.proc);
-                }
-                if (r.launchingApp != null) {
-                    pw.print("    launchingApp=");
-                    pw.println(r.launchingApp);
-                }
-                if (r.clients.size() > 0 || r.externalProcessNoHandleCount > 0) {
-                    pw.print("    "); pw.print(r.clients.size());
-                            pw.print(" clients, "); pw.print(r.externalProcessNoHandleCount);
-                            pw.println(" external handles");
-                }
-            }
+            pw.print("  * ");
+            pw.println(r);
+            r.dump(pw, "    ", dumpAll);
         }
     }
 
@@ -210,7 +192,7 @@ public class ProviderMap {
             pw.print("  ");
             pw.print(e.getKey());
             pw.print(": ");
-            pw.println(r);
+            pw.println(r.toShortString());
         }
     }
 
@@ -221,10 +203,10 @@ public class ProviderMap {
                 pw.println(" ");
             pw.println("  Published content providers (by class):");
             dumpProvidersByClassLocked(pw, dumpAll, mGlobalByClass);
-            pw.println("");
         }
 
         if (mProvidersByClassPerUser.size() > 1) {
+            pw.println("");
             for (int i = 0; i < mProvidersByClassPerUser.size(); i++) {
                 HashMap<ComponentName, ContentProviderRecord> map = mProvidersByClassPerUser.valueAt(i);
                 pw.println("  User " + mProvidersByClassPerUser.keyAt(i) + ":");
@@ -321,7 +303,7 @@ public class ProviderMap {
                     if (r.proc != null) pw.println(r.proc.pid);
                     else pw.println("(not running)");
             if (dumpAll) {
-                r.dump(pw, innerPrefix);
+                r.dump(pw, innerPrefix, true);
             }
         }
         if (r.proc != null && r.proc.thread != null) {
