@@ -17,6 +17,7 @@
 package android.media;
 
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.media.IAudioFocusDispatcher;
 import android.media.IRemoteControlClient;
@@ -133,4 +134,7 @@ interface IAudioService {
     void setRingtonePlayer(IRingtonePlayer player);
     IRingtonePlayer getRingtonePlayer();
     int getMasterStreamType();
+
+    void setWiredDeviceConnectionState(int device, int state, String name);
+    int setBluetoothA2dpDeviceConnectionState(in BluetoothDevice device, int state);
 }

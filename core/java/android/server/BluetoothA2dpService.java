@@ -33,7 +33,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
+import android.os.Handler;
+import android.os.Message;
 import android.os.ParcelUuid;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -65,6 +69,10 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     private final BluetoothAdapter mAdapter;
     private int   mTargetA2dpState;
     private BluetoothDevice mPlayingA2dpDevice;
+    private IntentBroadcastHandler mIntentBroadcastHandler;
+    private final WakeLock mWakeLock;
+
+    private static final int MSG_CONNECTION_STATE_CHANGED = 0;
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -130,6 +138,11 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
 
     public BluetoothA2dpService(Context context, BluetoothService bluetoothService) {
         mContext = context;
+
+        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "BluetoothA2dpService");
+
+        mIntentBroadcastHandler = new IntentBroadcastHandler();
 
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
@@ -514,17 +527,15 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                 adjustOtherSinkPriorities(device);
             }
 
-            Intent intent = new Intent(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
-            intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
-            intent.putExtra(BluetoothProfile.EXTRA_PREVIOUS_STATE, prevState);
-            intent.putExtra(BluetoothProfile.EXTRA_STATE, state);
-            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-            mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+            int delay = mAudioManager.setBluetoothA2dpDeviceConnectionState(device, state);
 
-            if (DBG) log("A2DP state : device: " + device + " State:" + prevState + "->" + state);
-
-            mBluetoothService.sendConnectionStateChange(device, BluetoothProfile.A2DP, state,
-                                                        prevState);
+            mWakeLock.acquire();
+            mIntentBroadcastHandler.sendMessageDelayed(mIntentBroadcastHandler.obtainMessage(
+                                                            MSG_CONNECTION_STATE_CHANGED,
+                                                            prevState,
+                                                            state,
+                                                            device),
+                                                       delay);
         }
     }
 
@@ -582,6 +593,34 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                 BluetoothDevice device = mAdapter.getRemoteDevice(address);
                 int state = getConnectionState(device);
                 handleSinkStateChange(device, state, BluetoothA2dp.STATE_DISCONNECTED);
+            }
+        }
+    }
+
+    /** Handles A2DP connection state change intent broadcasts. */
+    private class IntentBroadcastHandler extends Handler {
+
+        private void onConnectionStateChanged(BluetoothDevice device, int prevState, int state) {
+            Intent intent = new Intent(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
+            intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
+            intent.putExtra(BluetoothProfile.EXTRA_PREVIOUS_STATE, prevState);
+            intent.putExtra(BluetoothProfile.EXTRA_STATE, state);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+            mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+
+            if (DBG) log("A2DP state : device: " + device + " State:" + prevState + "->" + state);
+
+            mBluetoothService.sendConnectionStateChange(device, BluetoothProfile.A2DP, state,
+                                                        prevState);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_CONNECTION_STATE_CHANGED:
+                    onConnectionStateChanged((BluetoothDevice) msg.obj, msg.arg1, msg.arg2);
+                    mWakeLock.release();
+                    break;
             }
         }
     }

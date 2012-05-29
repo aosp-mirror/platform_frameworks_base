@@ -139,11 +139,14 @@ class WiredAccessoryObserver extends UEventObserver {
     private final Context mContext;
     private final WakeLock mWakeLock;  // held while there is a pending route change
 
+    private final AudioManager mAudioManager;
+
     public WiredAccessoryObserver(Context context) {
         mContext = context;
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WiredAccessoryObserver");
         mWakeLock.setReferenceCounted(false);
+        mAudioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
 
         context.registerReceiver(new BootCompletedReceiver(),
             new IntentFilter(Intent.ACTION_BOOT_COMPLETED), null, null);
@@ -250,106 +253,65 @@ class WiredAccessoryObserver extends UEventObserver {
         mPrevHeadsetState = mHeadsetState;
         mHeadsetState = headsetState;
 
-        if (headsetState == 0) {
-            if (mContext.getResources().getBoolean(
-                    com.android.internal.R.bool.config_sendAudioBecomingNoisy)) {
-                Intent intent = new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-                mContext.sendBroadcast(intent);
-            }
-
-            // It can take hundreds of ms flush the audio pipeline after
-            // apps pause audio playback, but audio route changes are
-            // immediate, so delay the route change by 1000ms.
-            // This could be improved once the audio sub-system provides an
-            // interface to clear the audio pipeline.
-            delay = 1000;
-        } else {
-            // Insert the same delay for headset connection so that the connection event is not
-            // broadcast before the disconnection event in case of fast removal/insertion
-            if (mHandler.hasMessages(0)) {
-                delay = 1000;
-            }
-        }
         mWakeLock.acquire();
-        mHandler.sendMessageDelayed(mHandler.obtainMessage(0,
-                                                           mHeadsetState,
-                                                           mPrevHeadsetState,
-                                                           mHeadsetName),
-                                    delay);
+        mHandler.sendMessage(mHandler.obtainMessage(0,
+                                                    mHeadsetState,
+                                                    mPrevHeadsetState,
+                                                    mHeadsetName));
     }
 
-    private synchronized final void sendIntents(int headsetState, int prevHeadsetState, String headsetName) {
+    private synchronized final void setDevicesState(int headsetState,
+                                                    int prevHeadsetState,
+                                                    String headsetName) {
         int allHeadsets = SUPPORTED_HEADSETS;
         for (int curHeadset = 1; allHeadsets != 0; curHeadset <<= 1) {
             if ((curHeadset & allHeadsets) != 0) {
-                sendIntent(curHeadset, headsetState, prevHeadsetState, headsetName);
+                setDeviceState(curHeadset, headsetState, prevHeadsetState, headsetName);
                 allHeadsets &= ~curHeadset;
             }
         }
     }
 
-    private final void sendIntent(int headset, int headsetState, int prevHeadsetState, String headsetName) {
+    private final void setDeviceState(int headset,
+                                      int headsetState,
+                                      int prevHeadsetState,
+                                      String headsetName) {
         if ((headsetState & headset) != (prevHeadsetState & headset)) {
+            int device;
+            int state;
 
-            int state = 0;
             if ((headsetState & headset) != 0) {
                 state = 1;
+            } else {
+                state = 0;
             }
-            if((headset == BIT_USB_HEADSET_ANLG) || (headset == BIT_USB_HEADSET_DGTL) ||
-               (headset == BIT_HDMI_AUDIO)) {
-                Intent intent;
 
-                //  Pack up the values and broadcast them to everyone
-                if (headset == BIT_USB_HEADSET_ANLG) {
-                    intent = new Intent(Intent.ACTION_ANALOG_AUDIO_DOCK_PLUG);
-                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                    intent.putExtra("state", state);
-                    intent.putExtra("name", headsetName);
-                    ActivityManagerNative.broadcastStickyIntent(intent, null);
-                } else if (headset == BIT_USB_HEADSET_DGTL) {
-                    intent = new Intent(Intent.ACTION_DIGITAL_AUDIO_DOCK_PLUG);
-                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                    intent.putExtra("state", state);
-                    intent.putExtra("name", headsetName);
-                    ActivityManagerNative.broadcastStickyIntent(intent, null);
-                } else if (headset == BIT_HDMI_AUDIO) {
-                    intent = new Intent(Intent.ACTION_HDMI_AUDIO_PLUG);
-                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                    intent.putExtra("state", state);
-                    intent.putExtra("name", headsetName);
-                    ActivityManagerNative.broadcastStickyIntent(intent, null);
-                }
-
-                if (LOG) Slog.v(TAG, "Intent.ACTION_USB_HEADSET_PLUG: state: "+state+" name: "+headsetName);
-                // TODO: Should we require a permission?
+            if (headset == BIT_HEADSET) {
+                device = AudioManager.DEVICE_OUT_WIRED_HEADSET;
+            } else if (headset == BIT_HEADSET_NO_MIC){
+                device = AudioManager.DEVICE_OUT_WIRED_HEADPHONE;
+            } else if (headset == BIT_USB_HEADSET_ANLG) {
+                device = AudioManager.DEVICE_OUT_ANLG_DOCK_HEADSET;
+            } else if (headset == BIT_USB_HEADSET_DGTL) {
+                device = AudioManager.DEVICE_OUT_DGTL_DOCK_HEADSET;
+            } else if (headset == BIT_HDMI_AUDIO) {
+                device = AudioManager.DEVICE_OUT_AUX_DIGITAL;
+            } else {
+                Slog.e(TAG, "setDeviceState() invalid headset type: "+headset);
+                return;
             }
-            if((headset == BIT_HEADSET) || (headset == BIT_HEADSET_NO_MIC)) {
 
-                //  Pack up the values and broadcast them to everyone
-                Intent intent = new Intent(Intent.ACTION_HEADSET_PLUG);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                //int state = 0;
-                int microphone = 0;
+            if (LOG)
+                Slog.v(TAG, "device "+headsetName+((state == 1) ? " connected" : " disconnected"));
 
-                if ((headset & HEADSETS_WITH_MIC) != 0) {
-                    microphone = 1;
-                }
-
-                intent.putExtra("state", state);
-                intent.putExtra("name", headsetName);
-                intent.putExtra("microphone", microphone);
-
-                if (LOG) Slog.v(TAG, "Intent.ACTION_HEADSET_PLUG: state: "+state+" name: "+headsetName+" mic: "+microphone);
-                // TODO: Should we require a permission?
-                ActivityManagerNative.broadcastStickyIntent(intent, null);
-            }
+            mAudioManager.setWiredDeviceConnectionState(device, state, headsetName);
         }
     }
 
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            sendIntents(msg.arg1, msg.arg2, (String)msg.obj);
+            setDevicesState(msg.arg1, msg.arg2, (String)msg.obj);
             mWakeLock.release();
         }
     };
