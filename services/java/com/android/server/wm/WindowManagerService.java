@@ -1638,7 +1638,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // it is of no interest to us.
                 if (w.mAppToken.hidden && w.mAppToken.mAppAnimator.animation == null) {
                     if (DEBUG_WALLPAPER) Slog.v(TAG,
-                            "Skipping not hidden or animating token: " + w);
+                            "Skipping hidden and not animating token: " + w);
                     continue;
                 }
             }
@@ -3865,6 +3865,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_APP_TRANSITIONS) Slog.v(
                     TAG, "Prepare app transition: transit=" + transit
                     + " mNextAppTransition=" + mNextAppTransition
+                    + " alwaysKeepCurrent=" + alwaysKeepCurrent
                     + " Callers=" + Debug.getCallers(3));
             if (okToDisplay()) {
                 if (mNextAppTransition == WindowManagerPolicy.TRANSIT_UNSET
@@ -3934,6 +3935,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    private void cancelWindowAnimations(final AppWindowToken wtoken) {
+        for (int i = wtoken.windows.size() - 1; i >= 0; i--) {
+            final WindowStateAnimator winAnimator = wtoken.windows.get(i).mWinAnimator;
+            if (winAnimator.isAnimating()) {
+                winAnimator.clearAnimation();
+            }
+        }
+    }
+
     public void executeAppTransition() {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "executeAppTransition()")) {
@@ -3949,6 +3959,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
                 mAppTransitionReady = true;
+                for (int i = mOpeningApps.size() - 1; i >= 0; i--) {
+                    cancelWindowAnimations(mOpeningApps.get(i));
+                }
+                for (int i = mClosingApps.size() - 1; i >= 0; i--) {
+                    cancelWindowAnimations(mClosingApps.get(i));
+                }
                 final long origId = Binder.clearCallingIdentity();
                 performLayoutAndPlaceSurfacesLocked();
                 Binder.restoreCallingIdentity(origId);
@@ -4296,6 +4312,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 if (DEBUG_APP_TRANSITIONS) Slog.v(
                         TAG, "Setting dummy animation on: " + wtoken);
+                cancelWindowAnimations(wtoken);
                 wtoken.mAppAnimator.setDummyAnimation();
                 mOpeningApps.remove(wtoken);
                 mClosingApps.remove(wtoken);
@@ -5319,7 +5336,8 @@ public class WindowManagerService extends IWindowManager.Stub
             // the background..)
             if (on) {
                 boolean isVisible = false;
-                for (WindowState ws : mWindows) {
+                for (int i = mWindows.size() - 1; i >= 0; i--) {
+                    final WindowState ws = mWindows.get(i);
                     if (ws.mSession.mPid == pid && ws.isVisibleLw()) {
                         isVisible = true;
                         break;
@@ -6437,7 +6455,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
             int keyboardPresence = 0;
             int navigationPresence = 0;
-            for (InputDevice device : mInputManager.getInputDevices()) {
+            final InputDevice[] devices = mInputManager.getInputDevices();
+            final int len = devices.length;
+            for (int i = 0; i < len; i++) {
+                InputDevice device = devices[i];
                 if (!device.isVirtual()) {
                     final int sources = device.getSources();
                     final int presenceFlag = device.isExternal() ?
@@ -7946,7 +7967,7 @@ public class WindowManagerService extends IWindowManager.Stub
             for (i=0; i<NN && goodToGo; i++) {
                 AppWindowToken wtoken = mOpeningApps.get(i);
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
-                        "Check opening app" + wtoken + ": allDrawn="
+                        "Check opening app=" + wtoken + ": allDrawn="
                         + wtoken.allDrawn + " startingDisplayed="
                         + wtoken.startingDisplayed + " startingMoved="
                         + wtoken.startingMoved);
@@ -8056,7 +8077,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                         "New transit: " + transit);
-            } else if (oldWallpaper != null) {
+            } else if ((oldWallpaper != null) && (oldWallpaper != mWallpaperTarget)) {
                 // We are transitioning from an activity with
                 // a wallpaper to one without.
                 transit = WindowManagerPolicy.TRANSIT_WALLPAPER_CLOSE;
