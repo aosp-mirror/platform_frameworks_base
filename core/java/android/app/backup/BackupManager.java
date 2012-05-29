@@ -145,8 +145,10 @@ public class BackupManager {
             try {
                 IRestoreSession binder = sService.beginRestoreSession(mContext.getPackageName(),
                         null);
-                session = new RestoreSession(mContext, binder);
-                result = session.restorePackage(mContext.getPackageName(), observer);
+                if (binder != null) {
+                    session = new RestoreSession(mContext, binder);
+                    result = session.restorePackage(mContext.getPackageName(), observer);
+                }
             } catch (RemoteException e) {
                 Log.w(TAG, "restoreSelf() unable to contact service");
             } finally {
@@ -170,7 +172,9 @@ public class BackupManager {
             try {
                 // All packages, current transport
                 IRestoreSession binder = sService.beginRestoreSession(null, null);
-                session = new RestoreSession(mContext, binder);
+                if (binder != null) {
+                    session = new RestoreSession(mContext, binder);
+                }
             } catch (RemoteException e) {
                 Log.w(TAG, "beginRestoreSession() couldn't connect");
             }
