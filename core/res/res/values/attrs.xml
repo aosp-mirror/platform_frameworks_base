@@ -2136,11 +2136,46 @@
              query the screen. Note: While not recommended, an accessibility service may
              decide to ignore this attribute and operate on all views in the view tree. -->
         <attr name="importantForAccessibility" format="integer">
-            <!-- The system determines whether the view is important for accessibility (recommended). -->
+            <!-- The system determines whether the view is important for accessibility - default
+                 (recommended). -->
             <enum name="auto" value="0" />
             <!-- The view is important for accessibility. -->
             <enum name="yes" value="1" />
             <!-- The view is not important for accessibility. -->
+            <enum name="no" value="2" />
+        </attr>
+
+        <!-- @hide Controls whether this view can take accessibility focus. -->
+        <attr name="accessibilityFocusable" format="integer">
+            <!-- The system determines whether the view can take accessibility focus - default
+                 (recommended).
+                 <p>
+                 Such a view is consideted by the focus search if it is:
+                 <ul>
+                 <li>
+                 Important for accessibility and actionable (clickable, long clickable, focusable)
+                 </li>
+                 <li>
+                 Important for accessibility, not actionable (clickable, long clickable, focusable),
+                 and does not have an actionable predecessor.
+                 </li>
+                 </ul>
+                 An accessibility srvice can request putting accessibility focus on such a view.
+                 </p> -->
+            <enum name="auto" value="0" />
+            <!-- The view can take accessibility focus.
+                 <p>
+                 A view that can take accessibility focus is always considered during focus
+                 search and an accessibility service can request putting accessibility focus
+                 on it.
+                 </p> -->
+            <enum name="yes" value="1" />
+            <!-- The view can not take accessibility focus.
+                 <p>
+                 A view that can not take accessibility focus is never considered during focus
+                 search and an accessibility service can not request putting accessibility focus
+                 on it.
+                 </p> -->
             <enum name="no" value="2" />
         </attr>
 
