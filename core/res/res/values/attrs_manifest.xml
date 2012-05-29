@@ -551,13 +551,13 @@
         <enum name="sensorLandscape" value="6" />
         <!-- Would like to have the screen in portrait orientation, but can
              use the sensor to change which direction the screen is facing. -->
-        <enum name="sensorPortait" value="7" />
+        <enum name="sensorPortrait" value="7" />
         <!-- Would like to have the screen in landscape orientation, turned in
              the opposite direction from normal landscape. -->
         <enum name="reverseLandscape" value="8" />
         <!-- Would like to have the screen in portrait orientation, turned in
              the opposite direction from normal portrait. -->
-        <enum name="reversePortait" value="9" />
+        <enum name="reversePortrait" value="9" />
         <!-- Orientation is determined by a physical orientation sensor:
              the display will rotate based on how the user moves the device.
              This allows any of the 4 possible rotations, regardless of what
