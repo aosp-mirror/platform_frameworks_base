@@ -8021,6 +8021,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     private void removeSendViewScrolledAccessibilityEventCallback() {
         if (mSendViewScrolledAccessibilityEvent != null) {
             removeCallbacks(mSendViewScrolledAccessibilityEvent);
+            mSendViewScrolledAccessibilityEvent.mIsPending = false;
         }
     }
 
