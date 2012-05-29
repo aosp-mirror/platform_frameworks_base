@@ -84,6 +84,12 @@ public class RecentsVerticalScrollView extends ScrollView
         setLayoutTransition(null);
 
         mLinearLayout.removeAllViews();
+        for (int i = 0; i < mRecycledViews.size(); i++) {
+            View child = mRecycledViews.get(i);
+            if (child.getParent() != null) {
+                throw new RuntimeException("Recycled child has parent");
+            }
+        }
         // Once we can clear the data associated with individual item views,
         // we can get rid of the removeAllViews() and the code below will
         // recycle them.
@@ -190,6 +196,9 @@ public class RecentsVerticalScrollView extends ScrollView
     public void onChildDismissed(View v) {
         mRecycledViews.add(v);
         mLinearLayout.removeView(v);
+        if (v.getParent() != null) {
+            throw new RuntimeException("Recycled child has parent");
+        }
         mCallback.handleSwipe(v);
         // Restore the alpha/translation parameters to what they were before swiping
         // (for when these items are recycled)
@@ -363,9 +372,15 @@ public class RecentsVerticalScrollView extends ScrollView
         mNumItemsInOneScreenful =
                 (int) FloatMath.ceil(dm.heightPixels / (float) child.getMeasuredHeight());
         mRecycledViews.add(child);
+        if (child.getParent() != null) {
+            throw new RuntimeException("First recycled child has parent");
+        }
 
         for (int i = 0; i < mNumItemsInOneScreenful - 1; i++) {
             mRecycledViews.add(mAdapter.createView(mLinearLayout));
+            if (mRecycledViews.get(mRecycledViews.size() - 1).getParent() != null) {
+                throw new RuntimeException("Recycled child has parent");
+            }
         }
     }
 
