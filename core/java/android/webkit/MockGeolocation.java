@@ -57,13 +57,8 @@ public final class MockGeolocation {
 
     // Native functions
     private static native void nativeSetUseMock(WebViewCore webViewCore);
-    private static native void nativeSetPosition(WebViewCore webViewCore,
-                                                 double latitude,
-                                                 double longitude,
-                                                 double accuracy);
-    private static native void nativeSetError(WebViewCore webViewCore,
-                                              int code,
-                                              String message);
-    private static native void nativeSetPermission(WebViewCore webViewCore,
-                                                   boolean allow);
+    private static native void nativeSetPosition(WebViewCore webViewCore, double latitude,
+            double longitude, double accuracy);
+    private static native void nativeSetError(WebViewCore webViewCore, int code, String message);
+    private static native void nativeSetPermission(WebViewCore webViewCore, boolean allow);
 }

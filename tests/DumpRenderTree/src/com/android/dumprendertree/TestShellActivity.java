@@ -541,9 +541,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
     @Override
     public void setMockGeolocationPosition(double latitude, double longitude, double accuracy) {
-        WebViewClassic.fromWebView(mWebView).setMockGeolocationPosition(latitude,
-                                                                        longitude,
-                                                                        accuracy);
+        WebViewClassic.fromWebView(mWebView).setMockGeolocationPosition(latitude, longitude,
+                accuracy);
     }
 
     @Override

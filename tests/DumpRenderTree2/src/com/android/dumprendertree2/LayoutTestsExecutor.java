@@ -694,9 +694,8 @@ public class LayoutTestsExecutor extends Activity {
     }
 
     public void setMockGeolocationPosition(double latitude, double longitude, double accuracy) {
-        WebViewClassic.fromWebView(mCurrentWebView).setMockGeolocationPosition(latitude,
-                                                                        longitude,
-                                                                        accuracy);
+        WebViewClassic.fromWebView(mCurrentWebView).setMockGeolocationPosition(latitude, longitude,
+                accuracy);
     }
 
     public void setMockGeolocationError(int code, String message) {
