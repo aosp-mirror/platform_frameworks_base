@@ -22,53 +22,26 @@
     xmlns:prvandroid="http://schemas.android.com/apk/prv/res/android"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/search_panel_container"
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
-    android:paddingBottom="0dip">
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
 
-    <RelativeLayout
-        android:id="@+id/search_bg_protect"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <com.android.internal.widget.multiwaveview.MultiWaveView
+        android:id="@+id/multi_wave_view"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/navbar_search_panel_height"
+        android:layout_gravity="center_horizontal|bottom"
+        android:gravity="center_horizontal|top"
+        android:background="@drawable/navbar_search_bg_scrim"
 
-        <RelativeLayout
-            android:id="@+id/search_panel_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true">
-
-            <View
-                android:layout_width="0dip"
-                android:layout_height="0dip"
-                android:layout_alignTop="@id/multi_wave_view"
-                android:layout_alignLeft="@id/multi_wave_view"
-                android:layout_alignRight="@id/multi_wave_view"
-                android:layout_alignBottom="@id/multi_wave_view"
-                android:layout_marginBottom="@dimen/navigation_bar_size"
-                android:background="@drawable/navbar_search_bg_scrim"/>
-
-            <com.android.internal.widget.multiwaveview.MultiWaveView
-                android:id="@+id/multi_wave_view"
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/navbar_search_panel_height"
-                android:layout_alignParentBottom="true"
-                android:gravity="top"
-
-                prvandroid:targetDrawables="@array/navbar_search_targets"
-                prvandroid:targetDescriptions="@array/navbar_search_target_descriptions"
-                prvandroid:directionDescriptions="@array/navbar_search_direction_descriptions"
-                prvandroid:handleDrawable="@drawable/navbar_search_handle"
-                prvandroid:waveDrawable="@drawable/navbar_search_outerring"
-                prvandroid:snapMargin="@dimen/navbar_search_snap_margin"
-                prvandroid:hitRadius="@dimen/navbar_search_hit_radius"
-                prvandroid:feedbackCount="0"
-                prvandroid:vibrationDuration="@integer/config_vibration_duration"
-                prvandroid:alwaysTrackFinger="true"/>
-
-        </RelativeLayout>
-
-    </RelativeLayout>
+        prvandroid:targetDrawables="@array/navbar_search_targets"
+        prvandroid:targetDescriptions="@array/navbar_search_target_descriptions"
+        prvandroid:directionDescriptions="@array/navbar_search_direction_descriptions"
+        prvandroid:handleDrawable="@drawable/navbar_search_handle"
+        prvandroid:waveDrawable="@drawable/navbar_search_outerring"
+        prvandroid:snapMargin="@dimen/navbar_search_snap_margin"
+        prvandroid:hitRadius="@dimen/navbar_search_hit_radius"
+        prvandroid:feedbackCount="0"
+        prvandroid:vibrationDuration="@integer/config_vibration_duration"
+        prvandroid:alwaysTrackFinger="true"/>
 
 </com.android.systemui.SearchPanelView>

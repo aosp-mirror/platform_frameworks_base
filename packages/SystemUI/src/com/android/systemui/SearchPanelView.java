@@ -27,7 +27,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.View;
@@ -38,7 +37,6 @@ import android.widget.FrameLayout;
 
 import com.android.internal.widget.multiwaveview.MultiWaveView;
 import com.android.internal.widget.multiwaveview.MultiWaveView.OnTriggerListener;
-import com.android.server.am.ActivityManagerService;
 import com.android.systemui.R;
 import com.android.systemui.recent.StatusBarTouchProxy;
 import com.android.systemui.statusbar.BaseStatusBar;
@@ -47,7 +45,8 @@ import com.android.systemui.statusbar.tablet.StatusBarPanel;
 import com.android.systemui.statusbar.tablet.TabletStatusBar;
 
 public class SearchPanelView extends FrameLayout implements
-        StatusBarPanel, Animator.AnimatorListener {
+        StatusBarPanel {
+    private static final int SEARCH_PANEL_HOLD_DURATION = 500;
     static final String TAG = "SearchPanelView";
     static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
     private Context mContext;
@@ -123,7 +122,7 @@ public class SearchPanelView extends FrameLayout implements
     final MultiWaveView.OnTriggerListener mMultiWaveViewListener
             = new MultiWaveView.OnTriggerListener() {
 
-        private int mTarget = -1;
+        private boolean mWaitingForLaunch;
 
         public void onGrabbed(View v, int handle) {
         }
@@ -132,26 +131,28 @@ public class SearchPanelView extends FrameLayout implements
         }
 
         public void onGrabbedStateChange(View v, int handle) {
-            if (mTarget == -1 && OnTriggerListener.NO_HANDLE == handle) {
+            if (!mWaitingForLaunch && OnTriggerListener.NO_HANDLE == handle) {
                 mBar.hideSearchPanel();
             }
         }
 
-        public void onTrigger(View v, int target) {
-            mTarget = target;
+        public void onTrigger(View v, final int target) {
+            final int resId = mMultiWaveView.getResourceIdForTarget(target);
+            switch (resId) {
+                case com.android.internal.R.drawable.ic_lockscreen_search:
+                    mWaitingForLaunch = true;
+                    startAssistActivity();
+                    postDelayed(new Runnable() {
+                        public void run() {
+                            mWaitingForLaunch = false;
+                            mBar.hideSearchPanel();
+                        }
+                    }, SEARCH_PANEL_HOLD_DURATION);
+                break;
+            }
         }
 
         public void onFinishFinalAnimation() {
-            if (mTarget != -1) {
-                final int resId = mMultiWaveView.getResourceIdForTarget(mTarget);
-                mTarget = -1; // a safety to make sure we never launch w/o prior call to onTrigger
-                switch (resId) {
-                    case com.android.internal.R.drawable.ic_lockscreen_search:
-                        startAssistActivity();
-                    break;
-                }
-                mBar.hideSearchPanel();
-            }
         }
     };
 
@@ -194,15 +195,11 @@ public class SearchPanelView extends FrameLayout implements
     };
 
     public void show(final boolean show, boolean animate) {
-        if (animate) {
-            if (mShowing != show) {
-                mShowing = show;
-                // TODO: start animating ring
-            }
-        } else {
-            mShowing = show;
-            onAnimationEnd(null);
+        if (!show) {
+            final LayoutTransition transitioner = animate ? createLayoutTransitioner() : null;
+            ((ViewGroup)mSearchTargetsContainer).setLayoutTransition(transitioner);
         }
+        mShowing = show;
         if (show) {
             if (getVisibility() != View.VISIBLE) {
                 setVisibility(View.VISIBLE);
@@ -226,25 +223,6 @@ public class SearchPanelView extends FrameLayout implements
         } else {
             setVisibility(View.INVISIBLE);
         }
-    }
-
-    public void onAnimationCancel(Animator animation) {
-    }
-
-    public void onAnimationEnd(Animator animation) {
-        if (mShowing) {
-            final LayoutTransition transitioner = new LayoutTransition();
-            ((ViewGroup)mSearchTargetsContainer).setLayoutTransition(transitioner);
-            createCustomAnimations(transitioner);
-        } else {
-            ((ViewGroup)mSearchTargetsContainer).setLayoutTransition(null);
-        }
-    }
-
-    public void onAnimationRepeat(Animator animation) {
-    }
-
-    public void onAnimationStart(Animator animation) {
     }
 
     /**
@@ -293,9 +271,11 @@ public class SearchPanelView extends FrameLayout implements
         }
     }
 
-    private void createCustomAnimations(LayoutTransition transitioner) {
+    private LayoutTransition createLayoutTransitioner() {
+        LayoutTransition transitioner = new LayoutTransition();
         transitioner.setDuration(200);
         transitioner.setStartDelay(LayoutTransition.CHANGE_DISAPPEARING, 0);
         transitioner.setAnimator(LayoutTransition.DISAPPEARING, null);
+        return transitioner;
     }
 }
