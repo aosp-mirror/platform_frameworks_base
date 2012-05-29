@@ -56,16 +56,18 @@ final class AccessibilityIterators {
             if (offset >= mText.length()) {
                 return null;
             }
-            int nextLine = -1;
+            int nextLine;
             if (offset < 0) {
                 nextLine = mLayout.getLineForOffset(0);
             } else {
                 final int currentLine = mLayout.getLineForOffset(offset);
-                if (currentLine < mLayout.getLineCount() - 1) {
+                if (getLineEdgeIndex(currentLine, DIRECTION_START) == offset) {
+                    nextLine = currentLine;
+                } else {
                     nextLine = currentLine + 1;
                 }
             }
-            if (nextLine < 0) {
+            if (nextLine >= mLayout.getLineCount()) {
                 return null;
             }
             final int start = getLineEdgeIndex(nextLine, DIRECTION_START);
@@ -82,12 +84,14 @@ final class AccessibilityIterators {
             if (offset <= 0) {
                 return null;
             }
-            int previousLine = -1;
+            int previousLine;
             if (offset > mText.length()) {
                 previousLine = mLayout.getLineForOffset(mText.length());
             } else {
-                final int currentLine = mLayout.getLineForOffset(offset - 1);
-                if (currentLine > 0) {
+                final int currentLine = mLayout.getLineForOffset(offset);
+                if (getLineEdgeIndex(currentLine, DIRECTION_END) + 1 == offset) {
+                    previousLine = currentLine;
+                } else {
                     previousLine = currentLine - 1;
                 }
             }
@@ -141,29 +145,18 @@ final class AccessibilityIterators {
                 return null;
             }
 
-            final int currentLine = mLayout.getLineForOffset(offset);
+            final int start = Math.max(0, offset);
+
+            final int currentLine = mLayout.getLineForOffset(start);
             final int currentLineTop = mLayout.getLineTop(currentLine);
             final int pageHeight = mTempRect.height() - mView.getTotalPaddingTop()
                     - mView.getTotalPaddingBottom();
+            final int nextPageStartY = currentLineTop + pageHeight;
+            final int lastLineTop = mLayout.getLineTop(mLayout.getLineCount() - 1);
+            final int currentPageEndLine = (nextPageStartY < lastLineTop)
+                    ? mLayout.getLineForVertical(nextPageStartY) - 1 : mLayout.getLineCount() - 1;
 
-            final int nextPageStartLine;
-            final int nextPageEndLine;
-            if (offset < 0) {
-                nextPageStartLine = currentLine;
-                final int nextPageEndY = currentLineTop + pageHeight;
-                nextPageEndLine = mLayout.getLineForVertical(nextPageEndY);
-            } else {
-                final int nextPageStartY = currentLineTop + pageHeight;
-                nextPageStartLine = mLayout.getLineForVertical(nextPageStartY) + 1;
-                if (mLayout.getLineTop(nextPageStartLine) <= nextPageStartY) {
-                    return null;
-                }
-                final int nextPageEndY = nextPageStartY + pageHeight;
-                nextPageEndLine = mLayout.getLineForVertical(nextPageEndY);
-            }
-
-            final int start = getLineEdgeIndex(nextPageStartLine, DIRECTION_START);
-            final int end = getLineEdgeIndex(nextPageEndLine, DIRECTION_END) + 1;
+            final int end = getLineEdgeIndex(currentPageEndLine, DIRECTION_END) + 1;
 
             return getRange(start, end);
         }
@@ -181,37 +174,17 @@ final class AccessibilityIterators {
                 return null;
             }
 
-            final int currentLine = mLayout.getLineForOffset(offset);
+            final int end = Math.min(mText.length(), offset);
+
+            final int currentLine = mLayout.getLineForOffset(end);
             final int currentLineTop = mLayout.getLineTop(currentLine);
             final int pageHeight = mTempRect.height() - mView.getTotalPaddingTop()
                     - mView.getTotalPaddingBottom();
+            final int previousPageEndY = currentLineTop - pageHeight;
+            final int currentPageStartLine = (previousPageEndY > 0) ?
+                     mLayout.getLineForVertical(previousPageEndY) + 1 : 0;
 
-            final int previousPageStartLine;
-            final int previousPageEndLine;
-            if (offset > mText.length()) {
-                final int prevousPageStartY = mLayout.getHeight() - pageHeight;
-                if (prevousPageStartY < 0) {
-                    return null;
-                }
-                previousPageStartLine = mLayout.getLineForVertical(prevousPageStartY);
-                previousPageEndLine = mLayout.getLineCount() - 1;
-            } else {
-                final int prevousPageStartY;
-                if (offset == mText.length()) {
-                    prevousPageStartY = mLayout.getHeight() - 2 * pageHeight;
-                } else {
-                    prevousPageStartY = currentLineTop - 2 * pageHeight;
-                }
-                if (prevousPageStartY < 0) {
-                    return null;
-                }
-                previousPageStartLine = mLayout.getLineForVertical(prevousPageStartY);
-                final int previousPageEndY = prevousPageStartY + pageHeight;
-                previousPageEndLine = mLayout.getLineForVertical(previousPageEndY) - 1;
-            }
-
-            final int start = getLineEdgeIndex(previousPageStartLine, DIRECTION_START);
-            final int end = getLineEdgeIndex(previousPageEndLine, DIRECTION_END) + 1;
+            final int start = getLineEdgeIndex(currentPageStartLine, DIRECTION_START);
 
             return getRange(start, end);
         }

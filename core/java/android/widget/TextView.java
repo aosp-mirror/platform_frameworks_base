@@ -8376,10 +8376,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public int getAccessibilityCursorPosition() {
         if (TextUtils.isEmpty(getContentDescription())) {
-            return getSelectionEnd();
-        } else {
-            return super.getAccessibilityCursorPosition();
+            final int selectionEnd = getSelectionEnd();
+            if (selectionEnd >= 0) {
+                return selectionEnd;
+            }
         }
+        return super.getAccessibilityCursorPosition();
     }
 
     /**
@@ -8391,7 +8393,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return;
         }
         if (TextUtils.isEmpty(getContentDescription())) {
-            if (index >= 0) {
+            if (index >= 0 && index <= mText.length()) {
                 Selection.setSelection((Spannable) mText, index);
             } else {
                 Selection.removeSelection((Spannable) mText);

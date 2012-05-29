@@ -47,7 +47,6 @@ public final class AccessibilityIterators {
      * @hide
      */
     public static abstract class AbstractTextSegmentIterator implements TextSegmentIterator {
-        protected static final int DONE = -1;
 
         protected String mText;
 
@@ -104,20 +103,20 @@ public final class AccessibilityIterators {
             if (offset >= textLegth) {
                 return null;
             }
-            int start = -1;
-            if (offset < 0) {
-                offset = 0;
-                if (mImpl.isBoundary(offset)) {
-                    start = offset;
+            int start = offset;
+            if (start < 0) {
+                start = 0;
+            }
+            while (!mImpl.isBoundary(start)) {
+                start = mImpl.following(start);
+                if (start == BreakIterator.DONE) {
+                    return null;
                 }
             }
-            if (start < 0) {
-                start = mImpl.following(offset);
-            }
-            if (start < 0) {
+            final int end = mImpl.following(start);
+            if (end == BreakIterator.DONE) {
                 return null;
             }
-            final int end = mImpl.following(start);
             return getRange(start, end);
         }
 
@@ -130,20 +129,20 @@ public final class AccessibilityIterators {
             if (offset <= 0) {
                 return null;
             }
-            int end = -1;
-            if (offset > mText.length()) {
-                offset = mText.length();
-                if (mImpl.isBoundary(offset)) {
-                    end = offset;
+            int end = offset;
+            if (end > textLegth) {
+                end = textLegth;
+            }
+            while (!mImpl.isBoundary(end)) {
+                end = mImpl.preceding(end);
+                if (end == BreakIterator.DONE) {
+                    return null;
                 }
             }
-            if (end < 0) {
-                end = mImpl.preceding(offset);
-            }
-            if (end < 0) {
+            final int start = mImpl.preceding(end);
+            if (start == BreakIterator.DONE) {
                 return null;
             }
-            final int start = mImpl.preceding(end);
             return getRange(start, end);
         }
 
@@ -195,25 +194,20 @@ public final class AccessibilityIterators {
             if (offset >= mText.length()) {
                 return null;
             }
-            int start = -1;
-            if (offset < 0) {
-                offset = 0;
-                if (mImpl.isBoundary(offset) && isLetterOrDigit(offset)) {
-                    start = offset;
-                }
-            }
+            int start = offset;
             if (start < 0) {
-                while ((offset = mImpl.following(offset)) != DONE) {
-                    if (isLetterOrDigit(offset)) {
-                        start = offset;
-                        break;
-                    }
-                }
+                start = 0;
             }
-            if (start < 0) {
-                return null;
+            while (!isLetterOrDigit(start) && !isStartBoundary(start)) {
+                start = mImpl.following(start);
+                if (start == BreakIterator.DONE) {
+                    return null;
+                }
             }
             final int end = mImpl.following(start);
+            if (end == BreakIterator.DONE || !isEndBoundary(end)) {
+                return null;
+            }
             return getRange(start, end);
         }
 
@@ -226,26 +220,31 @@ public final class AccessibilityIterators {
             if (offset <= 0) {
                 return null;
             }
-            int end = -1;
-            if (offset > mText.length()) {
-                offset = mText.length();
-                if (mImpl.isBoundary(offset) && offset > 0 && isLetterOrDigit(offset - 1)) {
-                    end = offset;
-                }
+            int end = offset;
+            if (end > textLegth) {
+                end = textLegth;
             }
-            if (end < 0) {
-                while ((offset = mImpl.preceding(offset)) != DONE) {
-                    if (offset > 0 && isLetterOrDigit(offset - 1)) {
-                        end = offset;
-                        break;
-                    }
+            while (end > 0 && !isLetterOrDigit(end - 1) && !isEndBoundary(end)) {
+                end = mImpl.preceding(end);
+                if (end == BreakIterator.DONE) {
+                    return null;
                 }
-            }
-            if (end < 0) {
-                return null;
             }
             final int start = mImpl.preceding(end);
+            if (start == BreakIterator.DONE || !isStartBoundary(start)) {
+                return null;
+            }
             return getRange(start, end);
+        }
+
+        private boolean isStartBoundary(int index) {
+            return isLetterOrDigit(index)
+                && (index == 0 || !isLetterOrDigit(index - 1));
+        }
+
+        private boolean isEndBoundary(int index) {
+            return (index > 0 && isLetterOrDigit(index - 1))
+                && (index == mText.length() || !isLetterOrDigit(index));
         }
 
         private boolean isLetterOrDigit(int index) {
@@ -276,31 +275,19 @@ public final class AccessibilityIterators {
             if (offset >= textLength) {
                 return null;
             }
-            int start = -1;
-            if (offset < 0) {
-                start = 0;
-            } else {
-                for (int i = offset + 1; i < textLength; i++) {
-                    if (mText.charAt(i) == '\n') {
-                        start = i;
-                        break;
-                    }
-                }
-            }
+            int start = offset;
             if (start < 0) {
-                return null;
+                start = 0;
             }
-            while (start < textLength && mText.charAt(start) == '\n') {
+            while (start < textLength && mText.charAt(start) == '\n'
+                    && !isStartBoundary(start)) {
                 start++;
             }
-            int end = start;
-            for (int i = end + 1; i < textLength; i++) {
-                end = i;
-                if (mText.charAt(i) == '\n') {
-                    break;
-                }
+            if (start >= textLength) {
+                return null;
             }
-            while (end < textLength && mText.charAt(end) == '\n') {
+            int end = start + 1;
+            while (end < textLength && !isEndBoundary(end)) {
                 end++;
             }
             return getRange(start, end);
@@ -315,38 +302,31 @@ public final class AccessibilityIterators {
             if (offset <= 0) {
                 return null;
             }
-            int end = -1;
-            if (offset > mText.length()) {
-                end = mText.length();
-            } else {
-                if (offset > 0 && mText.charAt(offset - 1) == '\n') {
-                    offset--;
-                }
-                for (int i = offset - 1; i >= 0; i--) {
-                    if (i > 0 && mText.charAt(i - 1) == '\n') {
-                        end = i;
-                        break;
-                    }
-                }
+            int end = offset;
+            if (end > textLength) {
+                end = textLength;
+            }
+            while(end > 0 && mText.charAt(end - 1) == '\n' && !isEndBoundary(end)) {
+                end--;
             }
             if (end <= 0) {
                 return null;
             }
-            int start = end;
-            while (start > 0 && mText.charAt(start - 1) == '\n') {
+            int start = end - 1;
+            while (start > 0 && !isStartBoundary(start)) {
                 start--;
             }
-            if (start == 0 && mText.charAt(start) == '\n') {
-                return null;
-            }
-            for (int i = start - 1; i >= 0; i--) {
-                start = i;
-                if (start > 0 && mText.charAt(i - 1) == '\n') {
-                    break;
-                }
-            }
-            start = Math.max(0, start);
             return getRange(start, end);
+        }
+
+        private boolean isStartBoundary(int index) {
+            return (mText.charAt(index) != '\n'
+                && (index == 0 || mText.charAt(index - 1) == '\n'));
+        }
+
+        private boolean isEndBoundary(int index) {
+            return (index > 0 && mText.charAt(index - 1) != '\n'
+                && (index == mText.length() || mText.charAt(index) == '\n'));
         }
     }
 }
