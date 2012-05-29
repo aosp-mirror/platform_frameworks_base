@@ -444,6 +444,16 @@ public class AsyncChannel {
         if ((mConnection != null) && (mSrcContext != null)) {
             mSrcContext.unbindService(mConnection);
         }
+        try {
+            // Send the DISCONNECTED, although it may not be received
+            // but its the best we can do.
+            Message msg = Message.obtain();
+            msg.what = CMD_CHANNEL_DISCONNECTED;
+            msg.replyTo = mSrcMessenger;
+            mDstMessenger.send(msg);
+        } catch(Exception e) {
+        }
+        // Tell source we're disconnected.
         if (mSrcHandler != null) {
             replyDisconnected(STATUS_SUCCESSFUL);
         }

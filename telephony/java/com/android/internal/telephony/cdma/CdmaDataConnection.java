@@ -51,11 +51,8 @@ public class CdmaDataConnection extends DataConnection {
      */
     static CdmaDataConnection makeDataConnection(CDMAPhone phone, int id, RetryManager rm,
             DataConnectionTracker dct) {
-        synchronized (mCountLock) {
-            mCount += 1;
-        }
-        CdmaDataConnection cdmaDc = new CdmaDataConnection(phone, "CdmaDC-" + mCount,
-                id, rm, dct);
+        CdmaDataConnection cdmaDc = new CdmaDataConnection(phone,
+                "CdmaDC-" + mCount.incrementAndGet(), id, rm, dct);
         cdmaDc.start();
         if (DBG) cdmaDc.log("Made " + cdmaDc.getName());
         return cdmaDc;
