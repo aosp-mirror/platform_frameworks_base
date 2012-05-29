@@ -1303,6 +1303,9 @@
   <java-symbol type="string" name="global_actions_airplane_mode_off_status" />
   <java-symbol type="string" name="global_actions_airplane_mode_on_status" />
   <java-symbol type="string" name="global_actions_toggle_airplane_mode" />
+  <java-symbol type="string" name="global_action_silent_mode_off_status" />
+  <java-symbol type="string" name="global_action_silent_mode_on_status" />
+  <java-symbol type="string" name="global_action_toggle_silent_mode" />
   <java-symbol type="string" name="invalidPuk" />
   <java-symbol type="string" name="keyguard_password_enter_pin_code" />
   <java-symbol type="string" name="keyguard_password_enter_puk_code" />
