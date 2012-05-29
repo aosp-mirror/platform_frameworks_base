@@ -1892,6 +1892,13 @@ public class InputMethodService extends AbstractInputMethodService {
      * {@link KeyEvent#FLAG_KEEP_TOUCH_MODE KeyEvent.FLAG_KEEP_TOUCH_MODE}, so
      * that they don't impact the current touch mode of the UI.
      *
+     * <p>Note that it's discouraged to send such key events in normal operation;
+     * this is mainly for use with {@link android.text.InputType#TYPE_NULL} type
+     * text fields, or for non-rich input methods. A reasonably capable software
+     * input method should use the
+     * {@link android.view.inputmethod.InputConnection#commitText} family of methods
+     * to send text to an application, rather than sending key events.</p>
+     *
      * @param keyEventCode The raw key code to send, as defined by
      * {@link KeyEvent}.
      */
@@ -1949,7 +1956,11 @@ public class InputMethodService extends AbstractInputMethodService {
      * {@link InputConnection#commitText InputConnection.commitText()} with
      * the character; some, however, may be handled different.  In particular,
      * the enter character ('\n') will either be delivered as an action code
-     * or a raw key event, as appropriate.
+     * or a raw key event, as appropriate.  Consider this as a convenience
+     * method for IMEs that do not have a full implementation of actions; a
+     * fully complying IME will decide of the right action for each event and
+     * will likely never call this method except maybe to handle events coming
+     * from an actual hardware keyboard.
      * 
      * @param charCode The UTF-16 character code to send.
      */

@@ -52,6 +52,19 @@ import android.view.KeyCharacterMap.KeyData;
  * to characters.  Be aware that there may be multiple key input devices active
  * at the same time and each will have its own key character map.
  * </p><p>
+ * As soft input methods can use multiple and inventive ways of inputting text,
+ * there is no guarantee that any key press on a soft keyboard will generate a key
+ * event: this is left to the IME's discretion, and in fact sending such events is
+ * discouraged.  You should never rely on receiving KeyEvents for any key on a soft
+ * input method.  In particular, the default software keyboard will never send any
+ * key event to any application targetting Jelly Bean or later, and will only send
+ * events for some presses of the delete and return keys to applications targetting
+ * Ice Cream Sandwich or earlier.  Be aware that other software input methods may
+ * never send key events regardless of the version.  Consider using editor actions
+ * like {@link android.view.inputmethod.EditorInfo#IME_ACTION_DONE} if you need
+ * specific interaction with the software keyboard, as it gives more visibility to
+ * the user as to how your application will react to key presses.
+ * </p><p>
  * When interacting with an IME, the framework may deliver key events
  * with the special action {@link #ACTION_MULTIPLE} that either specifies
  * that single repeated key code or a sequence of characters to insert.
