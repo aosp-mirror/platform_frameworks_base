@@ -3544,7 +3544,8 @@ public class WindowManagerService extends IWindowManager.Stub
             wtoken.groupId = groupId;
             wtoken.appFullscreen = fullscreen;
             wtoken.requestedOrientation = requestedOrientation;
-            if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG, "addAppToken: " + wtoken);
+            if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG, "addAppToken: " + wtoken
+                    + " at " + addPos);
             mAppTokens.add(addPos, wtoken);
             addAppTokenToAnimating(addPos, wtoken);
             mTokenMap.put(token.asBinder(), wtoken);
@@ -4816,8 +4817,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            if (mNextAppTransition == WindowManagerPolicy.TRANSIT_UNSET
-                    && !mAppTransitionRunning) {
+            if (!mAppTransitionRunning) {
                 mAnimatingAppTokens.clear();
                 mAnimatingAppTokens.addAll(mAppTokens);
                 moveAppWindowsLocked(tokens, mAppTokens.size());
@@ -4836,8 +4836,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final long origId = Binder.clearCallingIdentity();
         synchronized(mWindowMap) {
             final int N = tokens.size();
-            if (N > 0 && mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET
-                    && !mAppTransitionRunning) {
+            if (N > 0 && !mAppTransitionRunning) {
                 // animating towards back, hang onto old list for duration of animation.
                 mAnimatingAppTokens.clear();
                 mAnimatingAppTokens.addAll(mAppTokens);
@@ -4857,8 +4856,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            if (mNextAppTransition == WindowManagerPolicy.TRANSIT_UNSET
-                    && !mAppTransitionRunning) {
+            if (!mAppTransitionRunning) {
                 mAnimatingAppTokens.clear();
                 mAnimatingAppTokens.addAll(mAppTokens);
                 moveAppWindowsLocked(tokens, 0);
