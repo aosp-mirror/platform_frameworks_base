@@ -81,12 +81,6 @@ public class SmsUsageMonitor {
     private final HashMap<String, ArrayList<Long>> mSmsStamp =
             new HashMap<String, ArrayList<Long>>();
 
-    /**
-     * Hash of package names that are allowed to send to short codes.
-     * TODO: persist this across reboots.
-     */
-    private final HashSet<String> mApprovedShortCodeSenders = new HashSet<String>();
-
     /** Context for retrieving regexes from XML resource. */
     private final Context mContext;
 
@@ -248,9 +242,6 @@ public class SmsUsageMonitor {
                 DEFAULT_SMS_CHECK_PERIOD);
 
         mSettingsObserverHandler = new SettingsObserverHandler();
-
-        // system MMS app is always allowed to send to short codes
-        mApprovedShortCodeSenders.add("com.android.mms");
     }
 
     /**
@@ -354,28 +345,6 @@ public class SmsUsageMonitor {
             }
 
             return isUnderLimit(sentList, smsWaiting);
-        }
-    }
-
-    /**
-     * Return whether the app is approved to send to any short code.
-     * @param appName the package name of the app requesting to send an SMS
-     * @return true if the app is approved; false if we need to confirm short code destinations
-     */
-    public boolean isApprovedShortCodeSender(String appName) {
-        synchronized (mApprovedShortCodeSenders) {
-            return mApprovedShortCodeSenders.contains(appName);
-        }
-    }
-
-    /**
-     * Add app package name to the list of approved short code senders.
-     * @param appName the package name of the app to add
-     */
-    public void addApprovedShortCodeSender(String appName) {
-        if (DBG) log("Adding " + appName + " to list of approved short code senders.");
-        synchronized (mApprovedShortCodeSenders) {
-            mApprovedShortCodeSenders.add(appName);
         }
     }
 

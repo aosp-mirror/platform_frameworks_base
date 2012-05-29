@@ -78,6 +78,10 @@ public abstract class SMSDispatcher extends Handler {
     public static final String RECEIVE_EMERGENCY_BROADCAST_PERMISSION =
             "android.permission.RECEIVE_EMERGENCY_BROADCAST";
 
+    /** Permission required to send SMS to short codes without user confirmation. */
+    private static final String SEND_SMS_NO_CONFIRMATION_PERMISSION =
+            "android.permission.SEND_SMS_NO_CONFIRMATION";
+
     /** Query projection for checking for duplicate message segments. */
     private static final String[] PDU_PROJECTION = new String[] {
             "pdu"
@@ -944,7 +948,8 @@ public abstract class SMSDispatcher extends Handler {
      * @return true if the destination is approved; false if user confirmation event was sent
      */
     boolean checkDestination(SmsTracker tracker) {
-        if (mUsageMonitor.isApprovedShortCodeSender(tracker.mAppPackage)) {
+        if (mContext.checkCallingOrSelfPermission(SEND_SMS_NO_CONFIRMATION_PERMISSION)
+                == PackageManager.PERMISSION_GRANTED) {
             return true;            // app is pre-approved to send to short codes
         } else {
             String countryIso = mTelephonyManager.getSimCountryIso();
