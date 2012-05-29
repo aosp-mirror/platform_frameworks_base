@@ -532,11 +532,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         if (DEBUG) Log.d(TAG, "screen off");
         mScreenOn = false;
         mForgotPattern = false;
-        if (mBiometricUnlock != null) {
-            mSuppressBiometricUnlock =
-                    mUpdateMonitor.getPhoneState() != TelephonyManager.CALL_STATE_IDLE
-                    || mHasDialog;
-        }
 
         // Emulate activity life-cycle for both lock and unlock screen.
         if (mLockScreen != null) {
@@ -989,6 +984,17 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
         if (mBiometricUnlock != null) {
             restartBiometricUnlock = mBiometricUnlock.stop();
+        }
+
+        // Prevents biometric unlock from coming up immediately after a phone call or if there
+        // is a dialog on top of lockscreen. It is only updated if the screen is off because if the
+        // screen is on it's either because of an orientation change, or when it first boots.
+        // In both those cases, we don't want to override the current value of
+        // mSuppressBiometricUnlock and instead want to use the previous value.
+        if (!mScreenOn) {
+            mSuppressBiometricUnlock =
+                    mUpdateMonitor.getPhoneState() != TelephonyManager.CALL_STATE_IDLE
+                    || mHasDialog;
         }
 
         // If the biometric unlock is not being used, we don't bother constructing it.  Then we can
