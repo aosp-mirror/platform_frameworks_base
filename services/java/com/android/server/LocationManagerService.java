@@ -26,7 +26,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.Signature;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.location.Address;
@@ -123,8 +127,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     private static boolean sProvidersLoaded = false;
 
     private final Context mContext;
-    private final String mNetworkLocationProviderPackageName;
-    private final String mGeocodeProviderPackageName;
+    private PackageManager mPackageManager;  // final after initialize()
+    private String mNetworkLocationProviderPackageName;  // only used on handler thread
+    private String mGeocodeProviderPackageName;  // only used on handler thread
     private GeocoderProxy mGeocodeProvider;
     private IGpsStatusProvider mGpsStatusProvider;
     private INetInitiatedListener mNetInitiatedListener;
@@ -490,23 +495,76 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         addProvider(passiveProvider);
         mEnabledProviders.add(passiveProvider.getName());
 
-        // initialize external network location and geocoder services
-        PackageManager pm = mContext.getPackageManager();
-        if (mNetworkLocationProviderPackageName != null &&
-                pm.resolveService(new Intent(mNetworkLocationProviderPackageName), 0) != null) {
-            mNetworkLocationProvider =
-                new LocationProviderProxy(mContext, LocationManager.NETWORK_PROVIDER,
-                        mNetworkLocationProviderPackageName, mLocationHandler);
-
-            addProvider(mNetworkLocationProvider);
+        // initialize external network location and geocoder services.
+        // The initial value of mNetworkLocationProviderPackageName and
+        // mGeocodeProviderPackageName is just used to determine what
+        // signatures future mNetworkLocationProviderPackageName and
+        // mGeocodeProviderPackageName packages must have. So alternate
+        // providers can be installed under a different package name
+        // so long as they have the same signature as the original
+        // provider packages.
+        if (mNetworkLocationProviderPackageName != null) {
+            String packageName = findBestPackage(LocationProviderProxy.SERVICE_ACTION,
+                    mNetworkLocationProviderPackageName);
+            if (packageName != null) {
+                mNetworkLocationProvider = new LocationProviderProxy(mContext,
+                        LocationManager.NETWORK_PROVIDER,
+                        packageName, mLocationHandler);
+                mNetworkLocationProviderPackageName = packageName;
+                addProvider(mNetworkLocationProvider);
+            }
         }
-
-        if (mGeocodeProviderPackageName != null &&
-                pm.resolveService(new Intent(mGeocodeProviderPackageName), 0) != null) {
-            mGeocodeProvider = new GeocoderProxy(mContext, mGeocodeProviderPackageName);
+        if (mGeocodeProviderPackageName != null) {
+            String packageName = findBestPackage(GeocoderProxy.SERVICE_ACTION,
+                    mGeocodeProviderPackageName);
+            if (packageName != null) {
+                mGeocodeProvider = new GeocoderProxy(mContext, packageName);
+                mGeocodeProviderPackageName = packageName;
+            }
         }
 
         updateProvidersLocked();
+    }
+
+    /**
+     * Pick the best (network location provider or geocode provider) package.
+     * The best package:
+     * - implements serviceIntentName
+     * - has signatures that match that of sigPackageName
+     * - has the highest version value in a meta-data field in the service component
+     */
+    String findBestPackage(String serviceIntentName, String sigPackageName) {
+        Intent intent = new Intent(serviceIntentName);
+        List<ResolveInfo> infos = mPackageManager.queryIntentServices(intent,
+                PackageManager.GET_META_DATA);
+        if (infos == null) return null;
+
+        int bestVersion = Integer.MIN_VALUE;
+        String bestPackage = null;
+        for (ResolveInfo info : infos) {
+            String packageName = info.serviceInfo.packageName;
+            // check signature
+            if (mPackageManager.checkSignatures(packageName, sigPackageName) !=
+                    PackageManager.SIGNATURE_MATCH) {
+                Slog.w(TAG, packageName + " implements " + serviceIntentName +
+                       " but its signatures don't match those in " + sigPackageName +
+                       ", ignoring");
+                continue;
+            }
+            // read version
+            int version = 0;
+            if (info.serviceInfo.metaData != null) {
+                version = info.serviceInfo.metaData.getInt("version", 0);
+            }
+            if (LOCAL_LOGV) Slog.v(TAG, packageName + " implements " + serviceIntentName +
+                    " with version " + version);
+            if (version > bestVersion) {
+                bestVersion = version;
+                bestPackage = packageName;
+            }
+        }
+
+        return bestPackage;
     }
 
     /**
@@ -516,10 +574,12 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         super();
         mContext = context;
         Resources resources = context.getResources();
+
         mNetworkLocationProviderPackageName = resources.getString(
-                com.android.internal.R.string.config_networkLocationProvider);
+                com.android.internal.R.string.config_networkLocationProviderPackageName);
         mGeocodeProviderPackageName = resources.getString(
-                com.android.internal.R.string.config_geocodeProvider);
+                com.android.internal.R.string.config_geocodeProviderPackageName);
+
         mPackageMonitor.register(context, null, true);
 
         if (LOCAL_LOGV) {
@@ -537,6 +597,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         // Create a wake lock, needs to be done before calling loadProviders() below
         PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
+        mPackageManager = mContext.getPackageManager();
 
         // Load providers
         loadProviders();
@@ -1886,16 +1947,33 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                     }
                 } else if (msg.what == MESSAGE_PACKAGE_UPDATED) {
                     String packageName = (String) msg.obj;
-                    String packageDot = packageName + ".";
 
-                    // reconnect to external providers after their packages have been updated
-                    if (mNetworkLocationProvider != null &&
-                        mNetworkLocationProviderPackageName.startsWith(packageDot)) {
-                        mNetworkLocationProvider.reconnect();
+                    // reconnect to external providers if there is a better package
+                    if (mNetworkLocationProviderPackageName != null &&
+                            mPackageManager.resolveService(
+                            new Intent(LocationProviderProxy.SERVICE_ACTION)
+                            .setPackage(packageName), 0) != null) {
+                        // package implements service, perform full check
+                        String bestPackage = findBestPackage(
+                                LocationProviderProxy.SERVICE_ACTION,
+                                mNetworkLocationProviderPackageName);
+                        if (packageName.equals(bestPackage)) {
+                            mNetworkLocationProvider.reconnect(bestPackage);
+                            mNetworkLocationProviderPackageName = packageName;
+                        }
                     }
-                    if (mGeocodeProvider != null &&
-                        mGeocodeProviderPackageName.startsWith(packageDot)) {
-                        mGeocodeProvider.reconnect();
+                    if (mGeocodeProviderPackageName != null &&
+                            mPackageManager.resolveService(
+                            new Intent(GeocoderProxy.SERVICE_ACTION)
+                            .setPackage(packageName), 0) != null) {
+                        // package implements service, perform full check
+                        String bestPackage = findBestPackage(
+                                GeocoderProxy.SERVICE_ACTION,
+                                mGeocodeProviderPackageName);
+                        if (packageName.equals(bestPackage)) {
+                            mGeocodeProvider.reconnect(bestPackage);
+                            mGeocodeProviderPackageName = packageName;
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -2001,6 +2079,11 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
         @Override
         public void onPackageUpdateFinished(String packageName, int uid) {
+            // Called by main thread; divert work to LocationWorker.
+            Message.obtain(mLocationHandler, MESSAGE_PACKAGE_UPDATED, packageName).sendToTarget();
+        }
+        @Override
+        public void onPackageAdded(String packageName, int uid) {
             // Called by main thread; divert work to LocationWorker.
             Message.obtain(mLocationHandler, MESSAGE_PACKAGE_UPDATED, packageName).sendToTarget();
         }

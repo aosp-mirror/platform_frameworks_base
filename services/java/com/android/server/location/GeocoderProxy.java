@@ -39,27 +39,28 @@ public class GeocoderProxy {
 
     private static final String TAG = "GeocoderProxy";
 
+    public static final String SERVICE_ACTION =
+        "com.android.location.service.GeocodeProvider";
+
     private final Context mContext;
     private final Intent mIntent;
     private final Object mMutex = new Object();  // synchronizes access to mServiceConnection
-    private Connection mServiceConnection = new Connection();  // never null
+    private Connection mServiceConnection;  // never null after ctor
 
-    public GeocoderProxy(Context context, String serviceName) {
+    public GeocoderProxy(Context context, String packageName) {
         mContext = context;
-        mIntent = new Intent(serviceName);
-        mContext.bindService(mIntent, mServiceConnection,
-                Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
-                | Context.BIND_ALLOW_OOM_MANAGEMENT);
+        mIntent = new Intent(SERVICE_ACTION);
+        reconnect(packageName);
     }
 
-    /**
-     * When unbundled NetworkLocationService package is updated, we
-     * need to unbind from the old version and re-bind to the new one.
-     */
-    public void reconnect() {
+    /** Bind to service. Will reconnect if already connected */
+    public void reconnect(String packageName) {
         synchronized (mMutex) {
-            mContext.unbindService(mServiceConnection);
+            if (mServiceConnection != null) {
+                mContext.unbindService(mServiceConnection);
+            }
             mServiceConnection = new Connection();
+            mIntent.setPackage(packageName);
             mContext.bindService(mIntent, mServiceConnection,
                     Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
                     | Context.BIND_ALLOW_OOM_MANAGEMENT);
