@@ -661,6 +661,7 @@ final class WebViewInputDispatcher {
                         // Web kit has decided to consume the event!
                         if (d.mEventType == EVENT_TYPE_TOUCH) {
                             enqueueUiCancelTouchEventIfNeededLocked();
+                            unscheduleLongPressLocked();
                         }
                     } else {
                         // Web kit is being friendly.  Pass the event to the UI.
