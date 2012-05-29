@@ -71,7 +71,7 @@ class CallbackProxy extends Handler {
     // Start with 100 to indicate it is not in load for the empty page.
     private volatile int mLatestProgress = 100;
     // Back/Forward list
-    private final WebBackForwardList mBackForwardList;
+    private final WebBackForwardListClassic mBackForwardList;
     // Back/Forward list client
     private volatile WebBackForwardListClient mWebBackForwardListClient;
     // Used to call startActivity during url override.
@@ -188,7 +188,7 @@ class CallbackProxy extends Handler {
         // Used to start a default activity.
         mContext = context;
         mWebView = w;
-        mBackForwardList = new WebBackForwardList(this);
+        mBackForwardList = new WebBackForwardListClassic(this);
     }
 
     protected synchronized void blockMessages() {
@@ -249,7 +249,7 @@ class CallbackProxy extends Handler {
      * Get the Back/Forward list to return to the user or to update the cached
      * history list.
      */
-    public WebBackForwardList getBackForwardList() {
+    public WebBackForwardListClassic getBackForwardList() {
         return mBackForwardList;
     }
 
@@ -1301,7 +1301,7 @@ class CallbackProxy extends Handler {
     public void onReceivedIcon(Bitmap icon) {
         // The current item might be null if the icon was already stored in the
         // database and this is a new WebView.
-        WebHistoryItem i = mBackForwardList.getCurrentItem();
+        WebHistoryItemClassic i = mBackForwardList.getCurrentItem();
         if (i != null) {
             i.setFavicon(icon);
         }
@@ -1316,7 +1316,7 @@ class CallbackProxy extends Handler {
     /* package */ void onReceivedTouchIconUrl(String url, boolean precomposed) {
         // We should have a current item but we do not want to crash so check
         // for null.
-        WebHistoryItem i = mBackForwardList.getCurrentItem();
+        WebHistoryItemClassic i = mBackForwardList.getCurrentItem();
         if (i != null) {
             i.setTouchIconUrl(url, precomposed);
         }

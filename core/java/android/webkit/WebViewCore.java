@@ -2344,13 +2344,13 @@ public final class WebViewCore {
     //////////////////////////////////////////////////////////////////////////
 
     private void restoreState(int index) {
-        WebBackForwardList list = mCallbackProxy.getBackForwardList();
+        WebBackForwardListClassic list = mCallbackProxy.getBackForwardList();
         int size = list.getSize();
         for (int i = 0; i < size; i++) {
             list.getItemAtIndex(i).inflate(mBrowserFrame.mNativeFrame);
         }
         mBrowserFrame.mLoadInitFromJava = true;
-        list.restoreIndex(mBrowserFrame.mNativeFrame, index);
+        WebBackForwardListClassic.restoreIndex(mBrowserFrame.mNativeFrame, index);
         mBrowserFrame.mLoadInitFromJava = false;
     }
 

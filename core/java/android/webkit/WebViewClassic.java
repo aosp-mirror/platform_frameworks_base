@@ -2172,7 +2172,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
         // We grab a copy of the back/forward list because a client of WebView
         // may have invalidated the history list by calling clearHistory.
-        WebBackForwardList list = copyBackForwardList();
+        WebBackForwardListClassic list = copyBackForwardList();
         final int currentIndex = list.getCurrentIndex();
         final int size = list.getSize();
         // We should fail saving the state if the list is empty or the index is
@@ -2186,7 +2186,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         // arrays.
         ArrayList<byte[]> history = new ArrayList<byte[]>(size);
         for (int i = 0; i < size; i++) {
-            WebHistoryItem item = list.getItemAtIndex(i);
+            WebHistoryItemClassic item = list.getItemAtIndex(i);
             if (null == item) {
                 // FIXME: this shouldn't happen
                 // need to determine how item got set to null
@@ -2385,7 +2385,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public WebBackForwardList restoreState(Bundle inState) {
-        WebBackForwardList returnList = null;
+        WebBackForwardListClassic returnList = null;
         if (inState == null) {
             return returnList;
         }
@@ -2393,7 +2393,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             mCertificate = SslCertificate.restoreState(
                 inState.getBundle("certificate"));
 
-            final WebBackForwardList list = mCallbackProxy.getBackForwardList();
+            final WebBackForwardListClassic list = mCallbackProxy.getBackForwardList();
             final int index = inState.getInt("index");
             // We can't use a clone of the list because we need to modify the
             // shared copy, so synchronize instead to prevent concurrent
@@ -2414,7 +2414,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         // the item and thus our history list cannot be rebuilt.
                         return null;
                     }
-                    WebHistoryItem item = new WebHistoryItem(data);
+                    WebHistoryItem item = new WebHistoryItemClassic(data);
                     list.addHistoryItem(item);
                 }
                 // Grab the most recent copy to return to the caller.
@@ -2587,7 +2587,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public boolean canGoBack() {
-        WebBackForwardList l = mCallbackProxy.getBackForwardList();
+        WebBackForwardListClassic l = mCallbackProxy.getBackForwardList();
         synchronized (l) {
             if (l.getClearPending()) {
                 return false;
@@ -2610,7 +2610,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public boolean canGoForward() {
-        WebBackForwardList l = mCallbackProxy.getBackForwardList();
+        WebBackForwardListClassic l = mCallbackProxy.getBackForwardList();
         synchronized (l) {
             if (l.getClearPending()) {
                 return false;
@@ -2633,7 +2633,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public boolean canGoBackOrForward(int steps) {
-        WebBackForwardList l = mCallbackProxy.getBackForwardList();
+        WebBackForwardListClassic l = mCallbackProxy.getBackForwardList();
         synchronized (l) {
             if (l.getClearPending()) {
                 return false;
@@ -3347,7 +3347,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public String getTouchIconUrl() {
-        WebHistoryItem h = mCallbackProxy.getBackForwardList().getCurrentItem();
+        WebHistoryItemClassic h = mCallbackProxy.getBackForwardList().getCurrentItem();
         return h != null ? h.getTouchIconUrl() : null;
     }
 
@@ -3511,7 +3511,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * See {@link WebView#copyBackForwardList()}
      */
     @Override
-    public WebBackForwardList copyBackForwardList() {
+    public WebBackForwardListClassic copyBackForwardList() {
         return mCallbackProxy.getBackForwardList().clone();
     }
 
