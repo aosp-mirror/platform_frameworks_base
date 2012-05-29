@@ -192,7 +192,9 @@ public class TabletStatusBar extends BaseStatusBar implements
         public boolean onTouch(View v, MotionEvent event) {
             switch(event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    showSearchPanel();
+                    if (!shouldDisableNavbarGestures()) {
+                        showSearchPanel();
+                    }
                 break;
             }
             return false;
@@ -254,12 +256,12 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         // network icons: either a combo icon that switches between mobile and data, or distinct
         // mobile and data icons
-        final ImageView mobileRSSI = 
+        final ImageView mobileRSSI =
                 (ImageView)mNotificationPanel.findViewById(R.id.mobile_signal);
         if (mobileRSSI != null) {
             mNetworkController.addPhoneSignalIconView(mobileRSSI);
         }
-        final ImageView wifiRSSI = 
+        final ImageView wifiRSSI =
                 (ImageView)mNotificationPanel.findViewById(R.id.wifi_signal);
         if (wifiRSSI != null) {
             mNetworkController.addWifiIconView(wifiRSSI);
@@ -493,7 +495,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         mBluetoothController.addIconView((ImageView)sb.findViewById(R.id.bluetooth));
 
         mNetworkController = new NetworkController(mContext);
-        final SignalClusterView signalCluster = 
+        final SignalClusterView signalCluster =
                 (SignalClusterView)sb.findViewById(R.id.signal_cluster);
         mNetworkController.addSignalCluster(signalCluster);
 
@@ -1061,7 +1063,7 @@ public class TabletStatusBar extends BaseStatusBar implements
             if (0 != (diff & View.SYSTEM_UI_FLAG_LOW_PROFILE)) {
                 mHandler.removeMessages(MSG_HIDE_CHROME);
                 mHandler.removeMessages(MSG_SHOW_CHROME);
-                mHandler.sendEmptyMessage(0 == (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE) 
+                mHandler.sendEmptyMessage(0 == (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE)
                         ? MSG_SHOW_CHROME : MSG_HIDE_CHROME);
             }
 

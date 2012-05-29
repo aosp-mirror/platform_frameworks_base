@@ -483,7 +483,14 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     @Override
     public void showSearchPanel() {
-        super.showSearchPanel();
+        // XXX This is a bit of a hack.  Since navbar is no longer slippery, we use the
+        // gesture to dismiss the expanded statusbar.
+        if (mExpanded) {
+            animateCollapse();
+            return;
+        } else {
+            super.showSearchPanel();
+        }
         WindowManager.LayoutParams lp =
             (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
         lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
@@ -506,7 +513,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     public int getStatusBarHeight() {
         if (mNaturalBarHeight < 0) {
             final Resources res = mContext.getResources();
-            mNaturalBarHeight = 
+            mNaturalBarHeight =
                     res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
         }
         return mNaturalBarHeight;
@@ -526,7 +533,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         public boolean onTouch(View v, MotionEvent event) {
             switch(event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    showSearchPanel();
+                    if (!shouldDisableNavbarGestures()) {
+                        showSearchPanel();
+                    }
                 break;
             }
             return false;
@@ -674,9 +683,9 @@ public class PhoneStatusBar extends BaseStatusBar {
             if (INTRUDER_ALERT_DECAY_MS > 0) {
                 mHandler.sendEmptyMessageDelayed(MSG_HIDE_INTRUDER, INTRUDER_ALERT_DECAY_MS);
             }
-        } else 
+        } else
          */
-        
+
         if (notification.notification.fullScreenIntent != null) {
             // not immersive & a full-screen alert should be shown
             Slog.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
@@ -906,7 +915,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         flagdbg.append(((diff  & StatusBarManager.DISABLE_CLOCK) != 0) ? "* " : " ");
         flagdbg.append(">");
         Slog.d(TAG, flagdbg.toString());
-        
+
         if ((diff & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
             mIcons.animate().cancel();
             if ((state & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
@@ -1016,7 +1025,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mExpandedVisible) {
             return;
         }
-        
+
         mExpandedVisible = true;
         mNotificationPanel.setVisibility(View.VISIBLE);
 
@@ -1213,7 +1222,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         //Slog.d(TAG, "y=" + y + " v=" + v + " a=" + a + " t=" + t + " mAnimY=" + mAnimY
         //        + " mAnimAccel=" + mAnimAccel);
     }
-    
+
     void doRevealAnimation(long frameTimeNanos) {
         if (SPEW) {
             Slog.d(TAG, "doRevealAnimation: dt=" + (frameTimeNanos - mAnimLastTimeNanos));
@@ -1465,11 +1474,11 @@ public class PhoneStatusBar extends BaseStatusBar {
                         mTicker.halt();
                     }
                 }
-                
+
                 if (mNavigationBarView != null) {
                     mNavigationBarView.setLowProfile(lightsOut);
                 }
-                
+
                 setStatusBarLowProfile(lightsOut);
             }
 
@@ -1494,7 +1503,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                     ObjectAnimator.ofFloat(clock, View.ALPHA, 0.5f)
                 );
             mLightsOutAnimation.setDuration(750);
-            
+
             mLightsOnAnimation = new AnimatorSet();
             mLightsOnAnimation.playTogether(
                     ObjectAnimator.ofFloat(notifications, View.ALPHA, 1),
@@ -1505,7 +1514,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 );
             mLightsOnAnimation.setDuration(250);
         }
-        
+
         mLightsOutAnimation.cancel();
         mLightsOnAnimation.cancel();
 
@@ -1518,7 +1527,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     private boolean areLightsOn() {
         return 0 == (mSystemUiVisibility & View.SYSTEM_UI_FLAG_LOW_PROFILE);
     }
-    
+
     public void setLightsOn(boolean on) {
         Log.v(TAG, "setLightsOn(" + on + ")");
         if (on) {
@@ -1622,7 +1631,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     protected void tick(IBinder key, StatusBarNotification n, boolean firstTime) {
         // no ticking in lights-out mode
         if (!areLightsOn()) return;
-        
+
         // Show the ticker if one is requested. Also don't do this
         // until status bar window is attached to the window manager,
         // because...  well, what's the point otherwise?  And trying to
@@ -1822,7 +1831,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         int panelh = 0;
-        
         final int disph = getExpandedViewMaxHeight();
 
         // If the expanded view is not visible, make sure they're still off screen.
@@ -2039,7 +2047,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         try {
             mBarService.onNotificationClear(
                     mCurrentlyIntrudingNotification.pkg,
-                    mCurrentlyIntrudingNotification.tag, 
+                    mCurrentlyIntrudingNotification.tag,
                     mCurrentlyIntrudingNotification.id);
         } catch (android.os.RemoteException ex) {
             // oh well
@@ -2095,14 +2103,14 @@ public class PhoneStatusBar extends BaseStatusBar {
         mCollapseAccelPx = res.getDimension(R.dimen.collapse_accel);
 
         mFlingGestureMaxXVelocityPx = res.getDimension(R.dimen.fling_gesture_max_x_velocity);
-        
+
         mNotificationPanelMarginBottomPx
             = (int) res.getDimension(R.dimen.notification_panel_margin_bottom);
         mNotificationPanelMarginLeftPx
             = (int) res.getDimension(R.dimen.notification_panel_margin_left);
         mNotificationPanelGravity = res.getInteger(R.integer.notification_panel_layout_gravity);
         if (mNotificationPanelGravity <= 0) {
-            mNotificationPanelGravity = Gravity.CENTER_VERTICAL | Gravity.TOP; 
+            mNotificationPanelGravity = Gravity.CENTER_VERTICAL | Gravity.TOP;
         }
 
         if (false) Slog.v(TAG, "updateResources");
