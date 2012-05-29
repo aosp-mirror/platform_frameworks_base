@@ -24,9 +24,6 @@
     <dimen name="config_prefDialogWidth">440dp</dimen>
 
     <!-- see comment in values/config.xml -->
-    <integer name="config_longPressOnPowerBehavior">2</integer>
-
-    <!-- see comment in values/config.xml -->
     <integer name="config_longPressOnHomeBehavior">0</integer>
 
 </resources>
