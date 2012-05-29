@@ -79,12 +79,9 @@ public class AppWindowAnimator {
     }
 
     public void setDummyAnimation() {
-        if (animation == null) {
-            if (WindowManagerService.localLOGV) Slog.v(
-                TAG, "Setting dummy animation in " + mAppToken);
-            animation = sDummyAnimation;
-            animInitialized = false;
-        }
+        if (WindowManagerService.localLOGV) Slog.v(TAG, "Setting dummy animation in " + mAppToken);
+        animation = sDummyAnimation;
+        animInitialized = false;
         hasTransformation = true;
         transformation.clear();
         transformation.setAlpha(mAppToken.reportedVisible ? 1 : 0);
