@@ -297,7 +297,12 @@ public class WebChromeClient {
      * will continue to occur if the script does not finish at the next check
      * point.
      * @return boolean Whether the JavaScript execution should be interrupted.
+     * @deprecated This method is no longer supported and will not be invoked.
      */
+    // This method was only called when using the JSC javascript engine. V8 became
+    // the default JS engine with Froyo and support for building with JSC was
+    // removed in b/5495373. V8 does not have a mechanism for making a callback such
+    // as this.
     public boolean onJsTimeout() {
         return true;
     }
