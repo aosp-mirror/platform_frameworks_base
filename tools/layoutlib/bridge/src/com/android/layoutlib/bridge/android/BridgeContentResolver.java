@@ -72,6 +72,11 @@ public class BridgeContentResolver extends ContentResolver {
         return releaseProvider(icp);
     }
 
+    /** @hide */
+    @Override
+    public void unstableProviderDied(IContentProvider icp) {
+    }
+
     /**
      * Stub for the layoutlib bridge content resolver.
      */

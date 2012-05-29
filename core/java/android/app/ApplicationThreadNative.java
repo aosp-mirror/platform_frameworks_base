@@ -575,6 +575,15 @@ public abstract class ApplicationThreadNative extends Binder
             reply.writeNoException();
             return true;
         }
+
+        case UNSTABLE_PROVIDER_DIED_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            IBinder provider = data.readStrongBinder();
+            unstableProviderDied(provider);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -1161,6 +1170,14 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeFileDescriptor(fd);
         data.writeStringArray(args);
         mRemote.transact(DUMP_DB_INFO_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
+    public void unstableProviderDied(IBinder provider) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeStrongBinder(provider);
+        mRemote.transact(UNSTABLE_PROVIDER_DIED_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 }
