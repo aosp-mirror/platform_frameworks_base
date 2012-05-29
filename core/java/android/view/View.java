@@ -2086,7 +2086,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     // Accessiblity constants for mPrivateFlags2
 
     /**
-     * Shift for accessibility related bits in {@link #mPrivateFlags2}.
+     * Shift for the bits in {@link #mPrivateFlags2} related to the
+     * "importantForAccessibility" attribute.
      */
     static final int IMPORTANT_FOR_ACCESSIBILITY_SHIFT = 20;
 
@@ -2141,6 +2142,72 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * view to force the quickReject test to run again.
      */
     static final int VIEW_QUICK_REJECTED = 0x20000000;
+
+    // Accessiblity constants for mPrivateFlags2
+
+    /**
+     * Shift for the bits in {@link #mPrivateFlags2} related to the
+     * "accessibilityFocusable" attribute.
+     */
+    static final int ACCESSIBILITY_FOCUSABLE_SHIFT = 30;
+
+    /**
+     * The system determines whether the view can take accessibility focus - default (recommended).
+     * <p>
+     * Such a view is consideted by the focus search if it is:
+     * <ul>
+     * <li>
+     * Important for accessibility and actionable (clickable, long clickable, focusable)
+     * </li>
+     * <li>
+     * Important for accessibility, not actionable (clickable, long clickable, focusable),
+     * and does not have an actionable predecessor.
+     * </li>
+     * </ul>
+     * An accessibility srvice can request putting accessibility focus on such a view.
+     * </p>
+     *
+     * @hide
+     */
+    public static final int ACCESSIBILITY_FOCUSABLE_AUTO = 0x00000000;
+
+    /**
+     * The view can take accessibility focus.
+     * <p>
+     * A view that can take accessibility focus is always considered during focus
+     * search and an accessibility service can request putting accessibility focus
+     * on it.
+     * </p>
+     *
+     * @hide
+     */
+    public static final int ACCESSIBILITY_FOCUSABLE_YES = 0x00000001;
+
+    /**
+     * The view can not take accessibility focus.
+     * <p>
+     * A view that can not take accessibility focus is never considered during focus
+     * search and an accessibility service can not request putting accessibility focus
+     * on it.
+     * </p>
+     *
+     * @hide
+     */
+    public static final int ACCESSIBILITY_FOCUSABLE_NO = 0x00000002;
+
+    /**
+     * The default whether the view is accessiblity focusable.
+     */
+    static final int ACCESSIBILITY_FOCUSABLE_DEFAULT = ACCESSIBILITY_FOCUSABLE_AUTO;
+
+    /**
+     * Mask for obtainig the bits which specifies how to determine
+     * whether a view is accessibility focusable.
+     */
+    static final int ACCESSIBILITY_FOCUSABLE_MASK = (ACCESSIBILITY_FOCUSABLE_AUTO
+        | ACCESSIBILITY_FOCUSABLE_YES | ACCESSIBILITY_FOCUSABLE_NO)
+        << ACCESSIBILITY_FOCUSABLE_SHIFT;
+
 
     /* End of masks for mPrivateFlags2 */
 
@@ -3132,7 +3199,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         mPrivateFlags2 = (LAYOUT_DIRECTION_DEFAULT << LAYOUT_DIRECTION_MASK_SHIFT) |
                 (TEXT_DIRECTION_DEFAULT << TEXT_DIRECTION_MASK_SHIFT) |
                 (TEXT_ALIGNMENT_DEFAULT << TEXT_ALIGNMENT_MASK_SHIFT) |
-                (IMPORTANT_FOR_ACCESSIBILITY_DEFAULT << IMPORTANT_FOR_ACCESSIBILITY_SHIFT);
+                (IMPORTANT_FOR_ACCESSIBILITY_DEFAULT << IMPORTANT_FOR_ACCESSIBILITY_SHIFT) |
+                (ACCESSIBILITY_FOCUSABLE_DEFAULT << ACCESSIBILITY_FOCUSABLE_SHIFT);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         setOverScrollMode(OVER_SCROLL_IF_CONTENT_SCROLLS);
         mUserPaddingStart = -1;
@@ -4788,7 +4856,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         }
 
         if (!isAccessibilityFocused()) {
-            info.addAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+            final int mode = getAccessibilityFocusable();
+            if (mode == ACCESSIBILITY_FOCUSABLE_YES || mode == ACCESSIBILITY_FOCUSABLE_AUTO) {
+                info.addAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+            }
         } else {
             info.addAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
         }
@@ -6069,7 +6140,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             return;
         }
         if ((focusableMode & FOCUSABLES_ACCESSIBILITY) == FOCUSABLES_ACCESSIBILITY) {
-            if (canTakeAccessibilityFocusFromHover() || getAccessibilityNodeProvider() != null) {
+            if (isAccessibilityFocusable()) {
                 views.add(this);
                 return;
             }
@@ -6403,12 +6474,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @see #IMPORTANT_FOR_ACCESSIBILITY_AUTO
      */
     @ViewDebug.ExportedProperty(category = "accessibility", mapping = {
-            @ViewDebug.IntToString(from = IMPORTANT_FOR_ACCESSIBILITY_AUTO,
-                    to = "IMPORTANT_FOR_ACCESSIBILITY_AUTO"),
-            @ViewDebug.IntToString(from = IMPORTANT_FOR_ACCESSIBILITY_YES,
-                    to = "IMPORTANT_FOR_ACCESSIBILITY_YES"),
-            @ViewDebug.IntToString(from = IMPORTANT_FOR_ACCESSIBILITY_NO,
-                    to = "IMPORTANT_FOR_ACCESSIBILITY_NO")
+            @ViewDebug.IntToString(from = IMPORTANT_FOR_ACCESSIBILITY_AUTO, to = "auto"),
+            @ViewDebug.IntToString(from = IMPORTANT_FOR_ACCESSIBILITY_YES, to = "yes"),
+            @ViewDebug.IntToString(from = IMPORTANT_FOR_ACCESSIBILITY_NO, to = "no")
         })
     public int getImportantForAccessibility() {
         return (mPrivateFlags2 & IMPORTANT_FOR_ACCESSIBILITY_MASK)
@@ -6457,6 +6525,73 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             default:
                 throw new IllegalArgumentException("Unknow important for accessibility mode: "
                         + mode);
+        }
+    }
+
+    /**
+     * Gets the mode for determining whether this View can take accessibility focus.
+     *
+     * @return The mode for determining whether a View can take accessibility focus.
+     *
+     * @attr ref android.R.styleable#View_accessibilityFocusable
+     *
+     * @see #ACCESSIBILITY_FOCUSABLE_YES
+     * @see #ACCESSIBILITY_FOCUSABLE_NO
+     * @see #ACCESSIBILITY_FOCUSABLE_AUTO
+     *
+     * @hide
+     */
+    @ViewDebug.ExportedProperty(category = "accessibility", mapping = {
+            @ViewDebug.IntToString(from = ACCESSIBILITY_FOCUSABLE_AUTO, to = "auto"),
+            @ViewDebug.IntToString(from = ACCESSIBILITY_FOCUSABLE_YES, to = "yes"),
+            @ViewDebug.IntToString(from = ACCESSIBILITY_FOCUSABLE_NO, to = "no")
+        })
+    public int getAccessibilityFocusable() {
+        return (mPrivateFlags2 & ACCESSIBILITY_FOCUSABLE_MASK) >>> ACCESSIBILITY_FOCUSABLE_SHIFT;
+    }
+
+    /**
+     * Sets how to determine whether this view can take accessibility focus.
+     *
+     * @param mode How to determine whether this view can take accessibility focus.
+     *
+     * @attr ref android.R.styleable#View_accessibilityFocusable
+     *
+     * @see #ACCESSIBILITY_FOCUSABLE_YES
+     * @see #ACCESSIBILITY_FOCUSABLE_NO
+     * @see #ACCESSIBILITY_FOCUSABLE_AUTO
+     *
+     * @hide
+     */
+    public void setAccessibilityFocusable(int mode) {
+        if (mode != getAccessibilityFocusable()) {
+            mPrivateFlags2 &= ~ACCESSIBILITY_FOCUSABLE_MASK;
+            mPrivateFlags2 |= (mode << ACCESSIBILITY_FOCUSABLE_SHIFT)
+                    & ACCESSIBILITY_FOCUSABLE_MASK;
+            notifyAccessibilityStateChanged();
+        }
+    }
+
+    /**
+     * Gets whether this view can take accessibility focus.
+     *
+     * @return Whether the view can take accessibility focus.
+     *
+     * @hide
+     */
+    public boolean isAccessibilityFocusable() {
+        final int mode = (mPrivateFlags2 & ACCESSIBILITY_FOCUSABLE_MASK)
+                >>> ACCESSIBILITY_FOCUSABLE_SHIFT;
+        switch (mode) {
+            case ACCESSIBILITY_FOCUSABLE_YES:
+                return true;
+            case ACCESSIBILITY_FOCUSABLE_NO:
+                return false;
+            case ACCESSIBILITY_FOCUSABLE_AUTO:
+                return canTakeAccessibilityFocusFromHover()
+                        || getAccessibilityNodeProvider() != null;
+            default:
+                throw new IllegalArgumentException("Unknow accessibility focusable mode: " + mode);
         }
     }
 
@@ -6641,7 +6776,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 }
             } break;
             case AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS: {
-                if (!isAccessibilityFocused()) {
+                final int mode = getAccessibilityFocusable();
+                if (!isAccessibilityFocused()
+                        && (mode == ACCESSIBILITY_FOCUSABLE_YES
+                                || mode == ACCESSIBILITY_FOCUSABLE_AUTO)) {
                     return requestAccessibilityFocus();
                 }
             } break;
