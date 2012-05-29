@@ -1679,27 +1679,32 @@ class ContextImpl extends Context {
 
         @Override
         protected IContentProvider acquireProvider(Context context, String name) {
-            return mMainThread.acquireProvider(context, name);
+            return mMainThread.acquireProvider(context, name, true);
         }
 
         @Override
         protected IContentProvider acquireExistingProvider(Context context, String name) {
-            return mMainThread.acquireExistingProvider(context, name);
+            return mMainThread.acquireExistingProvider(context, name, true);
         }
 
         @Override
         public boolean releaseProvider(IContentProvider provider) {
-            return mMainThread.releaseProvider(provider);
+            return mMainThread.releaseProvider(provider, true);
         }
 
         @Override
         protected IContentProvider acquireUnstableProvider(Context c, String name) {
-            return mMainThread.acquireUnstableProvider(c, name);
+            return mMainThread.acquireProvider(c, name, false);
         }
 
         @Override
         public boolean releaseUnstableProvider(IContentProvider icp) {
-            return mMainThread.releaseUnstableProvider(icp);
+            return mMainThread.releaseProvider(icp, false);
+        }
+
+        @Override
+        public void unstableProviderDied(IContentProvider icp) {
+            mMainThread.handleUnstableProviderDied(icp.asBinder(), true);
         }
 
         private final ActivityThread mMainThread;

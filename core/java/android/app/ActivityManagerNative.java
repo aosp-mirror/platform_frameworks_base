@@ -580,7 +580,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             IBinder b = data.readStrongBinder();
             IApplicationThread app = ApplicationThreadNative.asInterface(b);
             String name = data.readString();
-            ContentProviderHolder cph = getContentProvider(app, name);
+            boolean stable = data.readInt() != 0;
+            ContentProviderHolder cph = getContentProvider(app, name, stable);
             reply.writeNoException();
             if (cph != null) {
                 reply.writeInt(1);
@@ -617,12 +618,30 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case REF_CONTENT_PROVIDER_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder b = data.readStrongBinder();
+            int stable = data.readInt();
+            int unstable = data.readInt();
+            boolean res = refContentProvider(b, stable, unstable);
+            reply.writeNoException();
+            reply.writeInt(res ? 1 : 0);
+            return true;
+        }
+
+        case UNSTABLE_PROVIDER_DIED_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder b = data.readStrongBinder();
+            unstableProviderDied(b);
+            reply.writeNoException();
+            return true;
+        }
+
         case REMOVE_CONTENT_PROVIDER_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
-            IApplicationThread app = ApplicationThreadNative.asInterface(b);
-            String name = data.readString();
-            removeContentProvider(app, name);
+            boolean stable = data.readInt() != 0;
+            removeContentProvider(b, stable);
             reply.writeNoException();
             return true;
         }
@@ -2314,13 +2333,13 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
     public ContentProviderHolder getContentProvider(IApplicationThread caller,
-                                                    String name) throws RemoteException
-    {
+            String name, boolean stable) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(caller != null ? caller.asBinder() : null);
         data.writeString(name);
+        data.writeInt(stable ? 1 : 0);
         mRemote.transact(GET_CONTENT_PROVIDER_TRANSACTION, data, reply, 0);
         reply.readException();
         int res = reply.readInt();
@@ -2352,7 +2371,7 @@ class ActivityManagerProxy implements IActivityManager
         return cph;
     }
     public void publishContentProviders(IApplicationThread caller,
-                                        List<ContentProviderHolder> providers) throws RemoteException
+            List<ContentProviderHolder> providers) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -2364,14 +2383,38 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
     }
-    
-    public void removeContentProvider(IApplicationThread caller,
-            String name) throws RemoteException {
+    public boolean refContentProvider(IBinder connection, int stable, int unstable)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeStrongBinder(caller != null ? caller.asBinder() : null);
-        data.writeString(name);
+        data.writeStrongBinder(connection);
+        data.writeInt(stable);
+        data.writeInt(unstable);
+        mRemote.transact(REF_CONTENT_PROVIDER_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean res = reply.readInt() != 0;
+        data.recycle();
+        reply.recycle();
+        return res;
+    }
+    public void unstableProviderDied(IBinder connection) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(connection);
+        mRemote.transact(UNSTABLE_PROVIDER_DIED_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    public void removeContentProvider(IBinder connection, boolean stable) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(connection);
+        data.writeInt(stable ? 1 : 0);
         mRemote.transact(REMOVE_CONTENT_PROVIDER_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();

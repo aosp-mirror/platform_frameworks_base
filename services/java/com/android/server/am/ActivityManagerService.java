@@ -62,6 +62,7 @@ import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.IContentProvider;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
@@ -1810,12 +1811,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         }
-        if (app.conProviders.size() > 0) {
-            for (ContentProviderRecord cpr : app.conProviders.keySet()) {
-                if (cpr.proc != null && cpr.proc.lruSeq != mLruSeq) {
-                    updateLruProcessInternalLocked(cpr.proc, oomAdj,
-                            updateActivityTime, i+1);
-                }
+        for (int j=app.conProviders.size()-1; j>=0; j--) {
+            ContentProviderRecord cpr = app.conProviders.get(j).provider;
+            if (cpr.proc != null && cpr.proc.lruSeq != mLruSeq) {
+                updateLruProcessInternalLocked(cpr.proc, oomAdj,
+                        updateActivityTime, i+1);
             }
         }
         
@@ -3742,7 +3742,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         N = providers.size();
         for (i=0; i<N; i++) {
-            removeDyingProviderLocked(null, providers.get(i));
+            removeDyingProviderLocked(null, providers.get(i), true);
         }
 
         if (doit) {
@@ -6058,53 +6058,72 @@ public final class ActivityManagerService extends ActivityManagerNative
         return msg;
     }
 
-    boolean incProviderCount(ProcessRecord r, final ContentProviderRecord cpr,
-            IBinder externalProcessToken) {
+    ContentProviderConnection incProviderCountLocked(ProcessRecord r,
+            final ContentProviderRecord cpr, IBinder externalProcessToken, boolean stable) {
         if (r != null) {
-            Integer cnt = r.conProviders.get(cpr);
-            if (DEBUG_PROVIDER) Slog.v(TAG,
-                    "Adding provider requested by "
-                    + r.processName + " from process "
-                    + cpr.info.processName + ": " + cpr.name.flattenToShortString()
-                    + " cnt=" + (cnt == null ? 1 : cnt));
-            if (cnt == null) {
-                cpr.clients.add(r);
-                r.conProviders.put(cpr, new Integer(1));
-                return true;
-            } else {
-                r.conProviders.put(cpr, new Integer(cnt.intValue()+1));
+            for (int i=0; i<r.conProviders.size(); i++) {
+                ContentProviderConnection conn = r.conProviders.get(i);
+                if (conn.provider == cpr) {
+                    if (DEBUG_PROVIDER) Slog.v(TAG,
+                            "Adding provider requested by "
+                            + r.processName + " from process "
+                            + cpr.info.processName + ": " + cpr.name.flattenToShortString()
+                            + " scnt=" + conn.stableCount + " uscnt=" + conn.unstableCount);
+                    if (stable) {
+                        conn.stableCount++;
+                        conn.numStableIncs++;
+                    } else {
+                        conn.unstableCount++;
+                        conn.numUnstableIncs++;
+                    }
+                    return conn;
+                }
             }
-        } else {
-            cpr.addExternalProcessHandleLocked(externalProcessToken);
+            ContentProviderConnection conn = new ContentProviderConnection(cpr, r);
+            if (stable) {
+                conn.stableCount = 1;
+                conn.numStableIncs = 1;
+            } else {
+                conn.unstableCount = 1;
+                conn.numUnstableIncs = 1;
+            }
+            cpr.connections.add(conn);
+            r.conProviders.add(conn);
+            return conn;
         }
-        return false;
+        cpr.addExternalProcessHandleLocked(externalProcessToken);
+        return null;
     }
 
-    boolean decProviderCount(ProcessRecord r, final ContentProviderRecord cpr,
-            IBinder externalProcessToken) {
-        if (r != null) {
-            Integer cnt = r.conProviders.get(cpr);
+    boolean decProviderCountLocked(ContentProviderConnection conn,
+            ContentProviderRecord cpr, IBinder externalProcessToken, boolean stable) {
+        if (conn != null) {
+            cpr = conn.provider;
             if (DEBUG_PROVIDER) Slog.v(TAG,
                     "Removing provider requested by "
-                    + r.processName + " from process "
+                    + conn.client.processName + " from process "
                     + cpr.info.processName + ": " + cpr.name.flattenToShortString()
-                    + " cnt=" + cnt);
-            if (cnt == null || cnt.intValue() <= 1) {
-                cpr.clients.remove(r);
-                r.conProviders.remove(cpr);
-                return true;
+                    + " scnt=" + conn.stableCount + " uscnt=" + conn.unstableCount);
+            if (stable) {
+                conn.stableCount--;
             } else {
-                r.conProviders.put(cpr, new Integer(cnt.intValue()-1));
+                conn.unstableCount--;
             }
-        } else {
-            cpr.removeExternalProcessHandleLocked(externalProcessToken);
+            if (conn.stableCount == 0 && conn.unstableCount == 0) {
+                cpr.connections.remove(conn);
+                conn.client.conProviders.remove(conn);
+                return true;
+            }
+            return false;
         }
+        cpr.removeExternalProcessHandleLocked(externalProcessToken);
         return false;
     }
 
     private final ContentProviderHolder getContentProviderImpl(IApplicationThread caller,
-            String name, IBinder token) {
+            String name, IBinder token, boolean stable) {
         ContentProviderRecord cpr;
+        ContentProviderConnection conn = null;
         ProviderInfo cpi = null;
 
         synchronized(this) {
@@ -6135,20 +6154,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // of being published...  but it is also allowed to run
                     // in the caller's process, so don't make a connection
                     // and just let the caller instantiate its own instance.
-                    if (cpr.provider != null) {
-                        // don't give caller the provider object, it needs
-                        // to make its own.
-                        cpr = new ContentProviderRecord(cpr);
-                    }
-                    return cpr;
+                    ContentProviderHolder holder = cpr.newHolder(null);
+                    // don't give caller the provider object, it needs
+                    // to make its own.
+                    holder.provider = null;
+                    return holder;
                 }
 
                 final long origId = Binder.clearCallingIdentity();
 
                 // In this case the provider instance already exists, so we can
                 // return it right away.
-                final boolean countChanged = incProviderCount(r, cpr, token);
-                if (countChanged) {
+                conn = incProviderCountLocked(r, cpr, token, stable);
+                if (conn != null && (conn.stableCount+conn.unstableCount) == 1) {
                     if (cpr.proc != null && r.setAdj <= ProcessList.PERCEPTIBLE_APP_ADJ) {
                         // If this is a perceptible app accessing the provider,
                         // make sure to count it as being accessed and thus
@@ -6181,7 +6199,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         Slog.i(TAG,
                                 "Existing provider " + cpr.name.flattenToShortString()
                                 + " is crashing; detaching " + r);
-                        boolean lastRef = decProviderCount(r, cpr, token);
+                        boolean lastRef = decProviderCountLocked(conn, cpr, token, stable);
                         appDiedLocked(cpr.proc, cpr.proc.pid, cpr.proc.thread);
                         if (!lastRef) {
                             // This wasn't the last ref our process had on
@@ -6189,6 +6207,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             return null;
                         }
                         providerRunning = false;
+                        conn = null;
                     }
                 }
 
@@ -6251,7 +6270,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // info and allow the caller to instantiate it.  Only do
                     // this if the provider is the same user as the caller's
                     // process, or can run as root (so can be in any process).
-                    return cpr;
+                    return cpr.newHolder(null);
                 }
 
                 if (DEBUG_PROVIDER) {
@@ -6312,7 +6331,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
 
                 mProviderMap.putProviderByName(name, cpr);
-                incProviderCount(r, cpr, token);
+                conn = incProviderCountLocked(r, cpr, token, stable);
+                if (conn != null) {
+                    conn.waiting = true;
+                }
             }
         }
 
@@ -6334,16 +6356,23 @@ public final class ActivityManagerService extends ActivityManagerNative
                         Slog.v(TAG_MU, "Waiting to start provider " + cpr + " launchingApp="
                                 + cpr.launchingApp);
                     }
+                    if (conn != null) {
+                        conn.waiting = true;
+                    }
                     cpr.wait();
                 } catch (InterruptedException ex) {
+                } finally {
+                    if (conn != null) {
+                        conn.waiting = false;
+                    }
                 }
             }
         }
-        return cpr;
+        return cpr != null ? cpr.newHolder(conn) : null;
     }
 
     public final ContentProviderHolder getContentProvider(
-            IApplicationThread caller, String name) {
+            IApplicationThread caller, String name, boolean stable) {
         enforceNotIsolatedCaller("getContentProvider");
         if (caller == null) {
             String msg = "null IApplicationThread when getting content provider "
@@ -6352,7 +6381,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException(msg);
         }
 
-        return getContentProviderImpl(caller, name, null);
+        return getContentProviderImpl(caller, name, null, stable);
     }
 
     public ContentProviderHolder getContentProviderExternal(String name, IBinder token) {
@@ -6362,45 +6391,30 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private ContentProviderHolder getContentProviderExternalUnchecked(String name,IBinder token) {
-        return getContentProviderImpl(null, name, token);
+        return getContentProviderImpl(null, name, token, true);
     }
 
     /**
      * Drop a content provider from a ProcessRecord's bookkeeping
      * @param cpr
      */
-    public void removeContentProvider(IApplicationThread caller, String name) {
+    public void removeContentProvider(IBinder connection, boolean stable) {
         enforceNotIsolatedCaller("removeContentProvider");
         synchronized (this) {
-            int userId = UserId.getUserId(Binder.getCallingUid());
-            ContentProviderRecord cpr = mProviderMap.getProviderByName(name, userId);
-            if(cpr == null) {
-                // remove from mProvidersByClass
-                if (DEBUG_PROVIDER) Slog.v(TAG, name +
-                        " provider not found in providers list");
-                return;
+            ContentProviderConnection conn;
+            try {
+                conn = (ContentProviderConnection)connection;
+            } catch (ClassCastException e) {
+                String msg ="removeContentProvider: " + connection
+                        + " not a ContentProviderConnection";
+                Slog.w(TAG, msg);
+                throw new IllegalArgumentException(msg);
             }
-            final ProcessRecord r = getRecordForAppLocked(caller);
-            if (r == null) {
-                throw new SecurityException(
-                        "Unable to find app for caller " + caller +
-                        " when removing content provider " + name);
+            if (conn == null) {
+                throw new NullPointerException("connection is null");
             }
-            //update content provider record entry info
-            ComponentName comp = new ComponentName(cpr.info.packageName, cpr.info.name);
-            ContentProviderRecord localCpr = mProviderMap.getProviderByClass(comp, userId);
-            if (DEBUG_PROVIDER) Slog.v(TAG, "Removing provider requested by "
-                    + r.info.processName + " from process "
-                    + localCpr.appInfo.processName);
-            if (localCpr.launchingApp == r) {
-                //should not happen. taken care of as a local provider
-                Slog.w(TAG, "removeContentProvider called on local provider: "
-                        + cpr.info.name + " in process " + r.processName);
-                return;
-            } else {
-                if (decProviderCount(r, localCpr, null)) {
-                    updateOomAdjLocked();
-                }
+            if (decProviderCountLocked(conn, null, null, stable)) {
+                updateOomAdjLocked();
             }
         }
     }
@@ -6447,7 +6461,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         enforceNotIsolatedCaller("publishContentProviders");
-        synchronized(this) {
+        synchronized (this) {
             final ProcessRecord r = getRecordForAppLocked(caller);
             if (DEBUG_MU)
                 Slog.v(TAG_MU, "ProcessRecord uid = " + r.uid);
@@ -6496,6 +6510,103 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    public boolean refContentProvider(IBinder connection, int stable, int unstable) {
+        ContentProviderConnection conn;
+        try {
+            conn = (ContentProviderConnection)connection;
+        } catch (ClassCastException e) {
+            String msg ="refContentProvider: " + connection
+                    + " not a ContentProviderConnection";
+            Slog.w(TAG, msg);
+            throw new IllegalArgumentException(msg);
+        }
+        if (conn == null) {
+            throw new NullPointerException("connection is null");
+        }
+
+        synchronized (this) {
+            if (stable > 0) {
+                conn.numStableIncs += stable;
+            }
+            stable = conn.stableCount + stable;
+            if (stable < 0) {
+                throw new IllegalStateException("stableCount < 0: " + stable);
+            }
+
+            if (unstable > 0) {
+                conn.numUnstableIncs += unstable;
+            }
+            unstable = conn.unstableCount + unstable;
+            if (unstable < 0) {
+                throw new IllegalStateException("unstableCount < 0: " + unstable);
+            }
+
+            if ((stable+unstable) <= 0) {
+                throw new IllegalStateException("ref counts can't go to zero here: stable="
+                        + stable + " unstable=" + unstable);
+            }
+            conn.stableCount = stable;
+            conn.unstableCount = unstable;
+            return !conn.dead;
+        }
+    }
+
+    public void unstableProviderDied(IBinder connection) {
+        ContentProviderConnection conn;
+        try {
+            conn = (ContentProviderConnection)connection;
+        } catch (ClassCastException e) {
+            String msg ="refContentProvider: " + connection
+                    + " not a ContentProviderConnection";
+            Slog.w(TAG, msg);
+            throw new IllegalArgumentException(msg);
+        }
+        if (conn == null) {
+            throw new NullPointerException("connection is null");
+        }
+
+        // Safely retrieve the content provider associated with the connection.
+        IContentProvider provider;
+        synchronized (this) {
+            provider = conn.provider.provider;
+        }
+
+        if (provider == null) {
+            // Um, yeah, we're way ahead of you.
+            return;
+        }
+
+        // Make sure the caller is being honest with us.
+        if (provider.asBinder().pingBinder()) {
+            // Er, no, still looks good to us.
+            synchronized (this) {
+                Slog.w(TAG, "unstableProviderDied: caller " + Binder.getCallingUid()
+                        + " says " + conn + " died, but we don't agree");
+                return;
+            }
+        }
+
+        // Well look at that!  It's dead!
+        synchronized (this) {
+            if (conn.provider.provider != provider) {
+                // But something changed...  good enough.
+                return;
+            }
+
+            ProcessRecord proc = conn.provider.proc;
+            if (proc == null || proc.thread == null) {
+                // Seems like the process is already cleaned up.
+                return;
+            }
+
+            // As far as we're concerned, this is just like receiving a
+            // death notification...  just a bit prematurely.
+            Slog.i(TAG, "Process " + proc.processName + " (pid " + proc.pid
+                    + ") early provider death");
+            appDiedLocked(proc, proc.pid, proc.thread);
         }
     }
 
@@ -10515,36 +10626,62 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.executingServices.clear();
     }
 
-    private final void removeDyingProviderLocked(ProcessRecord proc,
-            ContentProviderRecord cpr) {
-        synchronized (cpr) {
-            cpr.launchingApp = null;
-            cpr.notifyAll();
-        }
-        
-        mProviderMap.removeProviderByClass(cpr.name, UserId.getUserId(cpr.uid));
-        String names[] = cpr.info.authority.split(";");
-        for (int j = 0; j < names.length; j++) {
-            mProviderMap.removeProviderByName(names[j], UserId.getUserId(cpr.uid));
-        }
-        
-        Iterator<ProcessRecord> cit = cpr.clients.iterator();
-        while (cit.hasNext()) {
-            ProcessRecord capp = cit.next();
-            if (!capp.persistent && capp.thread != null
-                    && capp.pid != 0
-                    && capp.pid != MY_PID) {
-                Slog.i(TAG, "Kill " + capp.processName
-                        + " (pid " + capp.pid + "): provider " + cpr.info.name
-                        + " in dying process " + (proc != null ? proc.processName : "??"));
-                EventLog.writeEvent(EventLogTags.AM_KILL, capp.pid,
-                        capp.processName, capp.setAdj, "dying provider "
-                                + cpr.name.toShortString());
-                Process.killProcessQuiet(capp.pid);
+    private final boolean removeDyingProviderLocked(ProcessRecord proc,
+            ContentProviderRecord cpr, boolean always) {
+        final boolean inLaunching = mLaunchingProviders.contains(cpr);
+
+        if (!inLaunching || always) {
+            synchronized (cpr) {
+                cpr.launchingApp = null;
+                cpr.notifyAll();
+            }
+            mProviderMap.removeProviderByClass(cpr.name, UserId.getUserId(cpr.uid));
+            String names[] = cpr.info.authority.split(";");
+            for (int j = 0; j < names.length; j++) {
+                mProviderMap.removeProviderByName(names[j], UserId.getUserId(cpr.uid));
             }
         }
-        
-        mLaunchingProviders.remove(cpr);
+
+        for (int i=0; i<cpr.connections.size(); i++) {
+            ContentProviderConnection conn = cpr.connections.get(i);
+            if (conn.waiting) {
+                // If this connection is waiting for the provider, then we don't
+                // need to mess with its process unless we are always removing
+                // or for some reason the provider is not currently launching.
+                if (inLaunching && !always) {
+                    continue;
+                }
+            }
+            ProcessRecord capp = conn.client;
+            conn.dead = true;
+            if (conn.stableCount > 0) {
+                if (!capp.persistent && capp.thread != null
+                        && capp.pid != 0
+                        && capp.pid != MY_PID) {
+                    Slog.i(TAG, "Kill " + capp.processName
+                            + " (pid " + capp.pid + "): provider " + cpr.info.name
+                            + " in dying process " + (proc != null ? proc.processName : "??"));
+                    EventLog.writeEvent(EventLogTags.AM_KILL, capp.pid,
+                            capp.processName, capp.setAdj, "dying provider "
+                                    + cpr.name.toShortString());
+                    Process.killProcessQuiet(capp.pid);
+                }
+            } else if (capp.thread != null && conn.provider.provider != null) {
+                try {
+                    capp.thread.unstableProviderDied(conn.provider.provider.asBinder());
+                } catch (RemoteException e) {
+                }
+                // In the protocol here, we don't expect the client to correctly
+                // clean up this connection, we'll just remove it.
+                cpr.connections.remove(i);
+                conn.client.conProviders.remove(conn);
+            }
+        }
+
+        if (inLaunching && always) {
+            mLaunchingProviders.remove(cpr);
+        }
+        return inLaunching;
     }
     
     /**
@@ -10590,34 +10727,21 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         boolean restart = false;
 
-        int NL = mLaunchingProviders.size();
-        
         // Remove published content providers.
         if (!app.pubProviders.isEmpty()) {
             Iterator<ContentProviderRecord> it = app.pubProviders.values().iterator();
             while (it.hasNext()) {
                 ContentProviderRecord cpr = it.next();
+
+                final boolean always = app.bad || !allowRestart;
+                if (removeDyingProviderLocked(app, cpr, always) || always) {
+                    // We left the provider in the launching list, need to
+                    // restart it.
+                    restart = true;
+                }
+
                 cpr.provider = null;
                 cpr.proc = null;
-
-                // See if someone is waiting for this provider...  in which
-                // case we don't remove it, but just let it restart.
-                int i = 0;
-                if (!app.bad && allowRestart) {
-                    for (; i<NL; i++) {
-                        if (mLaunchingProviders.get(i) == cpr) {
-                            restart = true;
-                            break;
-                        }
-                    }
-                } else {
-                    i = NL;
-                }
-
-                if (i >= NL) {
-                    removeDyingProviderLocked(app, cpr);
-                    NL = mLaunchingProviders.size();
-                }
             }
             app.pubProviders.clear();
         }
@@ -10629,10 +10753,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         // Unregister from connected content providers.
         if (!app.conProviders.isEmpty()) {
-            Iterator it = app.conProviders.keySet().iterator();
-            while (it.hasNext()) {
-                ContentProviderRecord cpr = (ContentProviderRecord)it.next();
-                cpr.clients.remove(app);
+            for (int i=0; i<app.conProviders.size(); i++) {
+                ContentProviderConnection conn = app.conProviders.get(i);
+                conn.provider.connections.remove(conn);
             }
             app.conProviders.clear();
         }
@@ -10643,10 +10766,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         // XXX Commented out for now.  Trying to figure out a way to reproduce
         // the actual situation to identify what is actually going on.
         if (false) {
-            for (int i=0; i<NL; i++) {
+            for (int i=0; i<mLaunchingProviders.size(); i++) {
                 ContentProviderRecord cpr = (ContentProviderRecord)
                         mLaunchingProviders.get(i);
-                if (cpr.clients.size() <= 0 && !cpr.hasExternalProcessHandles()) {
+                if (cpr.connections.size() <= 0 && !cpr.hasExternalProcessHandles()) {
                     synchronized (cpr) {
                         cpr.launchingApp = null;
                         cpr.notifyAll();
@@ -10743,7 +10866,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (!alwaysBad && !app.bad) {
                     restart = true;
                 } else {
-                    removeDyingProviderLocked(app, cpr);
+                    removeDyingProviderLocked(app, cpr, true);
                     NL = mLaunchingProviders.size();
                 }
             }
@@ -13948,48 +14071,49 @@ public final class ActivityManagerService extends ActivityManagerNative
             while (jt.hasNext() && (adj > ProcessList.FOREGROUND_APP_ADJ
                     || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE)) {
                 ContentProviderRecord cpr = jt.next();
-                if (cpr.clients.size() != 0) {
-                    Iterator<ProcessRecord> kt = cpr.clients.iterator();
-                    while (kt.hasNext() && adj > ProcessList.FOREGROUND_APP_ADJ) {
-                        ProcessRecord client = kt.next();
-                        if (client == app) {
-                            // Being our own client is not interesting.
-                            continue;
+                for (int i = cpr.connections.size()-1;
+                        i >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
+                                || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE);
+                        i--) {
+                    ContentProviderConnection conn = cpr.connections.get(i);
+                    ProcessRecord client = conn.client;
+                    if (client == app) {
+                        // Being our own client is not interesting.
+                        continue;
+                    }
+                    int myHiddenAdj = hiddenAdj;
+                    if (myHiddenAdj > client.hiddenAdj) {
+                        if (client.hiddenAdj > ProcessList.FOREGROUND_APP_ADJ) {
+                            myHiddenAdj = client.hiddenAdj;
+                        } else {
+                            myHiddenAdj = ProcessList.FOREGROUND_APP_ADJ;
                         }
-                        int myHiddenAdj = hiddenAdj;
-                        if (myHiddenAdj > client.hiddenAdj) {
-                            if (client.hiddenAdj > ProcessList.FOREGROUND_APP_ADJ) {
-                                myHiddenAdj = client.hiddenAdj;
-                            } else {
-                                myHiddenAdj = ProcessList.FOREGROUND_APP_ADJ;
-                            }
+                    }
+                    int clientAdj = computeOomAdjLocked(
+                        client, myHiddenAdj, TOP_APP, true, doingAll);
+                    if (adj > clientAdj) {
+                        if (app.hasShownUi && app != mHomeProcess
+                                && clientAdj > ProcessList.PERCEPTIBLE_APP_ADJ) {
+                            app.adjType = "bg-ui-provider";
+                        } else {
+                            adj = clientAdj > ProcessList.FOREGROUND_APP_ADJ
+                                    ? clientAdj : ProcessList.FOREGROUND_APP_ADJ;
+                            app.adjType = "provider";
                         }
-                        int clientAdj = computeOomAdjLocked(
-                            client, myHiddenAdj, TOP_APP, true, doingAll);
-                        if (adj > clientAdj) {
-                            if (app.hasShownUi && app != mHomeProcess
-                                    && clientAdj > ProcessList.PERCEPTIBLE_APP_ADJ) {
-                                app.adjType = "bg-ui-provider";
-                            } else {
-                                adj = clientAdj > ProcessList.FOREGROUND_APP_ADJ
-                                        ? clientAdj : ProcessList.FOREGROUND_APP_ADJ;
-                                app.adjType = "provider";
-                            }
-                            if (!client.hidden) {
-                                app.hidden = false;
-                            }
-                            if (client.keeping) {
-                                app.keeping = true;
-                            }
-                            app.adjTypeCode = ActivityManager.RunningAppProcessInfo
-                                    .REASON_PROVIDER_IN_USE;
-                            app.adjSource = client;
-                            app.adjSourceOom = clientAdj;
-                            app.adjTarget = cpr.name;
+                        if (!client.hidden) {
+                            app.hidden = false;
                         }
-                        if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
-                            schedGroup = Process.THREAD_GROUP_DEFAULT;
+                        if (client.keeping) {
+                            app.keeping = true;
                         }
+                        app.adjTypeCode = ActivityManager.RunningAppProcessInfo
+                                .REASON_PROVIDER_IN_USE;
+                        app.adjSource = client;
+                        app.adjSourceOom = clientAdj;
+                        app.adjTarget = cpr.name;
+                    }
+                    if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
+                        schedGroup = Process.THREAD_GROUP_DEFAULT;
                     }
                 }
                 // If the provider has external (non-framework) process

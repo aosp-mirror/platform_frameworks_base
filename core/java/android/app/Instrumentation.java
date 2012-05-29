@@ -987,7 +987,12 @@ public class Instrumentation {
     /**
      * Perform calling of the application's {@link Application#onCreate}
      * method.  The default implementation simply calls through to that method.
-     * 
+     *
+     * <p>Note: This method will be called immediately after {@link #onCreate(Bundle)}.
+     * Often instrumentation tests start their test thread in onCreate(); you
+     * need to be careful of races between these.  (Well between it and
+     * everything else, but let's start here.)
+     *
      * @param app The application being created.
      */
     public void callApplicationOnCreate(Application app) {
