@@ -58,6 +58,9 @@
     <bool name="config_showRotationLock">true</bool>
 
     <!-- Vibration duration for MultiWaveView used in SearchPanelView -->
-    <integer translatable="false" name="config_vibration_duration">20</integer>
+    <integer translatable="false" name="config_vibration_duration">0</integer>
+
+    <!-- Vibration duration for MultiWaveView used in SearchPanelView -->
+    <integer translatable="false" name="config_search_panel_view_vibration_duration">20</integer>
 </resources>
 

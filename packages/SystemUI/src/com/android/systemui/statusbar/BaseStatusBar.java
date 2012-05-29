@@ -253,7 +253,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         mContext.startActivity(intent);
     }
 
-    protected View.OnLongClickListener getNotificationLongClicker() { 
+    protected View.OnLongClickListener getNotificationLongClicker() {
         return new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
