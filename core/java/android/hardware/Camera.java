@@ -736,8 +736,8 @@ public class Camera {
                 return;
 
             case CAMERA_MSG_PREVIEW_FRAME:
-                if (mPreviewCallback != null) {
-                    PreviewCallback cb = mPreviewCallback;
+                PreviewCallback pCb = mPreviewCallback;
+                if (pCb != null) {
                     if (mOneShot) {
                         // Clear the callback variable before the callback
                         // in case the app calls setPreviewCallback from
@@ -749,7 +749,7 @@ public class Camera {
                         // Set to oneshot mode again.
                         setHasPreviewCallback(true, false);
                     }
-                    cb.onPreviewFrame((byte[])msg.obj, mCamera);
+                    pCb.onPreviewFrame((byte[])msg.obj, mCamera);
                 }
                 return;
 
