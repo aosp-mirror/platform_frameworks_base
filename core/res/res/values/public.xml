@@ -120,7 +120,6 @@
   <java-symbol type="id" name="old_app_action" />
   <java-symbol type="id" name="old_app_description" />
   <java-symbol type="id" name="old_app_icon" />
-  <java-symbol type="id" name="overflow_title" />
   <java-symbol type="id" name="package_label" />
   <java-symbol type="id" name="packages_list" />
   <java-symbol type="id" name="pause" />
@@ -210,6 +209,8 @@
   <java-symbol type="id" name="inbox_text6" />
   <java-symbol type="id" name="inbox_more" />
   <java-symbol type="id" name="status_bar_latest_event_content" />
+  <java-symbol type="id" name="action_divider" />
+  <java-symbol type="id" name="overflow_divider" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />

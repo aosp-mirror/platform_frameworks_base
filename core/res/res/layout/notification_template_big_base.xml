@@ -33,19 +33,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="fill_vertical"
-        android:layout_marginLeft="@dimen/notification_large_icon_width"
         android:minHeight="@dimen/notification_large_icon_height"
         android:orientation="vertical"
-        android:paddingLeft="12dp"
-        android:paddingRight="12dp"
-        android:paddingTop="2dp"
-        android:paddingBottom="2dp"
         android:gravity="top"
         >
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/notification_large_icon_width"
             android:minHeight="@dimen/notification_large_icon_height"
+            android:paddingTop="2dp"
             android:orientation="vertical"
             >
             <LinearLayout
@@ -53,6 +50,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="6dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginLeft="8dp"
                 android:orientation="horizontal"
                 >
                 <TextView android:id="@+id/title"
@@ -87,6 +86,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="-2dp"
                 android:layout_marginBottom="-2dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
                 android:singleLine="true"
                 android:fadingEdge="horizontal"
                 android:ellipsize="marquee"
@@ -96,6 +97,8 @@
                 android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
                 android:singleLine="false"
                 android:visibility="gone"
                 />
@@ -103,7 +106,10 @@
                 android:id="@+id/line3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
                 android:orientation="horizontal"
+                android:gravity="center_vertical"
                 >
                 <TextView android:id="@+id/text"
                     android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
@@ -126,29 +132,38 @@
                     android:paddingLeft="8dp"
                     />
                 <ImageView android:id="@+id/right_icon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
                     android:layout_gravity="center"
                     android:layout_weight="0"
+                    android:layout_marginLeft="8dp"
                     android:scaleType="centerInside"
-                    android:paddingLeft="8dp"
                     android:visibility="gone"
-                    android:drawableAlpha="180"
+                    android:drawableAlpha="153"
                     />
             </LinearLayout>
             <ProgressBar
                 android:id="@android:id/progress"
                 android:layout_width="match_parent"
                 android:layout_height="12dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
                 android:visibility="gone"
                 style="?android:attr/progressBarStyleHorizontal"
                 />
         </LinearLayout>
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:id="@+id/action_divider"
+            android:visibility="gone"
+            android:background="?android:attr/dividerHorizontal" />
         <include
             layout="@layout/notification_action_list"
-            android:id="@+id/actions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/notification_large_icon_width"
             />
     </LinearLayout>
 </FrameLayout>

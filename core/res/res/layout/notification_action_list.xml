@@ -23,6 +23,7 @@
     android:visibility="gone"
     android:showDividers="middle"
     android:divider="?android:attr/listDivider"
+    android:dividerPadding="12dp"
     >
     <!-- actions will be added here -->
 </LinearLayout>
