@@ -41,6 +41,20 @@
 
 namespace android {
 
+/* Busy timeout in milliseconds.
+ * If another connection (possibly in another process) has the database locked for
+ * longer than this amount of time then SQLite will generate a SQLITE_BUSY error.
+ * The SQLITE_BUSY error is then raised as a SQLiteDatabaseLockedException.
+ *
+ * In ordinary usage, busy timeouts are quite rare.  Most databases only ever
+ * have a single open connection at a time unless they are using WAL.  When using
+ * WAL, a timeout could occur if one connection is busy performing an auto-checkpoint
+ * operation.  The busy timeout needs to be long enough to tolerate slow I/O write
+ * operations but not so long as to cause the application to hang indefinitely if
+ * there is a problem acquiring a database lock.
+ */
+static const int BUSY_TIMEOUT_MS = 2500;
+
 static struct {
     jfieldID name;
     jfieldID numArgs;
@@ -127,8 +141,8 @@ static jint nativeOpen(JNIEnv* env, jclass clazz, jstring pathStr, jint openFlag
         return 0;
     }
 
-    // Set the default busy handler to retry for 1000ms and then return SQLITE_BUSY
-    err = sqlite3_busy_timeout(db, 1000 /* ms */);
+    // Set the default busy handler to retry automatically before returning SQLITE_BUSY.
+    err = sqlite3_busy_timeout(db, BUSY_TIMEOUT_MS);
     if (err != SQLITE_OK) {
         throw_sqlite3_exception(env, db, "Could not set busy timeout");
         sqlite3_close(db);
