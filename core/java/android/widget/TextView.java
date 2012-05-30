@@ -1312,6 +1312,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * @return the Layout that is currently being used to display the hint text.
+     * This can be null.
+     */
+    final Layout getHintLayout() {
+        return mHintLayout;
+    }
+
+    /**
      * @return the current key listener for this TextView.
      * This will frequently be null for non-EditText TextViews.
      *
