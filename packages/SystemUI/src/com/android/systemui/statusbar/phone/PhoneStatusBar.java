@@ -76,6 +76,7 @@ import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.RotationToggle;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -529,16 +530,29 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     };
 
+    private int mShowSearchHoldoff = 0;
+    private Runnable mShowSearchPanel = new Runnable() {
+        public void run() {
+            showSearchPanel();
+        }
+    };
+
     View.OnTouchListener mHomeSearchActionListener = new View.OnTouchListener() {
         public boolean onTouch(View v, MotionEvent event) {
             switch(event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    if (!shouldDisableNavbarGestures()) {
-                        showSearchPanel();
-                    }
-                break;
-            }
-            return false;
+            case MotionEvent.ACTION_DOWN:
+                if (!shouldDisableNavbarGestures()) {
+                    mHandler.removeCallbacks(mShowSearchPanel);
+                    mHandler.postDelayed(mShowSearchPanel, mShowSearchHoldoff);
+                }
+            break;
+
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                mHandler.removeCallbacks(mShowSearchPanel);
+            break;
+        }
+        return false;
         }
     };
 
@@ -733,6 +747,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         updateRecentsPanel();
+        mShowSearchHoldoff  = mContext.getResources().getInteger(
+                R.integer.config_show_search_delay);
     }
 
     private void loadNotificationShade() {
@@ -1057,29 +1073,33 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     public void animateCollapse() {
-        animateCollapse(false);
+        animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
     }
 
-    public void animateCollapse(boolean excludeRecents) {
-        animateCollapse(excludeRecents, 1.0f);
+    public void animateCollapse(int flags) {
+        animateCollapse(flags, 1.0f);
     }
 
-    public void animateCollapse(boolean excludeRecents, float velocityMultiplier) {
+    public void animateCollapse(int flags, float velocityMultiplier) {
         if (SPEW) {
             Slog.d(TAG, "animateCollapse(): mExpanded=" + mExpanded
                     + " mExpandedVisible=" + mExpandedVisible
                     + " mExpanded=" + mExpanded
                     + " mAnimating=" + mAnimating
                     + " mAnimY=" + mAnimY
-                    + " mAnimVel=" + mAnimVel);
+                    + " mAnimVel=" + mAnimVel
+                    + " flags=" + flags);
         }
 
-        if (!excludeRecents) {
+        if ((flags & CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL) == 0) {
             mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
             mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
         }
-        mHandler.removeMessages(MSG_CLOSE_SEARCH_PANEL);
-        mHandler.sendEmptyMessage(MSG_CLOSE_SEARCH_PANEL);
+
+        if ((flags & CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL) == 0) {
+            mHandler.removeMessages(MSG_CLOSE_SEARCH_PANEL);
+            mHandler.sendEmptyMessage(MSG_CLOSE_SEARCH_PANEL);
+        }
 
         if (!mExpandedVisible) {
             return;
@@ -1941,7 +1961,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                     }
                 }
                 if (snapshot.isEmpty()) {
-                    animateCollapse(false);
+                    animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
                     return;
                 }
                 new Thread(new Runnable() {
@@ -1989,7 +2009,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                         mHandler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                animateCollapse(false);
+                                animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
                             }
                         }, totalDelay + 225);
                     }
@@ -2016,14 +2036,14 @@ public class PhoneStatusBar extends BaseStatusBar {
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
                     || Intent.ACTION_SCREEN_OFF.equals(action)) {
-                boolean excludeRecents = false;
+                int flags = CommandQueue.FLAG_EXCLUDE_NONE;
                 if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
                     String reason = intent.getStringExtra("reason");
-                    if (reason != null) {
-                        excludeRecents = reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS);
+                    if (reason != null && reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
+                        flags |= CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL;
                     }
                 }
-                animateCollapse(excludeRecents);
+                animateCollapse(flags);
             }
             else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
                 updateResources();

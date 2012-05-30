@@ -67,6 +67,7 @@ import com.android.systemui.R;
 import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.recent.RecentsPanelView;
 import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DoNotDisturb;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.SignalClusterView;
@@ -186,15 +187,29 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     private int mNavigationIconHints = 0;
 
+    private int mShowSearchHoldoff = 0;
+
     public Context getContext() { return mContext; }
+
+    private Runnable mShowSearchPanel = new Runnable() {
+        public void run() {
+            showSearchPanel();
+        }
+    };
 
     private View.OnTouchListener mHomeSearchActionListener = new View.OnTouchListener() {
         public boolean onTouch(View v, MotionEvent event) {
             switch(event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     if (!shouldDisableNavbarGestures()) {
-                        showSearchPanel();
+                        mHandler.removeCallbacks(mShowSearchPanel);
+                        mHandler.postDelayed(mShowSearchPanel, mShowSearchHoldoff);
                     }
+                break;
+
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    mHandler.removeCallbacks(mShowSearchPanel);
                 break;
             }
             return false;
@@ -387,6 +402,8 @@ public class TabletStatusBar extends BaseStatusBar implements
         WindowManagerImpl.getDefault().updateViewLayout(mNotificationPanel,
                 mNotificationPanelParams);
         mRecentsPanel.updateValuesFromResources();
+        mShowSearchHoldoff = mContext.getResources().getInteger(
+                R.integer.config_show_search_delay);
     }
 
     protected void loadDimens() {
@@ -1001,22 +1018,31 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     public void animateCollapse() {
-        animateCollapse(false);
+        animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
     }
 
-    private void animateCollapse(boolean excludeRecents) {
-        mHandler.removeMessages(MSG_CLOSE_NOTIFICATION_PANEL);
-        mHandler.sendEmptyMessage(MSG_CLOSE_NOTIFICATION_PANEL);
-        if (!excludeRecents) {
+    public void animateCollapse(int flags) {
+        if ((flags & CommandQueue.FLAG_EXCLUDE_NOTIFICATION_PANEL) == 0) {
+            mHandler.removeMessages(MSG_CLOSE_NOTIFICATION_PANEL);
+            mHandler.sendEmptyMessage(MSG_CLOSE_NOTIFICATION_PANEL);
+        }
+        if ((flags & CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL) == 0) {
             mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
             mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
         }
-        mHandler.removeMessages(MSG_CLOSE_INPUT_METHODS_PANEL);
-        mHandler.sendEmptyMessage(MSG_CLOSE_INPUT_METHODS_PANEL);
-        mHandler.removeMessages(MSG_CLOSE_COMPAT_MODE_PANEL);
-        mHandler.sendEmptyMessage(MSG_CLOSE_COMPAT_MODE_PANEL);
-        mHandler.removeMessages(MSG_CLOSE_SEARCH_PANEL);
-        mHandler.sendEmptyMessage(MSG_CLOSE_SEARCH_PANEL);
+        if ((flags & CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL) == 0) {
+            mHandler.removeMessages(MSG_CLOSE_SEARCH_PANEL);
+            mHandler.sendEmptyMessage(MSG_CLOSE_SEARCH_PANEL);
+        }
+        if ((flags & CommandQueue.FLAG_EXCLUDE_INPUT_METHODS_PANEL) == 0) {
+            mHandler.removeMessages(MSG_CLOSE_INPUT_METHODS_PANEL);
+            mHandler.sendEmptyMessage(MSG_CLOSE_INPUT_METHODS_PANEL);
+        }
+        if ((flags & CommandQueue.FLAG_EXCLUDE_COMPAT_MODE_PANEL) == 0) {
+            mHandler.removeMessages(MSG_CLOSE_COMPAT_MODE_PANEL);
+            mHandler.sendEmptyMessage(MSG_CLOSE_COMPAT_MODE_PANEL);
+        }
+
     }
 
     @Override // CommandQueue
@@ -1594,11 +1620,11 @@ public class TabletStatusBar extends BaseStatusBar implements
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
                 || Intent.ACTION_SCREEN_OFF.equals(action)) {
-                boolean excludeRecents = false;
+                int flags = CommandQueue.FLAG_EXCLUDE_NONE;
                 if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
                     String reason = intent.getStringExtra("reason");
-                    if (reason != null) {
-                        excludeRecents = reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS);
+                    if (reason != null && reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
+                        flags |= CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL;
                     }
                 }
                 if (Intent.ACTION_SCREEN_OFF.equals(action)) {
@@ -1607,9 +1633,9 @@ public class TabletStatusBar extends BaseStatusBar implements
                     // TODO: hide other things, like the notification tray,
                     // with no animation as well
                     mRecentsPanel.show(false, false);
-                    excludeRecents = true;
+                    flags |= CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL;
                 }
-                animateCollapse(excludeRecents);
+                animateCollapse(flags);
             }
         }
     };

@@ -57,6 +57,9 @@
     <!-- Show rotation lock button in phone-style notification panel. -->
     <bool name="config_showRotationLock">true</bool>
 
+    <!-- Amount of time to hold off before showing the search panel when the user presses home -->
+    <integer name="config_show_search_delay">200</integer>
+
     <!-- Vibration duration for MultiWaveView used in SearchPanelView -->
     <integer translatable="false" name="config_vibration_duration">20</integer>
 </resources>
