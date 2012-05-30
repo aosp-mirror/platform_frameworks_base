@@ -181,8 +181,11 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener,
                 // There is no autofill profile setup yet and the user has
                 // elected to try and set one up. Call through to the
                 // embedder to action that.
-                mWebView.getWebChromeClient().setupAutoFill(
+                WebChromeClient webChromeClient = mWebView.getWebChromeClient();
+                if (webChromeClient != null) {
+                    webChromeClient.setupAutoFill(
                         mHandler.obtainMessage(AUTOFILL_FORM));
+                }
             }
         } else {
             Object selectedItem;
