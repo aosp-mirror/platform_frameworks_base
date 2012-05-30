@@ -225,9 +225,10 @@ bool SensorService::threadLoop()
 {
     ALOGD("nuSensorService thread starting...");
 
-    const size_t numEventMax = 16 * (1 + mVirtualSensorList.size());
-    sensors_event_t buffer[numEventMax];
-    sensors_event_t scratch[numEventMax];
+    const size_t numEventMax = 16;
+    const size_t minBufferSize = numEventMax * mVirtualSensorList.size();
+    sensors_event_t buffer[minBufferSize];
+    sensors_event_t scratch[minBufferSize];
     SensorDevice& device(SensorDevice::getInstance());
     const size_t vcount = mVirtualSensorList.size();
 
@@ -255,10 +256,17 @@ bool SensorService::threadLoop()
                         fusion.process(event[i]);
                     }
                 }
-                for (size_t i=0 ; i<size_t(count) ; i++) {
+                for (size_t i=0 ; i<size_t(count) && k<minBufferSize ; i++) {
                     for (size_t j=0 ; j<activeVirtualSensorCount ; j++) {
+                        if (count + k >= minBufferSize) {
+                            ALOGE("buffer too small to hold all events: "
+                                    "count=%u, k=%u, size=%u",
+                                    count, k, minBufferSize);
+                            break;
+                        }
                         sensors_event_t out;
-                        if (virtualSensors.valueAt(j)->process(&out, event[i])) {
+                        SensorInterface* si = virtualSensors.valueAt(j);
+                        if (si->process(&out, event[i])) {
                             buffer[count + k] = out;
                             k++;
                         }
