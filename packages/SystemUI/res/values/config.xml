@@ -61,6 +61,9 @@
     <integer name="config_show_search_delay">200</integer>
 
     <!-- Vibration duration for MultiWaveView used in SearchPanelView -->
-    <integer translatable="false" name="config_vibration_duration">20</integer>
+    <integer translatable="false" name="config_vibration_duration">0</integer>
+
+    <!-- Vibration duration for MultiWaveView used in SearchPanelView -->
+    <integer translatable="false" name="config_search_panel_view_vibration_duration">20</integer>
 </resources>
 

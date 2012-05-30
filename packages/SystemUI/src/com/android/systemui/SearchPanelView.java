@@ -24,6 +24,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.os.Vibrator;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.MotionEvent;
@@ -32,7 +35,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.widget.FrameLayout;
-
 import com.android.internal.widget.multiwaveview.MultiWaveView;
 import com.android.internal.widget.multiwaveview.MultiWaveView.OnTriggerListener;
 import com.android.systemui.R;
@@ -76,7 +78,7 @@ public class SearchPanelView extends FrameLayout implements
         Intent intent = getAssistIntent();
         return intent == null ? false
                 : mContext.getPackageManager().queryIntentActivities(intent,
-                        PackageManager.MATCH_DEFAULT_ONLY).size() > 0;
+                PackageManager.MATCH_DEFAULT_ONLY).size() > 0;
     }
 
     private Intent getAssistIntent() {
@@ -141,13 +143,14 @@ public class SearchPanelView extends FrameLayout implements
                 case com.android.internal.R.drawable.ic_lockscreen_search:
                     mWaitingForLaunch = true;
                     startAssistActivity();
+                    vibrate();
                     postDelayed(new Runnable() {
                         public void run() {
                             mWaitingForLaunch = false;
                             mBar.hideSearchPanel();
                         }
                     }, SEARCH_PANEL_HOLD_DURATION);
-                break;
+                    break;
             }
         }
 
@@ -193,10 +196,20 @@ public class SearchPanelView extends FrameLayout implements
         }
     };
 
+    private void vibrate() {
+        Context context = getContext();
+        if (Settings.System.getInt(context.getContentResolver(),
+                Settings.System.HAPTIC_FEEDBACK_ENABLED, 1) != 0) {
+            Resources res = context.getResources();
+            Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+            vibrator.vibrate(res.getInteger(R.integer.config_search_panel_view_vibration_duration));
+        }
+    }
+
     public void show(final boolean show, boolean animate) {
         if (!show) {
             final LayoutTransition transitioner = animate ? createLayoutTransitioner() : null;
-            ((ViewGroup)mSearchTargetsContainer).setLayoutTransition(transitioner);
+            ((ViewGroup) mSearchTargetsContainer).setLayoutTransition(transitioner);
         }
         mShowing = show;
         if (show) {
@@ -206,6 +219,7 @@ public class SearchPanelView extends FrameLayout implements
                 // right before we are drawn
                 mMultiWaveView.suspendAnimations();
                 getViewTreeObserver().addOnPreDrawListener(mPreDrawListener);
+                vibrate();
             }
             setFocusable(true);
             setFocusableInTouchMode(true);
