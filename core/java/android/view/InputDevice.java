@@ -459,6 +459,18 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
+     * Returns true if the device is a full keyboard.
+     *
+     * @return True if the device is a full keyboard.
+     *
+     * @hide
+     */
+    public boolean isFullKeyboard() {
+        return (mSources & SOURCE_KEYBOARD) == SOURCE_KEYBOARD
+                && mKeyboardType == KEYBOARD_TYPE_ALPHABETIC;
+    }
+
+    /**
      * Gets the name of this input device.
      * @return The input device name.
      */
