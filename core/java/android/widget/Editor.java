@@ -1416,6 +1416,7 @@ public class Editor {
         }
 
         Layout layout = mTextView.getLayout();
+        Layout hintLayout = mTextView.getHintLayout();
         final int offset = mTextView.getSelectionStart();
         final int line = layout.getLineForOffset(offset);
         final int top = layout.getLineTop(line);
@@ -1429,10 +1430,20 @@ public class Editor {
             middle = (top + bottom) >> 1;
         }
 
-        updateCursorPosition(0, top, middle, layout.getPrimaryHorizontal(offset));
+        updateCursorPosition(0, top, middle, getPrimaryHorizontal(layout, hintLayout, offset));
 
         if (mCursorCount == 2) {
             updateCursorPosition(1, middle, bottom, layout.getSecondaryHorizontal(offset));
+        }
+    }
+
+    private float getPrimaryHorizontal(Layout layout, Layout hintLayout, int offset) {
+        if (TextUtils.isEmpty(layout.getText()) &&
+                hintLayout != null &&
+                !TextUtils.isEmpty(hintLayout.getText())) {
+            return hintLayout.getPrimaryHorizontal(offset);
+        } else {
+            return layout.getPrimaryHorizontal(offset);
         }
     }
 
