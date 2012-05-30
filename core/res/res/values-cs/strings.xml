@@ -145,7 +145,7 @@
     <string name="shutdown_progress" msgid="2281079257329981203">"Vypínání..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet se vypne."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Váš telefon bude vypnut."</string>
-    <string name="shutdown_confirm_question" msgid="2906544768881136183">"Chcete vypnout telefon?"</string>
+    <string name="shutdown_confirm_question" msgid="2906544768881136183">"Chcete zařízení vypnout?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Restart v nouzovém režimu"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"Chcete zařízení restartovat v nouzovém režimu? Deaktivujete tak veškeré nainstalované aplikace třetích stran. Po dalším restartu budou obnoveny."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Nejnovější"</string>
@@ -1205,7 +1205,7 @@
     <string name="throttled_notification_title" msgid="6269541897729781332">"Byl překročen limit mobilních dat"</string>
     <string name="throttled_notification_message" msgid="5443457321354907181">"Dotykem zobrazíte další informace o využití mobilních dat."</string>
     <string name="no_matches" msgid="8129421908915840737">"Žádné shody"</string>
-    <string name="find_on_page" msgid="1946799233822820384">"Vyhledat na stránce"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"Hledat na stránce"</string>
   <plurals name="matches_found">
     <item quantity="one" msgid="8167147081136579439">"1 shoda"</item>
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> z <xliff:g id="TOTAL">%d</xliff:g>"</item>
