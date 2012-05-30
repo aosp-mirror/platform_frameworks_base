@@ -64,7 +64,7 @@ been registered is triggered by user interaction with the item in the UI.</p>
     This is called when the user navigates onto or away from the item, using the navigation-keys or trackball.</dd>
   <dt><code>onKey()</code></dt>
     <dd>From {@link android.view.View.OnKeyListener}. 
-    This is called when the user is focused on the item and presses or releases a key on the device.</dd>
+    This is called when the user is focused on the item and presses or releases a hardware key on the device.</dd>
   <dt><code>onTouch()</code></dt>
     <dd>From {@link android.view.View.OnTouchListener}. 
     This is called when the user performs an action qualified as a touch event, including a press, a release,
@@ -143,12 +143,22 @@ depends on the event. For the few that do, here's why:</p>
     within the event, such as a finger gesture, or the eventual up action event.</li>
 </ul>
 
-<p>Remember that key events are always delivered to the View currently in focus. They are dispatched starting from the top
+<p>Remember that hardware key events are always delivered to the View currently in focus. They are dispatched starting from the top
 of the View hierarchy, and then down, until they reach the appropriate destination. If your View (or a child of your View)
 currently has focus, then you can see the event travel through the <code>{@link android.view.View#dispatchKeyEvent(KeyEvent)
 dispatchKeyEvent()}</code> method. As an alternative to capturing key events through your View, you can also receive 
 all of the events inside your Activity with <code>{@link android.app.Activity#onKeyDown(int,KeyEvent) onKeyDown()}</code>
 and <code>{@link android.app.Activity#onKeyUp(int,KeyEvent) onKeyUp()}</code>.</p>
+
+<p>Also, when thinking about text input for your application, remember that many devices only have software input
+methods. Such methods are not required to be key-based; some may use voice input, handwriting, and so on. Even if
+an input method presents a keyboard-like interface, it will generally <strong>not</strong> trigger the
+<code>{@link android.app.Activity#onKeyDown(int,KeyEvent) onKeyDown()}</code> family of events. You should never
+build a UI that requires specific key presses to be controlled unless you want to limit your application to devices
+with a hardware keyboard. In particular, do not rely on these methods to validate input when the user presses the
+return key; instead, use actions like {@link android.view.inputmethod.EditorInfo#IME_ACTION_DONE} to signal the
+input method how your application expects to react, so it may change its UI in a meaningful way. Avoid assumptions
+about how a software input method should work and just trust it to supply already formatted text to your application.</p>
 
 <p class="note"><strong>Note:</strong> Android will call event handlers first and then the appropriate default
 handlers from the class definition second. As such, returning <em>true</em> from these event listeners will stop

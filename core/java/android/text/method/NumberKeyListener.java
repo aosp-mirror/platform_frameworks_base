@@ -27,6 +27,10 @@ import android.text.Spanned;
 
 /**
  * For numeric text entry
+ * <p></p>
+ * As for all implementations of {@link KeyListener}, this class is only concerned
+ * with hardware keyboards.  Software input methods have no obligation to trigger
+ * the methods in this class.
  */
 public abstract class NumberKeyListener extends BaseKeyListener
     implements InputFilter

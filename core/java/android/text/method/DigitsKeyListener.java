@@ -24,6 +24,10 @@ import android.view.KeyEvent;
 
 /**
  * For digits-only text entry
+ * <p></p>
+ * As for all implementations of {@link KeyListener}, this class is only concerned
+ * with hardware keyboards.  Software input methods have no obligation to trigger
+ * the methods in this class.
  */
 public class DigitsKeyListener extends NumberKeyListener
 {
