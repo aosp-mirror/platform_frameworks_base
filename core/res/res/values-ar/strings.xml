@@ -855,12 +855,9 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"محو طلب البحث"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"إرسال طلب البحث"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"البحث الصوتي"</string>
-    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
-    <skip />
-    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
-    <skip />
-    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
-    <skip />
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"هل تريد تمكين ميزة Explore by Touch؟"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"يريد <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> تمكين ميزة Explore by Touch. عند تشغيل ميزة Explore by Touch، سيكون بإمكانك سماع أو مشاهدة أوصاف لما تحت إصبعك أو إجراء إيماءات للتفاعل مع الجهاز اللوحي."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"يريد <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> تمكين ميزة Explore by Touch. عند تشغيل ميزة Explore by Touch، سيكون بإمكانك سماع أو مشاهدة أوصاف لما تحت إصبعك أو إجراء إيماءات للتفاعل مع الهاتف."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"قبل شهر واحد"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"قبل شهر واحد"</string>
   <plurals name="num_seconds_ago">
@@ -1127,10 +1124,8 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"إعداد أسلوب الإدخال"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"لوحة مفاتيح فعلية"</string>
     <string name="hardware" msgid="7517821086888990278">"أجهزة"</string>
-    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
-    <skip />
-    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
-    <skip />
+    <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"تحديد تخطيط لوحة مفاتيح"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"المس لتحديد تخطيط لوحة مفاتيح."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" أ ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789 أ ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"العناصر المرشحة"</u></string>
@@ -1324,6 +1319,5 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"تشغيل المتصفح؟"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"هل تريد قبول المكالمة؟"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"دومًا"</string>
-    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
-    <skip />
+    <string name="activity_resolver_use_once" msgid="2404644797149173758">"مرة واحدة فقط"</string>
 </resources>
