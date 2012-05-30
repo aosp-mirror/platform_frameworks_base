@@ -2886,6 +2886,15 @@ public final class Settings {
             "enabled_accessibility_services";
 
         /**
+         * List of the accessibility services to which the user has graned
+         * permission to put the device into touch exploration mode.
+         *
+         * @hide
+         */
+        public static final String TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES =
+            "touch_exploration_granted_accessibility_services";
+
+        /**
          * Whether to speak passwords while in accessibility mode.
          */
         public static final String ACCESSIBILITY_SPEAK_PASSWORD = "speak_password";
@@ -4292,6 +4301,7 @@ public final class Settings {
             ACCESSIBILITY_SCRIPT_INJECTION,
             BACKUP_AUTO_RESTORE,
             ENABLED_ACCESSIBILITY_SERVICES,
+            TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
             TOUCH_EXPLORATION_ENABLED,
             ACCESSIBILITY_ENABLED,
             ACCESSIBILITY_SPEAK_PASSWORD,
