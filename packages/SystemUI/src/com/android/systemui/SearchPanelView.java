@@ -109,6 +109,7 @@ public class SearchPanelView extends FrameLayout implements
         mBar.animateCollapse();
         // Launch Assist
         Intent intent = getAssistIntent();
+        if (intent == null) return;
         try {
             ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
                     R.anim.search_launch_enter, R.anim.search_launch_exit);
