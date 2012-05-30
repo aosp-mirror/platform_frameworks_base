@@ -4516,7 +4516,7 @@ public final class ActivityThread {
             boolean noisy, boolean noReleaseNeeded, boolean stable) {
         ContentProvider localProvider = null;
         IContentProvider provider;
-        if (holder == null) {
+        if (holder == null || holder.provider == null) {
             if (DEBUG_PROVIDER || noisy) {
                 Slog.d(TAG, "Loading provider " + info.authority + ": "
                         + info.name);
