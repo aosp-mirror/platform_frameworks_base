@@ -16,9 +16,7 @@
 
 package com.android.systemui;
 
-import android.animation.Animator;
 import android.animation.LayoutTransition;
-import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
@@ -40,6 +38,7 @@ import com.android.internal.widget.multiwaveview.MultiWaveView.OnTriggerListener
 import com.android.systemui.R;
 import com.android.systemui.recent.StatusBarTouchProxy;
 import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
 import com.android.systemui.statusbar.tablet.TabletStatusBar;
@@ -49,7 +48,7 @@ public class SearchPanelView extends FrameLayout implements
     private static final int SEARCH_PANEL_HOLD_DURATION = 500;
     static final String TAG = "SearchPanelView";
     static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
-    private Context mContext;
+    private final Context mContext;
     private BaseStatusBar mBar;
     private StatusBarTouchProxy mStatusBarTouchProxy;
 
@@ -106,7 +105,7 @@ public class SearchPanelView extends FrameLayout implements
 
     private void startAssistActivity() {
         // Close Recent Apps if needed
-        mBar.animateCollapse();
+        mBar.animateCollapse(CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL);
         // Launch Assist
         Intent intent = getAssistIntent();
         try {
@@ -160,7 +159,7 @@ public class SearchPanelView extends FrameLayout implements
     protected void onFinishInflate() {
         super.onFinishInflate();
         mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mSearchTargetsContainer = (ViewGroup) findViewById(R.id.search_panel_container);
+        mSearchTargetsContainer = findViewById(R.id.search_panel_container);
         mStatusBarTouchProxy = (StatusBarTouchProxy) findViewById(R.id.status_bar_touch_proxy);
         // TODO: fetch views
         mMultiWaveView = (MultiWaveView) findViewById(R.id.multi_wave_view);
@@ -186,7 +185,7 @@ public class SearchPanelView extends FrameLayout implements
         }
     }
 
-    private OnPreDrawListener mPreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
+    private final OnPreDrawListener mPreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
         public boolean onPreDraw() {
             getViewTreeObserver().removeOnPreDrawListener(this);
             mMultiWaveView.resumeAnimations();
@@ -219,7 +218,7 @@ public class SearchPanelView extends FrameLayout implements
     public void hide(boolean animate) {
         if (mBar != null) {
             // This will indirectly cause show(false, ...) to get called
-            mBar.animateCollapse();
+            mBar.animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
         } else {
             setVisibility(View.INVISIBLE);
         }
