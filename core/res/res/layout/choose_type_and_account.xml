@@ -20,53 +20,52 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingLeft="16dip"
-    android:paddingRight="16dip">
+    android:orientation="vertical">
 
-    <TextView android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_gravity="left"
-        android:text="@string/choose_account_label"
-        android:paddingTop="16dip"
-        android:paddingBottom="16dip"
-        android:textColor="@android:color/holo_blue_light"
-    />
-
-    <View android:layout_height="3dip"
-          android:layout_width="match_parent"
-          android:background="#323232"/>
-
+    <!-- Customizable description text -->
     <TextView android:id="@+id/description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_gravity="left|center_vertical"
-        android:text="@string/choose_account_text"
         android:paddingTop="16dip"
         android:paddingBottom="16dip"
+        android:paddingLeft="16dip"
+        android:paddingRight="16dip"
     />
 
+    <!-- List of accounts, with "Add new account" as the last item -->
     <ListView android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:drawSelectorOnTop="false"
         android:layout_weight="1"
-        android:scrollbarAlwaysDrawVerticalTrack="true" />
+        android:scrollbarAlwaysDrawVerticalTrack="true"
+        android:choiceMode="singleChoice" />
 
+    <!-- Horizontal divider line -->
     <View android:layout_height="1dip"
         android:layout_width="match_parent"
         android:background="?android:attr/dividerHorizontal" />
 
-    <Button android:id="@+id/addAccount"
-        style="?android:attr/buttonBarButtonStyle"
+    <!-- Alert dialog style buttons along the bottom. -->
+    <LinearLayout android:id="@+id/button_bar"
+        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="2dip"
-        android:layout_marginRight="2dip"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/add_account_button_label"
-    />
+        android:measureWithLargestChild="true">
+        <Button android:id="@android:id/button1"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@android:string/no"
+            android:onClick="onCancelButtonClicked" />
+        <Button android:id="@android:id/button2"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@android:string/yes"
+            android:onClick="onOkButtonClicked" />
+    </LinearLayout>
 </LinearLayout>

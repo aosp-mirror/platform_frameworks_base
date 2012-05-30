@@ -1983,7 +1983,7 @@
         <activity android:name="android.accounts.ChooseTypeAndAccountActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Theme.Holo.DialogWhenLarge.NoActionBar"
+                android:theme="@android:style/Theme.Holo.Dialog"
                 android:label="@string/choose_account_label"
                 android:process=":ui">
         </activity>
