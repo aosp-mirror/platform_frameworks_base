@@ -74,6 +74,40 @@ static bool iszero(float f) {
     return isposzero(f) || isnegzero(f);
 }
 
+/* Absolute epsilon used for floats.  Value is similar to float.h. */
+#ifndef FLT_EPSILON
+#define FLT_EPSILON 1.19e7f
+#endif
+/* Max ULPs while still being considered "equal".  Only used when this number
+   of ULPs is of a greater size than FLT_EPSILON. */
+#define FLT_MAX_ULP 1
+
+/* Calculate the difference in ULPs between the two values.  (Return zero on
+   perfect equality.) */
+static int float_dist(float f1, float f2) {
+    return *((int *)(&f1)) - *((int *)(&f2));
+}
+
+/* Check if two floats are essentially equal.  Will fail with some values
+   due to design.  (Validate using FLT_EPSILON or similar if necessary.) */
+static bool float_almost_equal(float f1, float f2) {
+    int *i1 = (int*)(&f1);
+    int *i2 = (int*)(&f2);
+
+    // Check for sign equality
+    if ( ((*i1 >> 31) == 0) != ((*i2 >> 31) == 0) ) {
+        // Handle signed zeroes
+        if (f1 == f2)
+            return true;
+        return false;
+    }
+
+    // Check with ULP distance
+    if (float_dist(f1, f2) > FLT_MAX_ULP)
+        return false;
+    return true;
+}
+
 /* These constants must match those in UnitTest.java */
 static const int RS_MSG_TEST_PASSED = 100;
 static const int RS_MSG_TEST_FAILED = 101;
