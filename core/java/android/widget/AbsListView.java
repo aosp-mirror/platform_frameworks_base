@@ -2283,14 +2283,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final ListAdapter adapter = getAdapter();
 
             if ((position == INVALID_POSITION) || (adapter == null)) {
-                // Cannot perform actions on invalid items.
-                info.setEnabled(false);
                 return;
             }
 
             if (!isEnabled() || !adapter.isEnabled(position)) {
-                // Cannot perform actions on invalid items.
-                info.setEnabled(false);
                 return;
             }
 
