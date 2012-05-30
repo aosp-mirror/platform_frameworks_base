@@ -101,6 +101,9 @@ public class RecentsVerticalScrollView extends ScrollView
             }
 
             final View view = mAdapter.getView(i, old, mLinearLayout);
+            if (view.getParent() != null) {
+                throw new RuntimeException("Recycled child has parent");
+            }
 
             if (mPerformanceHelper != null) {
                 mPerformanceHelper.addViewCallback(view);
@@ -139,6 +142,9 @@ public class RecentsVerticalScrollView extends ScrollView
             thumbnailView.setClickable(true);
             thumbnailView.setOnClickListener(launchAppListener);
             thumbnailView.setOnLongClickListener(longClickListener);
+            if (view.getParent() != null) {
+                throw new RuntimeException("Recycled child has parent");
+            }
 
             // We don't want to dismiss recents if a user clicks on the app title
             // (we also don't want to launch the app either, though, because the
@@ -148,6 +154,9 @@ public class RecentsVerticalScrollView extends ScrollView
             appTitle.setOnTouchListener(noOpListener);
             final View calloutLine = view.findViewById(R.id.recents_callout_line);
             calloutLine.setOnTouchListener(noOpListener);
+            if (view.getParent() != null) {
+                throw new RuntimeException("Recycled child has parent");
+            }
 
             mLinearLayout.addView(view);
         }
