@@ -1059,6 +1059,7 @@ public class Camera {
         }
 
         native_takePicture(msgType);
+        mFaceDetectionRunning = false;
     }
 
     /**
