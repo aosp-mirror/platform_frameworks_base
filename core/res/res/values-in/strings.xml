@@ -606,30 +606,30 @@
     <item msgid="1735177144948329370">"Faks Rumah"</item>
     <item msgid="603878674477207394">"Pager"</item>
     <item msgid="1650824275177931637">"Lainnya"</item>
-    <item msgid="9192514806975898961">"Ubahsuaian"</item>
+    <item msgid="9192514806975898961">"Khusus"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Rumah"</item>
     <item msgid="7084237356602625604">"Kantor"</item>
     <item msgid="1112044410659011023">"Lainnya"</item>
-    <item msgid="2374913952870110618">"Ubahsuaian"</item>
+    <item msgid="2374913952870110618">"Khusus"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Rumah"</item>
     <item msgid="5629153956045109251">"Kantor"</item>
     <item msgid="4966604264500343469">"Lainnya"</item>
-    <item msgid="4932682847595299369">"Ubahsuaian"</item>
+    <item msgid="4932682847595299369">"Khusus"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"Rumah"</item>
     <item msgid="1359644565647383708">"Kantor"</item>
     <item msgid="7868549401053615677">"Lainnya"</item>
-    <item msgid="3145118944639869809">"Ubahsuaian"</item>
+    <item msgid="3145118944639869809">"Khusus"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="7546335612189115615">"Kantor"</item>
     <item msgid="4378074129049520373">"Lainnya"</item>
-    <item msgid="3455047468583965104">"Ubahsuaian"</item>
+    <item msgid="3455047468583965104">"Khusus"</item>
   </string-array>
   <string-array name="imProtocols">
     <item msgid="8595261363518459565">"AIM"</item>
@@ -641,7 +641,7 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
-    <string name="phoneTypeCustom" msgid="1644738059053355820">"Ubahsuaian"</string>
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"Khusus"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Rumah"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Seluler"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Kantor"</string>
@@ -662,24 +662,24 @@
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Pager Kantor"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Asisten"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <string name="eventTypeCustom" msgid="7837586198458073404">"Ubahsuaian"</string>
+    <string name="eventTypeCustom" msgid="7837586198458073404">"Khusus"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Hari Ulang Tahun"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Hari Peringatan"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Lainnya"</string>
-    <string name="emailTypeCustom" msgid="8525960257804213846">"Ubahsuaian"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Khusus"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Rumah"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Kantor"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Lainnya"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Seluler"</string>
-    <string name="postalTypeCustom" msgid="8903206903060479902">"Ubahsuaian"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"Khusus"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Rumah"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Kantor"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Lainnya"</string>
-    <string name="imTypeCustom" msgid="2074028755527826046">"Ubahsuaian"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"Khusus"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"Rumah"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Kantor"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Lainnya"</string>
-    <string name="imProtocolCustom" msgid="6919453836618749992">"Ubahsuaian"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"Khusus"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
     <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
@@ -691,8 +691,8 @@
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="29268870505363872">"Kantor"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Lainnya"</string>
-    <string name="orgTypeCustom" msgid="225523415372088322">"Ubahsuaian"</string>
-    <string name="relationTypeCustom" msgid="3542403679827297300">"Ubahsuaian"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"Khusus"</string>
+    <string name="relationTypeCustom" msgid="3542403679827297300">"Khusus"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Asisten"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Saudara laki-laki"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Anak"</string>
@@ -707,7 +707,7 @@
     <string name="relationTypeRelative" msgid="1799819930085610271">"Sanak saudara"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Saudara perempuan"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Pasangan"</string>
-    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Ubahsuaian"</string>
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Khusus"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Beranda"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Kerjaan"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Lainnya"</string>
@@ -855,12 +855,9 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Hapus kueri"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Mengirimkan kueri"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Penelusuran suara"</string>
-    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
-    <skip />
-    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
-    <skip />
-    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
-    <skip />
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Aktifkan Menjelajah dengan Sentuhan?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ingin mengaktifkan Menjelajah dengan Sentuhan. Saat Menjelajah dengan Sentuhan diaktifkan, Anda dapat melihat atau mendengar deskripsi dari apa yang ada di bawah jari Anda atau melakukan gerakan untuk berinteraksi dengan tablet."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ingin mengaktifkan Menjelajah dengan Sentuhan. Saat Menjelajah dengan Sentuhan diaktifkan, Anda dapat mendengar atau melihat deskripsi dari apa yang ada di bawah jari Anda atau melakukan gerakan untuk berinteraksi dengan ponsel."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 bulan yang lalu"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Sebelum 1 bulan yang lalu"</string>
   <plurals name="num_seconds_ago">
@@ -1127,10 +1124,8 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"Menyiapkan metode masukan"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Keyboard fisik"</string>
     <string name="hardware" msgid="7517821086888990278">"Perangkat Keras"</string>
-    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
-    <skip />
-    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
-    <skip />
+    <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Pilih tata letak keyboard"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Sentuh untuk memilih tata letak keyboard."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"calon"</u></string>
@@ -1324,6 +1319,5 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Luncurkan Browser?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Terima panggilan?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Selalu"</string>
-    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
-    <skip />
+    <string name="activity_resolver_use_once" msgid="2404644797149173758">"Hanya sekali"</string>
 </resources>
