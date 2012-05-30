@@ -148,7 +148,7 @@ this is how you'll listen for events. The View class contains a collection of ne
 On<em>&lt;something></em>Listener, each with a callback method called <code>On<em>&lt;something></em>()</code>.
 For example, {@link android.view.View.OnClickListener} (for handling "clicks" on a View),
 {@link android.view.View.OnTouchListener} (for handling touch screen events in a View), and
-{@link android.view.View.OnKeyListener} (for handling device key presses within a View). So if you want your View
+{@link android.view.View.OnKeyListener} if you want to handle hardware key presses within a View. So if you want your View
 to be notified when it is "clicked" (such as when a button is selected), implement OnClickListener and define
 its <code>onClick()</code> callback method (where you perform the action upon click), and register it
 to the View with <code>{@link android.view.View#setOnClickListener(View.OnClickListener) setOnClickListener()}</code>.
@@ -158,7 +158,7 @@ what you should do when you've implemented your own View class and want to liste
 that occur within it. Example events you can handle include when the
 screen is touched (<code>{@link android.view.View#onTouchEvent(MotionEvent) onTouchEvent()}</code>), when
 the trackball is moved (<code>{@link android.view.View#onTrackballEvent(MotionEvent) onTrackballEvent()}</code>), 
-or when a key on the device is pressed (<code>{@link android.view.View#onKeyDown(int, KeyEvent)
+or when a <em>hardware</em> key on the device is pressed (<code>{@link android.view.View#onKeyDown(int, KeyEvent)
 onKeyDown()}</code>). This allows you to define the default behavior for each event inside your custom View and determine
 whether the event should be passed on to some other child View. Again, these are callbacks to the View class,
 so your only chance to define them is when you 

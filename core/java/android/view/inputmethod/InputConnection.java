@@ -283,7 +283,7 @@ public interface InputConnection {
     
     /**
      * Tell the editor that you are done with a batch edit previously
-     * initiated with {@link #endBatchEdit}.
+     * initiated with {@link #beginBatchEdit}.
      */
     public boolean endBatchEdit();
     
@@ -307,7 +307,11 @@ public interface InputConnection {
      * {@link KeyEvent#FLAG_SOFT_KEYBOARD KeyEvent.FLAG_SOFT_KEYBOARD} on all
      * key event objects you give to this API; the flag will not be set
      * for you.
-     * 
+     *
+     * <p>Note that it's discouraged to send such key events in normal operation;
+     * this is mainly for use with {@link android.text.InputType#TYPE_NULL} type
+     * text fields. Use the {@link #commitText} family of methods to send text
+     * to the application instead.
      * @param event The key event.
      *        
      * @return Returns true on success, false if the input connection is no longer

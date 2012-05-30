@@ -27,6 +27,10 @@ import android.view.View;
  * This is the standard key listener for alphabetic input on qwerty
  * keyboards.  You should generally not need to instantiate this yourself;
  * TextKeyListener will do it for you.
+ * <p></p>
+ * As for all implementations of {@link KeyListener}, this class is only concerned
+ * with hardware keyboards.  Software input methods have no obligation to trigger
+ * the methods in this class.
  */
 public class QwertyKeyListener extends BaseKeyListener {
     private static QwertyKeyListener[] sInstance =
