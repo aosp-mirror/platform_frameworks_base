@@ -19,9 +19,8 @@ package com.android.server.am;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.os.UserId;
+import android.util.Slog;
 
 import java.io.PrintWriter;
 
@@ -69,6 +68,8 @@ class TaskRecord extends ThumbnailHolder {
                     _intent.setSourceBounds(null);
                 }
             }
+            if (ActivityManagerService.DEBUG_TASKS) Slog.v(ActivityManagerService.TAG,
+                    "Setting Intent of " + this + " to " + _intent);
             intent = _intent;
             realActivity = _intent != null ? _intent.getComponent() : null;
             origActivity = null;
@@ -80,6 +81,8 @@ class TaskRecord extends ThumbnailHolder {
                 targetIntent.setComponent(targetComponent);
                 targetIntent.setSelector(null);
                 targetIntent.setSourceBounds(null);
+                if (ActivityManagerService.DEBUG_TASKS) Slog.v(ActivityManagerService.TAG,
+                        "Setting Intent of " + this + " to target " + targetIntent);
                 intent = targetIntent;
                 realActivity = targetComponent;
                 origActivity = _intent.getComponent();
@@ -103,9 +106,10 @@ class TaskRecord extends ThumbnailHolder {
     }
     
     void dump(PrintWriter pw, String prefix) {
-        if (numActivities != 0 || rootWasReset) {
+        if (numActivities != 0 || rootWasReset || userId != 0) {
             pw.print(prefix); pw.print("numActivities="); pw.print(numActivities);
-                    pw.print(" rootWasReset="); pw.println(rootWasReset);
+                    pw.print(" rootWasReset="); pw.print(rootWasReset);
+                    pw.print(" userId="); pw.println(userId);
         }
         if (affinity != null) {
             pw.print(prefix); pw.print("affinity="); pw.println(affinity);
