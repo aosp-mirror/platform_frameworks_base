@@ -6466,17 +6466,18 @@ public class WindowManagerService extends IWindowManager.Stub
                                     WindowManagerPolicy.PRESENCE_INTERNAL;
 
                     if (mIsTouchDevice) {
-                        if ((sources & InputDevice.SOURCE_TOUCHSCREEN) != 0) {
+                        if ((sources & InputDevice.SOURCE_TOUCHSCREEN) ==
+                                InputDevice.SOURCE_TOUCHSCREEN) {
                             config.touchscreen = Configuration.TOUCHSCREEN_FINGER;
                         }
                     } else {
                         config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;
                     }
 
-                    if ((sources & InputDevice.SOURCE_TRACKBALL) != 0) {
+                    if ((sources & InputDevice.SOURCE_TRACKBALL) == InputDevice.SOURCE_TRACKBALL) {
                         config.navigation = Configuration.NAVIGATION_TRACKBALL;
                         navigationPresence |= presenceFlag;
-                    } else if ((sources & InputDevice.SOURCE_DPAD) != 0
+                    } else if ((sources & InputDevice.SOURCE_DPAD) == InputDevice.SOURCE_DPAD
                             && config.navigation == Configuration.NAVIGATION_NONAV) {
                         config.navigation = Configuration.NAVIGATION_DPAD;
                         navigationPresence |= presenceFlag;
