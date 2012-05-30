@@ -253,7 +253,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         mContext.startActivity(intent);
     }
 
-    protected View.OnLongClickListener getNotificationLongClicker() { 
+    protected View.OnLongClickListener getNotificationLongClicker() {
         return new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -268,7 +268,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     public boolean onMenuItemClick(MenuItem item) {
                         if (item.getItemId() == R.id.notification_inspect_item) {
                             startApplicationDetailsActivity(packageNameF);
-                            animateCollapse();
+                            animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
                         } else {
                             return false;
                         }
@@ -618,7 +618,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
 
             // close the shade if it was open
-            animateCollapse();
+            animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
             visibilityChanged(false);
 
             // If this click was on the intruder alert, hide that instead

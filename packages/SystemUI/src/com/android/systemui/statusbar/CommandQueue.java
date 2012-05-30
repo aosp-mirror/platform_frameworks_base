@@ -66,6 +66,13 @@ public class CommandQueue extends IStatusBar.Stub {
 
     private static final int MSG_SET_NAVIGATION_ICON_HINTS = 14 << MSG_SHIFT;
 
+    public static final int FLAG_EXCLUDE_NONE = 0;
+    public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
+    public static final int FLAG_EXCLUDE_RECENTS_PANEL = 1 << 1;
+    public static final int FLAG_EXCLUDE_NOTIFICATION_PANEL = 1 << 2;
+    public static final int FLAG_EXCLUDE_INPUT_METHODS_PANEL = 1 << 3;
+    public static final int FLAG_EXCLUDE_COMPAT_MODE_PANEL = 1 << 4;
+
     private StatusBarIconList mList;
     private Callbacks mCallbacks;
     private Handler mHandler = new H();
@@ -88,7 +95,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void removeNotification(IBinder key);
         public void disable(int state);
         public void animateExpand();
-        public void animateCollapse();
+        public void animateCollapse(int flags);
         public void setSystemUiVisibility(int vis, int mask);
         public void topAppWindowChanged(boolean visible);
         public void setImeWindowStatus(IBinder token, int vis, int backDisposition);
@@ -161,9 +168,13 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     public void animateCollapse() {
+        animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
+    }
+
+    public void animateCollapse(int flags) {
         synchronized (mList) {
             mHandler.removeMessages(MSG_SET_VISIBILITY);
-            mHandler.obtainMessage(MSG_SET_VISIBILITY, OP_COLLAPSE, 0, null).sendToTarget();
+            mHandler.obtainMessage(MSG_SET_VISIBILITY, OP_COLLAPSE, flags, null).sendToTarget();
         }
     }
 
@@ -277,7 +288,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     if (msg.arg1 == OP_EXPAND) {
                         mCallbacks.animateExpand();
                     } else {
-                        mCallbacks.animateCollapse();
+                        mCallbacks.animateCollapse(msg.arg2);
                     }
                     break;
                 case MSG_SET_SYSTEMUI_VISIBILITY:
