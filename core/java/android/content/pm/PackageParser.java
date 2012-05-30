@@ -935,7 +935,17 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifest_installLocation,
                 PARSE_DEFAULT_INSTALL_LOCATION);
         pkg.applicationInfo.installLocation = pkg.installLocation;
-        
+
+        /* Set the global "forward lock" flag */
+        if ((flags & PARSE_FORWARD_LOCK) != 0) {
+            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_FORWARD_LOCK;
+        }
+
+        /* Set the global "on SD card" flag */
+        if ((flags & PARSE_ON_SDCARD) != 0) {
+            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_EXTERNAL_STORAGE;
+        }
+
         // Resource boolean are -1, so 1 means we don't know the value.
         int supportsSmallScreens = 1;
         int supportsNormalScreens = 1;
@@ -1724,14 +1734,6 @@ public class PackageParser {
                     false)) {
                 ai.flags |= ApplicationInfo.FLAG_PERSISTENT;
             }
-        }
-
-        if ((flags & PARSE_FORWARD_LOCK) != 0) {
-            ai.flags |= ApplicationInfo.FLAG_FORWARD_LOCK;
-        }
-
-        if ((flags & PARSE_ON_SDCARD) != 0) {
-            ai.flags |= ApplicationInfo.FLAG_EXTERNAL_STORAGE;
         }
 
         if (sa.getBoolean(
