@@ -198,7 +198,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     // TODO: Respect allowImplicitlySelectedSubtype
-    // TODO: Save SpellCheckerSubtype by supported languages.
+    // TODO: Save SpellCheckerSubtype by supported languages by looking at "locale".
     @Override
     public SpellCheckerSubtype getCurrentSpellCheckerSubtype(
             String locale, boolean allowImplicitlySelectedSubtype) {
@@ -250,10 +250,10 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             for (int i = 0; i < sci.getSubtypeCount(); ++i) {
                 final SpellCheckerSubtype scs = sci.getSubtypeAt(i);
                 if (hashCode == 0) {
-                    if (candidateLocale.equals(locale)) {
+                    final String scsLocale = scs.getLocale();
+                    if (candidateLocale.equals(scsLocale)) {
                         return scs;
                     } else if (candidate == null) {
-                        final String scsLocale = scs.getLocale();
                         if (candidateLocale.length() >= 2 && scsLocale.length() >= 2
                                 && candidateLocale.startsWith(scsLocale)) {
                             // Fall back to the applicable language
