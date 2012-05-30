@@ -1600,7 +1600,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * @hide
      */
-    private int mAccessibilityCursorPosition = -1;
+    private int mAccessibilityCursorPosition = ACCESSIBILITY_CURSOR_POSITION_UNDEFINED;
 
     /**
      * The view's tag.
@@ -2518,6 +2518,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @hide
      */
     public static final int FIND_VIEWS_WITH_ACCESSIBILITY_NODE_PROVIDERS = 0x00000004;
+
+    /**
+     * The undefined cursor position.
+     */
+    private static final int ACCESSIBILITY_CURSOR_POSITION_UNDEFINED = -1;
 
     /**
      * Indicates that the screen has changed state and is now off.
@@ -6253,7 +6258,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
             notifyAccessibilityStateChanged();
             // Clear the text navigation state.
-            setAccessibilityCursorPosition(-1);
+            setAccessibilityCursorPosition(ACCESSIBILITY_CURSOR_POSITION_UNDEFINED);
         }
         // Clear the global reference of accessibility focus if this
         // view or any of its descendants had accessibility focus.
@@ -6303,6 +6308,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     void clearAccessibilityFocusNoCallbacks() {
         if ((mPrivateFlags2 & ACCESSIBILITY_FOCUSED) != 0) {
             mPrivateFlags2 &= ~ACCESSIBILITY_FOCUSED;
+            setAccessibilityCursorPosition(ACCESSIBILITY_CURSOR_POSITION_UNDEFINED);
             invalidate();
         }
     }
@@ -6799,12 +6805,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         final int current = getAccessibilityCursorPosition();
         final int[] range = iterator.following(current);
         if (range == null) {
-            setAccessibilityCursorPosition(-1);
             return false;
         }
         final int start = range[0];
         final int end = range[1];
-        setAccessibilityCursorPosition(start);
+        setAccessibilityCursorPosition(end);
         sendViewTextTraversedAtGranularityEvent(
                 AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY,
                 granularity, start, end);
@@ -6820,16 +6825,26 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         if (iterator == null) {
             return false;
         }
-        final int selectionStart = getAccessibilityCursorPosition();
-        final int current = selectionStart >= 0 ? selectionStart : text.length() + 1;
+        int current = getAccessibilityCursorPosition();
+        if (current == ACCESSIBILITY_CURSOR_POSITION_UNDEFINED) {
+            current = text.length();
+        } else if (granularity == AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER) {
+            // When traversing by character we always put the cursor after the character
+            // to ease edit and have to compensate before asking the for previous segment.
+            current--;
+        }
         final int[] range = iterator.preceding(current);
         if (range == null) {
-            setAccessibilityCursorPosition(-1);
             return false;
         }
         final int start = range[0];
         final int end = range[1];
-        setAccessibilityCursorPosition(end);
+        // Always put the cursor after the character to ease edit.
+        if (granularity == AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER) {
+            setAccessibilityCursorPosition(end);
+        } else {
+            setAccessibilityCursorPosition(start);
+        }
         sendViewTextTraversedAtGranularityEvent(
                 AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY,
                 granularity, start, end);
