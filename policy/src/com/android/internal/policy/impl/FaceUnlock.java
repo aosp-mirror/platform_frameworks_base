@@ -468,7 +468,8 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
             if (!mServiceRunning) {
                 Log.d(TAG, "Starting Face Unlock");
                 try {
-                    mService.startUi(windowToken, x, y, w, h, false);
+                    mService.startUi(windowToken, x, y, w, h,
+                            mLockPatternUtils.isBiometricWeakLivelinessEnabled());
                 } catch (RemoteException e) {
                     Log.e(TAG, "Caught exception starting Face Unlock: " + e.toString());
                     return;
