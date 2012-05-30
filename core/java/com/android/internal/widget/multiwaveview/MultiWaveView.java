@@ -519,6 +519,10 @@ public class MultiWaveView extends View {
             // Inform listener of any active targets.  Typically only one will be active.
             deactivateHandle(RETURN_TO_HOME_DURATION, RETURN_TO_HOME_DELAY, 0.0f, mResetListener);
             dispatchTriggerEvent(activeTarget);
+            if (!mAlwaysTrackFinger) {
+                // Force ring and targets to finish animation to final expanded state
+                mTargetAnimations.stop();
+            }
         } else {
             // Animate handle back to the center based on current state.
             deactivateHandle(HIDE_ANIMATION_DURATION, HIDE_ANIMATION_DELAY, 1.0f,
@@ -542,7 +546,6 @@ public class MultiWaveView extends View {
                 mTargetDrawables.get(i).setAlpha(0.0f);
             }
         }
-        mOuterRing.setAlpha(0.0f);
     }
 
     private void hideTargets(boolean animate, boolean expanded) {
@@ -809,7 +812,6 @@ public class MultiWaveView extends View {
         switchToState(STATE_START, eventX, eventY);
         if (!trySwitchToFirstTouchState(eventX, eventY)) {
             mDragging = false;
-            mTargetAnimations.cancel();
             ping();
         }
     }

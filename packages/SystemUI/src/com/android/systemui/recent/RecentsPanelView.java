@@ -58,6 +58,7 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
 import com.android.systemui.statusbar.tablet.TabletStatusBar;
@@ -368,7 +369,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
         if (mBar != null) {
             // This will indirectly cause show(false, ...) to get called
-            mBar.animateCollapse();
+            mBar.animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
         }
     }
 
@@ -822,7 +823,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                     if (viewHolder != null) {
                         final TaskDescription ad = viewHolder.taskDescription;
                         startApplicationDetailsActivity(ad.packageName);
-                        mBar.animateCollapse();
+                        mBar.animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
                     } else {
                         throw new IllegalStateException("Oops, no tag on view " + selectedView);
                     }
