@@ -419,6 +419,7 @@ public class MultiWaveView extends View {
             "y", 0,
             "onUpdate", mUpdateListener,
             "onComplete", finishListener));
+        mHandleAnimations.start();
     }
 
     /**
@@ -528,7 +529,6 @@ public class MultiWaveView extends View {
             deactivateHandle(HIDE_ANIMATION_DURATION, HIDE_ANIMATION_DELAY, 1.0f,
                     mResetListenerWithPing);
             hideTargets(true, false);
-            mHandleAnimations.start();
         }
 
         setGrabbedState(OnTriggerListener.NO_HANDLE);
