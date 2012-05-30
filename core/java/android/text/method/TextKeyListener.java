@@ -33,6 +33,10 @@ import java.lang.ref.WeakReference;
 /**
  * This is the key listener for typing normal text.  It delegates to
  * other key listeners appropriate to the current keyboard and language.
+ * <p></p>
+ * As for all implementations of {@link KeyListener}, this class is only concerned
+ * with hardware keyboards.  Software input methods have no obligation to trigger
+ * the methods in this class.
  */
 public class TextKeyListener extends BaseKeyListener implements SpanWatcher {
     private static TextKeyListener[] sInstance =

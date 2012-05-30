@@ -28,6 +28,10 @@ import android.util.SparseArray;
  * This is the standard key listener for alphabetic input on 12-key
  * keyboards.  You should generally not need to instantiate this yourself;
  * TextKeyListener will do it for you.
+ * <p></p>
+ * As for all implementations of {@link KeyListener}, this class is only concerned
+ * with hardware keyboards.  Software input methods have no obligation to trigger
+ * the methods in this class.
  */
 public class MultiTapKeyListener extends BaseKeyListener
         implements SpanWatcher {

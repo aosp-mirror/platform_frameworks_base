@@ -204,12 +204,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *     <tr>
  *         <td rowspan="4">Event processing</td>
  *         <td><code>{@link #onKeyDown(int, KeyEvent)}</code></td>
- *         <td>Called when a new key event occurs.
+ *         <td>Called when a new hardware key event occurs.
  *         </td>
  *     </tr>
  *     <tr>
  *         <td><code>{@link #onKeyUp(int, KeyEvent)}</code></td>
- *         <td>Called when a key up event occurs.
+ *         <td>Called when a hardware key up event occurs.
  *         </td>
  *     </tr>
  *     <tr>
@@ -4140,7 +4140,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * Register a callback to be invoked when a key is pressed in this view.
+     * Register a callback to be invoked when a hardware key is pressed in this view.
+     * Key presses in software input methods will generally not trigger the methods of
+     * this listener.
      * @param l the key listener to attach to this view
      */
     public void setOnKeyListener(OnKeyListener l) {
@@ -7522,6 +7524,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * when {@link KeyEvent#KEYCODE_DPAD_CENTER} or {@link KeyEvent#KEYCODE_ENTER}
      * is released, if the view is enabled and clickable.
      *
+     * <p>Key presses in software keyboards will generally NOT trigger this listener,
+     * although some may elect to do so in some situations. Do not rely on this to
+     * catch software key presses.
+     *
      * @param keyCode A key code that represents the button pressed, from
      *                {@link android.view.KeyEvent}.
      * @param event   The KeyEvent object that defines the button action.
@@ -7553,6 +7559,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Default implementation of {@link KeyEvent.Callback#onKeyLongPress(int, KeyEvent)
      * KeyEvent.Callback.onKeyLongPress()}: always returns false (doesn't handle
      * the event).
+     * <p>Key presses in software keyboards will generally NOT trigger this listener,
+     * although some may elect to do so in some situations. Do not rely on this to
+     * catch software key presses.
      */
     public boolean onKeyLongPress(int keyCode, KeyEvent event) {
         return false;
@@ -7563,6 +7572,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * KeyEvent.Callback.onKeyUp()}: perform clicking of the view
      * when {@link KeyEvent#KEYCODE_DPAD_CENTER} or
      * {@link KeyEvent#KEYCODE_ENTER} is released.
+     * <p>Key presses in software keyboards will generally NOT trigger this listener,
+     * although some may elect to do so in some situations. Do not rely on this to
+     * catch software key presses.
      *
      * @param keyCode A key code that represents the button pressed, from
      *                {@link android.view.KeyEvent}.
@@ -7597,6 +7609,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Default implementation of {@link KeyEvent.Callback#onKeyMultiple(int, int, KeyEvent)
      * KeyEvent.Callback.onKeyMultiple()}: always returns false (doesn't handle
      * the event).
+     * <p>Key presses in software keyboards will generally NOT trigger this listener,
+     * although some may elect to do so in some situations. Do not rely on this to
+     * catch software key presses.
      *
      * @param keyCode     A key code that represents the button pressed, from
      *                    {@link android.view.KeyEvent}.
@@ -16874,14 +16889,20 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * Interface definition for a callback to be invoked when a key event is
-     * dispatched to this view. The callback will be invoked before the key
-     * event is given to the view.
+     * Interface definition for a callback to be invoked when a hardware key event is
+     * dispatched to this view. The callback will be invoked before the key event is
+     * given to the view. This is only useful for hardware keyboards; a software input
+     * method has no obligation to trigger this listener.
      */
     public interface OnKeyListener {
         /**
-         * Called when a key is dispatched to a view. This allows listeners to
+         * Called when a hardware key is dispatched to a view. This allows listeners to
          * get a chance to respond before the target view.
+         * <p>Key presses in software keyboards will generally NOT trigger this method,
+         * although some may elect to do so in some situations. Do not assume a
+         * software input method has to be key-based; even if it is, it may use key presses
+         * in a different way than you expect, so there is no way to reliably catch soft
+         * input key presses.
          *
          * @param v The view the key has been dispatched to.
          * @param keyCode The code for the physical key that was pressed

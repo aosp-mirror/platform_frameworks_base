@@ -28,6 +28,10 @@ import android.widget.TextView;
  * Provides a basic foundation for entering and editing text.
  * Subclasses should override {@link #onKeyDown} and {@link #onKeyUp} to insert
  * characters as keys are pressed.
+ * <p></p>
+ * As for all implementations of {@link KeyListener}, this class is only concerned
+ * with hardware keyboards.  Software input methods have no obligation to trigger
+ * the methods in this class.
  */
 public abstract class BaseKeyListener extends MetaKeyKeyListener
         implements KeyListener {
