@@ -145,6 +145,6 @@
     <string name="notifications_off_title" msgid="8936620513608443224">"通知功能已停用"</string>
     <string name="notifications_off_text" msgid="2529001315769385273">"点按此处可重新启用通知功能。"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"屏幕会自动旋转。"</string>
-    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"屏幕锁定为横向浏览模式。"</string>
-    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"屏幕已锁定为纵向浏览模式。"</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"屏幕锁定为横向模式。"</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"屏幕锁定为纵向模式。"</string>
 </resources>
