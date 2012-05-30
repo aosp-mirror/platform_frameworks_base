@@ -592,7 +592,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
                 deviceIdAndGeneration[i * 2] = inputDevice.getId();
                 deviceIdAndGeneration[i * 2 + 1] = inputDevice.getGeneration();
 
-                if (isFullKeyboard(inputDevice)) {
+                if (!inputDevice.isVirtual() && inputDevice.isFullKeyboard()) {
                     if (!containsInputDeviceWithDescriptor(oldInputDevices,
                             inputDevice.getDescriptor())) {
                         mTempFullKeyboards.add(numFullKeyboardsAdded++, inputDevice);
@@ -693,12 +693,6 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
 
         // Reload keyboard layouts.
         reloadKeyboardLayouts();
-    }
-
-    private static boolean isFullKeyboard(InputDevice inputDevice) {
-        return !inputDevice.isVirtual()
-                && (inputDevice.getSources() & InputDevice.SOURCE_KEYBOARD) != 0
-                && inputDevice.getKeyboardType() == InputDevice.KEYBOARD_TYPE_ALPHABETIC;
     }
 
     private static boolean containsInputDeviceWithDescriptor(InputDevice[] inputDevices,
