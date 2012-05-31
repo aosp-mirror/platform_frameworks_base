@@ -135,6 +135,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private static final int MSG_RCDISPLAY_UPDATE = 13;
     private static final int MSG_SET_ALL_VOLUMES = 14;
     private static final int MSG_PERSIST_MASTER_VOLUME_MUTE = 15;
+    private static final int MSG_SET_WIRED_DEVICE_CONNECTION_STATE = 16;
+    private static final int MSG_SET_A2DP_CONNECTION_STATE = 17;
 
 
     // flags for MSG_PERSIST_VOLUME indicating if current and/or last audible volume should be
@@ -442,15 +444,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
         // Register for device connection intent broadcasts.
         IntentFilter intentFilter =
-                new IntentFilter(Intent.ACTION_HEADSET_PLUG);
-
-        intentFilter.addAction(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
-        intentFilter.addAction(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
+                new IntentFilter(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
         intentFilter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
         intentFilter.addAction(Intent.ACTION_DOCK_EVENT);
-        intentFilter.addAction(Intent.ACTION_ANALOG_AUDIO_DOCK_PLUG);
-        intentFilter.addAction(Intent.ACTION_DIGITAL_AUDIO_DOCK_PLUG);
-        intentFilter.addAction(Intent.ACTION_HDMI_AUDIO_PLUG);
         intentFilter.addAction(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG);
         intentFilter.addAction(Intent.ACTION_USB_AUDIO_DEVICE_PLUG);
         intentFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
@@ -1961,7 +1957,19 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 deviceList = a2dp.getConnectedDevices();
                 if (deviceList.size() > 0) {
                     btDevice = deviceList.get(0);
-                    handleA2dpConnectionStateChange(btDevice, a2dp.getConnectionState(btDevice));
+                    synchronized (mConnectedDevices) {
+                        int state = a2dp.getConnectionState(btDevice);
+                        int delay = checkSendBecomingNoisyIntent(
+                                                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+                                                (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0);
+                        sendMsg(mAudioHandler,
+                                MSG_SET_A2DP_CONNECTION_STATE,
+                                SENDMSG_QUEUE,
+                                state,
+                                0,
+                                btDevice,
+                                delay);
+                    }
                 }
                 break;
 
@@ -2260,6 +2268,36 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             }
         }
         return device;
+    }
+
+    public void setWiredDeviceConnectionState(int device, int state, String name) {
+        synchronized (mConnectedDevices) {
+            int delay = checkSendBecomingNoisyIntent(device, state);
+            sendMsg(mAudioHandler,
+                    MSG_SET_WIRED_DEVICE_CONNECTION_STATE,
+                    SENDMSG_QUEUE,
+                    device,
+                    state,
+                    name,
+                    delay);
+        }
+    }
+
+    public int setBluetoothA2dpDeviceConnectionState(BluetoothDevice device, int state)
+    {
+        int delay;
+        synchronized (mConnectedDevices) {
+            delay = checkSendBecomingNoisyIntent(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+                                            (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0);
+            sendMsg(mAudioHandler,
+                    MSG_SET_A2DP_CONNECTION_STATE,
+                    SENDMSG_QUEUE,
+                    state,
+                    0,
+                    device,
+                    delay);
+        }
+        return delay;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -2959,6 +2997,14 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 case MSG_BT_HEADSET_CNCT_FAILED:
                     resetBluetoothSco();
                     break;
+
+                case MSG_SET_WIRED_DEVICE_CONNECTION_STATE:
+                    onSetWiredDeviceConnectionState(msg.arg1, msg.arg2, (String)msg.obj);
+                    break;
+
+                case MSG_SET_A2DP_CONNECTION_STATE:
+                    onSetA2dpConnectionState((BluetoothDevice)msg.obj, msg.arg1);
+                    break;
             }
         }
     }
@@ -3020,7 +3066,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     // must be called synchronized on mConnectedDevices
     private void makeA2dpDeviceUnavailableNow(String address) {
-        sendBecomingNoisyIntent();
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_UNAVAILABLE,
                 address);
@@ -3050,7 +3095,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         return mAudioHandler.hasMessages(MSG_BTA2DP_DOCK_TIMEOUT);
     }
 
-    private void handleA2dpConnectionStateChange(BluetoothDevice btDevice, int state)
+    private void onSetA2dpConnectionState(BluetoothDevice btDevice, int state)
     {
         if (btDevice == null) {
             return;
@@ -3116,6 +3161,76 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         return false;
     }
 
+    // Devices which removal triggers intent ACTION_AUDIO_BECOMING_NOISY. The intent is only
+    // sent if none of these devices is connected.
+    int mBecomingNoisyIntentDevices =
+            AudioSystem.DEVICE_OUT_WIRED_HEADSET | AudioSystem.DEVICE_OUT_WIRED_HEADPHONE |
+            AudioSystem.DEVICE_OUT_ALL_A2DP;
+
+    // must be called before removing the device from mConnectedDevices
+    private int checkSendBecomingNoisyIntent(int device, int state) {
+        int delay = 0;
+        if ((state == 0) && ((device & mBecomingNoisyIntentDevices) != 0)) {
+            int devices = 0;
+            for (int dev : mConnectedDevices.keySet()) {
+                if ((dev & mBecomingNoisyIntentDevices) != 0) {
+                   devices |= dev;
+                }
+            }
+            if (devices == device) {
+                delay = 1000;
+                sendBecomingNoisyIntent();
+            }
+        }
+
+        if (mAudioHandler.hasMessages(MSG_SET_A2DP_CONNECTION_STATE) ||
+                mAudioHandler.hasMessages(MSG_SET_WIRED_DEVICE_CONNECTION_STATE)) {
+            delay = 1000;
+        }
+        return delay;
+    }
+
+    private void sendDeviceConnectionIntent(int device, int state, String name)
+    {
+        Intent intent = new Intent();
+
+        intent.putExtra("state", state);
+        intent.putExtra("name", name);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+
+        if (device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) {
+            intent.setAction(Intent.ACTION_HEADSET_PLUG);
+            intent.putExtra("microphone", 1);
+        } else if (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE) {
+            intent.setAction(Intent.ACTION_HEADSET_PLUG);
+            intent.putExtra("microphone", 0);
+        } else if (device == AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET) {
+            intent.setAction(Intent.ACTION_ANALOG_AUDIO_DOCK_PLUG);
+        } else if (device == AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET) {
+            intent.setAction(Intent.ACTION_DIGITAL_AUDIO_DOCK_PLUG);
+        } else if (device == AudioSystem.DEVICE_OUT_AUX_DIGITAL) {
+            intent.setAction(Intent.ACTION_HDMI_AUDIO_PLUG);
+        }
+
+        ActivityManagerNative.broadcastStickyIntent(intent, null);
+    }
+
+    private void onSetWiredDeviceConnectionState(int device, int state, String name)
+    {
+        synchronized (mConnectedDevices) {
+            if ((state == 0) && ((device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
+                    (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE))) {
+                setBluetoothA2dpOnInt(true);
+            }
+            handleDeviceConnection((state == 1), device, "");
+            if ((state != 0) && ((device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
+                    (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE))) {
+                setBluetoothA2dpOnInt(false);
+            }
+            sendDeviceConnectionIntent(device, state, name);
+        }
+    }
+
     /* cache of the address of the last dock the device was connected to */
     private String mDockAddress;
 
@@ -3151,12 +3266,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         config = AudioSystem.FORCE_NONE;
                 }
                 AudioSystem.setForceUse(AudioSystem.FOR_DOCK, config);
-            } else if (action.equals(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED)) {
-                state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
-                                               BluetoothProfile.STATE_DISCONNECTED);
-                BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-                handleA2dpConnectionStateChange(btDevice, state);
             } else if (action.equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
                 state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
                                                BluetoothProfile.STATE_DISCONNECTED);
@@ -3197,43 +3306,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         }
                     }
                 }
-            } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
-                state = intent.getIntExtra("state", 0);
-                int microphone = intent.getIntExtra("microphone", 0);
-
-                if (microphone != 0) {
-                    device = AudioSystem.DEVICE_OUT_WIRED_HEADSET;
-                } else {
-                    device = AudioSystem.DEVICE_OUT_WIRED_HEADPHONE;
-                }
-                // enable A2DP before notifying headset disconnection to avoid glitches
-                if (state == 0) {
-                    setBluetoothA2dpOnInt(true);
-                }
-                handleDeviceConnection((state == 1), device, "");
-                // disable A2DP after notifying headset connection to avoid glitches
-                if (state != 0) {
-                    setBluetoothA2dpOnInt(false);
-                }
-            } else if (action.equals(Intent.ACTION_ANALOG_AUDIO_DOCK_PLUG)) {
-                state = intent.getIntExtra("state", 0);
-                Log.v(TAG, "Broadcast Receiver: Got ACTION_ANALOG_AUDIO_DOCK_PLUG, state = "+state);
-                handleDeviceConnection((state == 1), AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET, "");
-            } else if (action.equals(Intent.ACTION_HDMI_AUDIO_PLUG)) {
-                state = intent.getIntExtra("state", 0);
-                Log.v(TAG, "Broadcast Receiver: Got ACTION_HDMI_AUDIO_PLUG, state = "+state);
-                handleDeviceConnection((state == 1), AudioSystem.DEVICE_OUT_AUX_DIGITAL, "");
-            } else if (action.equals(Intent.ACTION_DIGITAL_AUDIO_DOCK_PLUG)) {
-                state = intent.getIntExtra("state", 0);
-                Log.v(TAG,
-                      "Broadcast Receiver Got ACTION_DIGITAL_AUDIO_DOCK_PLUG, state = " + state);
-                handleDeviceConnection((state == 1), AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET, "");
             } else if (action.equals(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG) ||
                            action.equals(Intent.ACTION_USB_AUDIO_DEVICE_PLUG)) {
                 state = intent.getIntExtra("state", 0);
-                if (state == 0) {
-                    sendBecomingNoisyIntent();
-                }
                 int alsaCard = intent.getIntExtra("card", -1);
                 int alsaDevice = intent.getIntExtra("device", -1);
                 String params = (alsaCard == -1 && alsaDevice == -1 ? ""
