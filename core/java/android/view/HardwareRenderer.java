@@ -457,9 +457,11 @@ public abstract class HardwareRenderer {
      * @param functor The native functor to insert in the execution queue.
      *
      * @see HardwareCanvas#callDrawGLFunction(int)
-     * @see #detachFunctor(int) 
+     * @see #detachFunctor(int)
+     *
+     * @return true if the functor was attached successfully
      */
-    abstract void attachFunctor(View.AttachInfo attachInfo, int functor);
+    abstract boolean attachFunctor(View.AttachInfo attachInfo, int functor);
 
     /**
      * Initializes the hardware renderer for the specified surface and setup the
@@ -1227,11 +1229,13 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        void attachFunctor(View.AttachInfo attachInfo, int functor) {
+        boolean attachFunctor(View.AttachInfo attachInfo, int functor) {
             if (mCanvas != null) {
                 mCanvas.attachFunctor(functor);
                 scheduleFunctors(attachInfo);
+                return true;
             }
+            return false;
         }
 
         /**
