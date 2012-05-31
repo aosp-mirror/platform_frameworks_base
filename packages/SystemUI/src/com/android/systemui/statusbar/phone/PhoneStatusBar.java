@@ -484,14 +484,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     @Override
     public void showSearchPanel() {
-        // XXX This is a bit of a hack.  Since navbar is no longer slippery, we use the
-        // gesture to dismiss the expanded statusbar.
-        if (mExpanded) {
-            animateCollapse();
-            return;
-        } else {
-            super.showSearchPanel();
-        }
+        super.showSearchPanel();
         WindowManager.LayoutParams lp =
             (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
         lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
@@ -1044,6 +1037,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mExpandedVisible = true;
         mNotificationPanel.setVisibility(View.VISIBLE);
+        makeSlippery(mNavigationBarView, true);
 
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
 
@@ -1057,6 +1051,16 @@ public class PhoneStatusBar extends BaseStatusBar {
         wm.updateViewLayout(mStatusBarWindow, lp);
 
         visibilityChanged(true);
+    }
+
+    private static void makeSlippery(View view, boolean slippery) {
+        WindowManager.LayoutParams lp = (WindowManager.LayoutParams) view.getLayoutParams();
+        if (slippery) {
+            lp.flags |= WindowManager.LayoutParams.FLAG_SLIPPERY;
+        } else {
+            lp.flags &= ~WindowManager.LayoutParams.FLAG_SLIPPERY;
+        }
+        WindowManagerImpl.getDefault().updateViewLayout(view, lp);
     }
 
     public void animateExpand() {
@@ -1144,6 +1148,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mExpandedVisible = false;
         visibilityChanged(false);
         mNotificationPanel.setVisibility(View.INVISIBLE);
+        makeSlippery(mNavigationBarView, false);
 
         // Shrink the window to the size of the status bar only
         WindowManager.LayoutParams lp = (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
