@@ -39,11 +39,12 @@ public final class Trace {
     public static final long TRACE_TAG_SYNC_MANAGER = 1L << 7;
     public static final long TRACE_TAG_AUDIO = 1L << 8;
     public static final long TRACE_TAG_VIDEO = 1L << 9;
+    public static final long TRACE_TAG_CAMERA = 1L << 10;
 
     public static final int TRACE_FLAGS_START_BIT = 1;
     public static final String[] TRACE_TAGS = {
         "Graphics", "Input", "View", "WebView", "Window Manager",
-        "Activity Manager", "Sync Manager", "Audio", "Video",
+        "Activity Manager", "Sync Manager", "Audio", "Video", "Camera",
     };
 
     public static final String PROPERTY_TRACE_TAG_ENABLEFLAGS = "debug.atrace.tags.enableflags";
