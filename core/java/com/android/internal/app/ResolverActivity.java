@@ -19,6 +19,8 @@ package com.android.internal.app;
 import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
 
+import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -32,6 +34,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PatternMatcher;
+import android.os.Process;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,6 +59,8 @@ import java.util.Set;
  */
 public class ResolverActivity extends AlertActivity implements
         DialogInterface.OnClickListener, CheckBox.OnCheckedChangeListener {
+
+    private int mLaunchedFromUid;
     private ResolveListAdapter mAdapter;
     private CheckBox mAlwaysCheck;
     private TextView mClearDefaultHint;
@@ -88,6 +94,12 @@ public class ResolverActivity extends AlertActivity implements
             CharSequence title, Intent[] initialIntents, List<ResolveInfo> rList,
             boolean alwaysUseOption) {
         super.onCreate(savedInstanceState);
+        try {
+            mLaunchedFromUid = ActivityManagerNative.getDefault().getLaunchedFromUid(
+                    getActivityToken());
+        } catch (RemoteException e) {
+            mLaunchedFromUid = -1;
+        }
         mPm = getPackageManager();
         intent.setComponent(null);
 
@@ -99,6 +111,7 @@ public class ResolverActivity extends AlertActivity implements
         mPackageMonitor.register(this, false);
 
         if (alwaysUseOption) {
+            // in the original, this is moved down into the else if count > 1 test
             LayoutInflater inflater = (LayoutInflater) getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
             ap.mView = inflater.inflate(R.layout.always_use_checkbox, null);
@@ -109,9 +122,14 @@ public class ResolverActivity extends AlertActivity implements
                                                         com.android.internal.R.id.clearDefaultHint);
             mClearDefaultHint.setVisibility(View.GONE);
         }
-        mAdapter = new ResolveListAdapter(this, intent, initialIntents, rList);
+        mAdapter = new ResolveListAdapter(this, intent, initialIntents, rList,
+                mLaunchedFromUid);
         int count = mAdapter.getCount();
-        if (count > 1) {
+        if (mLaunchedFromUid < 0) {
+            // Gulp!
+            finish();
+            return;
+        } else if (count > 1) {
             ap.mAdapter = mAdapter;
         } else if (count == 1) {
             startActivity(mAdapter.intentForPosition(0));
@@ -133,8 +151,19 @@ public class ResolverActivity extends AlertActivity implements
 
     @Override
     protected void onStop() {
-        super.onStop();
         mPackageMonitor.unregister();
+        if ((getIntent().getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
+            // This resolver is in the unusual situation where it has been
+            // launched at the top of a new task.  We don't let it be added
+            // to the recent tasks shown to the user, and we need to make sure
+            // that each time we are launched we get the correct launching
+            // uid (not re-using the same resolver from an old launching uid),
+            // so we will now finish ourself since being no longer visible,
+            // the user probably can't get back to us.
+            if (!isChangingConfigurations()) {
+                finish();
+            }
+        }
     }
 
     public void onClick(DialogInterface dialog, int which) {
@@ -251,17 +280,19 @@ public class ResolverActivity extends AlertActivity implements
         private final Intent[] mInitialIntents;
         private final List<ResolveInfo> mBaseResolveList;
         private final Intent mIntent;
+        private final int mLaunchedFromUid;
         private final LayoutInflater mInflater;
 
         private List<ResolveInfo> mCurrentResolveList;
         private List<DisplayResolveInfo> mList;
 
         public ResolveListAdapter(Context context, Intent intent,
-                Intent[] initialIntents, List<ResolveInfo> rList) {
+                Intent[] initialIntents, List<ResolveInfo> rList, int launchedFromUid) {
             mIntent = new Intent(intent);
             mIntent.setComponent(null);
             mInitialIntents = initialIntents;
             mBaseResolveList = rList;
+            mLaunchedFromUid = launchedFromUid;
             mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             rebuildList();
         }
@@ -282,6 +313,23 @@ public class ResolverActivity extends AlertActivity implements
                 mCurrentResolveList = mPm.queryIntentActivities(
                         mIntent, PackageManager.MATCH_DEFAULT_ONLY
                         | (mAlwaysCheck != null ? PackageManager.GET_RESOLVED_FILTER : 0));
+                // Filter out any activities that the launched uid does not
+                // have permission for.  We don't do this when we have an explicit
+                // list of resolved activities, because that only happens when
+                // we are being subclassed, so we can safely launch whatever
+                // they gave us.
+                if (mCurrentResolveList != null) {
+                    for (int i=mCurrentResolveList.size()-1; i >= 0; i--) {
+                        ActivityInfo ai = mCurrentResolveList.get(i).activityInfo;
+                        int granted = ActivityManager.checkComponentPermission(
+                                ai.permission, mLaunchedFromUid,
+                                ai.applicationInfo.uid, ai.exported);
+                        if (granted != PackageManager.PERMISSION_GRANTED) {
+                            // Access not allowed!
+                            mCurrentResolveList.remove(i);
+                        }
+                    }
+                }
             }
             int N;
             if ((mCurrentResolveList != null) && ((N = mCurrentResolveList.size()) > 0)) {
