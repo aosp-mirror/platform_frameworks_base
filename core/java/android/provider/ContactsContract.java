@@ -24,6 +24,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.CursorEntityIterator;
 import android.content.Entity;
 import android.content.EntityIterator;
@@ -7711,9 +7712,19 @@ public final class ContactsContract {
          */
         public static void showQuickContact(Context context, Rect target, Uri lookupUri, int mode,
                 String[] excludeMimes) {
+            // When launching from an Activiy, we don't want to start a new task, but otherwise
+            // we *must* start a new task.  (Otherwise startActivity() would crash.)
+            Context actualContext = context;
+            while ((actualContext instanceof ContextWrapper)
+                    && !(actualContext instanceof Activity)) {
+                actualContext = ((ContextWrapper) actualContext).getBaseContext();
+            }
+            final int intentFlags = (actualContext instanceof Activity)
+                    ? Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET
+                    : Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK;
+
             // Launch pivot dialog through intent for now
-            final Intent intent = new Intent(ACTION_QUICK_CONTACT)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+            final Intent intent = new Intent(ACTION_QUICK_CONTACT).addFlags(intentFlags);
 
             intent.setData(lookupUri);
             intent.setSourceBounds(target);
