@@ -176,6 +176,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_SERVICE_EXECUTING = localLOGV || false;
     static final boolean DEBUG_VISBILITY = localLOGV || false;
     static final boolean DEBUG_PROCESSES = localLOGV || false;
+    static final boolean DEBUG_PROCESS_OBSERVERS = localLOGV || false;
     static final boolean DEBUG_PROVIDER = localLOGV || false;
     static final boolean DEBUG_URI_PERMISSION = localLOGV || false;
     static final boolean DEBUG_USER_LEAVING = localLOGV || false;
@@ -764,8 +765,24 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean mAutoStopProfiler = false;
     String mOpenGlTraceApp = null;
 
+    static class ProcessChangeItem {
+        static final int CHANGE_ACTIVITIES = 1<<0;
+        static final int CHANGE_IMPORTANCE= 1<<1;
+        int changes;
+        int uid;
+        int pid;
+        int importance;
+        boolean foregroundActivities;
+    }
+
     final RemoteCallbackList<IProcessObserver> mProcessObservers
             = new RemoteCallbackList<IProcessObserver>();
+    ProcessChangeItem[] mActiveProcessChanges = new ProcessChangeItem[5];
+
+    final ArrayList<ProcessChangeItem> mPendingProcessChanges
+            = new ArrayList<ProcessChangeItem>();
+    final ArrayList<ProcessChangeItem> mAvailProcessChanges
+            = new ArrayList<ProcessChangeItem>();
 
     /**
      * Callback of last caller to {@link #requestPss}.
@@ -855,7 +872,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int CLEAR_DNS_CACHE = 28;
     static final int UPDATE_HTTP_PROXY = 29;
     static final int SHOW_COMPAT_MODE_DIALOG_MSG = 30;
-    static final int DISPATCH_FOREGROUND_ACTIVITIES_CHANGED = 31;
+    static final int DISPATCH_PROCESSES_CHANGED = 31;
     static final int DISPATCH_PROCESS_DIED = 32;
     static final int REPORT_MEM_USAGE = 33;
 
@@ -1195,11 +1212,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 break;
             }
-            case DISPATCH_FOREGROUND_ACTIVITIES_CHANGED: {
-                final int pid = msg.arg1;
-                final int uid = msg.arg2;
-                final boolean foregroundActivities = (Boolean) msg.obj;
-                dispatchForegroundActivitiesChanged(pid, uid, foregroundActivities);
+            case DISPATCH_PROCESSES_CHANGED: {
+                dispatchProcessesChanged();
                 break;
             }
             case DISPATCH_PROCESS_DIED: {
@@ -2260,19 +2274,43 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     void reportResumedActivityLocked(ActivityRecord r) {
         //Slog.i(TAG, "**** REPORT RESUME: " + r);
-        
-        final int identHash = System.identityHashCode(r);
         updateUsageStats(r, true);
     }
 
-    private void dispatchForegroundActivitiesChanged(int pid, int uid, boolean foregroundActivities) {
+    private void dispatchProcessesChanged() {
+        int N;
+        synchronized (this) {
+            N = mPendingProcessChanges.size();
+            if (mActiveProcessChanges.length < N) {
+                mActiveProcessChanges = new ProcessChangeItem[N];
+            }
+            mPendingProcessChanges.toArray(mActiveProcessChanges);
+            mAvailProcessChanges.addAll(mPendingProcessChanges);
+            mPendingProcessChanges.clear();
+            if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "*** Delivering " + N + " process changes");
+        }
         int i = mProcessObservers.beginBroadcast();
         while (i > 0) {
             i--;
             final IProcessObserver observer = mProcessObservers.getBroadcastItem(i);
             if (observer != null) {
                 try {
-                    observer.onForegroundActivitiesChanged(pid, uid, foregroundActivities);
+                    for (int j=0; j<N; j++) {
+                        ProcessChangeItem item = mActiveProcessChanges[j];
+                        if ((item.changes&ProcessChangeItem.CHANGE_ACTIVITIES) != 0) {
+                            if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "ACTIVITIES CHANGED pid="
+                                    + item.pid + " uid=" + item.uid + ": "
+                                    + item.foregroundActivities);
+                            observer.onForegroundActivitiesChanged(item.pid, item.uid,
+                                    item.foregroundActivities);
+                        }
+                        if ((item.changes&ProcessChangeItem.CHANGE_IMPORTANCE) != 0) {
+                            if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "IMPORTANCE CHANGED pid="
+                                    + item.pid + " uid=" + item.uid + ": " + item.importance);
+                            observer.onImportanceChanged(item.pid, item.uid,
+                                    item.importance);
+                        }
+                    }
                 } catch (RemoteException e) {
                 }
             }
@@ -10802,6 +10840,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
+        for (int i = mPendingProcessChanges.size()-1; i>=0; i--) {
+            ProcessChangeItem item = mPendingProcessChanges.get(i);
+            if (item.pid == app.pid) {
+                mPendingProcessChanges.remove(i);
+                mAvailProcessChanges.add(item);
+            }
+        }
         mHandler.obtainMessage(DISPATCH_PROCESS_DIED, app.pid, app.info.uid, null).sendToTarget();
 
         // If the caller is restarting this app, then leave it in its
@@ -13734,9 +13779,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             return (app.curAdj=app.maxAdj);
         }
 
-        final boolean hadForegroundActivities = app.foregroundActivities;
-
-        app.foregroundActivities = false;
         app.keeping = false;
         app.systemNoUi = false;
 
@@ -13744,18 +13786,22 @@ public final class ActivityManagerService extends ActivityManagerNative
         // important to least, and assign an appropriate OOM adjustment.
         int adj;
         int schedGroup;
+        boolean foregroundActivities = false;
+        boolean interesting = false;
         BroadcastQueue queue;
         if (app == TOP_APP) {
             // The last app on the list is the foreground app.
             adj = ProcessList.FOREGROUND_APP_ADJ;
             schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "top-activity";
-            app.foregroundActivities = true;
+            foregroundActivities = true;
+            interesting = true;
         } else if (app.instrumentationClass != null) {
             // Don't want to kill running instrumentation.
             adj = ProcessList.FOREGROUND_APP_ADJ;
             schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "instrumentation";
+            interesting = true;
         } else if ((queue = isReceivingBroadcast(app)) != null) {
             // An app that is currently receiving a broadcast also
             // counts as being in the foreground for OOM killer purposes.
@@ -13791,7 +13837,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean hasStoppingActivities = false;
 
         // Examine all activities if not already foreground.
-        if (!app.foregroundActivities && activitiesSize > 0) {
+        if (!foregroundActivities && activitiesSize > 0) {
             for (int j = 0; j < activitiesSize; j++) {
                 final ActivityRecord r = app.activities.get(j);
                 if (r.visible) {
@@ -13802,7 +13848,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                     schedGroup = Process.THREAD_GROUP_DEFAULT;
                     app.hidden = false;
-                    app.foregroundActivities = true;
+                    foregroundActivities = true;
                     break;
                 } else if (r.state == ActivityState.PAUSING || r.state == ActivityState.PAUSED) {
                     if (adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
@@ -13810,13 +13856,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                         app.adjType = "pausing";
                     }
                     app.hidden = false;
-                    app.foregroundActivities = true;
+                    foregroundActivities = true;
                 } else if (r.state == ActivityState.STOPPING) {
                     // We will apply the actual adjustment later, because
                     // we want to allow this process to immediately go through
                     // any memory trimming that is in effect.
                     app.hidden = false;
-                    app.foregroundActivities = true;
+                    foregroundActivities = true;
                     hasStoppingActivities = true;
                 }
             }
@@ -13837,6 +13883,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 app.adjSource = app.forcingToForeground;
                 schedGroup = Process.THREAD_GROUP_DEFAULT;
             }
+        }
+
+        if (app.foregroundServices) {
+            interesting = true;
         }
 
         if (adj > ProcessList.HEAVY_WEIGHT_APP_ADJ && app == mHeavyWeightProcess) {
@@ -14188,12 +14238,84 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        app.curAdj = adj;
-        app.curSchedGroup = schedGroup;
+        int importance = app.memImportance;
+        if (importance == 0 || adj != app.curAdj || schedGroup != app.curSchedGroup) {
+            app.curAdj = adj;
+            app.curSchedGroup = schedGroup;
+            if (!interesting) {
+                // For this reporting, if there is not something explicitly
+                // interesting in this process then we will push it to the
+                // background importance.
+                importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
+            } else if (adj >= ProcessList.HIDDEN_APP_MIN_ADJ) {
+                importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
+            } else if (adj >= ProcessList.SERVICE_B_ADJ) {
+                importance =  ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE;
+            } else if (adj >= ProcessList.HOME_APP_ADJ) {
+                importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
+            } else if (adj >= ProcessList.SERVICE_ADJ) {
+                importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE;
+            } else if (adj >= ProcessList.HEAVY_WEIGHT_APP_ADJ) {
+                importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_CANT_SAVE_STATE;
+            } else if (adj >= ProcessList.PERCEPTIBLE_APP_ADJ) {
+                importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE;
+            } else if (adj >= ProcessList.VISIBLE_APP_ADJ) {
+                importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
+            } else if (adj >= ProcessList.FOREGROUND_APP_ADJ) {
+                importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+            } else {
+                importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_PERSISTENT;
+            }
+        }
 
-        if (hadForegroundActivities != app.foregroundActivities) {
-            mHandler.obtainMessage(DISPATCH_FOREGROUND_ACTIVITIES_CHANGED, app.pid, app.info.uid,
-                    app.foregroundActivities).sendToTarget();
+        int changes = importance != app.memImportance ? ProcessChangeItem.CHANGE_IMPORTANCE : 0;
+        if (foregroundActivities != app.foregroundActivities) {
+            changes |= ProcessChangeItem.CHANGE_ACTIVITIES;
+        }
+        if (changes != 0) {
+            if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "Changes in " + app + ": " + changes);
+            app.memImportance = importance;
+            app.foregroundActivities = foregroundActivities;
+            int i = mPendingProcessChanges.size()-1;
+            ProcessChangeItem item = null;
+            while (i >= 0) {
+                item = mPendingProcessChanges.get(i);
+                if (item.pid == app.pid) {
+                    if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "Re-using existing item: " + item);
+                    break;
+                }
+                i--;
+            }
+            if (i < 0) {
+                // No existing item in pending changes; need a new one.
+                final int NA = mAvailProcessChanges.size();
+                if (NA > 0) {
+                    item = mAvailProcessChanges.remove(NA-1);
+                    if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "Retreiving available item: " + item);
+                } else {
+                    item = new ProcessChangeItem();
+                    if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "Allocating new item: " + item);
+                }
+                item.changes = 0;
+                item.pid = app.pid;
+                item.uid = app.info.uid;
+                if (mPendingProcessChanges.size() == 0) {
+                    if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG,
+                            "*** Enqueueing dispatch processes changed!");
+                    mHandler.obtainMessage(DISPATCH_PROCESSES_CHANGED).sendToTarget();
+                }
+                mPendingProcessChanges.add(item);
+            }
+            item.changes |= changes;
+            item.importance = importance;
+            item.foregroundActivities = foregroundActivities;
+            if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG, "Item "
+                    + Integer.toHexString(System.identityHashCode(item))
+                    + " " + app.toShortString() + ": changes=" + item.changes
+                    + " importance=" + item.importance
+                    + " foreground=" + item.foregroundActivities
+                    + " type=" + app.adjType + " source=" + app.adjSource
+                    + " target=" + app.adjTarget);
         }
 
         return app.curRawAdj;
