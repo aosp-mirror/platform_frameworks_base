@@ -3529,7 +3529,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         for (int i=mMainStack.mHistory.size()-1; i>=0; i--) {
             ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
-            if ((r.info.flags&ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
+            if ((r.info.flags&ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0
+                    && (r.intent.getFlags()&Intent.FLAG_ACTIVITY_CLOSE_SYSTEM_DIALOGS) == 0) {
                 r.stack.finishActivityLocked(r, i,
                         Activity.RESULT_CANCELED, null, "close-sys");
             }
