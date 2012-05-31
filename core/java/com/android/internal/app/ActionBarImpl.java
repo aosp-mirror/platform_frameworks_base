@@ -673,26 +673,29 @@ public class ActionBarImpl extends ActionBar {
 
         if (mCurWindowVisibility == View.VISIBLE && (mShowHideAnimationEnabled
                 || fromSystem)) {
-            mTopVisibilityView.setAlpha(0);
-            mTopVisibilityView.setTranslationY(-mTopVisibilityView.getHeight());
+            mTopVisibilityView.setTranslationY(0); // because we're about to ask its window loc
+            float startingY = -mTopVisibilityView.getHeight();
+            if (fromSystem) {
+                int topLeft[] = {0, 0};
+                mTopVisibilityView.getLocationInWindow(topLeft);
+                startingY -= topLeft[1];
+            }
+            mTopVisibilityView.setTranslationY(startingY);
             AnimatorSet anim = new AnimatorSet();
-            AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mTopVisibilityView, "alpha", 1));
-            b.with(ObjectAnimator.ofFloat(mTopVisibilityView, "translationY", 0));
+            AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mTopVisibilityView,
+                    "translationY", 0));
             if (mContentView != null) {
                 b.with(ObjectAnimator.ofFloat(mContentView, "translationY",
-                        -mTopVisibilityView.getHeight(), 0));
+                        startingY, 0));
             }
             if (mSplitView != null && mContextDisplayMode == CONTEXT_DISPLAY_SPLIT) {
-                mSplitView.setAlpha(0);
                 mSplitView.setTranslationY(mSplitView.getHeight());
                 mSplitView.setVisibility(View.VISIBLE);
-                b.with(ObjectAnimator.ofFloat(mSplitView, "alpha", 1));
                 b.with(ObjectAnimator.ofFloat(mSplitView, "translationY", 0));
             }
             anim.setInterpolator(AnimationUtils.loadInterpolator(mContext,
-                    com.android.internal.R.interpolator.decelerate_quad));
-            anim.setDuration(mContext.getResources().getInteger(
-                    com.android.internal.R.integer.config_mediumAnimTime));
+                    com.android.internal.R.interpolator.decelerate_cubic));
+            anim.setDuration(250);
             // If this is being shown from the system, add a small delay.
             // This is because we will also be animating in the status bar,
             // and these two elements can't be done in lock-step.  So we give
@@ -700,9 +703,6 @@ public class ActionBarImpl extends ActionBar {
             // the action bar animates.  (This corresponds to the corresponding
             // case when hiding, where the status bar has a small delay before
             // starting.)
-            if (fromSystem) {
-                anim.setStartDelay(100);
-            }
             anim.addListener(mShowListener);
             mCurrentShowAnim = anim;
             anim.start();
@@ -734,23 +734,26 @@ public class ActionBarImpl extends ActionBar {
             mTopVisibilityView.setAlpha(1);
             mContainerView.setTransitioning(true);
             AnimatorSet anim = new AnimatorSet();
-            AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mTopVisibilityView, "alpha", 0));
-            b.with(ObjectAnimator.ofFloat(mTopVisibilityView, "translationY",
-                    -mTopVisibilityView.getHeight()));
+            float endingY = -mTopVisibilityView.getHeight();
+            if (fromSystem) {
+                int topLeft[] = {0, 0};
+                mTopVisibilityView.getLocationInWindow(topLeft);
+                endingY -= topLeft[1];
+            }
+            AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mTopVisibilityView,
+                    "translationY", endingY));
             if (mContentView != null) {
                 b.with(ObjectAnimator.ofFloat(mContentView, "translationY",
-                        0, -mTopVisibilityView.getHeight()));
+                        0, endingY));
             }
             if (mSplitView != null && mSplitView.getVisibility() == View.VISIBLE) {
                 mSplitView.setAlpha(1);
-                b.with(ObjectAnimator.ofFloat(mSplitView, "alpha", 0));
                 b.with(ObjectAnimator.ofFloat(mSplitView, "translationY",
                         mSplitView.getHeight()));
             }
             anim.setInterpolator(AnimationUtils.loadInterpolator(mContext,
-                    com.android.internal.R.interpolator.accelerate_quad));
-            anim.setDuration(mContext.getResources().getInteger(
-                    com.android.internal.R.integer.config_mediumAnimTime));
+                    com.android.internal.R.interpolator.accelerate_cubic));
+            anim.setDuration(250);
             anim.addListener(mHideListener);
             mCurrentShowAnim = anim;
             anim.start();

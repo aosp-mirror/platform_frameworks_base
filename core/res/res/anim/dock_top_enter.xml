@@ -18,7 +18,7 @@
 
 <!-- Animation for when a dock window at the top of the screen is entering. -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:interpolator="@android:interpolator/decelerate_quad">
+        android:interpolator="@android:interpolator/decelerate_cubic">
     <translate android:fromYDelta="-100%" android:toYDelta="0"
-        android:duration="@android:integer/config_mediumAnimTime"/>
+        android:duration="250"/>
 </set>
