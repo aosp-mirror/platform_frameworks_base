@@ -2242,7 +2242,9 @@ public class PowerManagerService extends IPowerManager.Stub
                     } else {
                         newValue = endValue;
                         mHighestLightSensorValue = endSensorValue;
-                        mInitialAnimation = false;
+                        if (endValue > 0) {
+                            mInitialAnimation = false;
+                        }
                     }
 
                     if (mDebugLightAnimation) {
@@ -2290,7 +2292,7 @@ public class PowerManagerService extends IPowerManager.Stub
                 currentMask = mask;
                 duration = (int) (mWindowScaleAnimation * animationDuration);
                 startTimeMillis = SystemClock.elapsedRealtime();
-                mInitialAnimation = currentValue == 0 && target > 0;
+                mInitialAnimation = mInitialAnimation && target > 0;
 
                 if (mDebugLightAnimation) {
                     Slog.v(TAG, "animateTo(target=" + target
@@ -2608,7 +2610,8 @@ public class PowerManagerService extends IPowerManager.Stub
         }
     };
 
-    private boolean mInitialAnimation; // used to prevent lightsensor changes while turning on
+    /** used to prevent lightsensor changes while turning on. */
+    private boolean mInitialAnimation = true;
 
     private void dockStateChanged(int state) {
         synchronized (mLocks) {
