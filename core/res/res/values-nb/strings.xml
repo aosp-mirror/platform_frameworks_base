@@ -748,7 +748,7 @@
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Pause-knappen"</string>
     <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Avspillingsknappen"</string>
     <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Stopp-knappen"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"Kun nødanrop"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Bare nødanrop"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Nettverk ikke tillatt"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-kortet er PUK-låst."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Les i brukerhåndboken eller kontakt brukerstøtten."</string>
@@ -1239,7 +1239,6 @@
     <string name="sync_do_nothing" msgid="3743764740430821845">"Ikke gjør noe nå"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Velg en konto"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Legg til en konto"</string>
-    <string name="choose_account_text" msgid="6303348737197849675">"Hvilken konto vil du bruke?"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Legg til konto"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Øk"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Reduser"</string>

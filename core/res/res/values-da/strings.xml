@@ -855,12 +855,9 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Ryd forespørgslen"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Indsend forespørgslen"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Stemmesøgning"</string>
-    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
-    <skip />
-    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
-    <skip />
-    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
-    <skip />
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Vil du aktivere Udforsk ved berøring?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ønsker at aktivere Udforsk ved berøring. Når Udforsk ved berøring er tændt, kan du høre eller se beskrivelser af, hvad der er under din finger eller udføre bevægelser for at interagere med tabletten."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ønsker at aktivere Udforsk ved berøring. Når Udforsk ved berøring er aktiveret, kan du høre eller se beskrivelser af, hvad der er under din finger, eller udføre bevægelser for at interagere med telefonen."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"For 1 måned siden"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Før for 1 måned siden"</string>
   <plurals name="num_seconds_ago">
@@ -1127,10 +1124,8 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"Konfigurer inputmetoder"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Fysisk tastatur"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
-    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
-    <skip />
-    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
-    <skip />
+    <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Vælg tastaturlayout"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Tryk for at vælge et tastaturlayout."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidater"</u></string>
@@ -1239,7 +1234,6 @@
     <string name="sync_do_nothing" msgid="3743764740430821845">"Gør ikke noget lige nu."</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Vælg en konto"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Tilføj en konto"</string>
-    <string name="choose_account_text" msgid="6303348737197849675">"Hvilken konto vil du bruge?"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Tilføj konto"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Højere"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Lavere"</string>
@@ -1324,6 +1318,5 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Vil du starte browseren?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Vil du besvare opkaldet?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Altid"</string>
-    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
-    <skip />
+    <string name="activity_resolver_use_once" msgid="2404644797149173758">"Kun én gang"</string>
 </resources>
