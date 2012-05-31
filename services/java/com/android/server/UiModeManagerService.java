@@ -65,7 +65,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
 
     // Enable launching of applications when entering the dock.
     private static final boolean ENABLE_LAUNCH_CAR_DOCK_APP = true;
-    private static final boolean ENABLE_LAUNCH_DESK_DOCK_APP = false;
+    private static final boolean ENABLE_LAUNCH_DESK_DOCK_APP = true;
 
     private static final int MSG_UPDATE_TWILIGHT = 0;
     private static final int MSG_ENABLE_LOCATION_UPDATES = 1;
@@ -120,7 +120,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         return intent;
     }
-    
+
     // The broadcast receiver which receives the result of the ordered broadcast sent when
     // the dock state changes. The original ordered broadcast is sent with an initial result
     // code of RESULT_OK. If any of the registered broadcast receivers changes this value, e.g.,
@@ -130,7 +130,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
         public void onReceive(Context context, Intent intent) {
             if (getResultCode() != Activity.RESULT_OK) {
                 if (LOG) {
-                    Slog.v(TAG, "Handling broadcast result for action " + intent.getAction() 
+                    Slog.v(TAG, "Handling broadcast result for action " + intent.getAction()
                             + ": canceled: " + getResultCode());
                 }
                 return;
@@ -138,7 +138,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
 
             final int  enableFlags = intent.getIntExtra("enableFlags", 0);
             final int  disableFlags = intent.getIntExtra("disableFlags", 0);
-            
+
             synchronized (mLock) {
                 // Launch a dock activity
                 String category = null;
@@ -166,15 +166,15 @@ class UiModeManagerService extends IUiModeManager.Stub {
 
                 if (LOG) {
                     Slog.v(TAG, String.format(
-                        "Handling broadcast result for action %s: enable=0x%08x disable=0x%08x category=%s", 
+                        "Handling broadcast result for action %s: enable=0x%08x disable=0x%08x category=%s",
                         intent.getAction(), enableFlags, disableFlags, category));
                 }
-                
+
                 if (category != null) {
                     // This is the new activity that will serve as home while
                     // we are in care mode.
                     Intent homeIntent = buildHomeIntent(category);
-                    
+
                     // Now we are going to be careful about switching the
                     // configuration and starting the activity -- we need to
                     // do this in a specific order under control of the
@@ -479,8 +479,8 @@ class UiModeManagerService extends IUiModeManager.Stub {
         }
 
         if (LOG) {
-            Slog.d(TAG, 
-                "updateConfigurationLocked: mDockState=" + mDockState 
+            Slog.d(TAG,
+                "updateConfigurationLocked: mDockState=" + mDockState
                 + "; mCarMode=" + mCarModeEnabled
                 + "; mNightMode=" + mNightMode
                 + "; uiMode=" + uiMode);
@@ -657,7 +657,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
         boolean mNetworkListenerEnabled;
         boolean mDidFirstInit;
         long mLastNetworkRegisterTime = -MIN_LOCATION_UPDATE_MS;
-        
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -682,12 +682,12 @@ class UiModeManagerService extends IUiModeManager.Stub {
                         // since we last requested an update.
                         return;
                     }
-                    
+
                     // Unregister the current location monitor, so we can
                     // register a new one for it to get an immediate update.
                     mNetworkListenerEnabled = false;
                     mLocationManager.removeUpdates(mEmptyLocationListener);
-                    
+
                     // Fall through to re-register listener.
                 case MSG_ENABLE_LOCATION_UPDATES:
                     // enable network provider to receive at least location updates for a given
