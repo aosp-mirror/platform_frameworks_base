@@ -17,6 +17,8 @@
 package com.android.server.am;
 
 import android.os.Binder;
+import android.os.SystemClock;
+import android.util.TimeUtils;
 
 /**
  * Represents a link between a content provider and client.
@@ -24,6 +26,7 @@ import android.os.Binder;
 public class ContentProviderConnection extends Binder {
     public final ContentProviderRecord provider;
     public final ProcessRecord client;
+    public final long createTime;
     public int stableCount;
     public int unstableCount;
     // The client of this connection is currently waiting for the provider to appear.
@@ -39,6 +42,7 @@ public class ContentProviderConnection extends Binder {
     public ContentProviderConnection(ContentProviderRecord _provider, ProcessRecord _client) {
         provider = _provider;
         client = _client;
+        createTime = SystemClock.elapsedRealtime();
     }
 
     public String toString() {
@@ -83,5 +87,8 @@ public class ContentProviderConnection extends Binder {
         if (dead) {
             sb.append(" DEAD");
         }
+        long nowReal = SystemClock.elapsedRealtime();
+        sb.append(" ");
+        TimeUtils.formatDuration(nowReal-createTime, sb);
     }
 }
