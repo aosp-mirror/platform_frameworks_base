@@ -18,7 +18,7 @@
 
 <!-- Animation for when a dock window at the top of the screen is exiting. -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:interpolator="@android:interpolator/accelerate_quad">
+        android:interpolator="@android:interpolator/accelerate_cubic">
     <translate android:fromYDelta="0" android:toYDelta="-100%"
-        android:startOffset="100" android:duration="@android:integer/config_mediumAnimTime"/>
+        android:startOffset="100" android:duration="250"/>
 </set>
