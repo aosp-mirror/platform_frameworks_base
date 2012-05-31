@@ -2278,7 +2278,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // It's a system nav bar or a portrait screen; nav bar goes on bottom.
                 int top = displayHeight - mNavigationBarHeightForRotation[displayRotation];
                 if (mHdmiPlugged) {
-                    if (top > mExternalDisplayHeight) {
+                    // Move the nav bar up if the external display is the same aspect ratio
+                    // but shorter.  This avoids clipping on the external display.
+                    boolean sameAspect = mExternalDisplayHeight > 0 && displayHeight > 0
+                        && ((float) mExternalDisplayWidth / mExternalDisplayHeight > 1)
+                        == ((float) displayWidth / displayHeight > 1);
+                    if (sameAspect && top > mExternalDisplayHeight) {
                         top = mExternalDisplayHeight;
                     }
                 }
