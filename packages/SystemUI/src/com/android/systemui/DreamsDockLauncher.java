@@ -58,8 +58,8 @@ public class DreamsDockLauncher extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
             final boolean activateOnDock = 0 != Settings.Secure.getInt(
-                context.getContentResolver(), 
-                Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK, 1);
+                context.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK, 0);
 
             if (!activateOnDock) return;
 
