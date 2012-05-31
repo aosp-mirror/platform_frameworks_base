@@ -385,7 +385,7 @@ public class BitmapDrawable extends Drawable {
             Shader shader = state.mPaint.getShader();
             if (shader == null) {
                 if (mApplyGravity) {
-                    final int layoutDirection = getResolvedLayoutDirectionSelf();
+                    final int layoutDirection = getLayoutDirection();
                     Gravity.apply(state.mGravity, mBitmapWidth, mBitmapHeight,
                             getBounds(), mDstRect, layoutDirection);
                     mApplyGravity = false;

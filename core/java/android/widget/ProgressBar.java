@@ -478,6 +478,9 @@ public class ProgressBar extends View {
             d.setCallback(this);
         }
         mIndeterminateDrawable = d;
+        if (mIndeterminateDrawable != null) {
+            mIndeterminateDrawable.setLayoutDirection(getLayoutDirection());
+        }
         if (mIndeterminate) {
             mCurrentDrawable = d;
             postInvalidate();
@@ -517,6 +520,7 @@ public class ProgressBar extends View {
 
         if (d != null) {
             d.setCallback(this);
+            d.setLayoutDirection(getLayoutDirection());
 
             // Make sure the ProgressBar is always tall enough
             int drawableHeight = d.getMinimumHeight();
@@ -973,12 +977,6 @@ public class ProgressBar extends View {
                 super.invalidateDrawable(dr);
             }
         }
-    }
-
-    @Override
-    public int getResolvedLayoutDirection(Drawable who) {
-        return (who == mProgressDrawable || who == mIndeterminateDrawable) ?
-            getResolvedLayoutDirection() : super.getResolvedLayoutDirection(who);
     }
 
     @Override

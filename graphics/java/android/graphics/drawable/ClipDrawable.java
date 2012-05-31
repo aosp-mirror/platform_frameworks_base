@@ -209,7 +209,7 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
         if ((mClipState.mOrientation & VERTICAL) != 0) {
             h -= (h - ih) * (10000 - level) / 10000;
         }
-        final int layoutDirection = getResolvedLayoutDirectionSelf();
+        final int layoutDirection = getLayoutDirection();
         Gravity.apply(mClipState.mGravity, w, h, bounds, r, layoutDirection);
 
         if (w > 0 && h > 0) {
