@@ -855,12 +855,9 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Maak navraag skoon"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Dien navraag in"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Stemsoektog"</string>
-    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
-    <skip />
-    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
-    <skip />
-    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
-    <skip />
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Wil jy Ontek-met-raak aktiveer?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> wil Ontdek-met-raak aktiveer. Wanneer Ontek-met-raak aangeskakel is, kan jy beskrywings van wat onder jou vinger is hoor of sien, of jy kan gebare uitvoer om interaksie met die tablet te hê."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> wil Ontdek-met-raak aktiveer. Wanneer Ontek-met-raak aangeskakel is, kan jy beskrywings van wat onder jou vinger is hoor of sien, of jy kan gebare uitvoer om interaksie met die foon te hê ."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 maand gelede"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Voor 1 maand gelede"</string>
   <plurals name="num_seconds_ago">
@@ -1127,10 +1124,8 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"Stel invoermetodes op"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Fisiese sleutelbord"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardeware"</string>
-    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
-    <skip />
-    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
-    <skip />
+    <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Kies sleutelborduitleg"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Raak om \'n sleutelborduitleg te kies."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidate"</u></string>
@@ -1239,7 +1234,6 @@
     <string name="sync_do_nothing" msgid="3743764740430821845">"Doen vir eers niks nie"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Kies \'n rekening"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Voeg \'n rekening by"</string>
-    <string name="choose_account_text" msgid="6303348737197849675">"Watter rekening wil jy gebruik?"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Voeg rekening by"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Vermeerder"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Verminder"</string>
@@ -1324,6 +1318,5 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Begin webblaaier?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Aanvaar oproep?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Altyd"</string>
-    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
-    <skip />
+    <string name="activity_resolver_use_once" msgid="2404644797149173758">"Net een keer"</string>
 </resources>

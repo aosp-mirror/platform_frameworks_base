@@ -1234,7 +1234,6 @@
     <string name="sync_do_nothing" msgid="3743764740430821845">"No hacer nada por ahora"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Seleccionar una cuenta"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Añadir una cuenta"</string>
-    <string name="choose_account_text" msgid="6303348737197849675">"¿Qué cuenta quieres usar?"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Añadir cuenta"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Aumentar"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Reducir"</string>
