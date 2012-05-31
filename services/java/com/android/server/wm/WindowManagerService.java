@@ -5437,8 +5437,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 // window.
                 including = !ws.mIsImWindow && !ws.isFullscreen(dw, dh);
 
-                if (maxLayer < ws.mWinAnimator.mAnimLayer) {
-                    maxLayer = ws.mWinAnimator.mAnimLayer;
+                if (maxLayer < ws.mWinAnimator.mSurfaceLayer) {
+                    maxLayer = ws.mWinAnimator.mSurfaceLayer;
                 }
                 
                 // Don't include wallpaper in bounds calculation
