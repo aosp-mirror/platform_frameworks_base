@@ -513,6 +513,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         @Override
+        protected BroadcastFilter[] newArray(int size) {
+            return new BroadcastFilter[size];
+        }
+
+        @Override
         protected String packageForFilter(BroadcastFilter filter) {
             return filter.packageName;
         }
