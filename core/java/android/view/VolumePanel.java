@@ -437,8 +437,10 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
     public void postVolumeChanged(int streamType, int flags) {
         if (hasMessages(MSG_VOLUME_CHANGED)) return;
-        if (mStreamControls == null) {
-            createSliders();
+        synchronized (this) {
+            if (mStreamControls == null) {
+                createSliders();
+            }
         }
         removeMessages(MSG_FREE_RESOURCES);
         obtainMessage(MSG_VOLUME_CHANGED, streamType, flags).sendToTarget();
@@ -450,8 +452,10 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
     public void postMuteChanged(int streamType, int flags) {
         if (hasMessages(MSG_VOLUME_CHANGED)) return;
-        if (mStreamControls == null) {
-            createSliders();
+        synchronized (this) {
+            if (mStreamControls == null) {
+                createSliders();
+            }
         }
         removeMessages(MSG_FREE_RESOURCES);
         obtainMessage(MSG_MUTE_CHANGED, streamType, flags).sendToTarget();
@@ -471,10 +475,12 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         if (LOGD) Log.d(TAG, "onVolumeChanged(streamType: " + streamType + ", flags: " + flags + ")");
 
         if ((flags & AudioManager.FLAG_SHOW_UI) != 0) {
-            if (mActiveStreamType != streamType) {
-                reorderSliders(streamType);
+            synchronized (this) {
+                if (mActiveStreamType != streamType) {
+                    reorderSliders(streamType);
+                }
+                onShowVolumeChanged(streamType, flags);
             }
-            onShowVolumeChanged(streamType, flags);
         }
 
         if ((flags & AudioManager.FLAG_PLAY_SOUND) != 0 && ! mRingIsSilent) {
