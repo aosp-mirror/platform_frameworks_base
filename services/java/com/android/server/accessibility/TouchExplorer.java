@@ -1532,7 +1532,7 @@ public class TouchExplorer {
          */
         public ReceivedPointerTracker(Context context) {
             mThresholdActivePointer =
-                ViewConfiguration.get(context).getScaledTouchSlop() * COEFFICIENT_ACTIVE_POINTER;
+                ViewConfiguration.get(context).getScaledTouchSlop() * COEFFICIENT_ACTIVE_POINTER;//Heie govna
         }
 
         /**

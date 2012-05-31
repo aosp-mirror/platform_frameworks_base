@@ -104,9 +104,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private static final String FUNCTION_REGISTER_UI_TEST_AUTOMATION_SERVICE =
         "registerUiTestAutomationService";
 
+    private static final char COMPONENT_NAME_SEPARATOR = ':';
+
     private static final int OWN_PROCESS_ID = android.os.Process.myPid();
 
     private static final int MSG_SHOW_ENABLE_TOUCH_EXPLORATION_DIALOG = 1;
+
+    private static final int MSG_TOGGLE_TOUCH_EXPLORATION = 2;
 
     private static int sIdCounter = 0;
 
@@ -127,12 +131,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private final Set<ComponentName> mEnabledServices = new HashSet<ComponentName>();
 
+    private final Set<ComponentName> mTouchExplorationGrantedServices = new HashSet<ComponentName>();
+
     private final SparseArray<AccessibilityConnectionWrapper> mWindowIdToInteractionConnectionWrapperMap =
         new SparseArray<AccessibilityConnectionWrapper>();
 
     private final SparseArray<IBinder> mWindowIdToWindowTokenMap = new SparseArray<IBinder>();
 
-    private final SimpleStringSplitter mStringColonSplitter = new SimpleStringSplitter(':');
+    private final SimpleStringSplitter mStringColonSplitter = new SimpleStringSplitter(COMPONENT_NAME_SEPARATOR);
 
     private final Rect mTempRect = new Rect();
 
@@ -163,6 +169,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private boolean mTouchExplorationGestureEnded;
 
     private boolean mTouchExplorationGestureStarted;
+
+    private AlertDialog mEnableTouchExplorationDialog;
 
     /**
      * Creates a new instance.
@@ -208,7 +216,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         String compPkg = comp.getPackageName();
                         if (compPkg.equals(packageName)) {
                             it.remove();
-                            updateEnabledAccessibilitySerivcesSettingLocked(mEnabledServices);
+                            // Update the enabled services setting.
+                            persistComponentNamesToSettingLocked(
+                                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                                    mEnabledServices);
+                            // Update the touch exploration granted services setting.
+                            mTouchExplorationGrantedServices.remove(comp);
+                            persistComponentNamesToSettingLocked(
+                                    Settings.Secure.
+                                            TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
+                                    mEnabledServices);
                             return;
                         }
                     }
@@ -219,7 +236,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             public boolean onHandleForceStop(Intent intent, String[] packages,
                     int uid, boolean doit) {
                 synchronized (mLock) {
-                    boolean changed = false;
                     Iterator<ComponentName> it = mEnabledServices.iterator();
                     while (it.hasNext()) {
                         ComponentName comp = it.next();
@@ -230,12 +246,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                                     return true;
                                 }
                                 it.remove();
-                                changed = true;
+                                persistComponentNamesToSettingLocked(
+                                        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                                        mEnabledServices);
                             }
                         }
-                    }
-                    if (changed) {
-                        updateEnabledAccessibilitySerivcesSettingLocked(mEnabledServices);
                     }
                     return false;
                 }
@@ -248,32 +263,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         // We will update when the automation service dies.
                         if (mUiAutomationService == null) {
                             populateAccessibilityServiceListLocked();
+                            populateEnabledAccessibilityServicesLocked();
+                            populateTouchExplorationGrantedAccessibilityServicesLocked();
                             handleAccessibilityEnabledSettingChangedLocked();
                             handleTouchExplorationEnabledSettingChangedLocked();
                             updateInputFilterLocked();
                             sendStateToClientsLocked();
                         }
                     }
-
                     return;
                 }
 
                 super.onReceive(context, intent);
-            }
-
-            private void updateEnabledAccessibilitySerivcesSettingLocked(
-                    Set<ComponentName> enabledServices) {
-                Iterator<ComponentName> it = enabledServices.iterator();
-                StringBuilder str = new StringBuilder();
-                while (it.hasNext()) {
-                    if (str.length() > 0) {
-                        str.append(':');
-                    }
-                    str.append(it.next().flattenToShortString());
-                }
-                Settings.Secure.putString(mContext.getContentResolver(),
-                        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                        str.toString());
             }
         };
 
@@ -338,6 +339,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     synchronized (mLock) {
                         // We will update when the automation service dies.
                         if (mUiAutomationService == null) {
+                            populateEnabledAccessibilityServicesLocked();
+                            manageServicesLocked();
+                        }
+                    }
+                }
+            });
+
+        Uri touchExplorationGrantedServicesUri = Settings.Secure.getUriFor(
+                Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES);
+        contentResolver.registerContentObserver(touchExplorationGrantedServicesUri, false,
+            new ContentObserver(new Handler()) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    super.onChange(selfChange);
+                    synchronized (mLock) {
+                        // We will update when the automation service dies.
+                        if (mUiAutomationService == null) {
+                            populateTouchExplorationGrantedAccessibilityServicesLocked();
+                            unbindAllServicesLocked();
                             manageServicesLocked();
                         }
                     }
@@ -647,6 +667,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    private void populateEnabledAccessibilityServicesLocked() {
+        populateComponentNamesFromSettingLocked(
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                mEnabledServices);
+    }
+
+    private void populateTouchExplorationGrantedAccessibilityServicesLocked() {
+        populateComponentNamesFromSettingLocked(
+                Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
+                mTouchExplorationGrantedServices);
+    }
+
     /**
      * Performs {@link AccessibilityService}s delayed notification. The delay is configurable
      * and denotes the period after the last event before notifying the service.
@@ -689,7 +721,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mServices.add(service);
             mComponentNameToServiceMap.put(service.mComponentName, service);
             updateInputFilterLocked();
-            tryEnableTouchExploration(service);
+            tryEnableTouchExplorationLocked(service);
         } catch (RemoteException e) {
             /* do nothing */
         }
@@ -710,7 +742,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         service.unlinkToOwnDeath();
         service.dispose();
         updateInputFilterLocked();
-        tryDisableTouchExploration(service);
+        tryDisableTouchExplorationLocked(service);
         return removed;
     }
 
@@ -762,7 +794,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      * Manages services by starting enabled ones and stopping disabled ones.
      */
     private void manageServicesLocked() {
-        populateEnabledServicesLocked(mEnabledServices);
         final int enabledInstalledServicesCount = updateServicesStateLocked(mInstalledServices,
                 mEnabledServices);
         // No enabled installed services => disable accessibility to avoid
@@ -789,20 +820,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     /**
-     * Populates a list with the {@link ComponentName}s of all enabled
-     * {@link AccessibilityService}s.
+     * Populates a set with the {@link ComponentName}s stored in a colon
+     * separated value setting.
      *
-     * @param enabledServices The list.
+     * @param settingName The setting to parse.
+     * @param outComponentNames The output component names.
      */
-    private void populateEnabledServicesLocked(Set<ComponentName> enabledServices) {
-        enabledServices.clear();
+    private void populateComponentNamesFromSettingLocked(String settingName,
+            Set<ComponentName> outComponentNames) {
+        outComponentNames.clear();
 
-        String servicesValue = Settings.Secure.getString(mContext.getContentResolver(),
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+        String settingValue = Settings.Secure.getString(mContext.getContentResolver(), settingName);
 
-        if (servicesValue != null) {
+        if (settingValue != null) {
             TextUtils.SimpleStringSplitter splitter = mStringColonSplitter;
-            splitter.setString(servicesValue);
+            splitter.setString(settingValue);
             while (splitter.hasNext()) {
                 String str = splitter.next();
                 if (str == null || str.length() <= 0) {
@@ -810,10 +842,29 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
                 ComponentName enabledService = ComponentName.unflattenFromString(str);
                 if (enabledService != null) {
-                    enabledServices.add(enabledService);
+                    outComponentNames.add(enabledService);
                 }
             }
         }
+    }
+
+    /**
+     * Persists the component names in the specified setting in a
+     * colon separated fashion.
+     *
+     * @param settingName The setting name.
+     * @param componentNames The component names.
+     */
+    private void persistComponentNamesToSettingLocked(String settingName,
+            Set<ComponentName> componentNames) {
+        StringBuilder builder = new StringBuilder();
+        for (ComponentName componentName : componentNames) {
+            if (builder.length() > 0) {
+                builder.append(COMPONENT_NAME_SEPARATOR);
+            }
+            builder.append(componentName.flattenToShortString());
+        }
+        Settings.Secure.putString(mContext.getContentResolver(), settingName, builder.toString());
     }
 
     /**
@@ -935,20 +986,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 Settings.Secure.TOUCH_EXPLORATION_ENABLED, 0) == 1;
     }
 
-    private void tryEnableTouchExploration(final Service service) {
+    private void tryEnableTouchExplorationLocked(final Service service) {
         if (!mIsTouchExplorationEnabled && service.mRequestTouchExplorationMode) {
-            if (!service.mIsAutomation) {
+            final boolean canToggleTouchExploration = mTouchExplorationGrantedServices.contains(
+                    service.mComponentName);
+            if (!service.mIsAutomation && !canToggleTouchExploration) {
                 mMainHandler.obtainMessage(MSG_SHOW_ENABLE_TOUCH_EXPLORATION_DIALOG,
                         service).sendToTarget();
             } else {
-                Settings.Secure.putInt(mContext.getContentResolver(),
-                        Settings.Secure.TOUCH_EXPLORATION_ENABLED, 1);
+                mMainHandler.obtainMessage(MSG_TOGGLE_TOUCH_EXPLORATION, 1, 0).sendToTarget();
             }
         }
     }
 
-    private void tryDisableTouchExploration(Service service) {
-        if (mIsTouchExplorationEnabled && service.mReqeustTouchExplorationMode) {
+    private void tryDisableTouchExplorationLocked(Service service) {
+        if (mIsTouchExplorationEnabled) {
             synchronized (mLock) {
                 final int serviceCount = mServices.size();
                 for (int i = 0; i < serviceCount; i++) {
@@ -957,8 +1009,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         return;
                     }
                 }
-                Settings.Secure.putInt(mContext.getContentResolver(),
-                        Settings.Secure.TOUCH_EXPLORATION_ENABLED, 0);
+                mMainHandler.obtainMessage(MSG_TOGGLE_TOUCH_EXPLORATION, 0, 0).sendToTarget();
             }
         }
     }
@@ -995,32 +1046,54 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public void handleMessage(Message msg) {
             final int type = msg.what;
             switch (type) {
+                case MSG_TOGGLE_TOUCH_EXPLORATION: {
+                    final int value = msg.arg1;
+                    Settings.Secure.putInt(mContext.getContentResolver(),
+                            Settings.Secure.TOUCH_EXPLORATION_ENABLED, value);
+                } break;
                 case MSG_SHOW_ENABLE_TOUCH_EXPLORATION_DIALOG: {
-                    Service service = (Service) msg.obj;
+                    final Service service = (Service) msg.obj;
                     String label = service.mResolveInfo.loadLabel(
                             mContext.getPackageManager()).toString();
-                    final AlertDialog dialog = new AlertDialog.Builder(mContext)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setPositiveButton(android.R.string.ok, new OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Settings.Secure.putInt(mContext.getContentResolver(),
-                                        Settings.Secure.TOUCH_EXPLORATION_ENABLED, 1);
-                            }
-                        })
-                        .setNegativeButton(android.R.string.cancel, new OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .setTitle(R.string.enable_explore_by_touch_warning_title)
-                        .setMessage(mContext.getString(
-                            R.string.enable_explore_by_touch_warning_message, label))
-                        .create();
-                    dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG);
-                    dialog.setCanceledOnTouchOutside(true);
-                    dialog.show();
+                    synchronized (mLock) {
+                        if (mIsTouchExplorationEnabled) {
+                            return;
+                        }
+                        if (mEnableTouchExplorationDialog != null
+                                && mEnableTouchExplorationDialog.isShowing()) {
+                            return;
+                        }
+                        mEnableTouchExplorationDialog = new AlertDialog.Builder(mContext)
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setPositiveButton(android.R.string.ok, new OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // The user allowed the service to toggle touch exploration.
+                                    mTouchExplorationGrantedServices.add(service.mComponentName);
+                                    persistComponentNamesToSettingLocked(
+                                            Settings.Secure.
+                                                   TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
+                                            mTouchExplorationGrantedServices);
+                                    // Enable touch exploration.
+                                    Settings.Secure.putInt(mContext.getContentResolver(),
+                                            Settings.Secure.TOUCH_EXPLORATION_ENABLED, 1);
+                                }
+                            })
+                            .setNegativeButton(android.R.string.cancel, new OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            })
+                            .setTitle(R.string.enable_explore_by_touch_warning_title)
+                            .setMessage(mContext.getString(
+                                R.string.enable_explore_by_touch_warning_message, label))
+                            .create();
+                        mEnableTouchExplorationDialog.getWindow().setType(
+                                WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG);
+                        mEnableTouchExplorationDialog.setCanceledOnTouchOutside(true);
+                        mEnableTouchExplorationDialog.show();
+                    }
                 }
             }
         }
@@ -1143,8 +1216,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mRequestTouchExplorationMode = (info.flags
                     & AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE) != 0;
 
+            // If this service is up and running we may have to enable touch
+            // exploration, otherwise this will happen when the service connects.
             synchronized (mLock) {
-                tryAddServiceLocked(this);
+                if (isConfigured()) {
+                    if (mRequestTouchExplorationMode) {
+                        tryEnableTouchExplorationLocked(this);
+                    } else {
+                        tryDisableTouchExplorationLocked(this);
+                    }
+                }
             }
         }
 
@@ -1495,6 +1576,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // the state based on values in the settings database.
                 if (mIsAutomation) {
                     mUiAutomationService = null;
+
+                    populateEnabledAccessibilityServicesLocked();
+                    populateTouchExplorationGrantedAccessibilityServicesLocked();
 
                     handleAccessibilityEnabledSettingChangedLocked();
                     sendStateToClientsLocked();
