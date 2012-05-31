@@ -603,6 +603,12 @@ public class FrameLayout extends ViewGroup {
          */
         public int gravity = -1;
 
+        @Override
+        protected void setBaseAttributes(TypedArray a, int widthAttr, int heightAttr) {
+            width = a.getLayoutDimension(widthAttr, MATCH_PARENT);
+            height = a.getLayoutDimension(heightAttr, MATCH_PARENT);
+        }
+
         /**
          * {@inheritDoc}
          */

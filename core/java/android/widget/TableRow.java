@@ -502,19 +502,8 @@ public class TableRow extends LinearLayout {
 
         @Override
         protected void setBaseAttributes(TypedArray a, int widthAttr, int heightAttr) {
-            // We don't want to force users to specify a layout_width
-            if (a.hasValue(widthAttr)) {
-                width = a.getLayoutDimension(widthAttr, "layout_width");
-            } else {
-                width = MATCH_PARENT;
-            }
-
-            // We don't want to force users to specify a layout_height
-            if (a.hasValue(heightAttr)) {
-                height = a.getLayoutDimension(heightAttr, "layout_height");
-            } else {
-                height = WRAP_CONTENT;
-            }
+            width = a.getLayoutDimension(widthAttr, MATCH_PARENT);
+            height = a.getLayoutDimension(heightAttr, WRAP_CONTENT);
         }
     }
 

@@ -297,33 +297,6 @@ public class RadioGroup extends LinearLayout {
         public LayoutParams(MarginLayoutParams source) {
             super(source);
         }
-
-        /**
-         * <p>Fixes the child's width to
-         * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} and the child's
-         * height to  {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}
-         * when not specified in the XML file.</p>
-         *
-         * @param a the styled attributes set
-         * @param widthAttr the width attribute to fetch
-         * @param heightAttr the height attribute to fetch
-         */
-        @Override
-        protected void setBaseAttributes(TypedArray a,
-                int widthAttr, int heightAttr) {
-
-            if (a.hasValue(widthAttr)) {
-                width = a.getLayoutDimension(widthAttr, "layout_width");
-            } else {
-                width = WRAP_CONTENT;
-            }
-            
-            if (a.hasValue(heightAttr)) {
-                height = a.getLayoutDimension(heightAttr, "layout_height");
-            } else {
-                height = WRAP_CONTENT;
-            }
-        }
     }
 
     /**

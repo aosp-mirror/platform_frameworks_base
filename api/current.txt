@@ -6949,7 +6949,7 @@ package android.content.res {
     method public int getIndexCount();
     method public int getInt(int, int);
     method public int getInteger(int, int);
-    method public int getLayoutDimension(int, java.lang.String);
+    method public deprecated int getLayoutDimension(int, java.lang.String);
     method public int getLayoutDimension(int, int);
     method public java.lang.String getNonResourceString(int);
     method public java.lang.String getPositionDescription();

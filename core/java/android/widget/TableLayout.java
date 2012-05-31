@@ -741,11 +741,7 @@ public class TableLayout extends LinearLayout {
         @Override
         protected void setBaseAttributes(TypedArray a, int widthAttr, int heightAttr) {
             this.width = MATCH_PARENT;
-            if (a.hasValue(heightAttr)) {
-                this.height = a.getLayoutDimension(heightAttr, "layout_height");
-            } else {
-                this.height = WRAP_CONTENT;
-            }
+            this.height = a.getLayoutDimension(heightAttr, WRAP_CONTENT);
         }
     }
 
