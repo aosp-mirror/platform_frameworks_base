@@ -1234,7 +1234,6 @@
     <string name="sync_do_nothing" msgid="3743764740430821845">"나중에 작업"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"계정 선택"</string>
     <string name="add_account_label" msgid="2935267344849993553">"계정 추가"</string>
-    <string name="choose_account_text" msgid="6303348737197849675">"사용할 계정을 선택하세요."</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"계정 추가"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"늘리기"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"줄이기"</string>

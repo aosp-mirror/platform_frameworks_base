@@ -1239,7 +1239,6 @@
     <string name="sync_do_nothing" msgid="3743764740430821845">"Zatím nic neprovádět."</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Vybrat účet"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Přidat účet"</string>
-    <string name="choose_account_text" msgid="6303348737197849675">"Který účet chcete použít?"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Přidat účet"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Zvýšit"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Snížit"</string>
@@ -1324,6 +1323,5 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Spustit prohlížeč?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Přijmout hovor?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Vždy"</string>
-    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
-    <skip />
+    <string name="activity_resolver_use_once" msgid="2404644797149173758">"Jen jednou"</string>
 </resources>
