@@ -1239,7 +1239,6 @@
     <string name="sync_do_nothing" msgid="3743764740430821845">"Ne rien faire pour l\'instant"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Sélectionnez un compte"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Ajouter un compte"</string>
-    <string name="choose_account_text" msgid="6303348737197849675">"Quel compte souhaitez-vous utiliser ?"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Ajouter un compte"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Augmenter"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Diminuer"</string>
