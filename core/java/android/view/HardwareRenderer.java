@@ -1102,6 +1102,7 @@ public abstract class HardwareRenderer {
 
                     onPreDraw(dirty);
 
+                    int status = DisplayList.STATUS_DONE;
                     int saveCount = canvas.save();
                     callbacks.onHardwarePreDraw(canvas);
 
@@ -1135,7 +1136,7 @@ public abstract class HardwareRenderer {
                                 drawDisplayListStartTime = System.nanoTime();
                             }
 
-                            int status = canvas.drawDisplayList(displayList, mRedrawClip,
+                            status = canvas.drawDisplayList(displayList, mRedrawClip,
                                     DisplayList.FLAG_CLIP_CHILDREN);
 
                             if (mProfileEnabled) {
@@ -1171,21 +1172,24 @@ public abstract class HardwareRenderer {
                     onPostDraw();
 
                     attachInfo.mIgnoreDirtyState = false;
+                    
+                    if ((status & DisplayList.STATUS_DREW) == DisplayList.STATUS_DREW) {
 
-                    long eglSwapBuffersStartTime = 0;
-                    if (mProfileEnabled) {
-                        eglSwapBuffersStartTime = System.nanoTime();
+                        long eglSwapBuffersStartTime = 0;
+                        if (mProfileEnabled) {
+                            eglSwapBuffersStartTime = System.nanoTime();
+                        }
+    
+                        sEgl.eglSwapBuffers(sEglDisplay, mEglSurface);
+    
+                        if (mProfileEnabled) {
+                            long now = System.nanoTime();
+                            float total = (now - eglSwapBuffersStartTime) * 0.000001f;
+                            mProfileData[mProfileCurrentFrame + 2] = total;
+                        }
+    
+                        checkEglErrors();
                     }
-
-                    sEgl.eglSwapBuffers(sEglDisplay, mEglSurface);
-
-                    if (mProfileEnabled) {
-                        long now = System.nanoTime();
-                        float total = (now - eglSwapBuffersStartTime) * 0.000001f;
-                        mProfileData[mProfileCurrentFrame + 2] = total;
-                    }
-
-                    checkEglErrors();
 
                     return dirty == null;
                 }

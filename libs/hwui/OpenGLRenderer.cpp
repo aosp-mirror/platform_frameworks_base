@@ -336,7 +336,7 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     info.height = getSnapshot()->height;
     getSnapshot()->transform->copyTo(&info.transform[0]);
 
-    status_t result = (*functor)(DrawGlInfo::kModeDraw, &info);
+    status_t result = (*functor)(DrawGlInfo::kModeDraw, &info) | DrawGlInfo::kStatusDrew;
 
     if (result != DrawGlInfo::kStatusDone) {
         Rect localDirty(info.dirtyLeft, info.dirtyTop, info.dirtyRight, info.dirtyBottom);
@@ -1472,17 +1472,17 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, Sk
     finishDrawTexture();
 }
 
-void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint) {
+status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint) {
     const float right = left + bitmap->width();
     const float bottom = top + bitmap->height();
 
     if (quickReject(left, top, right, bottom)) {
-        return;
+        return DrawGlInfo::kStatusDone;
     }
 
     mCaches.activeTexture(0);
     Texture* texture = mCaches.textureCache.get(bitmap);
-    if (!texture) return;
+    if (!texture) return DrawGlInfo::kStatusDone;
     const AutoTexture autoCleanup(texture);
 
     if (CC_UNLIKELY(bitmap->getConfig() == SkBitmap::kA8_Config)) {
@@ -1490,20 +1490,22 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint
     } else {
         drawTextureRect(left, top, right, bottom, texture, paint);
     }
+
+    return DrawGlInfo::kStatusDrew;
 }
 
-void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint) {
+status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint) {
     Rect r(0.0f, 0.0f, bitmap->width(), bitmap->height());
     const mat4 transform(*matrix);
     transform.mapRect(r);
 
     if (quickReject(r.left, r.top, r.right, r.bottom)) {
-        return;
+        return DrawGlInfo::kStatusDone;
     }
 
     mCaches.activeTexture(0);
     Texture* texture = mCaches.textureCache.get(bitmap);
-    if (!texture) return;
+    if (!texture) return DrawGlInfo::kStatusDone;
     const AutoTexture autoCleanup(texture);
 
     // This could be done in a cheaper way, all we need is pass the matrix
@@ -1512,14 +1514,16 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* pai
     concatMatrix(matrix);
     drawTextureRect(0.0f, 0.0f, bitmap->width(), bitmap->height(), texture, paint);
     restore();
+
+    return DrawGlInfo::kStatusDrew;
 }
 
-void OpenGLRenderer::drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint) {
+status_t OpenGLRenderer::drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint) {
     const float right = left + bitmap->width();
     const float bottom = top + bitmap->height();
 
     if (quickReject(left, top, right, bottom)) {
-        return;
+        return DrawGlInfo::kStatusDone;
     }
 
     mCaches.activeTexture(0);
@@ -1527,18 +1531,20 @@ void OpenGLRenderer::drawBitmapData(SkBitmap* bitmap, float left, float top, SkP
     const AutoTexture autoCleanup(texture);
 
     drawTextureRect(left, top, right, bottom, texture, paint);
+
+    return DrawGlInfo::kStatusDrew;
 }
 
-void OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
+status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
         float* vertices, int* colors, SkPaint* paint) {
     // TODO: Do a quickReject
     if (!vertices || mSnapshot->isIgnored()) {
-        return;
+        return DrawGlInfo::kStatusDone;
     }
 
     mCaches.activeTexture(0);
     Texture* texture = mCaches.textureCache.get(bitmap);
-    if (!texture) return;
+    if (!texture) return DrawGlInfo::kStatusDone;
     const AutoTexture autoCleanup(texture);
 
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
@@ -1611,19 +1617,21 @@ void OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHei
     drawTextureMesh(0.0f, 0.0f, 1.0f, 1.0f, texture->id, alpha / 255.0f,
             mode, texture->blend, &mesh[0].position[0], &mesh[0].texture[0],
             GL_TRIANGLES, count, false, false, 0, false, false);
+
+    return DrawGlInfo::kStatusDrew;
 }
 
-void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
+status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
          float srcLeft, float srcTop, float srcRight, float srcBottom,
          float dstLeft, float dstTop, float dstRight, float dstBottom,
          SkPaint* paint) {
     if (quickReject(dstLeft, dstTop, dstRight, dstBottom)) {
-        return;
+        return DrawGlInfo::kStatusDone;
     }
 
     mCaches.activeTexture(0);
     Texture* texture = mCaches.textureCache.get(bitmap);
-    if (!texture) return;
+    if (!texture) return DrawGlInfo::kStatusDone;
     const AutoTexture autoCleanup(texture);
 
     const float width = texture->width;
@@ -1666,18 +1674,20 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     }
 
     resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
+
+    return DrawGlInfo::kStatusDrew;
 }
 
-void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
+status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
         const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
         float left, float top, float right, float bottom, SkPaint* paint) {
     if (quickReject(left, top, right, bottom)) {
-        return;
+        return DrawGlInfo::kStatusDone;
     }
 
     mCaches.activeTexture(0);
     Texture* texture = mCaches.textureCache.get(bitmap);
-    if (!texture) return;
+    if (!texture) return DrawGlInfo::kStatusDone;
     const AutoTexture autoCleanup(texture);
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
     texture->setFilter(GL_LINEAR, true);
@@ -1726,6 +1736,8 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
                     true, !mesh->hasEmptyQuads);
         }
     }
+
+    return DrawGlInfo::kStatusDrew;
 }
 
 /**
@@ -1826,8 +1838,8 @@ void OpenGLRenderer::drawAARect(float left, float top, float right, float bottom
  * 'inside' the line area being filled opaquely and the other pixels being filled according to
  * how far into the boundary region they are, which is determined by shader interpolation.
  */
-void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
-    if (mSnapshot->isIgnored()) return;
+status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
+    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
 
     const bool isAA = paint->isAntiAlias();
     // We use half the stroke width here because we're going to position the quad
@@ -2083,10 +2095,12 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     if (isAA) {
         finishDrawAALine(widthSlot, lengthSlot);
     }
+
+    return DrawGlInfo::kStatusDrew;
 }
 
-void OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
-    if (mSnapshot->isIgnored()) return;
+status_t OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
+    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
 
     // TODO: The paint's cap style defines whether the points are square or circular
     // TODO: Handle AA for round points
@@ -2138,86 +2152,92 @@ void OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
     }
 
     glDrawArrays(GL_POINTS, 0, generatedVerticesCount);
+
+    return DrawGlInfo::kStatusDrew;
 }
 
-void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
+status_t OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
     // No need to check against the clip, we fill the clip region
-    if (mSnapshot->isIgnored()) return;
+    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
 
     Rect& clip(*mSnapshot->clipRect);
     clip.snapToPixelBoundaries();
 
     drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color, mode, true);
+
+    return DrawGlInfo::kStatusDrew;
 }
 
-void OpenGLRenderer::drawShape(float left, float top, const PathTexture* texture, SkPaint* paint) {
-    if (!texture) return;
+status_t OpenGLRenderer::drawShape(float left, float top, const PathTexture* texture,
+        SkPaint* paint) {
+    if (!texture) return DrawGlInfo::kStatusDone;
     const AutoTexture autoCleanup(texture);
 
     const float x = left + texture->left - texture->offset;
     const float y = top + texture->top - texture->offset;
 
     drawPathTexture(texture, x, y, paint);
+
+    return DrawGlInfo::kStatusDrew;
 }
 
-void OpenGLRenderer::drawRoundRect(float left, float top, float right, float bottom,
+status_t OpenGLRenderer::drawRoundRect(float left, float top, float right, float bottom,
         float rx, float ry, SkPaint* paint) {
-    if (mSnapshot->isIgnored()) return;
+    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
 
     mCaches.activeTexture(0);
     const PathTexture* texture = mCaches.roundRectShapeCache.getRoundRect(
             right - left, bottom - top, rx, ry, paint);
-    drawShape(left, top, texture, paint);
+    return drawShape(left, top, texture, paint);
 }
 
-void OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* paint) {
-    if (mSnapshot->isIgnored()) return;
+status_t OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* paint) {
+    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
 
     mCaches.activeTexture(0);
     const PathTexture* texture = mCaches.circleShapeCache.getCircle(radius, paint);
-    drawShape(x - radius, y - radius, texture, paint);
+    return drawShape(x - radius, y - radius, texture, paint);
 }
 
-void OpenGLRenderer::drawOval(float left, float top, float right, float bottom, SkPaint* paint) {
-    if (mSnapshot->isIgnored()) return;
+status_t OpenGLRenderer::drawOval(float left, float top, float right, float bottom,
+        SkPaint* paint) {
+    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
 
     mCaches.activeTexture(0);
     const PathTexture* texture = mCaches.ovalShapeCache.getOval(right - left, bottom - top, paint);
-    drawShape(left, top, texture, paint);
+    return drawShape(left, top, texture, paint);
 }
 
-void OpenGLRenderer::drawArc(float left, float top, float right, float bottom,
+status_t OpenGLRenderer::drawArc(float left, float top, float right, float bottom,
         float startAngle, float sweepAngle, bool useCenter, SkPaint* paint) {
-    if (mSnapshot->isIgnored()) return;
+    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
 
     if (fabs(sweepAngle) >= 360.0f) {
-        drawOval(left, top, right, bottom, paint);
-        return;
+        return drawOval(left, top, right, bottom, paint);
     }
 
     mCaches.activeTexture(0);
     const PathTexture* texture = mCaches.arcShapeCache.getArc(right - left, bottom - top,
             startAngle, sweepAngle, useCenter, paint);
-    drawShape(left, top, texture, paint);
+    return drawShape(left, top, texture, paint);
 }
 
-void OpenGLRenderer::drawRectAsShape(float left, float top, float right, float bottom,
+status_t OpenGLRenderer::drawRectAsShape(float left, float top, float right, float bottom,
         SkPaint* paint) {
-    if (mSnapshot->isIgnored()) return;
+    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
 
     mCaches.activeTexture(0);
     const PathTexture* texture = mCaches.rectShapeCache.getRect(right - left, bottom - top, paint);
-    drawShape(left, top, texture, paint);
+    return drawShape(left, top, texture, paint);
 }
 
-void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, SkPaint* p) {
+status_t OpenGLRenderer::drawRect(float left, float top, float right, float bottom, SkPaint* p) {
     if (p->getStyle() != SkPaint::kFill_Style) {
-        drawRectAsShape(left, top, right, bottom, p);
-        return;
+        return drawRectAsShape(left, top, right, bottom, p);
     }
 
     if (quickReject(left, top, right, bottom)) {
-        return;
+        return DrawGlInfo::kStatusDone;
     }
 
     SkXfermode::Mode mode;
@@ -2237,18 +2257,20 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
     } else {
         drawColorRect(left, top, right, bottom, color, mode);
     }
+
+    return DrawGlInfo::kStatusDrew;
 }
 
-void OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
+status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
         const float* positions, SkPaint* paint) {
     if (text == NULL || count == 0 || mSnapshot->isIgnored() ||
             (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
-        return;
+        return DrawGlInfo::kStatusDone;
     }
 
     // NOTE: Skia does not support perspective transform on drawPosText yet
     if (!mSnapshot->transform->isSimple()) {
-        return;
+        return DrawGlInfo::kStatusDone;
     }
 
     float x = 0.0f;
@@ -2308,13 +2330,15 @@ void OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
         }
 #endif
     }
+
+    return DrawGlInfo::kStatusDrew;
 }
 
-void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
+status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         float x, float y, SkPaint* paint, float length) {
     if (text == NULL || count == 0 || mSnapshot->isIgnored() ||
             (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
-        return;
+        return DrawGlInfo::kStatusDone;
     }
 
     if (length < 0.0f) length = paint->measureText(text, bytesCount);
@@ -2332,7 +2356,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     SkPaint::FontMetrics metrics;
     paint->getFontMetrics(&metrics, 0.0f);
     if (quickReject(x, y + metrics.fTop, x + length, y + metrics.fBottom)) {
-        return;
+        return DrawGlInfo::kStatusDone;
     }
 
     const float oldX = x;
@@ -2432,13 +2456,15 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     }
 
     drawTextDecorations(text, bytesCount, length, oldX, oldY, paint);
+
+    return DrawGlInfo::kStatusDrew;
 }
 
-void OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count, SkPath* path,
+status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count, SkPath* path,
         float hOffset, float vOffset, SkPaint* paint) {
     if (text == NULL || count == 0 || mSnapshot->isIgnored() ||
             (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
-        return;
+        return DrawGlInfo::kStatusDone;
     }
 
     FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer(paint);
@@ -2482,27 +2508,31 @@ void OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
         }
 #endif
     }
+
+    return DrawGlInfo::kStatusDrew;
 }
 
-void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
-    if (mSnapshot->isIgnored()) return;
+status_t OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
+    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
 
     mCaches.activeTexture(0);
 
     // TODO: Perform early clip test before we rasterize the path
     const PathTexture* texture = mCaches.pathCache.get(path, paint);
-    if (!texture) return;
+    if (!texture) return DrawGlInfo::kStatusDone;
     const AutoTexture autoCleanup(texture);
 
     const float x = texture->left - texture->offset;
     const float y = texture->top - texture->offset;
 
     drawPathTexture(texture, x, y, paint);
+
+    return DrawGlInfo::kStatusDrew;
 }
 
-void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
+status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
     if (!layer || quickReject(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight())) {
-        return;
+        return DrawGlInfo::kStatusDone;
     }
 
     if (layer->deferredUpdateScheduled && layer->renderer && layer->displayList) {
@@ -2575,6 +2605,8 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
     const Rect r(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight());
     composeLayerRect(layer, r);
 #endif
+
+    return DrawGlInfo::kStatusDrew;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
