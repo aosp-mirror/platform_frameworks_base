@@ -44,13 +44,14 @@ static struct {
 } gInputEventReceiverClassInfo;
 
 
-class NativeInputEventReceiver : public RefBase {
+class NativeInputEventReceiver : public LooperCallback {
 public:
     NativeInputEventReceiver(JNIEnv* env,
             jobject receiverObj, const sp<InputChannel>& inputChannel,
             const sp<MessageQueue>& messageQueue);
 
     status_t initialize();
+    void dispose();
     status_t finishInputEvent(uint32_t seq, bool handled);
     status_t consumeEvents(JNIEnv* env, bool consumeBatches, nsecs_t frameTime);
 
@@ -68,7 +69,7 @@ private:
         return mInputConsumer.getChannel()->getName().string();
     }
 
-    static int handleReceiveCallback(int receiveFd, int events, void* data);
+    virtual int handleEvent(int receiveFd, int events, void* data);
 };
 
 
@@ -84,21 +85,22 @@ NativeInputEventReceiver::NativeInputEventReceiver(JNIEnv* env,
 }
 
 NativeInputEventReceiver::~NativeInputEventReceiver() {
-#if DEBUG_DISPATCH_CYCLE
-    ALOGD("channel '%s' ~ Disposing input event receiver.", getInputChannelName());
-#endif
-
-    mMessageQueue->getLooper()->removeFd(mInputConsumer.getChannel()->getFd());
-
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     env->DeleteGlobalRef(mReceiverObjGlobal);
 }
 
 status_t NativeInputEventReceiver::initialize() {
     int receiveFd = mInputConsumer.getChannel()->getFd();
-    mMessageQueue->getLooper()->addFd(
-            receiveFd, 0, ALOOPER_EVENT_INPUT, handleReceiveCallback, this);
+    mMessageQueue->getLooper()->addFd(receiveFd, 0, ALOOPER_EVENT_INPUT, this, NULL);
     return OK;
+}
+
+void NativeInputEventReceiver::dispose() {
+#if DEBUG_DISPATCH_CYCLE
+    ALOGD("channel '%s' ~ Disposing input event receiver.", getInputChannelName());
+#endif
+
+    mMessageQueue->getLooper()->removeFd(mInputConsumer.getChannel()->getFd());
 }
 
 status_t NativeInputEventReceiver::finishInputEvent(uint32_t seq, bool handled) {
@@ -114,24 +116,22 @@ status_t NativeInputEventReceiver::finishInputEvent(uint32_t seq, bool handled) 
     return status;
 }
 
-int NativeInputEventReceiver::handleReceiveCallback(int receiveFd, int events, void* data) {
-    sp<NativeInputEventReceiver> r = static_cast<NativeInputEventReceiver*>(data);
-
+int NativeInputEventReceiver::handleEvent(int receiveFd, int events, void* data) {
     if (events & (ALOOPER_EVENT_ERROR | ALOOPER_EVENT_HANGUP)) {
         ALOGE("channel '%s' ~ Publisher closed input channel or an error occurred.  "
-                "events=0x%x", r->getInputChannelName(), events);
+                "events=0x%x", getInputChannelName(), events);
         return 0; // remove the callback
     }
 
     if (!(events & ALOOPER_EVENT_INPUT)) {
         ALOGW("channel '%s' ~ Received spurious callback for unhandled poll event.  "
-                "events=0x%x", r->getInputChannelName(), events);
+                "events=0x%x", getInputChannelName(), events);
         return 1;
     }
 
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    status_t status = r->consumeEvents(env, false /*consumeBatches*/, -1);
-    r->mMessageQueue->raiseAndClearException(env, "handleReceiveCallback");
+    status_t status = consumeEvents(env, false /*consumeBatches*/, -1);
+    mMessageQueue->raiseAndClearException(env, "handleReceiveCallback");
     return status == OK || status == NO_MEMORY ? 1 : 0;
 }
 
@@ -256,6 +256,7 @@ static jint nativeInit(JNIEnv* env, jclass clazz, jobject receiverObj,
 static void nativeDispose(JNIEnv* env, jclass clazz, jint receiverPtr) {
     sp<NativeInputEventReceiver> receiver =
             reinterpret_cast<NativeInputEventReceiver*>(receiverPtr);
+    receiver->dispose();
     receiver->decStrong(gInputEventReceiverClassInfo.clazz); // drop reference held by the object
 }
 
