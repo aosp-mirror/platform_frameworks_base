@@ -1301,7 +1301,6 @@ public class Am {
                 "       am display-size [reset|MxN]\n" +
                 "       am to-uri [INTENT]\n" +
                 "       am to-intent-uri [INTENT]\n" +
-                "       am switch-user <USER_ID>\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
