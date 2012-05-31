@@ -263,12 +263,19 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 Context.CONNECTIVITY_SERVICE);
         sWifiOnly = (cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE) == false);
 
-        // Disable for wifi only devices.
-        if (Settings.Secure.getString(contentResolver, Settings.Secure.WIFI_WATCHDOG_ON) == null
-                && sWifiOnly) {
-            log("Disabling watchog for wi-fi only device");
-            putSettingsBoolean(contentResolver, Settings.Secure.WIFI_WATCHDOG_ON, false);
+        // Watchdog is always enabled. Poor network detection & walled garden detection
+        // can individually be turned on/off
+        // TODO: Remove this setting & clean up state machine since we always have
+        // watchdog in an enabled state
+        putSettingsBoolean(contentResolver, Settings.Secure.WIFI_WATCHDOG_ON, true);
+
+        // Disable poor network avoidance, but keep watchdog active for walled garden detection
+        if (sWifiOnly) {
+            log("Disabling poor network avoidance for wi-fi only device");
+            putSettingsBoolean(contentResolver,
+                    Settings.Secure.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED, false);
         }
+
         WifiWatchdogStateMachine wwsm = new WifiWatchdogStateMachine(context);
         wwsm.start();
         return wwsm;
