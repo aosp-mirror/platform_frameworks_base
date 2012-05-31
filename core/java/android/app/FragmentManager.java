@@ -1568,8 +1568,17 @@ final class FragmentManagerImpl extends FragmentManager {
         for (int i=0; i<N; i++) {
             Fragment f = mActive.get(i);
             if (f != null) {
+                if (f.mIndex < 0) {
+                    String msg = "Failure saving state: active " + f
+                            + " has cleared index: " + f.mIndex;
+                    Slog.e(TAG, msg);
+                    dump("  ", null, new PrintWriter(new LogWriter(
+                            Log.ERROR, TAG, Log.LOG_ID_SYSTEM)), new String[] { });
+                    throw new IllegalStateException(msg);
+                }
+
                 haveFragments = true;
-                
+
                 FragmentState fs = new FragmentState(f);
                 active[i] = fs;
                 
@@ -1621,6 +1630,14 @@ final class FragmentManagerImpl extends FragmentManager {
                 added = new int[N];
                 for (int i=0; i<N; i++) {
                     added[i] = mAdded.get(i).mIndex;
+                    if (added[i] < 0) {
+                        String msg = "Failure saving state: active " + mAdded.get(i)
+                                + " has cleared index: " + added[i];
+                        Slog.e(TAG, msg);
+                        dump("  ", null, new PrintWriter(new LogWriter(
+                                Log.ERROR, TAG, Log.LOG_ID_SYSTEM)), new String[] { });
+                        throw new IllegalStateException(msg);
+                    }
                     if (DEBUG) Log.v(TAG, "saveAllState: adding fragment #" + i
                             + ": " + mAdded.get(i));
                 }
