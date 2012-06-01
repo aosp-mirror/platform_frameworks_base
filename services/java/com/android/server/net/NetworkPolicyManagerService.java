@@ -396,6 +396,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         @Override
+        public void onImportanceChanged(int pid, int uid, int importance) {
+        }
+
+        @Override
         public void onProcessDied(int pid, int uid) {
             mHandler.obtainMessage(MSG_PROCESS_DIED, pid, uid).sendToTarget();
         }
