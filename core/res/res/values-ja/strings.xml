@@ -855,12 +855,9 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"検索キーワードを削除"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"検索キーワードを送信"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"音声検索"</string>
-    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
-    <skip />
-    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
-    <skip />
-    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
-    <skip />
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"タッチガイドをONにしますか？"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>がタッチガイドをONにしようとしています。タッチガイドをONにすると、指の位置にあるアイテムの説明を読み上げたり表示したりできます。また、タブレットを通常とは違うジェスチャーで操作できます。"</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>がタッチガイドをONにしようとしています。タッチガイドをONにすると、指の位置にあるアイテムの説明を読み上げたり表示したりできます。また、携帯端末を通常とは違うジェスチャーで操作できます。"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1か月前"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1か月前"</string>
   <plurals name="num_seconds_ago">
@@ -1127,10 +1124,8 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"入力方法をセットアップ"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"物理キーボード"</string>
     <string name="hardware" msgid="7517821086888990278">"ハードウェア"</string>
-    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
-    <skip />
-    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
-    <skip />
+    <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"キーボードレイアウトの選択"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"タップしてキーボードレイアウトを選択してください。"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"候補"</u></string>
@@ -1323,6 +1318,5 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ブラウザを起動しますか？"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"通話を受けますか？"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"常時"</string>
-    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
-    <skip />
+    <string name="activity_resolver_use_once" msgid="2404644797149173758">"1回のみ"</string>
 </resources>

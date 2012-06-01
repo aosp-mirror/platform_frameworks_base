@@ -662,7 +662,7 @@
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Busca del trabajo"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Asistente"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <string name="eventTypeCustom" msgid="7837586198458073404">"Personalizados"</string>
+    <string name="eventTypeCustom" msgid="7837586198458073404">"Personalizado"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Cumpleaños"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Aniversario"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Otros"</string>
