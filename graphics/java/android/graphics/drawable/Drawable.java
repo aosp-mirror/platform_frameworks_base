@@ -124,6 +124,8 @@ public abstract class Drawable {
     private WeakReference<Callback> mCallback = null;
     private boolean mVisible = true;
 
+    private int mLayoutDirection;
+
     /**
      * Draw in its bounds (set via setBounds) respecting optional effects such
      * as alpha (set via setAlpha) and color filter (set via setColorFilter).
@@ -296,18 +298,6 @@ public abstract class Drawable {
     }
 
     /**
-     * Implement this interface if you want to create an drawable that is RTL aware
-     */
-    public static interface Callback2 extends Callback {
-        /**
-         * A Drawable can call this to get the resolved layout direction of the <var>who</var>.
-         *
-         * @param who The drawable being queried.
-         */
-        public int getResolvedLayoutDirection(Drawable who);
-    }
-
-    /**
      * Bind a {@link Callback} object to this Drawable.  Required for clients
      * that want to support animated drawables.
      *
@@ -384,15 +374,27 @@ public abstract class Drawable {
     }
 
     /**
-     * Use the current {@link android.graphics.drawable.Drawable.Callback2} implementation to get
-     * the resolved layout direction of this Drawable.
+     * Returns the resolved layout direction for this Drawable.
+     *
+     * @return One of {@link View#LAYOUT_DIRECTION_LTR},
+     *   {@link View#LAYOUT_DIRECTION_RTL}
      */
-    public int getResolvedLayoutDirectionSelf() {
-        final Callback callback = getCallback();
-        if (callback == null || !(callback instanceof Callback2)) {
-            return View.LAYOUT_DIRECTION_LTR;
+    public int getLayoutDirection() {
+        return mLayoutDirection;
+    }
+
+    /**
+     * Set the layout direction for this drawable. Should be a resolved direction as the
+     * Drawable as no capacity to do the resolution on his own.
+     *
+     * @param layoutDirection One of {@link View#LAYOUT_DIRECTION_LTR},
+     *   {@link View#LAYOUT_DIRECTION_RTL},
+     *
+     */
+    public void setLayoutDirection(int layoutDirection) {
+        if (getLayoutDirection() != layoutDirection) {
+            mLayoutDirection = layoutDirection;
         }
-        return ((Callback2) callback).getResolvedLayoutDirection(this);
     }
 
     /**

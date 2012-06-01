@@ -9251,12 +9251,12 @@ package android.graphics.drawable {
     method public android.graphics.drawable.Drawable getCurrent();
     method public int getIntrinsicHeight();
     method public int getIntrinsicWidth();
+    method public int getLayoutDirection();
     method public final int getLevel();
     method public int getMinimumHeight();
     method public int getMinimumWidth();
     method public abstract int getOpacity();
     method public boolean getPadding(android.graphics.Rect);
-    method public int getResolvedLayoutDirectionSelf();
     method public int[] getState();
     method public android.graphics.Region getTransparentRegion();
     method public void inflate(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
@@ -9279,6 +9279,7 @@ package android.graphics.drawable {
     method public void setColorFilter(int, android.graphics.PorterDuff.Mode);
     method public void setDither(boolean);
     method public void setFilterBitmap(boolean);
+    method public void setLayoutDirection(int);
     method public final boolean setLevel(int);
     method public boolean setState(int[]);
     method public boolean setVisible(boolean, boolean);
@@ -9289,10 +9290,6 @@ package android.graphics.drawable {
     method public abstract void invalidateDrawable(android.graphics.drawable.Drawable);
     method public abstract void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
     method public abstract void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
-  }
-
-  public static abstract interface Drawable.Callback2 implements android.graphics.drawable.Drawable.Callback {
-    method public abstract int getResolvedLayoutDirection(android.graphics.drawable.Drawable);
   }
 
   public static abstract class Drawable.ConstantState {
@@ -23905,7 +23902,7 @@ package android.view {
     method public void recycle();
   }
 
-  public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.graphics.drawable.Drawable.Callback2 android.view.KeyEvent.Callback {
+  public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
     ctor public View(android.content.Context);
     ctor public View(android.content.Context, android.util.AttributeSet);
     ctor public View(android.content.Context, android.util.AttributeSet, int);
@@ -24050,7 +24047,6 @@ package android.view {
     method public float getPivotX();
     method public float getPivotY();
     method public int getResolvedLayoutDirection();
-    method public int getResolvedLayoutDirection(android.graphics.drawable.Drawable);
     method public int getResolvedTextAlignment();
     method public int getResolvedTextDirection();
     method public android.content.res.Resources getResources();
@@ -24182,6 +24178,7 @@ package android.view {
     method protected void onOverScrolled(int, int, boolean, boolean);
     method public void onPaddingChanged(int);
     method public void onPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
+    method public void onResolveDrawables(int);
     method public void onResolvedLayoutDirectionChanged();
     method public void onResolvedLayoutDirectionReset();
     method public void onResolvedTextAlignmentChanged();
@@ -24233,6 +24230,7 @@ package android.view {
     method public void resetResolvedLayoutDirection();
     method public void resetResolvedTextAlignment();
     method public void resetResolvedTextDirection();
+    method public void resolveDrawables();
     method public void resolveLayoutDirection();
     method public void resolvePadding();
     method public static int resolveSize(int, int);
@@ -28725,7 +28723,6 @@ package android.widget {
     method public boolean onTextContextMenuItem(int);
     method public void removeTextChangedListener(android.text.TextWatcher);
     method protected void resetResolvedDrawables();
-    method protected void resolveDrawables();
     method public void setAllCaps(boolean);
     method public final void setAutoLinkMask(int);
     method public void setCompoundDrawablePadding(int);
