@@ -1360,6 +1360,13 @@ public class ActivityManager {
         public int lastTrimLevel;
 
         /**
+         * Constant for {@link #importance}: this is a persistent process.
+         * Only used when reporting to process observers.
+         * @hide
+         */
+        public static final int IMPORTANCE_PERSISTENT = 50;
+
+        /**
          * Constant for {@link #importance}: this process is running the
          * foreground UI.
          */
