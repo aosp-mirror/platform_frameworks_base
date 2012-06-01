@@ -62,6 +62,8 @@ final class AccessibilityInteractionController {
 
     private final int mMyProcessId;
 
+    private final ArrayList<View> mTempArrayList = new ArrayList<View>();
+
     public AccessibilityInteractionController(ViewRootImpl viewRootImpl) {
         Looper looper =  viewRootImpl.mHandler.getLooper();
         mMyLooperThreadId = looper.getThread().getId();
@@ -313,7 +315,7 @@ final class AccessibilityInteractionController {
                     infos = provider.findAccessibilityNodeInfosByText(text,
                             virtualDescendantId);
                 } else if (virtualDescendantId == AccessibilityNodeInfo.UNDEFINED) {
-                    ArrayList<View> foundViews = mViewRootImpl.mAttachInfo.mTempArrayList;
+                    ArrayList<View> foundViews = mTempArrayList;
                     foundViews.clear();
                     root.findViewsWithText(foundViews, text, View.FIND_VIEWS_WITH_TEXT
                             | View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION
