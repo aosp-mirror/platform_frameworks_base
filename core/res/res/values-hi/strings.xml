@@ -855,12 +855,9 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"क्‍वेरी साफ़ करें"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"क्वेरी सबमिट करें"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"ध्वनि खोज"</string>
-    <!-- no translation found for enable_explore_by_touch_warning_title (7460694070309730149) -->
-    <skip />
-    <!-- no translation found for enable_explore_by_touch_warning_message (8655887539089910577) -->
-    <skip />
-    <!-- no translation found for enable_explore_by_touch_warning_message (2708199672852373195) -->
-    <skip />
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"स्‍पर्श के द्वारा अन्‍वेषण करें सक्षम करें?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> स्‍पर्श के द्वारा अन्‍वेषण करें सक्षम करना चाहती है. स्‍पर्श के द्वारा अन्‍वेष करें चालू होने पर, आप अपनी अंगुली के नीचे क्या है उसका विवरण सुन सकते हैं या देख सकते हैं या टेबलेट से संवाद करने के लिए जेस्‍चर निष्‍पादित कर सकते हैं."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> स्‍पर्श के द्वारा अन्‍वेषण करें सक्षम करना चाहती है. स्‍पर्श के द्वारा अन्‍वेष करें चालू होने पर, आप अपनी अंगुली के नीचे क्या है उसका विवरण सुन सकते हैं या देख सकते हैं या फ़ोन से संवाद करने के लिए जेस्‍चर निष्‍पादित कर सकते हैं."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 माह पहले"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1 माह से पहले"</string>
   <plurals name="num_seconds_ago">
@@ -1127,10 +1124,8 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"इनपुट पद्धतियां सेट करें"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"भौतिक कीबोर्ड"</string>
     <string name="hardware" msgid="7517821086888990278">"हार्डवेयर"</string>
-    <!-- no translation found for select_keyboard_layout_notification_title (1407367017263030773) -->
-    <skip />
-    <!-- no translation found for select_keyboard_layout_notification_message (4465907700449257063) -->
-    <skip />
+    <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"कीबोर्ड लेआउट का चयन करें"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"कीबोर्ड लेआउट का चयन करने के लिए स्‍पर्श करें."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"उम्‍मीदवार"</u></string>
@@ -1323,6 +1318,5 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ब्राउज़र लॉन्च करें?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"कॉल स्वीकार करें?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"हमेशा"</string>
-    <!-- no translation found for activity_resolver_use_once (2404644797149173758) -->
-    <skip />
+    <string name="activity_resolver_use_once" msgid="2404644797149173758">"केवल एक बार"</string>
 </resources>
