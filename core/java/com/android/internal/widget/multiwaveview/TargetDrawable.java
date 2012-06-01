@@ -44,7 +44,7 @@ public class TargetDrawable {
     private float mAlpha = 1.0f;
     private Drawable mDrawable;
     private boolean mEnabled = true;
-    private int mResourceId;
+    private final int mResourceId;
 
     /* package */ static class DrawableWithAlpha extends Drawable {
         private float mAlpha = 1.0f;
@@ -78,6 +78,12 @@ public class TargetDrawable {
 
     public TargetDrawable(Resources res, int resId) {
         mResourceId = resId;
+        setDrawable(res, resId);
+    }
+
+    public void setDrawable(Resources res, int resId) {
+        // Note we explicitly don't set mResourceId to resId since we allow the drawable to be
+        // swapped at runtime and want to re-use the existing resource id for identification.
         Drawable drawable = resId == 0 ? null : res.getDrawable(resId);
         // Mutate the drawable so we can animate shared drawable properties.
         mDrawable = drawable != null ? drawable.mutate() : null;
