@@ -2253,8 +2253,7 @@ bool ResourceTable::getAttributeFlags(
         bool failed = false;
         while (pos < end && !failed) {
             const char16_t* start = pos;
-            end++;
-            while (pos < end && *pos != '|') {
+            while (pos <= end && *pos != '|') {
                 pos++;
             }
 
