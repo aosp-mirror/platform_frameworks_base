@@ -1103,6 +1103,8 @@ public class PowerManagerService extends IPowerManager.Stub
                         ? "SCREEN_BRIGHT_BIT " : "")
                 + (((state & SCREEN_ON_BIT) != 0)
                         ? "SCREEN_ON_BIT " : "")
+                + (((state & BUTTON_BRIGHT_BIT) != 0)
+                        ? "BUTTON_BRIGHT_BIT " : "")
                 + (((state & BATTERY_LOW_BIT) != 0)
                         ? "BATTERY_LOW_BIT " : "");
     }
