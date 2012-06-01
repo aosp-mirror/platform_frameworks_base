@@ -42,12 +42,13 @@ static struct {
 } gDisplayEventReceiverClassInfo;
 
 
-class NativeDisplayEventReceiver : public RefBase {
+class NativeDisplayEventReceiver : public LooperCallback {
 public:
     NativeDisplayEventReceiver(JNIEnv* env,
             jobject receiverObj, const sp<MessageQueue>& messageQueue);
 
     status_t initialize();
+    void dispose();
     status_t scheduleVsync();
 
 protected:
@@ -59,7 +60,7 @@ private:
     DisplayEventReceiver mReceiver;
     bool mWaitingForVsync;
 
-    static int handleReceiveCallback(int receiveFd, int events, void* data);
+    virtual int handleEvent(int receiveFd, int events, void* data);
     bool readLastVsyncMessage(nsecs_t* outTimestamp, uint32_t* outCount);
 };
 
@@ -72,12 +73,6 @@ NativeDisplayEventReceiver::NativeDisplayEventReceiver(JNIEnv* env,
 }
 
 NativeDisplayEventReceiver::~NativeDisplayEventReceiver() {
-    ALOGV("receiver %p ~ Disposing display event receiver.", this);
-
-    if (!mReceiver.initCheck()) {
-        mMessageQueue->getLooper()->removeFd(mReceiver.getFd());
-    }
-
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     env->DeleteGlobalRef(mReceiverObjGlobal);
 }
@@ -90,11 +85,19 @@ status_t NativeDisplayEventReceiver::initialize() {
     }
 
     int rc = mMessageQueue->getLooper()->addFd(mReceiver.getFd(), 0, ALOOPER_EVENT_INPUT,
-            handleReceiveCallback, this);
+            this, NULL);
     if (rc < 0) {
         return UNKNOWN_ERROR;
     }
     return OK;
+}
+
+void NativeDisplayEventReceiver::dispose() {
+    ALOGV("receiver %p ~ Disposing display event receiver.", this);
+
+    if (!mReceiver.initCheck()) {
+        mMessageQueue->getLooper()->removeFd(mReceiver.getFd());
+    }
 }
 
 status_t NativeDisplayEventReceiver::scheduleVsync() {
@@ -117,9 +120,7 @@ status_t NativeDisplayEventReceiver::scheduleVsync() {
     return OK;
 }
 
-int NativeDisplayEventReceiver::handleReceiveCallback(int receiveFd, int events, void* data) {
-    sp<NativeDisplayEventReceiver> r = static_cast<NativeDisplayEventReceiver*>(data);
-
+int NativeDisplayEventReceiver::handleEvent(int receiveFd, int events, void* data) {
     if (events & (ALOOPER_EVENT_ERROR | ALOOPER_EVENT_HANGUP)) {
         ALOGE("Display event receiver pipe was closed or an error occurred.  "
                 "events=0x%x", events);
@@ -135,23 +136,23 @@ int NativeDisplayEventReceiver::handleReceiveCallback(int receiveFd, int events,
     // Drain all pending events, keep the last vsync.
     nsecs_t vsyncTimestamp;
     uint32_t vsyncCount;
-    if (!r->readLastVsyncMessage(&vsyncTimestamp, &vsyncCount)) {
-        ALOGV("receiver %p ~ Woke up but there was no vsync pulse!", data);
+    if (!readLastVsyncMessage(&vsyncTimestamp, &vsyncCount)) {
+        ALOGV("receiver %p ~ Woke up but there was no vsync pulse!", this);
         return 1; // keep the callback, did not obtain a vsync pulse
     }
 
     ALOGV("receiver %p ~ Vsync pulse: timestamp=%lld, count=%d",
-            data, vsyncTimestamp, vsyncCount);
-    r->mWaitingForVsync = false;
+            this, vsyncTimestamp, vsyncCount);
+    mWaitingForVsync = false;
 
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-    ALOGV("receiver %p ~ Invoking vsync handler.", data);
-    env->CallVoidMethod(r->mReceiverObjGlobal,
+    ALOGV("receiver %p ~ Invoking vsync handler.", this);
+    env->CallVoidMethod(mReceiverObjGlobal,
             gDisplayEventReceiverClassInfo.dispatchVsync, vsyncTimestamp, vsyncCount);
-    ALOGV("receiver %p ~ Returned from vsync handler.", data);
+    ALOGV("receiver %p ~ Returned from vsync handler.", this);
 
-    r->mMessageQueue->raiseAndClearException(env, "dispatchVsync");
+    mMessageQueue->raiseAndClearException(env, "dispatchVsync");
     return 1; // keep the callback
 }
 
@@ -201,6 +202,7 @@ static jint nativeInit(JNIEnv* env, jclass clazz, jobject receiverObj,
 static void nativeDispose(JNIEnv* env, jclass clazz, jint receiverPtr) {
     sp<NativeDisplayEventReceiver> receiver =
             reinterpret_cast<NativeDisplayEventReceiver*>(receiverPtr);
+    receiver->dispose();
     receiver->decStrong(gDisplayEventReceiverClassInfo.clazz); // drop reference held by the object
 }
 
