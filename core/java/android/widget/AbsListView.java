@@ -57,7 +57,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -1331,43 +1330,42 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     @Override
     public void addFocusables(ArrayList<View> views, int direction, int focusableMode) {
-        if ((focusableMode & FOCUSABLES_ACCESSIBILITY) == FOCUSABLES_ACCESSIBILITY
-                && (direction == ACCESSIBILITY_FOCUS_FORWARD
-                        || direction == ACCESSIBILITY_FOCUS_BACKWARD)) {
-            if (canTakeAccessibilityFocusFromHover()) {
-                views.add(this);
+        if ((focusableMode & FOCUSABLES_ACCESSIBILITY) == FOCUSABLES_ACCESSIBILITY) {
+            switch(direction) {
+                case ACCESSIBILITY_FOCUS_BACKWARD: {
+                    View focusable = (getChildCount() > 0) ? getChildAt(getChildCount() - 1) : this;
+                    if (focusable.canTakeAccessibilityFocusFromHover()) {
+                        views.add(focusable);
+                    }
+                } return;
+                case ACCESSIBILITY_FOCUS_FORWARD: {
+                    if (canTakeAccessibilityFocusFromHover()) {
+                        views.add(this);
+                    }
+                } return;
             }
-        } else {
             super.addFocusables(views, direction, focusableMode);
         }
     }
 
     @Override
     public View focusSearch(int direction) {
-        return focusSearch(null, direction);
+        return focusSearch(this, direction);
     }
 
     @Override
     public View focusSearch(View focused, int direction) {
         switch (direction) {
             case ACCESSIBILITY_FOCUS_FORWARD: {
-                ViewRootImpl viewRootImpl = getViewRootImpl();
-                if (viewRootImpl == null) {
-                    return null;
-                }
-                View currentFocus = viewRootImpl.getAccessibilityFocusedHost();
-                if (currentFocus == null) {
-                    return super.focusSearch(this, direction);
-                }
-                // If we have the focus try giving it to the first child.
-                if (currentFocus == this) {
+                // If we are the focused view try giving it to the first child.
+                if (focused == this) {
                     if (getChildCount() > 0) {
                         return getChildAt(0);
                     }
                     return super.focusSearch(this, direction);
                 }
-                // Find the item that has accessibility focus.
-                final int currentPosition = getPositionForView(currentFocus);
+                // Find the item that has the focused view.
+                final int currentPosition = getPositionForView(focused);
                 if (currentPosition < 0 || currentPosition >= getCount()) {
                     return super.focusSearch(this, direction);
                 }
@@ -1376,9 +1374,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 if (currentItem instanceof ViewGroup) {
                     ViewGroup currentItemGroup = (ViewGroup) currentItem;
                     View nextFocus = FocusFinder.getInstance().findNextFocus(currentItemGroup,
-                                currentFocus, direction);
+                                focused, direction);
                     if (nextFocus != null && nextFocus != currentItemGroup
-                            && nextFocus != currentFocus) {
+                            && nextFocus != focused) {
                         return nextFocus;
                     }
                 }
@@ -1386,50 +1384,54 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 final int nextPosition = currentPosition - getFirstVisiblePosition() + 1;
                 if (nextPosition < getChildCount()) {
                     return getChildAt(nextPosition);
-                } else {
-                    return super.focusSearch(this, direction);
                 }
+                // No next item start searching from the list.
+                return super.focusSearch(this, direction);
             }
             case ACCESSIBILITY_FOCUS_BACKWARD: {
-                ViewRootImpl viewRootImpl = getViewRootImpl();
-                if (viewRootImpl == null) {
-                    return null;
-                }
-                View currentFocus = viewRootImpl.getAccessibilityFocusedHost();
-                if (currentFocus == null) {
-                    return super.focusSearch(this, direction);
-                }
-                // If we have the focus do a generic search.
-                if (currentFocus == this) {
-                    final int lastChildIndex = getChildCount() - 1;
-                    if (lastChildIndex >= 0) {
-                        return getChildAt(lastChildIndex);
+                // If we are the focused search from the view that is
+                // as closer to the bottom as possible.
+                if (focused == this) {
+                    final int childCount = getChildCount();
+                    if (childCount > 0) {
+                        return super.focusSearch(getChildAt(childCount - 1), direction);
                     }
                     return super.focusSearch(this, direction);
                 }
-                // Find the item that has accessibility focus.
-                final int currentPosition = getPositionForView(currentFocus);
+                // Find the item that has the focused view.
+                final int currentPosition = getPositionForView(focused);
                 if (currentPosition < 0 || currentPosition >= getCount()) {
                     return super.focusSearch(this, direction);
                 }
-                // Try to advance focus in the current item.
+
                 View currentItem = getChildAt(currentPosition - getFirstVisiblePosition());
+
+                // If a list item is the focused view we try to find a view
+                // in the previous item since in reverse the item contents
+                // get accessibility focus before the item itself.
+                if (currentItem == focused) {
+                    // This list gets accessibility focus after the last first item.
+                    final int previoustPosition = currentPosition - getFirstVisiblePosition() - 1;
+                    if (previoustPosition < 0) {
+                        return this;
+                    }
+                    currentItem = getChildAt(previoustPosition);
+                    focused = null;
+                }
+
+                // Search for into the item.
                 if (currentItem instanceof ViewGroup) {
                     ViewGroup currentItemGroup = (ViewGroup) currentItem;
                     View nextFocus = FocusFinder.getInstance().findNextFocus(currentItemGroup,
-                                currentFocus, direction);
+                                focused, direction);
                     if (nextFocus != null && nextFocus != currentItemGroup
-                            && nextFocus != currentFocus) {
+                            && nextFocus != focused) {
                         return nextFocus;
                     }
                 }
-                // Try to move focus to the previous item.
-                final int nextPosition = currentPosition - getFirstVisiblePosition() - 1;
-                if (nextPosition >= 0) {
-                    return getChildAt(nextPosition);
-                } else {
-                    return super.focusSearch(this, direction);
-                }
+
+                // If not item content wants focus we give it to the item.
+                return currentItem;
             }
         }
         return super.focusSearch(focused, direction);
