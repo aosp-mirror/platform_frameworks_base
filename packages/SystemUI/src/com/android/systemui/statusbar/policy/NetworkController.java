@@ -127,6 +127,7 @@ public class NetworkController extends BroadcastReceiver {
     private static final int INET_CONDITION_THRESHOLD = 50;
 
     private boolean mAirplaneMode = false;
+    private boolean mLastAirplaneMode = true;
 
     // our ui
     Context mContext;
@@ -1062,12 +1063,17 @@ public class NetworkController extends BroadcastReceiver {
          || mLastDataDirectionOverlayIconId != combinedActivityIconId
          || mLastWifiIconId                 != mWifiIconId
          || mLastWimaxIconId                != mWimaxIconId
-         || mLastDataTypeIconId             != mDataTypeIconId)
+         || mLastDataTypeIconId             != mDataTypeIconId
+         || mLastAirplaneMode               != mAirplaneMode)
         {
             // NB: the mLast*s will be updated later
             for (SignalCluster cluster : mSignalClusters) {
                 refreshSignalCluster(cluster);
             }
+        }
+
+        if (mLastAirplaneMode != mAirplaneMode) {
+            mLastAirplaneMode = mAirplaneMode;
         }
 
         // the phone icon on phones
