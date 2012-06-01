@@ -72,7 +72,14 @@ struct DrawGlInfo {
         // The functor needs to be invoked again but will
         // not redraw. Only the functor is invoked again
         // (unless another functor requests a redraw.)
-        kStatusInvoke = 0x2
+        kStatusInvoke = 0x2,
+        // DisplayList actually issued GL drawing commands.
+        // This is used to signal the HardwareRenderer that the
+        // buffers should be flipped - otherwise, there were no
+        // changes to the buffer, so no need to flip. Some hardware
+        // has issues with stale buffer contents when no GL
+        // commands are issued.
+        kStatusDrew = 0x4
     };
 }; // struct DrawGlInfo
 
