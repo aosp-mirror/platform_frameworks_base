@@ -78,9 +78,10 @@ public class RecentsScrollViewPerformanceHelper {
 
     public void addViewCallback(View newLinearLayoutChild) {
         if (mSoftwareRendered && OPTIMIZE_SW_RENDERED_RECENTS) {
-            final View view = newLinearLayoutChild;
-            view.setDrawingCacheEnabled(true);
-            view.buildDrawingCache();
+            final RecentsPanelView.ViewHolder holder =
+                    (RecentsPanelView.ViewHolder) newLinearLayoutChild.getTag();
+            holder.labelView.setDrawingCacheEnabled(true);
+            holder.labelView.buildDrawingCache();
         }
     }
 
