@@ -2342,13 +2342,13 @@ public class PowerManagerService extends IPowerManager.Stub
     }
 
     private int getPreferredBrightness() {
+        int brightness = mScreenBrightnessSetting;
         if (mScreenBrightnessOverride >= 0) {
-            return mScreenBrightnessOverride;
+            brightness = mScreenBrightnessOverride;
         } else if (mLightSensorScreenBrightness >= 0 && mUseSoftwareAutoBrightness
                 && mAutoBrightessEnabled) {
-            return mLightSensorScreenBrightness;
+            brightness = mLightSensorScreenBrightness;
         }
-        final int brightness = mScreenBrightnessSetting;
          // Don't let applications turn the screen all the way off
         return Math.max(brightness, mScreenBrightnessDim);
     }
