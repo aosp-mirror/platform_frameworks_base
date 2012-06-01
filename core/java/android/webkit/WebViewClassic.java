@@ -743,12 +743,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             // the existing GL resources for the html5 video will be destroyed
             // at native side.
             // Here we just need to clean up the Surface Texture which is static.
-            if (level >= TRIM_MEMORY_UI_HIDDEN) {
+            if (level > TRIM_MEMORY_UI_HIDDEN) {
                 HTML5VideoInline.cleanupSurfaceTexture();
             }
             WebViewClassic.nativeOnTrimMemory(level);
         }
-
     }
 
     // A final CallbackProxy shared by WebViewCore and BrowserFrame.
@@ -1037,7 +1036,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     static final int AUTOFILL_COMPLETE                  = 134;
 
     static final int SCREEN_ON                          = 136;
-    static final int ENTER_FULLSCREEN_VIDEO             = 137;
     static final int UPDATE_ZOOM_DENSITY                = 139;
     static final int EXIT_FULLSCREEN_VIDEO              = 140;
 
@@ -7363,15 +7361,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
                 case SCREEN_ON:
                     mWebView.setKeepScreenOn(msg.arg1 == 1);
-                    break;
-
-                case ENTER_FULLSCREEN_VIDEO:
-                    int layerId = msg.arg1;
-
-                    String url = (String) msg.obj;
-                    if (mHTML5VideoViewProxy != null) {
-                        mHTML5VideoViewProxy.enterFullScreenVideo(layerId, url);
-                    }
                     break;
 
                 case EXIT_FULLSCREEN_VIDEO:
