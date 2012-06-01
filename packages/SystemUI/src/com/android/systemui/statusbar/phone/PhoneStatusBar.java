@@ -39,6 +39,7 @@ import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.NinePatchDrawable;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.Message;
@@ -161,6 +162,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     View mExpandedContents;
     int mNotificationPanelMarginBottomPx, mNotificationPanelMarginLeftPx;
     int mNotificationPanelGravity;
+    int mNotificationPanelMinHeight;
 
     // top bar
     View mClearButton;
@@ -208,6 +210,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     long mAnimLastTimeNanos;
     boolean mAnimatingReveal = false;
     int mViewDelta;
+    float mFlingVelocity;
+    int mFlingY;
     int[] mAbsPos = new int[2];
     Runnable mPostCollapseCleanup = null;
 
@@ -233,6 +237,33 @@ public class PhoneStatusBar extends BaseStatusBar {
         @Override
         public void onAnimationEnd(Animator animation) {
             mIcons.setVisibility(View.VISIBLE);
+        }
+    };
+
+    private final Runnable mStartRevealAnimation = new Runnable() {
+        @Override
+        public void run() {
+            mAnimAccel = mExpandAccelPx;
+            mAnimVel = mFlingExpandMinVelocityPx;
+            mAnimY = getStatusBarHeight();
+            updateExpandedViewPos((int)mAnimY);
+
+            mAnimating = true;
+            mAnimatingReveal = true;
+            resetLastAnimTime();
+            mChoreographer.removeCallbacks(Choreographer.CALLBACK_ANIMATION,
+                mAnimationCallback, null);
+            mChoreographer.removeCallbacks(Choreographer.CALLBACK_ANIMATION,
+                mRevealAnimationCallback, null);
+            mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION,
+                mRevealAnimationCallback, null);
+        }
+    };
+
+    private final Runnable mPerformFling = new Runnable() {
+        @Override
+        public void run() {
+            performFling(mFlingY + mViewDelta, mFlingVelocity, false);
         }
     };
 
@@ -321,7 +352,6 @@ public class PhoneStatusBar extends BaseStatusBar {
             mNotificationPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
                     R.color.notification_panel_solid_background)));
         }
-
         if (ENABLE_INTRUDERS) {
             mIntruderAlertView = (IntruderAlertView) View.inflate(context, R.layout.intruder_alert, null);
             mIntruderAlertView.setVisibility(View.GONE);
@@ -1042,14 +1072,13 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     };
 
-    private void makeExpandedVisible() {
+    private void makeExpandedVisible(boolean revealAfterDraw) {
         if (SPEW) Slog.d(TAG, "Make expanded visible: expanded visible=" + mExpandedVisible);
         if (mExpandedVisible) {
             return;
         }
 
         mExpandedVisible = true;
-        mNotificationPanel.setVisibility(View.VISIBLE);
         makeSlippery(mNavigationBarView, true);
 
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
@@ -1062,6 +1091,12 @@ public class PhoneStatusBar extends BaseStatusBar {
         lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
         final WindowManager wm = WindowManagerImpl.getDefault();
         wm.updateViewLayout(mStatusBarWindow, lp);
+
+        // Updating the window layout will force an expensive traversal/redraw.
+        // Kick off the reveal animation after this is complete to avoid animation latency.
+        if (revealAfterDraw) {
+            mHandler.post(mStartRevealAnimation);
+        }
 
         visibilityChanged(true);
     }
@@ -1148,7 +1183,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         mExpanded = true;
-        makeExpandedVisible();
+        makeExpandedVisible(false);
         updateExpandedViewPos(EXPANDED_FULL_OPEN);
 
         if (false) postStartTracing();
@@ -1163,7 +1198,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
         mExpandedVisible = false;
         visibilityChanged(false);
-        mNotificationPanel.setVisibility(View.INVISIBLE);
         makeSlippery(mNavigationBarView, false);
 
         // Shrink the window to the size of the status bar only
@@ -1244,6 +1278,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     void stopTracking() {
+        if (!mTracking)
+            return;
         mTracking = false;
         mPile.setLayerType(View.LAYER_TYPE_NONE, null);
         mVelocityTracker.recycle();
@@ -1268,7 +1304,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (SPEW) {
             Slog.d(TAG, "doRevealAnimation: dt=" + (frameTimeNanos - mAnimLastTimeNanos));
         }
-        final int h = getCloseViewHeight() + getStatusBarHeight();
+        final int h = mNotificationPanelMinHeight;
         if (mAnimatingReveal && mAnimating && mAnimY < h) {
             incrementAnim(frameTimeNanos);
             if (mAnimY >= h) {
@@ -1293,20 +1329,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mPile.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         mVelocityTracker = VelocityTracker.obtain();
         if (opening) {
-            mAnimAccel = mExpandAccelPx;
-            mAnimVel = mFlingExpandMinVelocityPx;
-            mAnimY = getStatusBarHeight();
-            updateExpandedViewPos((int)mAnimY);
-            mAnimating = true;
-            mAnimatingReveal = true;
-            resetLastAnimTime();
-            mChoreographer.removeCallbacks(Choreographer.CALLBACK_ANIMATION,
-                    mAnimationCallback, null);
-            mChoreographer.removeCallbacks(Choreographer.CALLBACK_ANIMATION,
-                    mRevealAnimationCallback, null);
-            mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION,
-                    mRevealAnimationCallback, null);
-            makeExpandedVisible();
+            makeExpandedVisible(true);
         } else {
             // it's open, close it?
             if (mAnimating) {
@@ -1320,7 +1343,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     void performFling(int y, float vel, boolean always) {
         if (CHATTY) {
-            Slog.d(TAG, "panel: will fling, y=" + y + " vel=" + vel);
+            Slog.d(TAG, "panel: will fling, y=" + y + " vel=" + vel + " mExpanded=" + mExpanded);
         }
 
         mAnimatingReveal = false;
@@ -1389,7 +1412,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     boolean interceptTouchEvent(MotionEvent event) {
         if (SPEW) {
             Slog.d(TAG, "Touch: rawY=" + event.getRawY() + " event=" + event + " mDisabled="
-                + mDisabled);
+                + mDisabled + " mTracking=" + mTracking);
         } else if (CHATTY) {
             if (event.getAction() != MotionEvent.ACTION_MOVE) {
                 Slog.d(TAG, String.format(
@@ -1434,9 +1457,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         } else if (mTracking) {
             trackMovement(event);
-            final int minY = statusBarSize + getCloseViewHeight();
             if (action == MotionEvent.ACTION_MOVE) {
-                if (mAnimatingReveal && (y + mViewDelta) < minY) {
+                if (mAnimatingReveal && (y + mViewDelta) < mNotificationPanelMinHeight) {
                     // nothing
                 } else  {
                     mAnimatingReveal = false;
@@ -1470,7 +1492,15 @@ public class PhoneStatusBar extends BaseStatusBar {
                         vel));
                 }
 
-                performFling(y + mViewDelta, vel, false);
+                if (mTrackingPosition == mNotificationPanelMinHeight) {
+                    // start the fling from the tracking position, ignore y and view delta
+                    mFlingY = mTrackingPosition;
+                    mViewDelta = 0;
+                } else {
+                    mFlingY = y;
+                }
+                mFlingVelocity = vel;
+                mHandler.post(mPerformFling);
             }
 
         }
@@ -1873,7 +1903,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                     + " mTrackingPosition=" + mTrackingPosition
                     + " gravity=" + mNotificationPanelGravity);
         }
-
         int panelh = 0;
         final int disph = getExpandedViewMaxHeight();
 
@@ -2159,8 +2188,22 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mNotificationPanelGravity <= 0) {
             mNotificationPanelGravity = Gravity.CENTER_VERTICAL | Gravity.TOP;
         }
+        mNotificationPanelMinHeight =
+              res.getDimensionPixelSize(R.dimen.notification_panel_padding_top)
+            + res.getDimensionPixelSize(R.dimen.notification_panel_header_height)
+            + res.getDimensionPixelSize(R.dimen.close_handle_underlap)
+            + getNinePatchPadding(res.getDrawable(R.drawable.notification_panel_bg)).bottom;
 
         if (false) Slog.v(TAG, "updateResources");
+    }
+
+    private static Rect getNinePatchPadding(Drawable d) {
+        Rect padding = new Rect();
+        if (d instanceof NinePatchDrawable) {
+            NinePatchDrawable ninePatch = (NinePatchDrawable) d;
+            ninePatch.getPadding(padding);
+        }
+        return padding;
     }
 
     //
