@@ -494,10 +494,11 @@ public class NotificationManagerService extends INotificationManager.Stub
             String action = intent.getAction();
 
             boolean queryRestart = false;
+            boolean packageChanged = false;
             
             if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)
-                    || action.equals(Intent.ACTION_PACKAGE_CHANGED)
+                    || (packageChanged=action.equals(Intent.ACTION_PACKAGE_CHANGED))
                     || (queryRestart=action.equals(Intent.ACTION_QUERY_PACKAGE_RESTART))
                     || action.equals(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)) {
                 String pkgList[] = null;
@@ -513,6 +514,15 @@ public class NotificationManagerService extends INotificationManager.Stub
                     String pkgName = uri.getSchemeSpecificPart();
                     if (pkgName == null) {
                         return;
+                    }
+                    if (packageChanged) {
+                        // We cancel notifications for packages which have just been disabled
+                        final int enabled = mContext.getPackageManager()
+                                .getApplicationEnabledSetting(pkgName);
+                        if (enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                                || enabled == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
+                            return;
+                        }
                     }
                     pkgList = new String[]{pkgName};
                 }
