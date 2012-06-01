@@ -897,7 +897,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     break;
                 case WifiMonitor.P2P_DEVICE_LOST_EVENT:
                     WifiP2pDevice device = (WifiP2pDevice) message.obj;
-                    if (!mSavedPeerConfig.deviceAddress.equals(device.deviceAddress)) {
+
+                    // If we lose a device during an autonomous group creation,
+                    // mSavedPeerConfig can be empty
+                    if (mSavedPeerConfig != null &&
+                            !mSavedPeerConfig.deviceAddress.equals(device.deviceAddress)) {
                         // Do the regular device lost handling
                         ret = NOT_HANDLED;
                         break;
