@@ -22,7 +22,6 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -280,23 +279,16 @@ public class ChooseTypeAndAccountActivity extends Activity
         if (selectedAddNewAccount) {
             mSelectedItemIndex = mAccounts.size();
         }
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "mSelectedItemIndex is " + mSelectedItemIndex);
-        }
-
-        ViewGroup buttonBar = (ViewGroup) findViewById(R.id.button_bar);
-        if (buttonBar != null) {
-            mOkButton = (Button) buttonBar.findViewById(android.R.id.button2);
-            if (mSelectedItemIndex != SELECTED_ITEM_NONE) {
-                // If caller specified a selectedAccount, then display that as selected and enable
-                // the "OK" button by default.
-                list.setSelection(mSelectedItemIndex);
-                mOkButton.setEnabled(true);
-            } else {
-                // Otherwise "OK" button is disabled since nothing is pre-selected.
-                mOkButton.setEnabled(false);
+        if (mSelectedItemIndex != SELECTED_ITEM_NONE) {
+            list.setItemChecked(mSelectedItemIndex, true);
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "List item " + mSelectedItemIndex + " should be selected");
             }
         }
+
+        // Only enable "OK" button if something has been selected.
+        mOkButton = (Button) findViewById(android.R.id.button2);
+        mOkButton.setEnabled(mSelectedItemIndex != SELECTED_ITEM_NONE);
     }
 
     @Override
