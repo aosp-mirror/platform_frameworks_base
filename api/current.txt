@@ -754,7 +754,6 @@ package android {
     field public static final int pathPrefix = 16842795; // 0x101002b
     field public static final int permission = 16842758; // 0x1010006
     field public static final int permissionGroup = 16842762; // 0x101000a
-    field public static final int permissionGroupFlags = 16843688; // 0x10103a8
     field public static final int persistent = 16842765; // 0x101000d
     field public static final int persistentDrawingCache = 16842990; // 0x10100ee
     field public static final deprecated int phoneNumber = 16843111; // 0x1010167
@@ -6594,11 +6593,8 @@ package android.content.pm {
     method public int describeContents();
     method public java.lang.CharSequence loadDescription(android.content.pm.PackageManager);
     field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int FLAG_PERSONAL_INFO = 1; // 0x1
     field public int descriptionRes;
-    field public int flags;
     field public java.lang.CharSequence nonLocalizedDescription;
-    field public int priority;
   }
 
   public class PermissionInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {

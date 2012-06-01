@@ -199,7 +199,7 @@
         <flag name="development" value="0x20" />
     </attr>
 
-    <!-- Flags indicating more context for a permission group. -->
+    <!-- Flags indicating more context for a permission group. @hide -->
     <attr name="permissionGroupFlags">
         <!-- Set to indicate that this permission group contains permissions
              protecting access to some information that is considered
@@ -903,7 +903,6 @@
         <attr name="icon" />
         <attr name="logo" />
         <attr name="description" />
-        <attr name="permissionGroupFlags" />
         <attr name="priority" />
     </declare-styleable>
     

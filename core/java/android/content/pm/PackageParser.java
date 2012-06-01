@@ -1454,8 +1454,7 @@ public class PackageParser {
         perm.info.descriptionRes = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_description,
                 0);
-        perm.info.flags = sa.getInt(
-                com.android.internal.R.styleable.AndroidManifestPermissionGroup_permissionGroupFlags, 0);
+        perm.info.flags = 0;
         perm.info.priority = sa.getInt(
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_priority, 0);
         if (perm.info.priority > 0 && (flags&PARSE_IS_SYSTEM) == 0) {
