@@ -670,10 +670,11 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    public void attachFunctor(int functor) {
+    public boolean attachFunctor(int functor) {
         if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
-            mAttachInfo.mHardwareRenderer.attachFunctor(mAttachInfo, functor);
+            return mAttachInfo.mHardwareRenderer.attachFunctor(mAttachInfo, functor);
         }
+        return false;
     }
 
     public void detachFunctor(int functor) {
