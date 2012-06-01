@@ -135,8 +135,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private static final int MSG_RCDISPLAY_UPDATE = 13;
     private static final int MSG_SET_ALL_VOLUMES = 14;
     private static final int MSG_PERSIST_MASTER_VOLUME_MUTE = 15;
-    private static final int MSG_SET_WIRED_DEVICE_CONNECTION_STATE = 16;
-    private static final int MSG_SET_A2DP_CONNECTION_STATE = 17;
+    private static final int MSG_SET_WIRED_DEVICE_CONNECTION_STATE = 16;//handled under wakelock
+    private static final int MSG_SET_A2DP_CONNECTION_STATE = 17;        //handled under wakelock
 
 
     // flags for MSG_PERSIST_VOLUME indicating if current and/or last audible volume should be
@@ -410,7 +410,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 com.android.internal.R.bool.config_voice_capable);
 
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-        mMediaEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "mediaKeyEvent");
+        mMediaEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleMediaEvent");
 
         Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = vibrator == null ? false : vibrator.hasVibrator();
@@ -2228,6 +2228,15 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     }
 
     // Message helper methods
+    /**
+     * Queue a message on the given handler's message queue, after acquiring the service wake lock.
+     * Note that the wake lock needs to be released after the message has been handled.
+     */
+    private void queueMsgUnderWakeLock(Handler handler, int msg,
+            int arg1, int arg2, Object obj, int delay) {
+        mMediaEventWakeLock.acquire();
+        sendMsg(handler, msg, SENDMSG_QUEUE, arg1, arg2, obj, delay);
+    }
 
     private static void sendMsg(Handler handler, int msg,
             int existingMsgPolicy, int arg1, int arg2, Object obj, int delay) {
@@ -2273,9 +2282,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     public void setWiredDeviceConnectionState(int device, int state, String name) {
         synchronized (mConnectedDevices) {
             int delay = checkSendBecomingNoisyIntent(device, state);
-            sendMsg(mAudioHandler,
+            queueMsgUnderWakeLock(mAudioHandler,
                     MSG_SET_WIRED_DEVICE_CONNECTION_STATE,
-                    SENDMSG_QUEUE,
                     device,
                     state,
                     name,
@@ -2289,9 +2297,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         synchronized (mConnectedDevices) {
             delay = checkSendBecomingNoisyIntent(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                                             (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0);
-            sendMsg(mAudioHandler,
+            queueMsgUnderWakeLock(mAudioHandler,
                     MSG_SET_A2DP_CONNECTION_STATE,
-                    SENDMSG_QUEUE,
                     state,
                     0,
                     device,
@@ -3000,10 +3007,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
                 case MSG_SET_WIRED_DEVICE_CONNECTION_STATE:
                     onSetWiredDeviceConnectionState(msg.arg1, msg.arg2, (String)msg.obj);
+                    mMediaEventWakeLock.release();
                     break;
 
                 case MSG_SET_A2DP_CONNECTION_STATE:
                     onSetA2dpConnectionState((BluetoothDevice)msg.obj, msg.arg1);
+                    mMediaEventWakeLock.release();
                     break;
             }
         }
