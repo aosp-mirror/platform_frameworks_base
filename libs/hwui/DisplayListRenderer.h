@@ -576,35 +576,35 @@ public:
 
     virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t flags,
             uint32_t level = 0);
-    virtual void drawLayer(Layer* layer, float x, float y, SkPaint* paint);
-    virtual void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
-    virtual void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
-    virtual void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
+    virtual status_t drawLayer(Layer* layer, float x, float y, SkPaint* paint);
+    virtual status_t drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
+    virtual status_t drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
+    virtual status_t drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, SkPaint* paint);
-    virtual void drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint);
-    virtual void drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
+    virtual status_t drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint);
+    virtual status_t drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
             float* vertices, int* colors, SkPaint* paint);
-    virtual void drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
+    virtual status_t drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
             const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
             float left, float top, float right, float bottom, SkPaint* paint);
-    virtual void drawColor(int color, SkXfermode::Mode mode);
-    virtual void drawRect(float left, float top, float right, float bottom, SkPaint* paint);
-    virtual void drawRoundRect(float left, float top, float right, float bottom,
+    virtual status_t drawColor(int color, SkXfermode::Mode mode);
+    virtual status_t drawRect(float left, float top, float right, float bottom, SkPaint* paint);
+    virtual status_t drawRoundRect(float left, float top, float right, float bottom,
             float rx, float ry, SkPaint* paint);
-    virtual void drawCircle(float x, float y, float radius, SkPaint* paint);
-    virtual void drawOval(float left, float top, float right, float bottom, SkPaint* paint);
-    virtual void drawArc(float left, float top, float right, float bottom,
+    virtual status_t drawCircle(float x, float y, float radius, SkPaint* paint);
+    virtual status_t drawOval(float left, float top, float right, float bottom, SkPaint* paint);
+    virtual status_t drawArc(float left, float top, float right, float bottom,
             float startAngle, float sweepAngle, bool useCenter, SkPaint* paint);
-    virtual void drawPath(SkPath* path, SkPaint* paint);
-    virtual void drawLines(float* points, int count, SkPaint* paint);
-    virtual void drawPoints(float* points, int count, SkPaint* paint);
-    virtual void drawText(const char* text, int bytesCount, int count, float x, float y,
+    virtual status_t drawPath(SkPath* path, SkPaint* paint);
+    virtual status_t drawLines(float* points, int count, SkPaint* paint);
+    virtual status_t drawPoints(float* points, int count, SkPaint* paint);
+    virtual status_t drawText(const char* text, int bytesCount, int count, float x, float y,
             SkPaint* paint, float length = -1.0f);
-    virtual void drawTextOnPath(const char* text, int bytesCount, int count, SkPath* path,
+    virtual status_t drawTextOnPath(const char* text, int bytesCount, int count, SkPath* path,
             float hOffset, float vOffset, SkPaint* paint);
-    virtual void drawPosText(const char* text, int bytesCount, int count, const float* positions,
-            SkPaint* paint);
+    virtual status_t drawPosText(const char* text, int bytesCount, int count,
+            const float* positions, SkPaint* paint);
 
     virtual void resetShader();
     virtual void setupShader(SkiaShader* shader);

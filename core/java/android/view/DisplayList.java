@@ -62,6 +62,13 @@ public abstract class DisplayList {
     public static final int STATUS_INVOKE = 0x2;
 
     /**
+     * Indicates that the display list performed GL drawing operations.
+     *
+     * @see HardwareCanvas#drawDisplayList(DisplayList, android.graphics.Rect, int)
+     */
+    public static final int STATUS_DREW = 0x4;
+
+    /**
      * Starts recording the display list. All operations performed on the
      * returned canvas are recorded and stored in this display list.
      * 
