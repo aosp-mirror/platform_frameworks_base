@@ -2505,7 +2505,7 @@
 
     <!-- Title for a warning message about the interaction model changes after allowing an accessibility
          service to put the device into explore by touch mode, displayed as a dialog message when
-         the user selects to enables the service. (default). [CHAR LIMIT=35] -->
+         the user selects to enables the service. (default). [CHAR LIMIT=45] -->
     <string name="enable_explore_by_touch_warning_title">Enable Explore by Touch?</string>
     <!-- Summary for a warning message about the interaction model changes after allowing an accessibility
          service to put the device into explore by touch mode, displayed as a dialog message when
