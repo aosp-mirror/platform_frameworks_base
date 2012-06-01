@@ -1247,25 +1247,45 @@ public class TouchExplorer {
 
         @Override
         public void run() {
-            final int pointerIndex = mEvent.getActionIndex();
+            // If the last touched explored location is not within the focused
+            // window we will long press at that exact spot, otherwise we find the
+            // accessibility focus and if the tap is within its bounds we long press
+            // there, otherwise we pick the middle of the focus rectangle.
+            MotionEvent lastEvent = mInjectedPointerTracker.getLastInjectedHoverEvent();
+            if (lastEvent == null) {
+                return;
+            }
+
+            final int exploreLocationX = (int) lastEvent.getX(lastEvent.getActionIndex());
+            final int exploreLocationY = (int) lastEvent.getY(lastEvent.getActionIndex());
+
+            Rect bounds = mTempRect;
+            boolean useFocusedBounds = false;
+
+            final int pointerId = mEvent.getPointerId(mEvent.getActionIndex());
+            final int pointerIndex = mEvent.findPointerIndex(pointerId);
+            if (mAms.getAccessibilityFocusBounds(exploreLocationX, exploreLocationY, bounds)) {
+                // If the user's last touch explored location is not
+                // within the accessibility focus bounds we use the center
+                // of the accessibility focused rectangle.
+                if (!bounds.contains((int) mEvent.getX(pointerIndex),
+                        (int) mEvent.getY(pointerIndex))) {
+                    useFocusedBounds = true;
+                }
+            }
+
+            mLongPressingPointerId = mEvent.getPointerId(pointerIndex);
+
             final int eventX = (int) mEvent.getX(pointerIndex);
             final int eventY = (int) mEvent.getY(pointerIndex);
-            Rect bounds = mTempRect;
-            if (mAms.getAccessibilityFocusBounds(eventX, eventY, bounds)
-                    && !bounds.contains(eventX, eventY)) {
-                mLongPressingPointerId = mEvent.getPointerId(pointerIndex);
+            if (useFocusedBounds) {
                 mLongPressingPointerDeltaX = eventX - bounds.centerX();
                 mLongPressingPointerDeltaY = eventY - bounds.centerY();
             } else {
-                mLongPressingPointerId = -1;
-                mLongPressingPointerDeltaX = 0;
-                mLongPressingPointerDeltaY = 0;
+                mLongPressingPointerDeltaX = eventX - exploreLocationX;
+                mLongPressingPointerDeltaY = eventY - exploreLocationY;
             }
-            // We are sending events so send exit and gesture
-            // end since we transition to another state.
-            final int pointerId = mReceivedPointerTracker.getPrimaryActivePointerId();
-            final int pointerIdBits = (1 << pointerId);
-            mAms.touchExplorationGestureEnded();
+
             sendExitEventsIfNeeded(mPolicyFlags);
 
             mCurrentState = STATE_DELEGATING;
