@@ -1334,12 +1334,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             switch(direction) {
                 case ACCESSIBILITY_FOCUS_BACKWARD: {
                     View focusable = (getChildCount() > 0) ? getChildAt(getChildCount() - 1) : this;
-                    if (focusable.canTakeAccessibilityFocusFromHover()) {
+                    if (focusable.isAccessibilityFocusable()) {
                         views.add(focusable);
                     }
                 } return;
                 case ACCESSIBILITY_FOCUS_FORWARD: {
-                    if (canTakeAccessibilityFocusFromHover()) {
+                    if (isAccessibilityFocusable()) {
                         views.add(this);
                     }
                 } return;
