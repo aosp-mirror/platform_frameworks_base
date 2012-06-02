@@ -123,9 +123,12 @@
   <java-symbol type="id" name="package_label" />
   <java-symbol type="id" name="packages_list" />
   <java-symbol type="id" name="pause" />
-  <java-symbol type="id" name="perms_list" />
+  <java-symbol type="id" name="show_more" />
   <java-symbol type="id" name="perm_icon" />
-  <java-symbol type="id" name="perm_name" />
+  <java-symbol type="id" name="show_more_icon" />
+  <java-symbol type="id" name="show_more_text" />
+  <java-symbol type="id" name="dangerous_perms_list" />
+  <java-symbol type="id" name="non_dangerous_perms_list" />
   <java-symbol type="id" name="permission_group" />
   <java-symbol type="id" name="permission_list" />
   <java-symbol type="id" name="pickers" />
@@ -661,6 +664,10 @@
   <java-symbol type="string" name="passwordIncorrect" />
   <java-symbol type="string" name="perms_description_app" />
   <java-symbol type="string" name="perms_new_perm_prefix" />
+  <java-symbol type="string" name="perms_hide" />
+  <java-symbol type="string" name="perms_show_all" />
+  <java-symbol type="string" name="default_permission_group" />
+  <java-symbol type="string" name="permissions_format" />
   <java-symbol type="string" name="petabyteShort" />
   <java-symbol type="string" name="phoneTypeAssistant" />
   <java-symbol type="string" name="phoneTypeCallback" />
