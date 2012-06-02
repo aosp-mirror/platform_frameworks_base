@@ -831,6 +831,14 @@ public class LayoutTransition {
             return;
         }
 
+        // Don't animate items up from size(0,0); this is likely because the objects
+        // were offscreen/invisible or otherwise measured to be infinitely small. We don't
+        // want to see them animate into their real size; just ignore animation requests
+        // on these views
+        if (child.getWidth() == 0 && child.getHeight() == 0) {
+            return;
+        }
+
         // Make a copy of the appropriate animation
         final Animator anim = baseAnimator.clone();
 
