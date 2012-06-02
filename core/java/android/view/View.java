@@ -6308,10 +6308,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         }
     }
 
-    /**
-     * @hide
-     */
-    public boolean canTakeAccessibilityFocusFromHover() {
+    private boolean canTakeAccessibilityFocusFromHover() {
         if (includeForAccessibility() && isActionableForAccessibility()) {
             return true;
         }
