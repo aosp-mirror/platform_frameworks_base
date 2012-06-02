@@ -464,7 +464,7 @@
         android:protectionLevel="normal"
         android:description="@string/permdesc_accessWifiState"
         android:label="@string/permlab_accessWifiState" />
-        
+
     <!-- @hide -->
     <permission android:name="android.permission.ACCESS_WIMAX_STATE"
         android:permissionGroup="android.permission-group.NETWORK"
@@ -477,8 +477,8 @@
         android:permissionGroup="android.permission-group.NETWORK"
         android:protectionLevel="dangerous"
         android:description="@string/permdesc_bluetooth"
-        android:label="@string/permlab_bluetooth" />     
-   
+        android:label="@string/permlab_bluetooth" />
+
     <!-- Allows applications to perform I/O operations over NFC -->
     <permission android:name="android.permission.NFC"
         android:permissionGroup="android.permission-group.NETWORK"
@@ -691,10 +691,10 @@
 
     <!-- Allows an application to read from external storage -->
     <permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:permissionGroup="android.permission-group.STORAGE"
+        android:permissionGroup="android.permission-group.DEVELOPMENT_TOOLS"
         android:label="@string/permlab_sdcardRead"
         android:description="@string/permdesc_sdcardRead"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="normal" />
 
     <!-- Allows an application to write to external storage -->
     <permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -1062,7 +1062,7 @@
         android:label="@string/permlab_changeWimaxState" />
 
 
-        
+
     <!-- Allows applications to enter Wi-Fi Multicast mode -->
     <permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
