@@ -50,17 +50,19 @@ public class LomoishFilter extends Filter {
             "uniform float stepsizeX;\n" +
             "uniform float stepsizeY;\n" +
             "uniform float stepsize;\n" +
-            "uniform vec2 center;\n" +
+            "uniform vec2 scale;\n" +
             "uniform float inv_max_dist;\n" +
             "varying vec2 v_texcoord;\n" +
             "float rand(vec2 loc) {\n" +
-            "  const float divide = 0.00048828125;\n" +
-            "  const float factor = 2048.0;\n" +
-            "  float value = sin(dot(loc, vec2(12.9898, 78.233)));\n" +
-            "  float residual = mod(dot(mod(loc, divide), vec2(0.9898, 0.233)), divide);\n" +
-            "  float part2 = mod(value, divide);\n" +
-            "  float part1 = value - part2;\n" +
-            "  return fract(0.5453 * part1 + factor * (part2 + residual));\n" +
+            "  float theta1 = dot(loc, vec2(0.9898, 0.233));\n" +
+            "  float theta2 = dot(loc, vec2(12.0, 78.0));\n" +
+            "  float value = cos(theta1) * sin(theta2) + sin(theta1) * cos(theta2);\n" +
+            // keep value of part1 in range: (2^-14 to 2^14).
+            "  float temp = mod(197.0 * value, 1.0) + value;\n" +
+            "  float part1 = mod(220.0 * temp, 1.0) + temp;\n" +
+            "  float part2 = value * 0.5453;\n" +
+            "  float part3 = cos(theta1 + theta2) * 0.43758;\n" +
+            "  return fract(part1 + part2 + part3);\n" +
             "}\n" +
             "void main() {\n" +
             // sharpen
@@ -112,7 +114,8 @@ public class LomoishFilter extends Filter {
             "  vec3 temp = clamp((color.rgb + stepsize - 0.15) * 1.53846, 0.0, 1.0);\n" +
             "  vec3 bw_color = clamp(xform + (temp - xform) * (dither - 0.5), 0.0, 1.0);\n" +
             // vignette
-            "  float dist = distance(gl_FragCoord.xy, center);\n" +
+            "  coord = v_texcoord - vec2(0.5, 0.5);\n" +
+            "  float dist = length(coord * scale);\n" +
             "  float lumen = 0.85 / (1.0 + exp((dist * inv_max_dist - 0.73) * 20.0)) + 0.15;\n" +
             "  gl_FragColor = vec4(bw_color * lumen, color.a);\n" +
             "}\n";
@@ -150,12 +153,17 @@ public class LomoishFilter extends Filter {
 
     private void initParameters() {
         if (mProgram !=null) {
-            float centerX = (float) (0.5 * mWidth);
-            float centerY = (float) (0.5 * mHeight);
-            float center[] = {centerX, centerY};
-            float max_dist = (float) Math.sqrt(centerX * centerX + centerY * centerY);
+            float scale[] = new float[2];
+            if (mWidth > mHeight) {
+                scale[0] = 1f;
+                scale[1] = ((float) mHeight) / mWidth;
+            } else {
+                scale[0] = ((float) mWidth) / mHeight;
+                scale[1] = 1f;
+            }
+            float max_dist = ((float) Math.sqrt(scale[0] * scale[0] + scale[1] * scale[1])) * 0.5f;
 
-            mProgram.setHostValue("center", center);
+            mProgram.setHostValue("scale", scale);
             mProgram.setHostValue("inv_max_dist", 1.0f / max_dist);
 
             mProgram.setHostValue("stepsize", 1.0f / 255.0f);
