@@ -390,12 +390,11 @@
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_personalInfo">Your personal information</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_personalInfo">Direct access to information about you, stored in on your contact card.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_socialInfo">Your social information</string>
+    <string name="permgroupdesc_personalInfo" product="tablet">Direct access to your contacts
+        and calendar stored on the tablet.</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_socialInfo">Direct access to information about your contacts and social connections.</string>
+    <string name="permgroupdesc_personalInfo" product="default">Direct access to your contacts
+        and calendar stored on the phone.</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_location">Your location</string>
@@ -406,91 +405,6 @@
     <string name="permgrouplab_network">Network communication</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_network">Access various network features.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_bluetoothNetwork">Bluetooth</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_bluetoothNetwork">Access devices and networks through Bluetooth.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_shortrangeNetwork">Short-range Networks</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_shortrangeNetwork">Access devices through short-range networks such as NFC.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_audioSettings">Audio Settings</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_audioSettings">Change audio settings.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_affectsBattery">Affects Battery</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_affectsBattery">Use features that can quickly drain battery.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_calendar">Calendar</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_calendar">Direct access to calendar and events.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_dictionary">Read User Dictionary</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_dictionary">Read words in user dictionary.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_writeDictionary">Write User Dictionary</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_writeDictionary">Add words to the user dictionary.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_bookmarks">Bookmarks and History</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_bookmarks">Direct access to bookmarks and browser history.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_deviceAlarms">Alarm</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_deviceAlarms">Set the alarm clock.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_voicemail">Voicemail</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_voicemail">Direct access to voicemail.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_microphone">Microphone</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_microphone">Direct access to the microphone to record audio.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_camera">Camera</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_camera">Direct access to camera for image or video capture.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_appInfo">Your applications information</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_appInfo">Ability to affect behavior of other applications on your device.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_wallpaper">Wallpaper</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_wallpaper">Change the device wallpaper settings.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_systemClock">Clock</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_systemClock">Change the device time or timezone.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_statusBar">Status Bar</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_statusBar">Change the device status bar settings.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_syncSettings">Sync Settings</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_syncSettings">Access to the sync settings.</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_accounts">Your accounts</string>
@@ -516,11 +430,6 @@
     <string name="permgrouplab_developmentTools">Development tools</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_developmentTools">Features only needed for app developers.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_display">Other Application UI</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_display">Effect the UI of other applications.</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_storage">Storage</string>
@@ -630,7 +539,7 @@
     <string name="permlab_getTasks">retrieve running apps</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_getTasks">Allows the app to retrieve
-        information about currently and recently running tasks. Malicious apps may
+        information about currently and recently running tasks. Malicious apps may 
         discover private information about other apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50] -->
@@ -781,7 +690,7 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_batteryStats">modify battery statistics</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_batteryStats">Allows the app to modify
+    <string name="permdesc_batteryStats">Allows the app to modify 
         collected battery statistics. Not for use by normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1142,18 +1051,18 @@
     <string name="permlab_readCalendar">read calendar events plus confidential information</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readCalendar" product="tablet">Allows the app to read all calendar
-        events stored on your tablet, including those of friends or coworkers. Malicious apps
+        events stored on your tablet, including those of friends or coworkers. Malicious apps 
         may extract personal information from these calendars without the owners\' knowledge.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readCalendar" product="default">Allows the app to read all calendar
-        events stored on your phone, including those of friends or coworkers. Malicious apps
+        events stored on your phone, including those of friends or coworkers. Malicious apps 
         may extract personal information from these calendars without the owners\' knowledge.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_writeCalendar">add or modify calendar events and send email to guests without owners\' knowledge</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_writeCalendar">Allows the app to send event invitations as the calendar owner and add, remove,
-        change events that you can modify on your device, including those of friends or co-workers. Malicious apps
+        change events that you can modify on your device, including those of friends or co-workers. Malicious apps 
         may send spam emails that appear to come from calendar owners, modify events without the owners\' knowledge, or add fake events.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
