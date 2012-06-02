@@ -46,8 +46,8 @@ import com.android.systemui.statusbar.tablet.StatusBarPanel;
 import com.android.systemui.statusbar.tablet.TabletStatusBar;
 
 public class SearchPanelView extends FrameLayout implements
-        StatusBarPanel {
-    private static final int SEARCH_PANEL_HOLD_DURATION = 500;
+        StatusBarPanel, ActivityOptions.OnAnimationStartedListener {
+    private static final int SEARCH_PANEL_HOLD_DURATION = 0;
     static final String TAG = "SearchPanelView";
     static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
     private final Context mContext;
@@ -113,18 +113,18 @@ public class SearchPanelView extends FrameLayout implements
         if (intent == null) return;
         try {
             ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
-                    R.anim.search_launch_enter, R.anim.search_launch_exit);
+                    R.anim.search_launch_enter, R.anim.search_launch_exit,
+                    getHandler(), this);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(intent, opts.toBundle());
         } catch (ActivityNotFoundException e) {
             Slog.w(TAG, "Activity not found for " + intent.getAction());
+            onAnimationStarted();
         }
     }
 
-    final MultiWaveView.OnTriggerListener mMultiWaveViewListener
-            = new MultiWaveView.OnTriggerListener() {
-
-        private boolean mWaitingForLaunch;
+    class MultiWaveTriggerListener implements MultiWaveView.OnTriggerListener {
+        boolean mWaitingForLaunch;
 
         public void onGrabbed(View v, int handle) {
         }
@@ -145,19 +145,24 @@ public class SearchPanelView extends FrameLayout implements
                     mWaitingForLaunch = true;
                     startAssistActivity();
                     vibrate();
-                    postDelayed(new Runnable() {
-                        public void run() {
-                            mWaitingForLaunch = false;
-                            mBar.hideSearchPanel();
-                        }
-                    }, SEARCH_PANEL_HOLD_DURATION);
                     break;
             }
         }
 
         public void onFinishFinalAnimation() {
         }
-    };
+    }
+    final MultiWaveTriggerListener mMultiWaveViewListener = new MultiWaveTriggerListener();
+
+    @Override
+    public void onAnimationStarted() {
+        postDelayed(new Runnable() {
+            public void run() {
+                mMultiWaveViewListener.mWaitingForLaunch = false;
+                mBar.hideSearchPanel();
+            }
+        }, SEARCH_PANEL_HOLD_DURATION);
+    }
 
     @Override
     protected void onFinishInflate() {

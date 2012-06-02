@@ -22,10 +22,10 @@
 
     <alpha android:fromAlpha="0" android:toAlpha="1.0"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:interpolator="@android:interpolator/decelerate_quad"
+            android:interpolator="@android:interpolator/decelerate_cubic"
             android:duration="300"/>
 
-    <translate android:fromYDelta="200" android:toYDelta="0"
+    <translate android:fromYDelta="100%" android:toYDelta="0"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
             android:interpolator="@android:interpolator/decelerate_cubic"
             android:duration="300" />

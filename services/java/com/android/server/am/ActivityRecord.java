@@ -558,7 +558,8 @@ final class ActivityRecord {
                     service.mWindowManager.overridePendingAppTransition(
                             pendingOptions.getPackageName(),
                             pendingOptions.getCustomEnterResId(),
-                            pendingOptions.getCustomExitResId());
+                            pendingOptions.getCustomExitResId(),
+                            pendingOptions.getOnAnimationStartListener());
                     break;
                 case ActivityOptions.ANIM_SCALE_UP:
                     service.mWindowManager.overridePendingAppTransitionScaleUp(
