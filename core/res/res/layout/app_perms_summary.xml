@@ -26,16 +26,78 @@
         android:id="@+id/no_permissions"
         android:text="@string/no_permissions"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
+        android:paddingLeft="16dip"
+        android:paddingRight="12dip"
         android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <!-- Populated with all permissions. -->
+    <!-- List view containing list of dangerous permissions categorized by groups. -->
     <LinearLayout
-        android:id="@+id/perms_list"
+        android:id="@+id/dangerous_perms_list"
         android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:paddingLeft="16dip"
+        android:paddingRight="12dip"
+        android:layout_height="wrap_content" />
+
+    <!-- Clickable area letting user display additional permissions. -->
+    <LinearLayout
+        android:id="@+id/show_more"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_marginTop="12dip"
+        android:layout_marginBottom="16dip">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dip"
+            android:background="?android:attr/listDivider" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="16dip"
+            android:paddingBottom="12dip"
+            android:paddingLeft="16dip"
+            android:duplicateParentState="true"
+            android:background="?android:attr/selectableItemBackground">
+
+            <TextView
+                android:id="@+id/show_more_text"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:duplicateParentState="true"
+                android:layout_alignTop="@+id/show_more_icon"
+                android:layout_gravity="center_vertical"
+                android:paddingLeft="36dip"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <ImageView
+                android:id="@id/show_more_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="12dip" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dip"
+            android:background="?android:attr/listDivider" />
+
+    </LinearLayout>
+
+    <!-- List view containing list of permissions that aren't dangerous. -->
+    <LinearLayout
+        android:id="@+id/non_dangerous_perms_list"
+        android:orientation="vertical"
+        android:paddingLeft="16dip"
+        android:paddingRight="12dip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

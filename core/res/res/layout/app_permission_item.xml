@@ -19,33 +19,37 @@
   Contains the group name and a list of permission labels under the group.
 -->
 
-<view class="android.widget.AppSecurityPermissions$PermissionItemView"
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:background="?android:attr/selectableItemBackground">
+    android:layout_height="wrap_content">
 
     <ImageView
         android:id="@+id/perm_icon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="8dp"
+        android:layout_width="30dip"
+        android:layout_height="30dip"
+        android:layout_alignParentLeft="true" 
         android:scaleType="fitCenter" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:background="?android:attr/dividerVertical" />
 
     <TextView
-        android:id="@+id/perm_name"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textSize="16sp"
-        android:layout_marginLeft="8dp"
+        android:id="@+id/permission_group"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold"
+        android:paddingLeft="6dip"
+        android:layout_toRightOf="@id/perm_icon"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|left" />
+        android:layout_height="wrap_content" />
 
-</view>
+    <TextView
+        android:id="@+id/permission_list"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:layout_marginTop="-4dip"
+        android:paddingBottom="8dip"
+        android:paddingLeft="6dip"
+        android:layout_below="@id/permission_group"
+        android:layout_toRightOf="@id/perm_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>
