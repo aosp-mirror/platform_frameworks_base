@@ -1421,7 +1421,7 @@ public class NumberPicker extends LinearLayout {
         // We do not want the real descendant to be considered focus search
         // since it is managed by the accessibility node provider.
         if ((focusableMode & FOCUSABLES_ACCESSIBILITY) == FOCUSABLES_ACCESSIBILITY) {
-            if (canTakeAccessibilityFocusFromHover() || getAccessibilityNodeProvider() != null) {
+            if (isAccessibilityFocusable()) {
                 views.add(this);
                 return;
             }
