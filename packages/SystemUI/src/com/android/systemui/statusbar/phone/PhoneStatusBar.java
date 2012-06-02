@@ -1054,6 +1054,9 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     private static void makeSlippery(View view, boolean slippery) {
+        if (view == null) {
+            return;
+        }
         WindowManager.LayoutParams lp = (WindowManager.LayoutParams) view.getLayoutParams();
         if (slippery) {
             lp.flags |= WindowManager.LayoutParams.FLAG_SLIPPERY;
