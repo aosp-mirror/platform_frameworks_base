@@ -58,24 +58,19 @@ public class FisheyeFilter extends Filter {
     private static final String mFisheyeShader =
             "precision mediump float;\n" +
             "uniform sampler2D tex_sampler_0;\n" +
-            "uniform vec2 center;\n" +
+            "uniform vec2 scale;\n" +
             "uniform float alpha;\n" +
-            "uniform float bound;\n" +
             "uniform float radius2;\n" +
             "uniform float factor;\n" +
-            "uniform float inv_height;\n" +
-            "uniform float inv_width;\n" +
             "varying vec2 v_texcoord;\n" +
             "void main() {\n" +
             "  const float m_pi_2 = 1.570963;\n" +
-            "  float dist = distance(gl_FragCoord.xy, center);\n" +
+            "  vec2 coord = v_texcoord - vec2(0.5, 0.5);\n" +
+            "  float dist = length(coord * scale);\n" +
             "  float radian = m_pi_2 - atan(alpha * sqrt(radius2 - dist * dist), dist);\n" +
-            "  float scale = radian * factor / dist;\n" +
-            "  vec2 new_coord = gl_FragCoord.xy * scale + (1.0 - scale) * center;\n" +
-            "  new_coord.x *= inv_width;\n" +
-            "  new_coord.y *= inv_height;\n" +
-            "  vec4 color = texture2D(tex_sampler_0, new_coord);\n" +
-            "  gl_FragColor = color;\n" +
+            "  float scalar = radian * factor / dist;\n" +
+            "  vec2 new_coord = coord * scalar + vec2(0.5, 0.5);\n" +
+            "  gl_FragColor = texture2D(tex_sampler_0, new_coord);\n" +
             "}\n";
 
     public FisheyeFilter(String name) {
@@ -145,12 +140,6 @@ public class FisheyeFilter extends Filter {
     }
 
     private void updateFrameSize(int width, int height) {
-        float center[] = {0.5f * width, 0.5f * height};
-
-        mProgram.setHostValue("center", center);
-        mProgram.setHostValue("inv_width", 1.0f / width);
-        mProgram.setHostValue("inv_height", 1.0f / height);
-
         mWidth = width;
         mHeight = height;
 
@@ -159,9 +148,16 @@ public class FisheyeFilter extends Filter {
 
     private void updateProgramParams() {
         final float pi = 3.14159265f;
-
+        float scale[] = new float[2];
+        if (mWidth > mHeight) {
+          scale[0] = 1f;
+          scale[1] = ((float) mHeight) / mWidth;
+        } else {
+          scale[0] = ((float) mWidth) / mHeight;
+          scale[1] = 1f;
+        }
         float alpha = mScale * 2.0f + 0.75f;
-        float bound2 = 0.25f * (mWidth * mWidth  + mHeight * mHeight);
+        float bound2 = 0.25f * (scale[0] * scale[0] + scale[1] * scale[1]);
         float bound = (float) Math.sqrt(bound2);
         float radius = 1.15f * bound;
         float radius2 = radius * radius;
@@ -169,10 +165,9 @@ public class FisheyeFilter extends Filter {
             (float) Math.atan(alpha / bound * (float) Math.sqrt(radius2 - bound2));
         float factor = bound / max_radian;
 
+        mProgram.setHostValue("scale", scale);
         mProgram.setHostValue("radius2",radius2);
         mProgram.setHostValue("factor", factor);
-        mProgram.setHostValue("alpha", (float) (mScale * 2.0 + 0.75));
+        mProgram.setHostValue("alpha", alpha);
     }
-
-
 }
