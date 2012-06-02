@@ -2285,6 +2285,10 @@ public class PowerManagerService extends IPowerManager.Stub
 
         public void animateTo(int target, int sensorTarget, int mask, int animationDuration) {
             synchronized(this) {
+                if (isAnimating() && (mask ^ currentMask) != 0) {
+                    // current animation is unrelated to new animation, jump to final values
+                    cancelAnimation();
+                }
                 startValue = currentValue;
                 endValue = target;
                 startSensorValue = mHighestLightSensorValue;
@@ -2409,7 +2413,8 @@ public class PowerManagerService extends IPowerManager.Stub
 
     private boolean isScreenTurningOffLocked() {
         return (mScreenBrightnessAnimator.isAnimating()
-                && mScreenBrightnessAnimator.endValue == PowerManager.BRIGHTNESS_OFF);
+                && mScreenBrightnessAnimator.endValue == PowerManager.BRIGHTNESS_OFF
+                && (mScreenBrightnessAnimator.currentMask & SCREEN_BRIGHT_BIT) != 0);
     }
 
     private boolean shouldLog(long time) {
