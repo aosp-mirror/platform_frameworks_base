@@ -23,12 +23,16 @@ import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Vibrator;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -1232,5 +1236,63 @@ public class MultiWaveView extends View {
             }
         }
         return -1;
+    }
+
+    private boolean replaceTargetDrawables(Resources res, int existingResourceId,
+            int newResourceId) {
+        if (existingResourceId == 0 || newResourceId == 0) {
+            return false;
+        }
+
+        boolean result = false;
+        final ArrayList<TargetDrawable> drawables = mTargetDrawables;
+        final int size = drawables.size();
+        for (int i = 0; i < size; i++) {
+            final TargetDrawable target = drawables.get(i);
+            if (target != null && target.getResourceId() == existingResourceId) {
+                target.setDrawable(res, newResourceId);
+                result = true;
+            }
+        }
+
+        if (result) {
+            requestLayout(); // in case any given drawable's size changes
+        }
+
+        return result;
+    }
+
+    /**
+     * Searches the given package for a resource to use to replace the Drawable on the
+     * target with the given resource id
+     * @param component of the .apk that contains the resource
+     * @param name of the metadata in the .apk
+     * @param existingResId the resource id of the target to search for
+     * @return true if found in the given package and replaced at least one target Drawables
+     */
+    public boolean replaceTargetDrawablesIfPresent(ComponentName component, String name,
+                int existingResId) {
+        if (existingResId == 0) return false;
+
+        try {
+            PackageManager packageManager = mContext.getPackageManager();
+            // Look for the search icon specified in the activity meta-data
+            Bundle metaData = packageManager.getActivityInfo(
+                    component, PackageManager.GET_META_DATA).metaData;
+            if (metaData != null) {
+                int iconResId = metaData.getInt(name);
+                if (iconResId != 0) {
+                    Resources res = packageManager.getResourcesForActivity(component);
+                    return replaceTargetDrawables(res, existingResId, iconResId);
+                }
+            }
+        } catch (NameNotFoundException e) {
+            Log.w(TAG, "Failed to swap drawable; "
+                    + component.flattenToShortString() + " not found", e);
+        } catch (Resources.NotFoundException nfe) {
+            Log.w(TAG, "Failed to swap drawable from "
+                    + component.flattenToShortString(), nfe);
+        }
+        return false;
     }
 }

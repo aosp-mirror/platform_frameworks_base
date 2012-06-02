@@ -62,6 +62,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
     private static final String ENABLE_MENU_KEY_FILE = "/data/local/enable_menu_key";
     private static final int WAIT_FOR_ANIMATION_TIMEOUT = 0;
     private static final int STAY_ON_WHILE_GRABBED_TIMEOUT = 30000;
+    private static final String ASSIST_ICON_METADATA_NAME =
+            "com.android.systemui.action_assist_icon";
 
     private LockPatternUtils mLockPatternUtils;
     private KeyguardUpdateMonitor mUpdateMonitor;
@@ -290,8 +292,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
 
         MultiWaveViewMethods(MultiWaveView multiWaveView) {
             mMultiWaveView = multiWaveView;
-
-            // TODO: get search icon.  See Launcher.updateGlobalSearchIcon()
         }
 
         public boolean isTargetPresent(int resId) {
@@ -310,6 +310,26 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
             if (mMultiWaveView.getTargetResourceId() != resId) {
                 mMultiWaveView.setTargetResources(resId);
             }
+
+            // Update the search icon with drawable from the search .apk
+            if (!mSearchDisabled) {
+                SearchManager searchManager = getSearchManager();
+                if (searchManager != null) {
+                    ComponentName component = searchManager.getGlobalSearchActivity();
+                    if (component != null) {
+                        if (!mMultiWaveView.replaceTargetDrawablesIfPresent(component,
+                                ASSIST_ICON_METADATA_NAME,
+                                com.android.internal.R.drawable.ic_lockscreen_search)) {
+                            Slog.w(TAG, "Couldn't grab icon from package " + component);
+                        }
+                    } else {
+                        Slog.w(TAG, "No search icon specified in package " + component);
+                    }
+                } else {
+                    Slog.w(TAG, "No SearchManager");
+                }
+            }
+
             setEnabled(com.android.internal.R.drawable.ic_lockscreen_camera, !mCameraDisabled);
             setEnabled(com.android.internal.R.drawable.ic_lockscreen_search, !mSearchDisabled);
         }
