@@ -74,7 +74,6 @@ class BrowserFrame extends Handler {
     private final CallbackProxy mCallbackProxy;
     private final WebSettingsClassic mSettings;
     private final Context mContext;
-    private final WebViewDatabaseClassic mDatabase;
     private final WebViewCore mWebViewCore;
     /* package */ boolean mLoadInitFromJava;
     private int mLoadType;
@@ -243,7 +242,6 @@ class BrowserFrame extends Handler {
         mSettings = settings;
         mContext = context;
         mCallbackProxy = proxy;
-        mDatabase = WebViewDatabaseClassic.getInstance(appContext);
         mWebViewCore = w;
 
         mSearchBox = new SearchBoxImpl(mWebViewCore, mCallbackProxy);
@@ -426,7 +424,8 @@ class BrowserFrame extends Handler {
             if (h != null) {
                 String url = WebTextView.urlForAutoCompleteData(h.getUrl());
                 if (url != null) {
-                    mDatabase.setFormData(url, data);
+                    WebViewDatabaseClassic.getInstance(mContext).setFormData(
+                            url, data);
                 }
             }
         }
@@ -498,8 +497,9 @@ class BrowserFrame extends Handler {
                     if (item != null) {
                         WebAddress uri = new WebAddress(item.getUrl());
                         String schemePlusHost = uri.getScheme() + uri.getHost();
-                        String[] up = mDatabase.getUsernamePassword(
-                                schemePlusHost);
+                        String[] up =
+                                WebViewDatabaseClassic.getInstance(mContext)
+                                        .getUsernamePassword(schemePlusHost);
                         if (up != null && up[0] != null) {
                             setUsernamePassword(up[0], up[1]);
                         }
@@ -800,10 +800,10 @@ class BrowserFrame extends Handler {
             // the post data (there could be another form on the
             // page and that was posted instead.
             String postString = new String(postData);
+            WebViewDatabaseClassic db = WebViewDatabaseClassic.getInstance(mContext);
             if (postString.contains(URLEncoder.encode(username)) &&
                     postString.contains(URLEncoder.encode(password))) {
-                String[] saved = mDatabase.getUsernamePassword(
-                        schemePlusHost);
+                String[] saved = db.getUsernamePassword(schemePlusHost);
                 if (saved != null) {
                     // null username implies that user has chosen not to
                     // save password
@@ -811,7 +811,8 @@ class BrowserFrame extends Handler {
                         // non-null username implies that user has
                         // chosen to save password, so update the
                         // recorded password
-                        mDatabase.setUsernamePassword(schemePlusHost, username, password);
+                        db.setUsernamePassword(schemePlusHost, username,
+                                password);
                     }
                 } else {
                     // CallbackProxy will handle creating the resume
