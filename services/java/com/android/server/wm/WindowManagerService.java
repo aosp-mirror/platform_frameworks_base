@@ -8078,7 +8078,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                         "New transit: " + transit);
-            } else if ((oldWallpaper != null) && (oldWallpaper != mWallpaperTarget)) {
+            } else if (oldWallpaper != null) {
                 // We are transitioning from an activity with
                 // a wallpaper to one without.
                 transit = WindowManagerPolicy.TRANSIT_WALLPAPER_CLOSE;
