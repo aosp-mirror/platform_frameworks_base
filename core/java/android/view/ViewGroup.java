@@ -765,8 +765,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (mFocused == null) {
             super.clearFocus();
         } else {
-            mFocused.clearFocus();
+            View focused = mFocused;
             mFocused = null;
+            focused.clearFocus();
         }
     }
 
