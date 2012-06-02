@@ -50,6 +50,8 @@ public class SearchPanelView extends FrameLayout implements
     private static final int SEARCH_PANEL_HOLD_DURATION = 500;
     static final String TAG = "SearchPanelView";
     static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
+    private static final String ASSIST_ICON_METADATA_NAME =
+            "com.android.systemui.action_assist_icon";
     private final Context mContext;
     private BaseStatusBar mBar;
     private StatusBarTouchProxy mStatusBarTouchProxy;
@@ -168,6 +170,21 @@ public class SearchPanelView extends FrameLayout implements
         // TODO: fetch views
         mMultiWaveView = (MultiWaveView) findViewById(R.id.multi_wave_view);
         mMultiWaveView.setOnTriggerListener(mMultiWaveViewListener);
+        SearchManager searchManager = getSearchManager();
+        if (searchManager != null) {
+            ComponentName component = searchManager.getGlobalSearchActivity();
+            if (component != null) {
+                if (!mMultiWaveView.replaceTargetDrawablesIfPresent(component,
+                        ASSIST_ICON_METADATA_NAME,
+                        com.android.internal.R.drawable.ic_lockscreen_search)) {
+                    Slog.w(TAG, "Couldn't grab icon from component " + component);
+                }
+            } else {
+                Slog.w(TAG, "No search icon specified in component " + component);
+            }
+        } else {
+            Slog.w(TAG, "No SearchManager");
+        }
     }
 
     private boolean pointInside(int x, int y, View v) {
