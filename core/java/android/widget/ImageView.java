@@ -194,6 +194,12 @@ public class ImageView extends View {
     }
 
     @Override
+    public int getResolvedLayoutDirection(Drawable dr) {
+        return (dr == mDrawable) ?
+                getResolvedLayoutDirection() : super.getResolvedLayoutDirection(dr);
+    }
+
+    @Override
     public boolean hasOverlappingRendering() {
         return (getBackground() != null);
     }
@@ -666,7 +672,6 @@ public class ImageView extends View {
                 d.setState(getDrawableState());
             }
             d.setLevel(mLevel);
-            d.setLayoutDirection(getLayoutDirection());
             mDrawableWidth = d.getIntrinsicWidth();
             mDrawableHeight = d.getIntrinsicHeight();
             applyColorMod();
