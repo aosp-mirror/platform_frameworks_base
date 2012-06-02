@@ -73,10 +73,16 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         return mLinearLayout.getWidth() - getWidth();
     }
 
+    private void addToRecycledViews(View v) {
+        if (mRecycledViews.size() < mNumItemsInOneScreenful) {
+            mRecycledViews.add(v);
+        }
+    }
+
     private void update() {
         for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
             View v = mLinearLayout.getChildAt(i);
-            mRecycledViews.add(v);
+            addToRecycledViews(v);
             mAdapter.recycleView(v);
         }
         LayoutTransition transitioner = getLayoutTransition();
@@ -187,7 +193,7 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     }
 
     public void onChildDismissed(View v) {
-        mRecycledViews.add(v);
+        addToRecycledViews(v);
         mLinearLayout.removeView(v);
         if (v.getParent() != null) {
             throw new RuntimeException("Recycled child has parent");
@@ -362,13 +368,13 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         child.measure(childWidthMeasureSpec, childheightMeasureSpec);
         mNumItemsInOneScreenful =
                 (int) FloatMath.ceil(dm.widthPixels / (float) child.getMeasuredWidth());
-        mRecycledViews.add(child);
+        addToRecycledViews(child);
         if (child.getParent() != null) {
             throw new RuntimeException("First recycled child has parent");
         }
 
         for (int i = 0; i < mNumItemsInOneScreenful - 1; i++) {
-            mRecycledViews.add(mAdapter.createView(mLinearLayout));
+            addToRecycledViews(mAdapter.createView(mLinearLayout));
             if (mRecycledViews.get(mRecycledViews.size() - 1).getParent() != null) {
                 throw new RuntimeException("Recycled child has parent");
             }
