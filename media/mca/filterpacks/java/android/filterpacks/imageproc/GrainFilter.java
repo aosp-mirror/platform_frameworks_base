@@ -57,13 +57,15 @@ public class GrainFilter extends Filter {
             "uniform vec2 seed;\n" +
             "varying vec2 v_texcoord;\n" +
             "float rand(vec2 loc) {\n" +
-            "  const float divide = 0.00048828125;\n" +
-            "  const float factor = 2048.0;\n" +
-            "  float value = sin(dot(loc, vec2(12.9898, 78.233)));\n" +
-            "  float residual = mod(dot(mod(loc, divide), vec2(0.9898, 0.233)), divide);\n" +
-            "  float part2 = mod(value, divide);\n" +
-            "  float part1 = value - part2;\n" +
-            "  return fract(0.5453 * part1 + factor * (part2 + residual));\n" +
+            "  float theta1 = dot(loc, vec2(0.9898, 0.233));\n" +
+            "  float theta2 = dot(loc, vec2(12.0, 78.0));\n" +
+            "  float value = cos(theta1) * sin(theta2) + sin(theta1) * cos(theta2);\n" +
+            // keep value of part1 in range: (2^-14 to 2^14).
+            "  float temp = mod(197.0 * value, 1.0) + value;\n" +
+            "  float part1 = mod(220.0 * temp, 1.0) + temp;\n" +
+            "  float part2 = value * 0.5453;\n" +
+            "  float part3 = cos(theta1 + theta2) * 0.43758;\n" +
+            "  return fract(part1 + part2 + part3);\n" +
             "}\n" +
             "void main() {\n" +
             "  gl_FragColor = vec4(rand(v_texcoord + seed), 0.0, 0.0, 1.0);\n" +
