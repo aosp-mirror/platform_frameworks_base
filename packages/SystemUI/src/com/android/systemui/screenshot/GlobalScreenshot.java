@@ -188,10 +188,16 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             Intent sharingIntent = new Intent(Intent.ACTION_SEND);
             sharingIntent.setType("image/png");
             sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
-            sharingIntent.setFlags(Intent.FLAG_ACTIVITY_CLOSE_SYSTEM_DIALOGS);
+
+            Intent chooserIntent = Intent.createChooser(sharingIntent, null);
+            chooserIntent.addFlags(Intent.FLAG_ACTIVITY_CLOSE_SYSTEM_DIALOGS
+                    | Intent.FLAG_ACTIVITY_CLEAR_TASK 
+                    | Intent.FLAG_ACTIVITY_NEW_TASK);
+
             mNotificationBuilder.addAction(R.drawable.ic_menu_share,
                      r.getString(com.android.internal.R.string.share),
-                     PendingIntent.getActivity(context, 0, sharingIntent, 0));
+                     PendingIntent.getActivity(context, 0, chooserIntent, 
+                             PendingIntent.FLAG_CANCEL_CURRENT));
 
             OutputStream out = resolver.openOutputStream(uri);
             image.compress(Bitmap.CompressFormat.PNG, 100, out);
