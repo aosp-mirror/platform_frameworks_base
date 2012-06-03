@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
@@ -123,7 +124,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected Display mDisplay;
     private IWindowManager mWindowManager;
-
+    private boolean mDeviceProvisioned = false;
 
     public IWindowManager getWindowManager() {
         return mWindowManager;
@@ -137,9 +138,30 @@ public abstract class BaseStatusBar extends SystemUI implements
         return mBarService;
     }
 
+    protected boolean isDeviceProvisioned() {
+        return mDeviceProvisioned;
+    }
+
+    private ContentObserver mProvisioningObserver = new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            final boolean provisioned = 0 != Settings.Secure.getInt(
+                    mContext.getContentResolver(), Settings.Secure.DEVICE_PROVISIONED, 0);
+            if (provisioned != mDeviceProvisioned) {
+                mDeviceProvisioned = provisioned;
+                updateNotificationIcons();
+            }
+        }
+    };
+
     public void start() {
         mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
+
+        mProvisioningObserver.onChange(false); // set up
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.DEVICE_PROVISIONED), true,
+                mProvisioningObserver);
 
         mWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
@@ -754,7 +776,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected abstract boolean shouldDisableNavbarGestures();
 
     protected boolean isTopNotification(ViewGroup parent, NotificationData.Entry entry) {
-        return parent.indexOfChild(entry.row) == 0;
+        return parent != null && parent.indexOfChild(entry.row) == 0;
     }
 
     public void updateNotification(IBinder key, StatusBarNotification notification) {
