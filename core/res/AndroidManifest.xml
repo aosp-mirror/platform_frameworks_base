@@ -636,6 +636,12 @@
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="signature" />
 
+    <!-- Allows an application to route media output to other devices. -->
+    <permission android:name="android.permission.ROUTE_MEDIA_OUTPUT"
+                android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+                android:label="@string/permlab_route_media_output"
+                android:description="@string/permdesc_route_media_output" />
+
     <!-- =========================================== -->
     <!-- Permissions associated with telephony state -->
     <!-- =========================================== -->
