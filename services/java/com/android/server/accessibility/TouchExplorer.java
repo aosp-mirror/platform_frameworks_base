@@ -327,8 +327,9 @@ public class TouchExplorer {
                         if (mSendHoverEnterDelayed.isPending()) {
                             mSendHoverEnterDelayed.remove();
                             mSendHoverExitDelayed.remove();
-                            mPerformLongPressDelayed.remove();
                         }
+
+                        mPerformLongPressDelayed.remove();
 
                         // If we have the first tap schedule a long press and break
                         // since we do not want to schedule hover enter because
@@ -396,6 +397,7 @@ public class TouchExplorer {
                                     // exploring so start sending events.
                                     mSendHoverEnterDelayed.forceSendAndRemove();
                                     mSendHoverExitDelayed.remove();
+                                    mPerformLongPressDelayed.remove();
                                     sendMotionEvent(event, MotionEvent.ACTION_HOVER_MOVE,
                                             pointerIdBits, policyFlags);
                                 }
@@ -422,6 +424,7 @@ public class TouchExplorer {
                             mSendHoverExitDelayed.remove();
                             mPerformLongPressDelayed.remove();
                         } else {
+                            mPerformLongPressDelayed.remove();
                             // If the user is touch exploring the second pointer may be
                             // performing a double tap to activate an item without need
                             // for the user to lift his exploring finger.
@@ -446,9 +449,6 @@ public class TouchExplorer {
                         if (isDraggingGesture(event)) {
                             // Two pointers moving in the same direction within
                             // a given distance perform a drag.
-                            mSendHoverEnterDelayed.remove();
-                            mSendHoverExitDelayed.remove();
-                            mPerformLongPressDelayed.remove();
                             mCurrentState = STATE_DRAGGING;
                             mDraggingPointerId = pointerId;
                             sendMotionEvent(event, MotionEvent.ACTION_DOWN, pointerIdBits,
@@ -469,6 +469,7 @@ public class TouchExplorer {
                             mSendHoverExitDelayed.remove();
                             mPerformLongPressDelayed.remove();
                         } else {
+                            mPerformLongPressDelayed.remove();
                             // We are sending events so send exit and gesture
                             // end since we transition to another state.
                             sendExitEventsIfNeeded(policyFlags);
@@ -1247,6 +1248,11 @@ public class TouchExplorer {
 
         @Override
         public void run() {
+            // Active pointers should not be zero when running this command.
+            if (mReceivedPointerTracker.getActivePointerCount() == 0) {
+                return;
+            }
+
             // If the last touched explored location is not within the focused
             // window we will long press at that exact spot, otherwise we find the
             // accessibility focus and if the tap is within its bounds we long press
