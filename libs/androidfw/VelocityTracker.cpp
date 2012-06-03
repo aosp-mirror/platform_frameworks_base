@@ -161,6 +161,21 @@ VelocityTrackerStrategy* VelocityTracker::createStrategy(const char* strategy) {
         // of the velocity when the finger is released.
         return new LeastSquaresVelocityTrackerStrategy(3);
     }
+    if (!strcmp("wlsq2-delta", strategy)) {
+        // 2nd order weighted least squares, delta weighting.  Quality: EXPERIMENTAL
+        return new LeastSquaresVelocityTrackerStrategy(2,
+                LeastSquaresVelocityTrackerStrategy::WEIGHTING_DELTA);
+    }
+    if (!strcmp("wlsq2-central", strategy)) {
+        // 2nd order weighted least squares, central weighting.  Quality: EXPERIMENTAL
+        return new LeastSquaresVelocityTrackerStrategy(2,
+                LeastSquaresVelocityTrackerStrategy::WEIGHTING_CENTRAL);
+    }
+    if (!strcmp("wlsq2-recent", strategy)) {
+        // 2nd order weighted least squares, recent weighting.  Quality: EXPERIMENTAL
+        return new LeastSquaresVelocityTrackerStrategy(2,
+                LeastSquaresVelocityTrackerStrategy::WEIGHTING_RECENT);
+    }
     if (!strcmp("int1", strategy)) {
         // 1st order integrating filter.  Quality: GOOD.
         // Not as good as 'lsq2' because it cannot estimate acceleration but it is
@@ -327,8 +342,9 @@ bool VelocityTracker::getEstimator(uint32_t id, Estimator* outEstimator) const {
 const nsecs_t LeastSquaresVelocityTrackerStrategy::HORIZON;
 const uint32_t LeastSquaresVelocityTrackerStrategy::HISTORY_SIZE;
 
-LeastSquaresVelocityTrackerStrategy::LeastSquaresVelocityTrackerStrategy(uint32_t degree) :
-        mDegree(degree) {
+LeastSquaresVelocityTrackerStrategy::LeastSquaresVelocityTrackerStrategy(
+        uint32_t degree, Weighting weighting) :
+        mDegree(degree), mWeighting(weighting) {
     clear();
 }
 
@@ -366,10 +382,23 @@ void LeastSquaresVelocityTrackerStrategy::addMovement(nsecs_t eventTime, BitSet3
  *
  * Returns true if a solution is found, false otherwise.
  *
- * The input consists of two vectors of data points X and Y with indices 0..m-1.
+ * The input consists of two vectors of data points X and Y with indices 0..m-1
+ * along with a weight vector W of the same size.
+ *
  * The output is a vector B with indices 0..n that describes a polynomial
- * that fits the data, such the sum of abs(Y[i] - (B[0] + B[1] X[i] + B[2] X[i]^2 ... B[n] X[i]^n))
- * for all i between 0 and m-1 is minimized.
+ * that fits the data, such the sum of W[i] * W[i] * abs(Y[i] - (B[0] + B[1] X[i]
+ * + B[2] X[i]^2 ... B[n] X[i]^n)) for all i between 0 and m-1 is minimized.
+ *
+ * Accordingly, the weight vector W should be initialized by the caller with the
+ * reciprocal square root of the variance of the error in each input data point.
+ * In other words, an ideal choice for W would be W[i] = 1 / var(Y[i]) = 1 / stddev(Y[i]).
+ * The weights express the relative importance of each data point.  If the weights are
+ * all 1, then the data points are considered to be of equal importance when fitting
+ * the polynomial.  It is a good idea to choose weights that diminish the importance
+ * of data points that may have higher than usual error margins.
+ *
+ * Errors among data points are assumed to be independent.  W is represented here
+ * as a vector although in the literature it is typically taken to be a diagonal matrix.
  *
  * That is to say, the function that generated the input data can be approximated
  * by y(x) ~= B[0] + B[1] x + B[2] x^2 + ... + B[n] x^n.
@@ -379,14 +408,15 @@ void LeastSquaresVelocityTrackerStrategy::addMovement(nsecs_t eventTime, BitSet3
  * indicates perfect correspondence.
  *
  * This function first expands the X vector to a m by n matrix A such that
- * A[i][0] = 1, A[i][1] = X[i], A[i][2] = X[i]^2, ..., A[i][n] = X[i]^n.
+ * A[i][0] = 1, A[i][1] = X[i], A[i][2] = X[i]^2, ..., A[i][n] = X[i]^n, then
+ * multiplies it by w[i]./
  *
  * Then it calculates the QR decomposition of A yielding an m by m orthonormal matrix Q
  * and an m by n upper triangular matrix R.  Because R is upper triangular (lower
  * part is all zeroes), we can simplify the decomposition into an m by n matrix
  * Q1 and a n by n matrix R1 such that A = Q1 R1.
  *
- * Finally we solve the system of linear equations given by R1 B = (Qtranspose Y)
+ * Finally we solve the system of linear equations given by R1 B = (Qtranspose W Y)
  * to find B.
  *
  * For efficiency, we lay out A and Q column-wise in memory because we frequently
@@ -395,17 +425,18 @@ void LeastSquaresVelocityTrackerStrategy::addMovement(nsecs_t eventTime, BitSet3
  * http://en.wikipedia.org/wiki/Numerical_methods_for_linear_least_squares
  * http://en.wikipedia.org/wiki/Gram-Schmidt
  */
-static bool solveLeastSquares(const float* x, const float* y, uint32_t m, uint32_t n,
-        float* outB, float* outDet) {
+static bool solveLeastSquares(const float* x, const float* y,
+        const float* w, uint32_t m, uint32_t n, float* outB, float* outDet) {
 #if DEBUG_STRATEGY
-    ALOGD("solveLeastSquares: m=%d, n=%d, x=%s, y=%s", int(m), int(n),
-            vectorToString(x, m).string(), vectorToString(y, m).string());
+    ALOGD("solveLeastSquares: m=%d, n=%d, x=%s, y=%s, w=%s", int(m), int(n),
+            vectorToString(x, m).string(), vectorToString(y, m).string(),
+            vectorToString(w, m).string());
 #endif
 
-    // Expand the X vector to a matrix A.
+    // Expand the X vector to a matrix A, pre-multiplied by the weights.
     float a[n][m]; // column-major order
     for (uint32_t h = 0; h < m; h++) {
-        a[0][h] = 1;
+        a[0][h] = w[h];
         for (uint32_t i = 1; i < n; i++) {
             a[i][h] = a[i - 1][h] * x[h];
         }
@@ -462,10 +493,14 @@ static bool solveLeastSquares(const float* x, const float* y, uint32_t m, uint32
     ALOGD("  - qr=%s", matrixToString(&qr[0][0], m, n, false /*rowMajor*/).string());
 #endif
 
-    // Solve R B = Qt Y to find B.  This is easy because R is upper triangular.
+    // Solve R B = Qt W Y to find B.  This is easy because R is upper triangular.
     // We just work from bottom-right to top-left calculating B's coefficients.
+    float wy[m];
+    for (uint32_t h = 0; h < m; h++) {
+        wy[h] = y[h] * w[h];
+    }
     for (uint32_t i = n; i-- != 0; ) {
-        outB[i] = vectorDot(&q[i][0], y, m);
+        outB[i] = vectorDot(&q[i][0], wy, m);
         for (uint32_t j = n - 1; j > i; j--) {
             outB[i] -= r[i][j] * outB[j];
         }
@@ -476,8 +511,9 @@ static bool solveLeastSquares(const float* x, const float* y, uint32_t m, uint32
 #endif
 
     // Calculate the coefficient of determination as 1 - (SSerr / SStot) where
-    // SSerr is the residual sum of squares (squared variance of the error),
-    // and SStot is the total sum of squares (squared variance of the data).
+    // SSerr is the residual sum of squares (variance of the error),
+    // and SStot is the total sum of squares (variance of the data) where each
+    // has been weighted.
     float ymean = 0;
     for (uint32_t h = 0; h < m; h++) {
         ymean += y[h];
@@ -493,9 +529,9 @@ static bool solveLeastSquares(const float* x, const float* y, uint32_t m, uint32
             term *= x[h];
             err -= term * outB[i];
         }
-        sserr += err * err;
+        sserr += w[h] * w[h] * err * err;
         float var = y[h] - ymean;
-        sstot += var * var;
+        sstot += w[h] * w[h] * var * var;
     }
     *outDet = sstot > 0.000001f ? 1.0f - (sserr / sstot) : 1;
 #if DEBUG_STRATEGY
@@ -513,6 +549,7 @@ bool LeastSquaresVelocityTrackerStrategy::getEstimator(uint32_t id,
     // Iterate over movement samples in reverse time order and collect samples.
     float x[HISTORY_SIZE];
     float y[HISTORY_SIZE];
+    float w[HISTORY_SIZE];
     float time[HISTORY_SIZE];
     uint32_t m = 0;
     uint32_t index = mIndex;
@@ -531,6 +568,7 @@ bool LeastSquaresVelocityTrackerStrategy::getEstimator(uint32_t id,
         const VelocityTracker::Position& position = movement.getPosition(id);
         x[m] = position.x;
         y[m] = position.y;
+        w[m] = chooseWeight(index);
         time[m] = -age * 0.000000001f;
         index = (index == 0 ? HISTORY_SIZE : index) - 1;
     } while (++m < HISTORY_SIZE);
@@ -547,8 +585,8 @@ bool LeastSquaresVelocityTrackerStrategy::getEstimator(uint32_t id,
     if (degree >= 1) {
         float xdet, ydet;
         uint32_t n = degree + 1;
-        if (solveLeastSquares(time, x, m, n, outEstimator->xCoeff, &xdet)
-                && solveLeastSquares(time, y, m, n, outEstimator->yCoeff, &ydet)) {
+        if (solveLeastSquares(time, x, w, m, n, outEstimator->xCoeff, &xdet)
+                && solveLeastSquares(time, y, w, m, n, outEstimator->yCoeff, &ydet)) {
             outEstimator->time = newestMovement.eventTime;
             outEstimator->degree = degree;
             outEstimator->confidence = xdet * ydet;
@@ -570,6 +608,73 @@ bool LeastSquaresVelocityTrackerStrategy::getEstimator(uint32_t id,
     outEstimator->degree = 0;
     outEstimator->confidence = 1;
     return true;
+}
+
+float LeastSquaresVelocityTrackerStrategy::chooseWeight(uint32_t index) const {
+    switch (mWeighting) {
+    case WEIGHTING_DELTA: {
+        // Weight points based on how much time elapsed between them and the next
+        // point so that points that "cover" a shorter time span are weighed less.
+        //   delta  0ms: 0.5
+        //   delta 10ms: 1.0
+        if (index == mIndex) {
+            return 1.0f;
+        }
+        uint32_t nextIndex = (index + 1) % HISTORY_SIZE;
+        float deltaMillis = (mMovements[nextIndex].eventTime- mMovements[index].eventTime)
+                * 0.000001f;
+        if (deltaMillis < 0) {
+            return 0.5f;
+        }
+        if (deltaMillis < 10) {
+            return 0.5f + deltaMillis * 0.05;
+        }
+        return 1.0f;
+    }
+
+    case WEIGHTING_CENTRAL: {
+        // Weight points based on their age, weighing very recent and very old points less.
+        //   age  0ms: 0.5
+        //   age 10ms: 1.0
+        //   age 50ms: 1.0
+        //   age 60ms: 0.5
+        float ageMillis = (mMovements[mIndex].eventTime - mMovements[index].eventTime)
+                * 0.000001f;
+        if (ageMillis < 0) {
+            return 0.5f;
+        }
+        if (ageMillis < 10) {
+            return 0.5f + ageMillis * 0.05;
+        }
+        if (ageMillis < 50) {
+            return 1.0f;
+        }
+        if (ageMillis < 60) {
+            return 0.5f + (60 - ageMillis) * 0.05;
+        }
+        return 0.5f;
+    }
+
+    case WEIGHTING_RECENT: {
+        // Weight points based on their age, weighing older points less.
+        //   age   0ms: 1.0
+        //   age  50ms: 1.0
+        //   age 100ms: 0.5
+        float ageMillis = (mMovements[mIndex].eventTime - mMovements[index].eventTime)
+                * 0.000001f;
+        if (ageMillis < 50) {
+            return 1.0f;
+        }
+        if (ageMillis < 100) {
+            return 0.5f + (100 - ageMillis) * 0.01f;
+        }
+        return 0.5f;
+    }
+
+    case WEIGHTING_NONE:
+    default:
+        return 1.0f;
+    }
 }
 
 
