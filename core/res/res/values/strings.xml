@@ -3568,13 +3568,13 @@
          from the activity resolver to use just this once. [CHAR LIMIT=25] -->
     <string name="activity_resolver_use_once">Just once</string>
 
-    <!-- Name of the default audio route when nothing is connected to
-         a headphone or other wired audio output jack. [CHAR LIMIT=25] -->
-    <string name="default_audio_route_name" product="default">Phone speaker</string>
-
     <!-- Name of the default audio route for tablets when nothing
          is connected to a headphone or other wired audio output jack. [CHAR LIMIT=25] -->
     <string name="default_audio_route_name" product="tablet">Tablet speakers</string>
+
+    <!-- Name of the default audio route when nothing is connected to
+         a headphone or other wired audio output jack. [CHAR LIMIT=25] -->
+    <string name="default_audio_route_name" product="default">Phone speaker</string>
 
     <!-- Name of the default audio route when wired headphones are
          connected. [CHAR LIMIT=25] -->
