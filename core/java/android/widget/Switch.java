@@ -651,7 +651,7 @@ public class Switch extends CompoundButton {
             mVelocityTracker.computeCurrentVelocity(1000);
             float xvel = mVelocityTracker.getXVelocity();
             if (Math.abs(xvel) > mMinFlingVelocity) {
-                newState = xvel > 0;
+                newState = isLayoutRtl() ? (xvel < 0) : (xvel > 0);
             } else {
                 newState = getTargetCheckedState();
             }
@@ -669,13 +669,25 @@ public class Switch extends CompoundButton {
     }
 
     private boolean getTargetCheckedState() {
-        return mThumbPosition >= getThumbScrollRange() / 2;
+        if (isLayoutRtl()) {
+            return mThumbPosition <= getThumbScrollRange() / 2;
+        } else {
+            return mThumbPosition >= getThumbScrollRange() / 2;
+        }
+    }
+
+    private void setThumbPosition(boolean checked) {
+        if (isLayoutRtl()) {
+            mThumbPosition = checked ? 0 : getThumbScrollRange();
+        } else {
+            mThumbPosition = checked ? getThumbScrollRange() : 0;
+        }
     }
 
     @Override
     public void setChecked(boolean checked) {
         super.setChecked(checked);
-        mThumbPosition = checked ? getThumbScrollRange() : 0;
+        setThumbPosition(checked);
         invalidate();
     }
 
@@ -683,10 +695,19 @@ public class Switch extends CompoundButton {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
 
-        mThumbPosition = isChecked() ? getThumbScrollRange() : 0;
+        setThumbPosition(isChecked());
 
-        int switchRight = getWidth() - getPaddingRight();
-        int switchLeft = switchRight - mSwitchWidth;
+        int switchRight;
+        int switchLeft;
+
+        if (isLayoutRtl()) {
+            switchLeft = getPaddingLeft();
+            switchRight = switchLeft + mSwitchWidth;
+        } else {
+            switchRight = getWidth() - getPaddingRight();
+            switchLeft = switchRight - mSwitchWidth;
+        }
+
         int switchTop = 0;
         int switchBottom = 0;
         switch (getGravity() & Gravity.VERTICAL_GRAVITY_MASK) {
@@ -761,7 +782,22 @@ public class Switch extends CompoundButton {
     }
 
     @Override
+    public int getCompoundPaddingLeft() {
+        if (!isLayoutRtl()) {
+            return super.getCompoundPaddingLeft();
+        }
+        int padding = super.getCompoundPaddingLeft() + mSwitchWidth;
+        if (!TextUtils.isEmpty(getText())) {
+            padding += mSwitchPadding;
+        }
+        return padding;
+    }
+
+    @Override
     public int getCompoundPaddingRight() {
+        if (isLayoutRtl()) {
+            return super.getCompoundPaddingRight();
+        }
         int padding = super.getCompoundPaddingRight() + mSwitchWidth;
         if (!TextUtils.isEmpty(getText())) {
             padding += mSwitchPadding;
