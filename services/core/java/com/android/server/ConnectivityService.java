@@ -1037,6 +1037,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mDnsManager = new DnsManager(mContext, mDnsResolver, mSystemProperties);
         registerPrivateDnsSettingsCallbacks();
+
+        String hostname = Settings.System.getString(context.getContentResolver(),
+                Settings.System.DEVICE_HOSTNAME);
+        if (hostname != null && hostname != ""){
+            SystemProperties.set("net.hostname", hostname);
+        }
     }
 
     @VisibleForTesting
