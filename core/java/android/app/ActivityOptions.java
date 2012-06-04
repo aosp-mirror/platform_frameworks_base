@@ -127,12 +127,53 @@ public class ActivityOptions {
      */
     public static ActivityOptions makeCustomAnimation(Context context,
             int enterResId, int exitResId) {
+        return makeCustomAnimation(context, enterResId, exitResId, null, null);
+    }
+
+    /**
+     * Create an ActivityOptions specifying a custom animation to run when
+     * the activity is displayed.
+     *
+     * @param context Who is defining this.  This is the application that the
+     * animation resources will be loaded from.
+     * @param enterResId A resource ID of the animation resource to use for
+     * the incoming activity.  Use 0 for no animation.
+     * @param exitResId A resource ID of the animation resource to use for
+     * the outgoing activity.  Use 0 for no animation.
+     * @param handler If <var>listener</var> is non-null this must be a valid
+     * Handler on which to dispatch the callback; otherwise it should be null.
+     * @param listener Optional OnAnimationStartedListener to find out when the
+     * requested animation has started running.  If for some reason the animation
+     * is not executed, the callback will happen immediately.
+     * @return Returns a new ActivityOptions object that you can use to
+     * supply these options as the options Bundle when starting an activity.
+     * @hide
+     */
+    public static ActivityOptions makeCustomAnimation(Context context,
+            int enterResId, int exitResId, Handler handler, OnAnimationStartedListener listener) {
         ActivityOptions opts = new ActivityOptions();
         opts.mPackageName = context.getPackageName();
         opts.mAnimationType = ANIM_CUSTOM;
         opts.mCustomEnterResId = enterResId;
         opts.mCustomExitResId = exitResId;
+        opts.setListener(handler, listener);
         return opts;
+    }
+
+    private void setListener(Handler handler, OnAnimationStartedListener listener) {
+        if (listener != null) {
+            final Handler h = handler;
+            final OnAnimationStartedListener finalListener = listener;
+            mAnimationStartedListener = new IRemoteCallback.Stub() {
+                @Override public void sendResult(Bundle data) throws RemoteException {
+                    h.post(new Runnable() {
+                        @Override public void run() {
+                            finalListener.onAnimationStarted();
+                        }
+                    });
+                }
+            };
+        }
     }
 
     /**
@@ -258,19 +299,7 @@ public class ActivityOptions {
         source.getLocationOnScreen(pts);
         opts.mStartX = pts[0] + startX;
         opts.mStartY = pts[1] + startY;
-        if (listener != null) {
-            final Handler h = source.getHandler();
-            final OnAnimationStartedListener finalListener = listener;
-            opts.mAnimationStartedListener = new IRemoteCallback.Stub() {
-                @Override public void sendResult(Bundle data) throws RemoteException {
-                    h.post(new Runnable() {
-                        @Override public void run() {
-                            finalListener.onAnimationStarted();
-                        }
-                    });
-                }
-            };
-        }
+        opts.setListener(source.getHandler(), listener);
         return opts;
     }
 
@@ -284,6 +313,8 @@ public class ActivityOptions {
         if (mAnimationType == ANIM_CUSTOM) {
             mCustomEnterResId = opts.getInt(KEY_ANIM_ENTER_RES_ID, 0);
             mCustomExitResId = opts.getInt(KEY_ANIM_EXIT_RES_ID, 0);
+            mAnimationStartedListener = IRemoteCallback.Stub.asInterface(
+                    opts.getIBinder(KEY_ANIM_START_LISTENER));
         } else if (mAnimationType == ANIM_SCALE_UP) {
             mStartX = opts.getInt(KEY_ANIM_START_X, 0);
             mStartY = opts.getInt(KEY_ANIM_START_Y, 0);
@@ -381,7 +412,13 @@ public class ActivityOptions {
                 mCustomEnterResId = otherOptions.mCustomEnterResId;
                 mCustomExitResId = otherOptions.mCustomExitResId;
                 mThumbnail = null;
-                mAnimationStartedListener = null;
+                if (otherOptions.mAnimationStartedListener != null) {
+                    try {
+                        otherOptions.mAnimationStartedListener.sendResult(null);
+                    } catch (RemoteException e) {
+                    }
+                }
+                mAnimationStartedListener = otherOptions.mAnimationStartedListener;
                 break;
             case ANIM_SCALE_UP:
                 mAnimationType = otherOptions.mAnimationType;
@@ -389,6 +426,13 @@ public class ActivityOptions {
                 mStartY = otherOptions.mStartY;
                 mStartWidth = otherOptions.mStartWidth;
                 mStartHeight = otherOptions.mStartHeight;
+                if (otherOptions.mAnimationStartedListener != null) {
+                    try {
+                        otherOptions.mAnimationStartedListener.sendResult(null);
+                    } catch (RemoteException e) {
+                    }
+                }
+                mAnimationStartedListener = null;
                 break;
             case ANIM_THUMBNAIL:
             case ANIM_THUMBNAIL_DELAYED:
@@ -425,6 +469,8 @@ public class ActivityOptions {
                 b.putInt(KEY_ANIM_TYPE, mAnimationType);
                 b.putInt(KEY_ANIM_ENTER_RES_ID, mCustomEnterResId);
                 b.putInt(KEY_ANIM_EXIT_RES_ID, mCustomExitResId);
+                b.putIBinder(KEY_ANIM_START_LISTENER, mAnimationStartedListener
+                        != null ? mAnimationStartedListener.asBinder() : null);
                 break;
             case ANIM_SCALE_UP:
                 b.putInt(KEY_ANIM_TYPE, mAnimationType);

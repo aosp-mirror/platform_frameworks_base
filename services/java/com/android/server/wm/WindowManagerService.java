@@ -3897,41 +3897,62 @@ public class WindowManagerService extends IWindowManager.Stub
         return mNextAppTransition;
     }
 
+    private void scheduleAnimationCallback(IRemoteCallback cb) {
+        if (cb != null) {
+            mH.sendMessage(mH.obtainMessage(H.DO_ANIMATION_CALLBACK, cb));
+        }
+    }
+
     public void overridePendingAppTransition(String packageName,
-            int enterAnim, int exitAnim) {
-        if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
-            mNextAppTransitionType = ActivityOptions.ANIM_CUSTOM;
-            mNextAppTransitionPackage = packageName;
-            mNextAppTransitionThumbnail = null;
-            mNextAppTransitionEnter = enterAnim;
-            mNextAppTransitionExit = exitAnim;
+            int enterAnim, int exitAnim, IRemoteCallback startedCallback) {
+        synchronized(mWindowMap) {
+            if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+                mNextAppTransitionType = ActivityOptions.ANIM_CUSTOM;
+                mNextAppTransitionPackage = packageName;
+                mNextAppTransitionThumbnail = null;
+                mNextAppTransitionEnter = enterAnim;
+                mNextAppTransitionExit = exitAnim;
+                scheduleAnimationCallback(mNextAppTransitionCallback);
+                mNextAppTransitionCallback = startedCallback;
+            } else {
+                scheduleAnimationCallback(startedCallback);
+            }
         }
     }
 
     public void overridePendingAppTransitionScaleUp(int startX, int startY, int startWidth,
             int startHeight) {
-        if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
-            mNextAppTransitionType = ActivityOptions.ANIM_SCALE_UP;
-            mNextAppTransitionPackage = null;
-            mNextAppTransitionThumbnail = null;
-            mNextAppTransitionStartX = startX;
-            mNextAppTransitionStartY = startY;
-            mNextAppTransitionStartWidth = startWidth;
-            mNextAppTransitionStartHeight = startHeight;
+        synchronized(mWindowMap) {
+            if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+                mNextAppTransitionType = ActivityOptions.ANIM_SCALE_UP;
+                mNextAppTransitionPackage = null;
+                mNextAppTransitionThumbnail = null;
+                mNextAppTransitionStartX = startX;
+                mNextAppTransitionStartY = startY;
+                mNextAppTransitionStartWidth = startWidth;
+                mNextAppTransitionStartHeight = startHeight;
+                scheduleAnimationCallback(mNextAppTransitionCallback);
+                mNextAppTransitionCallback = null;
+            }
         }
     }
 
     public void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX,
             int startY, IRemoteCallback startedCallback, boolean delayed) {
-        if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
-            mNextAppTransitionType =
-                    delayed ? ActivityOptions.ANIM_THUMBNAIL_DELAYED : ActivityOptions.ANIM_THUMBNAIL;
-            mNextAppTransitionPackage = null;
-            mNextAppTransitionThumbnail = srcThumb;
-            mNextAppTransitionDelayed = delayed;
-            mNextAppTransitionStartX = startX;
-            mNextAppTransitionStartY = startY;
-            mNextAppTransitionCallback = startedCallback;
+        synchronized(mWindowMap) {
+            if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+                mNextAppTransitionType = delayed
+                        ? ActivityOptions.ANIM_THUMBNAIL_DELAYED : ActivityOptions.ANIM_THUMBNAIL;
+                mNextAppTransitionPackage = null;
+                mNextAppTransitionThumbnail = srcThumb;
+                mNextAppTransitionDelayed = delayed;
+                mNextAppTransitionStartX = startX;
+                mNextAppTransitionStartY = startY;
+                scheduleAnimationCallback(mNextAppTransitionCallback);
+                mNextAppTransitionCallback = startedCallback;
+            } else {
+                scheduleAnimationCallback(startedCallback);
+            }
         }
     }
 
@@ -6797,6 +6818,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int WAITING_FOR_DRAWN_TIMEOUT = 24;
         public static final int BULK_UPDATE_PARAMETERS = 25;
         public static final int SHOW_STRICT_MODE_VIOLATION = 26;
+        public static final int DO_ANIMATION_CALLBACK = 27;
 
         public static final int ANIMATOR_WHAT_OFFSET = 100000;
         public static final int SET_TRANSPARENT_REGION = ANIMATOR_WHAT_OFFSET + 1;
@@ -7295,6 +7317,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case CLEAR_PENDING_ACTIONS: {
                     mAnimator.clearPendingActions();
+                    break;
+                }
+
+                case DO_ANIMATION_CALLBACK: {
+                    try {
+                        ((IRemoteCallback)msg.obj).sendResult(null);
+                    } catch (RemoteException e) {
+                    }
                     break;
                 }
             }
@@ -8185,12 +8215,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mNextAppTransitionType = ActivityOptions.ANIM_NONE;
             mNextAppTransitionPackage = null;
             mNextAppTransitionThumbnail = null;
-            if (mNextAppTransitionCallback != null) {
-                try {
-                    mNextAppTransitionCallback.sendResult(null);
-                } catch (RemoteException e) {
-                }
-            }
+            scheduleAnimationCallback(mNextAppTransitionCallback);
+            mNextAppTransitionCallback = null;
 
             mOpeningApps.clear();
             mClosingApps.clear();
@@ -9725,11 +9751,11 @@ public class WindowManagerService extends IWindowManager.Stub
             switch (mNextAppTransitionType) {
                 case ActivityOptions.ANIM_CUSTOM:
                     pw.print("  mNextAppTransitionPackage=");
-                            pw.print(mNextAppTransitionPackage);
-                            pw.print(" mNextAppTransitionEnter=0x");
+                            pw.println(mNextAppTransitionPackage);
+                    pw.print("  mNextAppTransitionEnter=0x");
                             pw.print(Integer.toHexString(mNextAppTransitionEnter));
                             pw.print(" mNextAppTransitionExit=0x");
-                            pw.print(Integer.toHexString(mNextAppTransitionExit));
+                            pw.println(Integer.toHexString(mNextAppTransitionExit));
                     break;
                 case ActivityOptions.ANIM_SCALE_UP:
                     pw.print("  mNextAppTransitionStartX="); pw.print(mNextAppTransitionStartX);
@@ -9744,10 +9770,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 case ActivityOptions.ANIM_THUMBNAIL_DELAYED:
                     pw.print("  mNextAppTransitionThumbnail=");
                             pw.print(mNextAppTransitionThumbnail);
-                            pw.print(" mNextAppTransitionStartX="); pw.print(mNextAppTransitionStartX);
-                            pw.print(" mNextAppTransitionStartY="); pw.println(mNextAppTransitionStartY);
-                            pw.print(" mNextAppTransitionDelayed="); pw.println(mNextAppTransitionDelayed);
+                            pw.print(" mNextAppTransitionStartX=");
+                            pw.print(mNextAppTransitionStartX);
+                            pw.print(" mNextAppTransitionStartY=");
+                            pw.println(mNextAppTransitionStartY);
+                    pw.print("  mNextAppTransitionDelayed="); pw.println(mNextAppTransitionDelayed);
                     break;
+            }
+            if (mNextAppTransitionCallback != null) {
+                pw.print("  mNextAppTransitionCallback=");
+                        pw.println(mNextAppTransitionCallback);
             }
             pw.print("  mStartingIconInTransition="); pw.print(mStartingIconInTransition);
                     pw.print(", mSkipAppTransitionAnimation="); pw.println(mSkipAppTransitionAnimation);

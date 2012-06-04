@@ -80,7 +80,8 @@ interface IWindowManager
     void setFocusedApp(IBinder token, boolean moveFocusNow);
     void prepareAppTransition(int transit, boolean alwaysKeepCurrent);
     int getPendingAppTransition();
-    void overridePendingAppTransition(String packageName, int enterAnim, int exitAnim);
+    void overridePendingAppTransition(String packageName, int enterAnim, int exitAnim,
+            IRemoteCallback startedCallback);
     void overridePendingAppTransitionScaleUp(int startX, int startY, int startWidth,
             int startHeight);
     void overridePendingAppTransitionThumb(in Bitmap srcThumb, int startX, int startY,
