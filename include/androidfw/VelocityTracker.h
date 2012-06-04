@@ -138,8 +138,23 @@ public:
  */
 class LeastSquaresVelocityTrackerStrategy : public VelocityTrackerStrategy {
 public:
+    enum Weighting {
+        // No weights applied.  All data points are equally reliable.
+        WEIGHTING_NONE,
+
+        // Weight by time delta.  Data points clustered together are weighted less.
+        WEIGHTING_DELTA,
+
+        // Weight such that points within a certain horizon are weighed more than those
+        // outside of that horizon.
+        WEIGHTING_CENTRAL,
+
+        // Weight such that points older than a certain amount are weighed less.
+        WEIGHTING_RECENT,
+    };
+
     // Degree must be no greater than Estimator::MAX_DEGREE.
-    LeastSquaresVelocityTrackerStrategy(uint32_t degree);
+    LeastSquaresVelocityTrackerStrategy(uint32_t degree, Weighting weighting = WEIGHTING_NONE);
     virtual ~LeastSquaresVelocityTrackerStrategy();
 
     virtual void clear();
@@ -167,7 +182,10 @@ private:
         }
     };
 
+    float chooseWeight(uint32_t index) const;
+
     const uint32_t mDegree;
+    const Weighting mWeighting;
     uint32_t mIndex;
     Movement mMovements[HISTORY_SIZE];
 };
