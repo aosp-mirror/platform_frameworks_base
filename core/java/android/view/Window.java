@@ -718,6 +718,7 @@ public abstract class Window {
      * per {@link #setFlags}.
      * @param flags The flag bits to be set.
      * @see #setFlags
+     * @see #clearFlags
      */
     public void addFlags(int flags) {
         setFlags(flags, flags);
@@ -728,6 +729,7 @@ public abstract class Window {
      * per {@link #setFlags}.
      * @param flags The flag bits to be cleared.
      * @see #setFlags
+     * @see #addFlags
      */
     public void clearFlags(int flags) {
         setFlags(0, flags);
@@ -749,6 +751,8 @@ public abstract class Window {
      *
      * @param flags The new window flags (see WindowManager.LayoutParams).
      * @param mask Which of the window flag bits to modify.
+     * @see #addFlags
+     * @see #clearFlags
      */
     public void setFlags(int flags, int mask) {
         final WindowManager.LayoutParams attrs = getAttributes();
