@@ -1715,13 +1715,9 @@ public final class WebViewCore {
                             nativeInsertText(mNativeClass, (String) msg.obj);
                             break;
                         case SELECT_TEXT: {
-                            int[] args = (int[]) msg.obj;
-                            if (args == null) {
-                                nativeClearTextSelection(mNativeClass);
-                            } else {
-                                nativeSelectText(mNativeClass, args[0],
-                                        args[1], args[2], args[3]);
-                            }
+                            int handleId = (Integer) msg.obj;
+                            nativeSelectText(mNativeClass, handleId,
+                                    msg.arg1, msg.arg2);
                             break;
                         }
                         case SELECT_WORD_AT: {
@@ -3150,7 +3146,7 @@ public final class WebViewCore {
     private native String nativeGetText(int nativeClass,
             int startX, int startY, int endX, int endY);
     private native void nativeSelectText(int nativeClass,
-            int startX, int startY, int endX, int endY);
+            int handleId, int x, int y);
     private native void nativeClearTextSelection(int nativeClass);
     private native boolean nativeSelectWordAt(int nativeClass, int x, int y);
     private native void nativeSelectAll(int nativeClass);
