@@ -417,6 +417,7 @@ public class Notification implements Parcelable
     public static final String KIND_EVENT = "android.event";
 
     /**
+     * @hide
      * Notification type: promotion or advertisement.
      */
     public static final String KIND_PROMO = "android.promo";
