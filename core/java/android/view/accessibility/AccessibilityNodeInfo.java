@@ -443,6 +443,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public AccessibilityNodeInfo findFocus(int focus) {
         enforceSealed();
+        enforceValidFocusType(focus);
         if (!canPerformRequestOverConnection(mSourceNodeId)) {
             return null;
         }
@@ -472,6 +473,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public AccessibilityNodeInfo focusSearch(int direction) {
         enforceSealed();
+        enforceValidFocusDirection(direction);
         if (!canPerformRequestOverConnection(mSourceNodeId)) {
             return null;
         }
@@ -1327,6 +1329,36 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (!isSealed()) {
             throw new IllegalStateException("Cannot perform this "
                     + "action on a not sealed instance.");
+        }
+    }
+
+    private void enforceValidFocusDirection(int direction) {
+        switch (direction) {
+            case View.FOCUS_DOWN:
+            case View.FOCUS_UP:
+            case View.FOCUS_LEFT:
+            case View.FOCUS_RIGHT:
+            case View.FOCUS_FORWARD:
+            case View.FOCUS_BACKWARD:
+            case View.ACCESSIBILITY_FOCUS_DOWN:
+            case View.ACCESSIBILITY_FOCUS_UP:
+            case View.ACCESSIBILITY_FOCUS_LEFT:
+            case View.ACCESSIBILITY_FOCUS_RIGHT:
+            case View.ACCESSIBILITY_FOCUS_FORWARD:
+            case View.ACCESSIBILITY_FOCUS_BACKWARD:
+                return;
+            default:
+                throw new IllegalArgumentException("Unknown direction: " + direction);
+        }
+    }
+
+    private void enforceValidFocusType(int focusType) {
+        switch (focusType) {
+            case FOCUS_INPUT:
+            case FOCUS_ACCESSIBILITY:
+                return;
+            default:
+                throw new IllegalArgumentException("Unknown focus type: " + focusType);
         }
     }
 
