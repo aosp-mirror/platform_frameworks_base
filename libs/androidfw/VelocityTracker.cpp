@@ -20,8 +20,8 @@
 // Log debug messages about velocity tracking.
 #define DEBUG_VELOCITY 0
 
-// Log debug messages about least squares fitting.
-#define DEBUG_LEAST_SQUARES 0
+// Log debug messages about the progress of the algorithm itself.
+#define DEBUG_STRATEGY 0
 
 #include <math.h>
 #include <limits.h>
@@ -30,6 +30,8 @@
 #include <utils/BitSet.h>
 #include <utils/String8.h>
 #include <utils/Timers.h>
+
+#include <cutils/properties.h>
 
 namespace android {
 
@@ -60,7 +62,7 @@ static float vectorNorm(const float* a, uint32_t m) {
     return sqrtf(r);
 }
 
-#if DEBUG_LEAST_SQUARES || DEBUG_VELOCITY
+#if DEBUG_STRATEGY || DEBUG_VELOCITY
 static String8 vectorToString(const float* a, uint32_t m) {
     String8 str;
     str.append("[");
@@ -98,13 +100,68 @@ static String8 matrixToString(const float* a, uint32_t m, uint32_t n, bool rowMa
 
 // --- VelocityTracker ---
 
-VelocityTracker::VelocityTracker() :
-        mLastEventTime(0), mCurrentPointerIdBits(0), mActivePointerId(-1),
-        mStrategy(new LeastSquaresVelocityTrackerStrategy()) {
+// The default velocity tracker strategy.
+// Although other strategies are available for testing and comparison purposes,
+// this is the strategy that applications will actually use.  Be very careful
+// when adjusting the default strategy because it can dramatically affect
+// (often in a bad way) the user experience.
+const char* VelocityTracker::DEFAULT_STRATEGY = "lsq2";
+
+VelocityTracker::VelocityTracker(const char* strategy) :
+        mLastEventTime(0), mCurrentPointerIdBits(0), mActivePointerId(-1) {
+    char value[PROPERTY_VALUE_MAX];
+
+    // Allow the default strategy to be overridden using a system property for debugging.
+    if (!strategy) {
+        int length = property_get("debug.velocitytracker.strategy", value, NULL);
+        if (length > 0) {
+            strategy = value;
+        } else {
+            strategy = DEFAULT_STRATEGY;
+        }
+    }
+
+    // Configure the strategy.
+    if (!configureStrategy(strategy)) {
+        ALOGD("Unrecognized velocity tracker strategy name '%s'.", strategy);
+        if (!configureStrategy(DEFAULT_STRATEGY)) {
+            LOG_ALWAYS_FATAL("Could not create the default velocity tracker strategy '%s'!",
+                    strategy);
+        }
+    }
 }
 
 VelocityTracker::~VelocityTracker() {
     delete mStrategy;
+}
+
+bool VelocityTracker::configureStrategy(const char* strategy) {
+    mStrategy = createStrategy(strategy);
+    return mStrategy != NULL;
+}
+
+VelocityTrackerStrategy* VelocityTracker::createStrategy(const char* strategy) {
+    if (!strcmp("lsq1", strategy)) {
+        // 1st order least squares.  Quality: POOR.
+        // Frequently underfits the touch data especially when the finger accelerates
+        // or changes direction.  Often underestimates velocity.  The direction
+        // is overly influenced by historical touch points.
+        return new LeastSquaresVelocityTrackerStrategy(1);
+    }
+    if (!strcmp("lsq2", strategy)) {
+        // 2nd order least squares.  Quality: VERY GOOD.
+        // Pretty much ideal, but can be confused by certain kinds of touch data,
+        // particularly if the panel has a tendency to generate delayed,
+        // duplicate or jittery touch coordinates when the finger is released.
+        return new LeastSquaresVelocityTrackerStrategy(2);
+    }
+    if (!strcmp("lsq3", strategy)) {
+        // 3rd order least squares.  Quality: UNUSABLE.
+        // Frequently overfits the touch data yielding wildly divergent estimates
+        // of the velocity when the finger is released.
+        return new LeastSquaresVelocityTrackerStrategy(3);
+    }
+    return NULL;
 }
 
 void VelocityTracker::clear() {
@@ -259,11 +316,11 @@ bool VelocityTracker::getEstimator(uint32_t id, Estimator* outEstimator) const {
 
 // --- LeastSquaresVelocityTrackerStrategy ---
 
-const uint32_t LeastSquaresVelocityTrackerStrategy::DEGREE;
 const nsecs_t LeastSquaresVelocityTrackerStrategy::HORIZON;
 const uint32_t LeastSquaresVelocityTrackerStrategy::HISTORY_SIZE;
 
-LeastSquaresVelocityTrackerStrategy::LeastSquaresVelocityTrackerStrategy() {
+LeastSquaresVelocityTrackerStrategy::LeastSquaresVelocityTrackerStrategy(uint32_t degree) :
+        mDegree(degree) {
     clear();
 }
 
@@ -302,7 +359,7 @@ void LeastSquaresVelocityTrackerStrategy::addMovement(nsecs_t eventTime, BitSet3
  * Returns true if a solution is found, false otherwise.
  *
  * The input consists of two vectors of data points X and Y with indices 0..m-1.
- * The output is a vector B with indices 0..n-1 that describes a polynomial
+ * The output is a vector B with indices 0..n that describes a polynomial
  * that fits the data, such the sum of abs(Y[i] - (B[0] + B[1] X[i] + B[2] X[i]^2 ... B[n] X[i]^n))
  * for all i between 0 and m-1 is minimized.
  *
@@ -332,7 +389,7 @@ void LeastSquaresVelocityTrackerStrategy::addMovement(nsecs_t eventTime, BitSet3
  */
 static bool solveLeastSquares(const float* x, const float* y, uint32_t m, uint32_t n,
         float* outB, float* outDet) {
-#if DEBUG_LEAST_SQUARES
+#if DEBUG_STRATEGY
     ALOGD("solveLeastSquares: m=%d, n=%d, x=%s, y=%s", int(m), int(n),
             vectorToString(x, m).string(), vectorToString(y, m).string());
 #endif
@@ -345,7 +402,7 @@ static bool solveLeastSquares(const float* x, const float* y, uint32_t m, uint32
             a[i][h] = a[i - 1][h] * x[h];
         }
     }
-#if DEBUG_LEAST_SQUARES
+#if DEBUG_STRATEGY
     ALOGD("  - a=%s", matrixToString(&a[0][0], m, n, false /*rowMajor*/).string());
 #endif
 
@@ -366,7 +423,7 @@ static bool solveLeastSquares(const float* x, const float* y, uint32_t m, uint32
         float norm = vectorNorm(&q[j][0], m);
         if (norm < 0.000001f) {
             // vectors are linearly dependent or zero so no solution
-#if DEBUG_LEAST_SQUARES
+#if DEBUG_STRATEGY
             ALOGD("  - no solution, norm=%f", norm);
 #endif
             return false;
@@ -380,7 +437,7 @@ static bool solveLeastSquares(const float* x, const float* y, uint32_t m, uint32
             r[j][i] = i < j ? 0 : vectorDot(&q[j][0], &a[i][0], m);
         }
     }
-#if DEBUG_LEAST_SQUARES
+#if DEBUG_STRATEGY
     ALOGD("  - q=%s", matrixToString(&q[0][0], m, n, false /*rowMajor*/).string());
     ALOGD("  - r=%s", matrixToString(&r[0][0], n, n, true /*rowMajor*/).string());
 
@@ -406,7 +463,7 @@ static bool solveLeastSquares(const float* x, const float* y, uint32_t m, uint32
         }
         outB[i] /= r[i][i];
     }
-#if DEBUG_LEAST_SQUARES
+#if DEBUG_STRATEGY
     ALOGD("  - b=%s", vectorToString(outB, n).string());
 #endif
 
@@ -433,7 +490,7 @@ static bool solveLeastSquares(const float* x, const float* y, uint32_t m, uint32
         sstot += var * var;
     }
     *outDet = sstot > 0.000001f ? 1.0f - (sserr / sstot) : 1;
-#if DEBUG_LEAST_SQUARES
+#if DEBUG_STRATEGY
     ALOGD("  - sserr=%f", sserr);
     ALOGD("  - sstot=%f", sstot);
     ALOGD("  - det=%f", *outDet);
@@ -475,7 +532,7 @@ bool LeastSquaresVelocityTrackerStrategy::getEstimator(uint32_t id,
     }
 
     // Calculate a least squares polynomial fit.
-    uint32_t degree = DEGREE;
+    uint32_t degree = mDegree;
     if (degree > m - 1) {
         degree = m - 1;
     }
@@ -487,7 +544,7 @@ bool LeastSquaresVelocityTrackerStrategy::getEstimator(uint32_t id,
             outEstimator->time = newestMovement.eventTime;
             outEstimator->degree = degree;
             outEstimator->confidence = xdet * ydet;
-#if DEBUG_LEAST_SQUARES
+#if DEBUG_STRATEGY
             ALOGD("estimate: degree=%d, xCoeff=%s, yCoeff=%s, confidence=%f",
                     int(outEstimator->degree),
                     vectorToString(outEstimator->xCoeff, n).string(),

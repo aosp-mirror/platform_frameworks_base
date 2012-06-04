@@ -23,6 +23,7 @@ import android.graphics.RectF;
 import android.graphics.Paint.FontMetricsInt;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManager.InputDeviceListener;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
@@ -36,7 +37,11 @@ import java.util.ArrayList;
 
 public class PointerLocationView extends View implements InputDeviceListener {
     private static final String TAG = "Pointer";
-    
+
+    // The system property key used to specify an alternate velocity tracker strategy
+    // to plot alongside the default one.  Useful for testing and comparison purposes.
+    private static final String ALT_STRATEGY_PROPERY_KEY = "debug.velocitytracker.alt";
+
     public static class PointerState {
         // Trace of previous points.
         private float[] mTraceX = new float[32];
@@ -53,9 +58,12 @@ public class PointerLocationView extends View implements InputDeviceListener {
         // Most recent velocity.
         private float mXVelocity;
         private float mYVelocity;
+        private float mAltXVelocity;
+        private float mAltYVelocity;
 
         // Position estimator.
         private VelocityTracker.Estimator mEstimator = new VelocityTracker.Estimator();
+        private VelocityTracker.Estimator mAltEstimator = new VelocityTracker.Estimator();
 
         public void clearTrace() {
             mTraceCount = 0;
@@ -103,7 +111,8 @@ public class PointerLocationView extends View implements InputDeviceListener {
     private final PointerCoords mTempCoords = new PointerCoords();
     
     private final VelocityTracker mVelocity;
-    
+    private final VelocityTracker mAltVelocity;
+
     private final FasterStringBuilder mText = new FasterStringBuilder();
     
     private boolean mPrintCoords = true;
@@ -145,6 +154,14 @@ public class PointerLocationView extends View implements InputDeviceListener {
         mActivePointerId = 0;
         
         mVelocity = VelocityTracker.obtain();
+
+        String altStrategy = SystemProperties.get(ALT_STRATEGY_PROPERY_KEY);
+        if (altStrategy.length() != 0) {
+            Log.d(TAG, "Comparing default velocity tracker strategy with " + altStrategy);
+            mAltVelocity = VelocityTracker.obtain(altStrategy);
+        } else {
+            mAltVelocity = null;
+        }
     }
 
     public void setPrintCoords(boolean state) {
@@ -296,6 +313,25 @@ public class PointerLocationView extends View implements InputDeviceListener {
                 float xVel = ps.mXVelocity * (1000 / 60);
                 float yVel = ps.mYVelocity * (1000 / 60);
                 canvas.drawLine(lastX, lastY, lastX + xVel, lastY + yVel, mPaint);
+
+                // Draw alternate estimate.
+                if (mAltVelocity != null) {
+                    mPaint.setARGB(128, 0, 128, 128);
+                    lx = ps.mAltEstimator.estimateX(-ESTIMATE_PAST_POINTS * ESTIMATE_INTERVAL);
+                    ly = ps.mAltEstimator.estimateY(-ESTIMATE_PAST_POINTS * ESTIMATE_INTERVAL);
+                    for (int i = -ESTIMATE_PAST_POINTS + 1; i <= ESTIMATE_FUTURE_POINTS; i++) {
+                        float x = ps.mAltEstimator.estimateX(i * ESTIMATE_INTERVAL);
+                        float y = ps.mAltEstimator.estimateY(i * ESTIMATE_INTERVAL);
+                        canvas.drawLine(lx, ly, x, y, mPaint);
+                        lx = x;
+                        ly = y;
+                    }
+
+                    mPaint.setARGB(255, 64, 255, 128);
+                    xVel = ps.mAltXVelocity * (1000 / 60);
+                    yVel = ps.mAltYVelocity * (1000 / 60);
+                    canvas.drawLine(lastX, lastY, lastX + xVel, lastY + yVel, mPaint);
+                }
             }
 
             if (mCurDown && ps.mCurDown) {
@@ -470,6 +506,9 @@ public class PointerLocationView extends View implements InputDeviceListener {
                 mCurNumPointers = 0;
                 mMaxNumPointers = 0;
                 mVelocity.clear();
+                if (mAltVelocity != null) {
+                    mAltVelocity.clear();
+                }
             }
 
             mCurNumPointers += 1;
@@ -497,6 +536,10 @@ public class PointerLocationView extends View implements InputDeviceListener {
 
         mVelocity.addMovement(event);
         mVelocity.computeCurrentVelocity(1);
+        if (mAltVelocity != null) {
+            mAltVelocity.addMovement(event);
+            mAltVelocity.computeCurrentVelocity(1);
+        }
 
         final int N = event.getHistorySize();
         for (int historyPos = 0; historyPos < N; historyPos++) {
@@ -528,6 +571,11 @@ public class PointerLocationView extends View implements InputDeviceListener {
                 ps.mXVelocity = mVelocity.getXVelocity(id);
                 ps.mYVelocity = mVelocity.getYVelocity(id);
                 mVelocity.getEstimator(id, ps.mEstimator);
+                if (mAltVelocity != null) {
+                    ps.mAltXVelocity = mAltVelocity.getXVelocity(id);
+                    ps.mAltYVelocity = mAltVelocity.getYVelocity(id);
+                    mAltVelocity.getEstimator(id, ps.mAltEstimator);
+                }
                 ps.mToolType = event.getToolType(i);
             }
         }

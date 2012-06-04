@@ -35,7 +35,7 @@ public:
     };
 
     struct Estimator {
-        static const size_t MAX_DEGREE = 2;
+        static const size_t MAX_DEGREE = 4;
 
         // Estimator time base.
         nsecs_t time;
@@ -61,7 +61,10 @@ public:
         }
     };
 
-    VelocityTracker();
+    // Creates a velocity tracker using the specified strategy.
+    // If strategy is NULL, uses the default strategy for the platform.
+    VelocityTracker(const char* strategy = NULL);
+
     ~VelocityTracker();
 
     // Resets the velocity tracker state.
@@ -99,10 +102,16 @@ public:
     inline BitSet32 getCurrentPointerIdBits() const { return mCurrentPointerIdBits; }
 
 private:
+    static const char* DEFAULT_STRATEGY;
+
     nsecs_t mLastEventTime;
     BitSet32 mCurrentPointerIdBits;
     int32_t mActivePointerId;
     VelocityTrackerStrategy* mStrategy;
+
+    bool configureStrategy(const char* strategy);
+
+    static VelocityTrackerStrategy* createStrategy(const char* strategy);
 };
 
 
@@ -129,7 +138,8 @@ public:
  */
 class LeastSquaresVelocityTrackerStrategy : public VelocityTrackerStrategy {
 public:
-    LeastSquaresVelocityTrackerStrategy();
+    // Degree must be no greater than Estimator::MAX_DEGREE.
+    LeastSquaresVelocityTrackerStrategy(uint32_t degree);
     virtual ~LeastSquaresVelocityTrackerStrategy();
 
     virtual void clear();
@@ -139,9 +149,6 @@ public:
     virtual bool getEstimator(uint32_t id, VelocityTracker::Estimator* outEstimator) const;
 
 private:
-    // Polynomial degree.  Must be less than or equal to Estimator::MAX_DEGREE.
-    static const uint32_t DEGREE = 2;
-
     // Sample horizon.
     // We don't use too much history by default since we want to react to quick
     // changes in direction.
@@ -160,6 +167,7 @@ private:
         }
     };
 
+    const uint32_t mDegree;
     uint32_t mIndex;
     Movement mMovements[HISTORY_SIZE];
 };
