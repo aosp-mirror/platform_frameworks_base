@@ -1344,8 +1344,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     }
                 } return;
             }
-            super.addFocusables(views, direction, focusableMode);
         }
+        super.addFocusables(views, direction, focusableMode);
     }
 
     @Override
