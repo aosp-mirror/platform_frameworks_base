@@ -3713,7 +3713,6 @@ package android.app {
     field public static final int FLAG_ONGOING_EVENT = 2; // 0x2
     field public static final int FLAG_ONLY_ALERT_ONCE = 8; // 0x8
     field public static final int FLAG_SHOW_LIGHTS = 1; // 0x1
-    field public static final java.lang.String KIND_PROMO = "android.promo";
     field public static final int PRIORITY_DEFAULT = 0; // 0x0
     field public static final int PRIORITY_HIGH = 1; // 0x1
     field public static final int PRIORITY_LOW = -1; // 0xffffffff
