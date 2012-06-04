@@ -384,9 +384,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     public boolean sendAccessibilityEvent(AccessibilityEvent event) {
+        final int eventType = event.getEventType();
+
         // The event for gesture start should be strictly before the
         // first hover enter event for the gesture.
-        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_HOVER_ENTER
+        if (eventType == AccessibilityEvent.TYPE_VIEW_HOVER_ENTER
                 && mTouchExplorationGestureStarted) {
             mTouchExplorationGestureStarted = false;
             AccessibilityEvent gestureStartEvent = AccessibilityEvent.obtain(
@@ -400,20 +402,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 notifyAccessibilityServicesDelayedLocked(event, false);
                 notifyAccessibilityServicesDelayedLocked(event, true);
             }
+
+            event.recycle();
+            mHandledFeedbackTypes = 0;
         }
 
         // The event for gesture end should be strictly after the
         // last hover exit event for the gesture.
-        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_HOVER_EXIT
+        if (eventType == AccessibilityEvent.TYPE_VIEW_HOVER_EXIT
                 && mTouchExplorationGestureEnded) {
             mTouchExplorationGestureEnded = false;
             AccessibilityEvent gestureEndEvent = AccessibilityEvent.obtain(
                     AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END);
             sendAccessibilityEvent(gestureEndEvent);
         }
-
-        event.recycle();
-        mHandledFeedbackTypes = 0;
 
         return (OWN_PROCESS_ID != Binder.getCallingPid());
     }
