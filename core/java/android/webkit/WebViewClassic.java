@@ -5159,18 +5159,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     private void updateWebkitSelection() {
-        int[] handles = null;
-        if (mIsCaretSelection) {
-            mSelectCursorExtent.set(mSelectCursorBase.x, mSelectCursorBase.y);
-        }
-        if (mSelectingText) {
-            handles = new int[4];
-            getSelectionHandles(handles);
-        } else {
-            nativeSetTextSelection(mNativeClass, 0);
-        }
+        int handleId = (mSelectDraggingCursor == mSelectCursorBase)
+                ? HANDLE_ID_BASE : HANDLE_ID_EXTENT;
         mWebViewCore.removeMessages(EventHub.SELECT_TEXT);
-        mWebViewCore.sendMessageAtFrontOfQueue(EventHub.SELECT_TEXT, handles);
+        mWebViewCore.sendMessageAtFrontOfQueue(EventHub.SELECT_TEXT,
+                mSelectDraggingCursor.x, mSelectDraggingCursor.y, (Integer)handleId);
     }
 
     private void resetCaretTimer() {
@@ -6104,6 +6097,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
     }
 
+    private static int getSelectionCoordinate(int coordinate, int min, int max) {
+        return Math.max(Math.min(coordinate, max), min);
+    }
+
     private void beginScrollEdit() {
         if (mLastEditScroll == 0) {
             mLastEditScroll = SystemClock.uptimeMillis() -
@@ -6157,11 +6154,15 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     scrollY = Math.min(getMaxTextScrollY(), scrollY);
                     scrollY = Math.max(0, scrollY);
                     scrollEditText(scrollX, scrollY);
-                    int cursorX = mSelectDraggingCursor.x;
-                    int cursorY = mSelectDraggingCursor.y;
-                    mSelectDraggingCursor.set(x - deltaX, y - deltaY);
+                    int selectionX = getSelectionCoordinate(x,
+                            mEditTextContentBounds.left, mEditTextContentBounds.right);
+                    int selectionY = getSelectionCoordinate(y,
+                            mEditTextContentBounds.top, mEditTextContentBounds.bottom);
+                    int oldX = mSelectDraggingCursor.x;
+                    int oldY = mSelectDraggingCursor.y;
+                    mSelectDraggingCursor.set(selectionX, selectionY);
                     updateWebkitSelection();
-                    mSelectDraggingCursor.set(cursorX, cursorY);
+                    mSelectDraggingCursor.set(oldX, oldY);
                 }
             }
         }
