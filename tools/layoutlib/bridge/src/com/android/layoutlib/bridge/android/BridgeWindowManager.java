@@ -226,8 +226,8 @@ public class BridgeWindowManager implements IWindowManager {
     }
 
     @Override
-    public void overridePendingAppTransition(String arg0, int arg1, int arg2)
-            throws RemoteException {
+    public void overridePendingAppTransition(String arg0, int arg1, int arg2,
+            IRemoteCallback startedCallback) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
