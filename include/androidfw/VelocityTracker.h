@@ -196,7 +196,8 @@ private:
  */
 class IntegratingVelocityTrackerStrategy : public VelocityTrackerStrategy {
 public:
-    IntegratingVelocityTrackerStrategy();
+    // Degree must be 1 or 2.
+    IntegratingVelocityTrackerStrategy(uint32_t degree);
     ~IntegratingVelocityTrackerStrategy();
 
     virtual void clear();
@@ -209,18 +210,19 @@ private:
     // Current state estimate for a particular pointer.
     struct State {
         nsecs_t updateTime;
-        bool first;
+        uint32_t degree;
 
-        float xpos, xvel;
-        float ypos, yvel;
+        float xpos, xvel, xaccel;
+        float ypos, yvel, yaccel;
     };
 
+    const uint32_t mDegree;
     BitSet32 mPointerIdBits;
     State mPointerState[MAX_POINTER_ID + 1];
 
-    static void initState(State& state, nsecs_t eventTime, float xpos, float ypos);
-    static void updateState(State& state, nsecs_t eventTime, float xpos, float ypos);
-    static void populateEstimator(const State& state, VelocityTracker::Estimator* outEstimator);
+    void initState(State& state, nsecs_t eventTime, float xpos, float ypos) const;
+    void updateState(State& state, nsecs_t eventTime, float xpos, float ypos) const;
+    void populateEstimator(const State& state, VelocityTracker::Estimator* outEstimator) const;
 };
 
 } // namespace android
