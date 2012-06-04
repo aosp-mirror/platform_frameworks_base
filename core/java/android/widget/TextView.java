@@ -4579,20 +4579,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
-    public int getResolvedLayoutDirection(Drawable who) {
-        if (who == null) return View.LAYOUT_DIRECTION_LTR;
-        if (mDrawables != null) {
-            final Drawables drawables = mDrawables;
-            if (who == drawables.mDrawableLeft || who == drawables.mDrawableRight ||
-                who == drawables.mDrawableTop || who == drawables.mDrawableBottom ||
-                who == drawables.mDrawableStart || who == drawables.mDrawableEnd) {
-                return getResolvedLayoutDirection();
-            }
-        }
-        return super.getResolvedLayoutDirection(who);
-    }
-
-    @Override
     public boolean hasOverlappingRendering() {
         return (getBackground() != null || mText instanceof Spannable || hasSelection());
     }
@@ -8203,13 +8189,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    /**
-     * Subclasses will need to override this method to implement their own way of resolving
-     * drawables depending on the layout direction.
-     *
-     * A call to the super method will be required from the subclasses implementation.
-     */
-    protected void resolveDrawables() {
+    @Override
+    public void onResolveDrawables(int layoutDirection) {
         // No need to resolve twice
         if (mResolvedDrawables) {
             return;
@@ -8225,7 +8206,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         Drawables dr = mDrawables;
-        switch(getResolvedLayoutDirection()) {
+        switch(layoutDirection) {
             case LAYOUT_DIRECTION_RTL:
                 if (dr.mDrawableStart != null) {
                     dr.mDrawableRight = dr.mDrawableStart;
@@ -8257,7 +8238,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
                 break;
         }
+        updateDrawablesLayoutDirection(dr, layoutDirection);
         mResolvedDrawables = true;
+    }
+
+    private void updateDrawablesLayoutDirection(Drawables dr, int layoutDirection) {
+        if (dr.mDrawableLeft != null) {
+            dr.mDrawableLeft.setLayoutDirection(layoutDirection);
+        }
+        if (dr.mDrawableRight != null) {
+            dr.mDrawableRight.setLayoutDirection(layoutDirection);
+        }
+        if (dr.mDrawableTop != null) {
+            dr.mDrawableTop.setLayoutDirection(layoutDirection);
+        }
+        if (dr.mDrawableBottom != null) {
+            dr.mDrawableBottom.setLayoutDirection(layoutDirection);
+        }
     }
 
     protected void resetResolvedDrawables() {

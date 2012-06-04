@@ -660,7 +660,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @see android.view.ViewGroup
  */
-public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Callback,
+public class View implements Drawable.Callback, KeyEvent.Callback,
         AccessibilityEventSource {
     private static final boolean DBG = false;
 
@@ -3836,6 +3836,15 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 false);
         if (alwaysDraw) {
             scrollabilityCache.scrollBar.setAlwaysDrawVerticalTrack(true);
+        }
+
+        // Apply layout direction to the new Drawables if needed
+        final int layoutDirection = getResolvedLayoutDirection();
+        if (track != null) {
+            track.setLayoutDirection(layoutDirection);
+        }
+        if (thumb != null) {
+            thumb.setLayoutDirection(layoutDirection);
         }
 
         // Re-apply user/background padding so that scrollbar(s) get added
@@ -13863,12 +13872,29 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-    * Return the layout direction of a given Drawable.
-    *
-    * @param who the Drawable to query
-    */
-    public int getResolvedLayoutDirection(Drawable who) {
-        return (who == mBackground) ? getResolvedLayoutDirection() : LAYOUT_DIRECTION_DEFAULT;
+     * Resolve the Drawables depending on the layout direction. This is implicitly supposing
+     * that the View directionality can and will be resolved before its Drawables.
+     *
+     * Will call {@link View#onResolveDrawables} when resolution is done.
+     */
+    public void resolveDrawables() {
+        if (mBackground != null) {
+            mBackground.setLayoutDirection(getResolvedLayoutDirection());
+        }
+        onResolveDrawables(getResolvedLayoutDirection());
+    }
+
+    /**
+     * Called when layout direction has been resolved.
+     *
+     * The default implementation does nothing.
+     *
+     * @param layoutDirection The resolved layout direction.
+     *
+     * @see {@link #LAYOUT_DIRECTION_LTR}
+     * @see {@link #LAYOUT_DIRECTION_RTL}
+     */
+    public void onResolveDrawables(int layoutDirection) {
     }
 
     /**
@@ -14137,8 +14163,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 padding = new Rect();
                 sThreadLocal.set(padding);
             }
+            background.setLayoutDirection(getResolvedLayoutDirection());
             if (background.getPadding(padding)) {
-                switch (background.getResolvedLayoutDirectionSelf()) {
+                switch (background.getLayoutDirection()) {
                     case LAYOUT_DIRECTION_RTL:
                         setPadding(padding.right, padding.top, padding.left, padding.bottom);
                         break;
