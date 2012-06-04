@@ -73,6 +73,7 @@ import android.view.accessibility.IAccessibilityManagerClient;
 
 import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.server.wm.WindowManagerService;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -1535,7 +1536,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HOME);
                 } return true;
                 case AccessibilityService.GLOBAL_ACTION_RECENTS: {
-                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_APP_SWITCH);
+                    openRecents();
                 } return true;
                 case AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS: {
                     expandStatusBar();
@@ -1724,6 +1725,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             StatusBarManager statusBarManager = (StatusBarManager) mContext.getSystemService(
                     android.app.Service.STATUS_BAR_SERVICE);
             statusBarManager.expand();
+
+            Binder.restoreCallingIdentity(token);
+        }
+
+        private void openRecents() {
+            final long token = Binder.clearCallingIdentity();
+
+            IStatusBarService statusBarService = IStatusBarService.Stub.asInterface(
+                    ServiceManager.getService("statusbar"));
+            try {
+                statusBarService.toggleRecentApps();
+            } catch (RemoteException e) {
+                Slog.e(LOG_TAG, "Error toggling recent apps.");
+            }
 
             Binder.restoreCallingIdentity(token);
         }
