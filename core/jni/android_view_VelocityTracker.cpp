@@ -24,6 +24,8 @@
 #include <androidfw/VelocityTracker.h>
 #include "android_view_MotionEvent.h"
 
+#include <ScopedUtfChars.h>
+
 
 namespace android {
 
@@ -42,7 +44,7 @@ static struct {
 
 class VelocityTrackerState {
 public:
-    VelocityTrackerState();
+    VelocityTrackerState(const char* strategy);
 
     void clear();
     void addMovement(const MotionEvent* event);
@@ -61,7 +63,8 @@ private:
     Velocity mCalculatedVelocity[MAX_POINTERS];
 };
 
-VelocityTrackerState::VelocityTrackerState() : mActivePointerId(-1) {
+VelocityTrackerState::VelocityTrackerState(const char* strategy) :
+        mVelocityTracker(strategy), mActivePointerId(-1) {
 }
 
 void VelocityTrackerState::clear() {
@@ -135,8 +138,13 @@ bool VelocityTrackerState::getEstimator(int32_t id, VelocityTracker::Estimator* 
 
 // --- JNI Methods ---
 
-static jint android_view_VelocityTracker_nativeInitialize(JNIEnv* env, jclass clazz) {
-    return reinterpret_cast<jint>(new VelocityTrackerState());
+static jint android_view_VelocityTracker_nativeInitialize(JNIEnv* env, jclass clazz,
+        jstring strategyStr) {
+    if (strategyStr) {
+        ScopedUtfChars strategy(env, strategyStr);
+        return reinterpret_cast<jint>(new VelocityTrackerState(strategy.c_str()));
+    }
+    return reinterpret_cast<jint>(new VelocityTrackerState(NULL));
 }
 
 static void android_view_VelocityTracker_nativeDispose(JNIEnv* env, jclass clazz, jint ptr) {
@@ -209,7 +217,7 @@ static jboolean android_view_VelocityTracker_nativeGetEstimator(JNIEnv* env, jcl
 static JNINativeMethod gVelocityTrackerMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInitialize",
-            "()I",
+            "(Ljava/lang/String;)I",
             (void*)android_view_VelocityTracker_nativeInitialize },
     { "nativeDispose",
             "(I)V",

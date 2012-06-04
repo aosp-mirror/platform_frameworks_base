@@ -35,7 +35,7 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
     private static final Pool<VelocityTracker> sPool = Pools.synchronizedPool(
             Pools.finitePool(new PoolableManager<VelocityTracker>() {
                 public VelocityTracker newInstance() {
-                    return new VelocityTracker();
+                    return new VelocityTracker(null);
                 }
 
                 public void onAcquired(VelocityTracker element) {
@@ -50,10 +50,12 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
     private static final int ACTIVE_POINTER_ID = -1;
 
     private int mPtr;
+    private final String mStrategy;
+
     private VelocityTracker mNext;
     private boolean mIsPooled;
 
-    private static native int nativeInitialize();
+    private static native int nativeInitialize(String strategy);
     private static native void nativeDispose(int ptr);
     private static native void nativeClear(int ptr);
     private static native void nativeAddMovement(int ptr, MotionEvent event);
@@ -75,11 +77,29 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
     }
 
     /**
+     * Obtains a velocity tracker with the specified strategy.
+     * For testing and comparison purposes only.
+     *
+     * @param strategy The strategy, or null to use the default.
+     * @return The velocity tracker.
+     *
+     * @hide
+     */
+    public static VelocityTracker obtain(String strategy) {
+        if (strategy == null) {
+            return obtain();
+        }
+        return new VelocityTracker(strategy);
+    }
+
+    /**
      * Return a VelocityTracker object back to be re-used by others.  You must
      * not touch the object after calling this function.
      */
     public void recycle() {
-        sPool.release(this);
+        if (mStrategy == null) {
+            sPool.release(this);
+        }
     }
 
     /**
@@ -110,8 +130,9 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
         mIsPooled = isPooled;
     }
 
-    private VelocityTracker() {
-        mPtr = nativeInitialize();
+    private VelocityTracker(String strategy) {
+        mPtr = nativeInitialize(strategy);
+        mStrategy = strategy;
     }
 
     @Override
@@ -253,7 +274,7 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      */
     public static final class Estimator {
         // Must match VelocityTracker::Estimator::MAX_DEGREE
-        private static final int MAX_DEGREE = 2;
+        private static final int MAX_DEGREE = 4;
 
         /**
          * Polynomial coefficients describing motion in X.
