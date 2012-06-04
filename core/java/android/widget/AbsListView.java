@@ -1359,8 +1359,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             case ACCESSIBILITY_FOCUS_FORWARD: {
                 // If we are the focused view try giving it to the first child.
                 if (focused == this) {
-                    if (getChildCount() > 0) {
-                        return getChildAt(0);
+                    final int childCount = getChildCount();
+                    for (int i = 0; i < childCount; i++) {
+                        View child = getChildAt(i);
+                        if (child.getVisibility() == View.VISIBLE) {
+                            return child;
+                        }
                     }
                     return super.focusSearch(this, direction);
                 }
@@ -1371,19 +1375,24 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
                 // Try to advance focus in the current item.
                 View currentItem = getChildAt(currentPosition - getFirstVisiblePosition());
-                if (currentItem instanceof ViewGroup) {
-                    ViewGroup currentItemGroup = (ViewGroup) currentItem;
-                    View nextFocus = FocusFinder.getInstance().findNextFocus(currentItemGroup,
-                                focused, direction);
-                    if (nextFocus != null && nextFocus != currentItemGroup
-                            && nextFocus != focused) {
-                        return nextFocus;
+                if (currentItem.getVisibility() == View.VISIBLE) {
+                    if (currentItem instanceof ViewGroup) {
+                        ViewGroup currentItemGroup = (ViewGroup) currentItem;
+                        View nextFocus = FocusFinder.getInstance().findNextFocus(currentItemGroup,
+                                    focused, direction);
+                        if (nextFocus != null && nextFocus != currentItemGroup
+                                && nextFocus != focused) {
+                            return nextFocus;
+                        }
                     }
                 }
                 // Try to move focus to the next item.
                 final int nextPosition = currentPosition - getFirstVisiblePosition() + 1;
-                if (nextPosition < getChildCount()) {
-                    return getChildAt(nextPosition);
+                for (int i = nextPosition; i <= getLastVisiblePosition(); i++) {
+                    View child = getChildAt(i);
+                    if (child.getVisibility() == View.VISIBLE) {
+                        return child;
+                    }
                 }
                 // No next item start searching from the list.
                 return super.focusSearch(this, direction);
@@ -1393,8 +1402,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 // as closer to the bottom as possible.
                 if (focused == this) {
                     final int childCount = getChildCount();
-                    if (childCount > 0) {
-                        return super.focusSearch(getChildAt(childCount - 1), direction);
+                    for (int i = childCount - 1; i >= 0; i--) {
+                        View child = getChildAt(i);
+                        if (child.getVisibility() == View.VISIBLE) {
+                            return super.focusSearch(child, direction);
+                        }
                     }
                     return super.focusSearch(this, direction);
                 }
@@ -1410,28 +1422,39 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 // in the previous item since in reverse the item contents
                 // get accessibility focus before the item itself.
                 if (currentItem == focused) {
-                    // This list gets accessibility focus after the last first item.
-                    final int previoustPosition = currentPosition - getFirstVisiblePosition() - 1;
-                    if (previoustPosition < 0) {
+                    currentItem = null;
+                    focused = null;
+                    // This list gets accessibility focus after the last item.
+                    final int previousPosition = currentPosition - getFirstVisiblePosition() - 1;
+                    for (int i = previousPosition; i >= 0; i--) {
+                        View child = getChildAt(i);
+                        if (child.getVisibility() == View.VISIBLE) {
+                            currentItem = child;
+                            break;
+                        }
+                    }
+                    if (currentItem == null) {
                         return this;
                     }
-                    currentItem = getChildAt(previoustPosition);
-                    focused = null;
                 }
 
-                // Search for into the item.
-                if (currentItem instanceof ViewGroup) {
-                    ViewGroup currentItemGroup = (ViewGroup) currentItem;
-                    View nextFocus = FocusFinder.getInstance().findNextFocus(currentItemGroup,
-                                focused, direction);
-                    if (nextFocus != null && nextFocus != currentItemGroup
-                            && nextFocus != focused) {
-                        return nextFocus;
+                if (currentItem.getVisibility() == View.VISIBLE) {
+                    // Search into the item.
+                    if (currentItem instanceof ViewGroup) {
+                        ViewGroup currentItemGroup = (ViewGroup) currentItem;
+                        View nextFocus = FocusFinder.getInstance().findNextFocus(currentItemGroup,
+                                    focused, direction);
+                        if (nextFocus != null && nextFocus != currentItemGroup
+                                && nextFocus != focused) {
+                            return nextFocus;
+                        }
                     }
+
+                    // If not item content wants focus we give it to the item.
+                    return currentItem;
                 }
 
-                // If not item content wants focus we give it to the item.
-                return currentItem;
+                return super.focusSearch(this, direction);
             }
         }
         return super.focusSearch(focused, direction);
