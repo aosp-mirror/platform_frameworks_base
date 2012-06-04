@@ -3258,13 +3258,15 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mNextAppTransitionType == ActivityOptions.ANIM_CUSTOM) {
                 a = loadAnimation(mNextAppTransitionPackage, enter ?
                         mNextAppTransitionEnter : mNextAppTransitionExit);
-                if (DEBUG_ANIM) Slog.v(TAG, "applyAnimation: wtoken=" + wtoken
+                if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
+                        "applyAnimation: wtoken=" + wtoken
                         + " anim=" + a + " nextAppTransition=ANIM_CUSTOM"
                         + " transit=" + transit + " Callers " + Debug.getCallers(3));
             } else if (mNextAppTransitionType == ActivityOptions.ANIM_SCALE_UP) {
                 a = createScaleUpAnimationLocked(transit, enter);
                 initialized = true;
-                if (DEBUG_ANIM) Slog.v(TAG, "applyAnimation: wtoken=" + wtoken
+                if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
+                        "applyAnimation: wtoken=" + wtoken
                         + " anim=" + a + " nextAppTransition=ANIM_SCALE_UP"
                         + " transit=" + transit + " Callers " + Debug.getCallers(3));
             } else if (mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL ||
@@ -3273,7 +3275,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 a = createThumbnailAnimationLocked(transit, enter, false, delayed);
                 initialized = true;
 
-                if (DEBUG_ANIM) {
+                if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
                     String animName = delayed ? "ANIM_THUMBNAIL_DELAYED" : "ANIM_THUMBNAIL";
                     Slog.v(TAG, "applyAnimation: wtoken=" + wtoken
                             + " anim=" + a + " nextAppTransition=" + animName
@@ -3334,7 +3336,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         break;
                 }
                 a = animAttr != 0 ? loadAnimation(lp, animAttr) : null;
-                if (DEBUG_ANIM) Slog.v(TAG, "applyAnimation: wtoken=" + wtoken
+                if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
+                        "applyAnimation: wtoken=" + wtoken
                         + " anim=" + a
                         + " animAttr=0x" + Integer.toHexString(animAttr)
                         + " transit=" + transit + " Callers " + Debug.getCallers(3));
@@ -8042,6 +8045,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                     "New wallpaper target=" + mWallpaperTarget
+                    + ", oldWallpaper=" + oldWallpaper
                     + ", lower target=" + mLowerWallpaperTarget
                     + ", upper target=" + mUpperWallpaperTarget);
             int foundWallpapers = 0;
@@ -8108,7 +8112,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                         "New transit: " + transit);
-            } else if (oldWallpaper != null) {
+            } else if ((oldWallpaper != null) && !mOpeningApps.contains(oldWallpaper.mAppToken)) {
                 // We are transitioning from an activity with
                 // a wallpaper to one without.
                 transit = WindowManagerPolicy.TRANSIT_WALLPAPER_CLOSE;
@@ -8133,7 +8137,6 @@ public class WindowManagerService extends IWindowManager.Stub
             AppWindowToken topOpeningApp = null;
             int topOpeningLayer = 0;
 
-            // TODO(cmautner): Move to animation side.
             NN = mOpeningApps.size();
             for (i=0; i<NN; i++) {
                 AppWindowToken wtoken = mOpeningApps.get(i);
