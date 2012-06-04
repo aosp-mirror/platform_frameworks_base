@@ -190,6 +190,13 @@ VelocityTrackerStrategy* VelocityTracker::createStrategy(const char* strategy) {
         // for acceleration but it typically overestimates the effect.
         return new IntegratingVelocityTrackerStrategy(2);
     }
+    if (!strcmp("legacy", strategy)) {
+        // Legacy velocity tracker algorithm.  Quality: POOR.
+        // For comparison purposes only.  This algorithm is strongly influenced by
+        // old data points, consistently underestimates velocity and takes a very long
+        // time to adjust to changes in direction.
+        return new LegacyVelocityTrackerStrategy();
+    }
     return NULL;
 }
 
@@ -797,6 +804,125 @@ void IntegratingVelocityTrackerStrategy::populateEstimator(const State& state,
     outEstimator->yCoeff[0] = state.ypos;
     outEstimator->yCoeff[1] = state.yvel;
     outEstimator->yCoeff[2] = state.yaccel / 2;
+}
+
+
+// --- LegacyVelocityTrackerStrategy ---
+
+const nsecs_t LegacyVelocityTrackerStrategy::HORIZON;
+const uint32_t LegacyVelocityTrackerStrategy::HISTORY_SIZE;
+const nsecs_t LegacyVelocityTrackerStrategy::MIN_DURATION;
+
+LegacyVelocityTrackerStrategy::LegacyVelocityTrackerStrategy() {
+    clear();
+}
+
+LegacyVelocityTrackerStrategy::~LegacyVelocityTrackerStrategy() {
+}
+
+void LegacyVelocityTrackerStrategy::clear() {
+    mIndex = 0;
+    mMovements[0].idBits.clear();
+}
+
+void LegacyVelocityTrackerStrategy::clearPointers(BitSet32 idBits) {
+    BitSet32 remainingIdBits(mMovements[mIndex].idBits.value & ~idBits.value);
+    mMovements[mIndex].idBits = remainingIdBits;
+}
+
+void LegacyVelocityTrackerStrategy::addMovement(nsecs_t eventTime, BitSet32 idBits,
+        const VelocityTracker::Position* positions) {
+    if (++mIndex == HISTORY_SIZE) {
+        mIndex = 0;
+    }
+
+    Movement& movement = mMovements[mIndex];
+    movement.eventTime = eventTime;
+    movement.idBits = idBits;
+    uint32_t count = idBits.count();
+    for (uint32_t i = 0; i < count; i++) {
+        movement.positions[i] = positions[i];
+    }
+}
+
+bool LegacyVelocityTrackerStrategy::getEstimator(uint32_t id,
+        VelocityTracker::Estimator* outEstimator) const {
+    outEstimator->clear();
+
+    const Movement& newestMovement = mMovements[mIndex];
+    if (!newestMovement.idBits.hasBit(id)) {
+        return false; // no data
+    }
+
+    // Find the oldest sample that contains the pointer and that is not older than HORIZON.
+    nsecs_t minTime = newestMovement.eventTime - HORIZON;
+    uint32_t oldestIndex = mIndex;
+    uint32_t numTouches = 1;
+    do {
+        uint32_t nextOldestIndex = (oldestIndex == 0 ? HISTORY_SIZE : oldestIndex) - 1;
+        const Movement& nextOldestMovement = mMovements[nextOldestIndex];
+        if (!nextOldestMovement.idBits.hasBit(id)
+                || nextOldestMovement.eventTime < minTime) {
+            break;
+        }
+        oldestIndex = nextOldestIndex;
+    } while (++numTouches < HISTORY_SIZE);
+
+    // Calculate an exponentially weighted moving average of the velocity estimate
+    // at different points in time measured relative to the oldest sample.
+    // This is essentially an IIR filter.  Newer samples are weighted more heavily
+    // than older samples.  Samples at equal time points are weighted more or less
+    // equally.
+    //
+    // One tricky problem is that the sample data may be poorly conditioned.
+    // Sometimes samples arrive very close together in time which can cause us to
+    // overestimate the velocity at that time point.  Most samples might be measured
+    // 16ms apart but some consecutive samples could be only 0.5sm apart because
+    // the hardware or driver reports them irregularly or in bursts.
+    float accumVx = 0;
+    float accumVy = 0;
+    uint32_t index = oldestIndex;
+    uint32_t samplesUsed = 0;
+    const Movement& oldestMovement = mMovements[oldestIndex];
+    const VelocityTracker::Position& oldestPosition = oldestMovement.getPosition(id);
+    nsecs_t lastDuration = 0;
+
+    while (numTouches-- > 1) {
+        if (++index == HISTORY_SIZE) {
+            index = 0;
+        }
+        const Movement& movement = mMovements[index];
+        nsecs_t duration = movement.eventTime - oldestMovement.eventTime;
+
+        // If the duration between samples is small, we may significantly overestimate
+        // the velocity.  Consequently, we impose a minimum duration constraint on the
+        // samples that we include in the calculation.
+        if (duration >= MIN_DURATION) {
+            const VelocityTracker::Position& position = movement.getPosition(id);
+            float scale = 1000000000.0f / duration; // one over time delta in seconds
+            float vx = (position.x - oldestPosition.x) * scale;
+            float vy = (position.y - oldestPosition.y) * scale;
+            accumVx = (accumVx * lastDuration + vx * duration) / (duration + lastDuration);
+            accumVy = (accumVy * lastDuration + vy * duration) / (duration + lastDuration);
+            lastDuration = duration;
+            samplesUsed += 1;
+        }
+    }
+
+    // Report velocity.
+    const VelocityTracker::Position& newestPosition = newestMovement.getPosition(id);
+    outEstimator->time = newestMovement.eventTime;
+    outEstimator->confidence = 1;
+    outEstimator->xCoeff[0] = newestPosition.x;
+    outEstimator->yCoeff[0] = newestPosition.y;
+    if (samplesUsed) {
+        outEstimator->xCoeff[1] = accumVx;
+        outEstimator->yCoeff[1] = accumVy;
+        outEstimator->degree = 1;
+    } else {
+        outEstimator->degree = 0;
+    }
+    return true;
 }
 
 } // namespace android
