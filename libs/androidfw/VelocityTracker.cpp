@@ -161,6 +161,14 @@ VelocityTrackerStrategy* VelocityTracker::createStrategy(const char* strategy) {
         // of the velocity when the finger is released.
         return new LeastSquaresVelocityTrackerStrategy(3);
     }
+    if (!strcmp("int1", strategy)) {
+        // 1st order integrating filter.  Quality: GOOD.
+        // Not as good as 'lsq2' because it cannot estimate acceleration but it is
+        // more tolerant of errors.  Like 'lsq1', this strategy tends to underestimate
+        // the velocity of a fling but this strategy tends to respond to changes in
+        // direction more quickly and accurately.
+        return new IntegratingVelocityTrackerStrategy();
+    }
     return NULL;
 }
 
@@ -562,6 +570,102 @@ bool LeastSquaresVelocityTrackerStrategy::getEstimator(uint32_t id,
     outEstimator->degree = 0;
     outEstimator->confidence = 1;
     return true;
+}
+
+
+// --- IntegratingVelocityTrackerStrategy ---
+
+IntegratingVelocityTrackerStrategy::IntegratingVelocityTrackerStrategy() {
+}
+
+IntegratingVelocityTrackerStrategy::~IntegratingVelocityTrackerStrategy() {
+}
+
+void IntegratingVelocityTrackerStrategy::clear() {
+    mPointerIdBits.clear();
+}
+
+void IntegratingVelocityTrackerStrategy::clearPointers(BitSet32 idBits) {
+    mPointerIdBits.value &= ~idBits.value;
+}
+
+void IntegratingVelocityTrackerStrategy::addMovement(nsecs_t eventTime, BitSet32 idBits,
+        const VelocityTracker::Position* positions) {
+    uint32_t index = 0;
+    for (BitSet32 iterIdBits(idBits); !iterIdBits.isEmpty();) {
+        uint32_t id = iterIdBits.clearFirstMarkedBit();
+        State& state = mPointerState[id];
+        const VelocityTracker::Position& position = positions[index++];
+        if (mPointerIdBits.hasBit(id)) {
+            updateState(state, eventTime, position.x, position.y);
+        } else {
+            initState(state, eventTime, position.x, position.y);
+        }
+    }
+
+    mPointerIdBits = idBits;
+}
+
+bool IntegratingVelocityTrackerStrategy::getEstimator(uint32_t id,
+        VelocityTracker::Estimator* outEstimator) const {
+    outEstimator->clear();
+
+    if (mPointerIdBits.hasBit(id)) {
+        const State& state = mPointerState[id];
+        populateEstimator(state, outEstimator);
+        return true;
+    }
+
+    return false;
+}
+
+void IntegratingVelocityTrackerStrategy::initState(State& state,
+        nsecs_t eventTime, float xpos, float ypos) {
+    state.updateTime = eventTime;
+    state.first = true;
+
+    state.xpos = xpos;
+    state.xvel = 0;
+    state.ypos = ypos;
+    state.yvel = 0;
+}
+
+void IntegratingVelocityTrackerStrategy::updateState(State& state,
+        nsecs_t eventTime, float xpos, float ypos) {
+    const nsecs_t MIN_TIME_DELTA = 2 * NANOS_PER_MS;
+    const float FILTER_TIME_CONSTANT = 0.010f; // 10 milliseconds
+
+    if (eventTime <= state.updateTime + MIN_TIME_DELTA) {
+        return;
+    }
+
+    float dt = (eventTime - state.updateTime) * 0.000000001f;
+    state.updateTime = eventTime;
+
+    float xvel = (xpos - state.xpos) / dt;
+    float yvel = (ypos - state.ypos) / dt;
+    if (state.first) {
+        state.xvel = xvel;
+        state.yvel = yvel;
+        state.first = false;
+    } else {
+        float alpha = dt / (FILTER_TIME_CONSTANT + dt);
+        state.xvel += (xvel - state.xvel) * alpha;
+        state.yvel += (yvel - state.yvel) * alpha;
+    }
+    state.xpos = xpos;
+    state.ypos = ypos;
+}
+
+void IntegratingVelocityTrackerStrategy::populateEstimator(const State& state,
+        VelocityTracker::Estimator* outEstimator) {
+    outEstimator->time = state.updateTime;
+    outEstimator->degree = 1;
+    outEstimator->confidence = 1.0f;
+    outEstimator->xCoeff[0] = state.xpos;
+    outEstimator->xCoeff[1] = state.xvel;
+    outEstimator->yCoeff[0] = state.ypos;
+    outEstimator->yCoeff[1] = state.yvel;
 }
 
 } // namespace android

@@ -172,6 +172,39 @@ private:
     Movement mMovements[HISTORY_SIZE];
 };
 
+
+/*
+ * Velocity tracker algorithm that uses an IIR filter.
+ */
+class IntegratingVelocityTrackerStrategy : public VelocityTrackerStrategy {
+public:
+    IntegratingVelocityTrackerStrategy();
+    ~IntegratingVelocityTrackerStrategy();
+
+    virtual void clear();
+    virtual void clearPointers(BitSet32 idBits);
+    virtual void addMovement(nsecs_t eventTime, BitSet32 idBits,
+            const VelocityTracker::Position* positions);
+    virtual bool getEstimator(uint32_t id, VelocityTracker::Estimator* outEstimator) const;
+
+private:
+    // Current state estimate for a particular pointer.
+    struct State {
+        nsecs_t updateTime;
+        bool first;
+
+        float xpos, xvel;
+        float ypos, yvel;
+    };
+
+    BitSet32 mPointerIdBits;
+    State mPointerState[MAX_POINTER_ID + 1];
+
+    static void initState(State& state, nsecs_t eventTime, float xpos, float ypos);
+    static void updateState(State& state, nsecs_t eventTime, float xpos, float ypos);
+    static void populateEstimator(const State& state, VelocityTracker::Estimator* outEstimator);
+};
+
 } // namespace android
 
 #endif // _ANDROIDFW_VELOCITY_TRACKER_H
