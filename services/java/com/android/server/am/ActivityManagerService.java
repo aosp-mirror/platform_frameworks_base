@@ -2804,7 +2804,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (self.state == ActivityState.RESUMED
                     || self.state == ActivityState.PAUSING) {
                 mWindowManager.overridePendingAppTransition(packageName,
-                        enterAnim, exitAnim);
+                        enterAnim, exitAnim, null);
             }
             
             Binder.restoreCallingIdentity(origId);

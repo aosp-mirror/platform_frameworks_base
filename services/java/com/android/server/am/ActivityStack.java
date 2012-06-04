@@ -1371,6 +1371,10 @@ final class ActivityStack {
      * nothing happened.
      */
     final boolean resumeTopActivityLocked(ActivityRecord prev) {
+        return resumeTopActivityLocked(prev, null);
+    }
+
+    final boolean resumeTopActivityLocked(ActivityRecord prev, Bundle options) {
         // Find the first activity that is not finishing.
         ActivityRecord next = topRunningActivityLocked(null);
 
@@ -1383,6 +1387,7 @@ final class ActivityStack {
             // There are no more activities!  Let's just start up the
             // Launcher...
             if (mMainStack) {
+                ActivityOptions.abort(options);
                 return mService.startHomeActivityLocked(0);
             }
         }
@@ -1395,6 +1400,7 @@ final class ActivityStack {
             // should be nothing left to do at this point.
             mService.mWindowManager.executeAppTransition();
             mNoAnimActivities.clear();
+            ActivityOptions.abort(options);
             return false;
         }
 
@@ -1409,6 +1415,7 @@ final class ActivityStack {
             // should be nothing left to do at this point.
             mService.mWindowManager.executeAppTransition();
             mNoAnimActivities.clear();
+            ActivityOptions.abort(options);
             return false;
         }
         
@@ -1418,6 +1425,8 @@ final class ActivityStack {
         mGoingToSleepActivities.remove(next);
         next.sleeping = false;
         mWaitingVisibleActivities.remove(next);
+
+        next.updateOptionsLocked(options);
 
         if (DEBUG_SWITCH) Slog.v(TAG, "Resuming " + next);
 
@@ -2666,6 +2675,7 @@ final class ActivityStack {
                             movedHome = true;
                             moveHomeToFrontFromLaunchLocked(launchFlags);
                             moveTaskToFrontLocked(taskTop.task, r, options);
+                            options = null;
                         }
                     }
                     // If the caller has requested that the target task be
@@ -2679,9 +2689,10 @@ final class ActivityStack {
                         // is the case, so this is it!  And for paranoia, make
                         // sure we have correctly resumed the top activity.
                         if (doResume) {
-                            resumeTopActivityLocked(null);
+                            resumeTopActivityLocked(null, options);
+                        } else {
+                            ActivityOptions.abort(options);
                         }
-                        ActivityOptions.abort(options);
                         return ActivityManager.START_RETURN_INTENT_TO_CALLER;
                     }
                     if ((launchFlags &
@@ -2767,9 +2778,10 @@ final class ActivityStack {
                         // don't use that intent!)  And for paranoia, make
                         // sure we have correctly resumed the top activity.
                         if (doResume) {
-                            resumeTopActivityLocked(null);
+                            resumeTopActivityLocked(null, options);
+                        } else {
+                            ActivityOptions.abort(options);
                         }
-                        ActivityOptions.abort(options);
                         return ActivityManager.START_TASK_TO_FRONT;
                     }
                 }
