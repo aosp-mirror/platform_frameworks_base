@@ -182,7 +182,13 @@ VelocityTrackerStrategy* VelocityTracker::createStrategy(const char* strategy) {
         // more tolerant of errors.  Like 'lsq1', this strategy tends to underestimate
         // the velocity of a fling but this strategy tends to respond to changes in
         // direction more quickly and accurately.
-        return new IntegratingVelocityTrackerStrategy();
+        return new IntegratingVelocityTrackerStrategy(1);
+    }
+    if (!strcmp("int2", strategy)) {
+        // 2nd order integrating filter.  Quality: EXPERIMENTAL.
+        // For comparison purposes only.  Unlike 'int1' this strategy can compensate
+        // for acceleration but it typically overestimates the effect.
+        return new IntegratingVelocityTrackerStrategy(2);
     }
     return NULL;
 }
@@ -680,7 +686,8 @@ float LeastSquaresVelocityTrackerStrategy::chooseWeight(uint32_t index) const {
 
 // --- IntegratingVelocityTrackerStrategy ---
 
-IntegratingVelocityTrackerStrategy::IntegratingVelocityTrackerStrategy() {
+IntegratingVelocityTrackerStrategy::IntegratingVelocityTrackerStrategy(uint32_t degree) :
+        mDegree(degree) {
 }
 
 IntegratingVelocityTrackerStrategy::~IntegratingVelocityTrackerStrategy() {
@@ -725,18 +732,20 @@ bool IntegratingVelocityTrackerStrategy::getEstimator(uint32_t id,
 }
 
 void IntegratingVelocityTrackerStrategy::initState(State& state,
-        nsecs_t eventTime, float xpos, float ypos) {
+        nsecs_t eventTime, float xpos, float ypos) const {
     state.updateTime = eventTime;
-    state.first = true;
+    state.degree = 0;
 
     state.xpos = xpos;
     state.xvel = 0;
+    state.xaccel = 0;
     state.ypos = ypos;
     state.yvel = 0;
+    state.yaccel = 0;
 }
 
 void IntegratingVelocityTrackerStrategy::updateState(State& state,
-        nsecs_t eventTime, float xpos, float ypos) {
+        nsecs_t eventTime, float xpos, float ypos) const {
     const nsecs_t MIN_TIME_DELTA = 2 * NANOS_PER_MS;
     const float FILTER_TIME_CONSTANT = 0.010f; // 10 milliseconds
 
@@ -749,28 +758,45 @@ void IntegratingVelocityTrackerStrategy::updateState(State& state,
 
     float xvel = (xpos - state.xpos) / dt;
     float yvel = (ypos - state.ypos) / dt;
-    if (state.first) {
+    if (state.degree == 0) {
         state.xvel = xvel;
         state.yvel = yvel;
-        state.first = false;
+        state.degree = 1;
     } else {
         float alpha = dt / (FILTER_TIME_CONSTANT + dt);
-        state.xvel += (xvel - state.xvel) * alpha;
-        state.yvel += (yvel - state.yvel) * alpha;
+        if (mDegree == 1) {
+            state.xvel += (xvel - state.xvel) * alpha;
+            state.yvel += (yvel - state.yvel) * alpha;
+        } else {
+            float xaccel = (xvel - state.xvel) / dt;
+            float yaccel = (yvel - state.yvel) / dt;
+            if (state.degree == 1) {
+                state.xaccel = xaccel;
+                state.yaccel = yaccel;
+                state.degree = 2;
+            } else {
+                state.xaccel += (xaccel - state.xaccel) * alpha;
+                state.yaccel += (yaccel - state.yaccel) * alpha;
+            }
+            state.xvel += (state.xaccel * dt) * alpha;
+            state.yvel += (state.yaccel * dt) * alpha;
+        }
     }
     state.xpos = xpos;
     state.ypos = ypos;
 }
 
 void IntegratingVelocityTrackerStrategy::populateEstimator(const State& state,
-        VelocityTracker::Estimator* outEstimator) {
+        VelocityTracker::Estimator* outEstimator) const {
     outEstimator->time = state.updateTime;
-    outEstimator->degree = 1;
     outEstimator->confidence = 1.0f;
+    outEstimator->degree = state.degree;
     outEstimator->xCoeff[0] = state.xpos;
     outEstimator->xCoeff[1] = state.xvel;
+    outEstimator->xCoeff[2] = state.xaccel / 2;
     outEstimator->yCoeff[0] = state.ypos;
     outEstimator->yCoeff[1] = state.yvel;
+    outEstimator->yCoeff[2] = state.yaccel / 2;
 }
 
 } // namespace android
