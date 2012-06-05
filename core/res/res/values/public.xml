@@ -1141,7 +1141,6 @@
   <java-symbol type="xml" name="password_kbd_symbols_shift" />
   <java-symbol type="xml" name="power_profile" />
   <java-symbol type="xml" name="time_zones_by_country" />
-  <java-symbol type="xml" name="sms_short_codes" />
 
   <java-symbol type="raw" name="accessibility_gestures" />
   <java-symbol type="raw" name="incognito_mode_start_page" />
