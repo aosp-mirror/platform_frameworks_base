@@ -6147,18 +6147,19 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 long timeSinceLastUpdate = currentTime - mLastEditScroll;
                 int deltaX = getTextScrollDelta(scrollSpeedX, timeSinceLastUpdate);
                 int deltaY = getTextScrollDelta(scrollSpeedY, timeSinceLastUpdate);
+                int scrollX = getTextScrollX() + deltaX;
+                scrollX = Math.min(getMaxTextScrollX(), scrollX);
+                scrollX = Math.max(0, scrollX);
+                int scrollY = getTextScrollY() + deltaY;
+                scrollY = Math.min(getMaxTextScrollY(), scrollY);
+                scrollY = Math.max(0, scrollY);
+
                 mLastEditScroll = currentTime;
-                if (deltaX == 0 && deltaY == 0) {
+                if (scrollX == getTextScrollX() && scrollY == getTextScrollY()) {
                     // By probability no text scroll this time. Try again later.
                     mPrivateHandler.sendEmptyMessageDelayed(SCROLL_EDIT_TEXT,
                             TEXT_SCROLL_FIRST_SCROLL_MS);
                 } else {
-                    int scrollX = getTextScrollX() + deltaX;
-                    scrollX = Math.min(getMaxTextScrollX(), scrollX);
-                    scrollX = Math.max(0, scrollX);
-                    int scrollY = getTextScrollY() + deltaY;
-                    scrollY = Math.min(getMaxTextScrollY(), scrollY);
-                    scrollY = Math.max(0, scrollY);
                     scrollEditText(scrollX, scrollY);
                     int selectionX = getSelectionCoordinate(x,
                             mEditTextContentBounds.left, mEditTextContentBounds.right);
@@ -7429,7 +7430,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         mEditTextLayerId = initData.mNodeLayerId;
                         nativeMapLayerRect(mNativeClass, mEditTextLayerId,
                                 mEditTextContentBounds);
-                        mEditTextContent.set(initData.mContentRect);
+                        mEditTextContent.set(initData.mClientRect);
                         relocateAutoCompletePopup();
                     }
                     break;
