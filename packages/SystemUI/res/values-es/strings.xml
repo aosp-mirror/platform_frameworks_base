@@ -47,7 +47,7 @@
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Notificaciones"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth anclado"</string>
-    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Configurar métodos de introducción"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Configurar métodos de entrada"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Teclado físico"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"¿Permitir que la aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> acceda al dispositivo USB?"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"¿Permitir que la aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> acceda al accesorio USB?"</string>
@@ -77,7 +77,7 @@
     <string name="accessibility_home" msgid="8217216074895377641">"Inicio"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menú"</string>
     <string name="accessibility_recent" msgid="8571350598987952883">"Aplicaciones recientes"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Botón Cambiar método de introducción"</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Botón Cambiar método de entrada"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Botón de zoom de compatibilidad"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom de pantalla más pequeña a más grande"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth conectado"</string>
