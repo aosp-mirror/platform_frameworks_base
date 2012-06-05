@@ -904,8 +904,8 @@
     <item quantity="other" msgid="2176942008915455116">"před <xliff:g id="COUNT">%d</xliff:g> min"</item>
   </plurals>
   <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"před 1 hodinou"</item>
-    <item quantity="other" msgid="2467273239587587569">"před <xliff:g id="COUNT">%d</xliff:g> hod."</item>
+    <item quantity="one" msgid="9150797944610821849">"před 1 h"</item>
+    <item quantity="other" msgid="2467273239587587569">"před <xliff:g id="COUNT">%d</xliff:g> h"</item>
   </plurals>
   <plurals name="last_num_days">
     <item quantity="other" msgid="3069992808164318268">"Posledních <xliff:g id="COUNT">%d</xliff:g> dnů"</item>
@@ -941,8 +941,8 @@
     <item quantity="other" msgid="851164968597150710">"před <xliff:g id="COUNT">%d</xliff:g> min"</item>
   </plurals>
   <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"před 1 hodinou"</item>
-    <item quantity="other" msgid="6889970745748538901">"před <xliff:g id="COUNT">%d</xliff:g> hod."</item>
+    <item quantity="one" msgid="4796212039724722116">"před 1 h"</item>
+    <item quantity="other" msgid="6889970745748538901">"před <xliff:g id="COUNT">%d</xliff:g> h"</item>
   </plurals>
   <plurals name="abbrev_num_days_ago">
     <item quantity="one" msgid="8463161711492680309">"včera"</item>
