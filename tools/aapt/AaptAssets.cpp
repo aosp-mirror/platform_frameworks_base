@@ -58,7 +58,7 @@ static bool validateFileName(const char* fileName)
 
 // The default to use if no other ignore pattern is defined.
 const char * const gDefaultIgnoreAssets =
-    "!.svn:!.git:.*:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*.scc:*~";
+    "!.svn:!.git:!.ds_store:!*.scc:.*:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~";
 // The ignore pattern that can be passed via --ignore-assets in Main.cpp
 const char * gUserIgnoreAssets = NULL;
 
