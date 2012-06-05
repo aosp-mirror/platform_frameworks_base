@@ -429,13 +429,12 @@ class ZoomManager {
             scale = getReadingLevelScale();
         }
 
-        if (mHardwareAccelerated) {
-            mInHWAcceleratedZoom = true;
-        }
-
         setZoomScale(scale, reflowText);
 
         if (oldScale != mActualScale) {
+            if (mHardwareAccelerated) {
+                mInHWAcceleratedZoom = true;
+            }
             // use mZoomPickerScale to see zoom preview first
             mZoomStart = SystemClock.uptimeMillis();
             mInvInitialZoomScale = 1.0f / oldScale;
@@ -467,6 +466,8 @@ class ZoomManager {
         if (mZoomScale == 0) {
             Log.w(LOGTAG, "A WebView is attempting to perform a fixed length "
                     + "zoom animation when no zoom is in progress");
+            // Now that we've logged about it, go ahead and just recover
+            mInHWAcceleratedZoom = false;
             return;
         }
 
