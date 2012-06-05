@@ -678,6 +678,9 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public void detachFunctor(int functor) {
+        Log.e(HardwareRenderer.LOG_TAG, String.format("detachFunctor, mHarwareRenderer==null %b, enabled %b",
+                mAttachInfo.mHardwareRenderer == null,
+                mAttachInfo.mHardwareRenderer == null ? false : mAttachInfo.mHardwareRenderer.isEnabled()));
         if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
             mAttachInfo.mHardwareRenderer.detachFunctor(functor);
         }
