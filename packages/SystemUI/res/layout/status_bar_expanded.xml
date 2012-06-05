@@ -37,7 +37,7 @@
 
         <include layout="@layout/status_bar_expanded_header"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="@dimen/notification_panel_header_height"
             />
      
         <ScrollView
