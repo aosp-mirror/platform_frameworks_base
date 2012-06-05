@@ -6279,8 +6279,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             invalidate();
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
             notifyAccessibilityStateChanged();
-            // Clear the text navigation state.
-            setAccessibilityCursorPosition(ACCESSIBILITY_CURSOR_POSITION_UNDEFINED);
         }
         // Clear the global reference of accessibility focus if this
         // view or any of its descendants had accessibility focus.
@@ -6327,7 +6325,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     void clearAccessibilityFocusNoCallbacks() {
         if ((mPrivateFlags2 & ACCESSIBILITY_FOCUSED) != 0) {
             mPrivateFlags2 &= ~ACCESSIBILITY_FOCUSED;
-            setAccessibilityCursorPosition(ACCESSIBILITY_CURSOR_POSITION_UNDEFINED);
             invalidate();
         }
     }
