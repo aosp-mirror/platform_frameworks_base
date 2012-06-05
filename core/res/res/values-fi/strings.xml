@@ -765,7 +765,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Yritä uudelleen"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Face Unlock -yrityksiä tehty suurin sallittu määrä."</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Ladataan (<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>)"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Muutettu."</string>
+    <string name="lockscreen_charged" msgid="4938930459620989972">"Ladattu."</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Kytke laturi."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Ei SIM-korttia."</string>
@@ -1013,7 +1013,7 @@
     <string name="dialog_alert_title" msgid="2049658708609043103">"Huomio"</string>
     <string name="loading" msgid="7933681260296021180">"Ladataan…"</string>
     <string name="capital_on" msgid="1544682755514494298">"PÄÄLLÄ"</string>
-    <string name="capital_off" msgid="6815870386972805832">"POIS PÄÄLTÄ"</string>
+    <string name="capital_off" msgid="6815870386972805832">"POIS"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Tee toiminto käyttäen sovellusta"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Käytä oletuksena tälle toiminnolle."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Poista oletusasetus kohdassa Järjestelmäasetukset &gt; Sovellukset &gt; Ladattu."</string>
