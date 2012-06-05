@@ -1229,7 +1229,7 @@ public abstract class HardwareRenderer {
         void detachFunctor(int functor) {
             if (mCanvas != null) {
                 mCanvas.detachFunctor(functor);
-            }
+            } else Log.e(LOG_TAG, "can't detachFunctor, have no canvas");
         }
 
         @Override
