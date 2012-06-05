@@ -489,7 +489,11 @@ public class WindowAnimator {
 
             final int N = mWinAnimators.size();
             for (int i = 0; i < N; i++) {
-                mWinAnimators.get(i).prepareSurfaceLocked(true);
+                final WindowStateAnimator winAnimator = mWinAnimators.get(i);
+                if (winAnimator.mWin.mIsWallpaper && mService.mWallpaperTarget == null) {
+                    continue;
+                }
+                winAnimator.prepareSurfaceLocked(true);
             }
 
             if (mDimParams != null) {
