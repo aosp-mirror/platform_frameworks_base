@@ -2925,22 +2925,6 @@
     <!-- See SMS_DIALOG.  This is a button choice to disallow sending the SMSes. [CHAR LIMIT=30] -->
     <string name="sms_control_no">Deny</string>
 
-    <!-- SMS short code verification dialog. --> <skip />
-    <!-- The dialog title for the SMS short code confirmation dialog. [CHAR LIMIT=30] -->
-    <string name="sms_short_code_confirm_title">Send SMS to short code?</string>
-    <!-- The dialog title for the SMS premium short code confirmation dialog. [CHAR LIMIT=30] -->
-    <string name="sms_premium_short_code_confirm_title">Send premium SMS?</string>
-    <!-- The message text for the SMS short code confirmation dialog. [CHAR LIMIT=NONE] -->
-    <string name="sms_short_code_confirm_message">&lt;b><xliff:g id="app_name">%1$s</xliff:g>&lt;/b> would like to send a text message to &lt;b><xliff:g id="dest_address">%2$s</xliff:g>&lt;/b>, which appears to be an SMS short code.&lt;p>Sending text messages to some short codes may cause your mobile account to be billed for premium services.&lt;p>Do you want to allow this app to send the message?</string>
-    <!-- The message text for the SMS short code confirmation dialog. [CHAR LIMIT=NONE] -->
-    <string name="sms_premium_short_code_confirm_message">&lt;b><xliff:g id="app_name">%1$s</xliff:g>&lt;/b> would like to send a text message to &lt;b><xliff:g id="dest_address">%2$s</xliff:g>&lt;/b>, which is a premium SMS short code.&lt;p>&lt;b>Sending a message to this destination will cause your mobile account to be billed for premium services.&lt;/b>&lt;p>Do you want to allow this app to send the message?</string>
-    <!-- Text of the approval button for the SMS short code confirmation dialog. [CHAR LIMIT=50] -->
-    <string name="sms_short_code_confirm_allow">Send message</string>
-    <!-- Text of the cancel button for the SMS short code confirmation dialog. [CHAR LIMIT=30] -->
-    <string name="sms_short_code_confirm_deny">Don\'t send</string>
-    <!-- Text of the button for the SMS short code confirmation dialog to report a malicious app. [CHAR LIMIT=30] -->
-    <string name="sms_short_code_confirm_report">Report malicious app</string>
-
     <!-- SIM swap and device reboot Dialog --> <skip />
     <!-- See SIM_REMOVED_DIALOG.  This is the title of that dialog. -->
     <string name="sim_removed_title">SIM card removed</string>

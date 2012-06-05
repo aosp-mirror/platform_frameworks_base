@@ -920,61 +920,18 @@ public abstract class SMSDispatcher extends Handler {
         SmsTracker tracker = new SmsTracker(map, sentIntent, deliveryIntent, appPackage,
                 PhoneNumberUtils.extractNetworkPortion(destAddr));
 
-        // checkDestination() returns true if the destination is not a premium short code or the
-        // sending app is approved to send to short codes. Otherwise, a message is sent to our
-        // handler with the SmsTracker to request user confirmation before sending.
-        if (checkDestination(tracker)) {
-            // check for excessive outgoing SMS usage by this app
-            if (!mUsageMonitor.check(appPackage, SINGLE_PART_SMS)) {
-                sendMessage(obtainMessage(EVENT_SEND_LIMIT_REACHED_CONFIRMATION, tracker));
-                return;
-            }
-
-            int ss = mPhone.getServiceState().getState();
-
-            if (ss != ServiceState.STATE_IN_SERVICE) {
-                handleNotInService(ss, tracker.mSentIntent);
-            } else {
-                sendSms(tracker);
-            }
+        // check for excessive outgoing SMS usage by this app
+        if (!mUsageMonitor.check(appPackage, SINGLE_PART_SMS)) {
+            sendMessage(obtainMessage(EVENT_SEND_LIMIT_REACHED_CONFIRMATION, tracker));
+            return;
         }
-    }
 
-    /**
-     * Check if destination is a potential premium short code and sender is not pre-approved to
-     * send to short codes.
-     *
-     * @param tracker the tracker for the SMS to send
-     * @return true if the destination is approved; false if user confirmation event was sent
-     */
-    boolean checkDestination(SmsTracker tracker) {
-        if (mContext.checkCallingOrSelfPermission(SEND_SMS_NO_CONFIRMATION_PERMISSION)
-                == PackageManager.PERMISSION_GRANTED) {
-            return true;            // app is pre-approved to send to short codes
+        int ss = mPhone.getServiceState().getState();
+
+        if (ss != ServiceState.STATE_IN_SERVICE) {
+            handleNotInService(ss, tracker.mSentIntent);
         } else {
-            String countryIso = mTelephonyManager.getSimCountryIso();
-            if (countryIso == null || countryIso.length() != 2) {
-                Log.e(TAG, "Can't get SIM country code: trying network country code");
-                countryIso = mTelephonyManager.getNetworkCountryIso();
-            }
-
-            switch (mUsageMonitor.checkDestination(tracker.mDestAddress, countryIso)) {
-                case SmsUsageMonitor.CATEGORY_POSSIBLE_PREMIUM_SHORT_CODE:
-                    sendMessage(obtainMessage(EVENT_CONFIRM_SEND_TO_POSSIBLE_PREMIUM_SHORT_CODE,
-                            tracker));
-                    return false;   // wait for user confirmation before sending
-
-                case SmsUsageMonitor.CATEGORY_PREMIUM_SHORT_CODE:
-                    sendMessage(obtainMessage(EVENT_CONFIRM_SEND_TO_PREMIUM_SHORT_CODE,
-                            tracker));
-                    return false;   // wait for user confirmation before sending
-
-                case SmsUsageMonitor.CATEGORY_NOT_SHORT_CODE:
-                case SmsUsageMonitor.CATEGORY_FREE_SHORT_CODE:
-                case SmsUsageMonitor.CATEGORY_STANDARD_SHORT_CODE:
-                default:
-                    return true;    // destination is not a premium short code
-            }
+            sendSms(tracker);
         }
     }
 
