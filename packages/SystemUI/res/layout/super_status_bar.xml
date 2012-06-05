@@ -24,6 +24,7 @@
     android:focusable="true"
     android:descendantFocusability="afterDescendants"
     android:fitsSystemWindows="true"
+    android:background="@android:color/transparent"
     >
 
     <include layout="@layout/status_bar"
@@ -33,8 +34,7 @@
 
     <include layout="@layout/status_bar_expanded"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible"
+        android:layout_height="0dp"
         />
 
 </com.android.systemui.statusbar.phone.StatusBarWindowView>
