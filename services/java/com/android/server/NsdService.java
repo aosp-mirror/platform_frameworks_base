@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
 import android.net.nsd.NsdServiceInfo;
 import android.net.nsd.DnsSdTxtRecord;
 import android.net.nsd.INsdManager;
@@ -113,6 +114,26 @@ public class NsdService extends INsdManager.Stub {
             return cmdToString(msg.what);
         }
 
+        /**
+         * Observes the NSD on/off setting, and takes action when changed.
+         */
+        private void registerForNsdSetting() {
+            ContentObserver contentObserver = new ContentObserver(this.getHandler()) {
+                @Override
+                    public void onChange(boolean selfChange) {
+                        if (isNsdEnabled()) {
+                            mNsdStateMachine.sendMessage(NsdManager.ENABLE);
+                        } else {
+                            mNsdStateMachine.sendMessage(NsdManager.DISABLE);
+                        }
+                    }
+            };
+
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Secure.getUriFor(Settings.Secure.NSD_ON),
+                    false, contentObserver);
+        }
+
         NsdStateMachine(String name) {
             super(name);
             addState(mDefaultState);
@@ -124,6 +145,7 @@ public class NsdService extends INsdManager.Stub {
                 setInitialState(mDisabledState);
             }
             setProcessedMessagesSize(25);
+            registerForNsdSetting();
         }
 
         class DefaultState extends State {
