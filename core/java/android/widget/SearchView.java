@@ -1091,6 +1091,13 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
             inputType &= ~InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE;
             if (mSearchable.getSuggestAuthority() != null) {
                 inputType |= InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE;
+                // TYPE_TEXT_FLAG_AUTO_COMPLETE means that the text editor is performing
+                // auto-completion based on its own semantics, which it will present to the user
+                // as they type. This generally means that the input method should not show its
+                // own candidates, and the spell checker should not be in action. The text editor
+                // supplies its candidates by calling InputMethodManager.displayCompletions(),
+                // which in turn will call InputMethodSession.displayCompletions().
+                inputType |= InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
             }
         }
         mQueryTextView.setInputType(inputType);
