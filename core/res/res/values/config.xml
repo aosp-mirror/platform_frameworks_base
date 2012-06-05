@@ -76,6 +76,13 @@
         <item>0</item>  <item>5</item>  <!-- default: always increase volume by 5% -->
     </integer-array>
 
+    <!-- The attenuation in dB applied to the sound effects played
+         through AudioManager.playSoundEffect() when no volume is specified. -->
+    <integer name="config_soundEffectVolumeDb">-6</integer>
+
+    <!-- The attenuation in dB applied to the lock/unlock sounds. -->
+    <integer name="config_lockSoundVolumeDb">-6</integer>
+
     <!-- Flag indicating whether the AUDIO_BECOMING_NOISY notification should
          be sent during a change to the audio output device. -->
     <bool name="config_sendAudioBecomingNoisy">true</bool>

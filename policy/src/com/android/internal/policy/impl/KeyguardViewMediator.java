@@ -251,7 +251,11 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private int mLockSoundId;
     private int mUnlockSoundId;
     private int mLockSoundStreamId;
-    private int mMasterStreamMaxVolume;
+
+    /**
+     * The volume applied to the lock/unlock sounds.
+     */
+    private final float mLockSoundVolume;
 
     InfoCallbackImpl mInfoCallback = new InfoCallbackImpl() {
 
@@ -329,6 +333,9 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         if (soundPath == null || mUnlockSoundId == 0) {
             if (DEBUG) Log.d(TAG, "failed to load sound from " + soundPath);
         }
+        int lockSoundDefaultAttenuation = context.getResources().getInteger(
+                com.android.internal.R.integer.config_lockSoundVolumeDb);
+        mLockSoundVolume = (float)Math.pow(10, lockSoundDefaultAttenuation/20);
         IntentFilter userFilter = new IntentFilter();
         userFilter.addAction(Intent.ACTION_USER_SWITCHED);
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
@@ -1117,7 +1124,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             // If the stream is muted, don't play the sound
             if (mAudioManager.isStreamMute(mMasterStreamType)) return;
 
-            mLockSoundStreamId = mLockSounds.play(whichSound, 1.0f, 1.0f, 1, 0, 1.0f);
+            mLockSoundStreamId = mLockSounds.play(whichSound,
+                    mLockSoundVolume, mLockSoundVolume, 1/*priortiy*/, 0/*loop*/, 1.0f/*rate*/);
         }
     }
 
