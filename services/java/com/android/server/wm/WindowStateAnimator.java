@@ -381,6 +381,7 @@ class WindowStateAnimator {
         }
         if (mService.mWallpaperTarget == mWin && mService.mLowerWallpaperTarget == null) {
             mAnimator.hideWallpapersLocked();
+            mAnimator.mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
         }
     }
 
@@ -1105,8 +1106,8 @@ class WindowStateAnimator {
                 try {
                     mSurfaceAlpha = mShownAlpha;
                     mSurface.setAlpha(mShownAlpha);
-                    mSurfaceLayer = w.mWinAnimator.mAnimLayer;
-                    mSurface.setLayer(w.mWinAnimator.mAnimLayer);
+                    mSurfaceLayer = mAnimLayer;
+                    mSurface.setLayer(mAnimLayer);
                     mSurface.setMatrix(
                         mDsDx*w.mHScale, mDtDx*w.mVScale,
                         mDsDy*w.mHScale, mDtDy*w.mVScale);

@@ -8553,7 +8553,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     handleNotObscuredLocked(w, currentTime, innerDw, innerDh);
                 }
 
-                if (obscuredChanged && mWallpaperTarget == w) {
+                if (obscuredChanged && (mWallpaperTarget == w) && w.isVisibleLw()) {
                     // This is the wallpaper target and its obscured state
                     // changed... make sure the current wallaper's visibility
                     // has been updated accordingly.
