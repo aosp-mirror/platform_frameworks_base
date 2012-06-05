@@ -574,7 +574,7 @@ public final class MenuItemImpl implements MenuItem {
         if (mActionView != null) {
             return mActionView;
         } else if (mActionProvider != null) {
-            mActionView = mActionProvider.onCreateActionView();
+            mActionView = mActionProvider.onCreateActionView(this);
             return mActionView;
         } else {
             return null;

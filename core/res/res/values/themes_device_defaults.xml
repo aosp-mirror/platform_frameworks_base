@@ -190,6 +190,8 @@ easier.
 
         <!-- DatePicker style -->
         <item name="datePickerStyle">@style/Widget.DeviceDefault.DatePicker</item>
+
+        <item name="mediaRouteButtonStyle">@android:style/Widget.DeviceDefault.MediaRouteButton</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar -->
@@ -337,6 +339,8 @@ easier.
 
         <!-- DatePicker style -->
         <item name="datePickerStyle">@style/Widget.DeviceDefault.Light.DatePicker</item>
+
+        <item name="mediaRouteButtonStyle">@android:style/Widget.DeviceDefault.Light.MediaRouteButton</item>
     </style>
     <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar -->
     <style name="Theme.DeviceDefault.Light.NoActionBar" parent="Theme.Holo.Light.NoActionBar" >

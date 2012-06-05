@@ -720,4 +720,8 @@ easier.
     <style name="DeviceDefault.Light.SegmentedButton" parent="Holo.Light.SegmentedButton" >
 
     </style>
+
+    <style name="Widget.DeviceDefault.MediaRouteButton" parent="Widget.Holo.MediaRouteButton" />
+    <style name="Widget.DeviceDefault.Light.MediaRouteButton" parent="Widget.Holo.Light.MediaRouteButton" />
+
 </resources>
