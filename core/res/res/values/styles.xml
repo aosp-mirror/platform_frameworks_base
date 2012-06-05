@@ -343,17 +343,14 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.CompoundButton.CheckBox">
-        <item name="android:background">@android:drawable/btn_check_label_background</item>
         <item name="android:button">?android:attr/listChoiceIndicatorMultiple</item>
     </style>
 
     <style name="Widget.CompoundButton.RadioButton">
-        <item name="android:background">@android:drawable/btn_radio_label_background</item>
         <item name="android:button">?android:attr/listChoiceIndicatorSingle</item>
     </style>
 
     <style name="Widget.CompoundButton.Star">
-        <item name="android:background">@android:drawable/btn_star_label_background</item>
         <item name="android:button">@android:drawable/btn_star</item>
     </style>
 
