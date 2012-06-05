@@ -1388,7 +1388,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
                 // Try to move focus to the next item.
                 final int nextPosition = currentPosition - getFirstVisiblePosition() + 1;
-                for (int i = nextPosition; i <= getLastVisiblePosition(); i++) {
+                for (int i = nextPosition; i < getChildCount(); i++) {
                     View child = getChildAt(i);
                     if (child.getVisibility() == View.VISIBLE) {
                         return child;
