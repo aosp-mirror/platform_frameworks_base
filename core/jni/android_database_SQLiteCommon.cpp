@@ -33,8 +33,11 @@ void throw_sqlite3_exception(JNIEnv* env, const char* message) {
  */
 void throw_sqlite3_exception(JNIEnv* env, sqlite3* handle, const char* message) {
     if (handle) {
-        throw_sqlite3_exception(env, sqlite3_errcode(handle),
-                                sqlite3_errmsg(handle), message);
+        // get the error code and message from the SQLite connection
+        // the error message may contain more information than the error code
+        // because it is based on the extended error code rather than the simplified
+        // error code that SQLite normally returns.
+        throw_sqlite3_exception(env, sqlite3_errcode(handle), sqlite3_errmsg(handle), message);
     } else {
         // we use SQLITE_OK so that a generic SQLiteException is thrown;
         // any code not specified in the switch statement below would do.
@@ -42,15 +45,13 @@ void throw_sqlite3_exception(JNIEnv* env, sqlite3* handle, const char* message) 
     }
 }
 
-/* throw a SQLiteException for a given error code */
+/* throw a SQLiteException for a given error code
+ * should only be used when the database connection is not available because the
+ * error information will not be quite as rich */
 void throw_sqlite3_exception_errcode(JNIEnv* env, int errcode, const char* message) {
-    if (errcode == SQLITE_DONE) {
-        throw_sqlite3_exception(env, errcode, NULL, message);
-    } else {
-        char temp[21];
-        sprintf(temp, "error code %d", errcode);
-        throw_sqlite3_exception(env, errcode, temp, message);
-    }
+    char temp[21];
+    sprintf(temp, "error code %d", errcode);
+    throw_sqlite3_exception(env, errcode, temp, message);
 }
 
 /* throw a SQLiteException for a given error code, sqlite3message, and
@@ -75,6 +76,7 @@ void throw_sqlite3_exception(JNIEnv* env, int errcode,
             break;
         case SQLITE_DONE:
             exceptionClass = "android/database/sqlite/SQLiteDoneException";
+            sqlite3Message = NULL; // SQLite error message is irrelevant in this case
             break;
         case SQLITE_FULL:
             exceptionClass = "android/database/sqlite/SQLiteFullException";
