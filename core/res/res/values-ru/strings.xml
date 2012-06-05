@@ -1360,7 +1360,7 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Запустить браузер?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Ответить?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Всегда"</string>
-    <string name="activity_resolver_use_once" msgid="2404644797149173758">"Только один раз"</string>
+    <string name="activity_resolver_use_once" msgid="2404644797149173758">"Только сейчас"</string>
     <!-- no translation found for default_audio_route_name (6890731863195399186) -->
     <skip />
     <!-- no translation found for default_audio_route_name (4551396562363128432) -->
