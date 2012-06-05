@@ -100,6 +100,9 @@ public class TouchExplorer {
     // Temporary array for storing pointer IDs.
     private final int[] mTempPointerIds = new int[MAX_POINTER_COUNT];
 
+    // Timeout before trying to decide what the user is trying to do.
+    private final int mDetermineUserIntentTimeout;
+
     // Timeout within which we try to detect a tap.
     private final int mTapTimeout;
 
@@ -199,6 +202,7 @@ public class TouchExplorer {
         mInjectedPointerTracker = new InjectedPointerTracker();
         mInputFilter = inputFilter;
         mTapTimeout = ViewConfiguration.getTapTimeout();
+        mDetermineUserIntentTimeout = (int) (mTapTimeout * 1.5f);
         mDoubleTapTimeout = ViewConfiguration.getDoubleTapTimeout();
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mDoubleTapSlop = ViewConfiguration.get(context).getScaledDoubleTapSlop();
@@ -1332,7 +1336,7 @@ public class TouchExplorer {
             mPrototype = MotionEvent.obtain(prototype);
             mPointerIdBits = pointerIdBits;
             mPolicyFlags = policyFlags;
-            mHandler.postDelayed(this, mTapTimeout);
+            mHandler.postDelayed(this, mDetermineUserIntentTimeout);
         }
 
         public float getX() {
