@@ -6645,7 +6645,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             // death notification...  just a bit prematurely.
             Slog.i(TAG, "Process " + proc.processName + " (pid " + proc.pid
                     + ") early provider death");
-            appDiedLocked(proc, proc.pid, proc.thread);
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                appDiedLocked(proc, proc.pid, proc.thread);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
     }
 
