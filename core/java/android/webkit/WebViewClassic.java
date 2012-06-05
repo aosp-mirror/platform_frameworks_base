@@ -4546,8 +4546,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (mSelectingText) {
             if (mIsCaretSelection) {
                 // Caret handle is centered
-                int x = contentToViewDimension(mSelectCursorBase.x -
-                        (mSelectHandleCenter.getIntrinsicWidth() / 2));
+                int x = contentToViewDimension(mSelectCursorBase.x) -
+                        (mSelectHandleCenter.getIntrinsicWidth() / 2);
                 int y = contentToViewDimension(mSelectCursorBase.y);
                 mSelectHandleBaseBounds.set(x, y,
                         x + mSelectHandleCenter.getIntrinsicWidth(),
