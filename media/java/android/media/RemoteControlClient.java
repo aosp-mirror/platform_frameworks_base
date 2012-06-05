@@ -854,7 +854,11 @@ public class RemoteControlClient
                 float scale = Math.min((float) maxWidth / width, (float) maxHeight / height);
                 int newWidth = Math.round(scale * width);
                 int newHeight = Math.round(scale * height);
-                Bitmap outBitmap = Bitmap.createBitmap(newWidth, newHeight, bitmap.getConfig());
+                Bitmap.Config newConfig = bitmap.getConfig();
+                if (newConfig == null) {
+                    newConfig = Bitmap.Config.ARGB_8888;
+                }
+                Bitmap outBitmap = Bitmap.createBitmap(newWidth, newHeight, newConfig);
                 Canvas canvas = new Canvas(outBitmap);
                 Paint paint = new Paint();
                 paint.setAntiAlias(true);
