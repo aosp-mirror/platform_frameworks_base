@@ -444,7 +444,7 @@ static int executeNonQuery(JNIEnv* env, SQLiteConnection* connection, sqlite3_st
         throw_sqlite3_exception(env,
                 "Queries can be performed using SQLiteDatabase query or rawQuery methods only.");
     } else if (err != SQLITE_DONE) {
-        throw_sqlite3_exception_errcode(env, err, sqlite3_errmsg(connection->db));
+        throw_sqlite3_exception(env, connection->db);
     }
     return err;
 }
@@ -479,7 +479,7 @@ static jlong nativeExecuteForLastInsertedRowId(JNIEnv* env, jclass clazz,
 static int executeOneRowQuery(JNIEnv* env, SQLiteConnection* connection, sqlite3_stmt* statement) {
     int err = sqlite3_step(statement);
     if (err != SQLITE_ROW) {
-        throw_sqlite3_exception_errcode(env, err, sqlite3_errmsg(connection->db));
+        throw_sqlite3_exception(env, connection->db);
     }
     return err;
 }
