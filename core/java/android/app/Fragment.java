@@ -1503,7 +1503,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
         writer.print(prefix); writer.print("mFragmentId=#");
                 writer.print(Integer.toHexString(mFragmentId));
-                writer.print(" mContainerId#=");
+                writer.print(" mContainerId=#");
                 writer.print(Integer.toHexString(mContainerId));
                 writer.print(" mTag="); writer.println(mTag);
         writer.print(prefix); writer.print("mState="); writer.print(mState);

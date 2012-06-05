@@ -726,11 +726,12 @@ final class FragmentManagerImpl extends FragmentManager {
                 return;
             }
             f.mDeferStart = false;
-            moveToState(f, mCurState, 0, 0);
+            moveToState(f, mCurState, 0, 0, false);
         }
     }
 
-    void moveToState(Fragment f, int newState, int transit, int transitionStyle) {
+    void moveToState(Fragment f, int newState, int transit, int transitionStyle,
+            boolean keepActive) {
         // Fragments that are not currently added will sit in the onCreate() state.
         if (!f.mAdded && newState > Fragment.CREATED) {
             newState = Fragment.CREATED;
@@ -757,7 +758,7 @@ final class FragmentManagerImpl extends FragmentManager {
                 // animation, move to whatever the final state should be once
                 // the animation is done, and then we can proceed from there.
                 f.mAnimatingAway = null;
-                moveToState(f, f.mStateAfterAnimating, 0, 0);
+                moveToState(f, f.mStateAfterAnimating, 0, 0, true);
             }
             switch (f.mState) {
                 case Fragment.INITIALIZING:
@@ -940,7 +941,7 @@ final class FragmentManagerImpl extends FragmentManager {
                                         if (fragment.mAnimatingAway != null) {
                                             fragment.mAnimatingAway = null;
                                             moveToState(fragment, fragment.mStateAfterAnimating,
-                                                    0, 0);
+                                                    0, 0, false);
                                         }
                                     }
                                 });
@@ -992,11 +993,13 @@ final class FragmentManagerImpl extends FragmentManager {
                                 throw new SuperNotCalledException("Fragment " + f
                                         + " did not call through to super.onDetach()");
                             }
-                            if (!f.mRetaining) {
-                                makeInactive(f);
-                            } else {
-                                f.mActivity = null;
-                                f.mFragmentManager = null;
+                            if (!keepActive) {
+                                if (!f.mRetaining) {
+                                    makeInactive(f);
+                                } else {
+                                    f.mActivity = null;
+                                    f.mFragmentManager = null;
+                                }
                             }
                         }
                     }
@@ -1007,7 +1010,7 @@ final class FragmentManagerImpl extends FragmentManager {
     }
     
     void moveToState(Fragment f) {
-        moveToState(f, mCurState, 0, 0);
+        moveToState(f, mCurState, 0, 0, false);
     }
 
     void moveToState(int newState, boolean always) {
@@ -1029,7 +1032,7 @@ final class FragmentManagerImpl extends FragmentManager {
             for (int i=0; i<mActive.size(); i++) {
                 Fragment f = mActive.get(i);
                 if (f != null) {
-                    moveToState(f, newState, transit, transitStyle);
+                    moveToState(f, newState, transit, transitStyle, false);
                     if (f.mLoaderManager != null) {
                         loadersRunning |= f.mLoaderManager.hasRunningLoaders();
                     }
@@ -1122,7 +1125,7 @@ final class FragmentManagerImpl extends FragmentManager {
             fragment.mAdded = false;
             fragment.mRemoving = true;
             moveToState(fragment, inactive ? Fragment.INITIALIZING : Fragment.CREATED,
-                    transition, transitionStyle);
+                    transition, transitionStyle, false);
         }
     }
     
@@ -1189,7 +1192,7 @@ final class FragmentManagerImpl extends FragmentManager {
                     mNeedMenuInvalidate = true;
                 }
                 fragment.mAdded = false;
-                moveToState(fragment, Fragment.CREATED, transition, transitionStyle);
+                moveToState(fragment, Fragment.CREATED, transition, transitionStyle, false);
             }
         }
     }
@@ -1204,7 +1207,7 @@ final class FragmentManagerImpl extends FragmentManager {
                 if (fragment.mHasMenu && fragment.mMenuVisible) {
                     mNeedMenuInvalidate = true;
                 }
-                moveToState(fragment, mCurState, transition, transitionStyle);
+                moveToState(fragment, mCurState, transition, transitionStyle, false);
             }
         }
     }

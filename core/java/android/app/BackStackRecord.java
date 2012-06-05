@@ -53,7 +53,7 @@ final class BackStackState implements Parcelable {
         int pos = 0;
         while (op != null) {
             mOps[pos++] = op.cmd;
-            mOps[pos++] = op.fragment.mIndex;
+            mOps[pos++] = op.fragment != null ? op.fragment.mIndex : -1;
             mOps[pos++] = op.enterAnim;
             mOps[pos++] = op.exitAnim;
             mOps[pos++] = op.popEnterAnim;
@@ -99,8 +99,13 @@ final class BackStackState implements Parcelable {
             op.cmd = mOps[pos++];
             if (FragmentManagerImpl.DEBUG) Log.v(FragmentManagerImpl.TAG,
                     "BSE " + bse + " set base fragment #" + mOps[pos]);
-            Fragment f = fm.mActive.get(mOps[pos++]);
-            op.fragment = f;
+            int findex = mOps[pos++];
+            if (findex >= 0) {
+                Fragment f = fm.mActive.get(findex);
+                op.fragment = f;
+            } else {
+                op.fragment = null;
+            }
             op.enterAnim = mOps[pos++];
             op.exitAnim = mOps[pos++];
             op.popEnterAnim = mOps[pos++];
@@ -506,9 +511,11 @@ final class BackStackRecord extends FragmentTransaction implements
                 + " by " + amt);
         Op op = mHead;
         while (op != null) {
-            op.fragment.mBackStackNesting += amt;
-            if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Bump nesting of "
-                    + op.fragment + " to " + op.fragment.mBackStackNesting);
+            if (op.fragment != null) {
+                op.fragment.mBackStackNesting += amt;
+                if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Bump nesting of "
+                        + op.fragment + " to " + op.fragment.mBackStackNesting);
+            }
             if (op.removed != null) {
                 for (int i=op.removed.size()-1; i>=0; i--) {
                     Fragment r = op.removed.get(i);
@@ -568,23 +575,29 @@ final class BackStackRecord extends FragmentTransaction implements
                             Fragment old = mManager.mAdded.get(i);
                             if (FragmentManagerImpl.DEBUG) Log.v(TAG,
                                     "OP_REPLACE: adding=" + f + " old=" + old);
-                            if (old.mContainerId == f.mContainerId) {
-                                if (op.removed == null) {
-                                    op.removed = new ArrayList<Fragment>();
+                            if (f == null || old.mContainerId == f.mContainerId) {
+                                if (old == f) {
+                                    op.fragment = f = null;
+                                } else {
+                                    if (op.removed == null) {
+                                        op.removed = new ArrayList<Fragment>();
+                                    }
+                                    op.removed.add(old);
+                                    old.mNextAnim = op.exitAnim;
+                                    if (mAddToBackStack) {
+                                        old.mBackStackNesting += 1;
+                                        if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Bump nesting of "
+                                                + old + " to " + old.mBackStackNesting);
+                                    }
+                                    mManager.removeFragment(old, mTransition, mTransitionStyle);
                                 }
-                                op.removed.add(old);
-                                old.mNextAnim = op.exitAnim;
-                                if (mAddToBackStack) {
-                                    old.mBackStackNesting += 1;
-                                    if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Bump nesting of "
-                                            + old + " to " + old.mBackStackNesting);
-                                }
-                                mManager.removeFragment(old, mTransition, mTransitionStyle);
                             }
                         }
                     }
-                    f.mNextAnim = op.enterAnim;
-                    mManager.addFragment(f, false);
+                    if (f != null) {
+                        f.mNextAnim = op.enterAnim;
+                        mManager.addFragment(f, false);
+                    }
                 } break;
                 case OP_REMOVE: {
                     Fragment f = op.fragment;
@@ -644,10 +657,12 @@ final class BackStackRecord extends FragmentTransaction implements
                 } break;
                 case OP_REPLACE: {
                     Fragment f = op.fragment;
-                    f.mNextAnim = op.popExitAnim;
-                    mManager.removeFragment(f,
-                            FragmentManagerImpl.reverseTransit(mTransition),
-                            mTransitionStyle);
+                    if (f != null) {
+                        f.mNextAnim = op.popExitAnim;
+                        mManager.removeFragment(f,
+                                FragmentManagerImpl.reverseTransit(mTransition),
+                                mTransitionStyle);
+                    }
                     if (op.removed != null) {
                         for (int i=0; i<op.removed.size(); i++) {
                             Fragment old = op.removed.get(i);
