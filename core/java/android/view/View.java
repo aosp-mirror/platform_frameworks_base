@@ -3442,7 +3442,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
                     break;
                 case com.android.internal.R.styleable.View_contentDescription:
-                    mContentDescription = a.getString(attr);
+                    setContentDescription(a.getString(attr));
                     break;
                 case com.android.internal.R.styleable.View_soundEffectsEnabled:
                     if (!a.getBoolean(attr, true)) {
@@ -5042,6 +5042,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @RemotableViewMethod
     public void setContentDescription(CharSequence contentDescription) {
         mContentDescription = contentDescription;
+        final boolean nonEmptyDesc = contentDescription != null && contentDescription.length() > 0;
+        if (nonEmptyDesc && getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+             setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+        }
     }
 
     /**
