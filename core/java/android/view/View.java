@@ -2130,18 +2130,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     static final int ACCESSIBILITY_STATE_CHANGED = 0x00000080 << IMPORTANT_FOR_ACCESSIBILITY_SHIFT;
 
     /**
-     * Flag indicating that view has an animation set on it. This is used to track whether an
-     * animation is cleared between successive frames, in order to tell the associated
-     * DisplayList to clear its animation matrix.
-     */
-    static final int VIEW_IS_ANIMATING_TRANSFORM = 0x10000000;
-
-    /**
      * Flag indicating whether a view failed the quickReject() check in draw(). This condition
      * is used to check whether later changes to the view's transform should invalidate the
      * view to force the quickReject test to run again.
      */
-    static final int VIEW_QUICK_REJECTED = 0x20000000;
+    static final int VIEW_QUICK_REJECTED = 0x10000000;
 
     // Accessiblity constants for mPrivateFlags2
 
@@ -2149,7 +2142,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Shift for the bits in {@link #mPrivateFlags2} related to the
      * "accessibilityFocusable" attribute.
      */
-    static final int ACCESSIBILITY_FOCUSABLE_SHIFT = 30;
+    static final int ACCESSIBILITY_FOCUSABLE_SHIFT = 29;
 
     /**
      * The system determines whether the view can take accessibility focus - default (recommended).
@@ -2210,6 +2203,25 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
 
     /* End of masks for mPrivateFlags2 */
+
+    /* Masks for mPrivateFlags3 */
+
+    /**
+     * Flag indicating that view has a transform animation set on it. This is used to track whether
+     * an animation is cleared between successive frames, in order to tell the associated
+     * DisplayList to clear its animation matrix.
+     */
+    static final int VIEW_IS_ANIMATING_TRANSFORM = 0x1;
+
+    /**
+     * Flag indicating that view has an alpha animation set on it. This is used to track whether an
+     * animation is cleared between successive frames, in order to tell the associated
+     * DisplayList to restore its alpha value.
+     */
+    static final int VIEW_IS_ANIMATING_ALPHA = 0x2;
+
+
+    /* End of masks for mPrivateFlags3 */
 
     static final int DRAG_MASK = DRAG_CAN_ACCEPT | DRAG_HOVERED;
 
@@ -2591,6 +2603,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     })
     int mPrivateFlags;
     int mPrivateFlags2;
+    int mPrivateFlags3;
 
     /**
      * This view's request for the visibility of the status bar.
@@ -13041,15 +13054,15 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             more = drawAnimation(parent, drawingTime, a, scalingRequired);
             concatMatrix = a.willChangeTransformationMatrix();
             if (concatMatrix) {
-                mPrivateFlags2 |= VIEW_IS_ANIMATING_TRANSFORM;
+                mPrivateFlags3 |= VIEW_IS_ANIMATING_TRANSFORM;
             }
             transformToApply = parent.mChildTransformation;
         } else {
-            if ((mPrivateFlags2 & VIEW_IS_ANIMATING_TRANSFORM) == VIEW_IS_ANIMATING_TRANSFORM &&
+            if ((mPrivateFlags3 & VIEW_IS_ANIMATING_TRANSFORM) == VIEW_IS_ANIMATING_TRANSFORM &&
                     mDisplayList != null) {
                 // No longer animating: clear out old animation matrix
                 mDisplayList.setAnimationMatrix(null);
-                mPrivateFlags2 &= ~VIEW_IS_ANIMATING_TRANSFORM;
+                mPrivateFlags3 &= ~VIEW_IS_ANIMATING_TRANSFORM;
             }
             if (!useDisplayListProperties &&
                     (flags & ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
@@ -13161,7 +13174,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         }
 
         float alpha = useDisplayListProperties ? 1 : getAlpha();
-        if (transformToApply != null || alpha < 1 || !hasIdentityMatrix()) {
+        if (transformToApply != null || alpha < 1 || !hasIdentityMatrix() ||
+                (mPrivateFlags3 & VIEW_IS_ANIMATING_ALPHA) == VIEW_IS_ANIMATING_ALPHA) {
             if (transformToApply != null || !childHasIdentityMatrix) {
                 int transX = 0;
                 int transY = 0;
@@ -13187,7 +13201,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
                     float transformAlpha = transformToApply.getAlpha();
                     if (transformAlpha < 1) {
-                        alpha *= transformToApply.getAlpha();
+                        alpha *= transformAlpha;
                         parent.mGroupFlags |= ViewGroup.FLAG_CLEAR_TRANSFORMATION;
                     }
                 }
@@ -13199,7 +13213,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 }
             }
 
-            if (alpha < 1) {
+            // Deal with alpha if it is or used to be <1
+            if (alpha < 1 ||
+                    (mPrivateFlags3 & VIEW_IS_ANIMATING_ALPHA) == VIEW_IS_ANIMATING_ALPHA) {
+                if (alpha < 1) {
+                    mPrivateFlags3 |= VIEW_IS_ANIMATING_ALPHA;
+                } else {
+                    mPrivateFlags3 &= ~VIEW_IS_ANIMATING_ALPHA;
+                }
                 parent.mGroupFlags |= ViewGroup.FLAG_CLEAR_TRANSFORMATION;
                 if (hasNoCache) {
                     final int multipliedAlpha = (int) (255 * alpha);
