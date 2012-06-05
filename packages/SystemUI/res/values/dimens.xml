@@ -133,7 +133,7 @@
     <dimen name="notification_panel_header_height">48dp</dimen>
 
     <!-- Extra space above the panel -->
-    <dimen name="notification_panel_padding_top">4dp</dimen>
+    <dimen name="notification_panel_padding_top">0dp</dimen>
 
     <!-- Extra space above the clock in the panel -->
     <dimen name="notification_panel_header_padding_top">0dp</dimen>
@@ -145,4 +145,7 @@
     <!-- Gravity for the notification panel -->
     <!-- 0x37 = fill_horizontal|top -->
     <integer name="notification_panel_layout_gravity">0x37</integer>
+
+    <!-- Height of the carrier/wifi name label -->
+    <dimen name="carrier_label_height">24dp</dimen>
 </resources>

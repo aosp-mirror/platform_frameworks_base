@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -85,6 +86,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.IntruderAlertView;
 import com.android.systemui.statusbar.policy.LocationController;
+import com.android.systemui.statusbar.policy.OnSizeChangedListener;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 
@@ -104,7 +106,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     public static final String ACTION_STATUSBAR_START
             = "com.android.internal.policy.statusbar.START";
 
-    private static final boolean DIM_BEHIND_EXPANDED_PANEL = false;
+    private static final boolean DIM_BEHIND_EXPANDED_PANEL = true;
+    private static final boolean SHOW_CARRIER_LABEL = true;
 
     private static final int MSG_OPEN_NOTIFICATION_PANEL = 1000;
     private static final int MSG_CLOSE_NOTIFICATION_PANEL = 1001;
@@ -168,6 +171,11 @@ public class PhoneStatusBar extends BaseStatusBar {
     View mClearButton;
     View mSettingsButton;
     RotationToggle mRotationButton;
+
+    // carrier/wifi label
+    private TextView mCarrierLabel;
+    private boolean mCarrierLabelVisible = false;
+    private int mCarrierLabelHeight;
 
     // drag bar
     CloseDragHandle mCloseView;
@@ -386,6 +394,14 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mPile = (NotificationRowLayout)mStatusBarWindow.findViewById(R.id.latestItems);
         mPile.setLongPressListener(getNotificationLongClicker());
+        if (SHOW_CARRIER_LABEL) {
+            mPile.setOnSizeChangedListener(new OnSizeChangedListener() {
+                @Override
+                public void onSizeChanged(View view, int w, int h, int oldw, int oldh) {
+                    updateCarrierLabelVisibility();
+                }
+            });
+        }
         mExpandedContents = mPile; // was: expanded.findViewById(R.id.notificationLinearLayout);
 
         mClearButton = mStatusBarWindow.findViewById(R.id.clear_all_button);
@@ -397,6 +413,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         mSettingsButton = mStatusBarWindow.findViewById(R.id.settings_button);
         mSettingsButton.setOnClickListener(mSettingsButtonListener);
         mRotationButton = (RotationToggle) mStatusBarWindow.findViewById(R.id.rotation_lock_button);
+        
+        mCarrierLabel = (TextView)mStatusBarWindow.findViewById(R.id.carrier_label);
+        mCarrierLabel.setVisibility(mCarrierLabelVisible ? View.VISIBLE : View.INVISIBLE);
 
         mScrollView = (ScrollView)mStatusBarWindow.findViewById(R.id.scroll);
         mScrollView.setVerticalScrollBarEnabled(false); // less drawing during pulldowns
@@ -422,8 +441,17 @@ public class PhoneStatusBar extends BaseStatusBar {
         mNetworkController = new NetworkController(mContext);
         final SignalClusterView signalCluster =
                 (SignalClusterView)mStatusBarView.findViewById(R.id.signal_cluster);
+
         mNetworkController.addSignalCluster(signalCluster);
         signalCluster.setNetworkController(mNetworkController);
+        
+        // for wifi-only devices, we show SSID; otherwise, we show PLMN
+        if (mNetworkController.hasMobileDataFeature()) {
+            mNetworkController.addMobileLabelView(mCarrierLabel);
+        } else {
+            mNetworkController.addWifiLabelView(mCarrierLabel);
+        }
+
 //        final ImageView wimaxRSSI =
 //                (ImageView)sb.findViewById(R.id.wimax_signal);
 //        if (wimaxRSSI != null) {
@@ -862,6 +890,45 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
+    protected void updateCarrierLabelVisibility() {
+        if (!SHOW_CARRIER_LABEL) return;
+        // The idea here is to only show the carrier label when there is enough room to see it, 
+        // i.e. when there aren't enough notifications to fill the panel.
+        if (DEBUG) {
+            Slog.d(TAG, String.format("pileh=%d scrollh=%d carrierh=%d",
+                    mPile.getHeight(), mScrollView.getHeight(), mCarrierLabelHeight));
+        }
+        
+        final boolean makeVisible = 
+            mPile.getHeight() < (mScrollView.getHeight() - mCarrierLabelHeight);
+        
+        if (mCarrierLabelVisible != makeVisible) {
+            mCarrierLabelVisible = makeVisible;
+            if (DEBUG) {
+                Slog.d(TAG, "making carrier label " + (makeVisible?"visible":"invisible"));
+            }
+            mCarrierLabel.animate().cancel();
+            if (makeVisible) {
+                mCarrierLabel.setVisibility(View.VISIBLE);
+            }
+            mCarrierLabel.animate()
+                .alpha(makeVisible ? 1f : 0f)
+                //.setStartDelay(makeVisible ? 500 : 0)
+                //.setDuration(makeVisible ? 750 : 100)
+                .setDuration(150)
+                .setListener(makeVisible ? null : new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        if (!mCarrierLabelVisible) { // race
+                            mCarrierLabel.setVisibility(View.INVISIBLE);
+                            mCarrierLabel.setAlpha(0f);
+                        }
+                    }
+                })
+                .start();
+        }
+    }
+
     @Override
     protected void setAreThereNotifications() {
         final boolean any = mNotificationData.size() > 0;
@@ -919,6 +986,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                 })
                 .start();
         }
+
+        updateCarrierLabelVisibility();
     }
 
     public void showClock(boolean show) {
@@ -1077,6 +1146,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mExpandedVisible = true;
         makeSlippery(mNavigationBarView, true);
+
+        updateCarrierLabelVisibility();
 
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
 
@@ -1933,6 +2004,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             panelh = 0;
         }
 
+        if (panelh == mTrackingPosition) return;
+
         mTrackingPosition = panelh;
 
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mNotificationPanel.getLayoutParams();
@@ -1944,13 +2017,17 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
         mNotificationPanel.setLayoutParams(lp);
 
+        final int barh = getCloseViewHeight() + getStatusBarHeight();
+        final float frac = saturate((float)(panelh - barh) / (disph - barh));
+
         if (DIM_BEHIND_EXPANDED_PANEL && ActivityManager.isHighEndGfx(mDisplay)) {
             // woo, special effects
-            final int barh = getCloseViewHeight() + getStatusBarHeight();
-            final float frac = saturate((float)(panelh - barh) / (disph - barh));
-            final int color = ((int)(0xB0 * Math.sin(frac * 1.57f))) << 24;
+            final float k = (float)(1f-0.5f*(1f-Math.cos(3.14159f * Math.pow(1f-frac, 2.2f))));
+            final int color = ((int)(0xB0 * k)) << 24;
             mStatusBarWindow.setBackgroundColor(color);
         }
+        
+        updateCarrierLabelVisibility();
     }
 
     void updateDisplaySize() {
@@ -2185,11 +2262,15 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mNotificationPanelGravity <= 0) {
             mNotificationPanelGravity = Gravity.CENTER_VERTICAL | Gravity.TOP;
         }
-        mNotificationPanelMinHeight =
+        final int notificationPanelDecorationHeight =
               res.getDimensionPixelSize(R.dimen.notification_panel_padding_top)
             + res.getDimensionPixelSize(R.dimen.notification_panel_header_height)
-            + res.getDimensionPixelSize(R.dimen.close_handle_underlap)
             + getNinePatchPadding(res.getDrawable(R.drawable.notification_panel_bg)).bottom;
+        mNotificationPanelMinHeight = 
+              notificationPanelDecorationHeight 
+            + res.getDimensionPixelSize(R.dimen.close_handle_underlap);
+
+        mCarrierLabelHeight = res.getDimensionPixelSize(R.dimen.carrier_label_height);
 
         if (false) Slog.v(TAG, "updateResources");
     }
