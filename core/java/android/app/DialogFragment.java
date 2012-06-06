@@ -391,11 +391,12 @@ public class DialogFragment extends Fragment
     /** @hide */
     @Override
     public LayoutInflater getLayoutInflater(Bundle savedInstanceState) {
-        if (!mShowsDialog) {
+        if (mShowsDialog) {
+            mDialog = onCreateDialog(savedInstanceState);
+        }
+        if (mDialog == null) {
             return super.getLayoutInflater(savedInstanceState);
         }
-
-        mDialog = onCreateDialog(savedInstanceState);
         switch (mStyle) {
             case STYLE_NO_INPUT:
                 mDialog.getWindow().addFlags(
@@ -406,12 +407,9 @@ public class DialogFragment extends Fragment
             case STYLE_NO_TITLE:
                 mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         }
-        if (mDialog != null) {
-            return (LayoutInflater)mDialog.getContext().getSystemService(
-                    Context.LAYOUT_INFLATER_SERVICE);
+        return (LayoutInflater) mDialog.getContext().getSystemService(
+            Context.LAYOUT_INFLATER_SERVICE);
         }
-        return (LayoutInflater)mActivity.getSystemService(
-                Context.LAYOUT_INFLATER_SERVICE);
     }
     
     /**
