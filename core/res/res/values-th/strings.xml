@@ -1034,13 +1034,6 @@
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; กำลังส่งข้อความ SMS จำนวนมาก คุณต้องการอนุญาตให้แอปพลิเคชันนี้ส่งข้อความต่อหรือไม่"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"อนุญาต"</string>
     <string name="sms_control_no" msgid="625438561395534982">"ปฏิเสธ"</string>
-    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"ส่ง SMS เป็นรหัสสั้นหรือไม่"</string>
-    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"ส่ง SMS พรีเมียมหรือไม่"</string>
-    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ต้องการส่งข้อความให้กับ &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ซึ่งเป็น SMS รหัสสั้น&lt;p&gt;การส่งข้อความเป็นรหัสสั้นบางอย่างอาจทำให้มีการเรียกเก็บเงินในบัญชีมือถือของคุณสำหรับบริการพรีเมียม&lt;p&gt;คุณต้องการอนุญาตให้แอปพลิเคชันนี้ส่งข้อความหรือไม่"</string>
-    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ต้องการส่งข้อความให้กับ &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ซึ่งเป็น SMS รหัสสั้นแบบพรีเมียม&lt;p&gt;&lt;b&gt;การส่งข้อความไปยังปลายทางนี้จะทำให้มีการเรียกเก็บเงินในบัญชีมือถือของคุณสำหรับบริการพรีเมียม&lt;/b&gt;&lt;p&gt;คุณต้องการอนุญาตให้แอปพลิเคชันนี้ส่งข้อความหรือไม่"</string>
-    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"ส่งข้อความ"</string>
-    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"ไม่ส่ง"</string>
-    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"รายงานแอปที่เป็นอันตราย"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"นำซิมการ์ดออกแล้ว"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"เครือข่ายมือถือจะไม่สามารถใช้งานได้จนกว่าคุณจะรีสตาร์ทโดยใส่ซิมการ์ดที่ถูกต้องแล้ว"</string>
     <string name="sim_done_button" msgid="827949989369963775">"เสร็จสิ้น"</string>
