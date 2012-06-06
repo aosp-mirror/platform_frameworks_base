@@ -6140,7 +6140,22 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private InstallArgs createInstallArgs(int flags, String fullCodePath, String fullResourcePath,
             String nativeLibraryPath) {
-        if (installOnSd(flags) || installForwardLocked(flags)) {
+        final boolean isInAsec;
+        if (installOnSd(flags)) {
+            /* Apps on SD card are always in ASEC containers. */
+            isInAsec = true;
+        } else if (installForwardLocked(flags)
+                && !fullCodePath.startsWith(mDrmAppPrivateInstallDir.getAbsolutePath())) {
+            /*
+             * Forward-locked apps are only in ASEC containers if they're the
+             * new style
+             */
+            isInAsec = true;
+        } else {
+            isInAsec = false;
+        }
+
+        if (isInAsec) {
             return new AsecInstallArgs(fullCodePath, fullResourcePath, nativeLibraryPath,
                     installOnSd(flags), installForwardLocked(flags));
         } else {
