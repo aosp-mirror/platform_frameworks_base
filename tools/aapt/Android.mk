@@ -29,6 +29,10 @@ LOCAL_SRC_FILES := \
 
 
 LOCAL_CFLAGS += -Wno-format-y2k
+ifeq (darwin,$(HOST_OS))
+LOCAL_CFLAGS += -D_DARWIN_UNLIMITED_STREAMS
+endif
+
 
 LOCAL_C_INCLUDES += external/expat/lib
 LOCAL_C_INCLUDES += external/libpng
