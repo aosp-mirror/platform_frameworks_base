@@ -1034,6 +1034,13 @@
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; is sending a large number of SMS messages. Do you want to allow this app to continue sending messages?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Allow"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Deny"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Send SMS to short code?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Send premium SMS?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; would like to send a text message to &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, which appears to be an SMS short code.&lt;p&gt;Sending text messages to some short codes may cause your mobile account to be billed for premium services.&lt;p&gt;do you want to allow this app to send the message?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; would like to send a text message to &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, which is a premium SMS short code.&lt;p&gt;&lt;b&gt;Sending a message to this destination will cause your mobile account to be billed for premium services.&lt;/b&gt;&lt;p&gt;Do you want to allow this app to send the message?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Send message"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Don\'t send"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Report malicious app"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM card removed"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"The mobile network will be unavailable until you restart with a valid SIM card inserted."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Done"</string>

@@ -1103,6 +1103,13 @@
     <string name="sms_control_message" msgid="3867899169651496433">"Прыкладанне &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; дасылае вялікую колькасць SMS-паведамленняў. Дазволіць гэтаму прыкладанню працягваць адпраўляць паведамленні?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Дазволіць"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Забараніць"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Адправiць SMS на кароткі нумар?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Адправiць платнае SMS?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"Прыкладанне &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&amp;gt спрабуе адправiць тэкставае паведамленне на нумар &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, які, здаецца, з\'яўляецца кароткім нумарам для SMS.&lt;p&gt;Дасыланне тэкставых паведамленняў на кароткія нумары можа прывесці да спісання сродкаў з вашага мабільнага рахунку за платныя паслугі.&lt;/b&gt;&lt;p&gt;Жадаеце дазволіць гэтаму прыкладанню даслаць паведамленне?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"Прыкладанне &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&amp;g спрабуе адправiць тэкставае паведамленне на нумар &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, які з\'яўляецца платным кароткім нумарам для SMS.&lt;p&gt;&lt;b&gt;Адпраўка паведамлення гэтаму атрымальніку прывядзе да спісання сродкаў з вашага мабільнага рахунку за платныя паслугі.&lt;/b&gt;&lt;p&gt;Жадаеце дазволіць гэтаму прыкладанню даслаць паведамленне?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Адправiць паведамленне"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Не адпраўляць"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Павед. аб шкодн. прыкладаннях"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-карта выдаленая"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Мабільная сетка будзе недаступная да перазагрузкі з дзеючай SIM-картай."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Гатова"</string>
