@@ -2069,16 +2069,13 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     private void destroyImpl() {
-        int drawGLFunction = nativeGetDrawGLFunction(mNativeClass);
         ViewRootImpl viewRoot = mWebView.getViewRootImpl();
-        Log.d(LOGTAG, String.format(this + "destroyImpl, drawGLFunction %x,  viewroot == null %b, isHWAccel %b",
-                                    drawGLFunction, (viewRoot == null), mWebView.isHardwareAccelerated()));
-
         if (viewRoot != null) {
             Log.e(LOGTAG, "Error: WebView.destroy() called while still attached!");
         }
 
         if (mWebView.isHardwareAccelerated()) {
+            int drawGLFunction = nativeGetDrawGLFunction(mNativeClass);
             if (drawGLFunction != 0 && viewRoot != null) {
                 // functor should have been detached in onDetachedFromWindow, do
                 // additionally here for safety
@@ -5316,12 +5313,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
         updateHwAccelerated();
 
-        int drawGLFunction = nativeGetDrawGLFunction(mNativeClass);
-        ViewRootImpl viewRoot = mWebView.getViewRootImpl();
-        Log.d(LOGTAG, String.format(this + "onDetachedFromWindow, drawGLFunction %x,  viewroot == null %b, isHWAccel %b",
-                                    drawGLFunction, (viewRoot == null), mWebView.isHardwareAccelerated()));
-
         if (mWebView.isHardwareAccelerated()) {
+            int drawGLFunction = nativeGetDrawGLFunction(mNativeClass);
+            ViewRootImpl viewRoot = mWebView.getViewRootImpl();
             if (drawGLFunction != 0 && viewRoot != null) {
                 viewRoot.detachFunctor(drawGLFunction);
             }
