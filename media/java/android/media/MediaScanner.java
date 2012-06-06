@@ -523,6 +523,13 @@ public class MediaScanner
             try {
                 FileEntry entry = beginFile(path, mimeType, lastModified,
                         fileSize, isDirectory, noMedia);
+
+                // if this file was just inserted via mtp, set the rowid to zero
+                // (even though it already exists in the database), to trigger
+                // the correct code path for updating its entry
+                if (mMtpObjectHandle != 0) {
+                    entry.mRowId = 0;
+                }
                 // rescan for metadata if file was modified since last scan
                 if (entry != null && (entry.mLastModifiedChanged || scanAlways)) {
                     if (noMedia) {
