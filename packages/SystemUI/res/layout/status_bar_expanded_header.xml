@@ -20,7 +20,6 @@
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="@dimen/notification_panel_header_padding_top"
     android:background="@drawable/notification_header_bg"
     android:orientation="horizontal"
     android:gravity="center_vertical"
