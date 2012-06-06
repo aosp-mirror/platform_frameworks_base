@@ -34,10 +34,15 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.RelativeLayout;
 
+import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.NotificationRowLayout;
 
 public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         View.OnClickListener {
+    private ExpandHelper mExpandHelper;
+    private NotificationRowLayout latestItems;
+
     static final String TAG = "Tablet/NotificationPanel";
     static final boolean DEBUG = false;
 
@@ -101,6 +106,16 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         mShowing = false;
 
         setContentFrameVisible(mNotificationCount > 0, false);
+    }
+
+    @Override
+    protected void onAttachedToWindow () {
+        super.onAttachedToWindow();
+        latestItems = (NotificationRowLayout) findViewById(R.id.content);
+        int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
+        int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_max_height);
+        mExpandHelper = new ExpandHelper(mContext, latestItems, minHeight, maxHeight);
+        mExpandHelper.setEventSource(this);
     }
 
     private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
@@ -321,14 +336,11 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     }
 
     public boolean isInContentArea(int x, int y) {
-        mContentArea.left = mTitleArea.getLeft() + mTitleArea.getPaddingLeft();
-        mContentArea.top = mTitleArea.getTop() + mTitleArea.getPaddingTop() 
+        mContentArea.left = mContentFrame.getLeft() + mContentFrame.getPaddingLeft();
+        mContentArea.top = mContentFrame.getTop() + mContentFrame.getPaddingTop()
             + (int)mContentParent.getTranslationY(); // account for any adjustment
-        mContentArea.right = mTitleArea.getRight() - mTitleArea.getPaddingRight();
-
-        View theBottom = (mContentFrame.getVisibility() == View.VISIBLE)
-            ? mContentFrame : mTitleArea;
-        mContentArea.bottom = theBottom.getBottom() - theBottom.getPaddingBottom();
+        mContentArea.right = mContentFrame.getRight() - mContentFrame.getPaddingRight();
+        mContentArea.bottom = mContentFrame.getBottom() - mContentFrame.getPaddingBottom();
 
         offsetDescendantRectToMyCoords(mContentParent, mContentArea);
         return mContentArea.contains(x, y);
@@ -439,6 +451,26 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
 
         public void onAnimationStart(Animator animation) {
         }
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        MotionEvent cancellation = MotionEvent.obtain(ev);
+        cancellation.setAction(MotionEvent.ACTION_CANCEL);
+
+        boolean intercept = mExpandHelper.onInterceptTouchEvent(ev) ||
+                super.onInterceptTouchEvent(ev);
+        if (intercept) {
+            latestItems.onInterceptTouchEvent(cancellation);
+        }
+        return intercept;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        boolean handled = mExpandHelper.onTouchEvent(ev) ||
+                super.onTouchEvent(ev);
+        return handled;
     }
 }
 
