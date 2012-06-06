@@ -1103,13 +1103,6 @@
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sendet eine große Anzahl SMS. Möchten Sie zulassen, dass die App weiterhin Nachrichten sendet?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Zulassen"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Nicht zulassen"</string>
-    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"SMS an Kurzwahl senden?"</string>
-    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Premium-SMS senden?"</string>
-    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; versucht, eine SMS an &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; zu senden. Dabei scheint es sich um eine SMS-Kurzwahl zu handeln.&lt;p&gt;Wenn Sie SMS an eine Kurzwahl senden, werden Ihnen für Ihr Mobilfunkkonto möglicherweise Premiumdienste in Rechnung gestellt.&lt;p&gt;Möchten Sie zulassen, dass die App die Nachricht sendet?"</string>
-    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; versucht, eine SMS an die Premium-SMS-Kurzwahl &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; zu senden.&lt;p&gt;&lt;b&gt;Wenn Sie eine Nachricht an diese Zieladresse senden, werden Ihnen für Ihr Mobilfunkkonto Premiumdienste in Rechnung gestellt.&lt;/b&gt;&lt;p&gt;Möchten Sie zulassen, dass die App die Nachricht sendet?"</string>
-    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Nachricht senden"</string>
-    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Nicht senden"</string>
-    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Schädliche App melden"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-Karte entfernt"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Das Mobilfunknetz ist erst wieder verfügbar, wenn Sie einen Neustart mit einer gültigen SIM-Karte durchführen."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Fertig"</string>

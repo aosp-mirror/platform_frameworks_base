@@ -1103,13 +1103,6 @@
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; lähettää suuria määriä tekstiviestejä. Annetaanko tämän sovelluksen jatkaa tekstiviestien lähettämistä?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Salli"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Kiellä"</string>
-    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Lähetetäänkö viesti?"</string>
-    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Lähetä maksullinen viesti?"</string>
-    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; haluaa lähettää tekstiviestin kohteeseen &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, joka voi olla maksullinen numero.&lt;p&gt;&lt;b&gt;Jos lähetät viestin tähän kohteeseen, sinua saatetaan veloittaa maksullisten palveluiden käytöstä.&lt;/b&gt;&lt;p&gt;Annetaanko sovelluksen lähettää viesti?"</string>
-    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; haluaa lähettää tekstiviestin kohteeseen &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, joka on maksullinen numero.&lt;p&gt;&lt;b&gt;Jos lähetät viestin tähän kohteeseen, sinua veloitetaan maksullisten palveluiden käytöstä.&lt;/b&gt;&lt;p&gt;Annetaanko sovelluksen lähettää viesti?"</string>
-    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Lähetä viesti"</string>
-    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Älä lähetä"</string>
-    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Ilmoita haittasovelluksesta"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kortti poistettu"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Mobiiliverkko ei ole käytettävissä, ennen kuin käynnistät uudelleen kelvollisella laitteeseen kytketyllä SIM-kortilla."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Valmis"</string>
