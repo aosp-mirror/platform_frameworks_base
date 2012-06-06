@@ -1750,6 +1750,20 @@ public final class Settings {
         public static final String USER_ROTATION = "user_rotation";
 
         /**
+         * Control whether the rotation lock toggle in the System UI should be hidden.
+         * Typically this is done for accessibility purposes to make it harder for
+         * the user to accidentally toggle the rotation lock while the display rotation
+         * has been locked for accessibility.
+         *
+         * If 0, then rotation lock toggle is not hidden for accessibility (although it may be
+         * unavailable for other reasons).  If 1, then the rotation lock toggle is hidden.
+         *
+         * @hide
+         */
+        public static final String HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY =
+                "hide_rotation_lock_toggle_for_accessibility";
+
+        /**
          * Whether the phone vibrates when it is ringing due to an incoming call. This will
          * be used by Phone and Setting apps; it shouldn't affect other apps.
          * The value is boolean (1 or 0).
@@ -2029,6 +2043,7 @@ public final class Settings {
             DATE_FORMAT,
             ACCELEROMETER_ROTATION,
             USER_ROTATION,
+            HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
             DTMF_TONE_WHEN_DIALING,
             DTMF_TONE_TYPE_WHEN_DIALING,
             EMERGENCY_TONE,
