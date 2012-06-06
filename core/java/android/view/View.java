@@ -6300,13 +6300,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private void requestAccessibilityFocusFromHover() {
         if (includeForAccessibility() && isActionableForAccessibility()) {
             requestAccessibilityFocus();
-            requestFocusNoSearch(View.FOCUS_DOWN, null);
         } else {
             if (mParent != null) {
                 View nextFocus = mParent.findViewToTakeAccessibilityFocusFromHover(this, this);
                 if (nextFocus != null) {
                     nextFocus.requestAccessibilityFocus();
-                    nextFocus.requestFocusNoSearch(View.FOCUS_DOWN, null);
                 }
             }
         }
