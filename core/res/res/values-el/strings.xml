@@ -1103,6 +1103,13 @@
     <string name="sms_control_message" msgid="3867899169651496433">"Η εφαρμογή &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; στέλνει έναν μεγάλο αριθμό μηνυμάτων SMS. Θέλετε να επιτρέψετε σε αυτήν την εφαρμογή να συνεχίσει να στέλνει μηνύματα;"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Αποδοχή"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Άρνηση"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Να αποσταλεί SMS στον κωδικό;"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Να σταλεί SMS ειδικής χρέωσης;"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"Η εφαρμογή &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ζητά την έγκρισή σας για την αποστολή μηνύματος κειμένου στον αριθμό &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, ο οποίος φαίνεται ότι είναι κωδικός για την αποστολή SMS με ειδική χρέωση.&lt;p&gt;Η αποστολή μηνύματος σε αυτόν τον αριθμό θα χρεωθεί στον λογαριασμό του κινητού σας ως παροχή υπηρεσιών.&lt;p&gt;Θέλετε να επιτρέψετε σε αυτήν την εφαρμογή να στείλει το μήνυμα;"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"Η εφαρμογή &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; θέλει να στείλει ένα μήνυμα κειμένου στον αριθμό &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, ο οποίος είναι ένας κωδικός αποστολής SMS με ειδική χρέωση.&lt;p&gt;&lt;b&gt;Η αποστολή μηνύματος σε αυτόν τον αριθμό θα χρεωθεί στον λογαριασμό του κινητού σας ως παροχή υπηρεσιών.&lt;/b&gt;&lt;p&gt;Θέλετε να επιτρέψετε σε αυτήν την εφαρμογή να στείλει το μήνυμα;"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Αποστολή μηνύματος"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Να μην αποσταλεί"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Αναφορά κακόβουλης εφαρμογής"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Η κάρτα SIM αφαιρέθηκε"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Το δίκτυο κινητής τηλεφωνίας δεν θα είναι διαθέσιμο μέχρι να κάνετε επανεκκίνηση αφού τοποθετήσετε μια έγκυρη κάρτα SIM."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Τέλος"</string>

@@ -1103,6 +1103,13 @@
     <string name="sms_control_message" msgid="3867899169651496433">"Програма &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; надсилає велику кількість SMS-повідомлень. Дозволити цій програмі й надалі надсилати повідомлення?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Дозволити"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Відмовити"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Надіслати SMS на короткий код?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Надіслати спеціальне SMS?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"Програма &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; хоче надіслати текстове повідомлення на адресу &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, яка є коротким кодом SMS.&lt;p&gt;&lt;b&gt;Якщо надсилати текстові повідомлення на певні короткі коди, з вашого мобільного рахунку буде стягнено плату за спеціальні послуги.&lt;/b&gt;&lt;p&gt;Дозволити цій програмі надіслати повідомлення?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"Програма &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; хоче надіслати текстове повідомлення на адресу &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, яка є коротким кодом спеціальних SMS.&lt;p&gt;&lt;b&gt;Якщо надіслати повідомлення на цю адресу, з вашого мобільного рахунку буде стягнено плату за спеціальні послуги.&lt;/b&gt;&lt;p&gt;Дозволити цій програмі надіслати повідомлення?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Надіслати повідомлення"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Не надсилати"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Повідом. про шкідливу програму"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-карту вилучено"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Мобільна мережа буде недоступна, поки ви не здійсните перезапуск, вставивши дійсну SIM-карту."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>
