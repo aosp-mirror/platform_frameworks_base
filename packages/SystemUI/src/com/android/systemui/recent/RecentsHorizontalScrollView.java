@@ -41,7 +41,8 @@ import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.recent.RecentsPanelView.TaskDescriptionAdapter;
 
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 
 public class RecentsHorizontalScrollView extends HorizontalScrollView
         implements SwipeHelper.Callback, RecentsPanelView.RecentsScrollView {
@@ -53,7 +54,7 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     protected int mLastScrollPosition;
     private SwipeHelper mSwipeHelper;
     private RecentsScrollViewPerformanceHelper mPerformanceHelper;
-    private ArrayList<View> mRecycledViews;
+    private HashSet<View> mRecycledViews;
     private int mNumItemsInOneScreenful;
 
     public RecentsHorizontalScrollView(Context context, AttributeSet attrs) {
@@ -62,7 +63,7 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         float pagingTouchSlop = ViewConfiguration.get(mContext).getScaledPagingTouchSlop();
         mSwipeHelper = new SwipeHelper(SwipeHelper.Y, this, densityScale, pagingTouchSlop);
         mPerformanceHelper = RecentsScrollViewPerformanceHelper.create(context, attrs, this, false);
-        mRecycledViews = new ArrayList<View>();
+        mRecycledViews = new HashSet<View>();
     }
 
     public void setMinSwipeAlpha(float minAlpha) {
@@ -89,16 +90,12 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         setLayoutTransition(null);
 
         mLinearLayout.removeAllViews();
-        for (int i = 0; i < mRecycledViews.size(); i++) {
-            View child = mRecycledViews.get(i);
-            if (child.getParent() != null) {
-                throw new RuntimeException("Recycled child has a parent");
-            }
-        }
+        Iterator<View> recycledViews = mRecycledViews.iterator();
         for (int i = 0; i < mAdapter.getCount(); i++) {
             View old = null;
-            if (mRecycledViews.size() != 0) {
-                old = mRecycledViews.remove(mRecycledViews.size() - 1);
+            if (recycledViews.hasNext()) {
+                old = recycledViews.next();
+                recycledViews.remove();
                 old.setVisibility(VISIBLE);
             }
 
@@ -195,9 +192,6 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     public void onChildDismissed(View v) {
         addToRecycledViews(v);
         mLinearLayout.removeView(v);
-        if (v.getParent() != null) {
-            throw new RuntimeException("Recycled child has parent");
-        }
         mCallback.handleSwipe(v);
         // Restore the alpha/translation parameters to what they were before swiping
         // (for when these items are recycled)
@@ -369,15 +363,9 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         mNumItemsInOneScreenful =
                 (int) FloatMath.ceil(dm.widthPixels / (float) child.getMeasuredWidth());
         addToRecycledViews(child);
-        if (child.getParent() != null) {
-            throw new RuntimeException("First recycled child has parent");
-        }
 
         for (int i = 0; i < mNumItemsInOneScreenful - 1; i++) {
             addToRecycledViews(mAdapter.createView(mLinearLayout));
-            if (mRecycledViews.get(mRecycledViews.size() - 1).getParent() != null) {
-                throw new RuntimeException("Recycled child has parent");
-            }
         }
     }
 
