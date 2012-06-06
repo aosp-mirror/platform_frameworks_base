@@ -26,7 +26,11 @@
     android:layout_width="match_parent"
     systemui:recentItemLayout="@layout/status_bar_recent_item"
     >
-
+    <View
+        android:id="@+id/recents_transition_background"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:visibility="invisible" />
     <FrameLayout
         android:id="@+id/recents_bg_protect"
         android:background="@drawable/status_bar_recents_background"

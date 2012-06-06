@@ -34,11 +34,13 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -86,7 +88,8 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     OnRecentsPanelVisibilityChangedListener mVisibilityChangedListener;
 
     ImageView mPlaceholderThumbnail;
-    boolean mHideWindowAfterPlaceholderThumbnailIsHidden;
+    View mTransitionBg;
+    boolean mHideRecentsAfterThumbnailScaleUpStarted;
 
     private RecentTasksLoader mRecentTasksLoader;
     private ArrayList<TaskDescription> mRecentTaskDescriptions;
@@ -97,6 +100,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private boolean mFitThumbnailToXY;
     private int mRecentItemLayoutId;
     private boolean mFirstScreenful = true;
+    private boolean mHighEndGfx;
 
     public static interface OnRecentsPanelVisibilityChangedListener {
         public void onRecentsPanelVisibilityChanged(boolean visible);
@@ -248,7 +252,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && !event.isCanceled()) {
-            show(false, true);
+            show(false, false);
             return true;
         }
         return super.onKeyUp(keyCode, event);
@@ -305,10 +309,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             ArrayList<TaskDescription> recentTaskDescriptions, boolean firstScreenful) {
         sendCloseSystemWindows(mContext, BaseStatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS);
 
-        // For now, disable animations. We may want to re-enable in the future
-        if (show) {
-            animate = false;
-        }
         if (show) {
             // Need to update list of recent apps before we set visibility so this view's
             // content description is updated before it gets focus for TalkBack mode
@@ -318,6 +318,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             // quit early
             boolean noApps = !mFirstScreenful && (mRecentTaskDescriptions.size() == 0);
             if (mRecentsNoApps != null) {
+                mRecentsNoApps.setAlpha(1f);
                 mRecentsNoApps.setVisibility(noApps ? View.VISIBLE : View.INVISIBLE);
             } else {
                 if (noApps) {
@@ -339,7 +340,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             mRecentTasksDirty = true;
             mWaitingToShow = false;
             mReadyToShow = false;
-            mRecentsNoApps.setVisibility(View.INVISIBLE);
         }
         if (animate) {
             if (mShowing != show) {
@@ -488,7 +488,8 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         if (mRecentsScrim != null) {
             Display d = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
-            if (!ActivityManager.isHighEndGfx(d)) {
+            mHighEndGfx = ActivityManager.isHighEndGfx(d);
+            if (!mHighEndGfx) {
                 mRecentsScrim.setBackground(null);
             } else if (mRecentsScrim.getBackground() instanceof BitmapDrawable) {
                 // In order to save space, we make the background texture repeat in the Y direction
@@ -704,22 +705,57 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         setContentDescription(recentAppsAccessibilityDescription);
     }
 
+
+    boolean mThumbnailScaleUpStarted;
     public void handleOnClick(View view) {
         ViewHolder holder = (ViewHolder)view.getTag();
         TaskDescription ad = holder.taskDescription;
         final Context context = view.getContext();
         final ActivityManager am = (ActivityManager)
                 context.getSystemService(Context.ACTIVITY_SERVICE);
-        holder.thumbnailViewImage.setDrawingCacheEnabled(true);
-        Bitmap bm = holder.thumbnailViewImage.getDrawingCache();
-        mPlaceholderThumbnail = (ImageView) findViewById(R.id.recents_transition_placeholder_icon);
+        Bitmap bm = holder.thumbnailViewImageBitmap;
+        boolean usingDrawingCache;
+        if (bm.getWidth() == holder.thumbnailViewImage.getWidth() &&
+                bm.getHeight() == holder.thumbnailViewImage.getHeight()) {
+            usingDrawingCache = false;
+        } else {
+            holder.thumbnailViewImage.setDrawingCacheEnabled(true);
+            bm = holder.thumbnailViewImage.getDrawingCache();
+            usingDrawingCache = true;
+        }
+
+        if (mPlaceholderThumbnail == null) {
+            mPlaceholderThumbnail =
+                    (ImageView) findViewById(R.id.recents_transition_placeholder_icon);
+        }
+        if (mTransitionBg == null) {
+            mTransitionBg = (View) findViewById(R.id.recents_transition_background);
+
+            IWindowManager wm = IWindowManager.Stub.asInterface(
+                    ServiceManager.getService(Context.WINDOW_SERVICE));
+            try {
+                if (!wm.hasSystemNavBar()) {
+                    FrameLayout.LayoutParams lp =
+                            (FrameLayout.LayoutParams) mTransitionBg.getLayoutParams();
+                    int statusBarHeight = getResources().
+                            getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
+                    lp.setMargins(0, statusBarHeight, 0, 0);
+                    mTransitionBg.setLayoutParams(lp);
+                }
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failing checking whether status bar is visible", e);
+            }
+        }
 
         final ImageView placeholderThumbnail = mPlaceholderThumbnail;
-        mHideWindowAfterPlaceholderThumbnailIsHidden = false;
+        mHideRecentsAfterThumbnailScaleUpStarted = false;
         placeholderThumbnail.setVisibility(VISIBLE);
-        Bitmap b2 = bm.copy(bm.getConfig(), true);
-        placeholderThumbnail.setImageBitmap(b2);
-
+        if (!usingDrawingCache) {
+            placeholderThumbnail.setImageBitmap(bm);
+        } else {
+            Bitmap b2 = bm.copy(bm.getConfig(), true);
+            placeholderThumbnail.setImageBitmap(b2);
+        }
         Rect r = new Rect();
         holder.thumbnailViewImage.getGlobalVisibleRect(r);
 
@@ -728,13 +764,16 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
         show(false, true);
 
+        mThumbnailScaleUpStarted = false;
         ActivityOptions opts = ActivityOptions.makeDelayedThumbnailScaleUpAnimation(
                 holder.thumbnailViewImage, bm, 0, 0,
                 new ActivityOptions.OnAnimationStartedListener() {
                     @Override public void onAnimationStarted() {
-                        mPlaceholderThumbnail = null;
-                        placeholderThumbnail.setVisibility(INVISIBLE);
-                        if (mHideWindowAfterPlaceholderThumbnailIsHidden) {
+                        mThumbnailScaleUpStarted = true;
+                        if (!mHighEndGfx) {
+                            mPlaceholderThumbnail.setVisibility(INVISIBLE);
+                        }
+                        if (mHideRecentsAfterThumbnailScaleUpStarted) {
                             hideWindow();
                         }
                     }
@@ -751,15 +790,19 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             if (DEBUG) Log.v(TAG, "Starting activity " + intent);
             context.startActivity(intent, opts.toBundle());
         }
-        holder.thumbnailViewImage.setDrawingCacheEnabled(false);
+        if (!usingDrawingCache) {
+            holder.thumbnailViewImage.setDrawingCacheEnabled(false);
+        }
     }
 
     public void hideWindow() {
-        if (mPlaceholderThumbnail != null) {
-            mHideWindowAfterPlaceholderThumbnailIsHidden = true;
+        if (!mThumbnailScaleUpStarted) {
+            mHideRecentsAfterThumbnailScaleUpStarted = true;
         } else {
             setVisibility(GONE);
-            mHideWindowAfterPlaceholderThumbnailIsHidden = false;
+            mTransitionBg.setVisibility(INVISIBLE);
+            mPlaceholderThumbnail.setVisibility(INVISIBLE);
+            mHideRecentsAfterThumbnailScaleUpStarted = false;
         }
     }
 
