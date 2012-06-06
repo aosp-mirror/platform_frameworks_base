@@ -116,12 +116,6 @@ public abstract class SMSDispatcher extends Handler {
     /** Don't send SMS (user did not confirm). */
     static final int EVENT_STOP_SENDING = 7;        // accessed from inner class
 
-    /** Confirmation required for third-party apps sending to an SMS short code. */
-    private static final int EVENT_CONFIRM_SEND_TO_POSSIBLE_PREMIUM_SHORT_CODE = 8;
-
-    /** Confirmation required for third-party apps sending to an SMS short code. */
-    private static final int EVENT_CONFIRM_SEND_TO_PREMIUM_SHORT_CODE = 9;
-
     protected final Phone mPhone;
     protected final Context mContext;
     protected final ContentResolver mResolver;
@@ -292,14 +286,6 @@ public abstract class SMSDispatcher extends Handler {
 
         case EVENT_SEND_LIMIT_REACHED_CONFIRMATION:
             handleReachSentLimit((SmsTracker)(msg.obj));
-            break;
-
-        case EVENT_CONFIRM_SEND_TO_POSSIBLE_PREMIUM_SHORT_CODE:
-            handleConfirmShortCode(false, (SmsTracker)(msg.obj));
-            break;
-
-        case EVENT_CONFIRM_SEND_TO_PREMIUM_SHORT_CODE:
-            handleConfirmShortCode(true, (SmsTracker)(msg.obj));
             break;
 
         case EVENT_SEND_CONFIRMED_SMS:
@@ -992,47 +978,6 @@ public abstract class SMSDispatcher extends Handler {
                 .setMessage(messageText)
                 .setPositiveButton(r.getString(R.string.sms_control_yes), listener)
                 .setNegativeButton(r.getString(R.string.sms_control_no), listener)
-                .setOnCancelListener(listener)
-                .create();
-
-        d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        d.show();
-    }
-
-    /**
-     * Post an alert for user confirmation when sending to a potential short code.
-     * @param isPremium true if the destination is known to be a premium short code
-     * @param tracker the SmsTracker for the current message.
-     */
-    protected void handleConfirmShortCode(boolean isPremium, SmsTracker tracker) {
-        if (denyIfQueueLimitReached(tracker)) {
-            return;     // queue limit reached; error was returned to caller
-        }
-
-        int messageId;
-        int titleId;
-        if (isPremium) {
-            messageId = R.string.sms_premium_short_code_confirm_message;
-            titleId = R.string.sms_premium_short_code_confirm_title;
-        } else {
-            messageId = R.string.sms_short_code_confirm_message;
-            titleId = R.string.sms_short_code_confirm_title;
-        }
-
-        CharSequence appLabel = getAppLabel(tracker.mAppPackage);
-        Resources r = Resources.getSystem();
-        Spanned messageText = Html.fromHtml(r.getString(messageId, appLabel, tracker.mDestAddress));
-
-        ConfirmDialogListener listener = new ConfirmDialogListener(tracker);
-
-        AlertDialog d = new AlertDialog.Builder(mContext)
-                .setTitle(titleId)
-                .setIcon(R.drawable.stat_sys_warning)
-                .setMessage(messageText)
-                .setPositiveButton(r.getString(R.string.sms_short_code_confirm_allow), listener)
-                .setNegativeButton(r.getString(R.string.sms_short_code_confirm_deny), listener)
-// TODO: add third button for "Report malicious app" feature
-//                .setNeutralButton(r.getString(R.string.sms_short_code_confirm_report), listener)
                 .setOnCancelListener(listener)
                 .create();
 
