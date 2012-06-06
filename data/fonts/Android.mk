@@ -18,37 +18,25 @@
 LOCAL_PATH := $(call my-dir)
 
 ##########################################
+# create symlink for given font
+# $(1): new font $(2): link target
+# should be used with eval: $(eval $(call ...))
+define create-font-symlink
+$(PRODUCT_OUT)/system/fonts/$(1) : $(PRODUCT_OUT)/system/fonts/$(2)
+	@echo "Symlink: $$@ -> $$<"
+	@mkdir -p $$(dir $$@)
+	@rm -rf $$@
+	$(hide) ln -sf $$(notdir $$<) $$@
+# this magic makes LOCAL_REQUIRED_MODULES work
+ALL_MODULES.$(1).INSTALLED := \
+    $(ALL_MODULES.$(1).INSTALLED) $(PRODUCT_OUT)/system/fonts/$(1)
+endef
+
+##########################################
 # We may only afford small font footprint.
 ##########################################
-# Use only symlinks.
-# Symlink: DroidSans.ttf -> Roboto-Regular.ttf
-LOCAL_MODULE := DroidSans.ttf
-font_symlink_src := $(PRODUCT_OUT)/system/fonts/Roboto-Regular.ttf
-font_symlink := $(dir $(font_symlink_src))$(LOCAL_MODULE)
-$(font_symlink) : $(font_symlink_src)
-	@echo "Symlink: $@ -> $<"
-	@mkdir -p $(dir $@)
-	@rm -rf $@
-	$(hide) ln -sf $(notdir $<) $@
-
-# this magic makes LOCAL_REQUIRED_MODULES work
-ALL_MODULES.$(LOCAL_MODULE).INSTALLED := \
-    $(ALL_MODULES.$(LOCAL_MODULE).INSTALLED) $(font_symlink)
-
-################################
-# Symlink: DroidSans-Bold.ttf -> Roboto-Bold.ttf
-LOCAL_MODULE := DroidSans-Bold.ttf
-font_symlink_src := $(PRODUCT_OUT)/system/fonts/Roboto-Bold.ttf
-font_symlink := $(dir $(font_symlink_src))$(LOCAL_MODULE)
-$(font_symlink) : $(font_symlink_src)
-	@echo "Symlink: $@ -> $<"
-	@mkdir -p $(dir $@)
-	@rm -rf $@
-	$(hide) ln -sf $(notdir $<) $@
-
-# this magic makes LOCAL_REQUIRED_MODULES work
-ALL_MODULES.$(LOCAL_MODULE).INSTALLED := \
-    $(ALL_MODULES.$(LOCAL_MODULE).INSTALLED) $(font_symlink)
+$(eval $(call create-font-symlink,DroidSans.ttf,Roboto-Regular.ttf))
+$(eval $(call create-font-symlink,DroidSans-Bold.ttf,Roboto-Bold.ttf))
 
 ################################
 # On space-constrained devices, we include a subset of fonts:
@@ -121,7 +109,6 @@ font_symlink_src :=
 font_symlink :=
 droidsans_fallback_src :=
 extra_font_files :=
-
 ################################
 # Build the rest font files as prebuilt.
 
@@ -142,6 +129,27 @@ font_src_files := \
     Roboto-Bold.ttf \
     Roboto-Italic.ttf \
     Roboto-BoldItalic.ttf \
+    DroidSerif-Regular.ttf \
+    DroidSerif-Bold.ttf \
+    DroidSerif-Italic.ttf \
+    DroidSerif-BoldItalic.ttf \
+    DroidSansMono.ttf \
+    Clockopia.ttf \
+    AndroidClock.ttf \
+    AndroidClock_Highlight.ttf \
+    AndroidClock_Solid.ttf
+
+ifeq ($(MINIMAL_FONT_FOOTPRINT),true)
+
+$(eval $(call create-font-symlink,Roboto-Light.ttf,Roboto-Regular.ttf))
+$(eval $(call create-font-symlink,Roboto-LightItalic.ttf,Roboto-Italic.ttf))
+$(eval $(call create-font-symlink,RobotoCondensed-Regular.ttf,Roboto-Regular.ttf))
+$(eval $(call create-font-symlink,RobotoCondensed-Bold.ttf,Roboto-Bold.ttf))
+$(eval $(call create-font-symlink,RobotoCondensed-Italic.ttf,Roboto-Italic.ttf))
+$(eval $(call create-font-symlink,RobotoCondensed-BoldItalic.ttf,Roboto-BoldItalic.ttf))
+
+else # !MINIMAL_FONT
+font_src_files += \
     Roboto-Light.ttf \
     Roboto-LightItalic.ttf \
     RobotoCondensed-Regular.ttf \
@@ -154,18 +162,11 @@ font_src_files := \
     DroidSansHebrew-Regular.ttf \
     DroidSansHebrew-Bold.ttf \
     DroidSansThai.ttf \
-    DroidSerif-Regular.ttf \
-    DroidSerif-Bold.ttf \
-    DroidSerif-Italic.ttf \
-    DroidSerif-BoldItalic.ttf \
-    DroidSansMono.ttf \
     DroidSansArmenian.ttf \
     DroidSansGeorgian.ttf \
-    AndroidEmoji.ttf \
-    Clockopia.ttf \
-    AndroidClock.ttf \
-    AndroidClock_Highlight.ttf \
-    AndroidClock_Solid.ttf \
+    AndroidEmoji.ttf
+
+endif # !MINIMAL_FONT
 
 $(foreach f, $(font_src_files), $(call build-one-font-module, $(f)))
 
