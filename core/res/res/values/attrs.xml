@@ -828,6 +828,9 @@
         <!-- Default style for the Switch widget. -->
         <attr name="switchStyle" format="reference" />
 
+        <!-- Default style for the MediaRouteButton widget. -->
+        <attr name="mediaRouteButtonStyle" format="reference" />
+
         <!-- ============== -->
         <!-- Pointer styles -->
         <!-- ============== -->
@@ -5671,4 +5674,16 @@
         <!-- The key character map file resource. -->
         <attr name="keyboardLayout" format="reference" />
     </declare-styleable>
+
+    <declare-styleable name="MediaRouteButton">
+        <!-- This drawable is a state list where the "activated" state
+             indicates active media routing. Non-activated indicates
+             that media is playing to the local device only.
+             @hide -->
+        <attr name="externalRouteEnabledDrawable" format="reference" />
+
+        <attr name="minWidth" />
+        <attr name="minHeight" />
+    </declare-styleable>
+
 </resources>
