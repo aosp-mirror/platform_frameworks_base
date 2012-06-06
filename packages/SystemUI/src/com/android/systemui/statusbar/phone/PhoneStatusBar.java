@@ -65,6 +65,7 @@ import android.view.WindowManagerImpl;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -230,13 +231,11 @@ public class PhoneStatusBar extends BaseStatusBar {
     private final Animator.AnimatorListener mMakeIconsInvisible = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animation) {
-            mIcons.setVisibility(View.INVISIBLE);
-        }
-    };
-    private final Animator.AnimatorListener mMakeIconsVisible = new AnimatorListenerAdapter() {
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            mIcons.setVisibility(View.VISIBLE);
+            // double-check to avoid races
+            if (mIcons.getAlpha() == 0) {
+                Slog.d(TAG, "makeIconsInvisible");
+                mIcons.setVisibility(View.INVISIBLE);
+            }
         }
     };
 
@@ -968,11 +967,26 @@ public class PhoneStatusBar extends BaseStatusBar {
         if ((diff & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
             mIcons.animate().cancel();
             if ((state & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
-                mIcons.animate().alpha(0f).setStartDelay(100).setDuration(200).
-                        setListener(mMakeIconsInvisible).start();
+                if (mTicking) {
+                    mTicker.halt();
+                }
+                mIcons.animate()
+                    .alpha(0f)
+                    .translationY(mNaturalBarHeight*0.5f)
+                    //.setStartDelay(100)
+                    .setDuration(175)
+                    .setInterpolator(new DecelerateInterpolator(1.5f))
+                    .setListener(mMakeIconsInvisible)
+                    .start();
             } else {
-                mIcons.animate().alpha(1f).setStartDelay(0).setDuration(300).
-                        setListener(mMakeIconsVisible).start();
+                mIcons.setVisibility(View.VISIBLE);
+                mIcons.animate()
+                    .alpha(1f)
+                    .translationY(0)
+                    .setStartDelay(0)
+                    .setInterpolator(new DecelerateInterpolator(1.5f))
+                    .setDuration(175)
+                    .start();
             }
         }
 
