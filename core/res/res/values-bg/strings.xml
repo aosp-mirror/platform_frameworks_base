@@ -1103,13 +1103,6 @@
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; изпраща голям брой SMS съобщения. Искате ли да разрешите на това приложение да продължи да го прави?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Разрешаване"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Отказване"</string>
-    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Да се изпрати ли SMS до кратък код?"</string>
-    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Да се изпрати ли импулсен SMS?"</string>
-    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; иска да изпрати текстово съобщение до &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, което изглежда е кратък код на SMS.&lt;p&gt;Изпращането на съобщения до някои такива кодове може да доведе до таксуване на мобилната ви сметка за услуги, които се плащат допълнително.&lt;p&gt;Искате ли да разрешите на това приложение да изпрати съобщението?"</string>
-    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; иска да изпрати текстово съобщение до &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, което е кратък код за импулсен SMS.&lt;p&gt;&lt;b&gt;Изпращането до тази точка ще доведе до таксуване на мобилната ви сметка за услуги, които се плащат допълнително.&lt;/b&gt;&lt;p&gt;Искате ли да разрешите на това приложение да изпрати съобщението?"</string>
-    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Изпращане на съобщението"</string>
-    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Да не се изпраща"</string>
-    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Сигнал за злонам. приложение"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM картата е премахната"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Няма да имате достъп до мобилната мрежа, докато не рестартирате с поставена валидна SIM карта."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>

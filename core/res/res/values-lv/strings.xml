@@ -1103,13 +1103,6 @@
     <string name="sms_control_message" msgid="3867899169651496433">"Lietotne &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sūta daudz īsziņu. Vai vēlaties, lai šī lietotne turpinātu sūtīt ziņojumus?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Atļaut"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Aizliegt"</string>
-    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Vai sūtīt īsziņu uz īso kodu?"</string>
-    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Vai nosūtīt īpašo īsziņu?"</string>
-    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"Lietotne &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; vēlas nosūtīt īsziņu uz adresi &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, kas, iespējams, ir īsziņas īsais kods.&lt;p&gt;&lt;b&gt;Sūtot īsziņas uz dažiem īsajiem kodiem, no jūsu mobilā konta var tikt iekasēta maksa par paaugstinātas maksas pakalpojumiem.&lt;/b&gt;&lt;p&gt;Vai vēlaties atļaut šai lietotnei sūtīt šo ziņojumu?"</string>
-    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"Lietotne &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; vēlas nosūtīt īsziņu uz adresi &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, kas, iespējams, ir paaugstinātas maksas īsziņas īsais kods.&lt;p&gt;&lt;b&gt;Sūtot ziņojumu uz šo galamērķi, no jūsu mobilā konta tiks iekasēta maksa par paaugstinātas maksas pakalpojumiem.&lt;/b&gt;&lt;p&gt;Vai vēlaties atļaut šai lietotnei sūtīt šo ziņojumu?"</string>
-    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Sūtīt ziņojumu"</string>
-    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Nesūtīt"</string>
-    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Ziņot par ļaunprātīgu lietotni"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM karte ir izņemta."</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Mobilais tīkls nebūs pieejams līdz brīdim, kad restartēsiet ierīci ar ievietotu derīgu SIM karti."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Gatavs"</string>

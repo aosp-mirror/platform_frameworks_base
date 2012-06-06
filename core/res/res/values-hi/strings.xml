@@ -1103,13 +1103,6 @@
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; बड़ी संख्या में SMS संदेश भेज रहा है. क्या आप इस एप्लिकेशन को संदेश भेजना जारी रखने देना चाहते हैं?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"अनुमति दें"</string>
     <string name="sms_control_no" msgid="625438561395534982">"अस्वीकार करें"</string>
-    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"शॉर्ट कोड पर SMS भेजें?"</string>
-    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"प्रीमियम SMS भेजें?"</string>
-    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;, &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; को एक पाठ संदेश भेजना चाहता है, जो एक SMS शॉर्ट कोड लगता है.&lt;p&gt;कुछ शॉर्ट कोड को पाठ संदेश भेजने से आपके मोबाइल खाते पर प्रीमियम सेवाओं का शुल्क लिया जा सकता है.&lt;p&gt;क्या आप इस एप्लिकेशन को यह संदेश भेजने देना चाहते हैं?"</string>
-    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;, &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; को एक पाठ संदेश भेजना चाहता है, जो एक प्रीमियम SMS शॉर्ट कोड है.&lt;p&gt;&lt;b&gt;इस गंतव्य पर कोई संदेश भेजने से आपके मोबाइल खाते पर प्रीमियम सेवाओं का शुल्क लिया जाएगा.&lt;/b&gt;&lt;p&gt;क्या आप इस एप्लिकेशन को संदेश भेजने देना चाहते हैं?"</string>
-    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"संदेश भेजें"</string>
-    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"न भेजें"</string>
-    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"दुर्भावनापूर्ण एप्लि. की रिपोर्ट करें"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"सिमकार्ड निकाला गया"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"मान्‍य सि‍म कार्ड डालकर पुन: प्रारंभ करने तक मोबाइल नेटवर्क अनुपलब्‍ध रहेगा."</string>
     <string name="sim_done_button" msgid="827949989369963775">"पूर्ण"</string>

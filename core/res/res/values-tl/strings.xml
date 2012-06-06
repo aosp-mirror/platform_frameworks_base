@@ -194,43 +194,33 @@
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"palawakin/tiklupin ang status bar"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Pinapayagan ang app na palawakin o tiklupin ang status bar."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"baguhin ang ruta ng mga papalabas na tawag"</string>
-    <!-- no translation found for permdesc_processOutgoingCalls (5331318931937402040) -->
-    <skip />
+    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Pinapayagan ang app na magproseso ng mga papalabas na tawag at baguhin ang numerong ida-dial. Pinapayagan ng pahintulot na ito ang app na sumubaybay, mag-redirect, o pumigil ng mga papalabas na tawag."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"tumanggap ng mga text message (SMS)"</string>
-    <!-- no translation found for permdesc_receiveSms (6424387754228766939) -->
-    <skip />
+    <string name="permdesc_receiveSms" msgid="6424387754228766939">"Pinapayagan ang app na tumanggap at magproseso ng mga mensaheng SMS. Nangangahulugan ito na maaaring sumubaybay o magtanggal ang app ng mga mensaheng ipinapadala sa iyong device nang hindi ipinapakita ang mga ito sa iyo."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"tumanggap ng mga text message (MMS)"</string>
-    <!-- no translation found for permdesc_receiveMms (533019437263212260) -->
-    <skip />
+    <string name="permdesc_receiveMms" msgid="533019437263212260">"Pinapayagan ang app na tumanggap at magproseso ng mga mensaheng MMS. Nangangahulugan ito na maaaring sumubaybay o magtanggal ang app ng mga mensaheng ipinapadala sa iyong device nang hindi ipinapakita ang mga ito sa iyo."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"makatanggap ng mga emergency broadcast"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Pinapayagan ang app na tumanggap at magproseso ng mga mensahe ng broadcast na pang-emergency. Available lamang ang pahintulot na ito sa apps ng system."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"basahin ang mga mensahe ng cell broadcast"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Binibigyang-daan ang app na magbasa ng mga mensahe ng cell broadcast na natanggap ng iyong device. Inihahatid ang mga alerto ng cell broadcast sa ilang lokasyon upang balaan ka tungkol sa mga emergency na sitwasyon. Maaaring makaabala ang nakakahamak na apps sa pagganap o pagpapatakbo ng iyong device kapag nakatanggap ng emergency na cell broadcast."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"magpadala ng mga SMS na mensahe"</string>
-    <!-- no translation found for permdesc_sendSms (7094729298204937667) -->
-    <skip />
+    <string name="permdesc_sendSms" msgid="7094729298204937667">"Pinapayagan ang app na magpadala ng mga mensaheng SMS. Maaari itong magresulta sa mga hindi inaasahang pagsingil. Maaaring magpagastos sa iyo ng pera ang nakakahamak na apps sa pamamagitan ng pagpapadala ng mga mensahe nang wala ng iyong kumpirmasyon."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"magpadala ng mga SMS na mensahe nang walang pagkumpirma"</string>
-    <!-- no translation found for permdesc_sendSmsNoConfirmation (402569800862935907) -->
-    <skip />
+    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Pinapayagan ang app na magpadala ng mga mensaheng SMS. Maaari itong magresulta sa mga hindi inaasahang pagsingil. Maaaring magpagastos sa iyo ng pera ang nakakahamak na apps sa pamamagitan ng pagpapadala ng mga mensahe nang wala ng iyong kumpirmasyon."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"basahin ang iyong mga text message (SMS o MMS)"</string>
-    <!-- no translation found for permdesc_readSms (2467981548684735522) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (3695967533457240550) -->
-    <skip />
+    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Pinapayagan ang app na magbasa ng mga mensaheng SMS na naka-imbak sa iyong tablet o SIM card. Pinapayagan nito ang app na basahin ang lahat ng mensaheng SMS, ano pa man ang nilalaman at katayuan sa pagiging kumpedensyal ng mga ito."</string>
+    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Pinapayagan ang app na magbasa ng mga mensaheng SMS na naka-imbak sa iyong telepono o SIM card. Pinapayagan nito ang app na basahin ang lahat ng mensaheng SMS, ano pa man ang nilalaman at katayuan sa pagiging kumpedensyal ng mga ito."</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"i-edit ang iyong mga text message (SMS o MMS)"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Pinapayagan ang app na magsulat sa mga mensaheng SMS na nakaimbak sa iyong tablet o SIM card. Maaaring tanggalin ng nakakahamak na apps ang iyong mga mensahe."</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Pinapayagan ang app na magsulat sa mga mensaheng SMS na nakaimbak sa iyong telepono o SIM card. Maaaring tanggalin ng nakakahamak na apps ang iyong mga mensahe."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"tumanggap ng mga text message (WAP)"</string>
-    <!-- no translation found for permdesc_receiveWapPush (748232190220583385) -->
-    <skip />
+    <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Pinapayagan ang app na tumanggap at magproseso ng mga mensaheng WAP. Kabilang sa pahintulot na ito ang kakayahang sumubaybay o magtanggal ang app ng mga mensaheng ipinapadala sa iyo nang hindi ipinapakita ang mga ito sa iyo."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"bawiin ang tumatakbong apps"</string>
-    <!-- no translation found for permdesc_getTasks (7454215995847658102) -->
-    <skip />
+    <string name="permdesc_getTasks" msgid="7454215995847658102">"Pinapayagan ang app na kumuha ng impormasyon tungkol sa mga kasalukuyan at kamakailang gumaganang gawain. Maaari nitong payagan ang app na tumuklas ng impormasyon tungkol sa kung aling mga application ang ginagamit sa device."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"bawiin ang mga detalye ng gumaganang apps"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Binibigyang-daan ang app na bawiin ang detalyadong impormasyon tungkol sa mga kasalukuyan at kamakailang gumaganang gawain. Maaaring makatuklas ang nakakahamak na apps ng pribadong impormasyon tungkol sa iba pang apps."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"muling isaayos ang tumatakbong apps"</string>
-    <!-- no translation found for permdesc_reorderTasks (7734217754877439351) -->
-    <skip />
+    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Pinapayagan ang app na maglipat ng mga gawain sa foreground at background. Maaari itong gawin ng app nang wala ng iyong input."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"ihinto ang pagpapatakbo ng apps"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Pinapayagan ang app na mag-alis ng mga gawain at i-off ang apps nito. Maaaring maantala ng nakakahamak na apps ang pagkilos ng iba pang apps."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"magsimula ng anumang aktibidad"</string>
@@ -244,8 +234,7 @@
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"paganahin ang car mode"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Pinapayagan ang app na paganahin ang car mode."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"isara ang iba pang mga app"</string>
-    <!-- no translation found for permdesc_killBackgroundProcesses (4593353235959733119) -->
-    <skip />
+    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Pinapayagan ang app na tapusin ang mga proseso sa background ng iba pang apps. Maaari itong maging sanhi ng paghinto sa paggana ng iba pang apps."</string>
     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"puwersahang ihinto ang iba pang apps"</string>
     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Pinapayagan ang app na puwersahang ihinto ang iba pang apps."</string>
     <string name="permlab_forceBack" msgid="652935204072584616">"puwersahang isara ang app"</string>
@@ -279,8 +268,7 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"ipakita ang mga hindi pinahintulutang window"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Pinapayagan ang app na lumikha ng mga window na nakalaan upang gamitin ng user interface ng panloob na system. Hindi para sa paggamit ng normal na apps."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"gumuhit sa ibabaw ng ibang mga app"</string>
-    <!-- no translation found for permdesc_systemAlertWindow (4460454022797261814) -->
-    <skip />
+    <string name="permdesc_systemAlertWindow" msgid="4460454022797261814">"Pinapayagan ang app na magpakita ng mga window ng alerto sa system. Maaaring sakupin ng ilang window ng alerto ang buong screen."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"baguhin ang bilis ng global animation"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Pinapayagan ang app na baguhin ang bilis ng global animation (mas mabilis o mas mabagal na mga animation) anumang oras."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"pamahalaan ang mga token ng app"</string>
@@ -313,10 +301,8 @@
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"magpadala ng mga signal ng Linux sa apps"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Pinapayagan ang app na hilinging maipadala ang ibinigay na signal sa lahat ng nagpapatuloy na proseso."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"palaging patakbuhin ang app"</string>
-    <!-- no translation found for permdesc_persistentActivity (8525189272329086137) -->
-    <skip />
-    <!-- no translation found for permdesc_persistentActivity (4384760047508278272) -->
-    <skip />
+    <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Pinapayagan ang app na panatilihin ang ilang bahagi nito sa memory. Maaari nitong limitahan ang memory na available sa iba pang apps na nagpapabagal sa tablet."</string>
+    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Pinapayagan ang app na panatilihin ang ilang bahagi nito sa memory. Maaari nitong limitahan ang memory na available sa iba pang apps na nagpapabagal sa telepono."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"tanggalin ang apps"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Pinapayagan ang app na tanggalin ang mga package ng Android. Maaari itong gamitin ng nakakahamak na apps upang magtanggal ng mahahalagang apps."</string>
     <string name="permlab_clearAppUserData" msgid="274109191845842756">"tanggalin ang data ng iba pang apps"</string>
@@ -356,82 +342,55 @@
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Pinapayagan ang app na mapasimula ang sarili nito sa sandaling matapos ang system sa pag-boot. Maaari nitong gawing mas matagal upang simulan ang tablet at pinapayagan ang app na pabagalin ang buong tablet sa pamamagitan ng palaging pagtakbo."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Pinapayagan ang app na mapasimula ang sarili nito sa sandaling matapos ang system sa pag-boot. Maaari nitong gawing mas matagal upang simulan ang telepono at pinapayagan ang app na pabagalin ang buong telepono sa pamamagitan ng palaging pagtakbo."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"magpadala ng sticky na pag-broadcast"</string>
-    <!-- no translation found for permdesc_broadcastSticky (7749760494399915651) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastSticky (2825803764232445091) -->
-    <skip />
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Pinapayagan ang app na magpadala ng mga sticky na pag-broadcast, na nananatili pagkatapos ng pag-broadcast. Maaaring pabagalin o gawing hindi matatag ng labis na paggamit ang tablet sa pamamagitan ng pagdulot dito na gumamit ng masyadong maraming memory."</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Pinapayagan ang app na magpadala ng mga sticky na pag-broadcast, na nananatili pagkatapos ng pag-broadcast. Maaaring pabagalin o gawing hindi matatag ng labis na paggamit ang telepono sa pamamagitan ng pagdulot dito na gumamit ng masyadong maraming memory."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"basahin ang iyong mga contact"</string>
-    <!-- no translation found for permdesc_readContacts (5294866856941149639) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (8440654152457300662) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Pinapayagan ang app na magbasa ng data tungkol sa mga contact na naka-imbak sa iyong tablet, kabilang ang dalas kung kailan ka tumawag, nag-email, o nakipag-ugnayan sa iba pang mga paraan sa mga tukoy na indibidwal. Pinapayagan ng pahintulot na ito ang apps na i-save ang data ng iyong contact, at maaaring magbahagi ang nakakahamak na apps ng data ng contact nang hindi mo nalalaman."</string>
+    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Pinapayagan ang app na magbasa ng data tungkol sa mga contact na naka-imbak sa iyong telepono, kabilang ang dalas kung kailan ka tumawag, nag-email, o nakipag-ugnayan sa iba pang mga paraan sa mga tukoy na indibidwal. Pinapayagan ng pahintulot na ito ang apps na i-save ang data ng iyong contact, at maaaring magbahagi ang nakakahamak na apps ng data ng contact nang hindi mo nalalaman."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"baguhin ang iyong mga contact"</string>
-    <!-- no translation found for permdesc_writeContacts (897243932521953602) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (589869224625163558) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Pinapayagan ang app na baguhin ang data tungkol sa iyong mga contact na naka-imbak sa iyong tablet, kabilang ang dalas kung kailan ka tumawag, nag-email, o nakipag-ugnayan sa iba pang mga paraan sa mga tukoy na contact. Pinapayagan ng pahintulot na ito ang apps na magtanggal ng data ng contact."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Pinapayagan ang app na baguhin ang data tungkol sa iyong mga contact na naka-imbak sa iyong telepono, kabilang ang dalas kung kailan ka tumawag, nag-email, o nakipag-ugnayan sa iba pang mga paraan sa mga tukoy na contact. Pinapayagan ng pahintulot na ito ang apps na magtanggal ng data ng contact."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"basahin ang log ng tawag"</string>
-    <!-- no translation found for permdesc_readCallLog (3700645184870760285) -->
-    <skip />
-    <!-- no translation found for permdesc_readCallLog (5777725796813217244) -->
-    <skip />
+    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Pinapayagan ang app na basahin ang log ng tawag ng iyong tablet, kabilang ang data tungkol sa mga papasok o papalabas na tawag. Pinapayagan ng pahintulot na ito ang apps na i-save ang iyong data ng log ng tawag, at maaaring magbahagi ang nakakahamak na apps ng data ng log ng tawag nang hindi mo nalalaman."</string>
+    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Pinapayagan ang app na basahin ang log ng tawag ng iyong telepono, kabilang ang data tungkol sa mga papasok o papalabas na tawag. Pinapayagan ng pahintulot na ito ang apps na i-save ang iyong data ng log ng tawag, at maaaring magbahagi ang nakakahamak na apps ng data ng log ng tawag nang hindi mo nalalaman."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"isulat ang log ng tawag"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Binibigyan-daan ang app na baguhin ang log ng tawag ng iyong tablet, kabilang ang data tungkol sa mga paparating at papalabas na tawag. Maaari itong gamitin ng nakakahamak na apps upang burahin o baguhin ang iyong log ng tawag."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Binibigyan-daan ang app na baguhin ang log ng tawag ng iyong telepono, kabilang ang data tungkol sa mga paparating at papalabas na tawag. Maaari itong gamitin ng nakakahamak na apps upang burahin o baguhin ang iyong log ng tawag."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"basahin sarili mo contact card"</string>
-    <!-- no translation found for permdesc_readProfile (5462475151849888848) -->
-    <skip />
+    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Pinapayagan ang app na basahin ang personal na impormasyon ng profile na naka-imbak sa iyong device, gaya ng iyong pangalan at impormasyon sa pakikipag-ugnay. Nangangahulugan ito na makikilala ka ng app at maaari nitong ipadala ang impormasyon ng iyong profile sa iba."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"baguhin sarili mo contact card"</string>
-    <!-- no translation found for permdesc_writeProfile (5552084294598465899) -->
-    <skip />
+    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Pinapayagan ang app na baguhin ang o magdagdag sa personal na impormasyon ng profile na naka-imbak sa iyong device, gaya ng iyong pangalan at impormasyon sa pakikipag-ugnay. Nangangahulugan ito na makikilala ka ng app at maaari nitong ipadala ang impormasyon ng iyong profile sa iba."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"basahin ang iyong social stream"</string>
-    <!-- no translation found for permdesc_readSocialStream (4255706027172050872) -->
-    <skip />
+    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Pinapayagan ang app na mag-access at mag-sync ng mga social na update mula sa iyo at sa iyong mga kaibigan. Maging maingat kapag nagbabahagi ng impormasyon -- pinapayagan nito ang app na magbasa ng mga pakikipag-ugnayan sa pagitan mo at ng iyong mga kaibigan sa mga social network, ano pa man ang katayuan sa pagiging kumpedensyal nito. Tandaan: hindi maaaring ipatupad ang pahintulot na ito sa lahat ng social network."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"magsulat sa iyong social stream"</string>
-    <!-- no translation found for permdesc_writeSocialStream (3086557552204114849) -->
-    <skip />
+    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Pinapayagan ang app na magpakita ng mga social na update mula sa iyong mga kaibigan. Maging maingat kapag nagbabahagi ng impormasyon -- pinapayagan nito ang app na bumuo ng mga mensaheng maaaring lumitaw na mula sa isang kaibigan. Tandaan: hindi maaaring ipatupad ang pahintulot na ito sa lahat ng social network."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"magbasa ng mga kaganapan sa kalendaryo kasama ang kumpedensyal na impormasyon"</string>
-    <!-- no translation found for permdesc_readCalendar (4216462049057658723) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (7434548682470851583) -->
-    <skip />
+    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Pinapayagan ang app na basahin ang lahat ng kaganapan sa kalendaryo na naka-imbak sa iyong tablet, kabilang iyong sa mga kaibigan o katrabaho. Maaari nitong payagan ang app na ibahagi o i-save ang data ng iyong kalendaryo, ano pa man ang katayuan ng pagiging kumpedensyal o sensitibo nito."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Pinapayagan ang app na basahin ang lahat ng kaganapan sa kalendaryo na naka-imbak sa iyong telepono, kabilang iyong sa mga kaibigan o katrabaho. Maaari nitong payagan ang app na ibahagi o i-save ang data ng iyong kalendaryo, ano pa man ang katayuan ng pagiging kumpedensyal o sensitibo nito."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"magdagdag o magbago ng mga kaganapan sa kalendaryo at magpadala ng email sa mga bisita nang hindi nalalaman ng mga may-ari"</string>
-    <!-- no translation found for permdesc_writeCalendar (6679035520113668528) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (2324469496327249376) -->
-    <skip />
+    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Pinapayagan ang app na magdagdag, mag-alis, magbago ng mga kaganapang maaari mong baguhin sa iyong tablet, kabilang iyong sa mga kaibigan o katrabaho. Maaari nitong payagan ang app na magpadala ng mga mensaheng lumililitaw na mula sa mga may-ari ng kalendaryo, o magbago ng mga kaganapan nang hindi nalalaman ng mga may-ari."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Pinapayagan ang app na magdagdag, mag-alis, magbago ng mga kaganapang maaari mong baguhin sa iyong telepono, kabilang iyong sa mga kaibigan o katrabaho. Maaari nitong payagan ang app na magpadala ng mga mensaheng lumililitaw na mula sa mga may-ari ng kalendaryo, o magbago ng mga kaganapan nang hindi nalalaman ng mga may-ari."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"gayahin ang mga pinagmumulan ng lokasyon para sa pagsusuri"</string>
-    <!-- no translation found for permdesc_accessMockLocation (5808711039482051824) -->
-    <skip />
+    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Lumikha ng mga mock na pinagmulan ng lokasyon para sa pagsubok o mag-install ng bagong provider ng lokasyon. Pinapayagan nito ang app na i-override ang lokasyon at/o katayuan na ibinabalik ng iba pang mga pinagmulan ng lokasyon gaya ng GPS o mga provider ng lokasyon."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"i-access ang mga dagdag na command ng provider ng lokasyon"</string>
-    <!-- no translation found for permdesc_accessLocationExtraCommands (5945166642335800763) -->
-    <skip />
+    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Pinapayagan ang app na mag-access ng mga dagdag na command ng provider ng lokasyon. Maaari nitong payagan ang app na gambalain ang pagpapatakbo ng GPS o ng iba pang mga pinagmulan ng lokasyon."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"pahintulot na mag-install ng provider ng lokasyon"</string>
-    <!-- no translation found for permdesc_installLocationProvider (9066146120470591509) -->
-    <skip />
-    <!-- no translation found for permlab_accessFineLocation (5885550969882561436) -->
-    <skip />
-    <!-- no translation found for permdesc_accessFineLocation (8960597421469894181) -->
-    <skip />
-    <!-- no translation found for permdesc_accessFineLocation (239268765496141815) -->
-    <skip />
-    <!-- no translation found for permlab_accessCoarseLocation (7422827215441638984) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (5383798877137640762) -->
-    <skip />
+    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Lumikha ng mga mock na pinagmulan ng lokasyon o mag-install ng bagong provider ng lokasyon. Pinapayagan nito ang app na i-override ang lokasyon at/o katayuan na ibinabalik ng iba pang mga pinagmulan ng lokasyon gaya ng GPS o mga provider ng lokasyon."</string>
+    <string name="permlab_accessFineLocation" msgid="5885550969882561436">"tumpak (GPS) na lokasyon"</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="8960597421469894181">"Mag-access ng mga tumpak na pinagmulan ng lokasyon gaya ng Global Positioning System sa tablet. Kapag available at naka-on ang mga serbisyo ng lokasyon, pinapayagan ng pahintulot na ito ang app na tukuyin ang iyong tumpak na lokasyon."</string>
+    <string name="permdesc_accessFineLocation" product="default" msgid="239268765496141815">"Mag-access ng mga tumpak na pinagmulan ng lokasyon gaya ng Global Positioning System sa telepono. Kapag available at naka-on ang mga serbisyo ng lokasyon, pinapayagan ng pahintulot na ito ang app na tukuyin ang iyong tumpak na lokasyon."</string>
+    <string name="permlab_accessCoarseLocation" msgid="7422827215441638984">"tinatantya (network-based) na lokasyon"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="5383798877137640762">"Mag-access ng tinatantyang lokasyon mula sa mga provider ng lokasyon gamit ang mga pinagmumulan ng network gaya ng cell tower at Wi-Fi. Kapag available at naka-on ang mga serbisyo ng lokasyon na ito, pinapayagan ng pahintulot na ito ang app na tukuyin ang iyong tinatantyang lokasyon."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"i-access ang SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Pinapayagan ang app na gamitin ang mababang antas na mga tampok ng SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"basahin ang buffer ng frame"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Pinapayagan ang app na basahin ang nilalaman ng buffer ng frame."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"baguhin ang mga setting ng iyong audio"</string>
-    <!-- no translation found for permdesc_modifyAudioSettings (3522565366806248517) -->
-    <skip />
+    <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Pinapayagan ang app na baguhin ang mga pandaigdigang setting ng audio gaya ng volume at kung aling speaker ang ginagamit para sa output."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"mag-record ng audio"</string>
-    <!-- no translation found for permdesc_recordAudio (4906839301087980680) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Pinapayagan ang app na mag-record ng audio gamit ang mikropono. Pinapayagan ng pahintulot na ito ang app na mag-record ng audio anumang oras nang wala ng iyong kumpirmasyon."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"kumuha ng mga larawan at video"</string>
-    <!-- no translation found for permdesc_camera (8497216524735535009) -->
-    <skip />
+    <string name="permdesc_camera" msgid="8497216524735535009">"Pinapayagan ang app na kumuha ng mga larawan at video gamit ang camera. Pinapayagan ng pahintulot na ito ang app na gamitin ang camera anumang oras nang wala ng iyong kumpirmasyon."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"permanenteng huwag paganahin ang tablet"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"permanenteng huwag paganahin ang telepono"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Pinapayagan ang app na huwag paganahin nang permanente ang buong tablet. Lubos itong mapanganib."</string>
@@ -467,8 +426,7 @@
     <string name="permlab_hardware_test" msgid="4148290860400659146">"subukan ang hardware"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Pinapayagan ang app na kontrolin ang iba\'t ibang mga peripheral para sa layunin ng pagsubok sa hardware."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"direktang tawagan ang mga numero ng telepono"</string>
-    <!-- no translation found for permdesc_callPhone (3740797576113760827) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="3740797576113760827">"Pinapayagan ang app na tumawag sa mga numero ng telepono nang wala ng iyong panghihimasok. Maaari itong magresulta sa mga hindi inaasahang pagsingil o tawag. Tandaan na hindi nito pinapayagan ang app na tumawag sa mga numerong pang-emergency. Maaaring magpagastos sa iyo ng pera ang nakakahamak na apps sa pamamagitan ng pagtawag nang wala ng iyong kumpirmasyon."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"direktang tawagan ang anumang numero ng telepono"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Pinapayagan ang app na tumawag sa anumang numero ng telepono, kabilang ang mga numerong pang-emergency, nang wala ang iyong pamamagitan. Maaaring magsagawa ang nakakahamak na apps ng hindi kinakailangan at hindi legal na mga tawag sa mga serbisyong pang-emergency."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"direktang simulan ang setup ng CDMA tablet"</string>
@@ -483,8 +441,7 @@
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"baguhin ang katayuan ng telepono"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Pinapayagan ang app na kontrolin ang mga tampok ng telepono ng device. Maaaring lumipat ng mga network ang isang app na mayroong ganitong pahintulot, i-on o i-off ang radyo ng telepono at mga kaparehong bagay nang hindi ka nano-notify."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"basahin ang katayuan at pagkakakilanlan ng telepono"</string>
-    <!-- no translation found for permdesc_readPhoneState (1639212771826125528) -->
-    <skip />
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Pinapayagan ang app na i-access ang mga tampok ng telepono ng device. Pinapayagan ng pahintulot na ito ang app na tukuyin ang numero ng telepono at  mga ID ng device, kung aktibo man ang isang tawag, at ang malayuang numerong ikinonekta ng isang tawag."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"pigilan ang tablet mula sa pag-sleep"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"pigilan ang telepono mula sa paghinto"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Pinapayagan ang app na pigilan ang tablet mula sa pag-sleep."</string>
@@ -511,10 +468,8 @@
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"gumanap bilang AccountManagerService"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Pinapayagan ang app na tumawag sa AccountAuthenticators."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"maghanap ng mga account sa device"</string>
-    <!-- no translation found for permdesc_getAccounts (2741496534769660027) -->
-    <skip />
-    <!-- no translation found for permdesc_getAccounts (3448316822451807382) -->
-    <skip />
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Pinapayagan ang app na kunin ang listahan ng mga account na alam ng tablet. Maaari itong kabilangan ng anumang mga account na nililikha ng mga application na iyong na-install."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Pinapayagan ang app na kunin ang listahan ng mga account na alam ng telepono. Maaari itong kabilangan ng anumang mga account na nililikha ng mga application na iyong na-install."</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"lumikha ng mga account at magtakda ng mga password"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Pinapayagan ang app na gamitin ang mga kakayahan ng tagapagpatunay ng account ng AccountManager, kabilang ang paglikha ng mga account at pagkuha at pagtatakda ng mga password ng mga ito."</string>
     <string name="permlab_manageAccounts" msgid="4983126304757177305">"magdagdag o mag-alis ng mga account"</string>
@@ -522,12 +477,9 @@
     <string name="permlab_useCredentials" msgid="235481396163877642">"gamitin ang mga account sa device"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Pinapayagan ang app na humiling ng mga token sa pagpapatotoo."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"tingnan ang mga koneksyon sa network"</string>
-    <!-- no translation found for permdesc_accessNetworkState (8318964424675960975) -->
-    <skip />
-    <!-- no translation found for permlab_createNetworkSockets (8018758136404323658) -->
-    <skip />
-    <!-- no translation found for permdesc_createNetworkSockets (3403062187779724185) -->
-    <skip />
+    <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Pinapayagan ang app na tumingin ng impormasyon tungkol sa mga koneksyon ng network gaya ng kung aling mga network ang umiiral at nakakonekta."</string>
+    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"ganap na access sa network"</string>
+    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Pinapayagan ang app na lumikha ng mga network socket at gumamit ng mga custom na network protocol. Nagbibigay ang browser at iba pang mga application ng mga paraan ng pagpapadala ng data sa internet, kaya hindi kinakailangan ang pahintulot na ito upang magpadala ng data sa internet."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"baguhin/harangin ang mga setting ng network at trapiko"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Pinapayagan ang app na baguhin ang mga setting ng network at antalahin at suriin ang lahat ng trapiko ng network, halimbawa upang baguhin ang proxy at port ng anumang APN. Maaaring subaybayan, i-redirect, o baguhin ng nakakahamak na apps ang mga network packet nang hindi mo alam."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"baguhin ang pagkakakonekta ng network"</string>
@@ -537,63 +489,45 @@
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"baguhin ang setting ng paggamit ng data ng background"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Pinapayagan ang app na baguhin ang setting ng paggamit ng data sa background."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"tingnan ang mga koneksyon sa Wi-Fi"</string>
-    <!-- no translation found for permdesc_accessWifiState (5002798077387803726) -->
-    <skip />
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Pinapayagan ang app na tumingin ng impormasyon tungkol sa Wi-Fi networking, gaya ng kung pinapagana ang Wi-Fi at pangalan ng mga nakakonektang Wi-Fi device."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"kumonekta at magdiskonekta mula sa Wi-Fi"</string>
-    <!-- no translation found for permdesc_changeWifiState (7137950297386127533) -->
-    <skip />
+    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Pinapayagan ang app na kumonekta sa at magdiskonekta mula sa mga Wi-Fi access point at na gumawa ng mga pagbabago sa configuration ng device para sa mga Wi-Fi network."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"payagan ang pagtanggap ng Wi-Fi Multicast"</string>
-    <!-- no translation found for permdesc_changeWifiMulticastState (7969774021256336548) -->
-    <skip />
-    <!-- no translation found for permdesc_changeWifiMulticastState (6851949706025349926) -->
-    <skip />
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Pinapayagan ang app na tumanggap ng mga packet na ipinapadala sa lahat ng device sa isang Wi-Fi network gamit ang mga multicast na address, hindi lang sa iyong tablet. Gumagamit ito ng higit na power kaysa sa mode na hindi multicast."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Pinapayagan ang app na tumanggap ng mga packet na ipinapadala sa lahat ng device sa isang Wi-Fi network gamit ang mga multicast na address, hindi lang sa iyong telepono. Gumagamit ito ng higit na power kaysa sa mode na hindi multicast."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"I-access ang mga setting ng Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Pinapayagan ang app na i-configure ang lokal na Bluetooth tablet, at tumuklas ng at ipares sa mga malayuang device."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Pinapayagan ang app na i-configure ang lokal na Bluetooth na telepono, at tumuklas ng at ipares sa mga malayuang device."</string>
     <string name="permlab_accessWimaxState" msgid="7436749103151096452">"Tingnan ang mga WiMAX na koneksyon"</string>
-    <!-- no translation found for permdesc_accessWimaxState (6360102877261978887) -->
-    <skip />
+    <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Pinapayagan ang app na tukuyin kung pinapagana ang WiMAX at impormasyon tungkol sa anumang mga WiMAX network na nakakonekta."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Baguhin ang katayuan ng WiMAX"</string>
-    <!-- no translation found for permdesc_changeWimaxState (3156456504084201805) -->
-    <skip />
-    <!-- no translation found for permdesc_changeWimaxState (697025043004923798) -->
-    <skip />
+    <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Pinapayagan ang app na ikonekta ang tablet at idiskonekta ang tablet mula sa mga WiMAX network."</string>
+    <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Pinapayagan ang app na ikonekta ang telepono at idiskonekta ang telepono mula sa mga WiMAX network."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"ipares sa mga Bluetooth device"</string>
-    <!-- no translation found for permdesc_bluetooth (3480722181852438628) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth (3207106324452312739) -->
-    <skip />
+    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Pinapayagan ang app na tingnan ang configuration ng Bluetooth sa tablet, at na gumawa at tumanggap ng mga koneksyong may mga nakapares na device."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Pinapayagan ang app na tingnan ang configuration ng Bluetooth sa telepono, at na gumawa at tumanggap ng mga koneksyong may mga nakapares na device."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kontrolin ang Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Pinapayagan ang app na makipag-ugnay sa Near Field Communication (NFC) na mga tag, card, at reader."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"huwag paganahin ang iyong lock ng screen"</string>
-    <!-- no translation found for permdesc_disableKeyguard (6034203065077122992) -->
-    <skip />
+    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Pinapayagan ang app na huwag paganahin ang keylock at anumang nauugnay na seguridad sa password. Halimbawa, hindi pinapagana ng telepono ang keylock kapag nakakatanggap ng papasok na tawag sa telepono, pagkatapos ay muling pinapagana ang keylock kapag tapos na ang tawag."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"basahin ang mga setting ng sync"</string>
-    <!-- no translation found for permdesc_readSyncSettings (2706745674569678644) -->
-    <skip />
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Pinapayagan ang app na basahin ang mga setting ng pag-sync para sa isang account. Halimbawa, matutukoy nito kung naka-sync ang app na Mga Tao sa isang account."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"I-toggle on at off ang pag-sync"</string>
-    <!-- no translation found for permdesc_writeSyncSettings (8956262591306369868) -->
-    <skip />
+    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Pinapayagan ang isang app na baguhin ang mga setting ng pag-sync para sa isang account. Halimbawa, magagamit ito upang paganahin ang pag-sync ng app na Mga Tao sa isang account."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"basahin ang mga istatistika ng sync"</string>
-    <!-- no translation found for permdesc_readSyncStats (1510143761757606156) -->
-    <skip />
+    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Pinapayagan ang app na basahin ang mga istatistika ng pag-sync para sa isang account, kabilang ang kasaysayan ng mga kaganapan sa pag-sync at kung ilang data ang naka-sync."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"magbasa ng mga na-subscribe na feed"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Pinapayagan ang app na kumuha ng mga detalye tungkol sa kasalukuyang naka-sync na mga feed."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"sumulat ng mga naka-subscribe na feed"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Pinapayagan ang app na baguhin ang iyong kasalukuyang na-sync na mga feed. Maaaring baguhin ng nakakahamak na apps ang iyong na-sync na mga feed."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"basahin ang mga terminong idinagdag mo sa diksyunaryo"</string>
-    <!-- no translation found for permdesc_readDictionary (659614600338904243) -->
-    <skip />
+    <string name="permdesc_readDictionary" msgid="659614600338904243">"Pinapayagan ang app na basahin ang lahat ng salita, pangalan at parirala na maaaring inimbak ng user sa diksyunaryo ng user."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"magsulat sa diksyunaryong tinukoy ng user"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Pinapayagan ang app na magsulat ng mga bagong salita sa diksyunaryo ng user."</string>
-    <!-- no translation found for permlab_sdcardRead (8235341515605559677) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8235341515605559677) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (5791957130190763289) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (5914402684685848828) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"subukan ang access sa pinoprotektahang storage"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"subukan ang access sa pinoprotektahang storage"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Pinapayagan ang app na subukan ang isang pahintulot para sa USB storage na magiging availabe sa mga device sa hinaharap."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Pinapayagan ang app na subukan ang isang pahintulot para sa SD card na magiging available sa mga device sa hinaharap."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"bago tanggal laman USB storage"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"baguhin o tanggalin ang mga nilalaman ng iyong SD card"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Pinapayagan ang app na magsulat sa USB storage."</string>
@@ -850,13 +784,10 @@
     <string name="autofill_area" msgid="3547409050889952423">"Lugar"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emirate"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"basahin ang iyong mga bookmark at kasaysayan sa Web"</string>
-    <!-- no translation found for permdesc_readHistoryBookmarks (8462378226600439658) -->
-    <skip />
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Pinapayagan ang app na basahin ang kasaysayan ng lahat ng URL na binisita ng Browser, at lahat ng bookmark ng Browser. Tandaan: hindi maaaring ipatupad ang pahintulot na ito ng mga third-party na browser o iba pang mga application na may mga kakayahan sa pagba-browse sa web."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"magsulat ng mga bookmark at kasaysayan sa web"</string>
-    <!-- no translation found for permdesc_writeHistoryBookmarks (6825527469145760922) -->
-    <skip />
-    <!-- no translation found for permdesc_writeHistoryBookmarks (8497389531014185509) -->
-    <skip />
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Pinapayagan ang app na baguhin ang kasaysayan o mga bookmark ng Browser na naka-imbak sa iyong tablet. Maaari nitong payagan ang app na burahin o baguhin ang data ng Browser. Tandaan: hindi maaaring ipatupad ang pahintulot na ito ng mga third-party na browser o iba pang mga application na may mga kakayahan sa pagba-browse sa web."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Pinapayagan ang app na baguhin ang kasaysayan o mga bookmark ng Browser na naka-imbak sa iyong telepono. Maaari nitong payagan ang app na burahin o baguhin ang data ng Browser. Tandaan: hindi maaaring ipatupad ang pahintulot na ito ng mga third-party na browser o iba pang mga application na may mga kakayahan sa pagba-browse sa web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"magtakda ng alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Pinapayagan ang app na magtakda ng alarm sa isang naka-install na app ng alarm clock. Maaaring hindi ipatupad ng ilang apps ng alarm clock ang tampok na ito."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"magdagdag ng voicemail"</string>
@@ -1103,13 +1034,6 @@
     <string name="sms_control_message" msgid="3867899169651496433">"Ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ay nagpapadala ng maraming mensaheng SMS. Gusto mo bang payagan ang app na ito na magpatuloy sa pagpapadala ng mga mensahe?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Payagan"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Tanggihan"</string>
-    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Magpadala SMS sa short code?"</string>
-    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Ipadala ang premium na SMS?"</string>
-    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"Ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ay gustong magpadala ng text message sa &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, na lumilitaw na isang SMS na short code.&lt;p&gt;Ang pagpapadala ng mga text message sa ilang short code ay maaaring magdulot ng pagsingil sa iyong mobile account para sa mga premium na serbisyo.&lt;p&gt;Gusto mo bang payagan ang app na ito na ipadala ang mensahe?"</string>
-    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"Ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ay gustong magpadala ng text message sa &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, na isang premium na SMS na short code.&lt;p&gt;&lt;b&gt;Ang pagpapadala ng mensahe sa patutunguhang ito ay magdudulot ng pagsingil sa iyong mobile account para sa mga premium na serbisyo.&lt;/b&gt;&lt;p&gt;Gusto mo bang payagan ang app na ito na ipadala ang mensahe?"</string>
-    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Ipadala ang mensahe"</string>
-    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Huwag ipadala"</string>
-    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Mag-ulat ng nakakapahamak na app"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Naalis ang SIM card"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Hindi magiging available ang mobile network hanggang mag-restart ka gamit ang isang may-bisang SIM card"</string>
     <string name="sim_done_button" msgid="827949989369963775">"Tapos na"</string>
@@ -1195,10 +1119,8 @@
     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Pinapayagan ang app na baguhin ang nakolektang mga istatistika ng paggamit ng bahagi. Hindi para sa paggamit ng normal na apps."</string>
     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"kopyahin ang nilalaman"</string>
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Pinapayagan ang app na i-apela ang default na serbisyo ng container upang kopyahin ang nilalaman. Hindi para sa paggamit ng normal na apps."</string>
-    <!-- no translation found for permlab_route_media_output (1642024455750414694) -->
-    <skip />
-    <!-- no translation found for permdesc_route_media_output (4932818749547244346) -->
-    <skip />
+    <string name="permlab_route_media_output" msgid="1642024455750414694">"I-route ang output ng media"</string>
+    <string name="permdesc_route_media_output" msgid="4932818749547244346">"Pinapayagan ang application na mag-route ng output ng media sa iba pang mga panlabas na device."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Pindutin nang dalawang beses para sa pagkontrol ng zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Hindi maidagdag ang widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Pumunta"</string>
@@ -1361,16 +1283,10 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Tanggapin ang tawag?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Palagi"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Isang beses lang"</string>
-    <!-- no translation found for default_audio_route_name (6890731863195399186) -->
-    <skip />
-    <!-- no translation found for default_audio_route_name (4551396562363128432) -->
-    <skip />
-    <!-- no translation found for default_audio_route_name_headphones (8119971843803439110) -->
-    <skip />
-    <!-- no translation found for default_audio_route_name_dock_speakers (6240602982276591864) -->
-    <skip />
-    <!-- no translation found for default_audio_route_name_hdmi (7986404173839007682) -->
-    <skip />
-    <!-- no translation found for default_audio_route_category_name (3722811174003886946) -->
-    <skip />
+    <string name="default_audio_route_name" product="tablet" msgid="6890731863195399186">"Mga speaker ng tablet"</string>
+    <string name="default_audio_route_name" product="default" msgid="4551396562363128432">"Speaker ng telepono"</string>
+    <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Mga Headphone"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Mga speaker ng dock"</string>
+    <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"HDMI audio"</string>
+    <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
 </resources>

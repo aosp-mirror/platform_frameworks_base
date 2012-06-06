@@ -890,9 +890,9 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Maak navraag skoon"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Dien navraag in"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Stemsoektog"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Wil jy Ontek-met-raak aktiveer?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> wil Ontdek-met-raak aktiveer. Wanneer Ontek-met-raak aangeskakel is, kan jy beskrywings van wat onder jou vinger is hoor of sien, of jy kan gebare uitvoer om interaksie met die tablet te hê."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> wil Ontdek-met-raak aktiveer. Wanneer Ontek-met-raak aangeskakel is, kan jy beskrywings van wat onder jou vinger is hoor of sien, of jy kan gebare uitvoer om interaksie met die foon te hê ."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Wil jy Verken-met-raak aktiveer?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> wil Verken-met-raak aktiveer. Wanneer Verken-met-raak aangeskakel is, kan jy beskrywings van wat onder jou vinger is hoor of sien, of jy kan gebare uitvoer om interaksie met die tablet te hê."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> wil Verken-met-raak aktiveer. Wanneer Verken-met-raak aangeskakel is, kan jy beskrywings van wat onder jou vinger is hoor of sien, of jy kan gebare uitvoer om interaksie met die foon te hê ."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 maand gelede"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Voor 1 maand gelede"</string>
   <plurals name="num_seconds_ago">
@@ -1103,13 +1103,6 @@
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; stuur \'n groot aantal SMS-boodskappe. Wil jy hierdie program toelaat om voort te gaan om boodskappe te stuur?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Laat toe"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Weier"</string>
-    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Stuur SMS na kortkode?"</string>
-    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Stuur \'n premium-SMS?"</string>
-    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; wil graag \'n SMS stuur aan &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, wat lyk asof dit \'n SMS-kortkode is.&lt;p&gt;Die stuur van SMS\'e na sommige kortkodes kan veroorsaak dat jou selfoonrekening gedebiteer word vir premiumdienste.&lt;p&gt;Wil jy hierdie program toelaat om die boodskap te stuur?"</string>
-    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; wil graag \'n SMS stuur aan &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, wat \'n betaalde SMS-kortkode is.&lt;p&gt;&lt;b&gt;As jy \'n boodskap na hierdie bestemming stuur, sal jou selfoonrekening gedebiteer word vir betaalde dienste.&lt;/b&gt;&lt;p&gt;Wil jy hierdie program toelaat om die boodskap te stuur?"</string>
-    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Stuur boodskap"</string>
-    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Moenie stuur nie"</string>
-    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Gee kwaadwillige program aan"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kaart verwyder"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Die mobielnetwerk sal nie beskikbaar wees nie totdat jy weer begin met \'n geldige SIM-kaart."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Klaar"</string>
