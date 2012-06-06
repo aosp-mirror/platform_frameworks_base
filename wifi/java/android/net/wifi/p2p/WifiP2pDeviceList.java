@@ -19,6 +19,7 @@ package android.net.wifi.p2p;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.net.wifi.p2p.WifiP2pDevice;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -84,10 +85,21 @@ public class WifiP2pDeviceList implements Parcelable {
     }
 
     /** @hide */
-    public void updateStatus(String deviceAddress, int status) {
-        if (deviceAddress == null) return;
+    public void updateGroupCapability(String deviceAddress, int groupCapab) {
+        if (TextUtils.isEmpty(deviceAddress)) return;
         WifiP2pDevice d = mDevices.get(deviceAddress);
-        d.status = status;
+        if (d != null) {
+            d.groupCapability = groupCapab;
+        }
+    }
+
+    /** @hide */
+    public void updateStatus(String deviceAddress, int status) {
+        if (TextUtils.isEmpty(deviceAddress)) return;
+        WifiP2pDevice d = mDevices.get(deviceAddress);
+        if (d != null) {
+            d.status = status;
+        }
     }
 
     /** @hide */

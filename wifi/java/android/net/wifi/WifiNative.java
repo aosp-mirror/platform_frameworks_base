@@ -640,6 +640,27 @@ public class WifiNative {
         return "";
     }
 
+    public int getGroupCapability(String deviceAddress) {
+        int gc = 0;
+        if (TextUtils.isEmpty(deviceAddress)) return gc;
+        String peerInfo = p2pPeer(deviceAddress);
+        if (TextUtils.isEmpty(peerInfo)) return gc;
+
+        String[] tokens = peerInfo.split("\n");
+        for (String token : tokens) {
+            if (token.startsWith("group_capab=")) {
+                String[] nameValue = token.split("=");
+                if (nameValue.length != 2) break;
+                try {
+                    return Integer.decode(nameValue[1]);
+                } catch(NumberFormatException e) {
+                    return gc;
+                }
+            }
+        }
+        return gc;
+    }
+
     public String p2pPeer(String deviceAddress) {
         return doStringCommand("P2P_PEER " + deviceAddress);
     }
