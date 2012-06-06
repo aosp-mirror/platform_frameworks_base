@@ -1169,6 +1169,9 @@
   <java-symbol type="style" name="Theme.IconMenu" />
   <java-symbol type="style" name="Theme.Panel.Volume" />
 
+  <java-symbol type="attr" name="mediaRouteButtonStyle" />
+  <java-symbol type="attr" name="externalRouteEnabledDrawable" />
+
   <!-- From android.policy -->
   <java-symbol type="anim" name="app_starting_exit" />
   <java-symbol type="anim" name="lock_screen_behind_enter" />
@@ -3630,5 +3633,11 @@
   <public type="attr" name="importantForAccessibility" id="0x010103aa" />
   <public type="attr" name="keyboardLayout" id="0x010103ab" />
   <public type="attr" name="fontFamily" id="0x010103ac" />
+
+  <public type="attr" name="mediaRouteButtonStyle" id="0x010103ad" />
+  <public type="style" name="Widget.Holo.MediaRouteButton" id="0x010301d5" />
+  <public type="style" name="Widget.Holo.Light.MediaRouteButton" id="0x010301d6" />
+  <public type="style" name="Widget.DeviceDefault.MediaRouteButton" id="0x010301d7" />
+  <public type="style" name="Widget.DeviceDefault.Light.MediaRouteButton" id="0x010301d8" />
 
 </resources>

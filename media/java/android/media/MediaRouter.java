@@ -113,6 +113,7 @@ public class MediaRouter {
         mHandler = new Handler(mAppContext.getMainLooper());
 
         mAudioManager = (AudioManager) mAppContext.getSystemService(Context.AUDIO_SERVICE);
+
         mSystemCategory = new RouteCategory(mAppContext.getText(
                 com.android.internal.R.string.default_audio_route_category_name),
                 ROUTE_TYPE_LIVE_AUDIO, false);
@@ -151,7 +152,29 @@ public class MediaRouter {
         mDefaultAudio.mName = mAppContext.getText(
                 com.android.internal.R.string.default_audio_route_name);
         mDefaultAudio.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO;
+        final int maxMusicVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        if (maxMusicVolume > 0) {
+            mDefaultAudio.mVolume =
+                    mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC) / maxMusicVolume;
+        }
         addRoute(mDefaultAudio);
+    }
+
+    /**
+     * @hide for use by framework routing UI
+     */
+    public RouteInfo getSystemAudioRoute() {
+        return mDefaultAudio;
+    }
+
+    /**
+     * Return the currently selected route for the given types
+     *
+     * @param type route types
+     * @return the selected route
+     */
+    public RouteInfo getSelectedRoute(int type) {
+        return mSelectedRoute;
     }
 
     void onHeadphonesPlugged(boolean headphonesPresent, String headphonesName) {
@@ -161,17 +184,18 @@ public class MediaRouter {
     }
 
     /**
-     * Set volume for the specified route types.
+     * Set volume for the specified selected route types.
      *
      * @param types Volume will be set for these route types
      * @param volume Volume to set in the range 0.f (inaudible) to 1.f (full volume).
      */
-    public void setRouteVolume(int types, float volume) {
-        if ((types & ROUTE_TYPE_LIVE_AUDIO) != 0) {
+    public void setSelectedRouteVolume(int types, float volume) {
+        if ((types & ROUTE_TYPE_LIVE_AUDIO) != 0 && mSelectedRoute == mDefaultAudio) {
             final int index = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
             mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, index, 0);
         }
-        if ((types & ROUTE_TYPE_USER) != 0) {
+        if ((types & ROUTE_TYPE_USER) != 0 && mSelectedRoute instanceof UserRouteInfo) {
+            mSelectedRoute.mVolume = volume;
             dispatchVolumeChanged(ROUTE_TYPE_USER, volume);
         }
     }
@@ -267,8 +291,43 @@ public class MediaRouter {
         removeRoute(info);
     }
 
+    /**
+     * Remove all app-specified routes from the MediaRouter.
+     *
+     * @see #removeUserRoute(UserRouteInfo)
+     */
+    public void clearUserRoutes() {
+        for (int i = 0; i < mRoutes.size(); i++) {
+            final RouteInfo info = mRoutes.get(i);
+            if (info instanceof UserRouteInfo) {
+                removeRouteAt(i);
+                i--;
+            }
+        }
+    }
+
     void removeRoute(RouteInfo info) {
         if (mRoutes.remove(info)) {
+            final RouteCategory removingCat = info.getCategory();
+            final int count = mRoutes.size();
+            boolean found = false;
+            for (int i = 0; i < count; i++) {
+                final RouteCategory cat = mRoutes.get(i).getCategory();
+                if (removingCat == cat) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                mCategories.remove(removingCat);
+            }
+            dispatchRouteRemoved(info);
+        }
+    }
+
+    void removeRouteAt(int routeIndex) {
+        if (routeIndex >= 0 && routeIndex < mRoutes.size()) {
+            final RouteInfo info = mRoutes.remove(routeIndex);
             final RouteCategory removingCat = info.getCategory();
             final int count = mRoutes.size();
             boolean found = false;
@@ -437,6 +496,7 @@ public class MediaRouter {
         int mSupportedTypes;
         RouteGroup mGroup;
         final RouteCategory mCategory;
+        float mVolume;
 
         RouteInfo(RouteCategory category) {
             mCategory = category;
@@ -478,6 +538,13 @@ public class MediaRouter {
          */
         public RouteCategory getCategory() {
             return mCategory;
+        }
+
+        /**
+         * @return This route's current volume setting.
+         */
+        public float getVolume() {
+            return mVolume;
         }
 
         void setStatusInt(CharSequence status) {
@@ -828,6 +895,7 @@ public class MediaRouter {
                 final int maxVol = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
                 final int volExtra = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, 0);
                 final float volume = (float) volExtra / maxVol;
+                mDefaultAudio.mVolume = volume;
                 dispatchVolumeChanged(ROUTE_TYPE_LIVE_AUDIO, volume);
             }
         }

@@ -2445,4 +2445,19 @@ please see styles_device_defaults.xml.
         <item name="android:layout_height">wrap_content</item>
         <item name="android:orientation">vertical</item>
     </style>
+
+    <style name="Widget.Holo.MediaRouteButton">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:externalRouteEnabledDrawable">@drawable/ic_media_route_holo_dark</item>
+        <item name="android:minWidth">56dp</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+
+    <style name="Widget.Holo.Light.MediaRouteButton">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:externalRouteEnabledDrawable">@drawable/ic_media_route_holo_light</item>
+        <item name="android:minWidth">56dp</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+
 </resources>

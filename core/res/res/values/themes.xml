@@ -282,6 +282,8 @@ please see themes_device_defaults.xml.
         <item name="popupMenuStyle">@android:style/Widget.PopupMenu</item>
         <item name="activityChooserViewStyle">@android:style/Widget.ActivityChooserView</item>
 
+        <item name="mediaRouteButtonStyle">@android:style/Widget.DeviceDefault.MediaRouteButton</item>
+
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.PreferenceScreen</item>
         <item name="preferenceFragmentStyle">@style/PreferenceFragment</item>
@@ -463,6 +465,8 @@ please see themes_device_defaults.xml.
         <item name="searchViewEditQuery">@android:drawable/ic_commit_search_api_holo_light</item>
 
         <item name="detailsElementBackground">@android:drawable/panel_bg_holo_light</item>
+
+        <item name="mediaRouteButtonStyle">@android:style/Widget.DeviceDefault.Light.MediaRouteButton</item>
     </style>
 
     <!-- Variant of {@link #Theme_Light} with no title bar -->
@@ -940,6 +944,7 @@ please see themes_device_defaults.xml.
 
         <item name="buttonStyleToggle">@android:style/Widget.Holo.Button.Toggle</item>
         <item name="switchStyle">@android:style/Widget.Holo.CompoundButton.Switch</item>
+        <item name="mediaRouteButtonStyle">@android:style/Widget.Holo.MediaRouteButton</item>
 
         <item name="selectableItemBackground">@android:drawable/item_background_holo_dark</item>
         <item name="borderlessButtonStyle">@android:style/Widget.Holo.Button.Borderless</item>
@@ -1242,6 +1247,7 @@ please see themes_device_defaults.xml.
 
         <item name="buttonStyleToggle">@android:style/Widget.Holo.Light.Button.Toggle</item>
         <item name="switchStyle">@android:style/Widget.Holo.Light.CompoundButton.Switch</item>
+        <item name="mediaRouteButtonStyle">@android:style/Widget.Holo.Light.MediaRouteButton</item>
 
         <item name="selectableItemBackground">@android:drawable/item_background_holo_light</item>
         <item name="borderlessButtonStyle">@android:style/Widget.Holo.Light.Button.Borderless</item>
