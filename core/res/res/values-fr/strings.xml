@@ -1103,6 +1103,13 @@
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; envoie un grand nombre de SMS. Autorisez-vous cette application à poursuivre l\'envoi des messages ?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Autoriser"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Refuser"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Envoyer SMS au numéro abrégé ?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Envoyer un SMS premium ?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; essaie d\'envoyer un SMS à &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;. Il s\'agit apparemment d\'un numéro abrégé.&lt;p&gt;L\'envoi de SMS à de tels numéros peut entraîner la facturation de services premium sur votre compte mobile.&lt;p&gt;Autorisez-vous cette application à envoyer ce message ?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; essaie d\'envoyer un SMS à &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;. Il s\'agit apparemment d\'un numéro abrégé de type premium.&lt;p&gt;&lt;b&gt;L\'envoi de SMS à ce destinataire entraînera la facturation de services premium sur votre compte mobile.&lt;/b&gt;&lt;p&gt;Autorisez-vous cette application à envoyer le message ?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Envoyer le message"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Ne pas envoyer"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Signaler appli malveillante"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Carte SIM retirée"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Le réseau mobile ne sera pas disponible avant le redémarrage avec une carte SIM valide insérée."</string>
     <string name="sim_done_button" msgid="827949989369963775">"OK"</string>

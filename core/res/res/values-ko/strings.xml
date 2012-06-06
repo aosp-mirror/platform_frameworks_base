@@ -1103,6 +1103,13 @@
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;이(가) SMS 메시지를 대량으로 보내고 있습니다. 해당 앱이 메시지를 계속 보내도록 하시겠습니까?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"허용"</string>
     <string name="sms_control_no" msgid="625438561395534982">"거부"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"SMS를 단축 코드로 보내시겠습니까?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"프리미엄 SMS를 보내시겠습니까?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;이(가) SMS 단축 코드로 추정되는 문자 메시지를 &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;(으)로 보내려 합니다.&lt;p&gt;문자 메시지를 단축 코드로 보내면 사용자의 모바일 계정에 프리미엄 서비스 요금이 청구될 수 있습니다.&lt;p&gt;해당 앱이 메시지를 보내도록 하시겠습니까?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;이(가) 문자 메시지를 프리미엄 SMS 단축 코드인 &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;(으)로 보내려 합니다.&lt;p&gt;&lt;b&gt;메시지를 보내면 사용자의 모바일 계정에 프리미엄 서비스 요금이 청구됩니다.&lt;/b&gt;&lt;p&gt;해당 앱이 메시지를 보내도록 하시겠습니까?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"메시지 보내기"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"보내지 않음"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"악성 앱 신고"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM 카드 제거됨"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"유효한 SIM 카드를 삽입하여 다시 시작할 때까지 모바일 네트워크를 사용할 수 없습니다."</string>
     <string name="sim_done_button" msgid="827949989369963775">"완료"</string>
