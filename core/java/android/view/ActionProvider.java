@@ -58,7 +58,8 @@ public abstract class ActionProvider {
     private SubUiVisibilityListener mSubUiVisibilityListener;
 
     /**
-     * Creates a new instance.
+     * Creates a new instance. ActionProvider classes should always implement a
+     * constructor that takes a single Context parameter for inflating from menu XML.
      *
      * @param context Context for accessing resources.
      */
@@ -66,11 +67,33 @@ public abstract class ActionProvider {
     }
 
     /**
-     * Factory method for creating new action views.
+     * Factory method called by the Android framework to create new action views.
+     *
+     * <p>This method has been deprecated in favor of {@link #onCreateActionView(MenuItem)}.
+     * Newer apps that wish to support platform versions prior to API 16 should also
+     * implement this method to return a valid action view.</p>
      *
      * @return A new action view.
+     *
+     * @deprecated use {@link #onCreateActionView(MenuItem)}
      */
     public abstract View onCreateActionView();
+
+    /**
+     * Factory method called by the Android framework to create new action views.
+     * This method returns a new action view for the given MenuItem.
+     *
+     * <p>If your ActionProvider implementation overrides the deprecated no-argument overload
+     * {@link #onCreateActionView()}, overriding this method for devices running API 16 or later
+     * is recommended but optional. The default implementation calls {@link #onCreateActionView()}
+     * for compatibility with applications written for older platform versions.</p>
+     *
+     * @param forItem MenuItem to create the action view for
+     * @return the new action view
+     */
+    public View onCreateActionView(MenuItem forItem) {
+        return onCreateActionView();
+    }
 
     /**
      * Performs an optional default action.

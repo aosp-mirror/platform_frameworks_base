@@ -602,7 +602,7 @@ package android {
     field public static final int layerType = 16843604; // 0x1010354
     field public static final int layout = 16842994; // 0x10100f2
     field public static final int layoutAnimation = 16842988; // 0x10100ec
-    field public static final int layoutDirection = 16843696; // 0x10103b0
+    field public static final int layoutDirection = 16843697; // 0x10103b1
     field public static final int layout_above = 16843140; // 0x1010184
     field public static final int layout_alignBaseline = 16843142; // 0x1010186
     field public static final int layout_alignBottom = 16843146; // 0x101018a
@@ -624,10 +624,10 @@ package android {
     field public static final int layout_height = 16842997; // 0x10100f5
     field public static final int layout_margin = 16842998; // 0x10100f6
     field public static final int layout_marginBottom = 16843002; // 0x10100fa
-    field public static final int layout_marginEnd = 16843700; // 0x10103b4
+    field public static final int layout_marginEnd = 16843701; // 0x10103b5
     field public static final int layout_marginLeft = 16842999; // 0x10100f7
     field public static final int layout_marginRight = 16843001; // 0x10100f9
-    field public static final int layout_marginStart = 16843699; // 0x10103b3
+    field public static final int layout_marginStart = 16843700; // 0x10103b4
     field public static final int layout_marginTop = 16843000; // 0x10100f8
     field public static final int layout_row = 16843643; // 0x101037b
     field public static final int layout_rowSpan = 16843644; // 0x101037c
@@ -678,6 +678,7 @@ package android {
     field public static final int maxWidth = 16843039; // 0x101011f
     field public static final int measureAllChildren = 16843018; // 0x101010a
     field public static final int measureWithLargestChild = 16843476; // 0x10102d4
+    field public static final int mediaRouteButtonStyle = 16843693; // 0x10103ad
     field public static final int menuCategory = 16843230; // 0x10101de
     field public static final int mimeType = 16842790; // 0x1010026
     field public static final int minDate = 16843583; // 0x101033f
@@ -723,10 +724,10 @@ package android {
     field public static final int packageNames = 16843649; // 0x1010381
     field public static final int padding = 16842965; // 0x10100d5
     field public static final int paddingBottom = 16842969; // 0x10100d9
-    field public static final int paddingEnd = 16843698; // 0x10103b2
+    field public static final int paddingEnd = 16843699; // 0x10103b3
     field public static final int paddingLeft = 16842966; // 0x10100d6
     field public static final int paddingRight = 16842968; // 0x10100d8
-    field public static final int paddingStart = 16843697; // 0x10103b1
+    field public static final int paddingStart = 16843698; // 0x10103b2
     field public static final int paddingTop = 16842967; // 0x10100d7
     field public static final int panelBackground = 16842846; // 0x101005e
     field public static final int panelColorBackground = 16842849; // 0x1010061
@@ -938,7 +939,7 @@ package android {
     field public static final int summaryColumn = 16843426; // 0x10102a2
     field public static final int summaryOff = 16843248; // 0x10101f0
     field public static final int summaryOn = 16843247; // 0x10101ef
-    field public static final int supportsRtl = 16843693; // 0x10103ad
+    field public static final int supportsRtl = 16843694; // 0x10103ae
     field public static final int supportsUploading = 16843419; // 0x101029b
     field public static final int switchMinWidth = 16843632; // 0x1010370
     field public static final int switchPadding = 16843633; // 0x1010371
@@ -969,7 +970,7 @@ package android {
     field public static final int tension = 16843370; // 0x101026a
     field public static final int testOnly = 16843378; // 0x1010272
     field public static final int text = 16843087; // 0x101014f
-    field public static final int textAlignment = 16843695; // 0x10103af
+    field public static final int textAlignment = 16843696; // 0x10103b0
     field public static final int textAllCaps = 16843660; // 0x101038c
     field public static final int textAppearance = 16842804; // 0x1010034
     field public static final int textAppearanceButton = 16843271; // 0x1010207
@@ -1009,7 +1010,7 @@ package android {
     field public static final int textColorTertiary = 16843282; // 0x1010212
     field public static final int textColorTertiaryInverse = 16843283; // 0x1010213
     field public static final int textCursorDrawable = 16843618; // 0x1010362
-    field public static final int textDirection = 16843694; // 0x10103ae
+    field public static final int textDirection = 16843695; // 0x10103af
     field public static final int textEditNoPasteWindowLayout = 16843541; // 0x1010315
     field public static final int textEditPasteWindowLayout = 16843540; // 0x1010314
     field public static final int textEditSideNoPasteWindowLayout = 16843615; // 0x101035f
@@ -1797,6 +1798,7 @@ package android {
     field public static final int Widget_DeviceDefault_Light_ListPopupWindow = 16974235; // 0x103019b
     field public static final int Widget_DeviceDefault_Light_ListView = 16974210; // 0x1030182
     field public static final int Widget_DeviceDefault_Light_ListView_DropDown = 16974205; // 0x103017d
+    field public static final int Widget_DeviceDefault_Light_MediaRouteButton = 16974296; // 0x10301d8
     field public static final int Widget_DeviceDefault_Light_PopupMenu = 16974236; // 0x103019c
     field public static final int Widget_DeviceDefault_Light_PopupWindow = 16974211; // 0x1030183
     field public static final int Widget_DeviceDefault_Light_ProgressBar = 16974212; // 0x1030184
@@ -1822,6 +1824,7 @@ package android {
     field public static final int Widget_DeviceDefault_ListPopupWindow = 16974180; // 0x1030164
     field public static final int Widget_DeviceDefault_ListView = 16974158; // 0x103014e
     field public static final int Widget_DeviceDefault_ListView_DropDown = 16974153; // 0x1030149
+    field public static final int Widget_DeviceDefault_MediaRouteButton = 16974295; // 0x10301d7
     field public static final int Widget_DeviceDefault_PopupMenu = 16974181; // 0x1030165
     field public static final int Widget_DeviceDefault_PopupWindow = 16974159; // 0x103014f
     field public static final int Widget_DeviceDefault_ProgressBar = 16974160; // 0x1030150
@@ -1913,6 +1916,7 @@ package android {
     field public static final int Widget_Holo_Light_ListPopupWindow = 16974043; // 0x10300db
     field public static final int Widget_Holo_Light_ListView = 16974018; // 0x10300c2
     field public static final int Widget_Holo_Light_ListView_DropDown = 16974013; // 0x10300bd
+    field public static final int Widget_Holo_Light_MediaRouteButton = 16974294; // 0x10301d6
     field public static final int Widget_Holo_Light_PopupMenu = 16974044; // 0x10300dc
     field public static final int Widget_Holo_Light_PopupWindow = 16974019; // 0x10300c3
     field public static final int Widget_Holo_Light_ProgressBar = 16974020; // 0x10300c4
@@ -1938,6 +1942,7 @@ package android {
     field public static final int Widget_Holo_ListPopupWindow = 16973997; // 0x10300ad
     field public static final int Widget_Holo_ListView = 16973975; // 0x1030097
     field public static final int Widget_Holo_ListView_DropDown = 16973970; // 0x1030092
+    field public static final int Widget_Holo_MediaRouteButton = 16974293; // 0x10301d5
     field public static final int Widget_Holo_PopupMenu = 16973998; // 0x10300ae
     field public static final int Widget_Holo_PopupWindow = 16973976; // 0x1030098
     field public static final int Widget_Holo_ProgressBar = 16973977; // 0x1030099
@@ -3677,6 +3682,20 @@ package android.app {
     method public void removeAllActivities();
     method public android.os.Bundle saveInstanceState();
     method public android.view.Window startActivity(java.lang.String, android.content.Intent);
+  }
+
+  public class MediaRouteActionProvider extends android.view.ActionProvider {
+    ctor public MediaRouteActionProvider(android.content.Context);
+    method public android.view.View onCreateActionView();
+    method public void setRouteTypes(int);
+  }
+
+  public class MediaRouteButton extends android.view.View {
+    ctor public MediaRouteButton(android.content.Context);
+    ctor public MediaRouteButton(android.content.Context, android.util.AttributeSet);
+    ctor public MediaRouteButton(android.content.Context, android.util.AttributeSet, int);
+    method public int getRouteTypes();
+    method public void setRouteTypes(int);
   }
 
   public class NativeActivity extends android.app.Activity implements android.view.InputQueue.Callback android.view.SurfaceHolder.Callback2 android.view.ViewTreeObserver.OnGlobalLayoutListener {
@@ -11502,6 +11521,7 @@ package android.media {
   public class MediaRouter {
     method public void addCallback(int, android.media.MediaRouter.Callback);
     method public void addUserRoute(android.media.MediaRouter.UserRouteInfo);
+    method public void clearUserRoutes();
     method public android.media.MediaRouter.RouteCategory createRouteCategory(java.lang.CharSequence, boolean);
     method public android.media.MediaRouter.UserRouteInfo createUserRoute(android.media.MediaRouter.RouteCategory);
     method public static android.media.MediaRouter forApplication(android.content.Context);
@@ -11509,10 +11529,11 @@ package android.media {
     method public int getCategoryCount();
     method public android.media.MediaRouter.RouteInfo getRouteAt(int);
     method public int getRouteCount();
+    method public android.media.MediaRouter.RouteInfo getSelectedRoute(int);
     method public void removeCallback(android.media.MediaRouter.Callback);
     method public void removeUserRoute(android.media.MediaRouter.UserRouteInfo);
     method public void selectRoute(int, android.media.MediaRouter.RouteInfo);
-    method public void setRouteVolume(int, float);
+    method public void setSelectedRouteVolume(int, float);
     field public static final int ROUTE_TYPE_LIVE_AUDIO = 1; // 0x1
     field public static final int ROUTE_TYPE_USER = 8388608; // 0x800000
   }
@@ -11547,6 +11568,7 @@ package android.media {
     method public java.lang.CharSequence getName();
     method public java.lang.CharSequence getStatus();
     method public int getSupportedTypes();
+    method public float getVolume();
   }
 
   public static class MediaRouter.SimpleCallback implements android.media.MediaRouter.Callback {
@@ -22792,7 +22814,8 @@ package android.view {
   public abstract class ActionProvider {
     ctor public ActionProvider(android.content.Context);
     method public boolean hasSubMenu();
-    method public abstract android.view.View onCreateActionView();
+    method public abstract deprecated android.view.View onCreateActionView();
+    method public android.view.View onCreateActionView(android.view.MenuItem);
     method public boolean onPerformDefaultAction();
     method public void onPrepareSubMenu(android.view.SubMenu);
   }
