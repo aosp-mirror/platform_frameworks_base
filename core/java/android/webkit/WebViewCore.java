@@ -2550,6 +2550,11 @@ public final class WebViewCore {
             adjust = (float) mContext.getResources().getDisplayMetrics().densityDpi
                     / mViewportDensityDpi;
         }
+        // Remove any update density messages in flight.
+        // If the density is indeed different from WebView's default scale,
+        // a new message will be queued.
+        mWebViewClassic.mPrivateHandler.removeMessages(
+                WebViewClassic.UPDATE_ZOOM_DENSITY);
         if (adjust != mWebViewClassic.getDefaultZoomScale()) {
             Message.obtain(mWebViewClassic.mPrivateHandler,
                     WebViewClassic.UPDATE_ZOOM_DENSITY, adjust).sendToTarget();
