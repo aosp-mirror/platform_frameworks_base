@@ -1162,7 +1162,7 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"Giriş yöntemlerini ayarla"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Fiziksel klavye"</string>
     <string name="hardware" msgid="7517821086888990278">"Donanım"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Bir klavye düzeni seç"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Klavye düzeni seçin"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Bir klavye düzeni seçmek için dokunun."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
