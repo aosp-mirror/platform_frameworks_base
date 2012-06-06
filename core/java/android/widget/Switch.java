@@ -469,12 +469,6 @@ public class Switch extends CompoundButton {
 
     @Override
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
-
-
         if (mOnLayout == null) {
             mOnLayout = makeLayout(mTextOn);
         }
@@ -489,34 +483,6 @@ public class Switch extends CompoundButton {
         final int switchHeight = mTrackDrawable.getIntrinsicHeight();
 
         mThumbWidth = maxTextWidth + mThumbTextPadding * 2;
-
-        switch (widthMode) {
-            case MeasureSpec.AT_MOST:
-                widthSize = Math.min(widthSize, switchWidth);
-                break;
-
-            case MeasureSpec.UNSPECIFIED:
-                widthSize = switchWidth;
-                break;
-
-            case MeasureSpec.EXACTLY:
-                // Just use what we were given
-                break;
-        }
-
-        switch (heightMode) {
-            case MeasureSpec.AT_MOST:
-                heightSize = Math.min(heightSize, switchHeight);
-                break;
-
-            case MeasureSpec.UNSPECIFIED:
-                heightSize = switchHeight;
-                break;
-
-            case MeasureSpec.EXACTLY:
-                // Just use what we were given
-                break;
-        }
 
         mSwitchWidth = switchWidth;
         mSwitchHeight = switchHeight;
