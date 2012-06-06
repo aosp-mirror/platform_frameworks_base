@@ -16,80 +16,60 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.content.ContentResolver;
+import com.android.internal.view.RotationPolicy;
+
 import android.content.Context;
-import android.database.ContentObserver;
-import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.provider.Settings;
-import android.util.Log;
-import android.view.IWindowManager;
 import android.widget.CompoundButton;
 
-public class AutoRotateController implements CompoundButton.OnCheckedChangeListener {
-    private static final String TAG = "StatusBar.AutoRotateController";
-
+public final class AutoRotateController implements CompoundButton.OnCheckedChangeListener {
     private final Context mContext;
     private final CompoundButton mCheckbox;
+    private final RotationLockCallbacks mCallbacks;
 
     private boolean mAutoRotation;
 
-    private ContentObserver mAccelerometerRotationObserver = new ContentObserver(new Handler()) {
+    private final RotationPolicy.RotationPolicyListener mRotationPolicyListener =
+            new RotationPolicy.RotationPolicyListener() {
         @Override
-        public void onChange(boolean selfChange) {
-            updateCheckbox();
+        public void onChange() {
+            updateState();
         }
     };
 
-    public AutoRotateController(Context context, CompoundButton checkbox) {
+    public AutoRotateController(Context context, CompoundButton checkbox,
+            RotationLockCallbacks callbacks) {
         mContext = context;
         mCheckbox = checkbox;
-        updateCheckbox();
+        mCallbacks = callbacks;
+
         mCheckbox.setOnCheckedChangeListener(this);
 
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.ACCELEROMETER_ROTATION), true,
-                mAccelerometerRotationObserver);
+        RotationPolicy.registerRotationPolicyListener(context, mRotationPolicyListener);
+        updateState();
     }
 
     public void onCheckedChanged(CompoundButton view, boolean checked) {
         if (checked != mAutoRotation) {
-            setAutoRotation(checked);
+            mAutoRotation = checked;
+            RotationPolicy.setRotationLock(mContext, !checked);
         }
     }
 
     public void release() {
-        mContext.getContentResolver().unregisterContentObserver(mAccelerometerRotationObserver);
+        RotationPolicy.unregisterRotationPolicyListener(mContext,
+                mRotationPolicyListener);
     }
 
-    private void updateCheckbox() {
-        mAutoRotation = getAutoRotation();
+    private void updateState() {
+        mAutoRotation = !RotationPolicy.isRotationLocked(mContext);
         mCheckbox.setChecked(mAutoRotation);
+
+        boolean visible = RotationPolicy.isRotationLockToggleVisible(mContext);
+        mCallbacks.setRotationLockControlVisibility(visible);
+        mCheckbox.setEnabled(visible);
     }
 
-    private boolean getAutoRotation() {
-        ContentResolver cr = mContext.getContentResolver();
-        return 0 != Settings.System.getInt(cr, Settings.System.ACCELEROMETER_ROTATION, 0);
-    }
-
-    private void setAutoRotation(final boolean autorotate) {
-        mAutoRotation = autorotate;
-        AsyncTask.execute(new Runnable() {
-                public void run() {
-                    try {
-                        IWindowManager wm = IWindowManager.Stub.asInterface(
-                                ServiceManager.getService(Context.WINDOW_SERVICE));
-                        if (autorotate) {
-                            wm.thawRotation();
-                        } else {
-                            wm.freezeRotation(-1);
-                        }
-                    } catch (RemoteException exc) {
-                        Log.w(TAG, "Unable to save auto-rotate setting");
-                    }
-                }
-            });
+    public interface RotationLockCallbacks {
+        void setRotationLockControlVisibility(boolean show);
     }
 }

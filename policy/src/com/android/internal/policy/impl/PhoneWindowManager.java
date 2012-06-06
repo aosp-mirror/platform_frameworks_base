@@ -346,6 +346,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     int mUserRotationMode = WindowManagerPolicy.USER_ROTATION_FREE;
     int mUserRotation = Surface.ROTATION_0;
+    boolean mAccelerometerDefault;
 
     int mAllowAllRotations = -1;
     boolean mCarDockEnablesAccelerometer;
@@ -358,8 +359,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mScreenOnFully = false;
     boolean mOrientationSensorEnabled = false;
     int mCurrentAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-    static final int DEFAULT_ACCELEROMETER_ROTATION = 0;
-    int mAccelerometerDefault = DEFAULT_ACCELEROMETER_ROTATION;
     boolean mHasSoftInput = false;
     
     int mPointerLocationMode = 0; // guarded by mLock
@@ -617,7 +616,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // orientation management,
             return true;
         }
-        if (mAccelerometerDefault == 0) {
+        if (mUserRotationMode == USER_ROTATION_LOCKED) {
             // If the setting for using the sensor by default is enabled, then
             // we will always leave it on.  Note that the user could go to
             // a window that forces an orientation that does not use the
@@ -1076,19 +1075,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mIncallPowerBehavior = Settings.Secure.getInt(resolver,
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR,
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_DEFAULT);
-            int accelerometerDefault = Settings.System.getInt(resolver,
-                    Settings.System.ACCELEROMETER_ROTATION, DEFAULT_ACCELEROMETER_ROTATION);
-            
-            // set up rotation lock state
-            mUserRotationMode = (accelerometerDefault == 0)
-                ? WindowManagerPolicy.USER_ROTATION_LOCKED
-                : WindowManagerPolicy.USER_ROTATION_FREE;
-            mUserRotation = Settings.System.getInt(resolver,
-                    Settings.System.USER_ROTATION,
-                    Surface.ROTATION_0);
 
-            if (mAccelerometerDefault != accelerometerDefault) {
-                mAccelerometerDefault = accelerometerDefault;
+            // Configure rotation lock.
+            int userRotation = Settings.System.getInt(resolver,
+                    Settings.System.USER_ROTATION, Surface.ROTATION_0);
+            if (mUserRotation != userRotation) {
+                mUserRotation = userRotation;
+                updateRotation = true;
+            }
+            int userRotationMode = Settings.System.getInt(resolver,
+                    Settings.System.ACCELEROMETER_ROTATION, 0) != 0 ?
+                            WindowManagerPolicy.USER_ROTATION_FREE :
+                                    WindowManagerPolicy.USER_ROTATION_LOCKED;
+            if (mUserRotationMode != userRotationMode) {
+                mUserRotationMode = userRotationMode;
+                updateRotation = true;
                 updateOrientationListenerLp();
             }
 
@@ -3670,7 +3671,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // Ignore sensor when plugged into HDMI.
                 // Note that the dock orientation overrides the HDMI orientation.
                 preferredRotation = mHdmiRotation;
-            } else if ((mAccelerometerDefault != 0 /* implies not rotation locked */
+            } else if ((mUserRotationMode == WindowManagerPolicy.USER_ROTATION_FREE
                             && (orientation == ActivityInfo.SCREEN_ORIENTATION_USER
                                     || orientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED))
                     || orientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR
@@ -3693,8 +3694,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 } else {
                     preferredRotation = lastRotation;
                 }
-            } else if (mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED) {
-                // Apply rotation lock.
+            } else if (mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED
+                    && orientation != ActivityInfo.SCREEN_ORIENTATION_NOSENSOR) {
+                // Apply rotation lock.  Does not apply to NOSENSOR.
+                // The idea is that the user rotation expresses a weak preference for the direction
+                // of gravity and as NOSENSOR is never affected by gravity, then neither should
+                // NOSENSOR be affected by rotation lock (although it will be affected by docks).
                 preferredRotation = mUserRotation;
             } else {
                 // No overriding preference.
@@ -4325,8 +4330,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pw.print(prefix); pw.print("mUserRotationMode="); pw.print(mUserRotationMode);
                 pw.print(" mUserRotation="); pw.print(mUserRotation);
                 pw.print(" mAllowAllRotations="); pw.println(mAllowAllRotations);
-        pw.print(prefix); pw.print("mAccelerometerDefault="); pw.print(mAccelerometerDefault);
-                pw.print(" mCurrentAppOrientation="); pw.println(mCurrentAppOrientation);
+        pw.print(prefix); pw.print(" mCurrentAppOrientation="); pw.println(mCurrentAppOrientation);
         pw.print(prefix); pw.print("mCarDockEnablesAccelerometer=");
                 pw.print(mCarDockEnablesAccelerometer);
                 pw.print(" mDeskDockEnablesAccelerometer=");
