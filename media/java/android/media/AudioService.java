@@ -135,8 +135,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private static final int MSG_RCDISPLAY_UPDATE = 13;
     private static final int MSG_SET_ALL_VOLUMES = 14;
     private static final int MSG_PERSIST_MASTER_VOLUME_MUTE = 15;
-    private static final int MSG_SET_WIRED_DEVICE_CONNECTION_STATE = 16;//handled under wakelock
-    private static final int MSG_SET_A2DP_CONNECTION_STATE = 17;        //handled under wakelock
+    // messages handled under wakelock, can only be queued, i.e. sent with queueMsgUnderWakeLock(),
+    //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
+    private static final int MSG_SET_WIRED_DEVICE_CONNECTION_STATE = 16;
+    private static final int MSG_SET_A2DP_CONNECTION_STATE = 17;
 
 
     // flags for MSG_PERSIST_VOLUME indicating if current and/or last audible volume should be
@@ -1962,9 +1964,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         int delay = checkSendBecomingNoisyIntent(
                                                 AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                                                 (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0);
-                        sendMsg(mAudioHandler,
+                        queueMsgUnderWakeLock(mAudioHandler,
                                 MSG_SET_A2DP_CONNECTION_STATE,
-                                SENDMSG_QUEUE,
                                 state,
                                 0,
                                 btDevice,
