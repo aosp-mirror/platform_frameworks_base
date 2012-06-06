@@ -299,4 +299,11 @@ public class WebViewClient {
     public void onReceivedLoginRequest(WebView view, String realm,
             String account, String args) {
     }
+
+    /**
+     * @hide
+     */
+    public boolean overrideContentDetector(String url) {
+        return false;
+    }
 }
