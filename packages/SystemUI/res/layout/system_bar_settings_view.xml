@@ -89,7 +89,9 @@
                 android:layout_marginRight="5dp"
                 />
     </LinearLayout>
-    <View style="@style/StatusBarPanelSettingsPanelSeparator" />
+    <View
+            android:id="@+id/rotate_separator"
+            style="@style/StatusBarPanelSettingsPanelSeparator" />
 
     <!-- Brightness -->
     <LinearLayout style="@style/StatusBarPanelSettingsRow" >

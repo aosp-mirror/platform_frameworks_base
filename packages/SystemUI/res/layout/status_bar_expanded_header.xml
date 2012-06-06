@@ -43,6 +43,15 @@
         android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
         />
 
+    <com.android.systemui.statusbar.RotationToggle android:id="@+id/rotation_lock_button"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_margin="8dp"
+        android:button="@drawable/ic_notify_rotation"
+        android:contentDescription="@string/accessibility_rotation_lock_off"
+        android:clickable="true"
+        />
+
     <ImageView android:id="@+id/settings_button"
         android:layout_width="48dp"
         android:layout_height="48dp"
