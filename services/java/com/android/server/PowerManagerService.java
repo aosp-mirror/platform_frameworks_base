@@ -244,6 +244,7 @@ public class PowerManagerService extends IPowerManager.Stub
     private Handler mHandler;
     private final TimeoutTask mTimeoutTask = new TimeoutTask();
     private ScreenBrightnessAnimator mScreenBrightnessAnimator;
+    private boolean mWaitingForFirstLightSensor = false;
     private boolean mStillNeedSleepNotification;
     private boolean mIsPowered = false;
     private IActivityManager mActivityService;
@@ -1755,7 +1756,11 @@ public class PowerManagerService extends IPowerManager.Stub
             mLastScreenOnTime = (on ? SystemClock.elapsedRealtime() : 0);
             if (mUseSoftwareAutoBrightness) {
                 enableLightSensorLocked(on);
-                if (!on) {
+                if (on) {
+                    // If AutoBrightness is enabled, set the brightness immediately after the
+                    // next sensor value is received.
+                    mWaitingForFirstLightSensor = mAutoBrightessEnabled;
+                } else {
                     // make sure button and key backlights are off too
                     mButtonLight.turnOff();
                     mKeyboardLight.turnOff();
@@ -2636,7 +2641,7 @@ public class PowerManagerService extends IPowerManager.Stub
 
     private void lightSensorChangedLocked(int value, boolean immediate) {
         if (mDebugLightSensor) {
-            Slog.d(TAG, "lightSensorChangedLocked " + value);
+            Slog.d(TAG, "lightSensorChangedLocked value=" + value + " immediate=" + immediate);
         }
 
         // Don't do anything if the screen is off.
@@ -3212,7 +3217,9 @@ public class PowerManagerService extends IPowerManager.Stub
     private void enableLightSensorLocked(boolean enable) {
         if (mDebugLightSensor) {
             Slog.d(TAG, "enableLightSensorLocked enable=" + enable
-                    + " mAutoBrightessEnabled=" + mAutoBrightessEnabled);
+                    + " mLightSensorEnabled=" + mLightSensorEnabled
+                    + " mAutoBrightessEnabled=" + mAutoBrightessEnabled
+                    + " mWaitingForFirstLightSensor=" + mWaitingForFirstLightSensor);
         }
         if (!mAutoBrightessEnabled) {
             enable = false;
@@ -3226,8 +3233,8 @@ public class PowerManagerService extends IPowerManager.Stub
                     // reset our highest value when reenabling
                     mHighestLightSensorValue = -1;
                     // force recompute of backlight values
-                    if (mLightSensorValue >= 0) {
-                        int value = (int)mLightSensorValue;
+                    final int value = (int)mLightSensorValue;
+                    if (value >= 0) {
                         mLightSensorValue = -1;
                         handleLightSensorValue(value, true);
                     }
@@ -3291,8 +3298,9 @@ public class PowerManagerService extends IPowerManager.Stub
 
     private void handleLightSensorValue(int value, boolean immediate) {
         long milliseconds = SystemClock.elapsedRealtime();
-        if (mLightSensorValue == -1 ||
-                milliseconds < mLastScreenOnTime + mLightSensorWarmupTime) {
+        if (mLightSensorValue == -1
+                || milliseconds < mLastScreenOnTime + mLightSensorWarmupTime
+                || mWaitingForFirstLightSensor) {
             // process the value immediately if screen has just turned on
             mHandler.removeCallbacks(mAutoBrightnessTask);
             mLightSensorPendingDecrease = false;
@@ -3327,7 +3335,10 @@ public class PowerManagerService extends IPowerManager.Stub
                 if (isScreenTurningOffLocked()) {
                     return;
                 }
-                handleLightSensorValue((int)event.values[0], false);
+                handleLightSensorValue((int)event.values[0], mWaitingForFirstLightSensor);
+                if (mWaitingForFirstLightSensor) {
+                    mWaitingForFirstLightSensor = false;
+                }
             }
         }
 
