@@ -764,6 +764,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     WifiP2pConfig config = (WifiP2pConfig) message.obj;
                     mAutonomousGroup = false;
 
+                    /* Update group capability before connect */
+                    int gc = mWifiNative.getGroupCapability(config.deviceAddress);
+                    mPeers.updateGroupCapability(config.deviceAddress, gc);
+
                     if (mSavedPeerConfig != null && config.deviceAddress.equals(
                                     mSavedPeerConfig.deviceAddress)) {
                         mSavedPeerConfig = config;
