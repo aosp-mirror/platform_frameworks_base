@@ -262,10 +262,7 @@ void OpenGLRenderer::resume() {
 }
 
 void OpenGLRenderer::detachFunctor(Functor* functor) {
-    int size = mFunctors.size();
-    int remove = mFunctors.remove(functor);
-    ALOGD("OGLR %p detachFunctor %p, removed at index %d of %d",
-          this, functor, remove, size);
+    mFunctors.remove(functor);
 }
 
 void OpenGLRenderer::attachFunctor(Functor* functor) {
@@ -312,7 +309,7 @@ status_t OpenGLRenderer::invokeFunctors(Rect& dirty) {
 
 status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     interrupt();
-    mFunctors.remove(functor);
+    detachFunctor(functor);
 
     if (mDirtyClip) {
         setScissorFromClip();
