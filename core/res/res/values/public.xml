@@ -812,13 +812,6 @@
   <java-symbol type="string" name="sms_control_title" />
   <java-symbol type="string" name="sms_control_no" />
   <java-symbol type="string" name="sms_control_yes" />
-  <java-symbol type="string" name="sms_premium_short_code_confirm_message" />
-  <java-symbol type="string" name="sms_premium_short_code_confirm_title" />
-  <java-symbol type="string" name="sms_short_code_confirm_allow" />
-  <java-symbol type="string" name="sms_short_code_confirm_deny" />
-  <java-symbol type="string" name="sms_short_code_confirm_message" />
-  <java-symbol type="string" name="sms_short_code_confirm_report" />
-  <java-symbol type="string" name="sms_short_code_confirm_title" />
   <java-symbol type="string" name="submit" />
   <java-symbol type="string" name="sync_binding_label" />
   <java-symbol type="string" name="sync_do_nothing" />
