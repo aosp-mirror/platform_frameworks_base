@@ -194,43 +194,33 @@
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"ステータスバーの拡大/縮小"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"ステータスバーの展開/折りたたみをアプリに許可します。"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"発信先の変更"</string>
-    <!-- no translation found for permdesc_processOutgoingCalls (5331318931937402040) -->
-    <skip />
+    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"通話の発信とダイヤルする番号の変更をアプリに許可します。これにより、アプリが発信を監視、転送、阻止できるようになります。"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"テキストメッセージ（SMS）の受信"</string>
-    <!-- no translation found for permdesc_receiveSms (6424387754228766939) -->
-    <skip />
+    <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMSメッセージの受信と処理をアプリに許可します。これにより、アプリが端末に届いたメッセージを表示することなく監視または削除できるようになります。"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"テキストメッセージ（MMS）の受信"</string>
-    <!-- no translation found for permdesc_receiveMms (533019437263212260) -->
-    <skip />
+    <string name="permdesc_receiveMms" msgid="533019437263212260">"MMSメッセージの受信と処理をアプリに許可します。これにより、アプリが端末に届いたメッセージを表示することなく監視または削除できるようになります。"</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"緊急放送の受信"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"緊急ブロードキャストメッセージの受信と処理をアプリに許可します。これはシステムアプリのみが利用できる権限です。"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"エリアメールSMSの読み取り"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"端末で受信したエリアメールSMSの読み取りをアプリに許可します。エリアメール警報は、緊急事態を警告する目的で一部の地域に配信されます。緊急エリアメールの受信時に、悪意のあるアプリによって端末の動作や処理が妨害される恐れがあります。"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMSメッセージの送信"</string>
-    <!-- no translation found for permdesc_sendSms (7094729298204937667) -->
-    <skip />
+    <string name="permdesc_sendSms" msgid="7094729298204937667">"SMSメッセージの送信をアプリに許可します。これにより、予期せぬ料金が発生する可能性があります。悪意のあるアプリが確認なしでメッセージを送信し、料金が発生する恐れがあります。"</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"確認せずにSMSメッセージを送信する"</string>
-    <!-- no translation found for permdesc_sendSmsNoConfirmation (402569800862935907) -->
-    <skip />
+    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"SMSメッセージの送信をアプリに許可します。これにより、予期せぬ料金が発生する可能性があります。悪意のあるアプリが確認なしでメッセージを送信し、料金が発生する恐れがあります。"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"テキストメッセージ（SMSまたはMMS）の読み取り"</string>
-    <!-- no translation found for permdesc_readSms (2467981548684735522) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (3695967533457240550) -->
-    <skip />
+    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"タブレットまたはSIMカードに保存されているSMSメッセージの読み取りをアプリに許可します。これにより、すべてのSMSメッセージを機密性に関係なくアプリから読み取ることができるようになります。"</string>
+    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"携帯端末またはSIMカードに保存されているSMSメッセージの読み取りをアプリに許可します。これにより、すべてのSMSメッセージを機密性に関係なくアプリから読み取ることができるようになります。"</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"テキストメッセージ（SMSまたはMMS）の編集"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"タブレットやSIMカードに保存されているSMSメッセージへの書き込みをアプリに許可します。この許可を悪意のあるアプリに利用されると、メッセージが削除される恐れがあります。"</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"携帯端末やSIMカードに保存されているSMSメッセージへの書き込みをアプリに許可します。この許可を悪意のあるアプリに利用されると、メッセージが削除される恐れがあります。"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"テキストメッセージ（WAP）の受信"</string>
-    <!-- no translation found for permdesc_receiveWapPush (748232190220583385) -->
-    <skip />
+    <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAPメッセージの受信と処理をアプリに許可します。これにより、アプリが端末に届いたメッセージを表示することなく監視または削除できるようになります。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"実行中のアプリの取得"</string>
-    <!-- no translation found for permdesc_getTasks (7454215995847658102) -->
-    <skip />
+    <string name="permdesc_getTasks" msgid="7454215995847658102">"現在実行中または最近実行したタスクに関する情報の取得をアプリに許可します。これにより、その端末でどのアプリを使用しているかをアプリから識別できるようになる可能性があります。"</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"実行中のアプリの詳細の取得"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"現在実行中のタスクまたは最近実行したタスクに関する情報の取得をアプリに許可します。この許可を悪意のあるアプリに利用されると、他のアプリに関する非公開情報が読み取られる恐れがあります。"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"実行中のアプリの順序変更"</string>
-    <!-- no translation found for permdesc_reorderTasks (7734217754877439351) -->
-    <skip />
+    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"タスクをフォアグラウンドやバックグラウンドに移動することをアプリに許可します。これにより、アプリがユーザーからの入力なしでこの処理を実行する可能性があります。"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"実行中のアプリの停止"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"タスクの削除とアプリの終了をアプリに許可します。この許可を悪意のあるアプリケーションに利用されると、他のアプリの動作が妨害される恐れがあります。"</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"すべてのアクティビティの開始"</string>
@@ -244,8 +234,7 @@
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"運転モードの有効化"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"運転モードを有効にすることをアプリに許可します。"</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"他のアプリの終了"</string>
-    <!-- no translation found for permdesc_killBackgroundProcesses (4593353235959733119) -->
-    <skip />
+    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"他のアプリのバックグラウンドプロセスを終了することをアプリに許可します。これを許可すると、他のアプリの実行が停止する原因になることがあります。"</string>
     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"他のアプリの強制停止"</string>
     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"他のアプリの強制停止をアプリに許可します。"</string>
     <string name="permlab_forceBack" msgid="652935204072584616">"アプリの強制終了"</string>
@@ -279,8 +268,7 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"未許可のウィンドウの表示"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"内部システムのユーザーインターフェースで使用するためのウィンドウを作成することをアプリに許可します。通常のアプリでは使用しません。"</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"他のアプリの上に重ねて表示"</string>
-    <!-- no translation found for permdesc_systemAlertWindow (4460454022797261814) -->
-    <skip />
+    <string name="permdesc_systemAlertWindow" msgid="4460454022797261814">"システムの警告ウィンドウの表示をアプリに許可します。警告ウィンドウによっては、画面全体が乗っ取られる恐れがあります。"</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"アニメーションのプリセット速度の変更"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"いつでもアニメーション全般の速度を変更する（速くする、または遅くする）ことをアプリに許可します。"</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"アプリのトークンの管理"</string>
@@ -313,10 +301,8 @@
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"アプリへのLinuxシグナルの送信"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"受信したシグナルをすべての継続プロセスに送信するようリクエストすることをアプリに許可します。"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"アプリの常時実行"</string>
-    <!-- no translation found for permdesc_persistentActivity (8525189272329086137) -->
-    <skip />
-    <!-- no translation found for permdesc_persistentActivity (4384760047508278272) -->
-    <skip />
+    <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"アプリにその一部をメモリに常駐させることを許可します。これにより他のアプリが使用できるメモリが制限されるため、タブレットの動作が遅くなることがあります。"</string>
+    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"アプリにその一部をメモリに常駐させることを許可します。これにより他のアプリが使用できるメモリが制限されるため、携帯端末の動作が遅くなることがあります。"</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"アプリの削除"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Androidパッケージの削除をアプリに許可します。この許可を悪意のあるアプリに利用されると、重要なアプリが削除される恐れがあります。"</string>
     <string name="permlab_clearAppUserData" msgid="274109191845842756">"他のアプリのデータの削除"</string>
@@ -356,82 +342,55 @@
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"システムの起動後に自動的に起動することをアプリに許可します。許可すると、タブレットの起動時間が長くなったり、アプリが常に実行されるためにタブレット全体の動作が遅くなったりする可能性があります。"</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"システムの起動後に自動的に起動することをアプリに許可します。許可すると、携帯端末の起動時間が長くなったり、アプリが常に実行されるために携帯端末全体の動作が遅くなったりする可能性があります。"</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"stickyブロードキャストの配信"</string>
-    <!-- no translation found for permdesc_broadcastSticky (7749760494399915651) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastSticky (2825803764232445091) -->
-    <skip />
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"配信が終了してもメモリに残るstickyブロードキャストの配信をアプリに許可します。この許可を使用し過ぎると、メモリの使用量が増えてタブレットの動作が遅くなったり不安定になったりする恐れがあります。"</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"配信が終了してもメモリに残るstickyブロードキャストの配信をアプリに許可します。この許可を使用し過ぎると、メモリの使用量が増えて携帯端末の動作が遅くなったり不安定になったりする恐れがあります。"</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"連絡先の読み取り"</string>
-    <!-- no translation found for permdesc_readContacts (5294866856941149639) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (8440654152457300662) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"タブレットに保存されている連絡先に関するデータの読み取りをアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリに連絡先データの保存を許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
+    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"携帯端末に保存されている連絡先に関するデータの読み取りをアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリに連絡先データの保存を許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"連絡先の変更"</string>
-    <!-- no translation found for permdesc_writeContacts (897243932521953602) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (589869224625163558) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"タブレットに保存されている連絡先に関するデータの変更をアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリが連絡先データを削除できるようになります。"</string>
+    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"携帯端末に保存されている連絡先に関するデータの変更をアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリが連絡先データを削除できるようになります。"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"通話履歴の読み取り"</string>
-    <!-- no translation found for permdesc_readCallLog (3700645184870760285) -->
-    <skip />
-    <!-- no translation found for permdesc_readCallLog (5777725796813217244) -->
-    <skip />
+    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"タブレットの通話履歴（着信や発信のデータなど）の読み取りをアプリに許可します。これにより、アプリに通話履歴データの保存を許可することになり、悪意のあるアプリによって知らないうちに通話履歴データが共有される恐れがあります。"</string>
+    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"携帯端末の通話履歴（着信や発信のデータなど）の読み取りをアプリに許可します。これにより、アプリに通話履歴データの保存を許可することになり、悪意のあるアプリによって知らないうちに通話履歴データが共有される恐れがあります。"</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"通話履歴の書き込み"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"タブレットの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"携帯端末の通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"自分の連絡先カードの読み取り"</string>
-    <!-- no translation found for permdesc_readProfile (5462475151849888848) -->
-    <skip />
+    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"端末に保存されている個人のプロフィール情報（名前、連絡先情報など）の読み取りをアプリに許可します。これにより、アプリがユーザーの身元を特定できるようになり、プロフィール情報を第三者に転送する可能性があります。"</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"自分の連絡先カードの変更"</string>
-    <!-- no translation found for permdesc_writeProfile (5552084294598465899) -->
-    <skip />
+    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"端末に保存されている個人のプロフィール情報（名前、連絡先情報など）の変更と追加をアプリに許可します。これにより、アプリがユーザーの身元を特定できるようになり、プロフィール情報を第三者に転送する可能性があります。"</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"ソーシャルストリームを読む"</string>
-    <!-- no translation found for permdesc_readSocialStream (4255706027172050872) -->
-    <skip />
+    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"あなたや友だちのソーシャル更新情報へのアクセスと同期をアプリに許可します。情報の共有は慎重に行ってください。これを許可すると、あなたと友だちがソーシャルネットワークで行ったやり取りを、機密性に関係なくアプリから読み取ることができるようになります。注: この許可は、一部のソーシャルネットワークでは適用されない場合があります。"</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ソーシャルストリームに書く"</string>
-    <!-- no translation found for permdesc_writeSocialStream (3086557552204114849) -->
-    <skip />
+    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"友だちのソーシャル更新情報の表示をアプリに許可します。情報の共有は慎重に行ってください。これによりアプリは、友だちから発信されたかのようなメッセージを作成できるようになります。注: この許可は、一部のソーシャルネットワークでは適用されない場合があります。"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"カレンダーの予定と機密情報を読み取る"</string>
-    <!-- no translation found for permdesc_readCalendar (4216462049057658723) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (7434548682470851583) -->
-    <skip />
+    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"タブレットに保存されているカレンダーの予定（友だちや同僚の予定も含めすべて）を読み取ることをアプリに許可します。これにより、アプリがカレンダーのデータを機密性に関係なく共有または保存できるようになる可能性があります。"</string>
+    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"携帯端末に保存されているカレンダーの予定（友だちや同僚の予定も含めすべて）を読み取ることをアプリに許可します。これにより、アプリがカレンダーのデータを機密性に関係なく共有または保存できるようになる可能性があります。"</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"所有者に通知せずに、カレンダーの予定の追加や変更を行い、ゲストにメールを送信する"</string>
-    <!-- no translation found for permdesc_writeCalendar (6679035520113668528) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (2324469496327249376) -->
-    <skip />
+    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"ユーザーがタブレットから編集できる予定（友だちや同僚の予定も含む）を追加、削除、変更することをアプリに許可します。これによりアプリは、カレンダーの所有者から発信されたかのようなメッセージを送信したり、所有者の知らないうちに予定を変更したりできるようになる可能性があります。"</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ユーザーが携帯端末から編集できる予定（友だちや同僚の予定も含む）を追加、削除、変更することをアプリに許可します。これによりアプリは、カレンダーの所有者から発信されたかのようなメッセージを送信したり、所有者の知らないうちに予定を変更したりできるようになる可能性があります。"</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"仮の位置情報でテスト"</string>
-    <!-- no translation found for permdesc_accessMockLocation (5808711039482051824) -->
-    <skip />
+    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"テスト用に仮の位置情報源を作成するか、新しい位置情報提供元をインストールします。これにより、他の位置情報源（GPS、位置情報提供元など）から返された位置情報やステータスの上書きをアプリに許可することになります。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"位置情報提供者の追加コマンドアクセス"</string>
-    <!-- no translation found for permdesc_accessLocationExtraCommands (5945166642335800763) -->
-    <skip />
+    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"位置情報提供元の追加のコマンドにアクセスすることをアプリに許可します。許可すると、アプリがGPSなどの位置情報源の動作を妨害する恐れがあります。"</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"位置情報提供元のインストールを許可する"</string>
-    <!-- no translation found for permdesc_installLocationProvider (9066146120470591509) -->
-    <skip />
-    <!-- no translation found for permlab_accessFineLocation (5885550969882561436) -->
-    <skip />
-    <!-- no translation found for permdesc_accessFineLocation (8960597421469894181) -->
-    <skip />
-    <!-- no translation found for permdesc_accessFineLocation (239268765496141815) -->
-    <skip />
-    <!-- no translation found for permlab_accessCoarseLocation (7422827215441638984) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (5383798877137640762) -->
-    <skip />
+    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"テスト用に仮の位置情報源を作成するか、新しい位置情報提供元をインストールします。これにより、他の位置情報源（GPS、位置情報提供元など）から返された位置情報やステータスをアプリが上書きできるようになる可能性があります。"</string>
+    <string name="permlab_accessFineLocation" msgid="5885550969882561436">"正確な位置情報（GPS）"</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="8960597421469894181">"正確な位置情報源（タブレットのGPSなど）にアクセスします。これにより、位置情報サービスが利用でき、ONになっているときは、アプリが正確な現在地を特定できるようになります。"</string>
+    <string name="permdesc_accessFineLocation" product="default" msgid="239268765496141815">"正確な位置情報源（携帯端末のGPSなど）にアクセスします。これにより、位置情報サービスが利用でき、ONになっているときは、アプリが正確な現在地を特定できるようになります。"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7422827215441638984">"おおよその位置情報（ネットワーク基地局）"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="5383798877137640762">"基地局やWi-Fiなどのネットワーク情報源を使用して、位置情報提供元からのおおよその位置情報にアクセスします。これにより、これらの位置情報サービスが利用でき、ONになっているときは、アプリがおおよその現在地を特定できるようになります。"</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"SurfaceFlingerへのアクセス"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"SurfaceFlingerの低レベルの機能の使用をアプリに許可します。"</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"フレームバッファの読み取り"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"フレームバッファの内容の読み取りをアプリに許可します。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"音声設定の変更"</string>
-    <!-- no translation found for permdesc_modifyAudioSettings (3522565366806248517) -->
-    <skip />
+    <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"音声全般の設定（音量、出力に使用するスピーカーなど）の変更をアプリに許可します。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"録音"</string>
-    <!-- no translation found for permdesc_recordAudio (4906839301087980680) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="4906839301087980680">"マイクを使った録音をアプリに許可します。これにより、アプリがいつでも確認なしで録音できるようになります。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"写真と動画の撮影"</string>
-    <!-- no translation found for permdesc_camera (8497216524735535009) -->
-    <skip />
+    <string name="permdesc_camera" msgid="8497216524735535009">"カメラでの写真と動画の撮影をアプリに許可します。これにより、アプリが確認なしでいつでもカメラを使用できるようになります。"</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"タブレットを完全に無効化"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"端末を永続的に無効にする"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"タブレット全体を完全に無効にすることをアプリに許可します。この許可は危険です。"</string>
@@ -467,8 +426,7 @@
     <string name="permlab_hardware_test" msgid="4148290860400659146">"ハードウェアのテスト"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"ハードウェアのテストのために各種周辺機器を制御することをアプリに許可します。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"電話番号発信"</string>
-    <!-- no translation found for permdesc_callPhone (3740797576113760827) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="3740797576113760827">"電話番号への自動発信をアプリに許可します。これにより、予期せぬ発信や料金が発生する可能性があります。なお、緊急通報番号への発信は許可されません。悪意のあるアプリが確認なしで発信し、料金が発生する恐れがあります。"</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"電話番号発信"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"緊急通報を含めあらゆる電話番号に自動発信することをアプリに許可します。この許可を悪意のあるアプリに利用されると、緊急サービスに不要、不正な通報が行われる恐れがあります。"</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"CDMAタブレットのセットアップを直接開始"</string>
@@ -483,8 +441,7 @@
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"端末ステータスの変更"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"端末の電話機能の制御をアプリに許可します。許可すると、アプリではユーザーに通知なくネットワークの切り替え、無線通信のON/OFFなどを行えるようになります。"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"端末のステータスとIDの読み取り"</string>
-    <!-- no translation found for permdesc_readPhoneState (1639212771826125528) -->
-    <skip />
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"端末の電話機能へのアクセスをアプリに許可します。これにより、電話番号、端末ID、通話中かどうか、通話相手の電話番号をアプリから特定できるようになります。"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"タブレットのスリープを無効化"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"端末のスリープを無効にする"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"タブレットのスリープを無効にすることをアプリに許可します。"</string>
@@ -511,10 +468,8 @@
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"AccountManagerServiceとして機能"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"AccountAuthenticatorsの呼び出しをアプリに許可します。"</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"この端末上のアカウントの検索"</string>
-    <!-- no translation found for permdesc_getAccounts (2741496534769660027) -->
-    <skip />
-    <!-- no translation found for permdesc_getAccounts (3448316822451807382) -->
-    <skip />
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"タブレットで認識されているアカウントのリストの取得をアプリに許可します。これには、インストールしたアプリによって作成されたアカウントも含まれます。"</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"携帯端末で認識されているアカウントのリストの取得をアプリに許可します。これには、インストールしたアプリによって作成されたアカウントも含まれます。"</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"アカウントの作成とパスワードの設定"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"アカウントの作成、パスワードの取得や設定など、AccountManagerのアカウント認証機能を使用することをアプリに許可します。"</string>
     <string name="permlab_manageAccounts" msgid="4983126304757177305">"アカウントの追加と削除"</string>
@@ -522,12 +477,9 @@
     <string name="permlab_useCredentials" msgid="235481396163877642">"この端末上のアカウントの使用"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"認証トークンのリクエストをアプリに許可します。"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ネットワーク接続の表示"</string>
-    <!-- no translation found for permdesc_accessNetworkState (8318964424675960975) -->
-    <skip />
-    <!-- no translation found for permlab_createNetworkSockets (8018758136404323658) -->
-    <skip />
-    <!-- no translation found for permdesc_createNetworkSockets (3403062187779724185) -->
-    <skip />
+    <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"どのネットワークが存在するか、どのネットワークに接続されているかなど、ネットワーク接続に関する情報を表示することをアプリに許可します。"</string>
+    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"ネットワークへのフルアクセス"</string>
+    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"ネットワークソケットの作成とカスタムネットワークプロトコルの使用をアプリに許可します。インターネットにデータを送信する手段はブラウザや他のアプリが提供するため、インターネットへのデータ送信のためにこれを許可する必要はありません。"</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"ネットワークの設定の変更とトラフィックの傍受"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"ネットワークの設定を変更してすべてのネットワークトラフィックを傍受、検査することをアプリに許可します（例: 任意のAPNのプロキシとポートを変更する）。この許可を悪意のあるアプリに利用されると、知らないうちにネットワークパケットが監視、リダイレクト、変更される恐れがあります。"</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"ネットワーク接続の変更"</string>
@@ -537,63 +489,45 @@
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"バックグラウンドデータ使用設定の変更"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"バックグラウンドデータの使用設定の変更をアプリに許可します。"</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"Wi-Fi接続の表示"</string>
-    <!-- no translation found for permdesc_accessWifiState (5002798077387803726) -->
-    <skip />
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Wi-FiがONになっているかどうか、接続されているWi-Fi端末の名前など、Wi-Fiネットワークに関する情報を表示することをアプリに許可します。"</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fiからの接続と切断"</string>
-    <!-- no translation found for permdesc_changeWifiState (7137950297386127533) -->
-    <skip />
+    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Wi-Fiアクセスポイントへの接続/切断、Wi-Fiネットワークのデバイス設定の変更をアプリに許可します。"</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fiマルチキャストの受信を許可する"</string>
-    <!-- no translation found for permdesc_changeWifiMulticastState (7969774021256336548) -->
-    <skip />
-    <!-- no translation found for permdesc_changeWifiMulticastState (6851949706025349926) -->
-    <skip />
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"マルチキャストアドレスを使用して、このタブレットだけでなくWi-Fiネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電力を消費します。"</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"マルチキャストアドレスを使用して、この携帯端末だけでなくWi-Fiネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電力を消費します。"</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetoothの設定へのアクセス"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ローカルのBluetoothタブレットを設定することと、リモート端末を検出してペアに設定することをアプリに許可します。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ローカルのBluetooth携帯端末を設定することと、リモート端末を検出してペアに設定することをアプリに許可します。"</string>
     <string name="permlab_accessWimaxState" msgid="7436749103151096452">"WiMAX接続の表示"</string>
-    <!-- no translation found for permdesc_accessWimaxState (6360102877261978887) -->
-    <skip />
+    <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"WiMAXがONになっているかどうかを識別し、接続されているWiMAXネットワークの情報を表示することをアプリに許可します。"</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX状態の変更"</string>
-    <!-- no translation found for permdesc_changeWimaxState (3156456504084201805) -->
-    <skip />
-    <!-- no translation found for permdesc_changeWimaxState (697025043004923798) -->
-    <skip />
+    <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"WiMAXネットワークへの接続と切断をアプリに許可します。"</string>
+    <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"WiMAXネットワークへの接続と切断をアプリに許可します。"</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetoothデバイスのペアの設定"</string>
-    <!-- no translation found for permdesc_bluetooth (3480722181852438628) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth (3207106324452312739) -->
-    <skip />
+    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"タブレットのBluetooth設定を表示すること、ペアの端末に接続すること/ペアの端末からの接続を受け入れることをアプリに許可します。"</string>
+    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"携帯端末のBluetooth設定を表示すること、ペアの端末に接続すること/ペアの端末からの接続を受け入れることをアプリに許可します。"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"NFCの管理"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"NFCタグ、カード、リーダーとの通信をアプリに許可します。"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"画面ロックの無効化"</string>
-    <!-- no translation found for permdesc_disableKeyguard (6034203065077122992) -->
-    <skip />
+    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"キーロックとキーロックに関連付けられたパスワードのセキュリティを無効にすることをアプリに許可します。たとえば、かかってきた電話を受ける際にキーロックを無効にし、通話が終了したらキーロックを再度有効にする場合などに使用します。"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"同期設定の読み取り"</string>
-    <!-- no translation found for permdesc_readSyncSettings (2706745674569678644) -->
-    <skip />
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"アカウントの同期設定の読み取りをアプリに許可します。たとえば、Peopleアプリがアカウントと同期しているかどうかをアプリから特定できるようになります。"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"同期のON/OFFの切り替え"</string>
-    <!-- no translation found for permdesc_writeSyncSettings (8956262591306369868) -->
-    <skip />
+    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"アカウントの同期設定の変更をアプリに許可します。たとえば、Peopleアプリとアカウントの同期を有効にするために使用できます。"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"同期統計の読み取り"</string>
-    <!-- no translation found for permdesc_readSyncStats (1510143761757606156) -->
-    <skip />
+    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"アカウントの同期ステータス（同期イベントの履歴、同期されたデータの量など）の読み取りをアプリに許可します。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"登録したフィードの読み取り"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"現在同期されているフィードの詳細を取得することをアプリに許可します。"</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"登録したフィードの書き込み"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"現在同期されているフィードの変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、同期されたフィードが変更される恐れがあります。"</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"辞書に追加された語句の読み取り"</string>
-    <!-- no translation found for permdesc_readDictionary (659614600338904243) -->
-    <skip />
+    <string name="permdesc_readDictionary" msgid="659614600338904243">"ユーザー辞書に登録されているすべての語句や名前を読み取ることをアプリに許可します。"</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"単語リストへの書き込み"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"単語リストに新しい語句を書き込むことをアプリに許可します。"</string>
-    <!-- no translation found for permlab_sdcardRead (8235341515605559677) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8235341515605559677) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (5791957130190763289) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (5914402684685848828) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"保護されたストレージへのテストアクセス"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"保護されたストレージへのテストアクセス"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"今後追加するデバイスで使用できるUSBストレージの権限のテストをアプリに許可します。"</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"今後追加するデバイスで使用できるSDカードの権限のテストをアプリに許可します。"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USBストレージのコンテンツの変更または削除"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SDカードのコンテンツの変更または削除"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"USBストレージへの書き込みをアプリに許可します。"</string>
@@ -850,13 +784,10 @@
     <string name="autofill_area" msgid="3547409050889952423">"地域"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"首長国"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"ウェブのブックマークと履歴の読み取り"</string>
-    <!-- no translation found for permdesc_readHistoryBookmarks (8462378226600439658) -->
-    <skip />
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"ブラウザからアクセスしたすべてのURLの履歴とブラウザのすべてのブックマークの読み取りをアプリに許可します。注: この許可は、サードパーティブラウザまたはウェブブラウジング機能を備えたその他のアプリでは適用されない場合があります。"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"ウェブのブックマークと履歴の書き込み"</string>
-    <!-- no translation found for permdesc_writeHistoryBookmarks (6825527469145760922) -->
-    <skip />
-    <!-- no translation found for permdesc_writeHistoryBookmarks (8497389531014185509) -->
-    <skip />
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"タブレットに保存されているブラウザの履歴やブックマークの変更をアプリに許可します。これにより、アプリがブラウザデータを消去または変更できるようになる可能性があります。注: この許可は、サードパーティブラウザまたはウェブブラウジング機能を備えたその他のアプリでは適用されない場合があります。"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"携帯端末に保存されているブラウザの履歴やブックマークの変更をアプリに許可します。これにより、アプリがブラウザデータを消去または変更できるようになる可能性があります。注: この許可は、サードパーティブラウザまたはウェブブラウジング機能を備えたその他のアプリでは適用されない場合があります。"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"アラームの設定"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"インストール済みアラームアプリのアラームを設定することをアプリに許可します。この機能が実装されていないアラームアプリもあります。"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ボイスメールの追加"</string>
@@ -1195,10 +1126,8 @@
     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"コンポーネント使用状況に関して収集した統計情報の変更をアプリに許可します。通常のアプリでは使用しません。"</string>
     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"コンテンツのコピー"</string>
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"デフォルトのコンテナサービスを呼び出してコンテンツをコピーすることをアプリに許可します。通常のアプリでは使用しません。"</string>
-    <!-- no translation found for permlab_route_media_output (1642024455750414694) -->
-    <skip />
-    <!-- no translation found for permdesc_route_media_output (4932818749547244346) -->
-    <skip />
+    <string name="permlab_route_media_output" msgid="1642024455750414694">"メディア出力のルーティング"</string>
+    <string name="permdesc_route_media_output" msgid="4932818749547244346">"メディア出力を他の外部デバイスにルーティングすることをアプリに許可します。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ダブルタップでズームコントロール"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ウィジェットを追加できませんでした。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"移動"</string>
@@ -1361,16 +1290,10 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"通話を受けますか？"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"常時"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"1回のみ"</string>
-    <!-- no translation found for default_audio_route_name (6890731863195399186) -->
-    <skip />
-    <!-- no translation found for default_audio_route_name (4551396562363128432) -->
-    <skip />
-    <!-- no translation found for default_audio_route_name_headphones (8119971843803439110) -->
-    <skip />
-    <!-- no translation found for default_audio_route_name_dock_speakers (6240602982276591864) -->
-    <skip />
-    <!-- no translation found for default_audio_route_name_hdmi (7986404173839007682) -->
-    <skip />
-    <!-- no translation found for default_audio_route_category_name (3722811174003886946) -->
-    <skip />
+    <string name="default_audio_route_name" product="tablet" msgid="6890731863195399186">"タブレットのスピーカー"</string>
+    <string name="default_audio_route_name" product="default" msgid="4551396562363128432">"携帯端末のスピーカー"</string>
+    <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"ヘッドホン"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"ホルダーのスピーカー"</string>
+    <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"HDMIオーディオ"</string>
+    <string name="default_audio_route_category_name" msgid="3722811174003886946">"システム"</string>
 </resources>
