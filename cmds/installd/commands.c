@@ -106,6 +106,43 @@ int renamepkg(const char *oldpkgname, const char *newpkgname)
     return 0;
 }
 
+int fix_uid(const char *pkgname, uid_t uid, gid_t gid)
+{
+    char pkgdir[PKG_PATH_MAX];
+    struct stat s;
+    int rc = 0;
+
+    if ((uid < AID_SYSTEM) || (gid < AID_SYSTEM)) {
+        ALOGE("invalid uid/gid: %d %d\n", uid, gid);
+        return -1;
+    }
+
+    if (create_pkg_path(pkgdir, pkgname, PKG_DIR_POSTFIX, 0)) {
+        ALOGE("cannot create package path\n");
+        return -1;
+    }
+
+    if (stat(pkgdir, &s) < 0) return -1;
+
+    if (s.st_uid != 0 || s.st_gid != 0) {
+        ALOGE("fixing uid of non-root pkg: %s %d %d\n", pkgdir, s.st_uid, s.st_gid);
+        return -1;
+    }
+
+    if (chmod(pkgdir, 0751) < 0) {
+        ALOGE("cannot chmod dir '%s': %s\n", pkgdir, strerror(errno));
+        unlink(pkgdir);
+        return -errno;
+    }
+    if (chown(pkgdir, uid, gid) < 0) {
+        ALOGE("cannot chown dir '%s': %s\n", pkgdir, strerror(errno));
+        unlink(pkgdir);
+        return -errno;
+    }
+
+    return 0;
+}
+
 int delete_user_data(const char *pkgname, uid_t persona)
 {
     char pkgdir[PKG_PATH_MAX];
@@ -950,7 +987,7 @@ int linklib(const char* dataDir, const char* asecLibDir)
 out:
     if (chmod(dataDir, s.st_mode) < 0) {
         ALOGE("failed to chmod '%s': %s\n", dataDir, strerror(errno));
-        return -errno;
+        rc = -errno;
     }
 
     if (chown(dataDir, s.st_uid, s.st_gid) < 0) {
@@ -1027,7 +1064,7 @@ int unlinklib(const char* dataDir)
 out:
     if (chmod(dataDir, s.st_mode) < 0) {
         ALOGE("failed to chmod '%s': %s\n", dataDir, strerror(errno));
-        return -1;
+        rc = -1;
     }
 
     if (chown(dataDir, s.st_uid, s.st_gid) < 0) {

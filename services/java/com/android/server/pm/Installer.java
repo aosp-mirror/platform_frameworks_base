@@ -243,6 +243,17 @@ class Installer {
         return execute(builder.toString());
     }
 
+    public int fixUid(String name, int uid, int gid) {
+        StringBuilder builder = new StringBuilder("fixuid");
+        builder.append(' ');
+        builder.append(name);
+        builder.append(' ');
+        builder.append(uid);
+        builder.append(' ');
+        builder.append(gid);
+        return execute(builder.toString());
+    }
+
     public int deleteCacheFiles(String name) {
         StringBuilder builder = new StringBuilder("rmcache");
         builder.append(' ');
