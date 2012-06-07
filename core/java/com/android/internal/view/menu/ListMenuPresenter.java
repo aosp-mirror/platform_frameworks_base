@@ -88,6 +88,9 @@ public class ListMenuPresenter implements MenuPresenter, AdapterView.OnItemClick
             }
         }
         mMenu = menu;
+        if (mAdapter != null) {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
