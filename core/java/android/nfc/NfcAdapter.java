@@ -637,6 +637,9 @@ public final class NfcAdapter {
      * {@link Activity#onDestroy}. This is guaranteed if you call this API
      * during {@link Activity#onCreate}.
      *
+     * <p class="note">If this device does not support alternate transports
+     * such as Bluetooth or WiFI, calling this method does nothing.
+     *
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param uris an array of Uri(s) to push over Android Beam
@@ -710,6 +713,9 @@ public final class NfcAdapter {
      * <p class="note">Do not pass in an Activity that has already been through
      * {@link Activity#onDestroy}. This is guaranteed if you call this API
      * during {@link Activity#onCreate}.
+     *
+     * <p class="note">If this device does not support alternate transports
+     * such as Bluetooth or WiFI, calling this method does nothing.
      *
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
