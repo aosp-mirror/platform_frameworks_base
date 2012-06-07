@@ -47,7 +47,7 @@ public:
     ANDROID_API LayerRenderer(Layer* layer);
     virtual ~LayerRenderer();
 
-    virtual void prepareDirty(float left, float top, float right, float bottom, bool opaque);
+    virtual int prepareDirty(float left, float top, float right, float bottom, bool opaque);
     virtual void finish();
 
     virtual bool hasLayer();

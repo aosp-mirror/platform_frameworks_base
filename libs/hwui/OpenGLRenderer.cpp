@@ -164,11 +164,11 @@ void OpenGLRenderer::setViewport(int width, int height) {
     glEnableVertexAttribArray(Program::kBindingPosition);
 }
 
-void OpenGLRenderer::prepare(bool opaque) {
-    prepareDirty(0.0f, 0.0f, mWidth, mHeight, opaque);
+int OpenGLRenderer::prepare(bool opaque) {
+    return prepareDirty(0.0f, 0.0f, mWidth, mHeight, opaque);
 }
 
-void OpenGLRenderer::prepareDirty(float left, float top, float right, float bottom, bool opaque) {
+int OpenGLRenderer::prepareDirty(float left, float top, float right, float bottom, bool opaque) {
     mCaches.clearGarbage();
 
     mSnapshot = new Snapshot(mFirstSnapshot,
@@ -184,9 +184,12 @@ void OpenGLRenderer::prepareDirty(float left, float top, float right, float bott
     if (!opaque) {
         mCaches.setScissor(left, mSnapshot->height - bottom, right - left, bottom - top);
         glClear(GL_COLOR_BUFFER_BIT);
+        return DrawGlInfo::kStatusDrew;
     } else {
         mCaches.resetScissor();
     }
+
+    return DrawGlInfo::kStatusDone;
 }
 
 void OpenGLRenderer::syncState() {

@@ -215,16 +215,17 @@ class GLES20Canvas extends HardwareCanvas {
     private static native void nSetViewport(int renderer, int width, int height);
 
     @Override
-    public void onPreDraw(Rect dirty) {
+    public int onPreDraw(Rect dirty) {
         if (dirty != null) {
-            nPrepareDirty(mRenderer, dirty.left, dirty.top, dirty.right, dirty.bottom, mOpaque);
+            return nPrepareDirty(mRenderer, dirty.left, dirty.top, dirty.right, dirty.bottom,
+                    mOpaque);
         } else {
-            nPrepare(mRenderer, mOpaque);
+            return nPrepare(mRenderer, mOpaque);
         }
     }
 
-    private static native void nPrepare(int renderer, boolean opaque);
-    private static native void nPrepareDirty(int renderer, int left, int top, int right, int bottom,
+    private static native int nPrepare(int renderer, boolean opaque);
+    private static native int nPrepareDirty(int renderer, int left, int top, int right, int bottom,
             boolean opaque);
 
     @Override
