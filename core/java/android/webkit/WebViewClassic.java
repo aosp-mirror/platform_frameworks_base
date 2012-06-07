@@ -1048,6 +1048,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     static final int EDIT_TEXT_SIZE_CHANGED             = 150;
     static final int SHOW_CARET_HANDLE                  = 151;
     static final int UPDATE_CONTENT_BOUNDS              = 152;
+    static final int SCROLL_HANDLE_INTO_VIEW            = 153;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = HIT_TEST_RESULT;
@@ -5985,12 +5986,15 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 break;
             }
             case MotionEvent.ACTION_UP: {
-                endScrollEdit();
-                if (!mConfirmMove && mIsEditingText && mSelectionStarted &&
-                        mIsCaretSelection) {
-                    showPasteWindow();
-                    stopTouch();
-                    break;
+                if (mIsEditingText && mSelectionStarted) {
+                    endScrollEdit();
+                    mPrivateHandler.sendEmptyMessageDelayed(SCROLL_HANDLE_INTO_VIEW,
+                            TEXT_SCROLL_FIRST_SCROLL_MS);
+                    if (!mConfirmMove && mIsCaretSelection) {
+                        showPasteWindow();
+                        stopTouch();
+                        break;
+                    }
                 }
                 mLastTouchUpTime = eventTime;
                 if (mSentAutoScrollMessage) {
@@ -6109,8 +6113,35 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
     }
 
+    private void scrollDraggedSelectionHandleIntoView() {
+        if (mSelectDraggingCursor == null) {
+            return;
+        }
+        int x = mSelectDraggingCursor.x;
+        int y = mSelectDraggingCursor.y;
+        if (!mEditTextContentBounds.contains(x,y)) {
+            int left = Math.min(0, x - mEditTextContentBounds.left - EDIT_RECT_BUFFER);
+            int right = Math.max(0, x - mEditTextContentBounds.right + EDIT_RECT_BUFFER);
+            int deltaX = left + right;
+            int above = Math.min(0, y - mEditTextContentBounds.top - EDIT_RECT_BUFFER);
+            int below = Math.max(0, y - mEditTextContentBounds.bottom + EDIT_RECT_BUFFER);
+            int deltaY = above + below;
+            if (deltaX != 0 || deltaY != 0) {
+                int scrollX = getTextScrollX() + deltaX;
+                int scrollY = getTextScrollY() + deltaY;
+                scrollX = clampBetween(scrollX, 0, getMaxTextScrollX());
+                scrollY = clampBetween(scrollY, 0, getMaxTextScrollY());
+                scrollEditText(scrollX, scrollY);
+            }
+        }
+    }
+
     private void endScrollEdit() {
         mLastEditScroll = 0;
+    }
+
+    private static int clampBetween(int value, int min, int max) {
+        return Math.max(min, Math.min(value, max));
     }
 
     private static int getTextScrollDelta(float speed, long deltaT) {
@@ -6142,11 +6173,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 int deltaX = getTextScrollDelta(scrollSpeedX, timeSinceLastUpdate);
                 int deltaY = getTextScrollDelta(scrollSpeedY, timeSinceLastUpdate);
                 int scrollX = getTextScrollX() + deltaX;
-                scrollX = Math.min(getMaxTextScrollX(), scrollX);
-                scrollX = Math.max(0, scrollX);
+                scrollX = clampBetween(scrollX, 0, getMaxTextScrollX());
                 int scrollY = getTextScrollY() + deltaY;
-                scrollY = Math.min(getMaxTextScrollY(), scrollY);
-                scrollY = Math.max(0, scrollY);
+                scrollY = clampBetween(scrollY, 0, getMaxTextScrollY());
 
                 mLastEditScroll = currentTime;
                 if (scrollX == getTextScrollX() && scrollY == getTextScrollY()) {
@@ -6154,7 +6183,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     mPrivateHandler.sendEmptyMessageDelayed(SCROLL_EDIT_TEXT,
                             TEXT_SCROLL_FIRST_SCROLL_MS);
                 } else {
-                    scrollEditText(scrollX, scrollY);
                     int selectionX = getSelectionCoordinate(x,
                             mEditTextContentBounds.left, mEditTextContentBounds.right);
                     int selectionY = getSelectionCoordinate(y,
@@ -6163,6 +6191,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     int oldY = mSelectDraggingCursor.y;
                     mSelectDraggingCursor.set(selectionX, selectionY);
                     updateWebkitSelection();
+                    scrollEditText(scrollX, scrollY);
                     mSelectDraggingCursor.set(oldX, oldY);
                 }
             }
@@ -6219,10 +6248,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 // scrolling.  The rectangle is in document coordinates.
                 final int maxX = mScrollingLayerRect.right;
                 final int maxY = mScrollingLayerRect.bottom;
-                final int resultX = Math.max(0,
-                        Math.min(mScrollingLayerRect.left + contentX, maxX));
-                final int resultY = Math.max(0,
-                        Math.min(mScrollingLayerRect.top + contentY, maxY));
+                final int resultX = clampBetween(maxX, 0,
+                        mScrollingLayerRect.left + contentX);
+                final int resultY = clampBetween(maxY, 0,
+                        mScrollingLayerRect.top + contentY);
 
                 if (resultX != mScrollingLayerRect.left ||
                         resultY != mScrollingLayerRect.top) {
@@ -6322,10 +6351,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         int x = Math.round(newX);
         int y = Math.round(newY);
         if (mIsEditingText) {
-            x = Math.max(mEditTextContentBounds.left,
-                    Math.min(mEditTextContentBounds.right, x));
-            y = Math.max(mEditTextContentBounds.top,
-                    Math.min(mEditTextContentBounds.bottom, y));
+            x = clampBetween(x, mEditTextContentBounds.left,
+                    mEditTextContentBounds.right);
+            y = clampBetween(y, mEditTextContentBounds.top,
+                    mEditTextContentBounds.bottom);
         }
         mSelectDraggingCursor.set(x, y);
     }
@@ -7505,6 +7534,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     scrollEditWithCursor();
                     break;
 
+                case SCROLL_HANDLE_INTO_VIEW:
+                    scrollDraggedSelectionHandleIntoView();
+                    break;
+
                 default:
                     super.handleMessage(msg);
                     break;
@@ -7916,7 +7949,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         float maxScrollX = getMaxTextScrollX();
         float scrollPercentX = ((float)scrollX)/maxScrollX;
         mEditTextContent.offsetTo(-scrollX, -scrollY);
-        mWebViewCore.sendMessageAtFrontOfQueue(EventHub.SCROLL_TEXT_INPUT, 0,
+        mWebViewCore.removeMessages(EventHub.SCROLL_TEXT_INPUT);
+        mWebViewCore.sendMessage(EventHub.SCROLL_TEXT_INPUT, 0,
                 scrollY, (Float)scrollPercentX);
     }
 
