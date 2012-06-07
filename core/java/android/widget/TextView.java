@@ -4656,7 +4656,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // mInputType should already be EditorInfo.TYPE_NULL and mInput should be null
 
         setMovementMethod(selectable ? ArrowKeyMovementMethod.getInstance() : null);
-        setText(getText(), selectable ? BufferType.SPANNABLE : BufferType.NORMAL);
+        setText(mText, selectable ? BufferType.SPANNABLE : BufferType.NORMAL);
 
         // Called by setText above, but safer in case of future code changes
         mEditor.prepareCursorControllers();
