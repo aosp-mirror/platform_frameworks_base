@@ -167,7 +167,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private SoundPool mSoundPool;
     private final Object mSoundEffectsLock = new Object();
     private static final int NUM_SOUNDPOOL_CHANNELS = 4;
-    private static final int SOUND_EFFECT_VOLUME = 1000;
 
     // Internally master volume is a float in the 0.0 - 1.0 range,
     // but to support integer based AudioManager API we translate it to 0 - 100
@@ -372,10 +371,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private SoundPoolListenerThread mSoundPoolListenerThread;
     // message looper for SoundPool listener
     private Looper mSoundPoolLooper = null;
-    // default volume applied to sound played with playSoundEffect()
-    private static final int SOUND_EFFECT_DEFAULT_VOLUME_DB = 0;
-    // volume applied to sound played with playSoundEffect() read from ro.config.sound_fx_volume
-    private int SOUND_EFFECT_VOLUME_DB;
+    // volume applied to sound played with playSoundEffect()
+    private static int SOUND_EFFECT_VOLUME_DB;
     // getActiveStreamType() will return STREAM_NOTIFICATION during this period after a notification
     // stopped
     private static final int NOTIFICATION_VOLUME_DELAY_MS = 5000;
@@ -422,9 +419,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             "ro.config.vc_call_vol_steps",
            MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL]);
 
-        SOUND_EFFECT_VOLUME_DB = SystemProperties.getInt(
-                "ro.config.sound_fx_volume",
-                SOUND_EFFECT_DEFAULT_VOLUME_DB);
+        SOUND_EFFECT_VOLUME_DB = context.getResources().getInteger(
+                com.android.internal.R.integer.config_soundEffectVolumeDb);
 
         mVolumePanel = new VolumePanel(context, this);
         mMode = AudioSystem.MODE_NORMAL;
