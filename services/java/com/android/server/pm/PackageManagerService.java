@@ -6523,8 +6523,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             setCachePath(subStr1);
         }
 
-        AsecInstallArgs(String cid) {
-            super(null, null, isAsecExternal(cid) ? PackageManager.INSTALL_EXTERNAL : 0, null, null);
+        AsecInstallArgs(String cid, boolean isForwardLocked) {
+            super(null, null, (isAsecExternal(cid) ? PackageManager.INSTALL_EXTERNAL : 0)
+                    | (isForwardLocked ? PackageManager.INSTALL_FORWARD_LOCK : 0), null, null);
             this.cid = cid;
             setCachePath(PackageHelper.getSdDir(cid));
         }
@@ -6730,11 +6731,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         String getPackageName() {
-            int idx = cid.lastIndexOf("-");
-            if (idx == -1) {
-                return cid;
-            }
-            return cid.substring(0, idx);
+            return getAsecPackageName(cid);
         }
 
         boolean doPostDeleteLI(boolean delete) {
@@ -6765,7 +6762,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         @Override
         int doPostCopy(int uid) {
             if (isFwdLocked()) {
-                PackageHelper.fixSdPermissions(cid, uid, RES_FILE_NAME);
                 if (uid < Process.FIRST_APPLICATION_UID
                         || !PackageHelper.fixSdPermissions(cid, uid, RES_FILE_NAME)) {
                     Slog.e(TAG, "Failed to finalize " + cid);
@@ -6777,6 +6773,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             return PackageManager.INSTALL_SUCCEEDED;
         }
     };
+
+    static String getAsecPackageName(String packageCid) {
+        int idx = packageCid.lastIndexOf("-");
+        if (idx == -1) {
+            return packageCid;
+        }
+        return packageCid.substring(0, idx);
+    }
 
     // Utility method used to create code paths based on package name and available index.
     private static String getNextCodePath(String oldCodePath, String prefix, String suffix) {
@@ -8699,10 +8703,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             // reader
             synchronized (mPackages) {
                 for (String cid : list) {
-                    AsecInstallArgs args = new AsecInstallArgs(cid);
                     if (DEBUG_SD_INSTALL)
                         Log.i(TAG, "Processing container " + cid);
-                    String pkgName = args.getPackageName();
+                    String pkgName = getAsecPackageName(cid);
                     if (pkgName == null) {
                         if (DEBUG_SD_INSTALL)
                             Log.i(TAG, "Container : " + cid + " stale");
@@ -8711,24 +8714,31 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     if (DEBUG_SD_INSTALL)
                         Log.i(TAG, "Looking for pkg : " + pkgName);
-                    PackageSetting ps = mSettings.mPackages.get(pkgName);
+
+                    final PackageSetting ps = mSettings.mPackages.get(pkgName);
+                    if (ps == null) {
+                        Log.i(TAG, "Deleting container with no matching settings " + cid);
+                        removeCids.add(cid);
+                        continue;
+                    }
+
+                    final AsecInstallArgs args = new AsecInstallArgs(cid, isForwardLocked(ps));
                     // The package status is changed only if the code path
                     // matches between settings and the container id.
-                    if (ps != null && ps.codePathString != null
-                            && ps.codePathString.equals(args.getCodePath())) {
-                        if (DEBUG_SD_INSTALL)
+                    if (ps.codePathString != null && ps.codePathString.equals(args.getCodePath())) {
+                        if (DEBUG_SD_INSTALL) {
                             Log.i(TAG, "Container : " + cid + " corresponds to pkg : " + pkgName
                                     + " at code path: " + ps.codePathString);
+                        }
+
                         // We do have a valid package installed on sdcard
                         processCids.put(args, ps.codePathString);
-                        int uid = ps.appId;
+                        final int uid = ps.appId;
                         if (uid != -1) {
                             uidList[num++] = uid;
                         }
                     } else {
-                        // Stale container on sdcard. Just delete
-                        if (DEBUG_SD_INSTALL)
-                            Log.i(TAG, "Container : " + cid + " stale");
+                        Log.i(TAG, "Deleting stale container for " + cid);
                         removeCids.add(cid);
                     }
                 }
@@ -8811,6 +8821,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 int parseFlags = mDefParseFlags;
                 if (args.isExternal()) {
                     parseFlags |= PackageParser.PARSE_ON_SDCARD;
+                }
+                if (args.isFwdLocked()) {
+                    parseFlags |= PackageParser.PARSE_FORWARD_LOCK;
                 }
 
                 doGc = true;
