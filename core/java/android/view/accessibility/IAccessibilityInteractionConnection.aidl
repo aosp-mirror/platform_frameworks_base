@@ -28,25 +28,25 @@ import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
  */
 oneway interface IAccessibilityInteractionConnection {
 
-    void findAccessibilityNodeInfoByAccessibilityId(long accessibilityNodeId, int interactionId,
-        IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-        long interrogatingTid);
+    void findAccessibilityNodeInfoByAccessibilityId(long accessibilityNodeId, int windowLeft,
+        int windowTop, int interactionId, IAccessibilityInteractionConnectionCallback callback,
+        int flags, int interrogatingPid, long interrogatingTid);
 
-    void findAccessibilityNodeInfoByViewId(long accessibilityNodeId, int id, int interactionId,
-        IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-        long interrogatingTid);
+    void findAccessibilityNodeInfoByViewId(long accessibilityNodeId, int viewId, int windowLeft,
+        int windowTop, int interactionId, IAccessibilityInteractionConnectionCallback callback,
+        int flags, int interrogatingPid, long interrogatingTid);
 
-    void findAccessibilityNodeInfosByText(long accessibilityNodeId, String text, int interactionId,
-        IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-        long interrogatingTid);
+    void findAccessibilityNodeInfosByText(long accessibilityNodeId, String text, int windowLeft,
+        int windowTop, int interactionId, IAccessibilityInteractionConnectionCallback callback,
+        int flags, int interrogatingPid, long interrogatingTid);
 
-    void findFocus(long accessibilityNodeId, int interactionId, int focusType,
-        IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-        long interrogatingTid);
+    void findFocus(long accessibilityNodeId, int focusType, int windowLeft, int windowTop,
+        int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
+        int interrogatingPid, long interrogatingTid);
 
-    void focusSearch(long accessibilityNodeId, int interactionId, int direction,
-        IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-        long interrogatingTid);
+    void focusSearch(long accessibilityNodeId, int direction, int windowLeft, int windowTop,
+        int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
+        int interrogatingPid, long interrogatingTid);
 
     void performAccessibilityAction(long accessibilityNodeId, int action, in Bundle arguments,
         int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,

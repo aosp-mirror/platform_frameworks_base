@@ -3609,6 +3609,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 case R.styleable.View_importantForAccessibility:
                     setImportantForAccessibility(a.getInt(attr,
                             IMPORTANT_FOR_ACCESSIBILITY_DEFAULT));
+                    break;
             }
         }
 
@@ -4899,6 +4900,30 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD
                     | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PARAGRAPH);
         }
+    }
+
+    /**
+     * Returns the delta between the actual and last reported window left.
+     *
+     * @hide
+     */
+    public int getActualAndReportedWindowLeftDelta() {
+        if (mAttachInfo != null) {
+            return mAttachInfo.mActualWindowLeft - mAttachInfo.mWindowLeft; 
+        }
+        return 0;
+    }
+
+    /**
+     * Returns the delta between the actual and last reported window top.
+     *
+     * @hide
+     */
+    public int getActualAndReportedWindowTopDelta() {
+        if (mAttachInfo != null) {
+            return mAttachInfo.mActualWindowTop - mAttachInfo.mWindowTop;
+        }
+        return 0;
     }
 
     /**
@@ -17305,6 +17330,20 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
          * Top position of this view's window
          */
         int mWindowTop;
+
+        /**
+         * Left actual position of this view's window.
+         *
+         * TODO: This is a workaround for 6623031. Remove when fixed.
+         */
+        int mActualWindowLeft;
+
+        /**
+         * Actual top position of this view's window.
+         *
+         * TODO: This is a workaround for 6623031. Remove when fixed.
+         */
+        int mActualWindowTop;
 
         /**
          * Indicates whether views need to use 32-bit drawing caches

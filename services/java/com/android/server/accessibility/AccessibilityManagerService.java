@@ -141,8 +141,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private final SimpleStringSplitter mStringColonSplitter = new SimpleStringSplitter(COMPONENT_NAME_SEPARATOR);
 
-    private final Rect mTempRect = new Rect();
-
     private PackageManager mPackageManager;
 
     private int mHandledFeedbackTypes = 0;
@@ -403,7 +401,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 notifyAccessibilityServicesDelayedLocked(event, false);
                 notifyAccessibilityServicesDelayedLocked(event, true);
             }
-
+            if (mHasInputFilter && mInputFilter != null) {
+                mInputFilter.onAccessibilityEvent(event);
+            }
             event.recycle();
             mHandledFeedbackTypes = 0;
         }
@@ -543,17 +543,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     /**
-     * Gets the bounds of the accessibility focus if the provided,
-     * point coordinates are within the currently active window
-     * and accessibility focus is found within the latter.
+     * Gets the bounds of the accessibility focus in the active window.
      *
-     * @param x X coordinate.
-     * @param y Y coordinate
      * @param outBounds The output to which to write the focus bounds.
-     * @return The accessibility focus rectangle if the point is in the
-     *     window and the window has accessibility focus.
+     * @return Whether accessibility focus was found and the bounds are populated.
      */
-    boolean getAccessibilityFocusBounds(int x, int y, Rect outBounds) {
+    boolean getAccessibilityFocusBoundsInActiveWindow(Rect outBounds) {
         // Instead of keeping track of accessibility focus events per
         // window to be able to find the focus in the active window,
         // we take a stateless approach and look it up. This is fine
@@ -568,11 +563,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             if (root == null) {
                 return false;
             }
-            Rect bounds = mTempRect;
-            root.getBoundsInScreen(bounds);
-            if (!bounds.contains(x, y)) {
-                return false;
-            }
             AccessibilityNodeInfo focus = root.findFocus(
                     AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
             if (focus == null) {
@@ -582,6 +572,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             return true;
         } finally {
             client.removeConnection(connectionId);
+        }
+    }
+
+    /**
+     * Gets the bounds of the active window.
+     *
+     * @param outBounds The output to which to write the bounds.
+     */
+    void getActiveWindowBounds(Rect outBounds) {
+        synchronized (mLock) {
+            final int windowId = mSecurityPolicy.mActiveWindowId;
+            IBinder token = mWindowIdToWindowTokenMap.get(windowId);
+            mWindowManagerService.getWindowFrame(token, outBounds);
         }
     }
 
@@ -1316,6 +1319,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
                 throws RemoteException {
             final int resolvedWindowId = resolveAccessibilityWindowId(accessibilityWindowId);
+            final int windowLeft;
+            final int windowTop;
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
                 mSecurityPolicy.enforceCanRetrieveWindowContent(this);
@@ -1328,6 +1333,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         return 0;
                     }
                 }
+                IBinder token = mWindowIdToWindowTokenMap.get(resolvedWindowId);
+                mWindowManagerService.getWindowFrame(token, mTempBounds);
+                windowLeft = mTempBounds.left;
+                windowTop = mTempBounds.top;
             }
             final int flags = (mIncludeNotImportantViews) ?
                     AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
@@ -1335,7 +1344,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final long identityToken = Binder.clearCallingIdentity();
             try {
                 connection.findAccessibilityNodeInfoByViewId(accessibilityNodeId, viewId,
-                        interactionId, callback, flags, interrogatingPid, interrogatingTid);
+                        windowLeft, windowTop, interactionId, callback, flags, interrogatingPid,
+                        interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
                     Slog.e(LOG_TAG, "Error findAccessibilityNodeInfoByViewId().");
@@ -1352,6 +1362,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
                 throws RemoteException {
             final int resolvedWindowId = resolveAccessibilityWindowId(accessibilityWindowId);
+            final int windowLeft;
+            final int windowTop;
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
                 mSecurityPolicy.enforceCanRetrieveWindowContent(this);
@@ -1365,14 +1377,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         return 0;
                     }
                 }
+                IBinder token = mWindowIdToWindowTokenMap.get(resolvedWindowId);
+                mWindowManagerService.getWindowFrame(token, mTempBounds);
+                windowLeft = mTempBounds.left;
+                windowTop = mTempBounds.top;
             }
             final int flags = (mIncludeNotImportantViews) ?
                     AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
-                connection.findAccessibilityNodeInfosByText(accessibilityNodeId, text,
-                        interactionId, callback, flags, interrogatingPid, interrogatingTid);
+                connection.findAccessibilityNodeInfosByText(accessibilityNodeId, text, windowLeft,
+                        windowTop, interactionId, callback, flags, interrogatingPid,
+                        interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
                     Slog.e(LOG_TAG, "Error calling findAccessibilityNodeInfosByText()");
@@ -1389,6 +1406,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 IAccessibilityInteractionConnectionCallback callback, int flags,
                 long interrogatingTid) throws RemoteException {
             final int resolvedWindowId = resolveAccessibilityWindowId(accessibilityWindowId);
+            final int windowLeft;
+            final int windowTop;
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
                 mSecurityPolicy.enforceCanRetrieveWindowContent(this);
@@ -1402,6 +1421,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         return 0;
                     }
                 }
+                IBinder token = mWindowIdToWindowTokenMap.get(resolvedWindowId);
+                mWindowManagerService.getWindowFrame(token, mTempBounds);
+                windowLeft = mTempBounds.left;
+                windowTop = mTempBounds.top;
             }
             final int allFlags = flags | ((mIncludeNotImportantViews) ?
                     AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0);
@@ -1409,7 +1432,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final long identityToken = Binder.clearCallingIdentity();
             try {
                 connection.findAccessibilityNodeInfoByAccessibilityId(accessibilityNodeId,
-                        interactionId, callback, allFlags, interrogatingPid, interrogatingTid);
+                        windowLeft, windowTop, interactionId, callback, allFlags, interrogatingPid,
+                        interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
                     Slog.e(LOG_TAG, "Error calling findAccessibilityNodeInfoByAccessibilityId()");
@@ -1426,6 +1450,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
                 throws RemoteException {
             final int resolvedWindowId = resolveAccessibilityWindowId(accessibilityWindowId);
+            final int windowLeft;
+            final int windowTop;
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
                 mSecurityPolicy.enforceCanRetrieveWindowContent(this);
@@ -1439,14 +1465,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         return 0;
                     }
                 }
+                IBinder token = mWindowIdToWindowTokenMap.get(resolvedWindowId);
+                mWindowManagerService.getWindowFrame(token, mTempBounds);
+                windowLeft = mTempBounds.left;
+                windowTop = mTempBounds.top;
             }
             final int flags = (mIncludeNotImportantViews) ?
                     AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
-                connection.findFocus(accessibilityNodeId, interactionId, focusType, callback,
-                        flags, interrogatingPid, interrogatingTid);
+                connection.findFocus(accessibilityNodeId, focusType, windowLeft, windowTop,
+                        interactionId, callback, flags, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
                     Slog.e(LOG_TAG, "Error calling findAccessibilityFocus()");
@@ -1463,6 +1493,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
                 throws RemoteException {
             final int resolvedWindowId = resolveAccessibilityWindowId(accessibilityWindowId);
+            final int windowLeft;
+            final int windowTop;
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
                 mSecurityPolicy.enforceCanRetrieveWindowContent(this);
@@ -1476,14 +1508,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         return 0;
                     }
                 }
+                IBinder token = mWindowIdToWindowTokenMap.get(resolvedWindowId);
+                mWindowManagerService.getWindowFrame(token, mTempBounds);
+                windowLeft = mTempBounds.left;
+                windowTop = mTempBounds.top;
             }
             final int flags = (mIncludeNotImportantViews) ?
                     AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
-                connection.focusSearch(accessibilityNodeId, interactionId, direction, callback,
-                        flags, interrogatingPid, interrogatingTid);
+                connection.focusSearch(accessibilityNodeId, direction, windowLeft, windowTop,
+                        interactionId, callback, flags, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
                     Slog.e(LOG_TAG, "Error calling accessibilityFocusSearch()");
