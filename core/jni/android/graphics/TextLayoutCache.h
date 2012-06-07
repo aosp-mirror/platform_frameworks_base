@@ -32,6 +32,7 @@
 #include <SkTemplates.h>
 #include <SkUtils.h>
 #include <SkAutoKern.h>
+#include "SkTypeface_android.h"
 
 #include <unicode/ubidi.h>
 #include <unicode/ushape.h>
@@ -238,7 +239,7 @@ private:
             Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
             Vector<jchar>* const outGlyphs);
 
-    SkTypeface* getCachedTypeface(SkTypeface** typeface, const char path[]);
+    SkTypeface* getCachedTypeface(SkTypeface** typeface, FallbackScripts fallbackEnum);
     HB_Face getCachedHBFace(SkTypeface* typeface);
 
     void ensureShaperItemGlyphArrays(size_t size);
