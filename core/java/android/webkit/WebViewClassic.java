@@ -2065,31 +2065,31 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void destroy() {
-        destroyImpl();
-    }
-
-    private void destroyImpl() {
-        ViewRootImpl viewRoot = mWebView.getViewRootImpl();
-        if (viewRoot != null) {
+        if (mWebView.getViewRootImpl() != null) {
             Log.e(LOGTAG, "Error: WebView.destroy() called while still attached!");
         }
+        ensureFunctorDetached();
+        destroyJava();
+        destroyNative();
+    }
 
+    private void ensureFunctorDetached() {
         if (mWebView.isHardwareAccelerated()) {
             int drawGLFunction = nativeGetDrawGLFunction(mNativeClass);
+            ViewRootImpl viewRoot = mWebView.getViewRootImpl();
             if (drawGLFunction != 0 && viewRoot != null) {
-                // functor should have been detached in onDetachedFromWindow, do
-                // additionally here for safety
                 viewRoot.detachFunctor(drawGLFunction);
             }
         }
+    }
 
+    private void destroyJava() {
         mCallbackProxy.blockMessages();
         clearHelpers();
         if (mListBoxDialog != null) {
             mListBoxDialog.dismiss();
             mListBoxDialog = null;
         }
-        if (mNativeClass != 0) nativeStopGL();
         if (mWebViewCore != null) {
             // Tell WebViewCore to destroy itself
             synchronized (this) {
@@ -2100,10 +2100,34 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             // Remove any pending messages that might not be serviced yet.
             mPrivateHandler.removeCallbacksAndMessages(null);
         }
-        if (mNativeClass != 0) {
-            nativeDestroy();
-            mNativeClass = 0;
+    }
+
+    private void destroyNative() {
+        if (mNativeClass == 0) return;
+        int nptr = mNativeClass;
+        mNativeClass = 0;
+        if (Thread.currentThread() == mPrivateHandler.getLooper().getThread()) {
+            // We are on the main thread and can safely delete
+            nativeDestroy(nptr);
+        } else {
+            mPrivateHandler.post(new DestroyNativeRunnable(nptr));
         }
+    }
+
+    private static class DestroyNativeRunnable implements Runnable {
+
+        private int mNativePtr;
+
+        public DestroyNativeRunnable(int nativePtr) {
+            mNativePtr = nativePtr;
+        }
+
+        @Override
+        public void run() {
+            // nativeDestroy also does a stopGL()
+            nativeDestroy(mNativePtr);
+        }
+
     }
 
     /**
@@ -4099,14 +4123,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (mNativeClass != 0) {
-                mPrivateHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        destroy();
-                    }
-                });
-            }
+            destroy();
         } finally {
             super.finalize();
         }
@@ -5313,13 +5330,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
         updateHwAccelerated();
 
-        if (mWebView.isHardwareAccelerated()) {
-            int drawGLFunction = nativeGetDrawGLFunction(mNativeClass);
-            ViewRootImpl viewRoot = mWebView.getViewRootImpl();
-            if (drawGLFunction != 0 && viewRoot != null) {
-                viewRoot.detachFunctor(drawGLFunction);
-            }
-        }
+        ensureFunctorDetached();
     }
 
     @Override
@@ -8507,7 +8518,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     private native void     nativeCreate(int ptr, String drawableDir, boolean isHighEndGfx);
     private native void     nativeDebugDump();
-    private native void     nativeDestroy();
+    private static native void nativeDestroy(int ptr);
 
     private native void nativeDraw(Canvas canvas, RectF visibleRect,
             int color, int extra);
@@ -8526,7 +8537,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private native int      nativeGetBaseLayer(int nativeInstance);
     private native void     nativeCopyBaseContentToPicture(Picture pict);
     private native boolean  nativeHasContent();
-    private native void     nativeStopGL();
+    private native void     nativeStopGL(int ptr);
     private native void     nativeDiscardAllTextures();
     private native void     nativeTileProfilingStart();
     private native float    nativeTileProfilingStop();
