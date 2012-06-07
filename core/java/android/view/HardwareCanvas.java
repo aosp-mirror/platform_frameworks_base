@@ -41,8 +41,10 @@ public abstract class HardwareCanvas extends Canvas {
      * Invoked before any drawing operation is performed in this canvas.
      * 
      * @param dirty The dirty rectangle to update, can be null.
+     * @return {@link DisplayList#STATUS_DREW} if anything was drawn (such as a call to clear
+     * the canvas).
      */
-    public abstract void onPreDraw(Rect dirty);
+    public abstract int onPreDraw(Rect dirty);
 
     /**
      * Invoked after all drawing operation have been performed.
@@ -58,8 +60,9 @@ public abstract class HardwareCanvas extends Canvas {
      * @param flags Optional flags about drawing, see {@link DisplayList} for
      *              the possible flags.
      *
-     * @return One of {@link DisplayList#STATUS_DONE}, {@link DisplayList#STATUS_DRAW} or
-     *         {@link DisplayList#STATUS_INVOKE}
+     * @return One of {@link DisplayList#STATUS_DONE}, {@link DisplayList#STATUS_DRAW}, or
+     *         {@link DisplayList#STATUS_INVOKE}, or'd with {@link DisplayList#STATUS_DREW}
+     *         if anything was drawn.
      */
     public abstract int drawDisplayList(DisplayList displayList, Rect dirty, int flags);
 

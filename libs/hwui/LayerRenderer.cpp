@@ -37,7 +37,7 @@ LayerRenderer::LayerRenderer(Layer* layer): mLayer(layer) {
 LayerRenderer::~LayerRenderer() {
 }
 
-void LayerRenderer::prepareDirty(float left, float top, float right, float bottom, bool opaque) {
+int LayerRenderer::prepareDirty(float left, float top, float right, float bottom, bool opaque) {
     LAYER_RENDERER_LOGD("Rendering into layer, fbo = %d", mLayer->getFbo());
 
     glBindFramebuffer(GL_FRAMEBUFFER, mLayer->getFbo());
@@ -57,9 +57,9 @@ void LayerRenderer::prepareDirty(float left, float top, float right, float botto
         mLayer->region.subtractSelf(r);
     }
 
-    OpenGLRenderer::prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, opaque);
+    return OpenGLRenderer::prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, opaque);
 #else
-    OpenGLRenderer::prepareDirty(0.0f, 0.0f, width, height, opaque);
+    return OpenGLRenderer::prepareDirty(0.0f, 0.0f, width, height, opaque);
 #endif
 }
 

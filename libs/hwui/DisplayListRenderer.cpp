@@ -1368,13 +1368,14 @@ void DisplayListRenderer::setViewport(int width, int height) {
     mHeight = height;
 }
 
-void DisplayListRenderer::prepareDirty(float left, float top,
+int DisplayListRenderer::prepareDirty(float left, float top,
         float right, float bottom, bool opaque) {
     mSnapshot = new Snapshot(mFirstSnapshot,
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     mSaveCount = 1;
     mSnapshot->setClip(0.0f, 0.0f, mWidth, mHeight);
     mRestoreSaveCount = -1;
+    return DrawGlInfo::kStatusDone; // No invalidate needed at record-time
 }
 
 void DisplayListRenderer::finish() {

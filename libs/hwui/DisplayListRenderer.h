@@ -547,7 +547,7 @@ public:
     virtual bool isDeferred();
 
     virtual void setViewport(int width, int height);
-    virtual void prepareDirty(float left, float top, float right, float bottom, bool opaque);
+    virtual int prepareDirty(float left, float top, float right, float bottom, bool opaque);
     virtual void finish();
 
     virtual status_t callDrawGLFunction(Functor *functor, Rect& dirty);
