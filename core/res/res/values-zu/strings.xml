@@ -280,7 +280,7 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Ivumela insiza ukuthi ibheke izinkinobho ozicindezelayo ngisho ngabe usebenzisana nezinye izinsiza (njengokubhala amaphasiwedi). Akufanele kudingakele izinsiza ezijwayelekile."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"hlanganisa indlela yokufakwayo"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Ivumela isimeli ukuhlanganisa uxhumano nomsebenzisi wezinga eliphezulu lendlela yokufaka. Ayisoze yadingeka kwizinhlelo ezivamile."</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"hlanganisa esevisini yesinqujwana"</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"hlanganisa kusevisi yokufinyeleleka"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Ivumela isibambi ukuhlanganisa uxhumo nomsebenzisi kwezinga eliphezulu lesevisi yesinqunjwana. Akusoze kwadingekela izinhlelo zokusebenza ezivamile."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"bophezela kunsizakalo yombhalo"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Ivumela umbambi ukuhlanganisa uxhumano nomsebenzisi kwezinga eliphezulu lwesixhumi esibonakalayo sensizakalo yombhalo(isb. InsizakaloYokuhlolaUkubhala). Akusoze kwadingeka kwezinhlelo zokusebenza ezivamile."</string>
@@ -343,8 +343,7 @@
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Ivumela insiza ukuthi iziqalise ngokushesha uma isistiu isiqedile ukubhutha. Lokhu kungenz ukuthi kuthathe isikhathi esithe ukuba side ukuqalisa ucingo nokuvuela insiz ukuthi inciphise ucingo lonke ngokuthi luhlale lusebenza."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"thumela ukusakaza okunamathelayo"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Ivumela uhlelo lokusebenza ukuthumela ukusakaza okunamathelayo, okusalayo emva kokuba ukusakazwa sekuphelile. Ukusebenzisa kakhulu kuhle kwenze ithebhulethi ukuthi ingasheshi noma ingahlali kahle ngokuyibangela ukusebenzisa imemori eningi."</string>
-    <!-- no translation found for permdesc_broadcastSticky (2825803764232445091) -->
-    <skip />
+    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Ivumela uhlelo lokusebenza ukuthumela ukusakaza okunamathelayo, okusalayo emva kokuba ukusakazwa sekuphelile. Ukusebenzisa kakhulu kuhle kwenze ifoni ukuthi ingasheshi noma ingahlali kahle ngokuyibangela ukusebenzisa imemori eningi."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"funda oxhumana nabo"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Ivumela uhlelo lokusebenza ukufunda idatha mayelana noxhumana nabo abalondolozwe kuthebhulethi yakho, kufaka phakathi nobuningi obushayele, wathumela i-imeyili, noma oxhumene nabo ngezinye izindlela nomuntu oyedwa. Le mvume ivumela izinhlelo zokusebenza ukulondoloza idatha yoxhumana nabo, izinhlelo zokusebenza ezingalungile zingaba idatha yokuxhumana ngaphandle kolwazi lakho."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Ivumela uhlelo lokusebenza ukufunda idatha mayelana noxhumana nabo abalondolozwe efonini yakho, kufaka phakathi nobuningi obushayele, wathumela i-imeyili, noma oxhumene nabo ngezinye izindlela nomuntu oyedwa. Le mvume ivumela izinhlelo zokusebenza ukulondoloza idatha yoxhumana nabo, izinhlelo zokusebenza ezingalungile zingaba idatha yokuxhumana ngaphandle kolwazi lakho."</string>
@@ -510,8 +509,7 @@
     <string name="permlab_nfc" msgid="4423351274757876953">"lawula Uxhumano Lwenkambu Eseduze"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Ivuela insiza ukuthi ixhumane ne-Near Field Communication (NFC) amathegi, amakhadi kanye nezinhlelo zokufunda."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"khubaza ukukhiya kwakho iskrini"</string>
-    <!-- no translation found for permdesc_disableKeyguard (6034203065077122992) -->
-    <skip />
+    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Ivumela uhlelo lokusebenza ukukhubaza ukuvala ukhiye nanoma yikuphi ukuphepha kwephasiwedi okuhlobene. Isibonelo, ifoni ikhubaza ukuvala ukhiye lapho ithola ikholi yefoni engenayo, bese inike amandla kabusha ukuvala ukhiye lapho ikholi isiqedile."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"funda izilungiselelo zokuvumelanisa"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Ivumela uhlelo lokusebenza ukufunda izilungiselelo zokuvumelanisa ze-akhawunti. Isibonelo, lokhu kungacacisa ukuthi noma ngabe uhlelo lokusebenza le-People livumelanisiwe ne-akhawunti."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"shintsha phakathi kokuvula kanye nokucisha ukuvumelanisa"</string>
@@ -526,10 +524,8 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Ivumela uhlelo lokusebenza ukufunda onke amabizo, amagama, namatemu umsebenzisi awalondolozile kusichazamazwi somsebenzisi."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"bhala kwisichazamazwi esicacisiwe somsebenzisi"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Ivumela insiza ukuthi ibhale amagama amasha esichazinimazwi."</string>
-    <!-- no translation found for permlab_sdcardRead (8235341515605559677) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8235341515605559677) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"ukufinyelela kokuhlola esilondolozini esivikelekile"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"ukufinyelela kokuhlola esilondolozini esivikelekile"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Ivumela uhlelo lokusebenza ukuhlola imvume yokugciniwe okufinyeleleka nge-USB okuzotholakala kumadivayisi alandelayo."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Ivumela uhlelo lokusebenza ukuhlola imvume yekhadi le-SD okuzotholakala kumadivayisi alandelayo."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"guqula noma ususe okuqukethwe kwakho okugciniwe okufinyeleleka nge-USB"</string>

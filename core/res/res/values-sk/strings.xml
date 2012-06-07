@@ -822,8 +822,8 @@
     <string name="searchview_description_submit" msgid="2688450133297983542">"Odoslať dopyt"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Hlasové vyhľadávanie"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Povoliť Preskúmanie dotykom?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"Služba <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> požaduje povolenie funkcie Preskúmanie dotykom. Ak je funkcia Explore by Touch zapnutá, môžete počuť alebo vidieť popisy objektov pod vaším prstom alebo ovládať tablet gestami."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"Služba <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> požaduje povolenie funkcie Preskúmanie dotykom. Ak je funkcia Explore by Touch zapnutá, môžete počuť alebo vidieť popisy objektov pod vaším prstom alebo ovládať telefón gestami."</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"Služba <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> požaduje povolenie funkcie Preskúmanie dotykom. Ak je funkcia Preskúmanie dotykom zapnutá, môžete počuť alebo vidieť popisy objektov pod vaším prstom alebo ovládať tablet gestami."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"Služba <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> požaduje povolenie funkcie Preskúmanie dotykom. Ak je funkcia Preskúmanie dotykom zapnutá, môžete počuť alebo vidieť popisy objektov pod vaším prstom alebo ovládať telefón gestami."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"pred 1 mesiacom"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Viac ako pred 1 mesiacom"</string>
   <plurals name="num_seconds_ago">
