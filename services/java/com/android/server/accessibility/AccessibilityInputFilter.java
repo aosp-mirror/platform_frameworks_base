@@ -25,6 +25,7 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicy;
+import android.view.accessibility.AccessibilityEvent;
 
 /**
  * Input filter for accessibility.
@@ -119,5 +120,9 @@ public class AccessibilityInputFilter extends InputFilter {
         } else {
             super.onInputEvent(event, policyFlags);
         }
+    }
+
+    public void onAccessibilityEvent(AccessibilityEvent event) {
+        mTouchExplorer.onAccessibilityEvent(event);
     }
 }

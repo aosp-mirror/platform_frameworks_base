@@ -6675,6 +6675,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    // TODO: Put this on the IWindowManagerService and guard with a permission.
     public IBinder getFocusedWindowClientToken() {
         synchronized (mWindowMap) {
             WindowState windowState = getFocusedWindowLocked();
@@ -6683,6 +6684,18 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             return null;
         }
+    }
+
+    // TODO: This is a workaround - remove when 6623031 is fixed.
+    public boolean getWindowFrame(IBinder token, Rect outBounds) {
+        synchronized (mWindowMap) {
+            WindowState windowState = mWindowMap.get(token);
+            if (windowState != null) {
+                outBounds.set(windowState.getFrameLw());
+                return true;
+            }
+        }
+        return false;
     }
 
     private WindowState getFocusedWindow() {
