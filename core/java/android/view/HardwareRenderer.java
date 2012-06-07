@@ -1042,8 +1042,8 @@ public abstract class HardwareRenderer {
             return mGl != null && mCanvas != null;
         }        
         
-        void onPreDraw(Rect dirty) {
-            
+        int onPreDraw(Rect dirty) {
+            return DisplayList.STATUS_DONE;
         }
 
         void onPostDraw() {
@@ -1102,9 +1102,7 @@ public abstract class HardwareRenderer {
                         }
                     }
 
-                    onPreDraw(dirty);
-
-                    int status = DisplayList.STATUS_DONE;
+                    int status = onPreDraw(dirty);
                     int saveCount = canvas.save();
                     callbacks.onHardwarePreDraw(canvas);
 
@@ -1138,7 +1136,7 @@ public abstract class HardwareRenderer {
                                 drawDisplayListStartTime = System.nanoTime();
                             }
 
-                            status = canvas.drawDisplayList(displayList, mRedrawClip,
+                            status |= canvas.drawDisplayList(displayList, mRedrawClip,
                                     DisplayList.FLAG_CLIP_CHILDREN);
 
                             if (mProfileEnabled) {
@@ -1372,8 +1370,8 @@ public abstract class HardwareRenderer {
         }                
 
         @Override
-        void onPreDraw(Rect dirty) {
-            mGlCanvas.onPreDraw(dirty);
+        int onPreDraw(Rect dirty) {
+            return mGlCanvas.onPreDraw(dirty);
         }
 
         @Override

@@ -67,8 +67,8 @@ public:
 
     virtual void setViewport(int width, int height);
 
-    ANDROID_API void prepare(bool opaque);
-    virtual void prepareDirty(float left, float top, float right, float bottom, bool opaque);
+    ANDROID_API int prepare(bool opaque);
+    virtual int prepareDirty(float left, float top, float right, float bottom, bool opaque);
     virtual void finish();
 
     // These two calls must not be recorded in display lists

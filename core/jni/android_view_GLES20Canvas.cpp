@@ -133,15 +133,15 @@ static void android_view_GLES20Canvas_setViewport(JNIEnv* env, jobject clazz,
     renderer->setViewport(width, height);
 }
 
-static void android_view_GLES20Canvas_prepare(JNIEnv* env, jobject clazz,
+static int android_view_GLES20Canvas_prepare(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, jboolean opaque) {
-    renderer->prepare(opaque);
+    return renderer->prepare(opaque);
 }
 
-static void android_view_GLES20Canvas_prepareDirty(JNIEnv* env, jobject clazz,
+static int android_view_GLES20Canvas_prepareDirty(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, jint left, jint top, jint right, jint bottom,
         jboolean opaque) {
-    renderer->prepareDirty(left, top, right, bottom, opaque);
+    return renderer->prepareDirty(left, top, right, bottom, opaque);
 }
 
 static void android_view_GLES20Canvas_finish(JNIEnv* env, jobject clazz,
@@ -868,8 +868,8 @@ static JNINativeMethod gMethods[] = {
     { "nCreateRenderer",    "()I",             (void*) android_view_GLES20Canvas_createRenderer },
     { "nDestroyRenderer",   "(I)V",            (void*) android_view_GLES20Canvas_destroyRenderer },
     { "nSetViewport",       "(III)V",          (void*) android_view_GLES20Canvas_setViewport },
-    { "nPrepare",           "(IZ)V",           (void*) android_view_GLES20Canvas_prepare },
-    { "nPrepareDirty",      "(IIIIIZ)V",       (void*) android_view_GLES20Canvas_prepareDirty },
+    { "nPrepare",           "(IZ)I",           (void*) android_view_GLES20Canvas_prepare },
+    { "nPrepareDirty",      "(IIIIIZ)I",       (void*) android_view_GLES20Canvas_prepareDirty },
     { "nFinish",            "(I)V",            (void*) android_view_GLES20Canvas_finish },
 
     { "nGetStencilSize",    "()I",             (void*) android_view_GLES20Canvas_getStencilSize },
