@@ -7843,7 +7843,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 p = ps.pkg;
             }
-            if (p != null && isExternal(p)) {
+            if (p != null && (isExternal(p) || isForwardLocked(p))) {
                 String secureContainerId = cidFromCodePath(p.applicationInfo.sourceDir);
                 if (secureContainerId != null) {
                     asecPath = PackageHelper.getSdFilesystem(secureContainerId);
@@ -7866,6 +7866,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (res < 0) {
             return false;
         }
+
+        // Fix-up for forward-locked applications in ASEC containers.
+        if (!isExternal(p)) {
+            pStats.codeSize += pStats.externalCodeSize;
+            pStats.externalCodeSize = 0L;
+        }
+
         return true;
     }
 
