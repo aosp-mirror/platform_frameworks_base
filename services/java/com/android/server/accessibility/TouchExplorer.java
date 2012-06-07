@@ -190,6 +190,9 @@ public class TouchExplorer {
     // The long pressing pointer Y if coordinate remapping is needed.
     private int mLongPressingPointerDeltaY;
 
+    // The id of the last touch explored window.
+    private int mLastTouchedWindowId;
+
     /**
      * Creates a new instance.
      *
@@ -305,6 +308,11 @@ public class TouchExplorer {
                     mInjectedPointerTracker.mLastInjectedHoverEvent.recycle();
                     mInjectedPointerTracker.mLastInjectedHoverEvent = null;
                 }
+                mLastTouchedWindowId = -1;
+            } break;
+            case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER:
+            case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT: {
+                mLastTouchedWindowId = event.getWindowId();
             } break;
         }
     }
@@ -1078,13 +1086,15 @@ public class TouchExplorer {
                 clickLocationX = (int) lastExploreEvent.getX(lastExplorePointerIndex);
                 clickLocationY = (int) lastExploreEvent.getY(lastExplorePointerIndex);
                 Rect activeWindowBounds = mTempRect;
-                mAms.getActiveWindowBounds(activeWindowBounds);
-                if (activeWindowBounds.contains(clickLocationX, clickLocationY)) {
-                    Rect focusBounds = mTempRect;
-                    if (mAms.getAccessibilityFocusBoundsInActiveWindow(focusBounds)) {
-                        if (!focusBounds.contains(clickLocationX, clickLocationY)) {
-                            clickLocationX = focusBounds.centerX();
-                            clickLocationY = focusBounds.centerY();
+                if (mLastTouchedWindowId == mAms.getActiveWindowId()) {
+                    mAms.getActiveWindowBounds(activeWindowBounds);
+                    if (activeWindowBounds.contains(clickLocationX, clickLocationY)) {
+                        Rect focusBounds = mTempRect;
+                        if (mAms.getAccessibilityFocusBoundsInActiveWindow(focusBounds)) {
+                            if (!focusBounds.contains(clickLocationX, clickLocationY)) {
+                                clickLocationX = focusBounds.centerX();
+                                clickLocationY = focusBounds.centerY();
+                            }
                         }
                     }
                 }
@@ -1308,13 +1318,15 @@ public class TouchExplorer {
                 clickLocationX = (int) lastExploreEvent.getX(lastExplorePointerIndex);
                 clickLocationY = (int) lastExploreEvent.getY(lastExplorePointerIndex);
                 Rect activeWindowBounds = mTempRect;
-                mAms.getActiveWindowBounds(activeWindowBounds);
-                if (activeWindowBounds.contains(clickLocationX, clickLocationY)) {
-                    Rect focusBounds = mTempRect;
-                    if (mAms.getAccessibilityFocusBoundsInActiveWindow(focusBounds)) {
-                        if (!focusBounds.contains(clickLocationX, clickLocationY)) {
-                            clickLocationX = focusBounds.centerX();
-                            clickLocationY = focusBounds.centerY();
+                if (mLastTouchedWindowId == mAms.getActiveWindowId()) {
+                    mAms.getActiveWindowBounds(activeWindowBounds);
+                    if (activeWindowBounds.contains(clickLocationX, clickLocationY)) {
+                        Rect focusBounds = mTempRect;
+                        if (mAms.getAccessibilityFocusBoundsInActiveWindow(focusBounds)) {
+                            if (!focusBounds.contains(clickLocationX, clickLocationY)) {
+                                clickLocationX = focusBounds.centerX();
+                                clickLocationY = focusBounds.centerY();
+                            }
                         }
                     }
                 }
