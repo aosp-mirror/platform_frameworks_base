@@ -44,7 +44,7 @@ import java.util.HashMap;
 
 public class NotificationRowLayout 
         extends LinearLayout 
-        implements SwipeHelper.Callback, ExpandHelper.Callback 
+        implements SwipeHelper.Callback, ExpandHelper.Callback
 {
     private static final String TAG = "NotificationRowLayout";
     private static final boolean DEBUG = false;
@@ -61,6 +61,8 @@ public class NotificationRowLayout
     HashMap<View, ValueAnimator> mDisappearingViews = new HashMap<View, ValueAnimator>();
 
     private SwipeHelper mSwipeHelper;
+    
+    private OnSizeChangedListener mOnSizeChangedListener;
 
     // Flag set during notification removal animation to avoid causing too much work until
     // animation is done
@@ -99,6 +101,10 @@ public class NotificationRowLayout
 
     public void setLongPressListener(View.OnLongClickListener listener) {
         mSwipeHelper.setLongPressListener(listener);
+    }
+
+    public void setOnSizeChangedListener(OnSizeChangedListener l) {
+        mOnSizeChangedListener = l;
     }
 
     @Override
@@ -245,6 +251,13 @@ public class NotificationRowLayout
                     android.graphics.Region.Op.DIFFERENCE);
             c.drawColor(0xFFFF8000);
             c.restore();
+        }
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        if (mOnSizeChangedListener != null) {
+            mOnSizeChangedListener.onSizeChanged(this, w, h, oldw, oldh);
         }
     }
 }

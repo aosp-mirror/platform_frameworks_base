@@ -29,6 +29,17 @@
     android:layout_marginLeft="@dimen/notification_panel_margin_left"
     >
 
+    <TextView
+        android:id="@+id/carrier_label"
+        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Network"
+        android:layout_height="@dimen/carrier_label_height"
+        android:layout_width="match_parent"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="@dimen/close_handle_height"
+        android:gravity="center"
+        android:visibility="invisible"
+        />
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
