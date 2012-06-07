@@ -194,43 +194,33 @@
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"laienda/ahenda olekuriba"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Võimaldab rakendusel laiendada või ahendada olekuriba."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"marsruutige väljuvad kõned uuesti"</string>
-    <!-- no translation found for permdesc_processOutgoingCalls (5331318931937402040) -->
-    <skip />
+    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Võimaldab rakendusel töödelda väljuvaid kõnesid ja muuta valitavat numbrit. Luba võimaldab rakendusel jälgida, ümber suunata või takistada väljuvaid kõnesid."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"võtke vastu tekstisõnumeid (SMS)"</string>
-    <!-- no translation found for permdesc_receiveSms (6424387754228766939) -->
-    <skip />
+    <string name="permdesc_receiveSms" msgid="6424387754228766939">"Võimaldab rakendusel vastu võtta ja töödelda SMS-sõnumeid. See tähendab, et rakendus võib jälgida või kustutada teie seadmele saadetud sõnumeid neid teile näitamata."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"võtke vastu tekstisõnumeid (MMS)"</string>
-    <!-- no translation found for permdesc_receiveMms (533019437263212260) -->
-    <skip />
+    <string name="permdesc_receiveMms" msgid="533019437263212260">"Võimaldab rakendusel vastu võtta ja töödelda multimeediumsõnumeid. See tähendab, et rakendus võib jälgida või kustutada teie seadmele saadetud sõnumeid neid teile näitamata."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"hädaabiteadete vastuvõtmine"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Võimaldab rakendusel vastu võtta ja töödelda hädaabisõnumeid. See õigus on saadaval ainult süsteemirakendustele."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"mobiilsidesõnumite lugemine"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Võimaldab rakendusel lugeda seadme vastu võetud mobiilsidesõnumeid. Mobiilsidemärguandeid edastatakse mõnes asukohas eriolukorrast teavitamiseks. Pahatahtlikud rakendused võivad segada seadme toimivust või tööd eriolukorra sõnumi vastuvõtmisel."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"saada SMS-sõnumeid"</string>
-    <!-- no translation found for permdesc_sendSms (7094729298204937667) -->
-    <skip />
+    <string name="permdesc_sendSms" msgid="7094729298204937667">"Võimaldab rakendusel saata SMS-sõnumeid. See võib kaasa tuua ootamatuid tasusid. Pahatahtlikud rakendused võivad teile tekitada kulusid, saates sõnumeid teie kinnituseta."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"lühisõnumite saatmine ilma kinnituseta"</string>
-    <!-- no translation found for permdesc_sendSmsNoConfirmation (402569800862935907) -->
-    <skip />
+    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Võimaldab rakendusel saata SMS-sõnumeid. See võib kaasa tuua ootamatuid tasusid. Pahatahtlikud rakendused võivad teile tekitada kulusid, saates sõnumeid teie kinnituseta."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lugege oma tekstisõnumeid (SMS või MMS)"</string>
-    <!-- no translation found for permdesc_readSms (2467981548684735522) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (3695967533457240550) -->
-    <skip />
+    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Võimaldab rakendusel lugeda tahvelarvutisse või SIM-kaardile salvestatud SMS-sõnumeid. See võimaldab rakendusel lugeda kõiki SMS-sõnumeid sisust või konfidentsiaalsusest hoolimata."</string>
+    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Võimaldab rakendusel lugeda telefoni või SIM-kaardile salvestatud SMS-sõnumeid. See võimaldab rakendusel lugeda kõiki SMS-sõnumeid sisust või konfidentsiaalsusest hoolimata."</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"muutke oma tekstisõnumeid (SMS või MMS)"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Võimaldab rakendusel kirjutada teie tahvelarvutisse või SIM-kaardile salvestatud SMS-sõnumitesse. Pahatahtlikud rakendused võivad teie sõnumid kustutada."</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Võimaldab rakendusel kirjutada teie telefoni või SIM-kaardile salvestatud SMS-sõnumitesse. Pahatahtlikud rakendused võivad teie sõnumid kustutada."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"võtke vastu tekstisõnumeid (WAP)"</string>
-    <!-- no translation found for permdesc_receiveWapPush (748232190220583385) -->
-    <skip />
+    <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Võimaldab rakendusel vastu võtta ja töödelda WAP-sõnumeid. See luba hõlmab võimet jälgida või kustutada teile saadetud sõnumeid neid teile näitamata."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"Käitatud rakenduste toomine"</string>
-    <!-- no translation found for permdesc_getTasks (7454215995847658102) -->
-    <skip />
+    <string name="permdesc_getTasks" msgid="7454215995847658102">"Võimaldab rakendusel tuua teavet praegu ja hiljuti käitatud ülesannete kohta. See võib lubada rakendusel avastada teavet selle kohta, milliseid rakendusi seadmes kasutatakse."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"töötavate rakenduste üksikasjade toomine"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Võimaldab rakendusel tuua üksikasjalikku teavet praegu töötavate ja hiljuti käitatud ülesannete kohta. Pahatahtlikud rakendused võivad tuvastada privaatset teavet muude rakenduste kohta."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"käitatud rakenduste ümberjärjestamine"</string>
-    <!-- no translation found for permdesc_reorderTasks (7734217754877439351) -->
-    <skip />
+    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Võimaldab rakendusel teisaldada ülesanded esiplaanile ja taustale. Rakendus võib seda teha teie sisendita."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"käitatud rakenduste peatamine"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Võimaldab rakendusel eemaldada ülesanded ja peatada nende rakendused. Pahatahtlikud rakendused võivad häirida teiste rakenduste käitumist."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"mis tahes toimingu alustamine"</string>
@@ -244,8 +234,7 @@
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"autorežiimi lubamine"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Võimaldab rakendusel autorežiimi lubada."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"sulgege teised rakendused"</string>
-    <!-- no translation found for permdesc_killBackgroundProcesses (4593353235959733119) -->
-    <skip />
+    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Võimaldab rakendusel lõpetada teiste rakenduste taustaprotsesse. See võib peatada teiste rakenduste töö."</string>
     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"Teiste rakenduste jõuga peatamine"</string>
     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Lubab rakendusel sunniviisiliselt teisi rakendusi peatada."</string>
     <string name="permlab_forceBack" msgid="652935204072584616">"Rakenduse sulguma sundimine"</string>
@@ -279,8 +268,7 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"kuva volituseta aknad"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Võimaldab rakendusel luua aknaid, mis on mõeldud kasutamiseks süsteemisisesele kasutajaliidesele. Mitte kasutada tavarakenduste puhul."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"tõmmake üle teiste rakenduste"</string>
-    <!-- no translation found for permdesc_systemAlertWindow (4460454022797261814) -->
-    <skip />
+    <string name="permdesc_systemAlertWindow" msgid="4460454022797261814">"Võimaldab rakendusel kuvada süsteemihoiatuste aknaid. Mõned hoiatusaknad võivad hõlmata kogu ekraani."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"muuda üldist animatsioonikiirust"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Võimaldab rakendusel muuta animatsiooni üldist kiirust (animatsioone kiirendada või aeglustada) ükskõik millal."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"Rakenduse lubade haldamine"</string>
@@ -313,10 +301,8 @@
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"Linuxi signaalide saatmine rakendustele"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Võimaldab rakendusel taotleda edastatud signaali saatmist kõigile püsiprotsessidele."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"Rakenduste pidev töös hoidmine"</string>
-    <!-- no translation found for permdesc_persistentActivity (8525189272329086137) -->
-    <skip />
-    <!-- no translation found for permdesc_persistentActivity (4384760047508278272) -->
-    <skip />
+    <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Võimaldab rakendusel muuta oma osi mälus püsivaks. See võib piirata teistele (tahvelarvutit aeglasemaks muutvatele) rakendustele saadaolevat mälu."</string>
+    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Võimaldab rakendusel muuta oma osi mälus püsivaks. See võib piirata teistele (telefoni aeglasemaks muutvatele) rakendustele saadaolevat mälu."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"Rakenduste kustutamine"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Võimaldab rakendusel kustutada Android-pakette. Pahatahtlikud rakendused võivad seda kasutada oluliste rakenduste kustutamiseks."</string>
     <string name="permlab_clearAppUserData" msgid="274109191845842756">"Teiste rakenduste andmete kustutamine"</string>
@@ -356,82 +342,55 @@
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Võimaldab rakendusel käivituda ise kohe, kui süsteem on käivitunud. See võib tahvelarvuti käivitamist aeglustada ja lubab rakendusel muuta tahvelarvuti ka üldiselt aeglasemaks, kuna töötab pidevalt."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Võimaldab rakendusel käivituda ise kohe, kui süsteem on käivitunud. See võib telefoni käivitamist aeglustada ja lubab rakendusel muuta telefoni ka üldiselt aeglasemaks, kuna töötab pidevalt."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"kleepsaate saatmine"</string>
-    <!-- no translation found for permdesc_broadcastSticky (7749760494399915651) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastSticky (2825803764232445091) -->
-    <skip />
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Võimaldab rakendusel saata püsivaid edastusi, mis jäävad pärast saate lõppemist alles. Ülemäärane kasutamine võib muuta tahvelarvuti aeglaseks või ebastabiilseks, põhjustades selle liiga suure mälukasutuse."</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Võimaldab rakendusel saata püsivaid edastusi, mis jäävad pärast saate lõppemist alles. Ülemäärane kasutamine võib muuta telefoni aeglaseks või ebastabiilseks, põhjustades selle liiga suure mälukasutuse."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"lugege oma kontakte"</string>
-    <!-- no translation found for permdesc_readContacts (5294866856941149639) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (8440654152457300662) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Võimaldab rakendusel lugeda andmeid teie tahvelarvutisse salvestatud kontaktide kohta, näiteks seda, kui tihti te kellelegi helistate, meilite või nendega muul viisil suhtlete. See luba võimaldab rakendustel salvestada teie kontaktandmeid ja pahatahtlikud rakendused võivad teie teadmata kontaktandmeid jagada."</string>
+    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Võimaldab rakendusel lugeda andmeid teie telefoni salvestatud kontaktide kohta, näiteks seda, kui tihti te kellelegi helistate, meilite või nendega muul viisil suhtlete. See luba võimaldab rakendustel salvestada teie kontaktandmeid ja pahatahtlikud rakendused võivad teie teadmata kontaktandmeid jagada."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"muutke oma kontakte"</string>
-    <!-- no translation found for permdesc_writeContacts (897243932521953602) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (589869224625163558) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Võimaldab rakendusel muuta tahvelarvutisse salvestatud kontaktide andmeid, sealhulgas seda, kui tihti olete konkreetsetele kontaktidele helistanud, meilinud või nendega muul viisil suhelnud. See luba võimaldab rakendustel kustutada kontaktandmeid."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Võimaldab rakendusel muuta telefoni salvestatud kontaktide andmeid, sealhulgas seda, kui tihti olete konkreetsetele kontaktidele helistanud, meilinud või nendega muul viisil suhelnud. See luba võimaldab rakendustel kustutada kontaktandmeid."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"kõnelogi lugemine"</string>
-    <!-- no translation found for permdesc_readCallLog (3700645184870760285) -->
-    <skip />
-    <!-- no translation found for permdesc_readCallLog (5777725796813217244) -->
-    <skip />
+    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Võimaldab rakendusel lugeda teie tahvelarvuti kõnelogi, sh andmeid sissetulevate ja väljuvate kõnede kohta. See luba võimaldab rakendustel salvestada teie kõnelogi andmeid ja pahatahtlikud rakendused võivad teie teadmata kõnelogi andmeid jagada."</string>
+    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Võimaldab rakendusel lugeda teie telefoni kõnelogi, sh andmeid sissetulevate ja väljuvate kõnede kohta. See luba võimaldab rakendustel salvestada teie kõnelogi andmeid ja pahatahtlikud rakendused võivad teie teadmata kõnelogi andmeid jagada."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"kõnelogi kirjutamine"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Lubab rakendusel muuta tahvelarvuti kõnelogi, sh sissetulevate ja väljaminevate kõnede andmeid. Pahatahtlikud rakendused võivad kasutada seda kõnelogi kustutamiseks või muutmiseks."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Lubab rakendusel muuta telefoni kõnelogi, sh sissetulevate ja väljaminevate kõnede andmeid. Pahatahtlikud rakendused võivad kasutada seda kõnelogi kustutamiseks või muutmiseks."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"lugege oma kontaktikaarti"</string>
-    <!-- no translation found for permdesc_readProfile (5462475151849888848) -->
-    <skip />
+    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Võimaldab rakendusel lugeda seadmesse salvestatud isiklikku profiiliteavet, näiteks teie nime ja kontaktteavet. See tähendab, et rakendus saab teid tuvastada ja saata teie profiiliteavet teistele."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"muutke oma kontaktikaarti"</string>
-    <!-- no translation found for permdesc_writeProfile (5552084294598465899) -->
-    <skip />
+    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Võimaldab rakendusel muuta või lisada seadmesse salvestatud isiklikku profiiliteavet, näiteks teie nime ja kontaktteavet. See tähendab, et rakendus saab teid tuvastada ja saata teie profiiliteavet teistele."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"Sotsiaalvoo lugemine"</string>
-    <!-- no translation found for permdesc_readSocialStream (4255706027172050872) -->
-    <skip />
+    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Annab rakendusele juurdepääsu ja võimaldab sünkroonida teie ja teie sõprade sotsiaalseid värskendusi. Olge teabe jagamisel ettevaatlik – see võimaldab rakendusel lugeda teie suhtlusi sõpradega suhtlusvõrgustikes konfidentsiaalsusest hoolimata. Märkus: see luba ei pruugi jõustuda kõigis suhtlusvõrgustikes."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"Sotsiaalvoogu kirjutamine"</string>
-    <!-- no translation found for permdesc_writeSocialStream (3086557552204114849) -->
-    <skip />
+    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Võimaldab rakendusel kuvada sõprade sotsiaalseid värskendusi. Olge teabe jagamisel ettevaatlik – see võimaldab rakendusel luua sõnumeid, mis võivad näida tulevat sõpradelt. Märkus: see luba ei pruugi jõustuda kõikides suhtlusvõrgustikes."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"kalendrisündmuste lugemine ja konfidentsiaalne teave"</string>
-    <!-- no translation found for permdesc_readCalendar (4216462049057658723) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (7434548682470851583) -->
-    <skip />
+    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Võimaldab rakendusel lugeda kõiki tahvelarvutisse salvestatud kalendrisündmusi, sh sõprade või töökaaslaste omi. See võib lubada rakendusel jagada või salvestada teie kalendriandmeid, hoolimata konfidentsiaalsusest või tundlikkusest."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Võimaldab rakendusel lugeda kõiki telefoni salvestatud kalendrisündmusi, sh sõprade või töökaaslaste omi. See võib lubada rakendusel jagada või salvestada teie kalendriandmeid, hoolimata konfidentsiaalsusest või tundlikkusest."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"kalendrisündmuste lisamine või muutmine ja külalistele omanike teadmata meili saatmine"</string>
-    <!-- no translation found for permdesc_writeCalendar (6679035520113668528) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (2324469496327249376) -->
-    <skip />
+    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Võimaldab rakendusel lisada, eemaldada ja muuta sündmusi, mida saate muuta oma tahvelarvutis, sh sõprade ja töökaaslaste omi. See võib võimaldada rakendusel saata sõnumeid, mis näivad tulevat kalendri omanikelt, või muuta sündmusi omaniku teadmata."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Võimaldab rakendusel lisada, eemaldada ja muuta sündmusi, mida saate muuta oma telefonis, sh sõprade ja töökaaslaste omi. See võib võimaldada rakendusel saata sõnumeid, mis näivad tulevat kalendri omanikelt, või muuta sündmusi omaniku teadmata."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"võltsasukohad testimiseks"</string>
-    <!-- no translation found for permdesc_accessMockLocation (5808711039482051824) -->
-    <skip />
+    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Looge võltsasukoha allikaid, et katsetada või installida uut asukohapakkujat. See lubab rakendusel tühistada teiste asukohaallikate, näiteks GPS-i või asukohapakkujate tagastatud asukoha ja/või oleku."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"juurdepääs asukohapakkuja lisakäskudele"</string>
-    <!-- no translation found for permdesc_accessLocationExtraCommands (5945166642335800763) -->
-    <skip />
+    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Võimaldab rakendusel pääseda juurde asukohapakkuja erikäskudele. See võib lubada rakendusel segada GPS-i või muude asukohaallikate tööd."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"luba asukohapakkuja installimiseks"</string>
-    <!-- no translation found for permdesc_installLocationProvider (9066146120470591509) -->
-    <skip />
-    <!-- no translation found for permlab_accessFineLocation (5885550969882561436) -->
-    <skip />
-    <!-- no translation found for permdesc_accessFineLocation (8960597421469894181) -->
-    <skip />
-    <!-- no translation found for permdesc_accessFineLocation (239268765496141815) -->
-    <skip />
-    <!-- no translation found for permlab_accessCoarseLocation (7422827215441638984) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (5383798877137640762) -->
-    <skip />
+    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Looge võltsasukoha allikaid, et katsetada või installida uut asukohapakkujat. See lubab rakendusel tühistada teiste asukohaallikate, näiteks GPS-i või asukohapakkujate tagastatud asukoha ja/või oleku."</string>
+    <string name="permlab_accessFineLocation" msgid="5885550969882561436">"täpne (GPS-) asukoht"</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="8960597421469894181">"Tahvelarvuti kaudu saate juurdepääsu täpsetele asukoha allikatele, näiteks ülemaailmsele kohamääramise süsteemile. Kui need asukohateenused on saadaval ja sisse lülitatud, saab rakendus loa teie ligilähedase asukoha määramiseks."</string>
+    <string name="permdesc_accessFineLocation" product="default" msgid="239268765496141815">"Telefoni kaudu saate juurdepääsu täpsetele asukoha allikatele, näiteks ülemaailmsele kohamääramise süsteemile. Kui need asukohateenused on saadaval ja sisse lülitatud, saab rakendus loa teie ligilähedase asukoha määramiseks."</string>
+    <string name="permlab_accessCoarseLocation" msgid="7422827215441638984">"ligikaudne (võrgupõhine) asukoht"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="5383798877137640762">"Juurdepääs ligilähedasele asukohale asukohapakkujatelt, kes kasutavad selliseid võrguallikaid nagu mobiilside ja WiFi. Kui need asukohateenused on saadaval ja sisse lülitatud, saab rakendus loa teie ligilähedase asukoha määramiseks."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"juurdepääs SurfaceFlingerile"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Võimaldab rakendusel kasutada SurfaceFlingeri madalatasemelisi funktsioone."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"loe kaadripuhvrit"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Võimaldab rakendusel kaadripuhvri sisu lugeda."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"muuda heliseadeid"</string>
-    <!-- no translation found for permdesc_modifyAudioSettings (3522565366806248517) -->
-    <skip />
+    <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Võimaldab rakendusel muuta üldiseid heliseadeid, näiteks helitugevust ja seda, millist kõlarit kasutatakse väljundiks."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"salvesta heli"</string>
-    <!-- no translation found for permdesc_recordAudio (4906839301087980680) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Võimaldab rakendusel salvestada mikrofoniga heli. See luba võimaldab rakendusel salvestada heli igal ajal ilma teie kinnituseta."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"piltide ja videote tegemine"</string>
-    <!-- no translation found for permdesc_camera (8497216524735535009) -->
-    <skip />
+    <string name="permdesc_camera" msgid="8497216524735535009">"Võimaldab rakendusel teha kaameraga pilte ja videoid. See luba võimaldab rakendusel kasutada kaamerat mis tahes ajal teie kinnituseta."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"blokeeri tahvelarvuti jäädavalt"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"blokeeri telefon jäädavalt"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Võimaldab rakendusel kogu tahvelarvuti jäädavalt keelata. See on väga ohtlik."</string>
@@ -467,8 +426,7 @@
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testi riistvara"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Võimaldab rakendusel juhtida erinevaid välisseadmeid riistvara testimise eesmärgil."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"helista otse telefoninumbritele"</string>
-    <!-- no translation found for permdesc_callPhone (3740797576113760827) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="3740797576113760827">"Võimaldab rakendusel teie sekkumiseta telefoninumbritele helistada. See võib põhjustada ootamatuid tasusid või telefonikõnesid. Pange tähele, et see ei luba rakendusel helistada hädaabinumbritele. Pahatahtlikud rakendused võivad teile kulusid tekitada, tehes telefonikõnesid teie kinnituseta."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"helista otse mis tahes telefoninumbritele"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Võimaldab rakendusel helistada mis tahes telefoninumbrile, sh hädaabinumbritele ilma teie sekkumiseta. Pahatahtlikud rakendused võivad teha hädaabiteenustele mittevajalikke ja ebaseaduslikke kõnesid."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"käivita otse CDMA-tahvelarvuti seadistamine"</string>
@@ -483,8 +441,7 @@
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"muuda telefoni olekut"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Võimaldab rakendusel juhtida seadme telefonifunktsioone. Selle loaga rakendus saab vahetada võrke, lülitada telefoniraadiot sisse ja välja ning teha muudki ilma teid teavitamata."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lugege telefoni olekut ja identiteeti"</string>
-    <!-- no translation found for permdesc_readPhoneState (1639212771826125528) -->
-    <skip />
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Annab rakendusele juurdepääsu seadme telefonifunktsioonidele. See luba võimaldab rakendusel määrata telefoninumbri ja seadme ID-d ning kontrollida, kas kõne on aktiivne ja kaugnumber on kõne kaudu telefoniga ühendatud."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"tahvelarvuti uinumise vältimine"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"väldi telefoni uinumist"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Võimaldab rakendusel vältida tahvelarvuti uinumist."</string>
@@ -511,10 +468,8 @@
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"AccountManagerService\'ina tegutsemine"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Võimaldab rakendusel helistada konto autentijatele."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"leidke seadmest kontod"</string>
-    <!-- no translation found for permdesc_getAccounts (2741496534769660027) -->
-    <skip />
-    <!-- no translation found for permdesc_getAccounts (3448316822451807382) -->
-    <skip />
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Võimaldab rakendusel hankida tahvelarvutile teadaolevaid kontoloendeid. See võib hõlmata mis tahes kontosid, mille on loonud teie installitud rakendused."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Võimaldab rakendusel hankida telefonile teadaolevaid kontoloendeid. See võib hõlmata mis tahes kontosid, mille on loonud teie installitud rakendused."</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"looge kontod ja määrake paroolid"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Võimaldab rakendusel kasutada kontohalduri konto autentija võimalusi, sh luua kontosid ning hankida ja määrata paroole."</string>
     <string name="permlab_manageAccounts" msgid="4983126304757177305">"lisage või eemaldage kontosid"</string>
@@ -522,12 +477,9 @@
     <string name="permlab_useCredentials" msgid="235481396163877642">"kasutage seadmes olevaid kontosid"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Võimaldab rakendusel taotleda autentimise lubasid."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"vaadake võrguühendusi"</string>
-    <!-- no translation found for permdesc_accessNetworkState (8318964424675960975) -->
-    <skip />
-    <!-- no translation found for permlab_createNetworkSockets (8018758136404323658) -->
-    <skip />
-    <!-- no translation found for permdesc_createNetworkSockets (3403062187779724185) -->
-    <skip />
+    <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Lubab rakendusel vaadata teavet võrguühenduste kohta, näiteks seda, millised võrgud on olemas ja ühendatud."</string>
+    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"täielik juurdepääs võrgule"</string>
+    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Võimaldab rakendusel luua võrgupesasid ja kasutada kohandatud võrguprotokolle. Brauser ja teised rakendused annavad vahendid andmete saatmiseks Internetti, nii et seda luba ei ole vaja andmete saatmiseks Internetti."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"võrguseadete ja -liikluse muutmine/hõivamine"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Võimaldab rakendusel muuta võrguseadeid ning peatada ja kontrollida kogu võrguliiklust, näiteks muuta mis tahes APN-i puhverserverit ja porti. Pahatahtlikud rakendused võivad võrgupakette jälgida, ümber suunata või muuta teie teadmata."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"muuda võrguühenduvust"</string>
@@ -537,63 +489,45 @@
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"muuda taustaandmete kasutusseadeid"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Võimaldab rakendusel muuta taustaandmete kasutuse seadeid."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"vaadake WiFi-ühendusi"</string>
-    <!-- no translation found for permdesc_accessWifiState (5002798077387803726) -->
-    <skip />
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Võimaldab rakendusel vaadata teavet WiFi-võrgu kohta, näiteks ühendatud WiFi-seadmete nimesid ja seda, kas WiFi on lubatud."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"ühendage ja katkestage ühendus WiFi-ga"</string>
-    <!-- no translation found for permdesc_changeWifiState (7137950297386127533) -->
-    <skip />
+    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Võimaldab rakendusel luua ja katkestada ühenduse WiFi-pääsupunktidega ning teha muudatusi seadme konfiguratsioonis WiFi-võrkudesse."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"luba WiFi multiedastusvastuvõtt"</string>
-    <!-- no translation found for permdesc_changeWifiMulticastState (7969774021256336548) -->
-    <skip />
-    <!-- no translation found for permdesc_changeWifiMulticastState (6851949706025349926) -->
-    <skip />
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Võimaldab rakendusel vastu võtta pakette, mis on saadetud kõikidele WiFi-võrguga ühendatud seadmetele, mis kasutavad multiedastuse aadresse, mitte ainult teie tahvelarvutit. See võtab rohkem energiat kui mittemultiedastuse režiim."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Võimaldab rakendusel vastu võtta pakette, mis on saadetud kõikidele WiFi-võrguga ühendatud seadmetele, mis kasutavad multiedastuse aadresse, mitte ainult teie telefoni. See võtab rohkem energiat kui mittemultiedastuse režiim."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"juurdepääs Bluetoothi ​​seadetele"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Võimaldab rakendusel seadistada kohalikku Bluetooth-tahvelarvutit ning leida ja siduda seda kaugseadmetega."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Võimaldab rakendusel seadistada kohalikku Bluetooth-telefoni ning leida ja siduda seda kaugseadmetega."</string>
     <string name="permlab_accessWimaxState" msgid="7436749103151096452">"Vaadake WiMAX-i ühendusi"</string>
-    <!-- no translation found for permdesc_accessWimaxState (6360102877261978887) -->
-    <skip />
+    <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Võimaldab rakendusel määrata, kas WiMAX on lubatud, ja vaadata teavet kõikide ühendatud WiMAX-võrkude kohta."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX-i oleku muutmine"</string>
-    <!-- no translation found for permdesc_changeWimaxState (3156456504084201805) -->
-    <skip />
-    <!-- no translation found for permdesc_changeWimaxState (697025043004923798) -->
-    <skip />
+    <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Võimaldab rakendusel luua ja katkestada tahvelarvuti ühenduse WiMAX-i võrkudega."</string>
+    <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Võimaldab rakendusel luua ja katkestada telefoni ühenduse WiMAX-i võrkudega."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"siduge Bluetoothi seadmetega"</string>
-    <!-- no translation found for permdesc_bluetooth (3480722181852438628) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth (3207106324452312739) -->
-    <skip />
+    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Võimaldab rakendusel vaadata tahvelarvuti Bluetooth-konfiguratsiooni ning luua ja heaks kiita ühendusi seotud seadmetega."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Võimaldab rakendusel vaadata telefoni Bluetooth-konfiguratsiooni ning luua ja heaks kiita ühendusi seotud seadmetega."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"lähiväljaside juhtimine"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Võimaldab rakendusel suhelda lähiväljaside (NFC) märgendite, kaartide ja lugeritega."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"keelake ekraanilukk"</string>
-    <!-- no translation found for permdesc_disableKeyguard (6034203065077122992) -->
-    <skip />
+    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Võimaldab rakendusel keelata klahviluku ja muu seotud parooli turvalisuse. Näiteks keelab telefon klahviluku sissetuleva kõne vastuvõtmisel ja lubab klahviluku uuesti, kui kõne on lõpetatud."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"loe sünkroonimisseadeid"</string>
-    <!-- no translation found for permdesc_readSyncSettings (2706745674569678644) -->
-    <skip />
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Võimaldab rakendusel lugeda konto sünkroonimisseadeid. Näiteks võib see määrata, kas rakendus Inimesed on kontoga sünkroonitud."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"lülitage sünkroonimine sisse ja välja"</string>
-    <!-- no translation found for permdesc_writeSyncSettings (8956262591306369868) -->
-    <skip />
+    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Võimaldab rakendusel muuta konto sünkroonimisseadeid. Näiteks saab seda kasutada, et lubada rakenduse Inimesed sünkroonimine kontoga."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"loe sünkroonimisstatistikat"</string>
-    <!-- no translation found for permdesc_readSyncStats (1510143761757606156) -->
-    <skip />
+    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Võimaldab rakendusel lugeda konto sünkroonimisstatistikat, sh sünkroonimissündmuste ajalugu ja sünkroonitud andmete hulka."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"loe tellitud kanaleid"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Võimaldab rakendusel saada üksikasju praegu sünkroonitavate voogude kohta."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"kirjuta tellitud kanaleid"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Võimaldab rakendusel muuta teie praegu sünkroonitud vooge. Pahatahtlikud rakendused võivad muuta teie sünkroonitud vooge."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"lugege termineid, mis te sõnastikku lisasite"</string>
-    <!-- no translation found for permdesc_readDictionary (659614600338904243) -->
-    <skip />
+    <string name="permdesc_readDictionary" msgid="659614600338904243">"Võimaldab rakendusel lugeda kõiki sõnu, nimesid ja fraase, mille kasutaja on kasutaja sõnaraamatusse salvestanud."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"Kasutaja määratud sõnastikku kirjutamine"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Võimaldab rakendusel kirjutada kasutajasõnastikku uusi sõnu."</string>
-    <!-- no translation found for permlab_sdcardRead (8235341515605559677) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8235341515605559677) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (5791957130190763289) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (5914402684685848828) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"kaitstud salvestusruumi juurdepääsu katsetamine"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"kaitstud salvestusruumi juurdepääsu katsetamine"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Võimaldab rakendusel katsetada USB-salvestusruumi luba, mis on saadaval tulevastel seadmetel."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Võimaldab rakendusel katsetada SD-kaardi luba, mis on saadaval tulevastel seadmetel."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"muutke, kustut. USB-ruumi sisu"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD-kaardi sisu muutmine või kustutamine"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Võimaldab rakendusel kirjutada USB-mäluseadmele."</string>
@@ -850,13 +784,10 @@
     <string name="autofill_area" msgid="3547409050889952423">"Piirkond"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emiraat"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"lugege oma veebijärjehoidjaid ja -ajalugu"</string>
-    <!-- no translation found for permdesc_readHistoryBookmarks (8462378226600439658) -->
-    <skip />
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Võimaldab rakendusel lugeda kõikide URL-ide ajalugu, mida brauser on külastanud, ja kõiki brauseri järjehoidjaid. Märkus: see luba ei pruugi jõustuda kolmanda osapoole brauseritega või teiste veebisirvimisvõimega rakendustega."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"kirjutage veebijärjehoidjaid ja -ajalugu"</string>
-    <!-- no translation found for permdesc_writeHistoryBookmarks (6825527469145760922) -->
-    <skip />
-    <!-- no translation found for permdesc_writeHistoryBookmarks (8497389531014185509) -->
-    <skip />
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Võimaldab rakendusel muuta tahvelarvutisse salvestatud brauseri ajalugu või järjehoidjaid. See võimaldab rakendusel kustutada või muuta brauseri andmeid. Märkus: see luba ei pruugi jõustuda kolmanda osapoole brauserites või teistes veebisirvimisvõimega rakendustes."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Võimaldab rakendusel muuta telefoni salvestatud brauseri ajalugu või järjehoidjaid. See võimaldab rakendusel kustutada või muuta brauseri andmeid. Märkus: see luba ei pruugi jõustuda kolmanda osapoole brauserites või teistes veebisirvimisvõimega rakendustes."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"määrake äratus"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Võimaldab rakendusel seada installitud äratuskellarakenduses äratuse. Mõned äratuskellarakendused ei pruugi seda funktsiooni juurutada."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"lisa kõneposti"</string>
@@ -1103,13 +1034,6 @@
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; saadab suurel hulgal SMS-sõnumeid. Kas tahate lubada sellel rakendusel ka edaspidi sõnumeid saata?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Luba"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Keela"</string>
-    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Kas saata SMS lühinumbrile?"</string>
-    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Kas saata tasuline SMS?"</string>
-    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tahab saata tekstsõnumi adressaadile &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, mis paistab olevat SMS-i lühinumber.&lt;p&gt;Mõnele lühinumbrile saadetud sõnumi eest võidakse teie mobiilikontole esitada arve tasuliste teenuste eest.&lt;p&gt;Kas lubate rakendusel selle sõnumi saata?"</string>
-    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tahab saata tekstsõnumi adressaadile &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, mis on tasulise SMS-i lühinumber.&lt;p&gt;&lt;b&gt;Kui saadate sõnumi sellele adressaadile, esitatakse teie mobiilikontole arve tasuliste teenuste eest.&lt;/b&gt;&lt;p&gt;Kas lubate rakendusel sõnumi saata?"</string>
-    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Saada sõnum"</string>
-    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Ära saada"</string>
-    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Teata pahatahtlikust rakend."</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kaart eemaldatud"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Mobiilsidevõrk ei ole saadaval, kuni sisestate kehtiva SIM-kaardi ja taaskäivitate seadme."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Valmis"</string>
@@ -1195,10 +1119,8 @@
     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Võimaldab rakendusel muuta komponendi kohta kogutud kasutusstatistikat. Mitte kasutada tavarakenduste puhul."</string>
     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"Sisu kopeerimine"</string>
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Võimaldab rakendusel võtta sisu kopeerimiseks appi vaikekonteinerteenuse. Mitte kasutada tavarakenduste puhul."</string>
-    <!-- no translation found for permlab_route_media_output (1642024455750414694) -->
-    <skip />
-    <!-- no translation found for permdesc_route_media_output (4932818749547244346) -->
-    <skip />
+    <string name="permlab_route_media_output" msgid="1642024455750414694">"Meediaväljundi teekonna koostamine"</string>
+    <string name="permdesc_route_media_output" msgid="4932818749547244346">"Võimaldab rakendusel koostada teekonna meediaväljundist teistesse välistesse seadmetesse."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Suumi juhtimiseks puudutage kaks korda"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Vidinat ei saanud lisada."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Mine"</string>
@@ -1361,16 +1283,10 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Kas vastata kõnele?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Alati"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Ainult üks kord"</string>
-    <!-- no translation found for default_audio_route_name (6890731863195399186) -->
-    <skip />
-    <!-- no translation found for default_audio_route_name (4551396562363128432) -->
-    <skip />
-    <!-- no translation found for default_audio_route_name_headphones (8119971843803439110) -->
-    <skip />
-    <!-- no translation found for default_audio_route_name_dock_speakers (6240602982276591864) -->
-    <skip />
-    <!-- no translation found for default_audio_route_name_hdmi (7986404173839007682) -->
-    <skip />
-    <!-- no translation found for default_audio_route_category_name (3722811174003886946) -->
-    <skip />
+    <string name="default_audio_route_name" product="tablet" msgid="6890731863195399186">"Tahvelarvuti kõlarid"</string>
+    <string name="default_audio_route_name" product="default" msgid="4551396562363128432">"Telefoni kõlar"</string>
+    <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Kõrvaklapid"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Doki kõlarid"</string>
+    <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"HDMI heli"</string>
+    <string name="default_audio_route_category_name" msgid="3722811174003886946">"Süsteem"</string>
 </resources>
