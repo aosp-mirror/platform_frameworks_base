@@ -3351,6 +3351,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mPositionScroller.stop();
         }
 
+        if (!mIsAttached) {
+            // Something isn't right.
+            // Since we rely on being attached to get data set change notifications,
+            // don't risk doing anything where we might try to resync and find things
+            // in a bogus state.
+            return false;
+        }
+
         if (mFastScroller != null) {
             boolean intercepted = mFastScroller.onTouchEvent(ev);
             if (intercepted) {
@@ -3844,6 +3852,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         if (mPositionScroller != null) {
             mPositionScroller.stop();
+        }
+
+        if (!mIsAttached) {
+            // Something isn't right.
+            // Since we rely on being attached to get data set change notifications,
+            // don't risk doing anything where we might try to resync and find things
+            // in a bogus state.
+            return false;
         }
 
         if (mFastScroller != null) {
