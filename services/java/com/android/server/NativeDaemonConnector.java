@@ -35,6 +35,9 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.LinkedList;
 
 /**
@@ -482,102 +485,108 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
     private static class ResponseQueue {
 
-        private static class Response {
+        private static class PendingCmd {
             public int cmdNum;
-            public LinkedList<NativeDaemonEvent> responses = new LinkedList<NativeDaemonEvent>();
+            public BlockingQueue<NativeDaemonEvent> responses =
+                    new ArrayBlockingQueue<NativeDaemonEvent>(10);
             public String request;
-            public Response(int c, String r) {cmdNum = c; request = r;}
+
+            // The availableResponseCount member is used to track when we can remove this
+            // instance from the ResponseQueue.
+            // This is used under the protection of a sync of the mPendingCmds object.
+            // A positive value means we've had more writers retreive this object while
+            // a negative value means we've had more readers.  When we've had an equal number
+            // (it goes to zero) we can remove this object from the mPendingCmds list.
+            // Note that we may have more responses for this command (and more readers
+            // coming), but that would result in a new PendingCmd instance being created
+            // and added with the same cmdNum.
+            // Also note that when this goes to zero it just means a parity of readers and
+            // writers have retrieved this object - not that they are done using it.  The
+            // responses queue may well have more responses yet to be read or may get more
+            // responses added to it.  But all those readers/writers have retreived and
+            // hold references to this instance already so it can be removed from
+            // mPendingCmds queue.
+            public int availableResponseCount;
+            public PendingCmd(int c, String r) {cmdNum = c; request = r;}
         }
 
-        private final LinkedList<Response> mResponses;
+        private final LinkedList<PendingCmd> mPendingCmds;
         private int mMaxCount;
 
         ResponseQueue(int maxCount) {
-            mResponses = new LinkedList<Response>();
+            mPendingCmds = new LinkedList<PendingCmd>();
             mMaxCount = maxCount;
         }
 
         public void add(int cmdNum, NativeDaemonEvent response) {
-            Response found = null;
-            synchronized (mResponses) {
-                for (Response r : mResponses) {
-                    if (r.cmdNum == cmdNum) {
-                        found = r;
+            PendingCmd found = null;
+            synchronized (mPendingCmds) {
+                for (PendingCmd pendingCmd : mPendingCmds) {
+                    if (pendingCmd.cmdNum == cmdNum) {
+                        found = pendingCmd;
                         break;
                     }
                 }
                 if (found == null) {
                     // didn't find it - make sure our queue isn't too big before adding
-                    // another..
-                    while (mResponses.size() >= mMaxCount) {
+                    while (mPendingCmds.size() >= mMaxCount) {
                         Slog.e("NativeDaemonConnector.ResponseQueue",
-                                "more buffered than allowed: " + mResponses.size() +
+                                "more buffered than allowed: " + mPendingCmds.size() +
                                 " >= " + mMaxCount);
                         // let any waiter timeout waiting for this
-                        Response r = mResponses.remove();
+                        PendingCmd pendingCmd = mPendingCmds.remove();
                         Slog.e("NativeDaemonConnector.ResponseQueue",
-                                "Removing request: " + r.request + " (" + r.cmdNum + ")");
+                                "Removing request: " + pendingCmd.request + " (" +
+                                pendingCmd.cmdNum + ")");
                     }
-                    found = new Response(cmdNum, null);
-                    mResponses.add(found);
+                    found = new PendingCmd(cmdNum, null);
+                    mPendingCmds.add(found);
                 }
-                found.responses.add(response);
+                found.availableResponseCount++;
+                // if a matching remove call has already retrieved this we can remove this
+                // instance from our list
+                if (found.availableResponseCount == 0) mPendingCmds.remove(found);
             }
-            synchronized (found) {
-                found.notify();
-            }
+            try {
+                found.responses.put(response);
+            } catch (InterruptedException e) { }
         }
 
         // note that the timeout does not count time in deep sleep.  If you don't want
         // the device to sleep, hold a wakelock
         public NativeDaemonEvent remove(int cmdNum, int timeoutMs, String origCmd) {
-            long endTime = SystemClock.uptimeMillis() + timeoutMs;
-            long nowTime;
-            Response found = null;
-            while (true) {
-                synchronized (mResponses) {
-                    for (Response response : mResponses) {
-                        if (response.cmdNum == cmdNum) {
-                            found = response;
-                            // how many response fragments are left
-                            switch (response.responses.size()) {
-                            case 0:  // haven't got any - must wait
-                                break;
-                            case 1:  // last one - remove this from the master list
-                                mResponses.remove(response); // fall through
-                            default: // take one and move on
-                                response.request = origCmd;
-                                return response.responses.remove();
-                            }
-                        }
-                    }
-                    nowTime = SystemClock.uptimeMillis();
-                    if (endTime <= nowTime) {
-                        Slog.e("NativeDaemonConnector.ResponseQueue",
-                                "Timeout waiting for response");
-                        return null;
-                    }
-                    /* pre-allocate so we have something unique to wait on */
-                    if (found == null) {
-                        found = new Response(cmdNum, origCmd);
-                        mResponses.add(found);
+            PendingCmd found = null;
+            synchronized (mPendingCmds) {
+                for (PendingCmd pendingCmd : mPendingCmds) {
+                    if (pendingCmd.cmdNum == cmdNum) {
+                        found = pendingCmd;
+                        break;
                     }
                 }
-                try {
-                    synchronized (found) {
-                        found.wait(endTime - nowTime);
-                    }
-                } catch (InterruptedException e) {
-                    // loop around to check if we're done or if it's time to stop waiting
+                if (found == null) {
+                    found = new PendingCmd(cmdNum, origCmd);
+                    mPendingCmds.add(found);
                 }
+                found.availableResponseCount--;
+                // if a matching add call has already retrieved this we can remove this
+                // instance from our list
+                if (found.availableResponseCount == 0) mPendingCmds.remove(found);
             }
+            NativeDaemonEvent result = null;
+            try {
+                result = found.responses.poll(timeoutMs, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {}
+            if (result == null) {
+                Slog.e("NativeDaemonConnector.ResponseQueue", "Timeout waiting for response");
+            }
+            return result;
         }
 
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             pw.println("Pending requests:");
-            synchronized (mResponses) {
-                for (Response response : mResponses) {
-                    pw.println("  Cmd " + response.cmdNum + " - " + response.request);
+            synchronized (mPendingCmds) {
+                for (PendingCmd pendingCmd : mPendingCmds) {
+                    pw.println("  Cmd " + pendingCmd.cmdNum + " - " + pendingCmd.request);
                 }
             }
         }
