@@ -1067,6 +1067,11 @@ class WindowStateAnimator {
 
         if (w.mAttachedHidden || !w.isReadyForDisplay()) {
             hide();
+            // TODO: Consider moving the following into hide() and out of finishExit() as well.
+            if (mService.mWallpaperTarget == mWin && mService.mLowerWallpaperTarget == null) {
+                mAnimator.hideWallpapersLocked();
+                mAnimator.mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+            }
             // If we are waiting for this window to handle an
             // orientation change, well, it is hidden, so
             // doesn't really matter.  Note that this does
