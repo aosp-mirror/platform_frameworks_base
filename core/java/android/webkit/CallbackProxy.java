@@ -403,17 +403,18 @@ class CallbackProxy extends Handler {
                 break;
 
             case PROCEEDED_AFTER_SSL_ERROR:
-                if (mWebViewClient != null) {
-                    mWebViewClient.onProceededAfterSslError(mWebView.getWebView(),
+                if (mWebViewClient != null && mWebViewClient instanceof WebViewClientClassicExt) {
+                    ((WebViewClientClassicExt) mWebViewClient).onProceededAfterSslError(
+                            mWebView.getWebView(),
                             (SslError) msg.obj);
                 }
                 break;
 
             case CLIENT_CERT_REQUEST:
-                if (mWebViewClient != null) {
-                    HashMap<String, Object> map =
-                        (HashMap<String, Object>) msg.obj;
-                    mWebViewClient.onReceivedClientCertRequest(mWebView.getWebView(),
+                if (mWebViewClient != null  && mWebViewClient instanceof WebViewClientClassicExt) {
+                    HashMap<String, Object> map = (HashMap<String, Object>) msg.obj;
+                    ((WebViewClientClassicExt) mWebViewClient).onReceivedClientCertRequest(
+                            mWebView.getWebView(),
                             (ClientCertRequestHandler) map.get("handler"),
                             (String) map.get("host_and_port"));
                 }
@@ -1081,7 +1082,7 @@ class CallbackProxy extends Handler {
     }
 
     public void onProceededAfterSslError(SslError error) {
-        if (mWebViewClient == null) {
+        if (mWebViewClient == null || !(mWebViewClient instanceof WebViewClientClassicExt)) {
             return;
         }
         Message msg = obtainMessage(PROCEEDED_AFTER_SSL_ERROR);
@@ -1092,7 +1093,7 @@ class CallbackProxy extends Handler {
     public void onReceivedClientCertRequest(ClientCertRequestHandler handler, String host_and_port) {
         // Do an unsynchronized quick check to avoid posting if no callback has
         // been set.
-        if (mWebViewClient == null) {
+        if (mWebViewClient == null || !(mWebViewClient instanceof WebViewClientClassicExt)) {
             handler.cancel();
             return;
         }
