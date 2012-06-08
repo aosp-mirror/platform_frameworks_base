@@ -177,12 +177,15 @@ static void nativeReleaseWakeLock(JNIEnv *env, jobject clazz, jstring idObj) {
 }
 
 static int nativeSetScreenState(JNIEnv *env, jobject clazz, jboolean on) {
+    sp<ISurfaceComposer> s(ComposerService::getComposerService());
     if (on) {
         autosuspend_disable();
         if (gPowerModule) {
             gPowerModule->setInteractive(gPowerModule, true);
         }
+        s->unblank();
     } else {
+        s->blank();
         if (gPowerModule) {
             gPowerModule->setInteractive(gPowerModule, false);
         }
