@@ -262,22 +262,22 @@ public class MediaRouteButton extends View {
 
     private class MediaRouteCallback extends MediaRouter.SimpleCallback {
         @Override
-        public void onRouteSelected(int type, RouteInfo info) {
+        public void onRouteSelected(MediaRouter router, int type, RouteInfo info) {
             updateRemoteIndicator();
         }
 
         @Override
-        public void onRouteUnselected(int type, RouteInfo info) {
+        public void onRouteUnselected(MediaRouter router, int type, RouteInfo info) {
             updateRemoteIndicator();
         }
 
         @Override
-        public void onRouteAdded(int type, RouteInfo info) {
+        public void onRouteAdded(MediaRouter router, RouteInfo info) {
             updateRouteCount();
         }
 
         @Override
-        public void onRouteRemoved(int type, RouteInfo info) {
+        public void onRouteRemoved(MediaRouter router, RouteInfo info) {
             updateRouteCount();
         }
     }
