@@ -246,12 +246,17 @@ public class StaticLayout extends Layout {
             int width = firstWidth;
 
             float w = 0;
+            // here is the offset of the starting character of the line we are currently measuring
             int here = paraStart;
 
+            // ok is a character offset located after a word separator (space, tab, number...) where
+            // we would prefer to cut the current line. Equals to here when no such break was found.
             int ok = paraStart;
             float okWidth = w;
             int okAscent = 0, okDescent = 0, okTop = 0, okBottom = 0;
 
+            // fit is a character offset such that the [here, fit[ range fits in the allowed width.
+            // We will cut the line there if no ok position is found.
             int fit = paraStart;
             float fitWidth = w;
             int fitAscent = 0, fitDescent = 0, fitTop = 0, fitBottom = 0;
@@ -260,29 +265,21 @@ public class StaticLayout extends Layout {
             boolean hasTab = false;
             TabStops tabStops = null;
 
-            for (int spanStart = paraStart, spanEnd = spanStart, nextSpanStart;
-                    spanStart < paraEnd; spanStart = nextSpanStart) {
+            for (int spanStart = paraStart, spanEnd; spanStart < paraEnd; spanStart = spanEnd) {
 
-                if (spanStart == spanEnd) {
-                    if (spanned == null)
-                        spanEnd = paraEnd;
-                    else
-                        spanEnd = spanned.nextSpanTransition(spanStart, paraEnd,
-                                MetricAffectingSpan.class);
-
+                if (spanned == null) {
+                    spanEnd = paraEnd;
                     int spanLen = spanEnd - spanStart;
-                    if (spanned == null) {
-                        measured.addStyleRun(paint, spanLen, fm);
-                    } else {
-                        MetricAffectingSpan[] spans =
+                    measured.addStyleRun(paint, spanLen, fm);
+                } else {
+                    spanEnd = spanned.nextSpanTransition(spanStart, paraEnd,
+                            MetricAffectingSpan.class);
+                    int spanLen = spanEnd - spanStart;
+                    MetricAffectingSpan[] spans =
                             spanned.getSpans(spanStart, spanEnd, MetricAffectingSpan.class);
-                        spans = TextUtils.removeEmptySpans(spans, spanned,
-                                MetricAffectingSpan.class);
-                        measured.addStyleRun(paint, spans, spanLen, fm);
-                    }
+                    spans = TextUtils.removeEmptySpans(spans, spanned, MetricAffectingSpan.class);
+                    measured.addStyleRun(paint, spans, spanLen, fm);
                 }
-
-                nextSpanStart = spanEnd;
 
                 int fmTop = fm.top;
                 int fmBottom = fm.bottom;
@@ -343,8 +340,6 @@ public class StaticLayout extends Layout {
                         w += widths[j - paraStart];
                     }
 
-                    // Log.e("text", "was " + before + " now " + w + " after " + c + " within " + width);
-
                     if (w <= width) {
                         fitWidth = w;
                         fit = j + 1;
@@ -373,7 +368,6 @@ public class StaticLayout extends Layout {
                          * except for NS (non-starters), which can be broken
                          * after but not before.
                          */
-
                         if (c == CHAR_SPACE || c == CHAR_TAB ||
                             ((c == CHAR_DOT || c == CHAR_COMMA ||
                                     c == CHAR_COLON || c == CHAR_SEMICOLON) &&
@@ -437,17 +431,9 @@ public class StaticLayout extends Layout {
                                 needMultiply, chdirs, dir, easy, bufEnd, includepad, trackpad,
                                 chs, widths, paraStart, ellipsize, ellipsizedWidth,
                                 currentTextWidth, paint, moreChars);
+
                         here = endPos;
-
-                        if (here < spanStart) {
-                            // didn't output all the text for this span
-                            // we've measured the raw widths, though, so
-                            // just reset the start point
-                            j = nextSpanStart = here;
-                        } else {
-                            j = here - 1;    // continue looping
-                        }
-
+                        j = here - 1; // restart j-span loop from here, compensating for the j++
                         ok = fit = here;
                         w = 0;
                         fitAscent = fitDescent = fitTop = fitBottom = 0;
@@ -456,7 +442,16 @@ public class StaticLayout extends Layout {
                         if (--firstWidthLineLimit <= 0) {
                             width = restWidth;
                         }
+
+                        if (here < spanStart) {
+                            // The text was cut before the beginning of the current span range.
+                            // Exit the span loop, and get spanStart to start over from here.
+                            measured.setPos(here);
+                            spanEnd = here;
+                            break;
+                        }
                     }
+                    // FIXME This should be moved in the above else block which changes mLineCount
                     if (mLineCount >= mMaximumVisibleLineCount) {
                         break;
                     }
