@@ -1282,7 +1282,7 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Qala Isiphequluli?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Amukela ucingo?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Njalo"</string>
-    <string name="activity_resolver_use_once" msgid="2404644797149173758">"Kanje nje"</string>
+    <string name="activity_resolver_use_once" msgid="2404644797149173758">"Kanye nje"</string>
     <string name="default_audio_route_name" product="tablet" msgid="6890731863195399186">"Izipika zethebhulethi"</string>
     <string name="default_audio_route_name" product="default" msgid="4551396562363128432">"Isipika sefoni"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Ama-headphone"</string>

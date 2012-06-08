@@ -194,43 +194,33 @@
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"expandir o reducir la barra de estado"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Permite que la aplicación muestre y oculte la barra de estado."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"redireccionar llamadas salientes"</string>
-    <!-- no translation found for permdesc_processOutgoingCalls (5331318931937402040) -->
-    <skip />
+    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Permite que la aplicación procese las llamadas salientes y cambie el número que se va a marcar. La aplicación puede utilizar este permiso para controlar o desviar llamadas salientes o para impedir que se realicen."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"recibir mensajes de texto (SMS)"</string>
-    <!-- no translation found for permdesc_receiveSms (6424387754228766939) -->
-    <skip />
+    <string name="permdesc_receiveSms" msgid="6424387754228766939">"Permite que la aplicación reciba y procese mensajes SMS, lo que significa que podría controlar o eliminar mensajes enviados al dispositivo sin mostrártelos."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"recibir mensajes de texto (MMS)"</string>
-    <!-- no translation found for permdesc_receiveMms (533019437263212260) -->
-    <skip />
+    <string name="permdesc_receiveMms" msgid="533019437263212260">"Permite que la aplicación reciba y procese mensajes MMS, lo que significa que podría controlar o eliminar mensajes enviados al dispositivo sin mostrártelos."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"recibir mensajes de emergencia"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Permite que la aplicación reciba y procese mensajes de emergencia. Este permiso sólo está disponible para las aplicaciones del sistema."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"Leer mensajes de difusión móvil"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite a la aplicación leer los mensajes de difusión móvil que recibe tu dispositivo. En algunas ubicaciones, las alertas de difusión móvil se envían para informar situaciones de emergencia. Las aplicaciones maliciosas pueden afectar el rendimiento o funcionamiento de tu dispositivo cuando se recibe un un mensaje de difusión móvil de emergencia."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"enviar mensajes SMS"</string>
-    <!-- no translation found for permdesc_sendSms (7094729298204937667) -->
-    <skip />
+    <string name="permdesc_sendSms" msgid="7094729298204937667">"Permite que la aplicación envíe mensajes SMS, lo que puede generar cargos inesperados. Las aplicaciones malintencionadas pueden causarte gastos imprevistos al enviar mensajes sin tu confirmación."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"Enviar mensajes SMS sin confirmación"</string>
-    <!-- no translation found for permdesc_sendSmsNoConfirmation (402569800862935907) -->
-    <skip />
+    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Permite que la aplicación envíe mensajes SMS, lo que puede generar cargos inesperados. Las aplicaciones malintencionadas pueden causarte gastos imprevistos al enviar mensajes sin tu confirmación."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"leer tus mensajes de texto (SMS o MMS)"</string>
-    <!-- no translation found for permdesc_readSms (2467981548684735522) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (3695967533457240550) -->
-    <skip />
+    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Permite que la aplicación consulte los mensajes SMS almacenados en la tableta o en la tarjeta SIM. La aplicación puede utilizar este permiso para leer todos los mensajes SMS, independientemente de cuál sea su contenido o su nivel de confidencialidad."</string>
+    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Permite que la aplicación consulte los mensajes SMS almacenados en el teléfono o en la tarjeta SIM. La aplicación puede utilizar este permiso para leer todos los mensajes SMS, independientemente de cuál sea su contenido o su nivel de confidencialidad."</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"editar tus mensajes de texto (SMS o MMS)"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Permite que la aplicación escriba en mensajes SMS almacenados en tu tableta o tarjeta SIM. Las aplicaciones maliciosas pueden eliminar tus mensajes."</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Permite que la aplicación escriba en mensajes SMS almacenados en tu dispositivo o tarjeta SIM. Las aplicaciones maliciosas pueden eliminar tus mensajes."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"recibir mensajes de texto (WAP)"</string>
-    <!-- no translation found for permdesc_receiveWapPush (748232190220583385) -->
-    <skip />
+    <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permite que la aplicación reciba y procese mensajes WAP, lo que significa que podría controlar o eliminar mensajes enviados al usuario sin mostrártelos."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recuperar aplicaciones en ejecución"</string>
-    <!-- no translation found for permdesc_getTasks (7454215995847658102) -->
-    <skip />
+    <string name="permdesc_getTasks" msgid="7454215995847658102">"Permite que la aplicación recupere información sobre las tareas que se estén ejecutando en ese momento o que se hayan ejecutado recientemente. La aplicación puede utilizar este permiso para descubrir cuáles son las aplicaciones que se utilizan en el dispositivo."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"recuperar información sobre las aplicaciones en ejecución"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Permite que la aplicación recupere información detallada sobre tareas en ejecución y recientemente ejecutadas. Las aplicaciones malintencionadas pueden hallar información privada sobre otras aplicaciones."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"reorganizar aplicaciones en ejecución"</string>
-    <!-- no translation found for permdesc_reorderTasks (7734217754877439351) -->
-    <skip />
+    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Permite que la aplicación mueva tareas a segundo o a primer plano. La aplicación puede utilizar este permiso para realizar estos movimientos sin indicártelo."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"detener las aplicaciones en ejecución"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Permite que la aplicación elimine tareas y cierre sus aplicaciones. Las aplicaciones malintencionadas pueden usar este permiso para interferir en el comportamiento de otras aplicaciones."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"Iniciar cualquier actividad"</string>
@@ -244,8 +234,7 @@
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"activar el modo de auto"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Permite que la aplicación habilite el modo coche."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"cerrar otras aplicaciones"</string>
-    <!-- no translation found for permdesc_killBackgroundProcesses (4593353235959733119) -->
-    <skip />
+    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Este permiso autoriza a la aplicación a interrumpir procesos en segundo plano de otras aplicaciones y puede hacer, por lo tanto, que esas aplicaciones dejen de ejecutarse."</string>
     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"forzar la detención de otras aplicaciones"</string>
     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Permite que la aplicación fuerce la detención de otras aplicaciones."</string>
     <string name="permlab_forceBack" msgid="652935204072584616">"forzar el cierre de la aplicación"</string>
@@ -279,8 +268,7 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"mostrar ventanas no autorizadas"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Permite que la aplicación cree ventanas para la interfaz de usuario interna del sistema. Las aplicaciones normales no deben usar este permiso."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"destacar sobre otras aplicaciones"</string>
-    <!-- no translation found for permdesc_systemAlertWindow (4460454022797261814) -->
-    <skip />
+    <string name="permdesc_systemAlertWindow" msgid="4460454022797261814">"Permite que la aplicación muestre ventanas de alerta del sistema. Algunas ventanas de alerta pueden ocupar toda la pantalla."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"modificar la velocidad de la animación global"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Permite que la aplicación cambie la velocidad de animación global (animaciones más rápidas o más lentas) en cualquier momento."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"administrar tokens de aplicación"</string>
@@ -313,10 +301,8 @@
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"enviar señales de Linux a las aplicaciones"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Permite que la aplicación solicite que la señal suministrada se envíe a todos los procesos persistentes."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"hacer que la aplicación se ejecute siempre"</string>
-    <!-- no translation found for permdesc_persistentActivity (8525189272329086137) -->
-    <skip />
-    <!-- no translation found for permdesc_persistentActivity (4384760047508278272) -->
-    <skip />
+    <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Permite que la aplicación haga que algunas de sus partes se mantengan persistentes en la memoria. Esto puede limitar la memoria disponible para otras aplicaciones y ralentizar la tableta."</string>
+    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Permite que la aplicación haga que algunas de sus partes se mantengan persistentes en la memoria. Esto puede limitar la memoria disponible para otras aplicaciones y ralentizar el teléfono."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"eliminar aplicaciones"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Permite que la aplicación elimine paquetes de Android. Las aplicaciones maliciosas pueden utilizar este permiso para eliminar aplicaciones importantes."</string>
     <string name="permlab_clearAppUserData" msgid="274109191845842756">"eliminar datos de otras aplicaciones"</string>
@@ -356,82 +342,55 @@
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Permite que la aplicación se inicie en cuanto el sistema haya finalizado la inicialización. Esto puede ocasionar que la tableta tarde más en inicializarse y que la aplicación ralentice el funcionamiento general de la tableta al estar en ejecución constante."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Permite que la aplicación se inicie en cuanto el sistema haya finalizado la inicialización. Esto puede ocasionar que el dispositivo tarde más en inicializarse y que la aplicación ralentice el funcionamiento general del dispositivo al estar en ejecución constante."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"enviar emisiones pegajosas"</string>
-    <!-- no translation found for permdesc_broadcastSticky (7749760494399915651) -->
-    <skip />
-    <!-- no translation found for permdesc_broadcastSticky (2825803764232445091) -->
-    <skip />
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Permite que la aplicación envíe transmisiones persistentes que permanecen después de que finaliza la transmisión. Un uso excesivo podría ralentizar la tableta o hacer que funcione de manera inestable al forzarla a utilizar mucha memoria."</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Permite que la aplicación envíe transmisiones persistentes que permanecen después de que finaliza la transmisión. Un uso excesivo podría ralentizar el teléfono o hacer que funcione de manera inestable al forzarlo a utilizar mucha memoria."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"leer tus contactos"</string>
-    <!-- no translation found for permdesc_readContacts (5294866856941149639) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (8440654152457300662) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Permite que la aplicación consulte información sobre los contactos almacenados en la tableta, incluida la frecuencia con la que los has llamado, les has enviado un correo electrónico o te has puesto en contacto con ellos de otro modo. Las aplicaciones pueden utilizar este permiso para guardar los datos de los contactos, y las aplicaciones malintencionadas podrían compartirlos sin tu consentimiento."</string>
+    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Permite que la aplicación consulte información sobre contactos almacenados en el teléfono, incluida la frecuencia con la que los has llamado, les has enviado un correo electrónico o te has puesto en contacto con ellos de otro modo. Las aplicaciones pueden utilizar este permiso para guardar los datos de los contactos, y las aplicaciones malintencionadas podrían compartirlos sin tu consentimiento."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"modificar tus contactos"</string>
-    <!-- no translation found for permdesc_writeContacts (897243932521953602) -->
-    <skip />
-    <!-- no translation found for permdesc_writeContacts (589869224625163558) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Permite que la aplicación modifique los datos de los contactos almacenados en la tableta, incluida la frecuencia con la que los has llamado, les has enviado un correo electrónico o te has puesto en contacto con ellos de otro modo. Las aplicaciones pueden utilizar este permiso para eliminar datos de contactos."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Permite que la aplicación modifique los datos de los contactos almacenados en el teléfono, incluida la frecuencia con la que los has llamado, les has enviado un correo electrónico o te has puesto en contacto con ellos de otro modo. Las aplicaciones pueden utilizar este permiso para eliminar datos de contactos."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"leer el registro de llamadas"</string>
-    <!-- no translation found for permdesc_readCallLog (3700645184870760285) -->
-    <skip />
-    <!-- no translation found for permdesc_readCallLog (5777725796813217244) -->
-    <skip />
+    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Permite que la aplicación consulte el registro de llamadas de la tableta, incluidos los datos sobre llamadas entrantes y salientes. Las aplicaciones pueden utilizar este permiso para guardar los datos del registro de llamadas, y las aplicaciones malintencionadas podrían compartirlos sin tu consentimiento."</string>
+    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Permite que la aplicación consulte el registro de llamadas del teléfono, incluidos los datos sobre llamadas entrantes y salientes. Las aplicaciones pueden utilizar este permiso para guardar los datos del registro de llamadas, y las aplicaciones malintencionadas podrían compartirlos sin tu consentimiento."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"escribir en el registro de llamadas"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Permite que la aplicación modifique el registro de llamadas de la tableta, incluidos los datos sobre llamadas entrantes y salientes. Las aplicaciones malintencionadas pueden usar este permiso para borrar o modificar el registro de llamadas."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Permite que la aplicación modifique el registro de llamadas del dispositivo, incluidos los datos sobre llamadas entrantes y salientes. Las aplicaciones malintencionadas pueden usar este permiso para borrar o modificar el registro de llamadas."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"leer tarjeta contacto propia"</string>
-    <!-- no translation found for permdesc_readProfile (5462475151849888848) -->
-    <skip />
+    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Permite que la aplicación consulte la información del perfil personal almacenada en el dispositivo, como el nombre o la información de contacto, lo que significa que la aplicación puede identificar al usuario y enviar la información de su perfil a otros usuarios."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"modif. tarjeta contacto propia"</string>
-    <!-- no translation found for permdesc_writeProfile (5552084294598465899) -->
-    <skip />
+    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Permite que la aplicación modifique la información del perfil personal almacenada en el dispositivo, como el nombre o la información de contacto, o que agregue contenido a esa información. Esto significa que puede identificarte y enviar la información de tu perfil a otros usuarios."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"Lectura de tu muro social"</string>
-    <!-- no translation found for permdesc_readSocialStream (4255706027172050872) -->
-    <skip />
+    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Permite que la aplicación acceda a las actualizaciones de tus redes sociales y las de tus amigos, y que las sincronice. Ten cuidado al compartir información, ya que la aplicación puede utilizar este permiso para leer las conversaciones que tengas con tus amigos en las redes sociales sin tener en cuenta si son confidenciales. Nota: Este permiso no se puede utilizar en todas las redes sociales."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"Escritura en tu muro social"</string>
-    <!-- no translation found for permdesc_writeSocialStream (3086557552204114849) -->
-    <skip />
+    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Permite que la aplicación muestre actualizaciones de las redes sociales de tus amigos. Ten cuidado al compartir información, ya que la aplicación puede generar mensajes que parezcan proceder de amigos. Nota: Este permiso no se puede utilizar en todas las redes sociales."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"Leer eventos de calendario e información confidencial"</string>
-    <!-- no translation found for permdesc_readCalendar (4216462049057658723) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (7434548682470851583) -->
-    <skip />
+    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Permite que la aplicación consulte todos los eventos de calendario almacenados en la tableta, incluidos los de amigos y compañeros de trabajo. La aplicación puede utilizar este permiso para compartir o guardar datos del calendario del usuario sin tener en cuenta si son privados o confidenciales."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Permite que la aplicación consulte todos los eventos de calendario almacenados en el teléfono, incluidos los de amigos y compañeros de trabajo. La aplicación puede utilizar este permiso para compartir o guardar los datos del calendario sin tener en cuenta si son privados o confidenciales."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"Agregar o modificar los eventos de calendario y enviar un correo a los invitados sin que los propietarios lo sepan"</string>
-    <!-- no translation found for permdesc_writeCalendar (6679035520113668528) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (2324469496327249376) -->
-    <skip />
+    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Permite que la aplicación agregue, elimine y cambie eventos que se pueden modificar en la tableta, incluidos los de amigos o compañeros de trabajo. La aplicación puede utilizar este permiso para enviar mensajes que parezcan proceder de propietarios de un calendario o para modificar eventos sin el consentimiento de los propietarios."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Permite que la aplicación agregue, elimine y cambie eventos que se pueden modificar en el teléfono, incluidos los de amigos o compañeros de trabajo. La aplicación puede utilizar este permiso para enviar mensajes que parezcan proceder de propietarios de un calendario o para modificar los eventos sin el consentimiento de los propietarios."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"crear fuentes de ubicación de prueba"</string>
-    <!-- no translation found for permdesc_accessMockLocation (5808711039482051824) -->
-    <skip />
+    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Permite crear fuentes de ubicación simuladas para hacer pruebas o instalar un nuevo proveedor de ubicación. Esto autoriza a la aplicación a sobrescribir la ubicación o el estado proporcionados por otras fuentes de ubicación, como los proveedores de ubicación o GPS."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"acceder a comandos adicionales del proveedor del lugar"</string>
-    <!-- no translation found for permdesc_accessLocationExtraCommands (5945166642335800763) -->
-    <skip />
+    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Permite que la aplicación acceda a comandos adicionales del proveedor de ubicación. Esto puede permitirle a la aplicación interferir con el funcionamiento del GPS o de otras fuentes de ubicación."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"autorización para instalar un proveedor de ubicación"</string>
-    <!-- no translation found for permdesc_installLocationProvider (9066146120470591509) -->
-    <skip />
-    <!-- no translation found for permlab_accessFineLocation (5885550969882561436) -->
-    <skip />
-    <!-- no translation found for permdesc_accessFineLocation (8960597421469894181) -->
-    <skip />
-    <!-- no translation found for permdesc_accessFineLocation (239268765496141815) -->
-    <skip />
-    <!-- no translation found for permlab_accessCoarseLocation (7422827215441638984) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (5383798877137640762) -->
-    <skip />
+    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Permite crear fuentes de ubicación simuladas para hacer pruebas o instalar un nuevo proveedor de ubicación. Este permiso autoriza a la aplicación a sobrescribir la ubicación o el estado proporcionados por otras fuentes de ubicación, como los proveedores de ubicación o GPS."</string>
+    <string name="permlab_accessFineLocation" msgid="5885550969882561436">"ubicación exacta (GPS)"</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="8960597421469894181">"Permite acceder a fuentes de determinación de la ubicación exacta, como el sistema de posicionamiento global (GPS) de la tableta. Cuando los servicios de ubicación están disponibles y activados, este permiso permite que la aplicación determine tu ubicación exacta."</string>
+    <string name="permdesc_accessFineLocation" product="default" msgid="239268765496141815">"Permite acceder a fuentes de determinación de la ubicación exacta, como el sistema de posicionamiento global (GPS) del teléfono. Cuando los servicios de ubicación están disponibles y activados, este permiso permite que la aplicación determine tu ubicación exacta."</string>
+    <string name="permlab_accessCoarseLocation" msgid="7422827215441638984">"ubicación aproximada (basada en red)"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="5383798877137640762">"Permite acceder a la ubicación aproximada a través de proveedores de ubicación que utilizan fuentes de conexión como torres de telefonía móvil y redes Wi-Fi. Cuando estos servicios de ubicación están disponibles y activados, este permiso permite que la aplicación determine tu ubicación aproximada."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"acceder a SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permite que la aplicación utilice funciones de SurfaceFlinger de bajo nivel."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"leer el búfer de tramas"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Permite que la aplicación lea el contenido del búfer de tramas."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"cambiar tu configuración de audio"</string>
-    <!-- no translation found for permdesc_modifyAudioSettings (3522565366806248517) -->
-    <skip />
+    <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite que la aplicación modifique la configuración de audio global, por ejemplo, el volumen y el altavoz de salida."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"grabar audio"</string>
-    <!-- no translation found for permdesc_recordAudio (4906839301087980680) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Permite que la aplicación grabe audio con el micrófono. La aplicación puede utilizar este permiso para grabar audio en cualquier momento sin tener tu confirmación."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"tomar fotografías y grabar videos"</string>
-    <!-- no translation found for permdesc_camera (8497216524735535009) -->
-    <skip />
+    <string name="permdesc_camera" msgid="8497216524735535009">"Permite que la aplicación saque fotos o grabe videos con la cámara. Este permiso autoriza a la aplicación a utilizar la cámara en cualquier momento sin tu confirmación."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"desactivar tablet de forma permanente"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"desactivar dispositivo de manera permanente"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Permite que la aplicación inhabilite toda la tableta de manera permanente. Esto es muy peligroso."</string>
@@ -467,8 +426,7 @@
     <string name="permlab_hardware_test" msgid="4148290860400659146">"probar el hardware"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Permite que la aplicación controle distintos periféricos con fines de prueba del hardware."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"llamar directamente a números de teléfono"</string>
-    <!-- no translation found for permdesc_callPhone (3740797576113760827) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="3740797576113760827">"Permite que la aplicación haga llamadas a números de teléfono sin intervención del usuario, lo que puede dar lugar a llamadas o cargos inesperados. Ten en cuenta que las aplicaciones no pueden usar este servicio para realizar llamadas a números de emergencia, pero las aplicaciones malintencionadas pueden causarte gastos imprevistos al realizar llamadas sin tu confirmación."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"llamar directamente a cualquier número de teléfono"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Permite que la aplicación llame a cualquier número de teléfono, incluidos números de emergencia, sin tu intervención. Las aplicaciones maliciosas pueden realizar llamadas innecesarias e ilegales a servicios de emergencia."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"iniciar directamente la configuración CDMA del tablet"</string>
@@ -483,8 +441,7 @@
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"modificar el estado del dispositivo"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Permite que la aplicación controle las funciones de teléfono del dispositivo. Una aplicación con este permiso puede cambiar redes, encender y apagar la radio del teléfono y tareas similares sin siquiera notificártelo."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"leer la identidad y el estado del dispositivo"</string>
-    <!-- no translation found for permdesc_readPhoneState (1639212771826125528) -->
-    <skip />
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite que la aplicación acceda a las funciones de teléfono del dispositivo. La aplicación puede utilizar este permiso para descubrir identificadores de dispositivos y números de teléfono, para saber si una llamada está activa y para conocer el número remoto con el que se ha establecido conexión mediante una llamada."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"evitar que el tablet entre en estado de inactividad"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"evitar que el dispositivo entre en estado de inactividad"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permite que la aplicación evite que la tableta entre en estado de inactividad."</string>
@@ -511,10 +468,8 @@
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"actuar como cuenta, administrador o servicio"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Permite que la aplicación haga llamadas a los autenticadores de cuentas."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"buscar cuentas en el dispositivo"</string>
-    <!-- no translation found for permdesc_getAccounts (2741496534769660027) -->
-    <skip />
-    <!-- no translation found for permdesc_getAccounts (3448316822451807382) -->
-    <skip />
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Permite que la aplicación obtenga una lista de las cuentas reconocidas por la tableta, entre las que se pueden incluir las cuentas creadas por las aplicaciones que hayas instalado."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Permite que la aplicación obtenga una lista de las cuentas reconocidas por el teléfono, entre las que se pueden incluir las cuentas creadas por las aplicaciones que hayas instalado."</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"crear cuentas y establecer contraseñas"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Permite que la aplicación utilice las capacidades del autenticador de cuentas del administrador de cuentas, incluida la creación de cuentas y la obtención y configuración de sus contraseñas."</string>
     <string name="permlab_manageAccounts" msgid="4983126304757177305">"agregar o eliminar cuentas"</string>
@@ -522,12 +477,9 @@
     <string name="permlab_useCredentials" msgid="235481396163877642">"utilizar las cuentas del dispositivo"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Permite que la aplicación solicite tokens de autenticación."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ver conexiones de red"</string>
-    <!-- no translation found for permdesc_accessNetworkState (8318964424675960975) -->
-    <skip />
-    <!-- no translation found for permlab_createNetworkSockets (8018758136404323658) -->
-    <skip />
-    <!-- no translation found for permdesc_createNetworkSockets (3403062187779724185) -->
-    <skip />
+    <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Permite que la aplicación vea información sobre las conexiones de red, por ejemplo, qué redes existen y están conectadas."</string>
+    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"acceso completo a la red"</string>
+    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Permite que la aplicación cree sockets de red y utilice protocolos de red personalizados. El navegador y otras aplicaciones proporcionan los medios necesarios para el envío de datos a Internet, por lo que no hace falta utilizar este permiso para eso."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"Cambiar/interceptar el tráfico y la configuración de red"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Permite que la aplicación cambie la configuración de red e intercepte e inspeccione todo el tráfico de red; por ejemplo, para cambiar el proxy y el puerto de cualquier APN. Las aplicaciones maliciosas pueden controlar, redireccionar o modificar paquetes de red sin que tú lo sepas."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"cambiar la conectividad de la red"</string>
@@ -537,63 +489,45 @@
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"cambiar la configuración del uso de datos del fondo"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Permite que la aplicación cambe la configuración de uso de los datos de referencia."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"ver conexiones Wi-Fi"</string>
-    <!-- no translation found for permdesc_accessWifiState (5002798077387803726) -->
-    <skip />
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Permite que la aplicación vea información sobre la conexión a redes Wi-Fi, por ejemplo, si la conexión Wi-Fi está habilitada y cuál es el nombre de los dispositivos Wi-Fi conectados."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"conectarse y desconectarse de la red Wi-Fi"</string>
-    <!-- no translation found for permdesc_changeWifiState (7137950297386127533) -->
-    <skip />
+    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Permite que la aplicación se conecte a puntos de acceso Wi-Fi y se desconecte de ellos, y que realice modificaciones en la configuración de las redes Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"permitir recepción de multidifusión Wi-Fi"</string>
-    <!-- no translation found for permdesc_changeWifiMulticastState (7969774021256336548) -->
-    <skip />
-    <!-- no translation found for permdesc_changeWifiMulticastState (6851949706025349926) -->
-    <skip />
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Permite que la aplicación reciba paquetes enviados a todos los dispositivos de una red Wi-Fi que utilicen direcciones de multidifusión, no solo a la tableta. Utiliza más batería que el modo de no multidifusión."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Permite que la aplicación reciba paquetes enviados a todos los dispositivos de una red Wi-Fi que utilicen direcciones de multidifusión, no solo al teléfono. Utiliza más batería que el modo de no multidifusión."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"acceder a la configuración de Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permite que la aplicación configure la tableta Bluetooth local y descubra y se sincronice con dispositivos remotos."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permite que la aplicación configure el dispositivo Bluetooth local y descubra y se sincronice con dispositivos remotos."</string>
     <string name="permlab_accessWimaxState" msgid="7436749103151096452">"Ver conexiones WiMAX"</string>
-    <!-- no translation found for permdesc_accessWimaxState (6360102877261978887) -->
-    <skip />
+    <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Permite que la aplicación determine si está habilitada la conexión WiMAX y que obtenga información sobre las redes WiMAX que están conectadas."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Cambiar el estado de WiMAX"</string>
-    <!-- no translation found for permdesc_changeWimaxState (3156456504084201805) -->
-    <skip />
-    <!-- no translation found for permdesc_changeWimaxState (697025043004923798) -->
-    <skip />
+    <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Permite que la aplicación conecte la tableta a una red WiMAX y que la desconecte de ella."</string>
+    <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Permite que la aplicación conecte el teléfono a una red WiMAX y que lo desconecte de ella."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"vincular con dispositivos Bluetooth"</string>
-    <!-- no translation found for permdesc_bluetooth (3480722181852438628) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth (3207106324452312739) -->
-    <skip />
+    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Permite que la aplicación vea la configuración de Bluetooth de la tableta y que cree y acepte conexiones con los dispositivos sincronizados."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permite que la aplicación vea la configuración de Bluetooth del teléfono y que cree y acepte conexiones con los dispositivos sincronizados."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controlar la Transmisión de datos en proximidad"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permite que la aplicación se comunique con lectores, tarjetas y etiquetas de Comunicación de campo cercano (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"desactivar el bloqueo de pantalla"</string>
-    <!-- no translation found for permdesc_disableKeyguard (6034203065077122992) -->
-    <skip />
+    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permite que la aplicación inhabilite el bloqueo del teclado y cualquier protección con contraseña asociada. Por ejemplo, el teléfono puede inhabilitar el bloqueo del teclado cuando recibe una llamada telefónica y volver a habilitarlo cuando finaliza la llamada."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"leer la configuración de sincronización"</string>
-    <!-- no translation found for permdesc_readSyncSettings (2706745674569678644) -->
-    <skip />
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Este permiso permite que la aplicación consulte la configuración de sincronización de una cuenta. Esto permite, por ejemplo, determinar si la aplicación Personas está sincronizada con una cuenta."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activar y desactivar la sincronización"</string>
-    <!-- no translation found for permdesc_writeSyncSettings (8956262591306369868) -->
-    <skip />
+    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Permite que la aplicación modifique la configuración de sincronización de una cuenta. Este permiso se puede utilizar, por ejemplo, para habilitar la sincronización de la aplicación Personas con una cuenta."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"leer estadística de sincronización"</string>
-    <!-- no translation found for permdesc_readSyncStats (1510143761757606156) -->
-    <skip />
+    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Permite que la aplicación consulte las estadísticas de sincronización de una cuenta, por ejemplo, el historial de eventos sincronizados y la cantidad de datos sincronizados."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"leer canales suscritos"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permite que la aplicación obtenga detalles sobre los feeds sincronizados en este momento."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"escribir canales suscritos"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Permite que la aplicación modifique los feeds actualmente sincronizados. Las aplicaciones maliciosas pueden cambiar tus feeds sincronizados."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"leer los términos que agregaste al diccionario"</string>
-    <!-- no translation found for permdesc_readDictionary (659614600338904243) -->
-    <skip />
+    <string name="permdesc_readDictionary" msgid="659614600338904243">"Permite que la aplicación consulte cualquier palabra, nombre o frase que el usuario haya almacenado en su diccionario."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"agregar al diccionario definido por el usuario"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permite que la aplicación ingrese palabras nuevas en el diccionario del usuario."</string>
-    <!-- no translation found for permlab_sdcardRead (8235341515605559677) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8235341515605559677) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (5791957130190763289) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (5914402684685848828) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"probar acceso a almacenamiento protegido"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"probar acceso a almacenamiento protegido"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Permite que la aplicación pruebe un permiso de almacenamiento USB que estará disponible en futuros dispositivos."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Permite que la aplicación pruebe un permiso para la tarjeta SD que estará disponible en futuros dispositivos."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modificar/borrar contenido USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modificar o eliminar el contenido de la tarjeta SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permite que la aplicación escriba en el almacenamiento USB."</string>
@@ -850,13 +784,10 @@
     <string name="autofill_area" msgid="3547409050889952423">"Área"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emirato"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"leer tus marcadores web y el historial"</string>
-    <!-- no translation found for permdesc_readHistoryBookmarks (8462378226600439658) -->
-    <skip />
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Permite que la aplicación consulte el historial de todas las URL visitadas por el navegador, y todos sus marcadores. Nota: Este permiso no puede ser utilizado por navegadores externos ni otras aplicaciones que tengan funciones de navegación por Internet."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"escribir marcadores web e historial"</string>
-    <!-- no translation found for permdesc_writeHistoryBookmarks (6825527469145760922) -->
-    <skip />
-    <!-- no translation found for permdesc_writeHistoryBookmarks (8497389531014185509) -->
-    <skip />
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Permite que la aplicación modifique el historial o los marcadores del navegador almacenados en la tableta. La aplicación puede utilizar este permiso para borrar o modificar datos del navegador. Nota: Este permiso no puede ser utilizado por navegadores externos ni otras aplicaciones que tengan funciones de navegación por Internet."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permite que la aplicación modifique el historial o los marcadores del navegador almacenados en el teléfono. La aplicación puede utilizar este permiso para borrar o modificar los datos del navegador. Nota: Este permiso no puede ser utilizado por navegadores externos ni otras aplicaciones que tengan funciones de navegación por Internet."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"programar una alarma"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permite que la aplicación establezca una alarma en una aplicación de alarma instalada. Es posible que algunas aplicaciones de alarma no incluyan esta función."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"agregar correo de voz"</string>
@@ -890,9 +821,9 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Eliminar la consulta"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Enviar consulta"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Búsqueda por voz"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"¿Habilitar exploración táctil?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> quiere habilitar la exploración táctil. Cuando esta función esté activada, podrás escuchar o ver descripciones del contenido seleccionado o usar gestos para interactuar con la tableta."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> quiere habilitar la exploración táctil. Cuando esta función esté activada, podrás escuchar o ver descripciones del contenido seleccionado o usar gestos para interactuar con el teléfono."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"¿Activar exploración táctil?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> desea activar la exploración táctil. Cuando esta función esté activada, podrás escuchar o ver descripciones del contenido seleccionado o usar gestos para interactuar con la tableta."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> desea activar la exploración táctil. Cuando esta función esté activada, podrás escuchar o ver descripciones del contenido seleccionado o usar gestos para interactuar con el dispositivo."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"hace 1 mes"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Anterior a 1 mes atrás"</string>
   <plurals name="num_seconds_ago">
@@ -1188,10 +1119,8 @@
     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Permite que la aplicación modifique las estadísticas recopiladas sobre el uso de componentes. Las aplicaciones normales no deben utilizar este permiso."</string>
     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"copiar el contenido"</string>
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Permite que la aplicación ejecute el servicio de contenedor predeterminado para que copie contenido. Las aplicaciones normales no deben utilizar este permiso."</string>
-    <!-- no translation found for permlab_route_media_output (1642024455750414694) -->
-    <skip />
-    <!-- no translation found for permdesc_route_media_output (4932818749547244346) -->
-    <skip />
+    <string name="permlab_route_media_output" msgid="1642024455750414694">"Dirigir salida de medios"</string>
+    <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite que la aplicación dirija salidas de medios a otros dispositivos externos."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Toca dos veces para acceder al control de zoom."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"No se pudo agregar el widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>
@@ -1354,16 +1283,10 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"¿Aceptar la llamada?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Siempre"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Solo una vez"</string>
-    <!-- no translation found for default_audio_route_name (6890731863195399186) -->
-    <skip />
-    <!-- no translation found for default_audio_route_name (4551396562363128432) -->
-    <skip />
-    <!-- no translation found for default_audio_route_name_headphones (8119971843803439110) -->
-    <skip />
-    <!-- no translation found for default_audio_route_name_dock_speakers (6240602982276591864) -->
-    <skip />
-    <!-- no translation found for default_audio_route_name_hdmi (7986404173839007682) -->
-    <skip />
-    <!-- no translation found for default_audio_route_category_name (3722811174003886946) -->
-    <skip />
+    <string name="default_audio_route_name" product="tablet" msgid="6890731863195399186">"Altavoces de la tableta"</string>
+    <string name="default_audio_route_name" product="default" msgid="4551396562363128432">"Altavoz del teléfono"</string>
+    <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Auriculares"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Altavoces del conector"</string>
+    <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"Audio HDMI"</string>
+    <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
 </resources>

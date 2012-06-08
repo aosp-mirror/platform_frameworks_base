@@ -426,7 +426,7 @@
     <string name="permlab_hardware_test" msgid="4148290860400659146">"Tests du matériel"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Permet à l\'application de contrôler différents périphériques à des fins de test matériel."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"Appel direct des numéros de téléphone"</string>
-    <string name="permdesc_callPhone" msgid="3740797576113760827">"Permet à l\'application d\'appeler des numéros de téléphone sans votre intervention. Cette autorisation peut entraîner des frais ou des appels imprévus. Notez qu\'elle ne permet pas à l\'application d\'appeler des numéros d\'urgence. Les applications malveillantes peuvent générer des frais en passant des appels sans votre consentement."</string>
+    <string name="permdesc_callPhone" msgid="3740797576113760827">"Permet à l\'application d\'appeler des numéros de téléphone sans votre intervention. Cette autorisation peut entraîner des frais ou des appels imprévus et ne permet pas à l\'application d\'appeler des numéros d\'urgence. Les applications malveillantes peuvent générer des frais en passant des appels sans votre consentement."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"Appel direct de tout numéro de téléphone"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Permet à l\'application d\'appeler n\'importe quel numéro de téléphone, y compris les numéros d\'urgence, sans votre intervention. Des applications malveillantes peuvent passer des appels inutiles et interdits aux services d\'urgence."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"démarrer directement la configuration de la tablette CDMA"</string>
@@ -511,7 +511,7 @@
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"désactiver le verrouillage de l\'écran"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permet à l\'application de désactiver le verrouillage des touches et toute mesure de sécurité via mot de passe associée. Par exemple, votre téléphone désactive le verrouillage des touches lorsque vous recevez un appel, puis le réactive lorsque vous raccrochez."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lire les paramètres de synchronisation"</string>
-    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permet à l\'application d\'accéder aux paramètres de synchronisation d\'un compte. Cette autorisation peut permettre de déterminer si l\'application Contacts est synchronisée avec un compte ou non."</string>
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permet à l\'application d\'accéder aux paramètres de synchronisation d\'un compte. Par exemple, cette autorisation peut permettre de déterminer si l\'application Contacts est synchronisée avec un compte ou non."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activer/désactiver la synchronisation"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Permet à une application de modifier les paramètres de synchronisation d\'un compte. Cette autorisation peut, par exemple, être utilisée pour activer la synchronisation de l\'application Contacts avec un compte."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"Lecture des statistiques de synchronisation"</string>
@@ -1283,10 +1283,10 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Prendre l\'appel ?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Toujours"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Une seule fois"</string>
-    <string name="default_audio_route_name" product="tablet" msgid="6890731863195399186">"Haut-parleurs tablette"</string>
+    <string name="default_audio_route_name" product="tablet" msgid="6890731863195399186">"Haut-parleurs de la tablette"</string>
     <string name="default_audio_route_name" product="default" msgid="4551396562363128432">"Haut-parleur du téléphone"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Écouteurs"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Haut-parl. station accueil"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Haut-parleurs de la station d\'accueil"</string>
     <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"Audio HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Système"</string>
 </resources>

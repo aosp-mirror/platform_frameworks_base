@@ -479,7 +479,7 @@
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"hálózati kapcsolatok megtekintése"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Lehetővé teszi az alkalmazás számára, hogy hozzáférjen hálózati kapcsolatokra vonatkozó információkhoz, például melyek létező hálózatok, és melyek vannak csatlakoztatva."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"teljes hálózati hozzáférés"</string>
-    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Lehetővé teszi az alkalmazás számára hálózati socketek létrehozását, valamint egyéni hálózati protokollok használatát. A böngésző és egyéb alkalmazások lehetővé teszik adatok küldését az internetre, így ez az engedély nem szükséges az internetre való adatküldéshez."</string>
+    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Lehetővé teszi az alkalmazás számára hálózati szoftvercsatornák létrehozását, valamint egyéni hálózati protokollok használatát. A böngésző és egyéb alkalmazások lehetővé teszik adatok küldését az internetre, így ez az engedély nem szükséges az internetre való adatküldéshez."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"a hálózati beállítások és a forgalom megváltoztatása/elfogása"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Lehetővé teszi az alkalmazás számára a hálózati beállítások módosítását, illetve a teljes hálózati forgalom elfogását és vizsgálatát, például bármely APN proxyjának és portjának megváltoztatását. A rosszindulatú alkalmazások az Ön tudta nélkül felügyelhetik, átirányíthatják vagy módosíthatják a hálózati csomagokat."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"hálózati csatlakoztathatóság módosítása"</string>
@@ -526,7 +526,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Lehetővé teszi az alkalmazás számára, hogy új szavakat írjon a felhasználói szótárba."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"védett tárhelyhez való hozzáférés tesztelése"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"védett tárhelyhez való hozzáférés tesztelése"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Háttértár engedélyének tesztelése"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Lehetővé teszi az alkalmazás számára egy olyan USB-háttértár engedélyének tesztelését, amely későbbi eszközökön lesz elérhető."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Lehetővé teszi az alkalmazás számára egy olyan SD-kártya engedélyének tesztelését, amely későbbi eszközökön lesz elérhető."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB-tár törlése/módosítása"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD-kártya tartalmának módosítása vagy törlése"</string>
