@@ -375,8 +375,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     }
 
     /**
-     * Stops the Face Unlock service and exposes the backup lock.  Called when the user presses the
-     * cancel button to skip Face Unlock, no face is detected or there is an error.
+     * Stops the Face Unlock service and exposes the backup lock.
      */
     void handleCancel() {
         if (DEBUG) Log.d(TAG, "handleCancel()");
@@ -390,19 +389,11 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     }
 
     /**
-     * Stops the Face Unlock service and exposes the backup lock, reporting a failed unlock attempt.
-     * Called when Face Unlock denies access to the user.
+     * Increments the number of failed Face Unlock attempts.
      */
     void handleReportFailedAttempt() {
         if (DEBUG) Log.d(TAG, "handleReportFailedAttempt()");
         mUpdateMonitor.reportFailedBiometricUnlockAttempt();
-        if (mFaceUnlockView != null) {
-            mFaceUnlockView.setVisibility(View.INVISIBLE);
-        } else {
-            Log.e(TAG, "mFaceUnlockView is null in handleReportFailedAttempt()");
-        }
-        stop();
-        mKeyguardScreenCallback.pokeWakelock(BACKUP_LOCK_TIMEOUT);
     }
 
     /**
@@ -521,8 +512,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         }
 
         /**
-         * Called when the user presses cancel to skip Face Unlock, a face cannot be found or
-         * there is an error.
+         * Called when Face Unlock wants to go to the backup.
          */
         @Override
         public void cancel() {
@@ -531,7 +521,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         }
 
         /**
-         * Called when Face Unlock denies access to the user.
+         * Called when Face Unlock wants to increment the number of failed attempts.
          */
         @Override
         public void reportFailedAttempt() {
