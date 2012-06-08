@@ -819,8 +819,8 @@ use of the API.</p>
 <p>Calls to the Google Play Android Developer API require authorization. Google
 uses the OAuth 2.0 protocol to allow authorized applications to access user
 data. To learn more, see <a
-href="https://developers.google.com/accounts/docs/OAuth2WebServer">Using OAuth
-2.0 for Web Server Applications</a> on the Google Developers web site.</p>
+href="https://developers.google.com/android-publisher/authorization">Authorization</a>
+in the Google Play Android Developer API documentation.</p>
 
 <h3 id="practices">Using the API efficiently</h3>
 
