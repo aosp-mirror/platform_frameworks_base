@@ -29,6 +29,7 @@ import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
 import android.opengl.GLES20;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.Log;
 
 import java.lang.ArrayIndexOutOfBoundsException;
@@ -510,6 +511,20 @@ public class BackDropperFilter extends Filter {
         super(name);
 
         mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
+
+        String adjStr = SystemProperties.get("ro.media.effect.bgdropper.adj");
+        if (adjStr.length() > 0) {
+            try {
+                mAcceptStddev += Float.parseFloat(adjStr);
+                if (mLogVerbose) {
+                    Log.v(TAG, "Adjusting accept threshold by " + adjStr +
+                            ", now " + mAcceptStddev);
+                }
+            } catch (NumberFormatException e) {
+                Log.e(TAG,
+                        "Badly formatted property ro.media.effect.bgdropper.adj: " + adjStr);
+            }
+        }
     }
 
     @Override
@@ -695,7 +710,6 @@ public class BackDropperFilter extends Filter {
             mBgUpdateVarianceProgram.setHostValue("bg_adapt_rate", mAdaptRateLearning);
             mBgUpdateVarianceProgram.setHostValue("fg_adapt_rate", mAdaptRateLearning);
             mFrameCount = 0;
-            mStartLearning = false;
         }
 
         // Select correct pingpong buffers
@@ -719,6 +733,11 @@ public class BackDropperFilter extends Filter {
         mBgInput.generateMipMap();
         mBgInput.setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER,
                                      GLES20.GL_LINEAR_MIPMAP_NEAREST);
+
+        if (mStartLearning) {
+            copyShaderProgram.process(mVideoInput, mBgMean[inputIndex]);
+            mStartLearning = false;
+        }
 
         // Process shaders
         Frame[] distInputs = { mVideoInput, mBgMean[inputIndex], mBgVariance[inputIndex] };
@@ -765,7 +784,12 @@ public class BackDropperFilter extends Filter {
                 ByteBuffer mMaskAverageByteBuffer = mMaskAverage.getData();
                 byte[] mask_average = mMaskAverageByteBuffer.array();
                 int bi = (int)(mask_average[3] & 0xFF);
-                if (mLogVerbose) Log.v(TAG, String.format("Mask_average is %d", bi));
+
+                if (mLogVerbose) {
+                    Log.v(TAG,
+                            String.format("Mask_average is %d, threshold is %d",
+                                    bi, DEFAULT_LEARNING_DONE_THRESHOLD));
+                }
 
                 if (bi >= DEFAULT_LEARNING_DONE_THRESHOLD) {
                     mStartLearning = true;                                      // Restart learning
