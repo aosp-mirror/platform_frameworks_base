@@ -357,9 +357,9 @@ VO_U32 VO_API voAACEncSetParam(VO_HANDLE hCodec, VO_S32 uParamID, VO_PTR pData)
 		if(config.sampleRate%8000 == 0)
 			tmp =480;
 		/* check the bitrate */
-		if(config.bitRate!=0 && (config.bitRate/config.nChannelsOut < 4000) ||
+		if(config.bitRate!=0 && ((config.bitRate/config.nChannelsOut < 4000) ||
            (config.bitRate/config.nChannelsOut > 160000) ||
-		   (config.bitRate > config.sampleRate*6*config.nChannelsOut))
+		   (config.bitRate > config.sampleRate*6*config.nChannelsOut)))
 		{
 			config.bitRate = 640*config.sampleRate/tmp*config.nChannelsOut;
 
