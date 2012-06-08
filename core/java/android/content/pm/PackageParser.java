@@ -129,7 +129,7 @@ public class PackageParser {
         new PackageParser.SplitPermissionInfo[] {
             new PackageParser.SplitPermissionInfo(android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     new String[] { android.Manifest.permission.READ_EXTERNAL_STORAGE },
-                    android.os.Build.VERSION_CODES.CUR_DEVELOPMENT+1),
+                    android.os.Build.VERSION_CODES.JELLY_BEAN),
             new PackageParser.SplitPermissionInfo(android.Manifest.permission.READ_CONTACTS,
                     new String[] { android.Manifest.permission.READ_CALL_LOG },
                     android.os.Build.VERSION_CODES.JELLY_BEAN),
