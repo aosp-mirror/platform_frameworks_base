@@ -204,35 +204,6 @@ public class WebViewClient {
     }
 
     /**
-     * Notify the host application that an SSL error occurred while loading a
-     * resource, but the WebView chose to proceed anyway based on a
-     * decision retained from a previous response to onReceivedSslError().
-     * @hide
-     */
-    public void onProceededAfterSslError(WebView view, SslError error) {
-    }
-
-    /**
-     * Notify the host application to handle a SSL client certificate
-     * request (display the request to the user and ask whether to
-     * proceed with a client certificate or not). The host application
-     * has to call either handler.cancel() or handler.proceed() as the
-     * connection is suspended and waiting for the response. The
-     * default behavior is to cancel, returning no client certificate.
-     *
-     * @param view The WebView that is initiating the callback.
-     * @param handler A ClientCertRequestHandler object that will
-     *            handle the user's response.
-     * @param host_and_port The host and port of the requesting server.
-     *
-     * @hide
-     */
-    public void onReceivedClientCertRequest(WebView view,
-            ClientCertRequestHandler handler, String host_and_port) {
-        handler.cancel();
-    }
-
-    /**
      * Notify the host application to handle an authentication request. The
      * default behavior is to cancel the request.
      *

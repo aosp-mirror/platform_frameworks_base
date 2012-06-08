@@ -100,6 +100,7 @@ final class WebViewDatabaseClassic extends WebViewDatabase {
     private boolean mInitialized = false;
 
     WebViewDatabaseClassic(final Context context) {
+        JniUtil.setContext(context);
         new Thread() {
             @Override
             public void run() {
