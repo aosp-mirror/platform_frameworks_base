@@ -17,7 +17,6 @@
 package android.webkit;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 /**
  * This class contains the back/forward list for a WebView.
@@ -25,22 +24,11 @@ import java.util.ArrayList;
  * inspect the entries in the list.
  */
 public class WebBackForwardList implements Cloneable, Serializable {
-    // Current position in the list.
-    private int mCurrentIndex;
-    // ArrayList of WebHistoryItems for maintaining our copy.
-    private ArrayList<WebHistoryItem> mArray;
-    // Flag to indicate that the list is invalid
-    private boolean mClearPending;
-    // CallbackProxy to issue client callbacks.
-    private final CallbackProxy mCallbackProxy;
 
     /**
-     * Construct a back/forward list used by clients of WebView.
+     *  @hide
      */
-    /*package*/ WebBackForwardList(CallbackProxy proxy) {
-        mCurrentIndex = -1;
-        mArray = new ArrayList<WebHistoryItem>();
-        mCallbackProxy = proxy;
+    public WebBackForwardList() {
     }
 
     /**
@@ -49,7 +37,7 @@ public class WebBackForwardList implements Cloneable, Serializable {
      * @return The current history item.
      */
     public synchronized WebHistoryItem getCurrentItem() {
-        return getItemAtIndex(mCurrentIndex);
+        throw new MustOverrideException();
     }
 
     /**
@@ -58,7 +46,7 @@ public class WebBackForwardList implements Cloneable, Serializable {
      * @return The current index from 0...n or -1 if the list is empty.
      */
     public synchronized int getCurrentIndex() {
-        return mCurrentIndex;
+        throw new MustOverrideException();
     }
 
     /**
@@ -67,10 +55,7 @@ public class WebBackForwardList implements Cloneable, Serializable {
      * @param index The index to retrieve.
      */
     public synchronized WebHistoryItem getItemAtIndex(int index) {
-        if (index < 0 || index >= getSize()) {
-            return null;
-        }
-        return mArray.get(index);
+        throw new MustOverrideException();
     }
 
     /**
@@ -78,78 +63,7 @@ public class WebBackForwardList implements Cloneable, Serializable {
      * @return The size of the list.
      */
     public synchronized int getSize() {
-        return mArray.size();
-    }
-
-    /**
-     * Mark the back/forward list as having a pending clear. This is used on the
-     * UI side to mark the list as being invalid during the clearHistory method.
-     */
-    /*package*/ synchronized void setClearPending() {
-        mClearPending = true;
-    }
-
-    /**
-     * Return the status of the clear flag. This is used on the UI side to
-     * determine if the list is valid for checking things like canGoBack.
-     */
-    /*package*/ synchronized boolean getClearPending() {
-        return mClearPending;
-    }
-
-    /**
-     * Add a new history item to the list. This will remove all items after the
-     * current item and append the new item to the end of the list. Called from
-     * the WebCore thread only. Synchronized because the UI thread may be
-     * reading the array or the current index.
-     * @param item A new history item.
-     */
-    /*package*/ synchronized void addHistoryItem(WebHistoryItem item) {
-        // Update the current position because we are going to add the new item
-        // in that slot.
-        ++mCurrentIndex;
-        // If the current position is not at the end, remove all history items
-        // after the current item.
-        final int size = mArray.size();
-        final int newPos = mCurrentIndex;
-        if (newPos != size) {
-            for (int i = size - 1; i >= newPos; i--) {
-                final WebHistoryItem h = mArray.remove(i);
-            }
-        }
-        // Add the item to the list.
-        mArray.add(item);
-        if (mCallbackProxy != null) {
-            mCallbackProxy.onNewHistoryItem(item);
-        }
-    }
-
-    /**
-     * Clear the back/forward list. Called from the WebCore thread.
-     */
-    /*package*/ synchronized void close(int nativeFrame) {
-        // Clear the array first because nativeClose will call addHistoryItem
-        // with the current item.
-        mArray.clear();
-        mCurrentIndex = -1;
-        nativeClose(nativeFrame);
-        // Reset the clear flag
-        mClearPending = false;
-    }
-
-    /* Remove the item at the given index. Called by JNI only. */
-    private synchronized void removeHistoryItem(int index) {
-        // XXX: This is a special case. Since the callback is only triggered
-        // when removing the first item, we can assert that the index is 0.
-        // This lets us change the current index without having to query the
-        // native BackForwardList.
-        if (DebugFlags.WEB_BACK_FORWARD_LIST && (index != 0)) {
-            throw new AssertionError();
-        }
-        final WebHistoryItem h = mArray.remove(index);
-        // XXX: If we ever add another callback for removing history items at
-        // any index, this will no longer be valid.
-        mCurrentIndex--;
+        throw new MustOverrideException();
     }
 
     /**
@@ -158,39 +72,7 @@ public class WebBackForwardList implements Cloneable, Serializable {
      * webkit package classes.
      */
     protected synchronized WebBackForwardList clone() {
-        WebBackForwardList l = new WebBackForwardList(null);
-        if (mClearPending) {
-            // If a clear is pending, return a copy with only the current item.
-            l.addHistoryItem(getCurrentItem());
-            return l;
-        }
-        l.mCurrentIndex = mCurrentIndex;
-        int size = getSize();
-        l.mArray = new ArrayList<WebHistoryItem>(size);
-        for (int i = 0; i < size; i++) {
-            // Add a copy of each WebHistoryItem
-            l.mArray.add(mArray.get(i).clone());
-        }
-        return l;
+        throw new MustOverrideException();
     }
 
-    /**
-     * Set the new history index.
-     * @param newIndex The new history index.
-     */
-    /*package*/ synchronized void setCurrentIndex(int newIndex) {
-        mCurrentIndex = newIndex;
-        if (mCallbackProxy != null) {
-            mCallbackProxy.onIndexChanged(getItemAtIndex(newIndex), newIndex);
-        }
-    }
-
-    /**
-     * Restore the history index.
-     */
-    /*package*/ static native synchronized void restoreIndex(int nativeFrame,
-            int index);
-
-    /* Close the native list. */
-    private static native void nativeClose(int nativeFrame);
 }
