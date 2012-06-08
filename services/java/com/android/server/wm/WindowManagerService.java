@@ -8403,7 +8403,8 @@ public class WindowManagerService extends IWindowManager.Stub
             // performance reasons).
             mInnerFields.mObscured = true;
         } else if (canBeSeen && (attrFlags & FLAG_DIM_BEHIND) != 0
-                && !(w.mAppToken != null && w.mAppToken.hiddenRequested)) {
+                && !(w.mAppToken != null && w.mAppToken.hiddenRequested)
+                && !w.mExiting) {
             if (localLOGV) Slog.v(TAG, "Win " + w + " obscured=" + mInnerFields.mObscured);
             if (!mInnerFields.mDimming) {
                 //Slog.i(TAG, "DIM BEHIND: " + w);
