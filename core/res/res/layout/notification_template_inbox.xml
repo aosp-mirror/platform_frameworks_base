@@ -191,9 +191,8 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="1px"
-            android:id="@+id/overflow_divider"
-            android:layout_marginTop="8dp"
-            android:visibility="visible"
+            android:id="@+id/action_divider"
+            android:visibility="gone"
             android:background="?android:attr/dividerHorizontal" />
         <include
             layout="@layout/notification_action_list"
@@ -204,9 +203,10 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="1px"
-            android:id="@+id/action_divider"
-            android:visibility="gone"
-            android:background="?android:attr/dividerHorizontal" /><!-- note: divider below actions -->
+            android:id="@+id/overflow_divider"
+            android:layout_marginTop="8dp"
+            android:visibility="visible"
+            android:background="?android:attr/dividerHorizontal" />
         <LinearLayout
             android:id="@+id/line3"
             android:layout_width="match_parent"
