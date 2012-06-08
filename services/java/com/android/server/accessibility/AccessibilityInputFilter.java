@@ -123,6 +123,8 @@ public class AccessibilityInputFilter extends InputFilter {
     }
 
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        mTouchExplorer.onAccessibilityEvent(event);
+        if (mTouchExplorer != null) {
+            mTouchExplorer.onAccessibilityEvent(event);
+        }
     }
 }
