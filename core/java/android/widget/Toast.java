@@ -24,6 +24,7 @@ import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.LocaleUtil;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -32,6 +33,8 @@ import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+
+import java.util.Locale;
 
 /**
  * A toast is a view containing a quick little message for the user.  The toast class
@@ -371,7 +374,11 @@ public class Toast {
                 handleHide();
                 mView = mNextView;
                 mWM = WindowManagerImpl.getDefault();
-                final int gravity = mGravity;
+                // We can resolve the Gravity here by using the Locale for getting
+                // the layout direction
+                final int layoutDirection = LocaleUtil.getLayoutDirectionFromLocale(
+                        Locale.getDefault());
+                final int gravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
                 mParams.gravity = gravity;
                 if ((gravity & Gravity.HORIZONTAL_GRAVITY_MASK) == Gravity.FILL_HORIZONTAL) {
                     mParams.horizontalWeight = 1.0f;
