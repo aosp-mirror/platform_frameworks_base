@@ -588,6 +588,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    int getActiveWindowId() {
+        return mSecurityPolicy.mActiveWindowId;
+    }
+
     private Service getQueryBridge() {
         if (mQueryBridge == null) {
             AccessibilityServiceInfo info = new AccessibilityServiceInfo();
