@@ -18,11 +18,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/title_area"
+    android:background="@color/notification_panel_solid_background"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:clickable="true"
     android:orientation="vertical"
-    android:background="@drawable/notify_panel_clock_bg"
+    android:paddingLeft="26dp"
+    android:paddingTop="14dp"
+    android:paddingRight="26dp"
     >
 
     <TableLayout
@@ -31,7 +34,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         android:shrinkColumns="2,4"
@@ -167,7 +169,6 @@
                     android:id="@+id/settings_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingRight="16dp"
                     android:src="@drawable/ic_sysbar_quicksettings"
                     android:contentDescription="@string/accessibility_settings_button"
                     />
@@ -176,7 +177,6 @@
                     android:id="@+id/notification_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingRight="16dp"
                     android:src="@drawable/ic_notification_open"
                     android:visibility="invisible"
                     android:contentDescription="@string/accessibility_notifications_button"
@@ -186,40 +186,46 @@
         </TableRow>
     </TableLayout>
 
-    <com.android.systemui.statusbar.tablet.HoloClock
-        android:id="@+id/clock"
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="16dip"
-        android:layout_marginTop="16dip"
+        android:paddingTop="@dimen/notification_panel_header_padding_top"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:baselineAligned="false"
         >
-        <TextView android:id="@+id/time_bg"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="right"
-            android:singleLine="true"
-            android:textSize="92sp"
-            android:textColor="#ffffff" />
-        <TextView android:id="@+id/time_fg"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="right"
-            android:singleLine="true"
-            android:textSize="92sp"
-            android:textColor="#ffffff" />
-    </com.android.systemui.statusbar.tablet.HoloClock>
 
-    <com.android.systemui.statusbar.policy.DateView
-        android:id="@+id/date"
-        style="@style/StatusBarNotificationText"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_alignBottom="@id/clock"
-        android:layout_alignParentLeft="true"
-        android:gravity="left"
-        android:layout_marginLeft="16dp"
-        android:textColor="#ffffff"
-        />
+        <com.android.systemui.statusbar.policy.Clock
+            android:id="@+id/clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
+            />
+    
+        <com.android.systemui.statusbar.policy.DateView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
+            />
 
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            />
+
+        <ImageView android:id="@+id/clear_all_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleType="center"
+            android:src="@drawable/ic_notify_clear"
+            android:contentDescription="@string/accessibility_clear_all"
+            />
+    </LinearLayout>
 </com.android.systemui.statusbar.tablet.NotificationPanelTitle>
