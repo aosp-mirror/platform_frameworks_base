@@ -1221,6 +1221,8 @@ public class PowerManagerService extends IPowerManager.Stub
                     + " mLightSensorAdjustSetting=" + mLightSensorAdjustSetting);
             pw.println("  mLightSensorValue=" + mLightSensorValue
                     + " mLightSensorPendingValue=" + mLightSensorPendingValue);
+            pw.println("  mHighestLightSensorValue=" + mHighestLightSensorValue
+                    + " mWaitingForFirstLightSensor=" + mWaitingForFirstLightSensor);
             pw.println("  mLightSensorPendingDecrease=" + mLightSensorPendingDecrease
                     + " mLightSensorPendingIncrease=" + mLightSensorPendingIncrease);
             pw.println("  mLightSensorScreenBrightness=" + mLightSensorScreenBrightness
@@ -2281,8 +2283,13 @@ public class PowerManagerService extends IPowerManager.Stub
         }
 
         public void dump(PrintWriter pw, String string) {
-            pw.println(prefix + "animating: " + "start:" + startValue + ", end:" + endValue
+            pw.println(string);
+            pw.println("  animating: " + "start:" + startValue + ", end:" + endValue
                     + ", duration:" + duration + ", current:" + currentValue);
+            pw.println("  startSensorValue:" + startSensorValue
+                    + " endSensorValue:" + endSensorValue);
+            pw.println("  startSensorValue:" + startSensorValue
+                    + " endSensorValue:" + endSensorValue);
         }
 
         public void animateTo(int target, int mask, int animationDuration) {
@@ -2291,6 +2298,16 @@ public class PowerManagerService extends IPowerManager.Stub
 
         public void animateTo(int target, int sensorTarget, int mask, int animationDuration) {
             synchronized(this) {
+                if ((mask & SCREEN_BRIGHT_BIT) == 0) {
+                    // We only animate keyboard and button when passed in with SCREEN_BRIGHT_BIT.
+                    if ((mask & BUTTON_BRIGHT_BIT) != 0) {
+                        mButtonLight.setBrightness(target);
+                    }
+                    if ((mask & KEYBOARD_BRIGHT_BIT) != 0) {
+                        mKeyboardLight.setBrightness(target);
+                    }
+                    return;
+                }
                 if (isAnimating() && (mask ^ currentMask) != 0) {
                     // current animation is unrelated to new animation, jump to final values
                     cancelAnimation();
@@ -2653,13 +2670,6 @@ public class PowerManagerService extends IPowerManager.Stub
             return;
         }
 
-        final int stepsToTargetLevel;
-        if (mHighestLightSensorValue <= value) {
-            stepsToTargetLevel = AUTOBRIGHTNESS_ANIM_STEPS;
-        } else {
-            stepsToTargetLevel = AUTODIMNESS_ANIM_STEPS;
-        }
-
         if (mLightSensorValue != value) {
             mLightSensorValue = value;
             if ((mPowerState & BATTERY_LOW_BIT) == 0) {
@@ -2686,7 +2696,18 @@ public class PowerManagerService extends IPowerManager.Stub
 
                 if (mAutoBrightessEnabled && mScreenBrightnessOverride < 0) {
                     if (!mSkippedScreenOn && !mInitialAnimation) {
-                        int steps = immediate ? IMMEDIATE_ANIM_STEPS : stepsToTargetLevel;
+                        final int steps;
+                        if (immediate) {
+                            steps = IMMEDIATE_ANIM_STEPS;
+                        } else {
+                            synchronized (mScreenBrightnessAnimator) {
+                                if (mScreenBrightnessAnimator.currentValue <= lcdValue) {
+                                    steps = AUTOBRIGHTNESS_ANIM_STEPS;
+                                } else {
+                                    steps = AUTODIMNESS_ANIM_STEPS;
+                                }
+                            }
+                        }
                         mScreenBrightnessAnimator.animateTo(lcdValue, value,
                                 SCREEN_BRIGHT_BIT, steps * NOMINAL_FRAME_TIME_MS);
                     }
