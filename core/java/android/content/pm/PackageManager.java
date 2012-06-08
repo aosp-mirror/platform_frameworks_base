@@ -520,6 +520,14 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_PACKAGE_CHANGED = -23;
 
     /**
+     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
+     * the new package is assigned a different UID than it previously held.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_UID_CHANGED = -24;
+
+    /**
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
      * if the parser was given a path that is not a file, or does not end with the expected
