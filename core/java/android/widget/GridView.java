@@ -94,7 +94,7 @@ public class GridView extends AbsListView {
     private View mReferenceView = null;
     private View mReferenceViewInSelectedRow = null;
 
-    private int mGravity = Gravity.LEFT;
+    private int mGravity = Gravity.START;
 
     private final Rect mTempRect = new Rect();
 
@@ -300,9 +300,18 @@ public class GridView extends AbsListView {
         final int columnWidth = mColumnWidth;
         final int horizontalSpacing = mHorizontalSpacing;
 
+        final boolean isLayoutRtl = isLayoutRtl();
+
         int last;
-        int nextLeft = mListPadding.left +
-                ((mStretchMode == STRETCH_SPACING_UNIFORM) ? horizontalSpacing : 0);
+        int nextLeft;
+
+        if (isLayoutRtl) {
+            nextLeft = getWidth() - mListPadding.right - columnWidth -
+                    ((mStretchMode == STRETCH_SPACING_UNIFORM) ? horizontalSpacing : 0);
+        } else {
+            nextLeft = mListPadding.left +
+                    ((mStretchMode == STRETCH_SPACING_UNIFORM) ? horizontalSpacing : 0);
+        }
 
         if (!mStackFromBottom) {
             last = Math.min(startPos + mNumColumns, mItemCount);
@@ -311,7 +320,8 @@ public class GridView extends AbsListView {
             startPos = Math.max(0, startPos - mNumColumns + 1);
 
             if (last - startPos < mNumColumns) {
-                nextLeft += (mNumColumns - (last - startPos)) * (columnWidth + horizontalSpacing);
+                final int deltaLeft = (mNumColumns - (last - startPos)) * (columnWidth + horizontalSpacing);
+                nextLeft += (isLayoutRtl ? -1 : +1) * deltaLeft;
             }
         }
 
@@ -330,7 +340,7 @@ public class GridView extends AbsListView {
             final int where = flow ? -1 : pos - startPos;
             child = makeAndAddView(pos, y, flow, nextLeft, selected, where);
 
-            nextLeft += columnWidth;
+            nextLeft += (isLayoutRtl ? -1 : +1) * columnWidth;
             if (pos < last - 1) {
                 nextLeft += horizontalSpacing;
             }
