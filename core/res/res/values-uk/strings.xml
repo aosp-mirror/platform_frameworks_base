@@ -1080,7 +1080,7 @@
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Усі файли, збережені у вашому носії USB, буде стерто. Цю дію не можна скасувати!"</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Усі дані на вашій карті буде втрачено."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Форматув."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Налагодження USB підключ."</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Налагодження USB завершено"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Торкніться, щоб вимкнути налагодження USB."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Вибрати метод введення"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Налаштувати методи введення"</string>

@@ -1081,7 +1081,7 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Alle gegevens op uw kaart worden gewist."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatteren"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-foutopsporing verbonden"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Raak deze optie aan om USB-foutopsporing uit te schakelen."</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Tik om USB-foutopsporing uit te schakelen."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Invoermethode selecteren"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Invoermethoden instellen"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Fysiek toetsenbord"</string>

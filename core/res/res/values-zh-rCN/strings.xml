@@ -204,9 +204,9 @@
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"读取小区广播消息"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"允许应用读取您的设备收到的小区广播消息。小区广播消息是在某些地区发送的、用于发布紧急情况警告的提醒信息。恶意应用可能会在您收到小区紧急广播时干扰您设备的性能或操作。"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"发送短信"</string>
-    <string name="permdesc_sendSms" msgid="7094729298204937667">"允许该应用发送短信。此权限可能导致意外收费。恶意应用可能会未经您的确认而发送短信，由此产生相关费用。"</string>
+    <string name="permdesc_sendSms" msgid="7094729298204937667">"允许该应用发送短信。此权限可能会导致意外收费。恶意应用可能会未经您的确认而发送短信，由此产生相关费用。"</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"不经确认直接发送短信"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"允许该应用发送短信。此权限可能导致意外收费。恶意应用可能会未经您的确认而发送短信，由此产生相关费用。"</string>
+    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"允许该应用发送短信。此权限可能会导致意外收费。恶意应用可能会未经您的确认而发送短信，由此产生相关费用。"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"读取您的文字讯息（短信或彩信）"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"允许该应用读取您平板电脑或 SIM 卡上存储的短信。此权限可让该应用读取所有短信，而不考虑短信内容或机密性。"</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"允许该应用读取您手机或 SIM 卡上存储的短信。此权限可让该应用读取所有短信，而不考虑短信内容或机密性。"</string>
@@ -216,7 +216,7 @@
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"接收文字讯息 (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"允许该应用接收和处理 WAP 消息。此权限包括监视发送给您的消息或删除发送给您的消息而不向您显示的功能。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"检索正在运行的应用"</string>
-    <string name="permdesc_getTasks" msgid="7454215995847658102">"允许该应用针对近期运行的和当前正在运行的任务检索相关信息。此权限可让该应用了解设备上使用了哪些应用。"</string>
+    <string name="permdesc_getTasks" msgid="7454215995847658102">"允许该应用检索近期运行的和当前正在运行的任务的相关信息。此权限可让该应用了解设备上使用了哪些应用。"</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"检索正在运行的应用的详细信息"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"允许该应用检索当前正在运行和近期运行的任务的详细信息。恶意应用可能会发现有关其他应用的私密信息。"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"对正在运行的应用重新排序"</string>
@@ -342,16 +342,16 @@
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"允许应用在系统完成引导后立即自动启动。这样可能会延长平板电脑的启动时间，并允许应用始终运行，从而导致平板电脑总体运行速度减慢。"</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"允许应用在系统完成引导后立即自动启动。这样可能会延长手机的启动时间，并允许应用始终运行，从而导致手机总体运行速度减慢。"</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"发送持久广播"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"允许该应用发送持久广播消息，此类广播消息在结束后仍会保留。过度使用可能会导致平板电脑使用过多内存，从而降低其速度或稳定性。"</string>
-    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"允许该应用发送持久广播消息，此类广播消息在结束后仍会保留。过度使用可能会导致手机使用过多内存，从而降低其速度或稳定性。"</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"允许该应用发送持久广播消息，此类消息在广播结束后仍会保留。过度使用可能会导致平板电脑使用过多内存，从而降低其速度或稳定性。"</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"允许该应用发送持久广播消息，此类消息在广播结束后仍会保留。过度使用可能会导致手机使用过多内存，从而降低其速度或稳定性。"</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"读取您的通讯录"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"允许该应用读取您平板电脑上存储的联系人的相关数据，包括您通过呼叫、发送电子邮件或以其他方式与特定个人通信的频率。此权限可让应用保存您的联系人数据，而恶意应用可能会在您不知情的情况下分享联系人数据。"</string>
-    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"允许该应用读取您手机上存储的联系人的相关数据，包括您通过呼叫、发送电子邮件或以其他方式与特定个人通信的频率。此权限可让应用保存您的联系人数据，而恶意应用可能会在您不知情的情况下分享联系人数据。"</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"允许该应用读取您平板电脑上存储的联系人的相关数据，包括您通过打电话、发送电子邮件或以其他方式与特定个人通信的频率。此权限可让应用保存您的联系人数据，而恶意应用可能会在您不知情的情况下分享联系人数据。"</string>
+    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"允许该应用读取您手机上存储的联系人的相关数据，包括您通过打电话、发送电子邮件或以其他方式与特定个人通信的频率。此权限可让应用保存您的联系人数据，而恶意应用可能会在您不知情的情况下分享联系人数据。"</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"修改您的通讯录"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"允许该应用修改您平板电脑上存储的联系人的相关数据，包括您通过呼叫、发送电子邮件或以其他方式与特定联系人通信的频率。此权限可让应用删除联系人数据。"</string>
-    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"允许该应用修改您手机上存储的联系人的相关数据，包括您通过呼叫、发送电子邮件或以其他方式与特定联系人通信的频率。此权限可让应用删除联系人数据。"</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"允许该应用修改您平板电脑上存储的联系人的相关数据，包括您通过打电话、发送电子邮件或以其他方式与特定联系人通信的频率。此权限可让应用删除联系人数据。"</string>
+    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"允许该应用修改您手机上存储的联系人的相关数据，包括您通过打电话、发送电子邮件或以其他方式与特定联系人通信的频率。此权限可让应用删除联系人数据。"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"读取通话记录"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"允许该应用平板电脑的通话记录，包括有关来电和外拨电话的数据。此权限可让应用保存您的通话记录数据，而恶意应用可能会在您不知情的情况下分享通话记录数据。"</string>
+    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"允许该应用读取平板电脑的通话记录，包括有关来电和外拨电话的数据。此权限可让应用保存您的通话记录数据，而恶意应用可能会在您不知情的情况下分享通话记录数据。"</string>
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"允许该应用读取手机的通话记录，包括有关来电和外拨电话的数据。此权限可让应用保存您的通话记录数据，而恶意应用可能会在您不知情的情况下分享通话记录数据。"</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"写入通话记录"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"允许该应用修改平板电脑的通话记录，包括有关来电和外拨电话的数据。恶意应用可能会借此清除或修改您的通话记录。"</string>
@@ -361,9 +361,9 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"修改您自己的名片"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"允许该应用更改或添加您设备上存储的个人资料信息，例如您的姓名和联系信息。这意味着该应用可以识别您的身份，并可能将您的个人资料信息发送给他人。"</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"读取您的社交视频流"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"允许应用访问并同步您和朋友的社交动态信息。在分享信息时一定要小心，因为此权限可让该应用读取您与社交网络上的朋友之间的交流信息。"</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"允许该应用访问并同步您和朋友的社交动态信息。在分享信息时一定要小心，因为此权限可让该应用读取您与社交网络上的朋友之间的交流信息。"</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"写入您的社交视频流"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"允许该应用显示您朋友的社交动态信息。在分享信息时一定要小心，因为此权限可让该应用冒充某个朋友编写消息。请注意：此权限不得在任何社交网络上执行。"</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"允许该应用显示您朋友的社交动态信息。在分享信息时一定要小心，因为此权限可让该应用冒充某个朋友编写消息。请注意：此权限可能不适用于所有社交网络。"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"读取日历活动和机密信息"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"允许该应用读取您平板电脑上存储的所有日历活动，包括朋友或同事的活动。此权限可让该应用分享或保存您的日历数据，而不论这些数据是否属于机密或敏感内容。"</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"允许该应用读取您手机上存储的所有日历活动，包括朋友或同事的活动。此权限可让该应用分享或保存您的日历数据，而不论这些数据是否属于机密或敏感内容。"</string>
@@ -377,10 +377,10 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"允许安装位置信息提供程序"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"创建用于测试的模拟位置源或安装新的位置提供程序。此权限可让该应用覆盖由其他位置源（如 GPS）或位置提供程序返回的位置和/或状态信息。"</string>
     <string name="permlab_accessFineLocation" msgid="5885550969882561436">"确切 (GPS) 位置"</string>
-    <string name="permdesc_accessFineLocation" product="tablet" msgid="8960597421469894181">"访问平板电脑上的全球定位系统等确切位置源。当位置服务可用且处于启用状态时，此权限可让该应用确定您的确切位置。"</string>
-    <string name="permdesc_accessFineLocation" product="default" msgid="239268765496141815">"访问手机上的全球定位系统等确切位置源。当位置服务可用且处于启用状态时，此权限可让该应用确定您的确切位置。"</string>
-    <string name="permlab_accessCoarseLocation" msgid="7422827215441638984">"大概（基于网络）位置"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="5383798877137640762">"使用基站和 Wi-Fi 等网络源来访问位置提供程序提供的大概位置。当这些位置服务可用且处于启用状态时，此权限可让该应用确定您的大概位置。"</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="8960597421469894181">"访问平板电脑上的 GPS 等确切位置源。当位置服务可用且处于启用状态时，此权限可让该应用确定您的确切位置。"</string>
+    <string name="permdesc_accessFineLocation" product="default" msgid="239268765496141815">"访问手机上的 GPS 等确切位置源。当位置服务可用且处于启用状态时，此权限可让该应用确定您的确切位置。"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7422827215441638984">"（基于网络的）大概位置"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="5383798877137640762">"访问位置提供程序根据基站和 Wi-Fi 等网络源确定的大概位置。当这些位置服务可用且处于启用状态时，此权限可让该应用确定您的大概位置。"</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"访问 SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"允许应用使用 SurfaceFlinger 低级功能。"</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"读取帧缓冲区"</string>
@@ -479,7 +479,7 @@
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"查看网络连接"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"允许该应用查看网络连接的相关信息，例如存在和连接的网络。"</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"完全的网络访问权限"</string>
-    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"允许该应用创建网络套接字和使用自定义网络协议。浏览器和其他应用可用来向互联网发送数据，因此无需该权限即可向互联网发送数据。"</string>
+    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"允许该应用创建网络套接字和使用自定义网络协议。浏览器和其他某些应用提供了向互联网发送数据的途径，因此应用无需该权限即可向互联网发送数据。"</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"更改/拦截网络设置和流量"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"允许应用更改网络设置，并拦截和检查所有网络流量，例如更改任意 APN 的代理和端口。恶意应用可能会在您不知情的情况下监视、重定向或修改网络数据包。"</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"更改网络连接性"</string>
@@ -509,23 +509,23 @@
     <string name="permlab_nfc" msgid="4423351274757876953">"控制近距离通信"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"允许应用与近距离无线通信 (NFC) 标记、卡和阅读器进行通信。"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"停用屏幕锁定"</string>
-    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"允许该应用停用键锁以及任何关联的密码安全设置。例如，让手机在接听来电时停用键锁，在通话结束后重新启用键锁。"</string>
+    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"允许该应用停用键锁以及任何关联的密码安全措施。例如，让手机在接听来电时停用键锁，在通话结束后重新启用键锁。"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"读取同步设置"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"允许该应用读取某个帐户的同步设置。例如，此权限可确定“联系人”应用是否与某个帐户同步。"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"启用和停用同步"</string>
-    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"允许应用修改某个帐户的同步设置。例如，此权限可用于在“联系人”应用与某个帐户之间启用同步。"</string>
+    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"允许该应用修改某个帐户的同步设置。例如，此权限可用于在“联系人”应用与某个帐户之间启用同步。"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"读取同步统计信息"</string>
-    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"允许应用读取某个帐户的同步统计信息，包括同步活动历史记录和同步数据量。"</string>
+    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"允许该应用读取某个帐户的同步统计信息，包括同步活动历史记录和同步数据量。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"读取订阅的供稿"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"允许应用获取有关当前同步的 Feed 的详情。"</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"写入订阅的供稿"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"允许应用修改您当前同步的 Feed。恶意应用可能会更改您的同步 Feed。"</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"读取您添加到词典的字词"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"允许该应用读取用户可能已在用户字典中存储的所有字词、名称和词组。"</string>
+    <string name="permdesc_readDictionary" msgid="659614600338904243">"允许该应用读取用户可能已在用户词典中存储的所有字词、名称和词组。"</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"写入用户定义的词典"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"允许应用向用户词典中写入新词。"</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"测试针对受保护存储空间的访问权限"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"测试针对受保护存储空间的访问权限"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"测试对受保护存储空间的访问权限"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"测试对受保护存储空间的访问权限"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"允许该应用测试将对以后的设备开放的 USB 存储设备权限。"</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"允许该应用测试将对以后的设备开放的 SD 卡权限。"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"修改或删除您的 USB 存储设备中的内容"</string>
@@ -784,10 +784,10 @@
     <string name="autofill_area" msgid="3547409050889952423">"区域"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"酋长国"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"读取您的网络书签和历史记录"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"允许该应用读取浏览器访问过的所有网址记录以及浏览器的所有书签。请注意：此权限不得由第三方浏览器或具备网页浏览功能的其他应用执行。"</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"允许该应用读取浏览器访问过的所有网址记录以及浏览器的所有书签。请注意：此权限可能不适用于第三方浏览器或具备网页浏览功能的其他应用。"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"写入网络书签和历史记录"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"允许该应用修改您平板电脑上存储的浏览器历史记录或浏览器书签。此权限可让该应用清除或修改浏览器数据。请注意：此权限不得由第三方浏览器或具备网页浏览功能的其他应用执行。"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"允许该应用修改您手机上存储的浏览器历史记录或浏览器书签。此权限可让该应用清除或修改浏览器数据。请注意：此权限不得由第三方浏览器或具备网页浏览功能的其他应用执行。"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"允许该应用修改您平板电脑上存储的浏览器历史记录或浏览器书签。此权限可让该应用清除或修改浏览器数据。请注意：此权限可能不适用于第三方浏览器或具备网页浏览功能的其他应用。"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"允许该应用修改您手机上存储的浏览器历史记录或浏览器书签。此权限可让该应用清除或修改浏览器数据。请注意：此权限可能不适用于第三方浏览器或具备网页浏览功能的其他应用。"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"设置闹钟"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"允许应用在已安装的闹钟应用中设置闹钟。有些闹钟应用可能无法实现此功能。"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"添加语音邮件"</string>
@@ -1119,8 +1119,8 @@
     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"允许应用修改收集到的组件使用情况统计信息。普通应用不能使用此权限。"</string>
     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"复制内容"</string>
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"允许应用调用默认的容器服务，以便复制内容。普通应用不能使用此权限。"</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"路由媒体输出"</string>
-    <string name="permdesc_route_media_output" msgid="4932818749547244346">"允许应用将媒体输出路由到其他外部设备。"</string>
+    <string name="permlab_route_media_output" msgid="1642024455750414694">"更改媒体输出线路"</string>
+    <string name="permdesc_route_media_output" msgid="4932818749547244346">"允许该应用将媒体输出线路更改到其他外部设备。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"触摸两次可进行缩放控制"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"无法添加窗口小部件。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"开始"</string>

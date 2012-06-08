@@ -196,17 +196,17 @@
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"preusmjeravanje odlaznih poziva"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Aplikaciji omogućuje obradu odlaznih poziva i promjenu broja za biranje. Ta dozvola aplikaciji omogućuje nadziranje, preusmjeravanje ili sprječavanje odlaznih poziva."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"primanje tekstnih poruka (SMS)"</string>
-    <string name="permdesc_receiveSms" msgid="6424387754228766939">"Aplikaciji omogućuje primanje i obradu SMS poruka. To znači da aplikacija može nadzirati ili izbrisati poruke poslane na vaš uređaj bez prikazivanja vama."</string>
+    <string name="permdesc_receiveSms" msgid="6424387754228766939">"Aplikaciji omogućuje primanje i obradu SMS poruka. To znači da aplikacija može nadzirati ili izbrisati poruke poslane na vaš uređaj a da vam ih ne prikaže."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"primanje tekstnih poruka (MMS)"</string>
-    <string name="permdesc_receiveMms" msgid="533019437263212260">"Aplikaciji omogućuje primanje i obradu MMS poruka. To znači da aplikacija može nadzirati ili izbrisati poruke poslane na vaš uređaj bez prikazivanja vama."</string>
+    <string name="permdesc_receiveMms" msgid="533019437263212260">"Aplikaciji omogućuje primanje i obradu MMS poruka. To znači da aplikacija može nadzirati ili izbrisati poruke poslane na vaš uređaj a da vam ih ne prikaže."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"primanje hitnih odašiljanja"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Omogućuje aplikaciji primanje i obradu poruka hitnih odašiljanja. Ta je dozvola dostupna samo aplikacijama sustava."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"čitaj poruke koje se emitiraju unutar mobilne mreže"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Omogućuje aplikaciji čitanje poruka emitiranih unutar mobilne mreže koje prima vaš uređaj. Upozorenja koja se emitiraju na području mobilne mreže dostavljaju se na nekim lokacijama kako bi upozorila korisnike na hitne situacije. Zlonamjerne aplikacije mogu ometati izvršavanje ili rad vašeg uređaja kada stigne hitno upozorenje koje se emitira unutar mobilne mreže."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"slanje SMS poruka"</string>
-    <string name="permdesc_sendSms" msgid="7094729298204937667">"Aplikaciji omogućuje slanje SMS poruka. To može dovesti do neočekivanih troškova. Zlonamjerne aplikacije mogu vam uzrokovati troškove slanjem poruka bez vaše potvrde."</string>
+    <string name="permdesc_sendSms" msgid="7094729298204937667">"Aplikaciji omogućuje slanje SMS poruka. To može dovesti do neočekivanih troškova. Zlonamjerne aplikacije mogu vam uzrokovati dodatne troškove slanjem poruka bez vašeg odobrenja."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"slanje SMS poruka bez potvrde"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Aplikaciji omogućuje slanje SMS poruka. To može dovesti do neočekivanih troškova. Zlonamjerne aplikacije mogu vam uzrokovati troškove slanjem poruka bez vaše potvrde."</string>
+    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Aplikaciji omogućuje slanje SMS poruka. To može dovesti do neočekivanih troškova. Zlonamjerne aplikacije mogu vam uzrokovati dodatne troškove slanjem poruka bez vašeg odobrenja."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"čitanje tekstnih poruka (SMS ili MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Aplikaciji omogućuje čitanje SMS poruka pohranjenih na tabletnom računalu ili SIM kartici. To aplikaciji omogućuje čitanje svih SMS poruka, neovisno o sadržaju ili povjerljivosti."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Aplikaciji omogućuje čitanje SMS poruka pohranjenih na telefonu ili SIM kartici. To aplikaciji omogućuje čitanje svih SMS poruka, neovisno o sadržaju ili povjerljivosti."</string>
@@ -214,7 +214,7 @@
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Omogućuje aplikaciji pisanje u SMS poruke pohranjene na vašem tabletnom računalu ili SIM kartici. Zlonamjerne aplikacije mogu izbrisati vaše poruke."</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Omogućuje aplikaciji pisanje u SMS poruke pohranjene na telefonu ili SIM kartici. Zlonamjerne aplikacije mogu izbrisati vaše poruke."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"primanje tekstnih poruka (WAP)"</string>
-    <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Aplikaciji omogućuje primanje i obradu WAP poruka. Ta dozvola uključuje mogućnost nadziranja ili brisanja vama poslanih poruka bez prikazivanja vama."</string>
+    <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Aplikaciji omogućuje primanje i obradu WAP poruka. Ta dozvola uključuje mogućnost nadziranja ili brisanja vama poslanih poruka a da vam ih ne prikaže."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"dohvaćanje pokrenutih aplikacija"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Aplikaciji omogućuje dohvaćanje informacija o trenutačnim i nedavnim tekućim zadacima. To aplikaciji može omogućiti otkrivanje informacija o tome koje se aplikacije upotrebljavaju na uređaju."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"dohvaćanje pojedinosti o pokrenutim aplikacijama"</string>
@@ -268,7 +268,7 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"prikaz neovlaštenih prozora"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Omogućuje aplikaciji stvaranje prozora koje bi trebalo upotrebljavati korisničko sučelje internog sustava. Nije namijenjeno uobičajenim aplikacijama."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"crtanje preko drugih aplikacija"</string>
-    <string name="permdesc_systemAlertWindow" msgid="4460454022797261814">"Aplikaciji omogućuje prikaz prozora za sistemska upozorenja. Neki prozori upozorenja mogu zauzeti cijeli zaslon."</string>
+    <string name="permdesc_systemAlertWindow" msgid="4460454022797261814">"Aplikaciji omogućuje prikaz prozora upozorenja sustava. Neki prozori upozorenja mogu zauzeti cijeli zaslon."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"izmjena globalne brzine animacije"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"U bilo kojem trenutku aplikaciji omogućuje promjenu globalne brzine animacija (brža ili sporija animacija)."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"upravljanje oznakama aplikacije"</string>
@@ -301,8 +301,8 @@
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"slanje Linux signala aplikacijama"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Aplikaciji omogućuje zahtijevanje da isporučeni signal bude poslan na sve trajne procese."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"trajni rad aplikacije"</string>
-    <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Aplikaciji omogućuje trajnu prisutnost nekih svojih dijelova u memoriji. To može ograničiti dostupnost memorije drugim aplikacijama i usporiti tabletno računalo."</string>
-    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Aplikaciji omogućuje trajnu prisutnost nekih svojih dijelova u memoriji. To može ograničiti dostupnost memorije drugim aplikacijama i usporiti telefon."</string>
+    <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Aplikaciji omogućuje trajnu prisutnost nekih njenih dijelova u memoriji. To može ograničiti dostupnost memorije drugim aplikacijama i usporiti tabletno računalo."</string>
+    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Aplikaciji omogućuje trajnu prisutnost nekih njenih dijelova u memoriji. To može ograničiti dostupnost memorije drugim aplikacijama i usporiti telefon."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"izbrisati aplikacije"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Omogućuje aplikaciji brisanje Androidovih paketa. Zlonamjerne aplikacije mogu to upotrijebiti za brisanje važnih aplikacija."</string>
     <string name="permlab_clearAppUserData" msgid="274109191845842756">"brisanje ostalih podataka aplikacije"</string>
@@ -357,30 +357,30 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Aplikaciji omogućuje izmjenu dnevnika poziva vašeg tabletnog računala zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za brisanje ili izmjenu vašeg dnevnika poziva."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Aplikaciji omogućuje izmjenu dnevnika poziva vašeg telefona zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za brisanje ili izmjenu vašeg dnevnika poziva."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"čitanje vaše kontaktne kartice"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Omogućuje aplikaciji čitanje osobnih podataka profila pohranjenih na uređaju, kao što su vaše ime ili kontaktni podaci. To znači da vas aplikacija može identificirati i slati informacije s vašeg profila drugima."</string>
+    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Aplikaciji omogućuje čitanje osobnih podataka profila pohranjenih na uređaju, kao što su vaše ime ili kontaktni podaci. To znači da vas aplikacija može identificirati i slati informacije s vašeg profila drugima."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"izmjena vaše kontaktne kartice"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Aplikaciji omogućuje promjenu ili dodavanje osobnih podataka profila pohranjenih na uređaju, kao što su vaše ime i kontaktni podaci. To znači da vas aplikacija može identificirati i slati informacije s vašeg profila drugima."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"čitanje društvenog streama"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Aplikaciji omogućuje pristup ažuriranjima na društvenim mrežama vas i vaših prijatelja te sinkronizaciju tih ažuriranja. Budite oprezni kad dijelite informacije – to aplikaciji omogućuje čitanje poruka između vas i vaših prijatelja na društvenim mrežama, neovisno o povjerljivosti. Napomena: ta se dozvola možda ne primjenjuje svim društvenim mrežama."</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Aplikaciji omogućuje pristup vašim ažuriranjima na društvenim mrežama i ažuriranjima vaših prijatelja, kao i sinkronizaciju tih ažuriranja. Budite oprezni kad dijelite informacije – to aplikaciji omogućuje čitanje poruka između vas i vaših prijatelja na društvenim mrežama, neovisno o povjerljivosti. Napomena: ta se dozvola možda ne primjenjuje na svim društvenim mrežama."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"pisanje društvenog streama"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Aplikaciji omogućuje prikazivanje ažuriranja na društvenim mrežama od vaših prijatelja. Budite oprezni kad dijelite informacije – to aplikaciji omogućuje stvaranje poruka koje mogu izgledati kao da dolaze od prijatelja. Napomena: ta se dozvola možda ne primjenjuje na svim društvenim mrežama."</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Aplikaciji omogućuje prikazivanje ažuriranja vaših prijatelja na društvenim mrežama. Budite oprezni kad dijelite informacije – to aplikaciji omogućuje stvaranje poruka koje mogu izgledati kao da dolaze od prijatelja. Napomena: ta se dozvola možda ne primjenjuje na svim društvenim mrežama."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"čitajte kalendarske događaje i povjerljive informacije"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Aplikaciji omogućuje čitanje svih događaja u kalendaru pohranjenih na vašem tabletnom računalu, uključujući one od vaših prijatelja ili suradnika. To aplikaciji može omogućiti dijeljenje ili spremanje vaših podataka kalendara, neovisno o povjerljivosti ili osjetljivosti."</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Aplikaciji omogućuje čitanje svih događaja u kalendaru pohranjenih na vašem telefonu, uključujući one od vaših prijatelja ili suradnika. To aplikaciji može omogućiti dijeljenje ili spremanje vaših podataka kalendara, neovisno o povjerljivosti ili osjetljivosti."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"dodajte ili izmijenite kalendarske događaje i pošaljite e-poštu gostima bez znanja vlasnika"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Aplikaciji omogućuje dodavanje, uklanjanje, promjenu događaja koje možete izmijeniti na tabletnom računalu, uključujući one od vaših prijatelja ili suradnika. To aplikaciji može omogućiti slanje poruka koje izgledaju kao da dolaze od vlasnika kalendara ili izmjenu događaja bez znanja vlasnika."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Aplikaciji omogućuje dodavanje, uklanjanje, promjenu događaja koje možete izmijeniti na telefonu, uključujući one od vaših prijatelja ili suradnika. To aplikaciji može omogućiti slanje poruka koje izgledaju kao da dolaze od vlasnika kalendara ili izmjenu događaja bez znanja vlasnika."</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Aplikaciji omogućuje dodavanje, uklanjanje i promjenu događaja koje možete izmijeniti na tabletnom računalu, uključujući one od vaših prijatelja ili suradnika. To aplikaciji može omogućiti slanje poruka koje izgledaju kao da dolaze od vlasnika kalendara ili izmjenu događaja bez znanja vlasnika."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Aplikaciji omogućuje dodavanje, uklanjanje i promjenu događaja koje možete izmijeniti na telefonu, uključujući one od vaših prijatelja ili suradnika. To aplikaciji može omogućiti slanje poruka koje izgledaju kao da dolaze od vlasnika kalendara ili izmjenu događaja bez znanja vlasnika."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"omogući testiranje izvora lokacije"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Stvaranje lažnih izvora lokacije radi testiranja ili za instaliranje novog pružatelja lokacijskih usluga. To aplikaciji omogućuje zaobilaženje lokacije i/ili statusa koji vraćaju drugi izvori lokacije, primjerice GPS ili pružatelji lokacijskih usluga."</string>
+    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Stvaranje lažnih izvora lokacije radi testiranja ili za instaliranje novog pružatelja usluga lokacije. To aplikaciji omogućuje zaobilaženje lokacije i/ili statusa koji vraćaju drugi izvori lokacije, primjerice GPS ili pružatelji usluga lokacije."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"pristup dodatnim naredbama davatelja lokacije"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Aplikaciji omogućuje pristup dodatnim naredbama za davatelja lokacija. To aplikaciji može omogućiti ometanje rada GPS-a ili drugih izvora lokacije."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Aplikaciji omogućuje pristup dodatnim naredbama za pružatelja usluga lokacije. To aplikaciji može omogućiti ometanje rada GPS-a ili drugih izvora lokacije."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"dopuštenje za instaliranje davatelja usluge lociranja"</string>
-    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Stvaranje lažnih izvora lokacije radi testiranja ili za instaliranje novog pružatelja lokacijskih usluga. To aplikaciji omogućuje zaobilaženje lokacije i/ili statusa koji vraćaju drugi izvori lokacije, primjerice GPS ili pružatelji lokacijskih usluga."</string>
-    <string name="permlab_accessFineLocation" msgid="5885550969882561436">"precizna (GPS) lokacija"</string>
-    <string name="permdesc_accessFineLocation" product="tablet" msgid="8960597421469894181">"Pristup preciznim lokacijskim izvorima, primjerice globalnom sustavu pozicioniranja na vašem tabletnom računalu. Kad su lokacijske dostupne i uključene, ta dozvola aplikaciji omogućuje utvrđivanje vaše precizne lokacije."</string>
-    <string name="permdesc_accessFineLocation" product="default" msgid="239268765496141815">"Pristup preciznim lokacijskim izvorima, primjerice globalnom sustavu pozicioniranja na vašem telefonu. Kad su lokacijske dostupne i uključene, ta dozvola aplikaciji omogućuje utvrđivanje vaše precizne lokacije."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7422827215441638984">"približna (mrežna) lokacija"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="5383798877137640762">"Pristup približnoj lokaciji od pružatelja lokacijskih usluga koji upotrebljavaju mrežne izvore, primjerice bazne stanice i Wi-Fi. Kad su te lokacijske usluge dostupne i uključene, ta dozvola aplikaciji omogućuje utvrđivanje vaše približne lokacije."</string>
+    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Stvaranje lažnih izvora lokacije radi testiranja ili za instaliranje novog pružatelja usluga lokacije. To aplikaciji omogućuje zaobilaženje lokacije i/ili statusa koji vraćaju drugi izvori lokacije, primjerice GPS ili pružatelji usluga lokacije."</string>
+    <string name="permlab_accessFineLocation" msgid="5885550969882561436">"precizna lokacija (GPS)"</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="8960597421469894181">"Pristup preciznim izvorima lokacije, primjerice globalnom sustavu pozicioniranja na vašem tabletnom računalu. Kad su usluge lokacije dostupne i uključene, ta dozvola aplikaciji omogućuje utvrđivanje vaše precizne lokacije."</string>
+    <string name="permdesc_accessFineLocation" product="default" msgid="239268765496141815">"Pristup preciznim izvorima lokacije, primjerice globalnom sustavu pozicioniranja na vašem telefonu. Kad su usluge lokacije dostupne i uključene, ta dozvola aplikaciji omogućuje utvrđivanje vaše precizne lokacije."</string>
+    <string name="permlab_accessCoarseLocation" msgid="7422827215441638984">"približna lokacija (mreža)"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="5383798877137640762">"Pristup približnoj lokaciji od pružatelja usluge lokacije koji upotrebljavaju mrežne izvore, primjerice bazne stanice i Wi-Fi. Kad su te usluge lokacije dostupne i uključene, ta dozvola aplikaciji omogućuje utvrđivanje vaše približne lokacije."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"pristup značajci SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Aplikaciji omogućuje upotrebu značajki niske razine SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"čitanje međuspremnika okvira"</string>
@@ -388,9 +388,9 @@
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"promjena postavki zvuka"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Aplikaciji omogućuje izmjenu globalnih postavki zvuka, primjerice glasnoće i zvučnika koji se upotrebljava za izlaz."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"snimanje zvuka"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Aplikaciji omogućuje snimanje zvuka mikrofonom. Ta dozvola aplikaciji omogućuje snimanje zvuka u bilo kojem trenutku bez vaše potvrde."</string>
+    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Aplikaciji omogućuje snimanje zvuka mikrofonom. Ta dozvola aplikaciji omogućuje snimanje zvuka u bilo kojem trenutku bez vašeg odobrenja."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"snimi fotografije i videozapise"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"Aplikaciji omogućuje snimanje slika i videozapisa fotoaparatom. Ta dozvola aplikaciji omogućuje upotrebu fotoaparata u bilo kojem trenutku bez vaše potvrde."</string>
+    <string name="permdesc_camera" msgid="8497216524735535009">"Aplikaciji omogućuje snimanje slika i videozapisa fotoaparatom. Ta dozvola aplikaciji omogućuje upotrebu fotoaparata u bilo kojem trenutku bez vašeg odobrenja."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"trajno onemogući tabletni uređaj"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"trajno onemogućavanje telefona"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Aplikaciji omogućuje trajno isključivanje cijelog tabletnog računala. To je vrlo opasno."</string>
@@ -426,7 +426,7 @@
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testiranje hardvera"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Aplikaciji omogućuje upravljanje raznim perifernim uređajima za potrebe ispitivanja hardvera."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"izravno pozivanje telefonskog broja"</string>
-    <string name="permdesc_callPhone" msgid="3740797576113760827">"Aplikaciji omogućuje pozivanje telefonskih brojeva bez vašeg sudjelovanja. To može dovesti do neočekivanih troškova ili poziva. Uzmite u obzir da se time aplikaciji ne omogućuje pozivanje brojeva u nuždi. Zlonamjerne aplikacije mogu vam uzrokovati troškove postavljanjem poziva bez vašeg odobrenja."</string>
+    <string name="permdesc_callPhone" msgid="3740797576113760827">"Aplikaciji omogućuje pozivanje telefonskih brojeva bez vašeg sudjelovanja. To može dovesti do neočekivanih troškova ili poziva. Uzmite u obzir da se aplikaciji time ne omogućuje pozivanje brojeva u nuždi. Zlonamjerne aplikacije mogu vam uzrokovati dodatne troškove postavljanjem poziva bez vašeg odobrenja."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"izravno pozivanje bilo kojeg telefonskog broja"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Omogućuje aplikaciji pozivanje bilo kojeg telefonskog broja, uključujući hitne brojeve, bez vašeg uplitanja. Zlonamjerne aplikacije mogu upućivati nepotrebne i nezakonite pozive hitnim službama."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"izravno pokreni postavljanje CDMA tabletnog uređaja"</string>
@@ -441,7 +441,7 @@
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"promjena stanja telefona"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Omogućuje aplikaciji upravljanje telefonskim značajkama uređaja. Aplikacija s tom dozvolom može izmjenjivati mreže, uključiti i isključiti radiouređaj telefona i tome slično, a da vas o tome uopće ne obavijesti."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"čitanje statusa i identiteta telefona"</string>
-    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Aplikaciji omogućuje pristup telefonskim značajkama uređaja. Ta dozvola aplikaciji omogućuje utvrđivanje telefonskog broja i ID-ova uređaja, je li poziv aktivan te udaljeni broj s kojim je poziv povezan."</string>
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Aplikaciji omogućuje pristup telefonskim značajkama uređaja. Ta dozvola aplikaciji omogućuje utvrđivanje telefonskog broja i ID-ova uređaja, je li poziv aktivan te udaljeni broj koji je povezan pozivom."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"spriječi mirovanje tabletnog uređaja"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"sprečava telefon da prijeđe u stanje mirovanja"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Aplikaciji omogućuje sprječavanje prelaska tabletnog računala u mirovanje."</string>
@@ -478,8 +478,8 @@
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Aplikaciji omogućuje traženje oznaka za autentifikaciju."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"prikaz mrežnih veza"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Aplikaciji omogućuje pregled informacija o mrežnim vezama, primjerice koje mreže postoje i koje su spojene."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"puni pristup mreži"</string>
-    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Aplikaciji omogućuje stvaranje mrežnih utičnica i upotrebu prilagođenih mrežnih protokola. Preglednik i druge aplikacije pružaju sredstva za slanje podataka na internet, tako da ova dozvola nije potrebna za slanje podataka na internet."</string>
+    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"puni mrežni pristup"</string>
+    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Aplikaciji omogućuje stvaranje mrežnih utičnica i upotrebu prilagođenih mrežnih protokola. Preglednik i druge aplikacije pružaju sredstva za slanje podataka na internet, tako da ta dozvola nije potrebna za slanje podataka na internet."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"promjena/presretanje mrežnih postavki i prometa"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Omogućuje aplikaciji promjenu postavki mreže te presretanje i pregledavanje kompletnog mrežnog prometa, na primjer, radi promjene proxy poslužitelja i priključka bilo kojeg APN-a. Zlonamjerne aplikacije mogu nadzirati, preusmjeravati ili mijenjati mrežne pakete bez vašeg znanja."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"promjena mrežne povezivosti"</string>
@@ -493,16 +493,16 @@
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"uspostavljanje i prekidanje veze s Wi-Fi mrežom"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Aplikaciji omogućuje spajanje na Wi-Fi pristupne točke i prekidanje veze s njima te promjenu konfiguracije uređaja za Wi-Fi mreže."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"omogući višenamjenski Wi-Fi prijem"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Aplikaciji omogućuje primanje paketa koji su poslani na sve uređaje na Wi-Fi mreži putem adresa za višesmjerno slanje, ne samo vaše tabletno računalo. Troši se više struje nego u načinu bez višesmjernog slanja."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Aplikaciji omogućuje primanje paketa koji su poslani na sve uređaje na Wi-Fi mreži putem adresa za višesmjerno slanje, ne samo vaš telefon. Troši se više struje nego u načinu bez višesmjernog slanja."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Aplikaciji omogućuje primanje paketa poslanih na sve uređaje na Wi-Fi mreži putem adresa za višesmjerno slanje, ne samo na vaše tabletno računalo. Potrošnja struje veća je nego u načinu bez višesmjernog slanja."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Aplikaciji omogućuje primanje paketa poslanih na sve uređaje na Wi-Fi mreži putem adresa za višesmjerno slanje, ne samo na vaš telefon. Potrošnja struje veća je nego u načinu bez višesmjernog slanja."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"pristupanje postavkama Bluetootha"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Aplikaciji omogućuje konfiguraciju lokalnog tabletnog računala s Bluetoothom te otkrivanje i uparivanje s udaljenim  uređajima."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Aplikaciji omogućuje konfiguraciju lokalnog Bluetooth telefona i otkrivanje i uparivanje s udaljenim uređajima."</string>
     <string name="permlab_accessWimaxState" msgid="7436749103151096452">"Prikaz WiMAX veza"</string>
-    <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Aplikaciji omogućuje da utvrdi je li omogućen WiMAX te daje informaciju o teme je li neka WiMAX mreža spojena."</string>
+    <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Aplikaciji omogućuje utvrđivanje omogućenosti WiMAX mreže te daje informaciju o tome je li spojena neka WiMAX mreža."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Promjena stanja WiMAX mreže"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Aplikaciji omogućuje povezivanje tabletnog računala s WiMAX mrežama i prekidanje veze tabletnog računala s njima."</string>
-    <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Aplikaciji omogućuje povezivanje s WiMAX mrežama i prekidanje veze s njima."</string>
+    <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Aplikaciji omogućuje povezivanje telefona s WiMAX mrežama i prekidanje veze telefona s njima."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"uparivanje s Bluetooth uređajima"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Aplikaciji omogućuje pregled konfiguracije Bluetootha na tabletnom računalu te uspostavljanje i prihvaćanje veza s uparenim uređajima."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Aplikaciji omogućuje pregled konfiguracije Bluetootha na telefonu te uspostavljanje i prihvaćanje veza s uparenim uređajima."</string>
@@ -511,11 +511,11 @@
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"onemogućavanje zaključavanja zaslona"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Aplikaciji omogućuje onemogućavanje zaključavanja tipkovnice i svih pripadajućih sigurnosnih zaporki. Na primjer, telefon onemogućuje zaključavanje tipkovnice kod primanja dolaznog telefonskog poziva, nakon kojeg se zaključavanje tipkovnice ponovo omogućuje."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čitanje postavki sinkronizacije"</string>
-    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Aplikaciji omogućuje čitanje postavki sinkronizacije za račun. Na primjer, time se može utvrditi je li aplikacija Osobe sinkronizirana s računom."</string>
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Aplikaciji omogućuje čitanje postavki sinkronizacije za račun. Time se, primjerice, može utvrditi je li aplikacija Osobe sinkronizirana s računom."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"uključivanje/isključivanje sinkronizacije"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Aplikaciji omogućuje izmjenu postavki sinkronizacije za račun. Na primjer, to se može upotrijebiti za omogućavanje sinkronizacije aplikacije Osobe s računom."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"čitanje statistike o sinkronizaciji"</string>
-    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Aplikaciji omogućuje čitanje statistika sinkronizacije za račun, uključujući povijest događaja sinkronizacije te količinu sinkroniziranih podataka."</string>
+    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Aplikaciji omogućuje čitanje statistika sinkronizacije za račun, uključujući povijest sinkronizacije te količinu sinkroniziranih podataka."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čitanje pretplaćenih feedova"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Aplikaciji omogućuje dohvaćanje detalja o trenutačno sinkroniziranim feedovima."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"pisanje pretplaćenih feedova"</string>

@@ -208,8 +208,8 @@
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"確認せずにSMSメッセージを送信する"</string>
     <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"SMSメッセージの送信をアプリに許可します。これにより、予期せぬ料金が発生する可能性があります。悪意のあるアプリが確認なしでメッセージを送信し、料金が発生する恐れがあります。"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"テキストメッセージ（SMSまたはMMS）の読み取り"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"タブレットまたはSIMカードに保存されているSMSメッセージの読み取りをアプリに許可します。これにより、すべてのSMSメッセージを機密性に関係なくアプリから読み取ることができるようになります。"</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"携帯端末またはSIMカードに保存されているSMSメッセージの読み取りをアプリに許可します。これにより、すべてのSMSメッセージを機密性に関係なくアプリから読み取ることができるようになります。"</string>
+    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"タブレットまたはSIMカードに保存されているSMSメッセージの読み取りをアプリに許可します。これにより、すべてのSMSメッセージをコンテンツや機密性に関係なくアプリから読み取ることができるようになります。"</string>
+    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"携帯端末またはSIMカードに保存されているSMSメッセージの読み取りをアプリに許可します。これにより、すべてのSMSメッセージをコンテンツや機密性に関係なくアプリから読み取ることができるようになります。"</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"テキストメッセージ（SMSまたはMMS）の編集"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"タブレットやSIMカードに保存されているSMSメッセージへの書き込みをアプリに許可します。この許可を悪意のあるアプリに利用されると、メッセージが削除される恐れがあります。"</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"携帯端末やSIMカードに保存されているSMSメッセージへの書き込みをアプリに許可します。この許可を悪意のあるアプリに利用されると、メッセージが削除される恐れがあります。"</string>
@@ -477,7 +477,7 @@
     <string name="permlab_useCredentials" msgid="235481396163877642">"この端末上のアカウントの使用"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"認証トークンのリクエストをアプリに許可します。"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ネットワーク接続の表示"</string>
-    <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"どのネットワークが存在するか、どのネットワークに接続されているかなど、ネットワーク接続に関する情報を表示することをアプリに許可します。"</string>
+    <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"存在するネットワークや接続しているネットワークなど、ネットワーク接続に関する情報を表示することをアプリに許可します。"</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"ネットワークへのフルアクセス"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"ネットワークソケットの作成とカスタムネットワークプロトコルの使用をアプリに許可します。インターネットにデータを送信する手段はブラウザや他のアプリが提供するため、インターネットへのデータ送信のためにこれを許可する必要はありません。"</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"ネットワークの設定の変更とトラフィックの傍受"</string>
@@ -493,16 +493,16 @@
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fiからの接続と切断"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Wi-Fiアクセスポイントへの接続/切断、Wi-Fiネットワークのデバイス設定の変更をアプリに許可します。"</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fiマルチキャストの受信を許可する"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"マルチキャストアドレスを使用して、このタブレットだけでなくWi-Fiネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電力を消費します。"</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"マルチキャストアドレスを使用して、この携帯端末だけでなくWi-Fiネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電力を消費します。"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"マルチキャストアドレスを使用して、このタブレットだけでなくWi-Fiネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電池の消費量が大きくなります。"</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"マルチキャストアドレスを使用して、この携帯端末だけでなくWi-Fiネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電池の消費量が大きくなります。"</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetoothの設定へのアクセス"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ローカルのBluetoothタブレットを設定することと、リモート端末を検出してペアに設定することをアプリに許可します。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ローカルのBluetooth携帯端末を設定することと、リモート端末を検出してペアに設定することをアプリに許可します。"</string>
     <string name="permlab_accessWimaxState" msgid="7436749103151096452">"WiMAX接続の表示"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"WiMAXがONになっているかどうかを識別し、接続されているWiMAXネットワークの情報を表示することをアプリに許可します。"</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX状態の変更"</string>
-    <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"WiMAXネットワークへの接続と切断をアプリに許可します。"</string>
-    <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"WiMAXネットワークへの接続と切断をアプリに許可します。"</string>
+    <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"タブレットのWiMAXネットワークへの接続と切断をアプリに許可します。"</string>
+    <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"携帯端末のWiMAXネットワークへの接続と切断をアプリに許可します。"</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetoothデバイスのペアの設定"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"タブレットのBluetooth設定を表示すること、ペアの端末に接続すること/ペアの端末からの接続を受け入れることをアプリに許可します。"</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"携帯端末のBluetooth設定を表示すること、ペアの端末に接続すること/ペアの端末からの接続を受け入れることをアプリに許可します。"</string>
