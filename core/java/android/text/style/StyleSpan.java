@@ -98,6 +98,7 @@ public class StyleSpan extends MetricAffectingSpan implements ParcelableSpan {
         }
 
         int fake = want & ~tf.getStyle();
+        fake |= tf.getStyle() & Typeface.BOLD;
 
         if ((fake & Typeface.BOLD) != 0) {
             paint.setFakeBoldText(true);
