@@ -51,4 +51,24 @@
         <item name="android:background">@android:drawable/divider_horizontal_dark</item>
     </style>
 
+    <style name="TextAppearance.StatusBar.Clock" parent="@*android:style/TextAppearance.StatusBar.Icon">
+        <item name="android:textSize">30dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@android:color/holo_blue_light</item>
+    </style>
+
+    <style name="TextAppearance.StatusBar.Expanded.Clock">
+        <item name="android:textSize">48dp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">#ffffff</item>
+    </style>
+
+    <style name="TextAppearance.StatusBar.Expanded.Date">
+        <item name="android:textSize">14dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">#666666</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
 </resources>
