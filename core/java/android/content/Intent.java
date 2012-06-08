@@ -570,7 +570,9 @@ import java.util.Set;
  *     <li> {@link #EXTRA_INITIAL_INTENTS}
  *     <li> {@link #EXTRA_INTENT}
  *     <li> {@link #EXTRA_KEY_EVENT}
+ *     <li> {@link #EXTRA_ORIGINATING_URL}
  *     <li> {@link #EXTRA_PHONE_NUMBER}
+ *     <li> {@link #EXTRA_REFERRER}
  *     <li> {@link #EXTRA_REMOTE_INTENT_TOKEN}
  *     <li> {@link #EXTRA_REPLACING}
  *     <li> {@link #EXTRA_SHORTCUT_ICON}
@@ -1283,6 +1285,22 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_NOT_UNKNOWN_SOURCE
             = "android.intent.extra.NOT_UNKNOWN_SOURCE";
+
+    /**
+     * Used as a string extra field with {@link #ACTION_INSTALL_PACKAGE} and
+     * {@link #ACTION_VIEW} to indicate the URL from which the local APK in the Intent
+     * data field originated from.
+     */
+    public static final String EXTRA_ORIGINATING_URL
+            = "android.intent.extra.ORIGINATING_URL";
+
+    /**
+     * Used as a string extra field with {@link #ACTION_INSTALL_PACKAGE} and
+     * {@link #ACTION_VIEW} to indicate the HTTP referrer associated with the Intent
+     * data field or {@link #EXTRA_ORIGINATING_URL}.
+     */
+    public static final String EXTRA_REFERRER
+            = "android.intent.extra.REFERRER";
 
     /**
      * Used as a boolean extra field with {@link #ACTION_INSTALL_PACKAGE} to install a
