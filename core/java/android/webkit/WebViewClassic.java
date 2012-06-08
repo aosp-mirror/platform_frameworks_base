@@ -6224,8 +6224,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 final int resultY = Math.max(0,
                         Math.min(mScrollingLayerRect.top + contentY, maxY));
 
-                if (resultX != mScrollingLayerRect.left ||
-                        resultY != mScrollingLayerRect.top) {
+                if (resultX != mScrollingLayerRect.left
+                        || resultY != mScrollingLayerRect.top
+                        || (contentX | contentY) == 0) {
                     // In case we switched to dragging the page.
                     mTouchMode = TOUCH_DRAG_LAYER_MODE;
                     deltaX = contentX;
