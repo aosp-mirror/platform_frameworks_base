@@ -133,6 +133,7 @@ extern int register_android_os_Debug(JNIEnv* env);
 extern int register_android_os_MessageQueue(JNIEnv* env);
 extern int register_android_os_Parcel(JNIEnv* env);
 extern int register_android_os_ParcelFileDescriptor(JNIEnv *env);
+extern int register_android_os_SELinux(JNIEnv* env);
 extern int register_android_os_StatFs(JNIEnv *env);
 extern int register_android_os_SystemProperties(JNIEnv *env);
 extern int register_android_os_SystemClock(JNIEnv* env);
@@ -1146,6 +1147,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_os_FileUtils),
     REG_JNI(register_android_os_MessageQueue),
     REG_JNI(register_android_os_ParcelFileDescriptor),
+    REG_JNI(register_android_os_SELinux),
     REG_JNI(register_android_os_StatFs),
     REG_JNI(register_android_os_Trace),
     REG_JNI(register_android_os_UEventObserver),
