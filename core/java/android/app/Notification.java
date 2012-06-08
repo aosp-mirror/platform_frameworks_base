@@ -1614,6 +1614,7 @@ public class Notification implements Parcelable
     {
         private CharSequence mBigContentTitle;
         private CharSequence mSummaryText = null;
+        private boolean mSummaryTextSet = false;
 
         protected Builder mBuilder;
 
@@ -1630,6 +1631,7 @@ public class Notification implements Parcelable
          */
         protected void internalSetSummaryText(CharSequence cs) {
             mSummaryText = cs;
+            mSummaryTextSet = true;
         }
 
         public void setBuilder(Builder builder) {
@@ -1660,9 +1662,13 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.line1, View.VISIBLE);
             }
 
-            // The last line defaults to the content text or subtext, but can be replaced by mSummaryText
-            if (mSummaryText != null && !mSummaryText.equals("")) {
-                contentView.setTextViewText(R.id.text, mSummaryText);
+            // The last line defaults to the subtext, but can be replaced by mSummaryText
+            final CharSequence overflowText =
+                    mSummaryTextSet ? mSummaryText
+                                    : mBuilder.mSubText;
+            if (overflowText != null) {
+                contentView.setTextViewText(R.id.text, overflowText);
+                contentView.setViewVisibility(R.id.overflow_divider, View.VISIBLE);
                 contentView.setViewVisibility(R.id.line3, View.VISIBLE);
             }
 
@@ -1803,9 +1809,16 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews makeBigContentView() {
-            // Remove the content text so line3 disappears entirely
+            // Remove the content text so line3 only shows if you have a summary
+            final boolean hadThreeLines = (mBuilder.mContentText != null && mBuilder.mSubText != null);
             mBuilder.mContentText = null;
             RemoteViews contentView = getStandardView(R.layout.notification_template_big_text);
+            
+            if (hadThreeLines) {
+                // vertical centering
+                contentView.setViewPadding(R.id.line1, 0, 0, 0, 0);
+            }
+
             contentView.setTextViewText(R.id.big_text, mBigText);
             contentView.setViewVisibility(R.id.big_text, View.VISIBLE);
             contentView.setViewVisibility(R.id.text2, View.GONE);
@@ -1875,7 +1888,10 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews makeBigContentView() {
+            // Remove the content text so line3 disappears unless you have a summary
+            mBuilder.mContentText = null;
             RemoteViews contentView = getStandardView(R.layout.notification_template_inbox);
+
             contentView.setViewVisibility(R.id.text2, View.GONE);
 
             int[] rowIds = {R.id.inbox_text0, R.id.inbox_text1, R.id.inbox_text2, R.id.inbox_text3,
