@@ -57,6 +57,11 @@ static int do_rename(char **arg, char reply[REPLY_MAX])
     return renamepkg(arg[0], arg[1]); /* oldpkgname, newpkgname */
 }
 
+static int do_fixuid(char **arg, char reply[REPLY_MAX])
+{
+    return fix_uid(arg[0], atoi(arg[1]), atoi(arg[2])); /* pkgname, uid, gid */
+}
+
 static int do_free_cache(char **arg, char reply[REPLY_MAX]) /* TODO int:free_size */
 {
     return free_cache((int64_t)atoll(arg[0])); /* free_size */
@@ -141,6 +146,7 @@ struct cmdinfo cmds[] = {
     { "rmdex",                1, do_rm_dex },
     { "remove",               2, do_remove },
     { "rename",               2, do_rename },
+    { "fixuid",               3, do_fixuid },
     { "freecache",            1, do_free_cache },
     { "rmcache",              1, do_rm_cache },
     { "protect",              2, do_protect },
