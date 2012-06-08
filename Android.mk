@@ -607,6 +607,36 @@ $(full_target): $(framework_built) $(gen)
 
 droidcore: doc-comment-check-docs
 
+# ====  static html in the pdk ==================================
+include $(CLEAR_VARS)
+
+LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
+LOCAL_DROIDDOC_HTML_DIR:=../../vendor/pdk/data/google/docs
+LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
+
+LOCAL_MODULE := offline-pdk
+
+LOCAL_DROIDDOC_OPTIONS:=\
+		-hdf android.whichdoc offline \
+		-hdf android.whichmodule $(LOCAL_MODULE)
+
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-pdk
+
+include $(BUILD_DROIDDOC)
+
+static_doc_index_redirect := $(out_dir)/index.html
+$(static_doc_index_redirect): \
+	$(LOCAL_PATH)/docs/docs-documentation-redirect.html | $(ACP)
+	$(hide) mkdir -p $(dir $@)
+	$(hide) $(ACP) $< $@
+
+$(full_target): $(static_doc_index_redirect)
+$(full_target): $(framework_built)
+
 # ====  static html in the sdk ==================================
 include $(CLEAR_VARS)
 
