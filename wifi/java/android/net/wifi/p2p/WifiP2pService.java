@@ -703,6 +703,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiP2pManager.CLEAR_LOCAL_SERVICES:
                     if (DBG) logd(getName() + " clear service");
                     clearLocalServices(message.replyTo);
+                    replyToMessage(message, WifiP2pManager.CLEAR_LOCAL_SERVICES_SUCCEEDED);
                     break;
                 case WifiP2pManager.ADD_SERVICE_REQUEST:
                     if (DBG) logd(getName() + " add service request");
