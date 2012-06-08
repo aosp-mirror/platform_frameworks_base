@@ -191,6 +191,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int SCAN_NO_PATHS = 1<<5;
     static final int SCAN_UPDATE_TIME = 1<<6;
     static final int SCAN_DEFER_DEX = 1<<7;
+    static final int SCAN_BOOTING = 1<<8;
 
     static final int REMOVE_CHATTY = 1<<16;
 
@@ -924,7 +925,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Set flag to monitor and not change apk file paths when
             // scanning install directories.
-            int scanMode = SCAN_MONITOR | SCAN_NO_PATHS | SCAN_DEFER_DEX;
+            int scanMode = SCAN_MONITOR | SCAN_NO_PATHS | SCAN_DEFER_DEX | SCAN_BOOTING;
             if (mNoDexOpt) {
                 Slog.w(TAG, "Running ENG build: no pre-dexopt!");
                 scanMode |= SCAN_NO_DEX;
@@ -3750,17 +3751,34 @@ public class PackageManagerService extends IPackageManager.Stub {
         } else {
             // This is a normal package, need to make its data directory.
             dataPath = getDataPathForPackage(pkg.packageName, 0);
-            
+
             boolean uidError = false;
-            
+
             if (dataPath.exists()) {
+                // XXX should really do this check for each user.
                 mOutPermissions[1] = 0;
                 FileUtils.getPermissions(dataPath.getPath(), mOutPermissions);
 
                 // If we have mismatched owners for the data path, we have a problem.
                 if (mOutPermissions[1] != pkg.applicationInfo.uid) {
                     boolean recovered = false;
-                    if ((parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0) {
+                    if (mOutPermissions[1] == 0) {
+                        // The directory somehow became owned by root.  Wow.
+                        // This is probably because the system was stopped while
+                        // installd was in the middle of messing with its libs
+                        // directory.  Ask installd to fix that.
+                        int ret = mInstaller.fixUid(pkgName, pkg.applicationInfo.uid,
+                                pkg.applicationInfo.uid);
+                        if (ret >= 0) {
+                            recovered = true;
+                            String msg = "Package " + pkg.packageName
+                                    + " unexpectedly changed to uid 0; recovered to " +
+                                    + pkg.applicationInfo.uid;
+                            reportSettingsProblem(Log.WARN, msg);
+                        }
+                    }
+                    if (!recovered && ((parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0
+                            || (scanMode&SCAN_BOOTING) != 0)) {
                         // If this is a system app, we can at least delete its
                         // current data so the application will still work.
                         int ret = mInstaller.remove(pkgName, 0);
@@ -3769,7 +3787,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                             // Remove the data directories for all users
                             sUserManager.removePackageForAllUsers(pkgName);
                             // Old data gone!
-                            String msg = "System package " + pkg.packageName
+                            String prefix = (parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0
+                                    ? "System package " : "Third party package ";
+                            String msg = prefix + pkg.packageName
                                     + " has changed from uid: "
                                     + mOutPermissions[1] + " to "
                                     + pkg.applicationInfo.uid + "; old data erased";
@@ -3781,7 +3801,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     pkg.applicationInfo.uid);
                             if (ret == -1) {
                                 // Ack should not happen!
-                                msg = "System package " + pkg.packageName
+                                msg = prefix + pkg.packageName
                                         + " could not have data directory re-created after delete.";
                                 reportSettingsProblem(Log.WARN, msg);
                                 mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
@@ -3794,6 +3814,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (!recovered) {
                             mHasSystemUidErrors = true;
                         }
+                    } else if (!recovered) {
+                        // If we allow this install to proceed, we will be broken.
+                        // Abort, abort!
+                        mLastScanError = PackageManager.INSTALL_FAILED_UID_CHANGED;
+                        return null;
                     }
                     if (!recovered) {
                         pkg.applicationInfo.dataDir = "/mismatched_uid/settings_"

@@ -143,6 +143,7 @@ char *build_string3(char *s1, char *s2, char *s3);
 int install(const char *pkgname, uid_t uid, gid_t gid);
 int uninstall(const char *pkgname, uid_t persona);
 int renamepkg(const char *oldpkgname, const char *newpkgname);
+int fix_uid(const char *pkgname, uid_t uid, gid_t gid);
 int delete_user_data(const char *pkgname, uid_t persona);
 int make_user_data(const char *pkgname, uid_t uid, uid_t persona);
 int delete_persona(uid_t persona);
