@@ -933,6 +933,9 @@ public class Process {
     public static final native boolean parseProcLine(byte[] buffer, int startIndex, 
             int endIndex, int[] format, String[] outStrings, long[] outLongs, float[] outFloats);
 
+    /** @hide */
+    public static final native int[] getPidsForCommands(String[] cmds);
+
     /**
      * Gets the total Pss value for a given process, in bytes.
      * 
