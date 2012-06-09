@@ -3019,10 +3019,11 @@ public final class ActivityManagerService extends ActivityManagerNative
      *    appended to any existing file content.
      * @param firstPids of dalvik VM processes to dump stack traces for first
      * @param lastPids of dalvik VM processes to dump stack traces for last
+     * @param nativeProcs optional list of native process names to dump stack crawls
      * @return file containing stack traces, or null if no dump file is configured
      */
     public static File dumpStackTraces(boolean clearTraces, ArrayList<Integer> firstPids,
-            ProcessStats processStats, SparseArray<Boolean> lastPids) {
+            ProcessStats processStats, SparseArray<Boolean> lastPids, String[] nativeProcs) {
         String tracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
         if (tracesPath == null || tracesPath.length() == 0) {
             return null;
@@ -3042,12 +3043,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             return null;
         }
 
-        dumpStackTraces(tracesPath, firstPids, processStats, lastPids);
+        dumpStackTraces(tracesPath, firstPids, processStats, lastPids, nativeProcs);
         return tracesFile;
     }
 
     private static void dumpStackTraces(String tracesPath, ArrayList<Integer> firstPids,
-            ProcessStats processStats, SparseArray<Boolean> lastPids) {
+            ProcessStats processStats, SparseArray<Boolean> lastPids, String[] nativeProcs) {
         // Use a FileObserver to detect when traces finish writing.
         // The order of traces is considered important to maintain for legibility.
         FileObserver observer = new FileObserver(tracesPath, FileObserver.CLOSE_WRITE) {
@@ -3108,6 +3109,15 @@ public final class ActivityManagerService extends ActivityManagerNative
         } finally {
             observer.stopWatching();
         }
+
+        if (nativeProcs != null) {
+            int[] pids = Process.getPidsForCommands(nativeProcs);
+            if (pids != null) {
+                for (int pid : pids) {
+                    Debug.dumpNativeBacktraceToFile(pid, tracesPath);
+                }
+            }
+        }
     }
 
     final void logAppTooSlow(ProcessRecord app, long startTime, String msg) {
@@ -3156,7 +3166,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (app != null) {
                 ArrayList<Integer> firstPids = new ArrayList<Integer>();
                 firstPids.add(app.pid);
-                dumpStackTraces(tracesPath, firstPids, null, null);
+                dumpStackTraces(tracesPath, firstPids, null, null, null);
             }
 
             File lastTracesFile = null;
@@ -3264,7 +3274,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         final ProcessStats processStats = new ProcessStats(true);
 
-        File tracesFile = dumpStackTraces(true, firstPids, processStats, lastPids);
+        File tracesFile = dumpStackTraces(true, firstPids, processStats, lastPids, null);
 
         String cpuInfo = null;
         if (MONITOR_CPU_USAGE) {
