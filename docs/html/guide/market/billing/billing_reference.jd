@@ -417,7 +417,7 @@ a <code>PURCHASE_STATE_CHANGED</code> intent.</p>
   (refunded), or 3 (expired, for subscription purchases only).</td>
 </tr>
 <tr>
-  <td>subscriptionToken</td>
+  <td>purchaseToken</td>
   <td>A token that uniquely identifies a subscription purchase for a given item and user pair.
   You can use the token to specify the subscription when querying for subscription validity.
   
