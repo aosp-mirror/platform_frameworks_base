@@ -113,6 +113,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private static final int MSG_TOGGLE_TOUCH_EXPLORATION = 2;
 
+    private static final int MSG_SEND_ACCESSIBILITY_EVENT_TO_INPUT_FILTER = 3;
+
     private static int sIdCounter = 0;
 
     private static int sNextWindowId;
@@ -402,7 +404,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 notifyAccessibilityServicesDelayedLocked(event, true);
             }
             if (mHasInputFilter && mInputFilter != null) {
-                mInputFilter.onAccessibilityEvent(event);
+                mMainHandler.obtainMessage(MSG_SEND_ACCESSIBILITY_EVENT_TO_INPUT_FILTER,
+                        AccessibilityEvent.obtain(event)).sendToTarget();
+
             }
             event.recycle();
             mHandledFeedbackTypes = 0;
@@ -1104,7 +1108,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         mEnableTouchExplorationDialog.setCanceledOnTouchOutside(true);
                         mEnableTouchExplorationDialog.show();
                     }
-                }
+                } break;
+                case MSG_SEND_ACCESSIBILITY_EVENT_TO_INPUT_FILTER: {
+                    AccessibilityEvent event = (AccessibilityEvent) msg.obj;
+                    if (mHasInputFilter && mInputFilter != null) {
+                        mInputFilter.onAccessibilityEvent(event);
+                    }
+                    event.recycle();
+                } break;
             }
         }
     }
