@@ -4305,14 +4305,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final int lastPos = firstPos + childCount - 1;
 
             int viewTravelCount;
-            if (position < firstPos) {
-                viewTravelCount = firstPos - position + 1;
+            int clampedPosition = Math.max(0, Math.min(getCount() - 1, position));
+            if (clampedPosition < firstPos) {
+                viewTravelCount = firstPos - clampedPosition + 1;
                 mMode = MOVE_UP_POS;
-            } else if (position > lastPos) {
-                viewTravelCount = position - lastPos + 1;
+            } else if (clampedPosition > lastPos) {
+                viewTravelCount = clampedPosition - lastPos + 1;
                 mMode = MOVE_DOWN_POS;
             } else {
-                scrollToVisible(position, INVALID_POSITION, SCROLL_DURATION);
+                scrollToVisible(clampedPosition, INVALID_POSITION, SCROLL_DURATION);
                 return;
             }
 
@@ -4321,7 +4322,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             } else {
                 mScrollDuration = SCROLL_DURATION;
             }
-            mTargetPos = position;
+            mTargetPos = clampedPosition;
             mBoundPos = INVALID_POSITION;
             mLastSeenPos = INVALID_POSITION;
 
@@ -4356,14 +4357,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final int lastPos = firstPos + childCount - 1;
 
             int viewTravelCount;
-            if (position < firstPos) {
+            int clampedPosition = Math.max(0, Math.min(getCount() - 1, position));
+            if (clampedPosition < firstPos) {
                 final int boundPosFromLast = lastPos - boundPosition;
                 if (boundPosFromLast < 1) {
                     // Moving would shift our bound position off the screen. Abort.
                     return;
                 }
 
-                final int posTravel = firstPos - position + 1;
+                final int posTravel = firstPos - clampedPosition + 1;
                 final int boundTravel = boundPosFromLast - 1;
                 if (boundTravel < posTravel) {
                     viewTravelCount = boundTravel;
@@ -4372,14 +4374,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     viewTravelCount = posTravel;
                     mMode = MOVE_UP_POS;
                 }
-            } else if (position > lastPos) {
+            } else if (clampedPosition > lastPos) {
                 final int boundPosFromFirst = boundPosition - firstPos;
                 if (boundPosFromFirst < 1) {
                     // Moving would shift our bound position off the screen. Abort.
                     return;
                 }
 
-                final int posTravel = position - lastPos + 1;
+                final int posTravel = clampedPosition - lastPos + 1;
                 final int boundTravel = boundPosFromFirst - 1;
                 if (boundTravel < posTravel) {
                     viewTravelCount = boundTravel;
@@ -4389,7 +4391,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     mMode = MOVE_DOWN_POS;
                 }
             } else {
-                scrollToVisible(position, boundPosition, SCROLL_DURATION);
+                scrollToVisible(clampedPosition, boundPosition, SCROLL_DURATION);
                 return;
             }
 
@@ -4398,7 +4400,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             } else {
                 mScrollDuration = SCROLL_DURATION;
             }
-            mTargetPos = position;
+            mTargetPos = clampedPosition;
             mBoundPos = boundPosition;
             mLastSeenPos = INVALID_POSITION;
 
@@ -4431,7 +4433,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
             offset += getPaddingTop();
 
-            mTargetPos = position;
+            mTargetPos = Math.max(0, Math.min(getCount() - 1, position));
             mOffsetFromTop = offset;
             mBoundPos = INVALID_POSITION;
             mLastSeenPos = INVALID_POSITION;
@@ -4441,13 +4443,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final int lastPos = firstPos + childCount - 1;
 
             int viewTravelCount;
-            if (position < firstPos) {
-                viewTravelCount = firstPos - position;
-            } else if (position > lastPos) {
-                viewTravelCount = position - lastPos;
+            if (mTargetPos < firstPos) {
+                viewTravelCount = firstPos - mTargetPos;
+            } else if (mTargetPos > lastPos) {
+                viewTravelCount = mTargetPos - lastPos;
             } else {
                 // On-screen, just scroll.
-                final int targetTop = getChildAt(position - firstPos).getTop();
+                final int targetTop = getChildAt(mTargetPos - firstPos).getTop();
                 smoothScrollBy(targetTop - offset, duration, true);
                 return;
             }
