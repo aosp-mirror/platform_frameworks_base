@@ -432,8 +432,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         final int rootAccessibilityViewId =
             (root != null) ? root.getAccessibilityViewId() : UNDEFINED;
         mSourceNodeId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
-        mActualAndReportedWindowLeftDelta = root.getActualAndReportedWindowLeftDelta();
-        mActualAndReportedWindowTopDelta = root.getActualAndReportedWindowTopDelta();
+        if (root != null) {
+            mActualAndReportedWindowLeftDelta = root.getActualAndReportedWindowLeftDelta();
+            mActualAndReportedWindowTopDelta = root.getActualAndReportedWindowTopDelta();
+        }
     }
 
     /**
