@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.Log;
 
@@ -492,6 +493,7 @@ public class MediaRouter {
         int mSupportedTypes;
         RouteGroup mGroup;
         final RouteCategory mCategory;
+        Drawable mIcon;
 
         RouteInfo(RouteCategory category) {
             mCategory = category;
@@ -534,6 +536,16 @@ public class MediaRouter {
             return mCategory;
         }
 
+        /**
+         * Get the icon representing this route.
+         * This icon will be used in picker UIs if available.
+         *
+         * @return the icon representing this route or null if no icon is available
+         */
+        public Drawable getIconDrawable() {
+            return mIcon;
+        }
+
         void setStatusInt(CharSequence status) {
             if (!status.equals(mStatus)) {
                 mStatus = status;
@@ -564,6 +576,7 @@ public class MediaRouter {
      * @see MediaRouter.RouteInfo
      */
     public static class UserRouteInfo extends RouteInfo {
+        RemoteControlClient mRcc;
 
         UserRouteInfo(RouteCategory category) {
             super(category);
@@ -586,6 +599,40 @@ public class MediaRouter {
          */
         public void setStatus(CharSequence status) {
             setStatusInt(status);
+        }
+
+        /**
+         * Set the RemoteControlClient responsible for reporting playback info for this
+         * user route.
+         *
+         * <p>If this route manages remote playback, the data exposed by this
+         * RemoteControlClient will be used to reflect and update information
+         * such as route volume info in related UIs.</p>
+         *
+         * @param rcc RemoteControlClient associated with this route
+         */
+        public void setRemoteControlClient(RemoteControlClient rcc) {
+            mRcc = rcc;
+        }
+
+        /**
+         * Set an icon that will be used to represent this route.
+         * The system may use this icon in picker UIs or similar.
+         *
+         * @param icon icon drawable to use to represent this route
+         */
+        public void setIconDrawable(Drawable icon) {
+            mIcon = icon;
+        }
+
+        /**
+         * Set an icon that will be used to represent this route.
+         * The system may use this icon in picker UIs or similar.
+         *
+         * @param icon Resource ID of an icon drawable to use to represent this route
+         */
+        public void setIconResource(int resId) {
+            setIconDrawable(sStatic.mResources.getDrawable(resId));
         }
     }
 
@@ -693,6 +740,26 @@ public class MediaRouter {
          */
         public RouteInfo getRouteAt(int index) {
             return mRoutes.get(index);
+        }
+
+        /**
+         * Set an icon that will be used to represent this group.
+         * The system may use this icon in picker UIs or similar.
+         *
+         * @param icon icon drawable to use to represent this group
+         */
+        public void setIconDrawable(Drawable icon) {
+            mIcon = icon;
+        }
+
+        /**
+         * Set an icon that will be used to represent this group.
+         * The system may use this icon in picker UIs or similar.
+         *
+         * @param icon Resource ID of an icon drawable to use to represent this group
+         */
+        public void setIconResource(int resId) {
+            setIconDrawable(sStatic.mResources.getDrawable(resId));
         }
 
         void memberNameChanged(RouteInfo info, CharSequence name) {
