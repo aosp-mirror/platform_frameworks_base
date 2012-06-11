@@ -892,6 +892,93 @@ static jlong android_os_Process_getPss(JNIEnv* env, jobject clazz, jint pid)
     return pss * 1024;
 }
 
+jintArray android_os_Process_getPidsForCommands(JNIEnv* env, jobject clazz,
+        jobjectArray commandNames)
+{
+    if (commandNames == NULL) {
+        jniThrowNullPointerException(env, NULL);
+        return NULL;
+    }
+
+    Vector<String8> commands;
+
+    jsize count = env->GetArrayLength(commandNames);
+
+    for (int i=0; i<count; i++) {
+        jobject obj = env->GetObjectArrayElement(commandNames, i);
+        if (obj != NULL) {
+            const char* str8 = env->GetStringUTFChars((jstring)obj, NULL);
+            if (str8 == NULL) {
+                jniThrowNullPointerException(env, "Element in commandNames");
+                return NULL;
+            }
+            commands.add(String8(str8));
+            env->ReleaseStringUTFChars((jstring)obj, str8);
+        } else {
+            jniThrowNullPointerException(env, "Element in commandNames");
+            return NULL;
+        }
+    }
+
+    Vector<jint> pids;
+
+    DIR *proc = opendir("/proc");
+    if (proc == NULL) {
+        fprintf(stderr, "/proc: %s\n", strerror(errno));
+        return NULL;
+    }
+
+    struct dirent *d;
+    while ((d = readdir(proc))) {
+        int pid = atoi(d->d_name);
+        if (pid <= 0) continue;
+
+        char path[PATH_MAX];
+        char data[PATH_MAX];
+        snprintf(path, sizeof(path), "/proc/%d/cmdline", pid);
+
+        int fd = open(path, O_RDONLY);
+        if (fd < 0) {
+            continue;
+        }
+        const int len = read(fd, data, sizeof(data)-1);
+        close(fd);
+
+        if (len < 0) {
+            continue;
+        }
+        data[len] = 0;
+
+        for (int i=0; i<len; i++) {
+            if (data[i] == ' ') {
+                data[i] = 0;
+                break;
+            }
+        }
+
+        for (size_t i=0; i<commands.size(); i++) {
+            if (commands[i] == data) {
+                pids.add(pid);
+                break;
+            }
+        }
+    }
+
+    closedir(proc);
+
+    jintArray pidArray = env->NewIntArray(pids.size());
+    if (pidArray == NULL) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+        return NULL;
+    }
+
+    if (pids.size() > 0) {
+        env->SetIntArrayRegion(pidArray, 0, pids.size(), pids.array());
+    }
+
+    return pidArray;
+}
+
 static const JNINativeMethod methods[] = {
     {"myPid",       "()I", (void*)android_os_Process_myPid},
     {"myTid",       "()I", (void*)android_os_Process_myTid},
@@ -919,6 +1006,7 @@ static const JNINativeMethod methods[] = {
     {"parseProcLine", "([BII[I[Ljava/lang/String;[J[F)Z", (void*)android_os_Process_parseProcLine},
     {"getElapsedCpuTime", "()J", (void*)android_os_Process_getElapsedCpuTime},
     {"getPss", "(I)J", (void*)android_os_Process_getPss},
+    {"getPidsForCommands", "([Ljava/lang/String;)[I", (void*)android_os_Process_getPidsForCommands},
     //{"setApplicationObject", "(Landroid/os/IBinder;)V", (void*)android_os_Process_setApplicationObject},
 };
 
