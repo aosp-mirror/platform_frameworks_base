@@ -98,7 +98,10 @@ public class AudioManager {
 
     /**
      * @hide Broadcast intent when the volume for a particular stream type changes.
-     * Includes the stream, the new volume and previous volumes
+     * Includes the stream, the new volume and previous volumes.
+     * Notes:
+     *  - for internal platform use only, do not make public,
+     *  - never used for "remote" volume changes
      *
      * @see #EXTRA_VOLUME_STREAM_TYPE
      * @see #EXTRA_VOLUME_STREAM_VALUE
@@ -1498,6 +1501,24 @@ public class AudioManager {
         return AudioSystem.isStreamActive(STREAM_MUSIC, 0);
     }
 
+    /**
+     * @hide
+     * If the stream is active locally or remotely, adjust its volume according to the enforced
+     * priority rules.
+     * Note: only AudioManager.STREAM_MUSIC is supported at the moment
+     */
+    public void adjustLocalOrRemoteStreamVolume(int streamType, int direction) {
+        if (streamType != STREAM_MUSIC) {
+            Log.w(TAG, "adjustLocalOrRemoteStreamVolume() doesn't support stream " + streamType);
+        }
+        IAudioService service = getService();
+        try {
+            service.adjustLocalOrRemoteStreamVolume(streamType, direction);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in adjustLocalOrRemoteStreamVolume", e);
+        }
+    }
+
     /*
      * Sets a generic audio configuration parameter. The use of these parameters
      * are platform dependant, see libaudio
@@ -2074,10 +2095,12 @@ public class AudioManager {
         }
         IAudioService service = getService();
         try {
-            service.registerRemoteControlClient(rcClient.getRcMediaIntent(),   /* mediaIntent   */
-                    rcClient.getIRemoteControlClient(),                        /* rcClient      */
+            int rcseId = service.registerRemoteControlClient(
+                    rcClient.getRcMediaIntent(),       /* mediaIntent   */
+                    rcClient.getIRemoteControlClient(),/* rcClient      */
                     // used to match media button event receiver and audio focus
-                    mContext.getPackageName());                                /* packageName   */
+                    mContext.getPackageName());        /* packageName   */
+            rcClient.setRcseId(rcseId);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in registerRemoteControlClient"+e);
         }
