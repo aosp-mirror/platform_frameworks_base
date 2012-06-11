@@ -385,6 +385,7 @@ public abstract class ApplicationThreadNative extends Binder
 
         case SCHEDULE_LOW_MEMORY_TRANSACTION:
         {
+            data.enforceInterface(IApplicationThread.descriptor);
             scheduleLowMemory();
             return true;
         }
