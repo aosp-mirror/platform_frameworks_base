@@ -16,7 +16,6 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Debug;
-import android.os.RemoteException;
 import android.util.Slog;
 import android.view.Surface;
 import android.view.SurfaceSession;
@@ -379,10 +378,7 @@ class WindowStateAnimator {
             mService.mPendingRemove.add(mWin);
             mWin.mRemoveOnExit = false;
         }
-        if (mService.mWallpaperTarget == mWin && mService.mLowerWallpaperTarget == null) {
-            mAnimator.hideWallpapersLocked();
-            mAnimator.mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-        }
+        mAnimator.hideWallpapersLocked(mWin);
     }
 
     void hide() {
@@ -738,6 +734,7 @@ class WindowStateAnimator {
                     }
                     mSurface.destroy();
                 }
+                mAnimator.hideWallpapersLocked(mWin);
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Exception thrown when destroying Window " + this
                     + " surface " + mSurface + " session " + mSession
@@ -763,6 +760,7 @@ class WindowStateAnimator {
                     WindowManagerService.logSurface(mWin, "DESTROY PENDING", e);
                 }
                 mPendingDestroySurface.destroy();
+                mAnimator.hideWallpapersLocked(mWin);
             }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Exception thrown when destroying Window "
@@ -1067,11 +1065,8 @@ class WindowStateAnimator {
 
         if (w.mAttachedHidden || !w.isReadyForDisplay()) {
             hide();
-            // TODO: Consider moving the following into hide() and out of finishExit() as well.
-            if (mService.mWallpaperTarget == mWin && mService.mLowerWallpaperTarget == null) {
-                mAnimator.hideWallpapersLocked();
-                mAnimator.mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-            }
+            mAnimator.hideWallpapersLocked(w);
+
             // If we are waiting for this window to handle an
             // orientation change, well, it is hidden, so
             // doesn't really matter.  Note that this does
