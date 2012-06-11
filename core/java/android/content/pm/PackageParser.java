@@ -127,9 +127,13 @@ public class PackageParser {
      */
     public static final PackageParser.SplitPermissionInfo SPLIT_PERMISSIONS[] =
         new PackageParser.SplitPermissionInfo[] {
+            // READ_EXTERNAL_STORAGE is always required when an app requests
+            // WRITE_EXTERNAL_STORAGE, because we can't have an app that has
+            // write access without read access.  The hack here with the target
+            // target SDK version ensures that this grant is always done.
             new PackageParser.SplitPermissionInfo(android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     new String[] { android.Manifest.permission.READ_EXTERNAL_STORAGE },
-                    android.os.Build.VERSION_CODES.JELLY_BEAN),
+                    android.os.Build.VERSION_CODES.CUR_DEVELOPMENT+1),
             new PackageParser.SplitPermissionInfo(android.Manifest.permission.READ_CONTACTS,
                     new String[] { android.Manifest.permission.READ_CALL_LOG },
                     android.os.Build.VERSION_CODES.JELLY_BEAN),

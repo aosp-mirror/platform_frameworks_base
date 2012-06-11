@@ -1204,7 +1204,9 @@ int doDump(Bundle* bundle)
             }
 
             // If the application has requested WRITE_EXTERNAL_STORAGE, we will
-            // force them to always take READ_EXTERNAL_STORAGE as well.
+            // force them to always take READ_EXTERNAL_STORAGE as well.  We always
+            // do this (regardless of target API version) because we can't have
+            // an app with write permission but not read permission.
             if (!hasReadExternalStoragePermission && hasWriteExternalStoragePermission) {
                 printf("uses-permission:'android.permission.READ_EXTERNAL_STORAGE'\n");
                 printf("uses-implied-permission:'android.permission.READ_EXTERNAL_STORAGE'," \
