@@ -127,6 +127,7 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.ScaleAnimation;
 
@@ -279,6 +280,8 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final int ALLOW_DISABLE_NO = 0;
     private static final int ALLOW_DISABLE_UNKNOWN = -1; // check with DevicePolicyManager
     private int mAllowDisableKeyguard = ALLOW_DISABLE_UNKNOWN; // sync'd by mKeyguardTokenWatcher
+
+    private static final float THUMBNAIL_ANIMATION_DECELERATE_FACTOR = 1.5f;
 
     final TokenWatcher mKeyguardTokenWatcher = new TokenWatcher(
             new Handler(), "WindowManagerService.mKeyguardTokenWatcher") {
@@ -3183,7 +3186,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // it  is the standard duration for that.  Otherwise we use the longer
         // task transition duration.
         int duration;
-        int delayDuration = delayed ? 200 : 0;
+        int delayDuration = delayed ? 270 : 0;
         switch (transit) {
             case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
             case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
@@ -3191,7 +3194,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         com.android.internal.R.integer.config_shortAnimTime);
                 break;
             default:
-                duration = delayed ? 200 : 300;
+                duration = delayed ? 250 : 300;
                 break;
         }
         if (thumb) {
@@ -3206,6 +3209,8 @@ public class WindowManagerService extends IWindowManager.Stub
             AnimationSet set = new AnimationSet(true);
             Animation alpha = new AlphaAnimation(1, 0);
             scale.setDuration(duration);
+            scale.setInterpolator(
+                    new DecelerateInterpolator(THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
             set.addAnimation(scale);
             alpha.setDuration(duration);
             set.addAnimation(alpha);
@@ -3222,6 +3227,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     computePivot(mNextAppTransitionStartX, scaleW),
                     computePivot(mNextAppTransitionStartY, scaleH));
             scale.setDuration(duration);
+            scale.setInterpolator(
+                    new DecelerateInterpolator(THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
             scale.setFillBefore(true);
             if (delayDuration > 0) {
                 scale.setStartOffset(delayDuration);
