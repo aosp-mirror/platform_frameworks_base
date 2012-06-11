@@ -443,12 +443,14 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mNetworkController.addSignalCluster(signalCluster);
         signalCluster.setNetworkController(mNetworkController);
-        
-        // for wifi-only devices, we show SSID; otherwise, we show PLMN
-        if (mNetworkController.hasMobileDataFeature()) {
-            mNetworkController.addMobileLabelView(mCarrierLabel);
-        } else {
-            mNetworkController.addWifiLabelView(mCarrierLabel);
+
+        if (SHOW_CARRIER_LABEL) {
+            // for wifi-only devices, we show SSID; otherwise, we show PLMN
+            if (mNetworkController.hasMobileDataFeature()) {
+                mNetworkController.addMobileLabelView(mCarrierLabel);
+            } else {
+                mNetworkController.addWifiLabelView(mCarrierLabel);
+            }
         }
 
 //        final ImageView wimaxRSSI =
