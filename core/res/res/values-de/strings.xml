@@ -639,7 +639,7 @@
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobil"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Benutzerdefiniert"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Privat"</string>
-    <string name="postalTypeWork" msgid="5268172772387694495">"Geschäftlich"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"Büro"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Sonstige"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Benutzerdefiniert"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"Privat"</string>
