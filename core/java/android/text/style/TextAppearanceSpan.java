@@ -235,7 +235,6 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
             }
 
             int fake = style & ~tf.getStyle();
-            fake |= tf.getStyle() & Typeface.BOLD;
 
             if ((fake & Typeface.BOLD) != 0) {
                 ds.setFakeBoldText(true);
