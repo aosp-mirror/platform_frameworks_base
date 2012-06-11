@@ -134,6 +134,9 @@ public class PhoneStatusBar extends BaseStatusBar {
     private float mExpandAccelPx; // classic value: 2000px/s/s
     private float mCollapseAccelPx; // classic value: 2000px/s/s (will be negated to collapse "up")
 
+    private float mFlingGestureMaxOutputVelocityPx; // how fast can it really go? (should be a little 
+                                                    // faster than mSelfCollapseVelocityPx)
+
     PhoneStatusBarPolicy mIconPolicy;
 
     // These are no longer handled by the policy, because we need custom strategies for them
@@ -392,12 +395,13 @@ public class PhoneStatusBar extends BaseStatusBar {
         mTickerView = mStatusBarView.findViewById(R.id.ticker);
 
         mPile = (NotificationRowLayout)mStatusBarWindow.findViewById(R.id.latestItems);
+        mPile.setLayoutTransitionsEnabled(false);
         mPile.setLongPressListener(getNotificationLongClicker());
         if (SHOW_CARRIER_LABEL) {
             mPile.setOnSizeChangedListener(new OnSizeChangedListener() {
                 @Override
                 public void onSizeChanged(View view, int w, int h, int oldw, int oldh) {
-                    updateCarrierLabelVisibility();
+                    updateCarrierLabelVisibility(false);
                 }
             });
         }
@@ -889,7 +893,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
-    protected void updateCarrierLabelVisibility() {
+    protected void updateCarrierLabelVisibility(boolean force) {
         if (!SHOW_CARRIER_LABEL) return;
         // The idea here is to only show the carrier label when there is enough room to see it, 
         // i.e. when there aren't enough notifications to fill the panel.
@@ -901,7 +905,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         final boolean makeVisible = 
             mPile.getHeight() < (mScrollView.getHeight() - mCarrierLabelHeight);
         
-        if (mCarrierLabelVisible != makeVisible) {
+        if (force || mCarrierLabelVisible != makeVisible) {
             mCarrierLabelVisible = makeVisible;
             if (DEBUG) {
                 Slog.d(TAG, "making carrier label " + (makeVisible?"visible":"invisible"));
@@ -986,7 +990,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 .start();
         }
 
-        updateCarrierLabelVisibility();
+        updateCarrierLabelVisibility(false);
     }
 
     public void showClock(boolean show) {
@@ -1159,9 +1163,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         mExpandedVisible = true;
+        mPile.setLayoutTransitionsEnabled(true);
         makeSlippery(mNavigationBarView, true);
 
-        updateCarrierLabelVisibility();
+        updateCarrierLabelVisibility(true);
 
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
 
@@ -1279,6 +1284,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             return;
         }
         mExpandedVisible = false;
+        mPile.setLayoutTransitionsEnabled(false);
         visibilityChanged(false);
         makeSlippery(mNavigationBarView, false);
 
@@ -1562,6 +1568,9 @@ public class PhoneStatusBar extends BaseStatusBar {
                 }
 
                 float vel = (float)Math.hypot(yVel, xVel);
+                if (vel > mFlingGestureMaxOutputVelocityPx) {
+                    vel = mFlingGestureMaxOutputVelocityPx;
+                }
                 if (negative) {
                     vel = -vel;
                 }
@@ -2041,7 +2050,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             mStatusBarWindow.setBackgroundColor(color);
         }
         
-        updateCarrierLabelVisibility();
+        updateCarrierLabelVisibility(false);
     }
 
     void updateDisplaySize() {
@@ -2267,6 +2276,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         mCollapseAccelPx = res.getDimension(R.dimen.collapse_accel);
 
         mFlingGestureMaxXVelocityPx = res.getDimension(R.dimen.fling_gesture_max_x_velocity);
+
+        mFlingGestureMaxOutputVelocityPx = res.getDimension(R.dimen.fling_gesture_max_output_velocity);
 
         mNotificationPanelMarginBottomPx
             = (int) res.getDimension(R.dimen.notification_panel_margin_bottom);
