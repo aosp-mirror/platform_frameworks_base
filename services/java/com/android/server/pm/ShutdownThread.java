@@ -84,6 +84,8 @@ public final class ShutdownThread extends Thread {
     private PowerManager.WakeLock mCpuWakeLock;
     private PowerManager.WakeLock mScreenWakeLock;
     private Handler mHandler;
+
+    private static AlertDialog sConfirmDialog;
     
     private ShutdownThread() {
     }
@@ -124,7 +126,10 @@ public final class ShutdownThread extends Thread {
 
         if (confirm) {
             final CloseDialogReceiver closer = new CloseDialogReceiver(context);
-            final AlertDialog dialog = new AlertDialog.Builder(context)
+            if (sConfirmDialog != null) {
+                sConfirmDialog.dismiss();
+            }
+            sConfirmDialog = new AlertDialog.Builder(context)
                     .setTitle(mRebootSafeMode
                             ? com.android.internal.R.string.reboot_safemode_title
                             : com.android.internal.R.string.power_off)
@@ -136,10 +141,10 @@ public final class ShutdownThread extends Thread {
                     })
                     .setNegativeButton(com.android.internal.R.string.no, null)
                     .create();
-            closer.dialog = dialog;
-            dialog.setOnDismissListener(closer);
-            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-            dialog.show();
+            closer.dialog = sConfirmDialog;
+            sConfirmDialog.setOnDismissListener(closer);
+            sConfirmDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+            sConfirmDialog.show();
         } else {
             beginShutdownSequence(context);
         }
