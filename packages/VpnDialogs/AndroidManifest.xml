@@ -1,6 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.vpndialogs"
-        android:sharedUserId="android.uid.system">
+        package="com.android.vpndialogs">
 
     <application android:label="VpnDialogs"
             android:allowBackup="false" >
