@@ -766,7 +766,7 @@ subscription product:</p>
 In-app Billing</a>.</p>
 
 
-<h2 id="play-dev-api">Googe Play Android Developer API</h2>
+<h2 id="play-dev-api">Google Play Android Developer API</h2>
 
 <p>Google Play offers an HTTP-based API that you can use to remotely query the
 validity of a specific subscription at any time or cancel a subscription. The
