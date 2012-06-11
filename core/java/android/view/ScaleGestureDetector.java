@@ -152,10 +152,6 @@ public class ScaleGestureDetector {
     private float mPrevPressure;
     private long mTimeDelta;
 
-    private final float mEdgeSlop;
-    private float mRightSlopEdge;
-    private float mBottomSlopEdge;
-    private boolean mSloppyGesture;
     private boolean mInvalidGesture;
 
     // Pointer IDs currently responsible for the two fingers controlling the gesture
@@ -171,10 +167,8 @@ public class ScaleGestureDetector {
                     new InputEventConsistencyVerifier(this, 0) : null;
 
     public ScaleGestureDetector(Context context, OnScaleGestureListener listener) {
-        ViewConfiguration config = ViewConfiguration.get(context);
         mContext = context;
         mListener = listener;
-        mEdgeSlop = config.getScaledEdgeSlop();
     }
 
     public boolean onTouchEvent(MotionEvent event) {
@@ -193,171 +187,37 @@ public class ScaleGestureDetector {
             handled = false;
         } else if (!mGestureInProgress) {
             switch (action) {
-            case MotionEvent.ACTION_DOWN: {
-                mActiveId0 = event.getPointerId(0);
-                mActive0MostRecent = true;
-            }
-            break;
-
-            case MotionEvent.ACTION_UP:
-                reset();
+                case MotionEvent.ACTION_DOWN: {
+                    mActiveId0 = event.getPointerId(0);
+                    mActive0MostRecent = true;
+                }
                 break;
 
-            case MotionEvent.ACTION_POINTER_DOWN: {
-                // We have a new multi-finger gesture
+                case MotionEvent.ACTION_UP:
+                    reset();
+                    break;
 
-                // as orientation can change, query the metrics in touch down
-                DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
-                mRightSlopEdge = metrics.widthPixels - mEdgeSlop;
-                mBottomSlopEdge = metrics.heightPixels - mEdgeSlop;
+                case MotionEvent.ACTION_POINTER_DOWN: {
+                    // We have a new multi-finger gesture
+                    if (mPrevEvent != null) mPrevEvent.recycle();
+                    mPrevEvent = MotionEvent.obtain(event);
+                    mTimeDelta = 0;
 
-                if (mPrevEvent != null) mPrevEvent.recycle();
-                mPrevEvent = MotionEvent.obtain(event);
-                mTimeDelta = 0;
-
-                int index1 = event.getActionIndex();
-                int index0 = event.findPointerIndex(mActiveId0);
-                mActiveId1 = event.getPointerId(index1);
-                if (index0 < 0 || index0 == index1) {
-                    // Probably someone sending us a broken event stream.
-                    index0 = findNewActiveIndex(event, index0 == index1 ? -1 : mActiveId1, index0);
-                    mActiveId0 = event.getPointerId(index0);
-                }
-                mActive0MostRecent = false;
-
-                setContext(event);
-
-                // Check if we have a sloppy gesture. If so, delay
-                // the beginning of the gesture until we're sure that's
-                // what the user wanted. Sloppy gestures can happen if the
-                // edge of the user's hand is touching the screen, for example.
-                final float edgeSlop = mEdgeSlop;
-                final float rightSlop = mRightSlopEdge;
-                final float bottomSlop = mBottomSlopEdge;
-                float x0 = getRawX(event, index0);
-                float y0 = getRawY(event, index0);
-                float x1 = getRawX(event, index1);
-                float y1 = getRawY(event, index1);
-
-                boolean p0sloppy = x0 < edgeSlop || y0 < edgeSlop
-                        || x0 > rightSlop || y0 > bottomSlop;
-                boolean p1sloppy = x1 < edgeSlop || y1 < edgeSlop
-                        || x1 > rightSlop || y1 > bottomSlop;
-
-                if (p0sloppy && p1sloppy) {
-                    mFocusX = -1;
-                    mFocusY = -1;
-                    mSloppyGesture = true;
-                } else if (p0sloppy) {
-                    mFocusX = event.getX(index1);
-                    mFocusY = event.getY(index1);
-                    mSloppyGesture = true;
-                } else if (p1sloppy) {
-                    mFocusX = event.getX(index0);
-                    mFocusY = event.getY(index0);
-                    mSloppyGesture = true;
-                } else {
-                    mSloppyGesture = false;
-                    mGestureInProgress = mListener.onScaleBegin(this);
-                }
-            }
-            break;
-
-            case MotionEvent.ACTION_MOVE:
-                if (mSloppyGesture) {
-                    // Initiate sloppy gestures if we've moved outside of the slop area.
-                    final float edgeSlop = mEdgeSlop;
-                    final float rightSlop = mRightSlopEdge;
-                    final float bottomSlop = mBottomSlopEdge;
+                    int index1 = event.getActionIndex();
                     int index0 = event.findPointerIndex(mActiveId0);
-                    int index1 = event.findPointerIndex(mActiveId1);
-
-                    float x0 = getRawX(event, index0);
-                    float y0 = getRawY(event, index0);
-                    float x1 = getRawX(event, index1);
-                    float y1 = getRawY(event, index1);
-
-                    boolean p0sloppy = x0 < edgeSlop || y0 < edgeSlop
-                            || x0 > rightSlop || y0 > bottomSlop;
-                    boolean p1sloppy = x1 < edgeSlop || y1 < edgeSlop
-                            || x1 > rightSlop || y1 > bottomSlop;
-
-                    if (p0sloppy) {
-                        // Do we have a different pointer that isn't sloppy?
-                        int index = findNewActiveIndex(event, mActiveId1, index0);
-                        if (index >= 0) {
-                            index0 = index;
-                            mActiveId0 = event.getPointerId(index);
-                            x0 = getRawX(event, index);
-                            y0 = getRawY(event, index);
-                            p0sloppy = false;
-                        }
+                    mActiveId1 = event.getPointerId(index1);
+                    if (index0 < 0 || index0 == index1) {
+                        // Probably someone sending us a broken event stream.
+                        index0 = findNewActiveIndex(event, mActiveId1, -1);
+                        mActiveId0 = event.getPointerId(index0);
                     }
+                    mActive0MostRecent = false;
 
-                    if (p1sloppy) {
-                        // Do we have a different pointer that isn't sloppy?
-                        int index = findNewActiveIndex(event, mActiveId0, index1);
-                        if (index >= 0) {
-                            index1 = index;
-                            mActiveId1 = event.getPointerId(index);
-                            x1 = getRawX(event, index);
-                            y1 = getRawY(event, index);
-                            p1sloppy = false;
-                        }
-                    }
+                    setContext(event);
 
-                    if(p0sloppy && p1sloppy) {
-                        mFocusX = -1;
-                        mFocusY = -1;
-                    } else if (p0sloppy) {
-                        mFocusX = event.getX(index1);
-                        mFocusY = event.getY(index1);
-                    } else if (p1sloppy) {
-                        mFocusX = event.getX(index0);
-                        mFocusY = event.getY(index0);
-                    } else {
-                        mSloppyGesture = false;
-                        mGestureInProgress = mListener.onScaleBegin(this);
-                    }
+                    mGestureInProgress = mListener.onScaleBegin(this);
+                    break;
                 }
-                break;
-
-            case MotionEvent.ACTION_POINTER_UP:
-                if (mSloppyGesture) {
-                    final int pointerCount = event.getPointerCount();
-                    final int actionIndex = event.getActionIndex();
-                    final int actionId = event.getPointerId(actionIndex);
-
-                    if (pointerCount > 2) {
-                        if (actionId == mActiveId0) {
-                            final int newIndex = findNewActiveIndex(event, mActiveId1, actionIndex);
-                            if (newIndex >= 0) mActiveId0 = event.getPointerId(newIndex);
-                        } else if (actionId == mActiveId1) {
-                            final int newIndex = findNewActiveIndex(event, mActiveId0, actionIndex);
-                            if (newIndex >= 0) mActiveId1 = event.getPointerId(newIndex);
-                        }
-                    } else {
-                        // Set focus point to the remaining finger
-                        final int index = event.findPointerIndex(actionId == mActiveId0 ?
-                                mActiveId1 : mActiveId0);
-                        if (index < 0) {
-                            mInvalidGesture = true;
-                            Log.e(TAG, "Invalid MotionEvent stream detected.", new Throwable());
-                            if (mGestureInProgress) {
-                                mListener.onScaleEnd(this);
-                            }
-                            return false;
-                        }
-
-                        mActiveId0 = event.getPointerId(index);
-
-                        mActive0MostRecent = true;
-                        mActiveId1 = -1;
-                        mFocusX = event.getX(index);
-                        mFocusY = event.getY(index);
-                    }
-                }
-                break;
             }
         } else {
             // Transform gesture in progress - attempt to handle it
@@ -381,8 +241,7 @@ public class ScaleGestureDetector {
                                 " with bad state while a gesture was in progress. " +
                                 "Did you forget to pass an event to " +
                                 "ScaleGestureDetector#onTouchEvent?");
-                        index0 = findNewActiveIndex(event,
-                                mActiveId0 == mActiveId1 ? -1 : mActiveId1, index0);
+                        index0 = findNewActiveIndex(event, mActiveId1, -1);
                         mActiveId0 = event.getPointerId(index0);
                     }
 
@@ -483,49 +342,19 @@ public class ScaleGestureDetector {
         return handled;
     }
 
-    private int findNewActiveIndex(MotionEvent ev, int otherActiveId, int oldIndex) {
+    private int findNewActiveIndex(MotionEvent ev, int otherActiveId, int removedPointerIndex) {
         final int pointerCount = ev.getPointerCount();
 
         // It's ok if this isn't found and returns -1, it simply won't match.
         final int otherActiveIndex = ev.findPointerIndex(otherActiveId);
-        int newActiveIndex = -1;
 
-        // Pick a new id and update tracking state. Only pick pointers not on the slop edges.
+        // Pick a new id and update tracking state.
         for (int i = 0; i < pointerCount; i++) {
-            if (i != oldIndex && i != otherActiveIndex) {
-                final float edgeSlop = mEdgeSlop;
-                final float rightSlop = mRightSlopEdge;
-                final float bottomSlop = mBottomSlopEdge;
-                float x = getRawX(ev, i);
-                float y = getRawY(ev, i);
-                if (x >= edgeSlop && y >= edgeSlop && x <= rightSlop && y <= bottomSlop) {
-                    newActiveIndex = i;
-                    break;
-                }
+            if (i != removedPointerIndex && i != otherActiveIndex) {
+                return i;
             }
         }
-
-        return newActiveIndex;
-    }
-
-    /**
-     * MotionEvent has no getRawX(int) method; simulate it pending future API approval.
-     */
-    private static float getRawX(MotionEvent event, int pointerIndex) {
-        if (pointerIndex < 0) return Float.MIN_VALUE;
-        if (pointerIndex == 0) return event.getRawX();
-        float offset = event.getRawX() - event.getX();
-        return event.getX(pointerIndex) + offset;
-    }
-
-    /**
-     * MotionEvent has no getRawY(int) method; simulate it pending future API approval.
-     */
-    private static float getRawY(MotionEvent event, int pointerIndex) {
-        if (pointerIndex < 0) return Float.MIN_VALUE;
-        if (pointerIndex == 0) return event.getRawY();
-        float offset = event.getRawY() - event.getY();
-        return event.getY(pointerIndex) + offset;
+        return -1;
     }
 
     private void setContext(MotionEvent curr) {
@@ -588,7 +417,6 @@ public class ScaleGestureDetector {
             mCurrEvent.recycle();
             mCurrEvent = null;
         }
-        mSloppyGesture = false;
         mGestureInProgress = false;
         mActiveId0 = -1;
         mActiveId1 = -1;
