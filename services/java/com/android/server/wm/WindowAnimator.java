@@ -85,12 +85,19 @@ public class WindowAnimator {
         mPolicy = policy;
     }
 
-    void hideWallpapersLocked() {
-        for (final WindowToken token : mService.mWallpaperTokens) {
-            for (final WindowState wallpaper : token.windows) {
-                wallpaper.mWinAnimator.hide();
+    void hideWallpapersLocked(final WindowState w) {
+        if ((mService.mWallpaperTarget == w && mService.mLowerWallpaperTarget == null)
+                || mService.mWallpaperTarget == null) {
+            for (final WindowToken token : mService.mWallpaperTokens) {
+                for (final WindowState wallpaper : token.windows) {
+                    final WindowStateAnimator winAnimator = wallpaper.mWinAnimator;
+                    if (!winAnimator.mLastHidden) {
+                        winAnimator.hide();
+                        mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+                    }
+                }
+                token.hidden = true;
             }
-            token.hidden = true;
         }
     }
 
@@ -491,6 +498,10 @@ public class WindowAnimator {
             for (int i = 0; i < N; i++) {
                 final WindowStateAnimator winAnimator = mWinAnimators.get(i);
                 if (winAnimator.mWin.mIsWallpaper && mService.mWallpaperTarget == null) {
+                    if (!winAnimator.mWin.mWallpaperVisible && !winAnimator.mLastHidden) {
+                        // Wallpaper is no longer visible and there is no wp target => hide it.
+                        winAnimator.hide();
+                    }
                     continue;
                 }
                 winAnimator.prepareSurfaceLocked(true);
