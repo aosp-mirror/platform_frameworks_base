@@ -5336,6 +5336,7 @@ package android.content {
     field public static final java.lang.String KEYGUARD_SERVICE = "keyguard";
     field public static final java.lang.String LAYOUT_INFLATER_SERVICE = "layout_inflater";
     field public static final java.lang.String LOCATION_SERVICE = "location";
+    field public static final java.lang.String MEDIA_ROUTER_SERVICE = "media_router";
     field public static final int MODE_APPEND = 32768; // 0x8000
     field public static final int MODE_ENABLE_WRITE_AHEAD_LOGGING = 8; // 0x8
     field public static final int MODE_MULTI_PROCESS = 4; // 0x4
@@ -11511,7 +11512,6 @@ package android.media {
     method public void clearUserRoutes();
     method public android.media.MediaRouter.RouteCategory createRouteCategory(java.lang.CharSequence, boolean);
     method public android.media.MediaRouter.UserRouteInfo createUserRoute(android.media.MediaRouter.RouteCategory);
-    method public static android.media.MediaRouter forApplication(android.content.Context);
     method public android.media.MediaRouter.RouteCategory getCategoryAt(int);
     method public int getCategoryCount();
     method public android.media.MediaRouter.RouteInfo getRouteAt(int);
@@ -11534,14 +11534,14 @@ package android.media {
     method public abstract void onRouteUnselected(android.media.MediaRouter, int, android.media.MediaRouter.RouteInfo);
   }
 
-  public class MediaRouter.RouteCategory {
+  public static class MediaRouter.RouteCategory {
     method public java.lang.CharSequence getName();
     method public java.util.List<android.media.MediaRouter.RouteInfo> getRoutes(java.util.List<android.media.MediaRouter.RouteInfo>);
     method public int getSupportedTypes();
     method public boolean isGroupable();
   }
 
-  public class MediaRouter.RouteGroup extends android.media.MediaRouter.RouteInfo {
+  public static class MediaRouter.RouteGroup extends android.media.MediaRouter.RouteInfo {
     method public void addRoute(android.media.MediaRouter.RouteInfo);
     method public void addRoute(android.media.MediaRouter.RouteInfo, int);
     method public android.media.MediaRouter.RouteInfo getRouteAt(int);
@@ -11550,7 +11550,7 @@ package android.media {
     method public void removeRoute(int);
   }
 
-  public class MediaRouter.RouteInfo {
+  public static class MediaRouter.RouteInfo {
     method public android.media.MediaRouter.RouteCategory getCategory();
     method public android.media.MediaRouter.RouteGroup getGroup();
     method public java.lang.CharSequence getName();
@@ -11569,7 +11569,7 @@ package android.media {
     method public void onRouteUnselected(android.media.MediaRouter, int, android.media.MediaRouter.RouteInfo);
   }
 
-  public class MediaRouter.UserRouteInfo extends android.media.MediaRouter.RouteInfo {
+  public static class MediaRouter.UserRouteInfo extends android.media.MediaRouter.RouteInfo {
     method public void setName(java.lang.CharSequence);
     method public void setStatus(java.lang.CharSequence);
   }

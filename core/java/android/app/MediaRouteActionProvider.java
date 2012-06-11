@@ -37,7 +37,7 @@ public class MediaRouteActionProvider extends ActionProvider {
     public MediaRouteActionProvider(Context context) {
         super(context);
         mContext = context;
-        mRouter = MediaRouter.forApplication(context);
+        mRouter = (MediaRouter)context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
 
         // Start with live audio by default.
         // TODO Update this when new route types are added; segment by API level
