@@ -478,7 +478,7 @@
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"የማረጋገጫ የምስጋና የምስክር ወረቀትን ለመጠየቅ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"የአውታረ መረብ ግኑኝነቶችን እይ"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"መተግበሪያው እንደ የትኛዎቹ አውታረ መረቦች እንዳሉ እና እንደተገናኙ ያሉ የአውታረ መረብ ግንኙነቶች መረጃዎችን እንዲያይ ይፈቅድለታል።"</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"ሙሉ የአውታረ መረብ መድረሻ"</string>
+    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"ሙሉ የአውታረ መረብ መዳረሻ"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"መተግበሪያው የአውታረ መረብ መሰኪያዎችን እንዲፈጥር እና ብጁ የአውታረ መረብ ፕሮቶኮሎችን እንዲጠቀም ይፈቅድለታል። አሳሹ እና ሌሎች መተግበሪያዎች ውሂብ ወደ በይነመረብ የመላኪያ መንገዶችን ስለሚያቀርቡውሂብ ወደ በይነመረብ ለመላክ ይህ ፍቃድ አያስፈልግም።"</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"የአውታረ መረብ ቅንብሮች እና ትራፊክ ለውጥ/ አቋርጥ"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"የአውታረ መረብ ቅንጅቶችን ለመለወጥ እና ለማቋረጥ እና ሁሉንም የአውታረ መረብ ትራፊክ ለመመርመር፤ለምሳሌ ወኪል እና የማንኛውም APN ወደብ ለመለወጥ ለመተግበሪያው ይፈቅዳሉ፡፡ ተንኮል አዘል መተግበሪያዎች ሊቆጣጠሩ፣ አቅጣጫ ሊያስቀይሩ ፣ ወይም ያለአንተ እውቅና የአውታረ መረብ ፓኬቶችን ሊቀይሩ ይችላሉ፡፡"</string>
