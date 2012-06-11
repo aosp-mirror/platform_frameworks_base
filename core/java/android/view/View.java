@@ -6957,7 +6957,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 CharSequence text = getIterableTextForAccessibility();
                 if (text != null && text.length() > 0) {
                     CharacterTextSegmentIterator iterator =
-                        CharacterTextSegmentIterator.getInstance(mContext);
+                        CharacterTextSegmentIterator.getInstance(
+                                mContext.getResources().getConfiguration().locale);
                     iterator.initialize(text.toString());
                     return iterator;
                 }
@@ -6966,7 +6967,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 CharSequence text = getIterableTextForAccessibility();
                 if (text != null && text.length() > 0) {
                     WordTextSegmentIterator iterator =
-                        WordTextSegmentIterator.getInstance(mContext);
+                        WordTextSegmentIterator.getInstance(
+                                mContext.getResources().getConfiguration().locale);
                     iterator.initialize(text.toString());
                     return iterator;
                 }
