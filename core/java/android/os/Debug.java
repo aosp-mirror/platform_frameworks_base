@@ -1326,6 +1326,13 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
+     * Have the stack traces of the given native process dumped to the
+     * specified file.  Will be appended to the file.
+     * @hide
+     */
+    public static native void dumpNativeBacktraceToFile(int pid, String file);
+
+    /**
      * Return a String describing the calling method and location at a particular stack depth.
      * @param callStack the Thread stack 
      * @param depth the depth of stack to return information for.
