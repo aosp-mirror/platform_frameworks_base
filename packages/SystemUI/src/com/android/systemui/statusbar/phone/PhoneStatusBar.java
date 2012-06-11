@@ -165,6 +165,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     ScrollView mScrollView;
     View mExpandedContents;
     int mNotificationPanelMarginBottomPx, mNotificationPanelMarginLeftPx;
+    final Rect mNotificationPanelBackgroundPadding = new Rect();
     int mNotificationPanelGravity;
     int mNotificationPanelMinHeight;
 
@@ -264,6 +265,13 @@ public class PhoneStatusBar extends BaseStatusBar {
                 mRevealAnimationCallback, null);
             mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION,
                 mRevealAnimationCallback, null);
+        }
+    };
+
+    private final Runnable mPerformSelfExpandFling = new Runnable() {
+        @Override
+        public void run() {
+            performFling(0, mSelfExpandVelocityPx, true);
         }
     };
 
@@ -1206,7 +1214,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         prepareTracking(0, true);
-        performFling(0, mSelfExpandVelocityPx, true);
+        mHandler.post(mPerformSelfExpandFling);
     }
 
     public void animateCollapse() {
@@ -1521,12 +1529,15 @@ public class PhoneStatusBar extends BaseStatusBar {
                 mViewDelta = statusBarSize - y;
             } else {
                 mCloseView.getLocationOnScreen(mAbsPos);
-                mViewDelta = mAbsPos[1] + statusBarSize + getCloseViewHeight() - y; // XXX: not closeViewHeight, but paddingBottom from the 9patch
+                mViewDelta = mAbsPos[1]
+                           + getCloseViewHeight() // XXX: not closeViewHeight, but paddingBottom from the 9patch
+                           + mNotificationPanelBackgroundPadding.top
+                           + mNotificationPanelBackgroundPadding.bottom
+                           - y;
             }
             if ((!mExpanded && y < hitSize) ||
                     // @@ add taps outside the panel if it's not full-screen
                     (mExpanded && y > (getExpandedViewMaxHeight()-hitSize))) {
-
                 // We drop events at the edge of the screen to make the windowshade come
                 // down by accident less, especially when pushing open a device with a keyboard
                 // that rotates (like g1 and droid)
@@ -2274,10 +2285,12 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mNotificationPanelGravity <= 0) {
             mNotificationPanelGravity = Gravity.CENTER_VERTICAL | Gravity.TOP;
         }
+        getNinePatchPadding(res.getDrawable(R.drawable.notification_panel_bg), mNotificationPanelBackgroundPadding);
         final int notificationPanelDecorationHeight =
               res.getDimensionPixelSize(R.dimen.notification_panel_padding_top)
             + res.getDimensionPixelSize(R.dimen.notification_panel_header_height)
-            + getNinePatchPadding(res.getDrawable(R.drawable.notification_panel_bg)).bottom;
+            + mNotificationPanelBackgroundPadding.top
+            + mNotificationPanelBackgroundPadding.bottom;
         mNotificationPanelMinHeight = 
               notificationPanelDecorationHeight 
             + res.getDimensionPixelSize(R.dimen.close_handle_underlap);
@@ -2287,13 +2300,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (false) Slog.v(TAG, "updateResources");
     }
 
-    private static Rect getNinePatchPadding(Drawable d) {
-        Rect padding = new Rect();
+    private static void getNinePatchPadding(Drawable d, Rect outPadding) {
         if (d instanceof NinePatchDrawable) {
             NinePatchDrawable ninePatch = (NinePatchDrawable) d;
-            ninePatch.getPadding(padding);
+            ninePatch.getPadding(outPadding);
         }
-        return padding;
     }
 
     //
