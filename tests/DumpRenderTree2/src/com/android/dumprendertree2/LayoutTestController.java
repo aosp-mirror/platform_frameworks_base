@@ -80,20 +80,16 @@ public class LayoutTestController {
                 quota);
     }
 
-    public void setMockGeolocationPosition(double latitude,
-                                           double longitude,
-                                           double accuracy) {
+    public void setMockGeolocationPosition(double latitude, double longitude, double accuracy) {
         Log.i(LOG_TAG, "setMockGeolocationPosition(): " + "latitude=" + latitude +
                 " longitude=" + longitude + " accuracy=" + accuracy);
-        mLayoutTestsExecutor.setMockGeolocationPosition(latitude,
-                                                         longitude,
-                                                         accuracy);
+        mLayoutTestsExecutor.setMockGeolocationPosition(latitude, longitude, accuracy);
     }
 
     public void setMockGeolocationError(int code, String message) {
         Log.i(LOG_TAG, "setMockGeolocationError(): " + "code=" + code + " message=" + message);
         mLayoutTestsExecutor.setMockGeolocationError(code, message);
-     }
+    }
 
     public void setGeolocationPermission(boolean allow) {
         mLayoutTestsExecutor.setGeolocationPermission(allow);
