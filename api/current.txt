@@ -98,7 +98,6 @@ package android {
     field public static final java.lang.String RECORD_AUDIO = "android.permission.RECORD_AUDIO";
     field public static final java.lang.String REORDER_TASKS = "android.permission.REORDER_TASKS";
     field public static final deprecated java.lang.String RESTART_PACKAGES = "android.permission.RESTART_PACKAGES";
-    field public static final java.lang.String ROUTE_MEDIA_OUTPUT = "android.permission.ROUTE_MEDIA_OUTPUT";
     field public static final java.lang.String SEND_SMS = "android.permission.SEND_SMS";
     field public static final java.lang.String SET_ACTIVITY_WATCHER = "android.permission.SET_ACTIVITY_WATCHER";
     field public static final java.lang.String SET_ALARM = "com.android.alarm.permission.SET_ALARM";
@@ -11521,24 +11520,23 @@ package android.media {
     method public void removeCallback(android.media.MediaRouter.Callback);
     method public void removeUserRoute(android.media.MediaRouter.UserRouteInfo);
     method public void selectRoute(int, android.media.MediaRouter.RouteInfo);
-    method public void setSelectedRouteVolume(int, float);
     field public static final int ROUTE_TYPE_LIVE_AUDIO = 1; // 0x1
     field public static final int ROUTE_TYPE_USER = 8388608; // 0x800000
   }
 
   public static abstract interface MediaRouter.Callback {
-    method public abstract void onRouteAdded(int, android.media.MediaRouter.RouteInfo);
-    method public abstract void onRouteChanged(android.media.MediaRouter.RouteInfo);
-    method public abstract void onRouteRemoved(int, android.media.MediaRouter.RouteInfo);
-    method public abstract void onRouteSelected(int, android.media.MediaRouter.RouteInfo);
-    method public abstract void onRouteUnselected(int, android.media.MediaRouter.RouteInfo);
-    method public abstract void onVolumeChanged(int, float);
+    method public abstract void onRouteAdded(android.media.MediaRouter, android.media.MediaRouter.RouteInfo);
+    method public abstract void onRouteChanged(android.media.MediaRouter, android.media.MediaRouter.RouteInfo);
+    method public abstract void onRouteGrouped(android.media.MediaRouter, android.media.MediaRouter.RouteInfo, android.media.MediaRouter.RouteGroup, int);
+    method public abstract void onRouteRemoved(android.media.MediaRouter, android.media.MediaRouter.RouteInfo);
+    method public abstract void onRouteSelected(android.media.MediaRouter, int, android.media.MediaRouter.RouteInfo);
+    method public abstract void onRouteUngrouped(android.media.MediaRouter, android.media.MediaRouter.RouteInfo, android.media.MediaRouter.RouteGroup);
+    method public abstract void onRouteUnselected(android.media.MediaRouter, int, android.media.MediaRouter.RouteInfo);
   }
 
   public class MediaRouter.RouteCategory {
     method public java.lang.CharSequence getName();
-    method public android.media.MediaRouter.RouteInfo getRouteAt(int);
-    method public int getRouteCount();
+    method public java.util.List<android.media.MediaRouter.RouteInfo> getRoutes(java.util.List<android.media.MediaRouter.RouteInfo>);
     method public int getSupportedTypes();
     method public boolean isGroupable();
   }
@@ -11546,6 +11544,8 @@ package android.media {
   public class MediaRouter.RouteGroup extends android.media.MediaRouter.RouteInfo {
     method public void addRoute(android.media.MediaRouter.RouteInfo);
     method public void addRoute(android.media.MediaRouter.RouteInfo, int);
+    method public android.media.MediaRouter.RouteInfo getRouteAt(int);
+    method public int getRouteCount();
     method public void removeRoute(android.media.MediaRouter.RouteInfo);
     method public void removeRoute(int);
   }
@@ -11556,17 +11556,17 @@ package android.media {
     method public java.lang.CharSequence getName();
     method public java.lang.CharSequence getStatus();
     method public int getSupportedTypes();
-    method public float getVolume();
   }
 
   public static class MediaRouter.SimpleCallback implements android.media.MediaRouter.Callback {
     ctor public MediaRouter.SimpleCallback();
-    method public void onRouteAdded(int, android.media.MediaRouter.RouteInfo);
-    method public void onRouteChanged(android.media.MediaRouter.RouteInfo);
-    method public void onRouteRemoved(int, android.media.MediaRouter.RouteInfo);
-    method public void onRouteSelected(int, android.media.MediaRouter.RouteInfo);
-    method public void onRouteUnselected(int, android.media.MediaRouter.RouteInfo);
-    method public void onVolumeChanged(int, float);
+    method public void onRouteAdded(android.media.MediaRouter, android.media.MediaRouter.RouteInfo);
+    method public void onRouteChanged(android.media.MediaRouter, android.media.MediaRouter.RouteInfo);
+    method public void onRouteGrouped(android.media.MediaRouter, android.media.MediaRouter.RouteInfo, android.media.MediaRouter.RouteGroup, int);
+    method public void onRouteRemoved(android.media.MediaRouter, android.media.MediaRouter.RouteInfo);
+    method public void onRouteSelected(android.media.MediaRouter, int, android.media.MediaRouter.RouteInfo);
+    method public void onRouteUngrouped(android.media.MediaRouter, android.media.MediaRouter.RouteInfo, android.media.MediaRouter.RouteGroup);
+    method public void onRouteUnselected(android.media.MediaRouter, int, android.media.MediaRouter.RouteInfo);
   }
 
   public class MediaRouter.UserRouteInfo extends android.media.MediaRouter.RouteInfo {

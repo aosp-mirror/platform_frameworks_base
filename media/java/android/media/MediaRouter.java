@@ -26,6 +26,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * MediaRouter allows applications to control the routing of media channels
@@ -119,16 +120,10 @@ public class MediaRouter {
                 ROUTE_TYPE_LIVE_AUDIO, false);
 
         registerReceivers();
-
         createDefaultRoutes();
     }
 
     private void registerReceivers() {
-        final BroadcastReceiver volumeReceiver = new VolumeChangedBroadcastReceiver();
-        mAppContext.registerReceiver(volumeReceiver,
-                new IntentFilter(AudioManager.VOLUME_CHANGED_ACTION));
-        mRegisteredReceivers.add(volumeReceiver);
-
         final IntentFilter speakerFilter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
         speakerFilter.addAction(Intent.ACTION_ANALOG_AUDIO_DOCK_PLUG);
         speakerFilter.addAction(Intent.ACTION_DIGITAL_AUDIO_DOCK_PLUG);
@@ -152,11 +147,6 @@ public class MediaRouter {
         mDefaultAudio.mName = mAppContext.getText(
                 com.android.internal.R.string.default_audio_route_name);
         mDefaultAudio.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO;
-        final int maxMusicVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        if (maxMusicVolume > 0) {
-            mDefaultAudio.mVolume =
-                    mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC) / maxMusicVolume;
-        }
         addRoute(mDefaultAudio);
     }
 
@@ -181,23 +171,6 @@ public class MediaRouter {
         mDefaultAudio.mName = headphonesPresent ? headphonesName : mAppContext.getText(
                 com.android.internal.R.string.default_audio_route_name);
         dispatchRouteChanged(mDefaultAudio);
-    }
-
-    /**
-     * Set volume for the specified selected route types.
-     *
-     * @param types Volume will be set for these route types
-     * @param volume Volume to set in the range 0.f (inaudible) to 1.f (full volume).
-     */
-    public void setSelectedRouteVolume(int types, float volume) {
-        if ((types & ROUTE_TYPE_LIVE_AUDIO) != 0 && mSelectedRoute == mDefaultAudio) {
-            final int index = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-            mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, index, 0);
-        }
-        if ((types & ROUTE_TYPE_USER) != 0 && mSelectedRoute instanceof UserRouteInfo) {
-            mSelectedRoute.mVolume = volume;
-            dispatchVolumeChanged(ROUTE_TYPE_USER, volume);
-        }
     }
 
     /**
@@ -236,6 +209,13 @@ public class MediaRouter {
         Log.w(TAG, "removeCallback(" + cb + "): callback not registered");
     }
 
+    /**
+     * Select the specified route to use for output of the given media types.
+     *
+     * @param types type flags indicating which types this route should be used for.
+     *              The route must support at least a subset.
+     * @param route Route to select
+     */
     public void selectRoute(int types, RouteInfo route) {
         if (mSelectedRoute == route) return;
 
@@ -267,15 +247,23 @@ public class MediaRouter {
         if (!mCategories.contains(cat)) {
             mCategories.add(cat);
         }
-        if (info.getCategory().isGroupable() && !(info instanceof RouteGroup)) {
+        final boolean onlyRoute = mRoutes.isEmpty();
+        if (cat.isGroupable() && !(info instanceof RouteGroup)) {
             // Enforce that any added route in a groupable category must be in a group.
             final RouteGroup group = new RouteGroup(info.getCategory());
+            mRoutes.add(group);
+            dispatchRouteAdded(group);
+
+            final int at = group.getRouteCount();
             group.addRoute(info);
+            dispatchRouteGrouped(info, group, at);
+
             info = group;
+        } else {
+            mRoutes.add(info);
+            dispatchRouteAdded(info);
         }
-        final boolean onlyRoute = mRoutes.isEmpty();
-        mRoutes.add(info);
-        dispatchRouteAdded(info);
+
         if (onlyRoute) {
             selectRoute(info.getSupportedTypes(), info);
         }
@@ -420,7 +408,7 @@ public class MediaRouter {
         for (int i = 0; i < count; i++) {
             final CallbackInfo cbi = mCallbacks.get(i);
             if ((cbi.type & type) != 0) {
-                cbi.cb.onRouteSelected(type, info);
+                cbi.cb.onRouteSelected(this, type, info);
             }
         }
     }
@@ -430,7 +418,7 @@ public class MediaRouter {
         for (int i = 0; i < count; i++) {
             final CallbackInfo cbi = mCallbacks.get(i);
             if ((cbi.type & type) != 0) {
-                cbi.cb.onRouteUnselected(type, info);
+                cbi.cb.onRouteUnselected(this, type, info);
             }
         }
     }
@@ -440,7 +428,7 @@ public class MediaRouter {
         for (int i = 0; i < count; i++) {
             final CallbackInfo cbi = mCallbacks.get(i);
             if ((cbi.type & info.mSupportedTypes) != 0) {
-                cbi.cb.onRouteChanged(info);
+                cbi.cb.onRouteChanged(this, info);
             }
         }
     }
@@ -450,7 +438,7 @@ public class MediaRouter {
         for (int i = 0; i < count; i++) {
             final CallbackInfo cbi = mCallbacks.get(i);
             if ((cbi.type & info.mSupportedTypes) != 0) {
-                cbi.cb.onRouteAdded(info.mSupportedTypes, info);
+                cbi.cb.onRouteAdded(this, info);
             }
         }
     }
@@ -460,17 +448,27 @@ public class MediaRouter {
         for (int i = 0; i < count; i++) {
             final CallbackInfo cbi = mCallbacks.get(i);
             if ((cbi.type & info.mSupportedTypes) != 0) {
-                cbi.cb.onRouteRemoved(info.mSupportedTypes, info);
+                cbi.cb.onRouteRemoved(this, info);
             }
         }
     }
 
-    void dispatchVolumeChanged(int type, float volume) {
+    void dispatchRouteGrouped(RouteInfo info, RouteGroup group, int index) {
         final int count = mCallbacks.size();
         for (int i = 0; i < count; i++) {
             final CallbackInfo cbi = mCallbacks.get(i);
-            if ((cbi.type & type) != 0) {
-                cbi.cb.onVolumeChanged(type, volume);
+            if ((cbi.type & group.mSupportedTypes) != 0) {
+                cbi.cb.onRouteGrouped(this, info, group, index);
+            }
+        }
+    }
+
+    void dispatchRouteUngrouped(RouteInfo info, RouteGroup group) {
+        final int count = mCallbacks.size();
+        for (int i = 0; i < count; i++) {
+            final CallbackInfo cbi = mCallbacks.get(i);
+            if ((cbi.type & group.mSupportedTypes) != 0) {
+                cbi.cb.onRouteUngrouped(this, info, group);
             }
         }
     }
@@ -496,11 +494,9 @@ public class MediaRouter {
         int mSupportedTypes;
         RouteGroup mGroup;
         final RouteCategory mCategory;
-        float mVolume;
 
         RouteInfo(RouteCategory category) {
             mCategory = category;
-            category.mRoutes.add(this);
         }
 
         /**
@@ -538,13 +534,6 @@ public class MediaRouter {
          */
         public RouteCategory getCategory() {
             return mCategory;
-        }
-
-        /**
-         * @return This route's current volume setting.
-         */
-        public float getVolume() {
-            return mVolume;
         }
 
         void setStatusInt(CharSequence status) {
@@ -634,8 +623,10 @@ public class MediaRouter {
                             "(Route category=" + route.getCategory() +
                             " group category=" + mCategory + ")");
             }
+            final int at = mRoutes.size();
             mRoutes.add(route);
             mUpdateName = true;
+            dispatchRouteGrouped(route, this, at);
             routeUpdated();
         }
 
@@ -657,6 +648,7 @@ public class MediaRouter {
             }
             mRoutes.add(insertAt, route);
             mUpdateName = true;
+            dispatchRouteGrouped(route, this, insertAt);
             routeUpdated();
         }
 
@@ -672,6 +664,7 @@ public class MediaRouter {
             }
             mRoutes.remove(route);
             mUpdateName = true;
+            dispatchRouteUngrouped(route, this);
             routeUpdated();
         }
 
@@ -681,9 +674,27 @@ public class MediaRouter {
          * @param index index of the route to remove
          */
         public void removeRoute(int index) {
-            mRoutes.remove(index);
+            RouteInfo route = mRoutes.remove(index);
             mUpdateName = true;
+            dispatchRouteUngrouped(route, this);
             routeUpdated();
+        }
+
+        /**
+         * @return The number of routes in this group
+         */
+        public int getRouteCount() {
+            return mRoutes.size();
+        }
+
+        /**
+         * Return the route in this group at the specified index
+         *
+         * @param index Index to fetch
+         * @return The route at index
+         */
+        public RouteInfo getRouteAt(int index) {
+            return mRoutes.get(index);
         }
 
         void memberNameChanged(RouteInfo info, CharSequence name) {
@@ -712,7 +723,6 @@ public class MediaRouter {
      * Definition of a category of routes. All routes belong to a category.
      */
     public class RouteCategory {
-        final ArrayList<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
         CharSequence mName;
         int mTypes;
         final boolean mGroupable;
@@ -731,20 +741,33 @@ public class MediaRouter {
         }
 
         /**
-         * @return the number of routes in this category
-         */
-        public int getRouteCount() {
-            return mRoutes.size();
-        }
-
-        /**
-         * Return a route from this category
+         * Return the current list of routes in this category that have been added
+         * to the MediaRouter.
          *
-         * @param index Index from [0-getRouteCount)
-         * @return the route at the given index
+         * <p>This list will not include routes that are nested within RouteGroups.
+         * A RouteGroup is treated as a single route within its category.</p>
+         *
+         * @param out a List to fill with the routes in this category. If this parameter is
+         *            non-null, it will be cleared, filled with the current routes with this
+         *            category, and returned. If this parameter is null, a new List will be
+         *            allocated to report the category's current routes.
+         * @return A list with the routes in this category that have been added to the MediaRouter.
          */
-        public RouteInfo getRouteAt(int index) {
-            return mRoutes.get(index);
+        public List<RouteInfo> getRoutes(List<RouteInfo> out) {
+            if (out == null) {
+                out = new ArrayList<RouteInfo>();
+            } else {
+                out.clear();
+            }
+
+            final int count = getRouteCount();
+            for (int i = 0; i < count; i++) {
+                final RouteInfo route = getRouteAt(i);
+                if (route.mCategory == this) {
+                    out.add(route);
+                }
+            }
+            return out;
         }
 
         /**
@@ -758,7 +781,7 @@ public class MediaRouter {
          * Return whether or not this category supports grouping.
          *
          * <p>If this method returns true, all routes obtained from this category
-         * via calls to {@link #getRouteAt(int)} will be {@link MediaRouter.RouteGroup}s.
+         * via calls to {@link #getRouteAt(int)} will be {@link MediaRouter.RouteGroup}s.</p>
          *
          * @return true if this category supports
          */
@@ -797,43 +820,37 @@ public class MediaRouter {
          * Called when the supplied route becomes selected as the active route
          * for the given route type.
          *
+         * @param router the MediaRouter reporting the event
          * @param type Type flag set indicating the routes that have been selected
          * @param info Route that has been selected for the given route types
          */
-        public void onRouteSelected(int type, RouteInfo info);
+        public void onRouteSelected(MediaRouter router, int type, RouteInfo info);
 
         /**
          * Called when the supplied route becomes unselected as the active route
          * for the given route type.
          *
+         * @param router the MediaRouter reporting the event
          * @param type Type flag set indicating the routes that have been unselected
          * @param info Route that has been unselected for the given route types
          */
-        public void onRouteUnselected(int type, RouteInfo info);
-
-        /**
-         * Called when the volume is changed for the specified route types.
-         *
-         * @param type Type flags indicating which volume type was changed
-         * @param volume New volume value in the range 0 (inaudible) to 1 (full)
-         */
-        public void onVolumeChanged(int type, float volume);
+        public void onRouteUnselected(MediaRouter router, int type, RouteInfo info);
 
         /**
          * Called when a route for the specified type was added.
          *
-         * @param type Type flags indicating which types the added route supports
+         * @param router the MediaRouter reporting the event
          * @param info Route that has become available for use
          */
-        public void onRouteAdded(int type, RouteInfo info);
+        public void onRouteAdded(MediaRouter router, RouteInfo info);
 
         /**
          * Called when a route for the specified type was removed.
          *
-         * @param type Type flags indicating which types the removed route supported
+         * @param router the MediaRouter reporting the event
          * @param info Route that has been removed from availability
          */
-        public void onRouteRemoved(int type, RouteInfo info);
+        public void onRouteRemoved(MediaRouter router, RouteInfo info);
 
         /**
          * Called when an aspect of the indicated route has changed.
@@ -841,9 +858,29 @@ public class MediaRouter {
          * <p>This will not indicate that the types supported by this route have
          * changed, only that cosmetic info such as name or status have been updated.</p>
          *
+         * @param router the MediaRouter reporting the event
          * @param info The route that was changed
          */
-        public void onRouteChanged(RouteInfo info);
+        public void onRouteChanged(MediaRouter router, RouteInfo info);
+
+        /**
+         * Called when a route is added to a group.
+         *
+         * @param router the MediaRouter reporting the event
+         * @param info The route that was added
+         * @param group The group the route was added to
+         * @param index The route index within group that info was added at
+         */
+        public void onRouteGrouped(MediaRouter router, RouteInfo info, RouteGroup group, int index);
+
+        /**
+         * Called when a route is removed from a group.
+         *
+         * @param router the MediaRouter reporting the event
+         * @param info The route that was removed
+         * @param group The group the route was removed from
+         */
+        public void onRouteUngrouped(MediaRouter router, RouteInfo info, RouteGroup group);
     }
 
     /**
@@ -854,51 +891,34 @@ public class MediaRouter {
     public static class SimpleCallback implements Callback {
 
         @Override
-        public void onRouteSelected(int type, RouteInfo info) {
-
+        public void onRouteSelected(MediaRouter router, int type, RouteInfo info) {
         }
 
         @Override
-        public void onRouteUnselected(int type, RouteInfo info) {
-
+        public void onRouteUnselected(MediaRouter router, int type, RouteInfo info) {
         }
 
         @Override
-        public void onVolumeChanged(int type, float volume) {
-
+        public void onRouteAdded(MediaRouter router, RouteInfo info) {
         }
 
         @Override
-        public void onRouteAdded(int type, RouteInfo info) {
-
+        public void onRouteRemoved(MediaRouter router, RouteInfo info) {
         }
 
         @Override
-        public void onRouteRemoved(int type, RouteInfo info) {
-
+        public void onRouteChanged(MediaRouter router, RouteInfo info) {
         }
 
         @Override
-        public void onRouteChanged(RouteInfo info) {
-
+        public void onRouteGrouped(MediaRouter router, RouteInfo info, RouteGroup group,
+                int index) {
         }
 
-    }
-
-    class VolumeChangedBroadcastReceiver extends BroadcastReceiver {
         @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (AudioManager.VOLUME_CHANGED_ACTION.equals(action) &&
-                    AudioManager.STREAM_MUSIC == intent.getIntExtra(
-                            AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1)) {
-                final int maxVol = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-                final int volExtra = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, 0);
-                final float volume = (float) volExtra / maxVol;
-                mDefaultAudio.mVolume = volume;
-                dispatchVolumeChanged(ROUTE_TYPE_LIVE_AUDIO, volume);
-            }
+        public void onRouteUngrouped(MediaRouter router, RouteInfo info, RouteGroup group) {
         }
+
     }
 
     class BtChangedBroadcastReceiver extends BroadcastReceiver {
