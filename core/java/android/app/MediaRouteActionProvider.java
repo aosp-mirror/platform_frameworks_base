@@ -33,11 +33,12 @@ public class MediaRouteActionProvider extends ActionProvider {
     private MediaRouteButton mView;
     private int mRouteTypes;
     private final RouterCallback mRouterCallback = new RouterCallback();
+    private View.OnClickListener mExtendedSettingsListener;
 
     public MediaRouteActionProvider(Context context) {
         super(context);
         mContext = context;
-        mRouter = (MediaRouter)context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
+        mRouter = (MediaRouter) context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
 
         // Start with live audio by default.
         // TODO Update this when new route types are added; segment by API level
@@ -76,6 +77,7 @@ public class MediaRouteActionProvider extends ActionProvider {
         mView = new MediaRouteButton(mContext);
         mMenuItem.setVisible(mRouter.getRouteCount() > 1);
         mView.setRouteTypes(mRouteTypes);
+        mView.setExtendedSettingsClickListener(mExtendedSettingsListener);
         return mView;
     }
 
@@ -83,6 +85,13 @@ public class MediaRouteActionProvider extends ActionProvider {
     public boolean onPerformDefaultAction() {
         // Show routing dialog
         return true;
+    }
+
+    public void setExtendedSettingsClickListener(View.OnClickListener listener) {
+        mExtendedSettingsListener = listener;
+        if (mView != null) {
+            mView.setExtendedSettingsClickListener(listener);
+        }
     }
 
     private class RouterCallback extends MediaRouter.SimpleCallback {
