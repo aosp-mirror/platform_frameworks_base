@@ -1237,12 +1237,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // now compute what (if any) algorithmic styling is needed
             int typefaceStyle = tf != null ? tf.getStyle() : 0;
             int need = style & ~typefaceStyle;
-            need |= typefaceStyle & Typeface.BOLD; // keep bold in
             mTextPaint.setFakeBoldText((need & Typeface.BOLD) != 0);
             mTextPaint.setTextSkewX((need & Typeface.ITALIC) != 0 ? -0.25f : 0);
         } else {
-            int typefaceStyle = tf != null ? tf.getStyle() : 0;
-            mTextPaint.setFakeBoldText((typefaceStyle & Typeface.BOLD) != 0);
+            mTextPaint.setFakeBoldText(false);
             mTextPaint.setTextSkewX(0);
             setTypeface(tf);
         }
