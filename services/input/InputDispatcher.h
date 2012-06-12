@@ -440,6 +440,8 @@ private:
 
         void release();
 
+        virtual void appendDescription(String8& msg) const = 0;
+
     protected:
         EventEntry(int32_t type, nsecs_t eventTime, uint32_t policyFlags);
         virtual ~EventEntry();
@@ -448,6 +450,7 @@ private:
 
     struct ConfigurationChangedEntry : EventEntry {
         ConfigurationChangedEntry(nsecs_t eventTime);
+        virtual void appendDescription(String8& msg) const;
 
     protected:
         virtual ~ConfigurationChangedEntry();
@@ -457,6 +460,7 @@ private:
         int32_t deviceId;
 
         DeviceResetEntry(nsecs_t eventTime, int32_t deviceId);
+        virtual void appendDescription(String8& msg) const;
 
     protected:
         virtual ~DeviceResetEntry();
@@ -488,6 +492,7 @@ private:
                 int32_t deviceId, uint32_t source, uint32_t policyFlags, int32_t action,
                 int32_t flags, int32_t keyCode, int32_t scanCode, int32_t metaState,
                 int32_t repeatCount, nsecs_t downTime);
+        virtual void appendDescription(String8& msg) const;
         void recycle();
 
     protected:
@@ -516,6 +521,7 @@ private:
                 float xPrecision, float yPrecision,
                 nsecs_t downTime, uint32_t pointerCount,
                 const PointerProperties* pointerProperties, const PointerCoords* pointerCoords);
+        virtual void appendDescription(String8& msg) const;
 
     protected:
         virtual ~MotionEntry();
@@ -530,6 +536,7 @@ private:
         float xOffset;
         float yOffset;
         float scaleFactor;
+        nsecs_t deliveryTime; // time when the event was actually delivered
 
         // Set to the resolved action and flags when the event is enqueued.
         int32_t resolvedAction;
@@ -978,7 +985,7 @@ private:
     int32_t handleTargetsNotReadyLocked(nsecs_t currentTime, const EventEntry* entry,
             const sp<InputApplicationHandle>& applicationHandle,
             const sp<InputWindowHandle>& windowHandle,
-            nsecs_t* nextWakeupTime);
+            nsecs_t* nextWakeupTime, const char* reason);
     void resumeAfterTargetsNotReadyTimeoutLocked(nsecs_t newTimeout,
             const sp<InputChannel>& inputChannel);
     nsecs_t getTimeSpentWaitingForApplicationLocked(nsecs_t currentTime);
@@ -1056,7 +1063,7 @@ private:
     void onANRLocked(
             nsecs_t currentTime, const sp<InputApplicationHandle>& applicationHandle,
             const sp<InputWindowHandle>& windowHandle,
-            nsecs_t eventTime, nsecs_t waitStartTime);
+            nsecs_t eventTime, nsecs_t waitStartTime, const char* reason);
 
     // Outbound policy interactions.
     void doNotifyConfigurationChangedInterruptible(CommandEntry* commandEntry);
