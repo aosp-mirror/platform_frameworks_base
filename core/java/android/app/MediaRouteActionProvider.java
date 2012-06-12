@@ -87,12 +87,12 @@ public class MediaRouteActionProvider extends ActionProvider {
 
     private class RouterCallback extends MediaRouter.SimpleCallback {
         @Override
-        public void onRouteAdded(int type, RouteInfo info) {
+        public void onRouteAdded(MediaRouter router, RouteInfo info) {
             mMenuItem.setVisible(mRouter.getRouteCount() > 1);
         }
 
         @Override
-        public void onRouteRemoved(int type, RouteInfo info) {
+        public void onRouteRemoved(MediaRouter router, RouteInfo info) {
             mMenuItem.setVisible(mRouter.getRouteCount() > 1);
         }
     }
