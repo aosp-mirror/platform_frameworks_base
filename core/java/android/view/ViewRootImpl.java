@@ -229,6 +229,7 @@ public final class ViewRootImpl implements ViewParent,
     boolean mWindowsAnimating;
     boolean mIsDrawing;
     int mLastSystemUiVisibility;
+    int mClientWindowLayoutFlags;
 
     // Pool of queued input events.
     private static final int MAX_QUEUED_INPUT_EVENT_POOL_SIZE = 10;
@@ -485,6 +486,8 @@ public final class ViewRootImpl implements ViewParent,
                 mFallbackEventHandler.setView(view);
                 mWindowAttributes.copyFrom(attrs);
                 attrs = mWindowAttributes;
+                // Keep track of the actual window flags supplied by the client.
+                mClientWindowLayoutFlags = attrs.flags;
 
                 setAccessibilityFocusedHost(null);
 
@@ -760,6 +763,8 @@ public final class ViewRootImpl implements ViewParent,
     void setLayoutParams(WindowManager.LayoutParams attrs, boolean newView) {
         synchronized (this) {
             int oldSoftInputMode = mWindowAttributes.softInputMode;
+            // Keep track of the actual window flags supplied by the client.
+            mClientWindowLayoutFlags = attrs.flags;
             // preserve compatible window flag if exists.
             int compatibleWindowFlag =
                 mWindowAttributes.flags & WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
@@ -768,7 +773,9 @@ public final class ViewRootImpl implements ViewParent,
             attrs.subtreeSystemUiVisibility = mWindowAttributes.subtreeSystemUiVisibility;
             mWindowAttributesChangesFlag = mWindowAttributes.copyFrom(attrs);
             mWindowAttributes.flags |= compatibleWindowFlag;
-            
+
+            applyKeepScreenOnFlag(mWindowAttributes);
+
             if (newView) {
                 mSoftInputMode = attrs.softInputMode;
                 requestLayout();
@@ -1000,6 +1007,18 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    private void applyKeepScreenOnFlag(WindowManager.LayoutParams params) {
+        // Update window's global keep screen on flag: if a view has requested
+        // that the screen be kept on, then it is always set; otherwise, it is
+        // set to whatever the client last requested for the global state.
+        if (mAttachInfo.mKeepScreenOn) {
+            params.flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+        } else {
+            params.flags = (params.flags&~WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    | (mClientWindowLayoutFlags&WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+    }
+
     private boolean collectViewAttributes() {
         final View.AttachInfo attachInfo = mAttachInfo;
         if (attachInfo.mRecomputeGlobalAttributes) {
@@ -1017,9 +1036,7 @@ public final class ViewRootImpl implements ViewParent,
                     || attachInfo.mSystemUiVisibility != oldVis
                     || attachInfo.mHasSystemUiListeners != oldHasSystemUiListeners) {
                 WindowManager.LayoutParams params = mWindowAttributes;
-                if (attachInfo.mKeepScreenOn) {
-                    params.flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
-                }
+                applyKeepScreenOnFlag(params);
                 params.subtreeSystemUiVisibility = attachInfo.mSystemUiVisibility;
                 params.hasSystemUiListeners = attachInfo.mHasSystemUiListeners;
                 mView.dispatchWindowSystemUiVisiblityChanged(attachInfo.mSystemUiVisibility);
