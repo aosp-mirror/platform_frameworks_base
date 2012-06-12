@@ -671,6 +671,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public boolean attachFunctor(int functor) {
+        //noinspection SimplifiableIfStatement
         if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
             return mAttachInfo.mHardwareRenderer.attachFunctor(mAttachInfo, functor);
         }
@@ -678,7 +679,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public void detachFunctor(int functor) {
-        if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
+        if (mAttachInfo.mHardwareRenderer != null) {
             mAttachInfo.mHardwareRenderer.detachFunctor(functor);
         }
     }
