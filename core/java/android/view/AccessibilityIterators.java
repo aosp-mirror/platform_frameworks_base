@@ -70,20 +70,19 @@ public final class AccessibilityIterators {
             implements ComponentCallbacks {
         private static CharacterTextSegmentIterator sInstance;
 
-        private final Context mAppContext;
+        private Locale mLocale;
 
         protected BreakIterator mImpl;
 
-        public static CharacterTextSegmentIterator getInstance(Context context) {
+        public static CharacterTextSegmentIterator getInstance(Locale locale) {
             if (sInstance == null) {
-                sInstance = new CharacterTextSegmentIterator(context);
+                sInstance = new CharacterTextSegmentIterator(locale);
             }
             return sInstance;
         }
 
-        private CharacterTextSegmentIterator(Context context) {
-            mAppContext = context.getApplicationContext();
-            Locale locale = mAppContext.getResources().getConfiguration().locale;
+        private CharacterTextSegmentIterator(Locale locale) {
+            mLocale = locale;
             onLocaleChanged(locale);
             ViewRootImpl.addConfigCallback(this);
         }
@@ -148,10 +147,9 @@ public final class AccessibilityIterators {
 
         @Override
         public void onConfigurationChanged(Configuration newConfig) {
-            Configuration oldConfig = mAppContext.getResources().getConfiguration();
-            final int changed = oldConfig.diff(newConfig);
-            if ((changed & ActivityInfo.CONFIG_LOCALE) != 0) {
-                Locale locale = newConfig.locale;
+            Locale locale = newConfig.locale;
+            if (!mLocale.equals(locale)) {
+                mLocale = locale;
                 onLocaleChanged(locale);
             }
         }
@@ -169,15 +167,15 @@ public final class AccessibilityIterators {
     static class WordTextSegmentIterator extends CharacterTextSegmentIterator {
         private static WordTextSegmentIterator sInstance;
 
-        public static WordTextSegmentIterator getInstance(Context context) {
+        public static WordTextSegmentIterator getInstance(Locale locale) {
             if (sInstance == null) {
-                sInstance = new WordTextSegmentIterator(context);
+                sInstance = new WordTextSegmentIterator(locale);
             }
             return sInstance;
         }
 
-        private WordTextSegmentIterator(Context context) {
-           super(context);
+        private WordTextSegmentIterator(Locale locale) {
+           super(locale);
         }
 
         @Override
