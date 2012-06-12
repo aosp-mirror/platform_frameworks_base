@@ -1639,8 +1639,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadStringSetting(stmt, Settings.Secure.ACCESSIBILITY_SCREEN_READER_URL,
                     R.string.def_accessibility_screen_reader_url);
 
-            loadBooleanSetting(stmt, Settings.System.LOCKSCREEN_DISABLED,
-                    R.bool.def_lockscreen_disabled);
+            if (SystemProperties.getBoolean("ro.lockscreen.disable.default", false) == true) {
+                loadSetting(stmt, Settings.System.LOCKSCREEN_DISABLED, "1");
+            } else {
+                loadBooleanSetting(stmt, Settings.System.LOCKSCREEN_DISABLED,
+                        R.bool.def_lockscreen_disabled);
+            }
 
             loadBooleanSetting(stmt, Settings.Secure.DEVICE_PROVISIONED,
                     R.bool.def_device_provisioned);
