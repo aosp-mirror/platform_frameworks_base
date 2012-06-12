@@ -3679,6 +3679,7 @@ package android.app {
   public class MediaRouteActionProvider extends android.view.ActionProvider {
     ctor public MediaRouteActionProvider(android.content.Context);
     method public android.view.View onCreateActionView();
+    method public void setExtendedSettingsClickListener(android.view.View.OnClickListener);
     method public void setRouteTypes(int);
   }
 
@@ -3687,6 +3688,7 @@ package android.app {
     ctor public MediaRouteButton(android.content.Context, android.util.AttributeSet);
     ctor public MediaRouteButton(android.content.Context, android.util.AttributeSet, int);
     method public int getRouteTypes();
+    method public void setExtendedSettingsClickListener(android.view.View.OnClickListener);
     method public void setRouteTypes(int);
   }
 
