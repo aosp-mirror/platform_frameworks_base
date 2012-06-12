@@ -1063,10 +1063,7 @@ class WindowStateAnimator {
 
         setSurfaceBoundaries(recoveringMemory);
 
-        if (mWin.mIsWallpaper && !mWin.mWallpaperVisible) {
-            // Wallpaper is no longer visible and there is no wp target => hide it.
-            hide();
-        } else if (w.mAttachedHidden || !w.isReadyForDisplay()) {
+        if (w.mAttachedHidden || !w.isReadyForDisplay()) {
             hide();
             mAnimator.hideWallpapersLocked(w);
 
