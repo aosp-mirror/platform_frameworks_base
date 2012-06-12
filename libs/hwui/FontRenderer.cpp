@@ -598,6 +598,7 @@ void FontRenderer::allocateTextureMemory(CacheTexture* cacheTexture) {
         glGenTextures(1, &cacheTexture->mTextureId);
     }
 
+    Caches::getInstance().activeTexture(0);
     glBindTexture(GL_TEXTURE_2D, cacheTexture->mTextureId);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     // Initialize texture dimensions
@@ -826,6 +827,7 @@ void FontRenderer::checkTextureUpdate() {
         }
     }
 
+    caches.activeTexture(0);
     glBindTexture(GL_TEXTURE_2D, mCurrentCacheTexture->mTextureId);
     if (mLinearFiltering != mCurrentCacheTexture->mLinearFiltering) {
         const GLenum filtering = mLinearFiltering ? GL_LINEAR : GL_NEAREST;

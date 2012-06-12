@@ -2422,6 +2422,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         linearFilter = fabs(y - (int) y) > 0.0f || fabs(x - (int) x) > 0.0f;
     }
 
+    // The font renderer will always use texture unit 0
     mCaches.activeTexture(0);
     setupDraw();
     setupDrawDirtyRegionsDisabled();
@@ -2432,6 +2433,8 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     setupDrawBlending(true, mode);
     setupDrawProgram();
     setupDrawModelView(x, y, x, y, pureTranslate, true);
+    // See comment above; the font renderer must use texture unit 0
+    // assert(mTextureUnit == 0)
     setupDrawTexture(fontRenderer.getTexture(linearFilter));
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
