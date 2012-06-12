@@ -196,9 +196,9 @@
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"preusmjeravanje odlaznih poziva"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Aplikaciji omogućuje obradu odlaznih poziva i promjenu broja za biranje. Ta dozvola aplikaciji omogućuje nadziranje, preusmjeravanje ili sprječavanje odlaznih poziva."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"primanje tekstnih poruka (SMS)"</string>
-    <string name="permdesc_receiveSms" msgid="6424387754228766939">"Aplikaciji omogućuje primanje i obradu SMS poruka. To znači da aplikacija može nadzirati ili izbrisati poruke poslane na vaš uređaj a da vam ih ne prikaže."</string>
+    <string name="permdesc_receiveSms" msgid="6424387754228766939">"Aplikaciji omogućuje primanje i obradu SMS poruka. To znači da aplikacija može nadzirati ili izbrisati poruke poslane na vaš uređaj, a da vam ih ne prikaže."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"primanje tekstnih poruka (MMS)"</string>
-    <string name="permdesc_receiveMms" msgid="533019437263212260">"Aplikaciji omogućuje primanje i obradu MMS poruka. To znači da aplikacija može nadzirati ili izbrisati poruke poslane na vaš uređaj a da vam ih ne prikaže."</string>
+    <string name="permdesc_receiveMms" msgid="533019437263212260">"Aplikaciji omogućuje primanje i obradu MMS poruka. To znači da aplikacija može nadzirati ili izbrisati poruke poslane na vaš uređaj, a da vam ih ne prikaže."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"primanje hitnih odašiljanja"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Omogućuje aplikaciji primanje i obradu poruka hitnih odašiljanja. Ta je dozvola dostupna samo aplikacijama sustava."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"čitaj poruke koje se emitiraju unutar mobilne mreže"</string>
@@ -214,7 +214,7 @@
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Omogućuje aplikaciji pisanje u SMS poruke pohranjene na vašem tabletnom računalu ili SIM kartici. Zlonamjerne aplikacije mogu izbrisati vaše poruke."</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Omogućuje aplikaciji pisanje u SMS poruke pohranjene na telefonu ili SIM kartici. Zlonamjerne aplikacije mogu izbrisati vaše poruke."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"primanje tekstnih poruka (WAP)"</string>
-    <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Aplikaciji omogućuje primanje i obradu WAP poruka. Ta dozvola uključuje mogućnost nadziranja ili brisanja vama poslanih poruka a da vam ih ne prikaže."</string>
+    <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Aplikaciji omogućuje primanje i obradu WAP poruka. Ta dozvola uključuje mogućnost nadziranja ili brisanja vama poslanih poruka, a da vam ih ne prikaže."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"dohvaćanje pokrenutih aplikacija"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Aplikaciji omogućuje dohvaćanje informacija o trenutačnim i nedavnim tekućim zadacima. To aplikaciji može omogućiti otkrivanje informacija o tome koje se aplikacije upotrebljavaju na uređaju."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"dohvaćanje pojedinosti o pokrenutim aplikacijama"</string>
