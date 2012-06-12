@@ -24,6 +24,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Binder;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserId;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
@@ -303,12 +304,15 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void writeToDb(String key, String value, int userId) {
+        writeToDb(mOpenHelper.getWritableDatabase(), key, value, userId);
+    }
+
+    private void writeToDb(SQLiteDatabase db, String key, String value, int userId) {
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_KEY, key);
         cv.put(COLUMN_USERID, userId);
         cv.put(COLUMN_VALUE, value);
 
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
             db.delete(TABLE, COLUMN_KEY + "=? AND " + COLUMN_USERID + "=?",
@@ -359,6 +363,16 @@ public class LockSettingsService extends ILockSettings.Stub {
         @Override
         public void onCreate(SQLiteDatabase db) {
             createTable(db);
+            initializeDefaults(db);
+        }
+
+        private void initializeDefaults(SQLiteDatabase db) {
+            // Get the lockscreen default from a system property, if available
+            boolean lockScreenDisable = SystemProperties.getBoolean("ro.lockscreen.disable.default",
+                    false);
+            if (lockScreenDisable) {
+                writeToDb(db, LockPatternUtils.DISABLE_LOCKSCREEN_KEY, "1", 0);
+            }
         }
 
         @Override
