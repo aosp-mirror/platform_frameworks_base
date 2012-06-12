@@ -239,7 +239,7 @@ page.title=Android Open Accessory Development Kit
 
     <li><a href="http://www.arduino.cc/playground/Main/CapSense">CapSense library v.04</a>:
     contains the libraries to sense human capacitance. This library is needed for the capacitive
-    button that is located on the ADK shield. The </li>
+    button that is located on the ADK shield.</li>
 
     <li><a href="https://dl-ssl.google.com/android/adk/adk_release_20120606.zip">ADK software
     package</a>: contains the firmware for the ADK board and hardware design files for the ADK
