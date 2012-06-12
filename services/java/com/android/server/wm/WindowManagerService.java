@@ -3966,15 +3966,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void cancelWindowAnimations(final AppWindowToken wtoken) {
-        for (int i = wtoken.windows.size() - 1; i >= 0; i--) {
-            final WindowStateAnimator winAnimator = wtoken.windows.get(i).mWinAnimator;
-            if (winAnimator.isAnimating()) {
-                winAnimator.clearAnimation();
-            }
-        }
-    }
-
     public void executeAppTransition() {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "executeAppTransition()")) {
@@ -3990,12 +3981,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
                 mAppTransitionReady = true;
-                for (int i = mOpeningApps.size() - 1; i >= 0; i--) {
-                    cancelWindowAnimations(mOpeningApps.get(i));
-                }
-                for (int i = mClosingApps.size() - 1; i >= 0; i--) {
-                    cancelWindowAnimations(mClosingApps.get(i));
-                }
                 final long origId = Binder.clearCallingIdentity();
                 performLayoutAndPlaceSurfacesLocked();
                 Binder.restoreCallingIdentity(origId);
@@ -4343,7 +4328,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 if (DEBUG_APP_TRANSITIONS) Slog.v(
                         TAG, "Setting dummy animation on: " + wtoken);
-                cancelWindowAnimations(wtoken);
                 wtoken.mAppAnimator.setDummyAnimation();
                 mOpeningApps.remove(wtoken);
                 mClosingApps.remove(wtoken);
