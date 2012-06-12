@@ -456,6 +456,7 @@ public abstract class Layout {
         final int top = Math.max(dtop, 0);
         final int bottom = Math.min(getLineTop(getLineCount()), dbottom);
 
+        if (top >= bottom) return TextUtils.packRangeInLong(0, -1);
         return TextUtils.packRangeInLong(getLineForVertical(top), getLineForVertical(bottom));
     }
 
