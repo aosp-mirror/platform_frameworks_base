@@ -20,15 +20,19 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.AnimatorSet.Builder;
 import android.animation.ObjectAnimator;
+import android.content.res.Resources;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Slog;
 import android.view.View;
 import android.view.ViewRootImpl;
 
+import com.android.systemui.R;
+
 /* package */ class Choreographer implements Animator.AnimatorListener {
     // should group this into a multi-property animation
     private static final int OPEN_DURATION = 136;
-    private static final int CLOSE_DURATION = 130;
+    private static final int CLOSE_DURATION = 230;
     private static final int SCRIM_DURATION = 400;
     private static final String TAG = RecentsPanelView.TAG;
     private static final boolean DEBUG = RecentsPanelView.DEBUG;
@@ -81,7 +85,7 @@ import android.view.ViewRootImpl;
                 mContentView.getAlpha(), appearing ? 1.0f : 0.0f);
         fadeAnim.setInterpolator(appearing
                 ? new android.view.animation.AccelerateInterpolator(1.0f)
-                : new android.view.animation.DecelerateInterpolator(1.0f));
+                : new android.view.animation.AccelerateInterpolator(2.5f));
         fadeAnim.setDuration(appearing ? OPEN_DURATION : CLOSE_DURATION);
 
         Animator noRecentAppsFadeAnim = null;
@@ -108,6 +112,20 @@ import android.view.ViewRootImpl;
                 Animator bgAnim = ObjectAnimator.ofInt(background,
                     "alpha", appearing ? 0 : 255, appearing ? 255 : 0);
                 bgAnim.setDuration(appearing ? SCRIM_DURATION : CLOSE_DURATION);
+                builder.with(bgAnim);
+            }
+        } else {
+            final Resources res = mRootView.getResources();
+            boolean isTablet = res.getBoolean(R.bool.config_recents_interface_for_tablets);
+            if (!isTablet) {
+                View recentsTransitionBackground =
+                        mRootView.findViewById(R.id.recents_transition_background);
+                recentsTransitionBackground.setVisibility(View.VISIBLE);
+                Drawable bgDrawable = new ColorDrawable(0xFF000000);
+                recentsTransitionBackground.setBackground(bgDrawable);
+                Animator bgAnim = ObjectAnimator.ofInt(bgDrawable, "alpha", 0, 255);
+                bgAnim.setDuration(CLOSE_DURATION);
+                bgAnim.setInterpolator(new android.view.animation.AccelerateInterpolator(1f));
                 builder.with(bgAnim);
             }
         }
@@ -139,6 +157,10 @@ import android.view.ViewRootImpl;
         if (mScrimView.getBackground() != null) {
             mScrimView.getBackground().setAlpha(appearing ? 255 : 0);
         }
+        View recentsTransitionBackground =
+                mRootView.findViewById(R.id.recents_transition_background);
+        recentsTransitionBackground.setVisibility(View.INVISIBLE);
+        mRootView.requestLayout();
     }
 
     public void setPanelHeight(int h) {

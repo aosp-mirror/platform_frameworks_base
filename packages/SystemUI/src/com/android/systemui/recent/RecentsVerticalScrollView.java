@@ -76,9 +76,6 @@ public class RecentsVerticalScrollView extends ScrollView
     }
 
     private void addToRecycledViews(View v) {
-        if (mRecycledViews.contains(v)) {
-            throw new RuntimeException("Child was already recycled");
-        }
         if (mRecycledViews.size() < mNumItemsInOneScreenful) {
             mRecycledViews.add(v);
         }
@@ -105,9 +102,6 @@ public class RecentsVerticalScrollView extends ScrollView
                 old = recycledViews.next();
                 recycledViews.remove();
                 old.setVisibility(VISIBLE);
-                if (old.getParent() != null) {
-                    throw new RuntimeException("Recycled child has parent (i: " + i + ", recycled i: " + mRecycledViews.size());
-                }
             }
             final View view = mAdapter.getView(i, old, mLinearLayout);
 
