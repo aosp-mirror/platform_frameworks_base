@@ -1166,6 +1166,13 @@
 
   <java-symbol type="attr" name="mediaRouteButtonStyle" />
   <java-symbol type="attr" name="externalRouteEnabledDrawable" />
+  <java-symbol type="layout" name="media_route_chooser_layout" />
+  <java-symbol type="id" name="extended_settings" />
+  <java-symbol type="id" name="done" />
+  <java-symbol type="layout" name="media_route_list_item_top_header" />
+  <java-symbol type="layout" name="media_route_list_item_section_header" />
+  <java-symbol type="layout" name="media_route_list_item" />
+  <java-symbol type="id" name="group_button" />
 
   <!-- From android.policy -->
   <java-symbol type="anim" name="app_starting_exit" />
