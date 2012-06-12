@@ -3282,7 +3282,9 @@ final class ActivityStack {
                 requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
                         "no-history");
             }
-        } else if (r.app != null && r.app.thread != null) {
+        }
+
+        if (r.app != null && r.app.thread != null) {
             if (mMainStack) {
                 if (mService.mFocusedActivity == r) {
                     mService.setFocusedActivityLocked(topRunningActivityLocked(null));
