@@ -68,6 +68,8 @@ public class NotificationRowLayout
     // animation is done
     boolean mRemoveViews = true;
 
+    private LayoutTransition mRealLayoutTransition;
+
     public NotificationRowLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
@@ -75,7 +77,8 @@ public class NotificationRowLayout
     public NotificationRowLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        setLayoutTransition(new LayoutTransition());
+        mRealLayoutTransition = new LayoutTransition();
+        setLayoutTransitionsEnabled(true);
         
         setOrientation(LinearLayout.VERTICAL);
 
@@ -121,9 +124,9 @@ public class NotificationRowLayout
 
     private void logLayoutTransition() {
         Log.v(TAG, "layout " +
-              (getLayoutTransition().isChangingLayout() ? "is " : "is not ") +
+              (mRealLayoutTransition.isChangingLayout() ? "is " : "is not ") +
               "in transition and animations " +
-              (getLayoutTransition().isRunning() ? "are " : "are not ") +
+              (mRealLayoutTransition.isRunning() ? "are " : "are not ") +
               "running.");
     }
 
@@ -223,6 +226,18 @@ public class NotificationRowLayout
      */
     public void setViewRemoval(boolean removeViews) {
         mRemoveViews = removeViews;
+    }
+
+    // Suppress layout transitions for a little while.
+    public void setLayoutTransitionsEnabled(boolean b) {
+        if (b) {
+            setLayoutTransition(mRealLayoutTransition);
+        } else {
+            if (mRealLayoutTransition.isRunning()) {
+                mRealLayoutTransition.cancel();
+            }
+            setLayoutTransition(null);
+        }
     }
 
     public void dismissRowAnimated(View child) {
