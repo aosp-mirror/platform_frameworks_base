@@ -11548,11 +11548,14 @@ package android.media {
     method public int getRouteCount();
     method public void removeRoute(android.media.MediaRouter.RouteInfo);
     method public void removeRoute(int);
+    method public void setIconDrawable(android.graphics.drawable.Drawable);
+    method public void setIconResource(int);
   }
 
   public static class MediaRouter.RouteInfo {
     method public android.media.MediaRouter.RouteCategory getCategory();
     method public android.media.MediaRouter.RouteGroup getGroup();
+    method public android.graphics.drawable.Drawable getIconDrawable();
     method public java.lang.CharSequence getName();
     method public java.lang.CharSequence getStatus();
     method public int getSupportedTypes();
@@ -11570,7 +11573,10 @@ package android.media {
   }
 
   public static class MediaRouter.UserRouteInfo extends android.media.MediaRouter.RouteInfo {
+    method public void setIconDrawable(android.graphics.drawable.Drawable);
+    method public void setIconResource(int);
     method public void setName(java.lang.CharSequence);
+    method public void setRemoteControlClient(android.media.RemoteControlClient);
     method public void setStatus(java.lang.CharSequence);
   }
 
