@@ -73,14 +73,20 @@
     <!-- Size of lockscreen outerring on unsecure unlock LockScreen -->
     <dimen name="keyguard_lockscreen_outerring_diameter">270dp</dimen>
 
-    <!-- Default target placement radius for MultiWaveView -->
-    <dimen name="multiwaveview_target_placement_radius">135dip</dimen>
+    <!-- Default target placement radius for GlowPadView. Should be 1/2 of outerring diameter. -->
+    <dimen name="glowpadview_target_placement_radius">135dip</dimen>
 
-    <!-- Default distance beyond which MultiWaveView snaps to the target radius -->
-    <dimen name="multiwaveview_snap_margin">20dip</dimen>
+    <!-- Default glow radius for GlowPadView -->
+    <dimen name="glowpadview_glow_radius">75dip</dimen>
 
-    <!-- Default distance from each snap target that MultiWaveView considers a "hit" -->
-    <dimen name="multiwaveview_hit_radius">60dip</dimen>
+    <!-- Default distance beyond which GlowPadView snaps to the target radius -->
+    <dimen name="glowpadview_snap_margin">20dip</dimen>
+
+    <!-- Default distance from each snap target that GlowPadView considers a "hit" -->
+    <dimen name="glowpadview_hit_radius">60dip</dimen>
+
+    <!-- Default distance from each snap target that GlowPadView considers a "hit" -->
+    <dimen name="glowpadview_inner_radius">15dip</dimen>
 
     <!-- Preference activity side margins -->
     <dimen name="preference_screen_side_margin">0dp</dimen>
@@ -228,10 +234,10 @@
          a few are present. -->
     <dimen name="action_bar_stacked_tab_max_width">180dp</dimen>
 
-	<!-- Size of notification text (see TextAppearance.StatusBar.EventContent) -->
+    <!-- Size of notification text (see TextAppearance.StatusBar.EventContent) -->
     <dimen name="notification_text_size">14dp</dimen>
-	<!-- Size of notification text titles (see TextAppearance.StatusBar.EventContent.Title) -->
+    <!-- Size of notification text titles (see TextAppearance.StatusBar.EventContent.Title) -->
     <dimen name="notification_title_text_size">18dp</dimen>
-	<!-- Size of smaller notification text (see TextAppearance.StatusBar.EventContent.Line2, Info, Time) -->
+    <!-- Size of smaller notification text (see TextAppearance.StatusBar.EventContent.Line2, Info, Time) -->
     <dimen name="notification_subtext_size">12dp</dimen>
 </resources>

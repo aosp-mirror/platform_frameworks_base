@@ -38,25 +38,29 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true">
 
-            <com.android.internal.widget.multiwaveview.MultiWaveView
-                android:id="@+id/multi_wave_view"
+            <com.android.internal.widget.multiwaveview.GlowPadView
+                android:id="@+id/glow_pad_view"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/navbar_search_panel_height"
                 android:layout_alignParentBottom="true"
-                android:background="@drawable/navbar_search_bg_scrim"
                 android:gravity="top"
 
                 prvandroid:targetDrawables="@array/navbar_search_targets"
                 prvandroid:targetDescriptions="@array/navbar_search_target_descriptions"
                 prvandroid:directionDescriptions="@array/navbar_search_direction_descriptions"
                 prvandroid:handleDrawable="@drawable/navbar_search_handle"
-                prvandroid:waveDrawable="@drawable/navbar_search_outerring"
+                prvandroid:outerRingDrawable="@drawable/navbar_search_outerring"
+                prvandroid:outerRadius="@dimen/navbar_search_outerring_radius"
+                prvandroid:innerRadius="@*android:dimen/glowpadview_inner_radius"
                 prvandroid:snapMargin="@dimen/navbar_search_snap_margin"
                 prvandroid:hitRadius="@dimen/navbar_search_hit_radius"
                 prvandroid:feedbackCount="0"
                 prvandroid:vibrationDuration="@integer/config_vibration_duration"
-                prvandroid:alwaysTrackFinger="true"/>
+                prvandroid:alwaysTrackFinger="true"
+                prvandroid:glowRadius="@*android:dimen/glowpadview_glow_radius"
+                prvandroid:pointDrawable="@*android:drawable/ic_lockscreen_glowdot"
+               />
 
         </RelativeLayout>
 

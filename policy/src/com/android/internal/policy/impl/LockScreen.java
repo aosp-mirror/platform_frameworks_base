@@ -23,7 +23,7 @@ import com.android.internal.telephony.IccCard.State;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.SlidingTab;
 import com.android.internal.widget.WaveView;
-import com.android.internal.widget.multiwaveview.MultiWaveView;
+import com.android.internal.widget.multiwaveview.GlowPadView;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -286,16 +286,16 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         return mSearchManager;
     }
 
-    class MultiWaveViewMethods implements MultiWaveView.OnTriggerListener,
+    class GlowPadViewMethods implements GlowPadView.OnTriggerListener,
             UnlockWidgetCommonMethods {
-        private final MultiWaveView mMultiWaveView;
+        private final GlowPadView mGlowPadView;
 
-        MultiWaveViewMethods(MultiWaveView multiWaveView) {
-            mMultiWaveView = multiWaveView;
+        GlowPadViewMethods(GlowPadView glowPadView) {
+            mGlowPadView = glowPadView;
         }
 
         public boolean isTargetPresent(int resId) {
-            return mMultiWaveView.getTargetPosition(resId) != -1;
+            return mGlowPadView.getTargetPosition(resId) != -1;
         }
 
         public void updateResources() {
@@ -307,8 +307,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
             } else {
                 resId = R.array.lockscreen_targets_with_camera;
             }
-            if (mMultiWaveView.getTargetResourceId() != resId) {
-                mMultiWaveView.setTargetResources(resId);
+            if (mGlowPadView.getTargetResourceId() != resId) {
+                mGlowPadView.setTargetResources(resId);
             }
 
             // Update the search icon with drawable from the search .apk
@@ -317,7 +317,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
                 if (searchManager != null) {
                     ComponentName component = searchManager.getGlobalSearchActivity();
                     if (component != null) {
-                        if (!mMultiWaveView.replaceTargetDrawablesIfPresent(component,
+                        if (!mGlowPadView.replaceTargetDrawablesIfPresent(component,
                                 ASSIST_ICON_METADATA_NAME,
                                 com.android.internal.R.drawable.ic_lockscreen_search)) {
                             Slog.w(TAG, "Couldn't grab icon from package " + component);
@@ -343,7 +343,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         }
 
         public void onTrigger(View v, int target) {
-            final int resId = mMultiWaveView.getResourceIdForTarget(target);
+            final int resId = mGlowPadView.getResourceIdForTarget(target);
             switch (resId) {
                 case com.android.internal.R.drawable.ic_lockscreen_search:
                     Intent assistIntent = getAssistIntent();
@@ -393,33 +393,33 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
             // Don't poke the wake lock when returning to a state where the handle is
             // not grabbed since that can happen when the system (instead of the user)
             // cancels the grab.
-            if (handle != MultiWaveView.OnTriggerListener.NO_HANDLE) {
+            if (handle != GlowPadView.OnTriggerListener.NO_HANDLE) {
                 mCallback.pokeWakelock();
             }
         }
 
         public View getView() {
-            return mMultiWaveView;
+            return mGlowPadView;
         }
 
         public void reset(boolean animate) {
-            mMultiWaveView.reset(animate);
+            mGlowPadView.reset(animate);
         }
 
         public void ping() {
-            mMultiWaveView.ping();
+            mGlowPadView.ping();
         }
 
         public void setEnabled(int resourceId, boolean enabled) {
-            mMultiWaveView.setEnableTarget(resourceId, enabled);
+            mGlowPadView.setEnableTarget(resourceId, enabled);
         }
 
         public int getTargetPosition(int resourceId) {
-            return mMultiWaveView.getTargetPosition(resourceId);
+            return mGlowPadView.getTargetPosition(resourceId);
         }
 
         public void cleanUp() {
-            mMultiWaveView.setOnTriggerListener(null);
+            mGlowPadView.setOnTriggerListener(null);
         }
 
         public void onFinishFinalAnimation() {
@@ -531,11 +531,11 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
             WaveViewMethods waveViewMethods = new WaveViewMethods(waveView);
             waveView.setOnTriggerListener(waveViewMethods);
             return waveViewMethods;
-        } else if (unlockWidget instanceof MultiWaveView) {
-            MultiWaveView multiWaveView = (MultiWaveView) unlockWidget;
-            MultiWaveViewMethods multiWaveViewMethods = new MultiWaveViewMethods(multiWaveView);
-            multiWaveView.setOnTriggerListener(multiWaveViewMethods);
-            return multiWaveViewMethods;
+        } else if (unlockWidget instanceof GlowPadView) {
+            GlowPadView glowPadView = (GlowPadView) unlockWidget;
+            GlowPadViewMethods glowPadViewMethods = new GlowPadViewMethods(glowPadView);
+            glowPadView.setOnTriggerListener(glowPadViewMethods);
+            return glowPadViewMethods;
         } else {
             throw new IllegalStateException("Unrecognized unlock widget: " + unlockWidget);
         }
@@ -545,12 +545,12 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         boolean disabledByAdmin = mLockPatternUtils.getDevicePolicyManager()
                 .getCameraDisabled(null);
         boolean disabledBySimState = mUpdateMonitor.isSimLocked();
-        boolean cameraTargetPresent = (mUnlockWidgetMethods instanceof MultiWaveViewMethods)
-                ? ((MultiWaveViewMethods) mUnlockWidgetMethods)
+        boolean cameraTargetPresent = (mUnlockWidgetMethods instanceof GlowPadViewMethods)
+                ? ((GlowPadViewMethods) mUnlockWidgetMethods)
                         .isTargetPresent(com.android.internal.R.drawable.ic_lockscreen_camera)
                         : false;
-        boolean searchTargetPresent = (mUnlockWidgetMethods instanceof MultiWaveViewMethods)
-                ? ((MultiWaveViewMethods) mUnlockWidgetMethods)
+        boolean searchTargetPresent = (mUnlockWidgetMethods instanceof GlowPadViewMethods)
+                ? ((GlowPadViewMethods) mUnlockWidgetMethods)
                         .isTargetPresent(com.android.internal.R.drawable.ic_lockscreen_search)
                         : false;
 
