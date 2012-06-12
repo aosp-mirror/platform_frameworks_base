@@ -204,9 +204,9 @@
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"läsa SMS-meddelanden"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Appen tillåts läsa SMS som skickas till din enhet. På vissa platser skickas SMS för att varna för nödsituationer. Skadliga appar kan påverka enhetens prestanda eller funktionalitet när du får ett meddelande om en nödsituation via SMS."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"skicka SMS"</string>
-    <string name="permdesc_sendSms" msgid="7094729298204937667">"Tillåter att appen skickar SMS. Detta kan leda till ovänta avgifter. Skadliga appar kan skicka meddelanden utan ditt godkännande vilket kan kosta pengar."</string>
+    <string name="permdesc_sendSms" msgid="7094729298204937667">"Tillåter att appen skickar SMS. Detta kan leda till oväntade avgifter. Skadliga appar kan skicka meddelanden utan ditt godkännande vilket kan kosta pengar."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"skicka SMS utan bekräftelse"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Tillåter att appen skickar SMS. Detta kan leda till ovänta avgifter. Skadliga appar kan skicka meddelanden utan ditt godkännande vilket kan kosta pengar."</string>
+    <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Tillåter att appen skickar SMS. Detta kan leda till oväntade avgifter. Skadliga appar kan skicka meddelanden utan ditt godkännande vilket kan kosta pengar."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"läsa dina textmeddelanden (SMS eller MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Tillåter att appen läser SMS som sparats på pekdatorn eller på SIM-kortet. Med den här behörigheten tillåts appen att läsa alla SMS oavsett innehåll eller sekretess."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Tillåter att appen läser SMS som sparats på mobilen eller på SIM-kortet. Med den här behörigheten tillåts appen att läsa alla SMS oavsett innehåll eller sekretess."</string>
