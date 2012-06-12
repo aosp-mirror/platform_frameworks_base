@@ -11359,6 +11359,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         resolveLayoutParams();
         resolveTextDirection();
         resolveTextAlignment();
+        resolveDrawables();
     }
 
     /**

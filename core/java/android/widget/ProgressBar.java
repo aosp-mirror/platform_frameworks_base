@@ -478,8 +478,8 @@ public class ProgressBar extends View {
             d.setCallback(this);
         }
         mIndeterminateDrawable = d;
-        if (mIndeterminateDrawable != null) {
-            mIndeterminateDrawable.setLayoutDirection(getLayoutDirection());
+        if (mIndeterminateDrawable != null && canResolveLayoutDirection()) {
+            mIndeterminateDrawable.setLayoutDirection(getResolvedLayoutDirection());
         }
         if (mIndeterminate) {
             mCurrentDrawable = d;
@@ -520,7 +520,9 @@ public class ProgressBar extends View {
 
         if (d != null) {
             d.setCallback(this);
-            d.setLayoutDirection(getLayoutDirection());
+            if (canResolveLayoutDirection()) {
+                d.setLayoutDirection(getResolvedLayoutDirection());
+            }
 
             // Make sure the ProgressBar is always tall enough
             int drawableHeight = d.getMinimumHeight();
@@ -561,6 +563,20 @@ public class ProgressBar extends View {
         super.jumpDrawablesToCurrentState();
         if (mProgressDrawable != null) mProgressDrawable.jumpToCurrentState();
         if (mIndeterminateDrawable != null) mIndeterminateDrawable.jumpToCurrentState();
+    }
+
+    @Override
+    public void onResolveDrawables(int layoutDirection) {
+        final Drawable d = mCurrentDrawable;
+        if (d != null) {
+            d.setLayoutDirection(layoutDirection);
+        }
+        if (mIndeterminateDrawable != null) {
+            mIndeterminateDrawable.setLayoutDirection(layoutDirection);
+        }
+        if (mProgressDrawable != null) {
+            mProgressDrawable.setLayoutDirection(layoutDirection);
+        }
     }
 
     @Override
@@ -652,6 +668,9 @@ public class ProgressBar extends View {
 
             if (d instanceof LayerDrawable) {
                 progressDrawable = ((LayerDrawable) d).findDrawableByLayerId(id);
+                if (progressDrawable != null && canResolveLayoutDirection()) {
+                    progressDrawable.setLayoutDirection(getResolvedLayoutDirection());
+                }
             }
 
             final int level = (int) (scale * MAX_LEVEL);
