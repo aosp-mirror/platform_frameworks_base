@@ -440,13 +440,13 @@ public abstract class BaseStatusBar extends SystemUI implements
              case MSG_OPEN_RECENTS_PANEL:
                   if (DEBUG) Slog.d(TAG, "opening recents panel");
                   if (mRecentsPanel != null) {
-                      mRecentsPanel.show(true, true);
+                      mRecentsPanel.show(true, false);
                   }
                   break;
              case MSG_CLOSE_RECENTS_PANEL:
                   if (DEBUG) Slog.d(TAG, "closing recents panel");
                   if (mRecentsPanel != null && mRecentsPanel.isShowing()) {
-                      mRecentsPanel.show(false, true);
+                      mRecentsPanel.show(false, false);
                   }
                   break;
              case MSG_PRELOAD_RECENT_APPS:
