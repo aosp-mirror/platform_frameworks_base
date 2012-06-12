@@ -1080,8 +1080,8 @@
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"همه فایلهای ذخیره شده در حافظه USB پاک خواهد شد. این عمل را نمی‎توان برگرداند!"</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"تمام اطلاعات روی کارت شما از بین می‎رود."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"قالب"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"رفع عیب USB متصل شد"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"غیرفعال کردن اشکال زدایی USB را لمس کنید."</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"اتصال رفع عیب USB"</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"برای غیرفعال کردن اشکال زدایی USB لمس کنید."</string>
     <string name="select_input_method" msgid="4653387336791222978">"انتخاب روش ورودی"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"تنظیم روش‌های ورودی"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"صفحه کلید فیزیکی"</string>

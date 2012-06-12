@@ -459,7 +459,7 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Uygulamaya, sistem duvar kağıdı için boyut ipuçlarını ayarlama izni verir."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"sistemi fabrika değerlerine sıfırla"</string>
     <string name="permdesc_masterClear" msgid="3665380492633910226">"Uygulamaya, tüm verileri, yapılandırmayı ve yüklü uygulamaları silerek sistemi tamamen fabrika ayarlarına sıfırlama izni verir."</string>
-    <string name="permlab_setTime" msgid="2021614829591775646">"saati ayarla"</string>
+    <string name="permlab_setTime" msgid="2021614829591775646">"saati ayarlayın"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Uygulamaya, tablet saatini değiştirme izni verir."</string>
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Uygulamaya, telefon saatini değiştirme izni verir."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"saat dilimini ayarla"</string>
@@ -1040,8 +1040,8 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM kart eklendi"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Mobil ağa erişmek için cihazınızı yeniden başlatın."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Yeniden başlat"</string>
-    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Saati ayarla"</string>
-    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Tarihi ayarla"</string>
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Saati ayarlayın"</string>
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Tarihi ayarlayın"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Ayarla"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Tamamlandı"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Varsayılan"</string>
