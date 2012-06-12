@@ -16,6 +16,8 @@
 
 #include "android_database_SQLiteCommon.h"
 
+#include <utils/String8.h>
+
 namespace android {
 
 /* throw a SQLiteException with a message appropriate for the error in handle */
@@ -37,7 +39,8 @@ void throw_sqlite3_exception(JNIEnv* env, sqlite3* handle, const char* message) 
         // the error message may contain more information than the error code
         // because it is based on the extended error code rather than the simplified
         // error code that SQLite normally returns.
-        throw_sqlite3_exception(env, sqlite3_errcode(handle), sqlite3_errmsg(handle), message);
+        throw_sqlite3_exception(env, sqlite3_extended_errcode(handle),
+                sqlite3_errmsg(handle), message);
     } else {
         // we use SQLITE_OK so that a generic SQLiteException is thrown;
         // any code not specified in the switch statement below would do.
@@ -49,9 +52,7 @@ void throw_sqlite3_exception(JNIEnv* env, sqlite3* handle, const char* message) 
  * should only be used when the database connection is not available because the
  * error information will not be quite as rich */
 void throw_sqlite3_exception_errcode(JNIEnv* env, int errcode, const char* message) {
-    char temp[21];
-    sprintf(temp, "error code %d", errcode);
-    throw_sqlite3_exception(env, errcode, temp, message);
+    throw_sqlite3_exception(env, errcode, "unknown error", message);
 }
 
 /* throw a SQLiteException for a given error code, sqlite3message, and
@@ -60,7 +61,7 @@ void throw_sqlite3_exception_errcode(JNIEnv* env, int errcode, const char* messa
 void throw_sqlite3_exception(JNIEnv* env, int errcode,
                              const char* sqlite3Message, const char* message) {
     const char* exceptionClass;
-    switch (errcode) {
+    switch (errcode & 0xff) { /* mask off extended error code */
         case SQLITE_IOERR:
             exceptionClass = "android/database/sqlite/SQLiteDiskIOException";
             break;
@@ -119,19 +120,15 @@ void throw_sqlite3_exception(JNIEnv* env, int errcode,
             break;
     }
 
-    if (sqlite3Message != NULL && message != NULL) {
-        char* fullMessage = (char *)malloc(strlen(sqlite3Message) + strlen(message) + 3);
-        if (fullMessage != NULL) {
-            strcpy(fullMessage, sqlite3Message);
-            strcat(fullMessage, ": ");
-            strcat(fullMessage, message);
-            jniThrowException(env, exceptionClass, fullMessage);
-            free(fullMessage);
-        } else {
-            jniThrowException(env, exceptionClass, sqlite3Message);
+    if (sqlite3Message) {
+        String8 fullMessage;
+        fullMessage.append(sqlite3Message);
+        fullMessage.appendFormat(" (code %d)", errcode); // print extended error code
+        if (message) {
+            fullMessage.append(": ");
+            fullMessage.append(message);
         }
-    } else if (sqlite3Message != NULL) {
-        jniThrowException(env, exceptionClass, sqlite3Message);
+        jniThrowException(env, exceptionClass, fullMessage.string());
     } else {
         jniThrowException(env, exceptionClass, message);
     }
