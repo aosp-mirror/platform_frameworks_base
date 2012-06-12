@@ -629,7 +629,7 @@ public class MediaRouter {
          * Set an icon that will be used to represent this route.
          * The system may use this icon in picker UIs or similar.
          *
-         * @param icon Resource ID of an icon drawable to use to represent this route
+         * @param resId Resource ID of an icon drawable to use to represent this route
          */
         public void setIconResource(int resId) {
             setIconDrawable(sStatic.mResources.getDrawable(resId));
@@ -756,7 +756,7 @@ public class MediaRouter {
          * Set an icon that will be used to represent this group.
          * The system may use this icon in picker UIs or similar.
          *
-         * @param icon Resource ID of an icon drawable to use to represent this group
+         * @param resId Resource ID of an icon drawable to use to represent this group
          */
         public void setIconResource(int resId) {
             setIconDrawable(sStatic.mResources.getDrawable(resId));
