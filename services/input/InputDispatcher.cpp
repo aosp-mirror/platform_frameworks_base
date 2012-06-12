@@ -56,6 +56,8 @@
 
 #define INDENT "  "
 #define INDENT2 "    "
+#define INDENT3 "      "
+#define INDENT4 "        "
 
 namespace android {
 
@@ -77,6 +79,9 @@ const nsecs_t STALE_EVENT_TIMEOUT = 10000 * 1000000LL; // 10sec
 // amount.  For example, if streaming is allowed to get ahead by one second relative to the
 // queue of waiting unfinished events, then ANRs will similarly be delayed by one second.
 const nsecs_t STREAM_AHEAD_EVENT_TIMEOUT = 500 * 1000000LL; // 0.5sec
+
+// Log a warning when an event takes longer than this to process, even if an ANR does not occur.
+const nsecs_t SLOW_EVENT_PROCESSING_WARNING_TIMEOUT = 2000 * 1000000LL; // 2sec
 
 
 static inline nsecs_t now() {
@@ -897,11 +902,11 @@ int32_t InputDispatcher::handleTargetsNotReadyLocked(nsecs_t currentTime,
         const EventEntry* entry,
         const sp<InputApplicationHandle>& applicationHandle,
         const sp<InputWindowHandle>& windowHandle,
-        nsecs_t* nextWakeupTime) {
+        nsecs_t* nextWakeupTime, const char* reason) {
     if (applicationHandle == NULL && windowHandle == NULL) {
         if (mInputTargetWaitCause != INPUT_TARGET_WAIT_CAUSE_SYSTEM_NOT_READY) {
 #if DEBUG_FOCUS
-            ALOGD("Waiting for system to become ready for input.");
+            ALOGD("Waiting for system to become ready for input.  Reason: %s", reason);
 #endif
             mInputTargetWaitCause = INPUT_TARGET_WAIT_CAUSE_SYSTEM_NOT_READY;
             mInputTargetWaitStartTime = currentTime;
@@ -912,8 +917,9 @@ int32_t InputDispatcher::handleTargetsNotReadyLocked(nsecs_t currentTime,
     } else {
         if (mInputTargetWaitCause != INPUT_TARGET_WAIT_CAUSE_APPLICATION_NOT_READY) {
 #if DEBUG_FOCUS
-            ALOGD("Waiting for application to become ready for input: %s",
-                    getApplicationWindowLabelLocked(applicationHandle, windowHandle).string());
+            ALOGD("Waiting for application to become ready for input: %s.  Reason: %s",
+                    getApplicationWindowLabelLocked(applicationHandle, windowHandle).string(),
+                    reason);
 #endif
             nsecs_t timeout;
             if (windowHandle != NULL) {
@@ -946,7 +952,7 @@ int32_t InputDispatcher::handleTargetsNotReadyLocked(nsecs_t currentTime,
 
     if (currentTime >= mInputTargetWaitTimeoutTime) {
         onANRLocked(currentTime, applicationHandle, windowHandle,
-                entry->eventTime, mInputTargetWaitStartTime);
+                entry->eventTime, mInputTargetWaitStartTime, reason);
 
         // Force poll loop to wake up immediately on next iteration once we get the
         // ANR response back from the policy.
@@ -1017,13 +1023,11 @@ int32_t InputDispatcher::findFocusedWindowTargetsLocked(nsecs_t currentTime,
     // then drop the event.
     if (mFocusedWindowHandle == NULL) {
         if (mFocusedApplicationHandle != NULL) {
-#if DEBUG_FOCUS
-            ALOGD("Waiting because there is no focused window but there is a "
-                    "focused application that may eventually add a window: %s.",
-                    getApplicationWindowLabelLocked(mFocusedApplicationHandle, NULL).string());
-#endif
             injectionResult = handleTargetsNotReadyLocked(currentTime, entry,
-                    mFocusedApplicationHandle, NULL, nextWakeupTime);
+                    mFocusedApplicationHandle, NULL, nextWakeupTime,
+                    "Waiting because no window has focus but there is a "
+                    "focused application that may eventually add a window "
+                    "when it finishes starting up.");
             goto Unresponsive;
         }
 
@@ -1040,21 +1044,18 @@ int32_t InputDispatcher::findFocusedWindowTargetsLocked(nsecs_t currentTime,
 
     // If the currently focused window is paused then keep waiting.
     if (mFocusedWindowHandle->getInfo()->paused) {
-#if DEBUG_FOCUS
-        ALOGD("Waiting because focused window is paused.");
-#endif
         injectionResult = handleTargetsNotReadyLocked(currentTime, entry,
-                mFocusedApplicationHandle, mFocusedWindowHandle, nextWakeupTime);
+                mFocusedApplicationHandle, mFocusedWindowHandle, nextWakeupTime,
+                "Waiting because the focused window is paused.");
         goto Unresponsive;
     }
 
     // If the currently focused window is still working on previous events then keep waiting.
     if (!isWindowReadyForMoreInputLocked(currentTime, mFocusedWindowHandle, entry)) {
-#if DEBUG_FOCUS
-        ALOGD("Waiting because focused window still processing previous input.");
-#endif
         injectionResult = handleTargetsNotReadyLocked(currentTime, entry,
-                mFocusedApplicationHandle, mFocusedWindowHandle, nextWakeupTime);
+                mFocusedApplicationHandle, mFocusedWindowHandle, nextWakeupTime,
+                "Waiting because the focused window has not finished "
+                "processing the input events that were previously delivered to it.");
         goto Unresponsive;
     }
 
@@ -1210,11 +1211,9 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         // it is invisible) then wait for it.  Any other focused window may in
         // fact be in ANR state.
         if (topErrorWindowHandle != NULL && newTouchedWindowHandle != topErrorWindowHandle) {
-#if DEBUG_FOCUS
-            ALOGD("Waiting because system error window is pending.");
-#endif
             injectionResult = handleTargetsNotReadyLocked(currentTime, entry,
-                    NULL, NULL, nextWakeupTime);
+                    NULL, NULL, nextWakeupTime,
+                    "Waiting because a system error window is about to be displayed.");
             injectionPermission = INJECTION_PERMISSION_UNKNOWN;
             goto Unresponsive;
         }
@@ -1241,14 +1240,11 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
                 // but not yet put up a window and the user is starting to get impatient.
                 if (maskedAction == AMOTION_EVENT_ACTION_DOWN
                         && mFocusedApplicationHandle != NULL) {
-#if DEBUG_FOCUS
-                    ALOGD("Waiting because there is no touched window but there is a "
-                            "focused application that may eventually add a new window: %s.",
-                            getApplicationWindowLabelLocked(
-                                    mFocusedApplicationHandle, NULL).string());
-#endif
                     injectionResult = handleTargetsNotReadyLocked(currentTime, entry,
-                            mFocusedApplicationHandle, NULL, nextWakeupTime);
+                            mFocusedApplicationHandle, NULL, nextWakeupTime,
+                            "Waiting because there is no touchable window that can "
+                            "handle the event but there is focused application that may "
+                            "eventually add a new window when it finishes starting up.");
                     goto Unresponsive;
                 }
 
@@ -1412,21 +1408,18 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         if (touchedWindow.targetFlags & InputTarget::FLAG_FOREGROUND) {
             // If the touched window is paused then keep waiting.
             if (touchedWindow.windowHandle->getInfo()->paused) {
-#if DEBUG_FOCUS
-                ALOGD("Waiting because touched window is paused.");
-#endif
                 injectionResult = handleTargetsNotReadyLocked(currentTime, entry,
-                        NULL, touchedWindow.windowHandle, nextWakeupTime);
+                        NULL, touchedWindow.windowHandle, nextWakeupTime,
+                        "Waiting because the touched window is paused.");
                 goto Unresponsive;
             }
 
             // If the touched window is still working on previous events then keep waiting.
             if (!isWindowReadyForMoreInputLocked(currentTime, touchedWindow.windowHandle, entry)) {
-#if DEBUG_FOCUS
-                ALOGD("Waiting because touched window still processing previous input.");
-#endif
                 injectionResult = handleTargetsNotReadyLocked(currentTime, entry,
-                        NULL, touchedWindow.windowHandle, nextWakeupTime);
+                        NULL, touchedWindow.windowHandle, nextWakeupTime,
+                        "Waiting because the touched window has not finished "
+                        "processing the input events that were previously delivered to it.");
                 goto Unresponsive;
             }
         }
@@ -1897,6 +1890,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
     while (connection->status == Connection::STATUS_NORMAL
             && !connection->outboundQueue.isEmpty()) {
         DispatchEntry* dispatchEntry = connection->outboundQueue.head;
+        dispatchEntry->deliveryTime = currentTime;
 
         // Publish the event.
         status_t status;
@@ -3099,7 +3093,65 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
         dump.append(INDENT "MonitoringChannels: <none>\n");
     }
 
-    dump.appendFormat(INDENT "InboundQueue: length=%u\n", mInboundQueue.count());
+    nsecs_t currentTime = now();
+
+    if (!mInboundQueue.isEmpty()) {
+        dump.appendFormat(INDENT "InboundQueue: length=%u\n", mInboundQueue.count());
+        for (EventEntry* entry = mInboundQueue.head; entry; entry = entry->next) {
+            dump.append(INDENT2);
+            entry->appendDescription(dump);
+            dump.appendFormat(", age=%01.1fms\n",
+                    (currentTime - entry->eventTime) * 0.000001f);
+        }
+    } else {
+        dump.append(INDENT "InboundQueue: <empty>\n");
+    }
+
+    if (!mConnectionsByFd.isEmpty()) {
+        dump.append(INDENT "Connections:\n");
+        for (size_t i = 0; i < mConnectionsByFd.size(); i++) {
+            const sp<Connection>& connection = mConnectionsByFd.valueAt(i);
+            dump.appendFormat(INDENT2 "%d: channelName='%s', windowName='%s', "
+                    "status=%s, monitor=%s, inputPublisherBlocked=%s\n",
+                    i, connection->getInputChannelName(), connection->getWindowName(),
+                    connection->getStatusLabel(), toString(connection->monitor),
+                    toString(connection->inputPublisherBlocked));
+
+            if (!connection->outboundQueue.isEmpty()) {
+                dump.appendFormat(INDENT3 "OutboundQueue: length=%u\n",
+                        connection->outboundQueue.count());
+                for (DispatchEntry* entry = connection->outboundQueue.head; entry;
+                        entry = entry->next) {
+                    dump.append(INDENT4);
+                    entry->eventEntry->appendDescription(dump);
+                    dump.appendFormat(", targetFlags=0x%08x, resolvedAction=%d, age=%01.1fms\n",
+                            entry->targetFlags, entry->resolvedAction,
+                            (currentTime - entry->eventEntry->eventTime) * 0.000001f);
+                }
+            } else {
+                dump.append(INDENT3 "OutboundQueue: <empty>\n");
+            }
+
+            if (!connection->waitQueue.isEmpty()) {
+                dump.appendFormat(INDENT3 "WaitQueue: length=%u\n",
+                        connection->waitQueue.count());
+                for (DispatchEntry* entry = connection->waitQueue.head; entry;
+                        entry = entry->next) {
+                    dump.append(INDENT4);
+                    entry->eventEntry->appendDescription(dump);
+                    dump.appendFormat(", targetFlags=0x%08x, resolvedAction=%d, "
+                            "age=%01.1fms, wait=%01.1fms\n",
+                            entry->targetFlags, entry->resolvedAction,
+                            (currentTime - entry->eventEntry->eventTime) * 0.000001f,
+                            (currentTime - entry->deliveryTime) * 0.000001f);
+                }
+            } else {
+                dump.append(INDENT3 "WaitQueue: <empty>\n");
+            }
+        }
+    } else {
+        dump.append(INDENT "Connections: <none>\n");
+    }
 
     if (isAppSwitchPendingLocked()) {
         dump.appendFormat(INDENT "AppSwitch: pending, due in %01.1fms\n",
@@ -3214,6 +3266,7 @@ void InputDispatcher::onDispatchCycleFinishedLocked(
     CommandEntry* commandEntry = postCommandLocked(
             & InputDispatcher::doDispatchCycleFinishedLockedInterruptible);
     commandEntry->connection = connection;
+    commandEntry->eventTime = currentTime;
     commandEntry->seq = seq;
     commandEntry->handled = handled;
 }
@@ -3231,12 +3284,12 @@ void InputDispatcher::onDispatchCycleBrokenLocked(
 void InputDispatcher::onANRLocked(
         nsecs_t currentTime, const sp<InputApplicationHandle>& applicationHandle,
         const sp<InputWindowHandle>& windowHandle,
-        nsecs_t eventTime, nsecs_t waitStartTime) {
+        nsecs_t eventTime, nsecs_t waitStartTime, const char* reason) {
     ALOGI("Application is not responding: %s.  "
-            "%01.1fms since event, %01.1fms since wait started",
+            "It has been %01.1fms since event, %01.1fms since wait started.  Reason: %s",
             getApplicationWindowLabelLocked(applicationHandle, windowHandle).string(),
             (currentTime - eventTime) / 1000000.0,
-            (currentTime - waitStartTime) / 1000000.0);
+            (currentTime - waitStartTime) / 1000000.0, reason);
 
     CommandEntry* commandEntry = postCommandLocked(
             & InputDispatcher::doNotifyANRLockedInterruptible);
@@ -3308,12 +3361,22 @@ void InputDispatcher::doInterceptKeyBeforeDispatchingLockedInterruptible(
 void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
         CommandEntry* commandEntry) {
     sp<Connection> connection = commandEntry->connection;
+    nsecs_t finishTime = commandEntry->eventTime;
     uint32_t seq = commandEntry->seq;
     bool handled = commandEntry->handled;
 
     // Handle post-event policy actions.
     DispatchEntry* dispatchEntry = connection->findWaitQueueEntry(seq);
     if (dispatchEntry) {
+        nsecs_t eventDuration = finishTime - dispatchEntry->deliveryTime;
+        if (eventDuration > SLOW_EVENT_PROCESSING_WARNING_TIMEOUT) {
+            String8 msg;
+            msg.appendFormat("Window '%s' spent %01.1fms processing the last input event: ",
+                    connection->getWindowName(), eventDuration * 0.000001f);
+            dispatchEntry->eventEntry->appendDescription(msg);
+            ALOGI("%s", msg.string());
+        }
+
         bool restartEvent;
         if (dispatchEntry->eventEntry->type == EventEntry::TYPE_KEY) {
             KeyEntry* keyEntry = static_cast<KeyEntry*>(dispatchEntry->eventEntry);
@@ -3656,6 +3719,10 @@ InputDispatcher::ConfigurationChangedEntry::ConfigurationChangedEntry(nsecs_t ev
 InputDispatcher::ConfigurationChangedEntry::~ConfigurationChangedEntry() {
 }
 
+void InputDispatcher::ConfigurationChangedEntry::appendDescription(String8& msg) const {
+    msg.append("ConfigurationChangedEvent()");
+}
+
 
 // --- InputDispatcher::DeviceResetEntry ---
 
@@ -3665,6 +3732,10 @@ InputDispatcher::DeviceResetEntry::DeviceResetEntry(nsecs_t eventTime, int32_t d
 }
 
 InputDispatcher::DeviceResetEntry::~DeviceResetEntry() {
+}
+
+void InputDispatcher::DeviceResetEntry::appendDescription(String8& msg) const {
+    msg.appendFormat("DeviceResetEvent(deviceId=%d)", deviceId);
 }
 
 
@@ -3683,6 +3754,11 @@ InputDispatcher::KeyEntry::KeyEntry(nsecs_t eventTime,
 }
 
 InputDispatcher::KeyEntry::~KeyEntry() {
+}
+
+void InputDispatcher::KeyEntry::appendDescription(String8& msg) const {
+    msg.appendFormat("KeyEvent(action=%d, deviceId=%d, source=0x%08x)",
+            action, deviceId, source);
 }
 
 void InputDispatcher::KeyEntry::recycle() {
@@ -3718,6 +3794,11 @@ InputDispatcher::MotionEntry::MotionEntry(nsecs_t eventTime,
 InputDispatcher::MotionEntry::~MotionEntry() {
 }
 
+void InputDispatcher::MotionEntry::appendDescription(String8& msg) const {
+    msg.appendFormat("MotionEvent(action=%d, deviceId=%d, source=0x%08x)",
+            action, deviceId, source);
+}
+
 
 // --- InputDispatcher::DispatchEntry ---
 
@@ -3728,7 +3809,7 @@ InputDispatcher::DispatchEntry::DispatchEntry(EventEntry* eventEntry,
         seq(nextSeq()),
         eventEntry(eventEntry), targetFlags(targetFlags),
         xOffset(xOffset), yOffset(yOffset), scaleFactor(scaleFactor),
-        resolvedAction(0), resolvedFlags(0) {
+        deliveryTime(0), resolvedAction(0), resolvedFlags(0) {
     eventEntry->refCount += 1;
 }
 
