@@ -1528,6 +1528,8 @@ public abstract class Context {
      * @see android.net.wifi.WifiManager
      * @see #AUDIO_SERVICE
      * @see android.media.AudioManager
+     * @see #MEDIA_ROUTER_SERVICE
+     * @see android.media.MediaRouter
      * @see #TELEPHONY_SERVICE
      * @see android.telephony.TelephonyManager
      * @see #INPUT_METHOD_SERVICE
@@ -1778,7 +1780,6 @@ public abstract class Context {
      */
     public static final String NSD_SERVICE = "servicediscovery";
 
-
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.media.AudioManager} for handling management of volume,
@@ -1788,6 +1789,16 @@ public abstract class Context {
      * @see android.media.AudioManager
      */
     public static final String AUDIO_SERVICE = "audio";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.media.MediaRouter} for controlling and managing
+     * routing of media.
+     *
+     * @see #getSystemService
+     * @see android.media.MediaRouter
+     */
+    public static final String MEDIA_ROUTER_SERVICE = "media_router";
 
     /**
      * Use with {@link #getSystemService} to retrieve a

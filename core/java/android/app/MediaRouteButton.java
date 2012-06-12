@@ -58,7 +58,7 @@ public class MediaRouteButton extends View {
     public MediaRouteButton(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        mRouter = MediaRouter.forApplication(context);
+        mRouter = (MediaRouter)context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
 
         TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.MediaRouteButton, defStyleAttr, 0);

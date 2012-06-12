@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.os.Handler;
 import android.util.Log;
 
@@ -32,27 +33,60 @@ import java.util.List;
  * MediaRouter allows applications to control the routing of media channels
  * and streams from the current device to external speakers and destination devices.
  *
- * <p>Media routes should only be modified on your application's main thread.</p>
+ * <p>A MediaRouter is retrieved through {@link Context#getSystemService(String)
+ * Context.getSystemService()} of a {@link Context#MEDIA_ROUTER_SERVICE
+ * Context.MEDIA_ROUTER_SERVICE}.
+ *
+ * <p>The media router API is not thread-safe; all interactions with it must be
+ * done from the main thread of the process.</p>
  */
 public class MediaRouter {
     private static final String TAG = "MediaRouter";
 
-    private Context mAppContext;
-    private AudioManager mAudioManager;
-    private Handler mHandler;
-    private final ArrayList<CallbackInfo> mCallbacks = new ArrayList<CallbackInfo>();
+    static class Static {
+        private final Resources mResources;
+        private final AudioManager mAudioManager;
+        private final Handler mHandler;
+        private final ArrayList<CallbackInfo> mCallbacks = new ArrayList<CallbackInfo>();
 
-    private final ArrayList<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
-    private final ArrayList<RouteCategory> mCategories = new ArrayList<RouteCategory>();
+        private final ArrayList<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
+        private final ArrayList<RouteCategory> mCategories = new ArrayList<RouteCategory>();
 
-    private final RouteCategory mSystemCategory;
-    private RouteInfo mDefaultAudio;
-    private RouteInfo mBluetoothA2dpRoute;
+        private final RouteCategory mSystemCategory;
+        private final HeadphoneChangedBroadcastReceiver mHeadphoneChangedReceiver;
 
-    private RouteInfo mSelectedRoute;
+        private RouteInfo mDefaultAudio;
+        private RouteInfo mBluetoothA2dpRoute;
 
-    // These get removed when an activity dies
-    final ArrayList<BroadcastReceiver> mRegisteredReceivers = new ArrayList<BroadcastReceiver>();
+        private RouteInfo mSelectedRoute;
+
+        Static(Context appContext) {
+            mResources = Resources.getSystem();
+            mHandler = new Handler(appContext.getMainLooper());
+
+            mAudioManager = (AudioManager)appContext.getSystemService(Context.AUDIO_SERVICE);
+
+            // XXX this doesn't deal with locale changes!
+            mSystemCategory = new RouteCategory(mResources.getText(
+                    com.android.internal.R.string.default_audio_route_category_name),
+                    ROUTE_TYPE_LIVE_AUDIO, false);
+
+            final IntentFilter speakerFilter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
+            speakerFilter.addAction(Intent.ACTION_ANALOG_AUDIO_DOCK_PLUG);
+            speakerFilter.addAction(Intent.ACTION_DIGITAL_AUDIO_DOCK_PLUG);
+            speakerFilter.addAction(Intent.ACTION_HDMI_AUDIO_PLUG);
+            mHeadphoneChangedReceiver = new HeadphoneChangedBroadcastReceiver();
+            appContext.registerReceiver(mHeadphoneChangedReceiver, speakerFilter);
+
+            mDefaultAudio = new RouteInfo(mSystemCategory);
+            mDefaultAudio.mName = mResources.getText(
+                    com.android.internal.R.string.default_audio_route_name);
+            mDefaultAudio.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO;
+            addRoute(mDefaultAudio);
+        }
+    }
+
+    static Static sStatic;
 
     /**
      * Route type flag for live audio.
@@ -79,25 +113,6 @@ public class MediaRouter {
     // Maps application contexts
     static final HashMap<Context, MediaRouter> sRouters = new HashMap<Context, MediaRouter>();
 
-    /**
-     * Return a MediaRouter for the application that the specified Context belongs to.
-     * The behavior or availability of media routing may depend on
-     * various parameters of the context.
-     *
-     * @param context Context for the desired router
-     * @return Router for the supplied Context
-     */
-    public static MediaRouter forApplication(Context context) {
-        final Context appContext = context.getApplicationContext();
-        if (!sRouters.containsKey(appContext)) {
-            final MediaRouter r = new MediaRouter(appContext);
-            sRouters.put(appContext, r);
-            return r;
-        } else {
-            return sRouters.get(appContext);
-        }
-    }
-
     static String typesToString(int types) {
         final StringBuilder result = new StringBuilder();
         if ((types & ROUTE_TYPE_LIVE_AUDIO) != 0) {
@@ -109,52 +124,20 @@ public class MediaRouter {
         return result.toString();
     }
 
-    private MediaRouter(Context context) {
-        mAppContext = context;
-        mHandler = new Handler(mAppContext.getMainLooper());
-
-        mAudioManager = (AudioManager) mAppContext.getSystemService(Context.AUDIO_SERVICE);
-
-        mSystemCategory = new RouteCategory(mAppContext.getText(
-                com.android.internal.R.string.default_audio_route_category_name),
-                ROUTE_TYPE_LIVE_AUDIO, false);
-
-        registerReceivers();
-        createDefaultRoutes();
-    }
-
-    private void registerReceivers() {
-        final IntentFilter speakerFilter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
-        speakerFilter.addAction(Intent.ACTION_ANALOG_AUDIO_DOCK_PLUG);
-        speakerFilter.addAction(Intent.ACTION_DIGITAL_AUDIO_DOCK_PLUG);
-        speakerFilter.addAction(Intent.ACTION_HDMI_AUDIO_PLUG);
-        final BroadcastReceiver plugReceiver = new HeadphoneChangedBroadcastReceiver();
-        mAppContext.registerReceiver(plugReceiver, speakerFilter);
-        mRegisteredReceivers.add(plugReceiver);
-    }
-
-    void unregisterReceivers() {
-        final int count = mRegisteredReceivers.size();
-        for (int i = 0; i < count; i++) {
-            final BroadcastReceiver r = mRegisteredReceivers.get(i);
-            mAppContext.unregisterReceiver(r);
+    /** @hide */
+    public MediaRouter(Context context) {
+        synchronized (Static.class) {
+            if (sStatic == null) {
+                sStatic = new Static(context.getApplicationContext());
+            }
         }
-        mRegisteredReceivers.clear();
-    }
-
-    private void createDefaultRoutes() {
-        mDefaultAudio = new RouteInfo(mSystemCategory);
-        mDefaultAudio.mName = mAppContext.getText(
-                com.android.internal.R.string.default_audio_route_name);
-        mDefaultAudio.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO;
-        addRoute(mDefaultAudio);
     }
 
     /**
      * @hide for use by framework routing UI
      */
     public RouteInfo getSystemAudioRoute() {
-        return mDefaultAudio;
+        return sStatic.mDefaultAudio;
     }
 
     /**
@@ -164,13 +147,15 @@ public class MediaRouter {
      * @return the selected route
      */
     public RouteInfo getSelectedRoute(int type) {
-        return mSelectedRoute;
+        return sStatic.mSelectedRoute;
     }
 
-    void onHeadphonesPlugged(boolean headphonesPresent, String headphonesName) {
-        mDefaultAudio.mName = headphonesPresent ? headphonesName : mAppContext.getText(
-                com.android.internal.R.string.default_audio_route_name);
-        dispatchRouteChanged(mDefaultAudio);
+    static void onHeadphonesPlugged(boolean headphonesPresent, String headphonesName) {
+        sStatic.mDefaultAudio.mName = headphonesPresent
+                ? headphonesName
+                : sStatic.mResources.getText(
+                        com.android.internal.R.string.default_audio_route_name);
+        dispatchRouteChanged(sStatic.mDefaultAudio);
     }
 
     /**
@@ -182,15 +167,15 @@ public class MediaRouter {
      * @param cb Callback to add
      */
     public void addCallback(int types, Callback cb) {
-        final int count = mCallbacks.size();
+        final int count = sStatic.mCallbacks.size();
         for (int i = 0; i < count; i++) {
-            final CallbackInfo info = mCallbacks.get(i);
+            final CallbackInfo info = sStatic.mCallbacks.get(i);
             if (info.cb == cb) {
                 info.type &= types;
                 return;
             }
         }
-        mCallbacks.add(new CallbackInfo(cb, types));
+        sStatic.mCallbacks.add(new CallbackInfo(cb, types, this));
     }
 
     /**
@@ -199,10 +184,10 @@ public class MediaRouter {
      * @param cb Callback to remove
      */
     public void removeCallback(Callback cb) {
-        final int count = mCallbacks.size();
+        final int count = sStatic.mCallbacks.size();
         for (int i = 0; i < count; i++) {
-            if (mCallbacks.get(i).cb == cb) {
-                mCallbacks.remove(i);
+            if (sStatic.mCallbacks.get(i).cb == cb) {
+                sStatic.mCallbacks.remove(i);
                 return;
             }
         }
@@ -217,13 +202,18 @@ public class MediaRouter {
      * @param route Route to select
      */
     public void selectRoute(int types, RouteInfo route) {
-        if (mSelectedRoute == route) return;
+        selectRouteStatic(types, route);
+    }
 
-        if (mSelectedRoute != null) {
+    static void selectRouteStatic(int types, RouteInfo route) {
+        if (sStatic.mSelectedRoute == route) return;
+
+        if (sStatic.mSelectedRoute != null) {
             // TODO filter types properly
-            dispatchRouteUnselected(types & mSelectedRoute.getSupportedTypes(), mSelectedRoute);
+            dispatchRouteUnselected(types & sStatic.mSelectedRoute.getSupportedTypes(),
+                    sStatic.mSelectedRoute);
         }
-        mSelectedRoute = route;
+        sStatic.mSelectedRoute = route;
         if (route != null) {
             // TODO filter types properly
             dispatchRouteSelected(types & route.getSupportedTypes(), route);
@@ -242,16 +232,16 @@ public class MediaRouter {
         addRoute(info);
     }
 
-    void addRoute(RouteInfo info) {
+    static void addRoute(RouteInfo info) {
         final RouteCategory cat = info.getCategory();
-        if (!mCategories.contains(cat)) {
-            mCategories.add(cat);
+        if (!sStatic.mCategories.contains(cat)) {
+            sStatic.mCategories.add(cat);
         }
-        final boolean onlyRoute = mRoutes.isEmpty();
+        final boolean onlyRoute = sStatic.mRoutes.isEmpty();
         if (cat.isGroupable() && !(info instanceof RouteGroup)) {
             // Enforce that any added route in a groupable category must be in a group.
             final RouteGroup group = new RouteGroup(info.getCategory());
-            mRoutes.add(group);
+            sStatic.mRoutes.add(group);
             dispatchRouteAdded(group);
 
             final int at = group.getRouteCount();
@@ -260,12 +250,12 @@ public class MediaRouter {
 
             info = group;
         } else {
-            mRoutes.add(info);
+            sStatic.mRoutes.add(info);
             dispatchRouteAdded(info);
         }
 
         if (onlyRoute) {
-            selectRoute(info.getSupportedTypes(), info);
+            selectRouteStatic(info.getSupportedTypes(), info);
         }
     }
 
@@ -285,8 +275,8 @@ public class MediaRouter {
      * @see #removeUserRoute(UserRouteInfo)
      */
     public void clearUserRoutes() {
-        for (int i = 0; i < mRoutes.size(); i++) {
-            final RouteInfo info = mRoutes.get(i);
+        for (int i = 0; i < sStatic.mRoutes.size(); i++) {
+            final RouteInfo info = sStatic.mRoutes.get(i);
             if (info instanceof UserRouteInfo) {
                 removeRouteAt(i);
                 i--;
@@ -294,40 +284,40 @@ public class MediaRouter {
         }
     }
 
-    void removeRoute(RouteInfo info) {
-        if (mRoutes.remove(info)) {
+    static void removeRoute(RouteInfo info) {
+        if (sStatic.mRoutes.remove(info)) {
             final RouteCategory removingCat = info.getCategory();
-            final int count = mRoutes.size();
+            final int count = sStatic.mRoutes.size();
             boolean found = false;
             for (int i = 0; i < count; i++) {
-                final RouteCategory cat = mRoutes.get(i).getCategory();
+                final RouteCategory cat = sStatic.mRoutes.get(i).getCategory();
                 if (removingCat == cat) {
                     found = true;
                     break;
                 }
             }
             if (!found) {
-                mCategories.remove(removingCat);
+                sStatic.mCategories.remove(removingCat);
             }
             dispatchRouteRemoved(info);
         }
     }
 
     void removeRouteAt(int routeIndex) {
-        if (routeIndex >= 0 && routeIndex < mRoutes.size()) {
-            final RouteInfo info = mRoutes.remove(routeIndex);
+        if (routeIndex >= 0 && routeIndex < sStatic.mRoutes.size()) {
+            final RouteInfo info = sStatic.mRoutes.remove(routeIndex);
             final RouteCategory removingCat = info.getCategory();
-            final int count = mRoutes.size();
+            final int count = sStatic.mRoutes.size();
             boolean found = false;
             for (int i = 0; i < count; i++) {
-                final RouteCategory cat = mRoutes.get(i).getCategory();
+                final RouteCategory cat = sStatic.mRoutes.get(i).getCategory();
                 if (removingCat == cat) {
                     found = true;
                     break;
                 }
             }
             if (!found) {
-                mCategories.remove(removingCat);
+                sStatic.mCategories.remove(removingCat);
             }
             dispatchRouteRemoved(info);
         }
@@ -340,7 +330,7 @@ public class MediaRouter {
      * @return the number of unique categories represented by this MediaRouter's known routes
      */
     public int getCategoryCount() {
-        return mCategories.size();
+        return sStatic.mCategories.size();
     }
 
     /**
@@ -351,7 +341,7 @@ public class MediaRouter {
      * @return the category at index
      */
     public RouteCategory getCategoryAt(int index) {
-        return mCategories.get(index);
+        return sStatic.mCategories.get(index);
     }
 
     /**
@@ -361,7 +351,7 @@ public class MediaRouter {
      * @return the number of routes tracked by this router
      */
     public int getRouteCount() {
-        return mRoutes.size();
+        return sStatic.mRoutes.size();
     }
 
     /**
@@ -371,7 +361,15 @@ public class MediaRouter {
      * @return the route at index
      */
     public RouteInfo getRouteAt(int index) {
-        return mRoutes.get(index);
+        return sStatic.mRoutes.get(index);
+    }
+
+    static int getRouteCountStatic() {
+        return sStatic.mRoutes.size();
+    }
+
+    static RouteInfo getRouteAtStatic(int index) {
+        return sStatic.mRoutes.get(index);
     }
 
     /**
@@ -399,96 +397,96 @@ public class MediaRouter {
         return new RouteCategory(name, ROUTE_TYPE_USER, isGroupable);
     }
 
-    void updateRoute(final RouteInfo info) {
+    static void updateRoute(final RouteInfo info) {
         dispatchRouteChanged(info);
     }
 
-    void dispatchRouteSelected(int type, RouteInfo info) {
-        final int count = mCallbacks.size();
+    static void dispatchRouteSelected(int type, RouteInfo info) {
+        final int count = sStatic.mCallbacks.size();
         for (int i = 0; i < count; i++) {
-            final CallbackInfo cbi = mCallbacks.get(i);
+            final CallbackInfo cbi = sStatic.mCallbacks.get(i);
             if ((cbi.type & type) != 0) {
-                cbi.cb.onRouteSelected(this, type, info);
+                cbi.cb.onRouteSelected(cbi.router, type, info);
             }
         }
     }
 
-    void dispatchRouteUnselected(int type, RouteInfo info) {
-        final int count = mCallbacks.size();
+    static void dispatchRouteUnselected(int type, RouteInfo info) {
+        final int count = sStatic.mCallbacks.size();
         for (int i = 0; i < count; i++) {
-            final CallbackInfo cbi = mCallbacks.get(i);
+            final CallbackInfo cbi = sStatic.mCallbacks.get(i);
             if ((cbi.type & type) != 0) {
-                cbi.cb.onRouteUnselected(this, type, info);
+                cbi.cb.onRouteUnselected(cbi.router, type, info);
             }
         }
     }
 
-    void dispatchRouteChanged(RouteInfo info) {
-        final int count = mCallbacks.size();
+    static void dispatchRouteChanged(RouteInfo info) {
+        final int count = sStatic.mCallbacks.size();
         for (int i = 0; i < count; i++) {
-            final CallbackInfo cbi = mCallbacks.get(i);
+            final CallbackInfo cbi = sStatic.mCallbacks.get(i);
             if ((cbi.type & info.mSupportedTypes) != 0) {
-                cbi.cb.onRouteChanged(this, info);
+                cbi.cb.onRouteChanged(cbi.router, info);
             }
         }
     }
 
-    void dispatchRouteAdded(RouteInfo info) {
-        final int count = mCallbacks.size();
+    static void dispatchRouteAdded(RouteInfo info) {
+        final int count = sStatic.mCallbacks.size();
         for (int i = 0; i < count; i++) {
-            final CallbackInfo cbi = mCallbacks.get(i);
+            final CallbackInfo cbi = sStatic.mCallbacks.get(i);
             if ((cbi.type & info.mSupportedTypes) != 0) {
-                cbi.cb.onRouteAdded(this, info);
+                cbi.cb.onRouteAdded(cbi.router, info);
             }
         }
     }
 
-    void dispatchRouteRemoved(RouteInfo info) {
-        final int count = mCallbacks.size();
+    static void dispatchRouteRemoved(RouteInfo info) {
+        final int count = sStatic.mCallbacks.size();
         for (int i = 0; i < count; i++) {
-            final CallbackInfo cbi = mCallbacks.get(i);
+            final CallbackInfo cbi = sStatic.mCallbacks.get(i);
             if ((cbi.type & info.mSupportedTypes) != 0) {
-                cbi.cb.onRouteRemoved(this, info);
+                cbi.cb.onRouteRemoved(cbi.router, info);
             }
         }
     }
 
-    void dispatchRouteGrouped(RouteInfo info, RouteGroup group, int index) {
-        final int count = mCallbacks.size();
+    static void dispatchRouteGrouped(RouteInfo info, RouteGroup group, int index) {
+        final int count = sStatic.mCallbacks.size();
         for (int i = 0; i < count; i++) {
-            final CallbackInfo cbi = mCallbacks.get(i);
+            final CallbackInfo cbi = sStatic.mCallbacks.get(i);
             if ((cbi.type & group.mSupportedTypes) != 0) {
-                cbi.cb.onRouteGrouped(this, info, group, index);
+                cbi.cb.onRouteGrouped(cbi.router, info, group, index);
             }
         }
     }
 
-    void dispatchRouteUngrouped(RouteInfo info, RouteGroup group) {
-        final int count = mCallbacks.size();
+    static void dispatchRouteUngrouped(RouteInfo info, RouteGroup group) {
+        final int count = sStatic.mCallbacks.size();
         for (int i = 0; i < count; i++) {
-            final CallbackInfo cbi = mCallbacks.get(i);
+            final CallbackInfo cbi = sStatic.mCallbacks.get(i);
             if ((cbi.type & group.mSupportedTypes) != 0) {
-                cbi.cb.onRouteUngrouped(this, info, group);
+                cbi.cb.onRouteUngrouped(cbi.router, info, group);
             }
         }
     }
 
-    void onA2dpDeviceConnected() {
-        final RouteInfo info = new RouteInfo(mSystemCategory);
+    static void onA2dpDeviceConnected() {
+        final RouteInfo info = new RouteInfo(sStatic.mSystemCategory);
         info.mName = "Bluetooth"; // TODO Fetch the real name of the device
-        mBluetoothA2dpRoute = info;
-        addRoute(mBluetoothA2dpRoute);
+        sStatic.mBluetoothA2dpRoute = info;
+        addRoute(sStatic.mBluetoothA2dpRoute);
     }
 
-    void onA2dpDeviceDisconnected() {
-        removeRoute(mBluetoothA2dpRoute);
-        mBluetoothA2dpRoute = null;
+    static void onA2dpDeviceDisconnected() {
+        removeRoute(sStatic.mBluetoothA2dpRoute);
+        sStatic.mBluetoothA2dpRoute = null;
     }
 
     /**
      * Information about a media route.
      */
-    public class RouteInfo {
+    public static class RouteInfo {
         CharSequence mName;
         private CharSequence mStatus;
         int mSupportedTypes;
@@ -565,7 +563,7 @@ public class MediaRouter {
      *
      * @see MediaRouter.RouteInfo
      */
-    public class UserRouteInfo extends RouteInfo {
+    public static class UserRouteInfo extends RouteInfo {
 
         UserRouteInfo(RouteCategory category) {
             super(category);
@@ -594,7 +592,7 @@ public class MediaRouter {
     /**
      * Information about a route that consists of multiple other routes in a group.
      */
-    public class RouteGroup extends RouteInfo {
+    public static class RouteGroup extends RouteInfo {
         final ArrayList<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
         private boolean mUpdateName;
 
@@ -722,7 +720,7 @@ public class MediaRouter {
     /**
      * Definition of a category of routes. All routes belong to a category.
      */
-    public class RouteCategory {
+    public static class RouteCategory {
         CharSequence mName;
         int mTypes;
         final boolean mGroupable;
@@ -760,9 +758,9 @@ public class MediaRouter {
                 out.clear();
             }
 
-            final int count = getRouteCount();
+            final int count = getRouteCountStatic();
             for (int i = 0; i < count; i++) {
-                final RouteInfo route = getRouteAt(i);
+                final RouteInfo route = getRouteAtStatic(i);
                 if (route.mCategory == this) {
                     out.add(route);
                 }
@@ -791,17 +789,19 @@ public class MediaRouter {
 
         public String toString() {
             return "RouteCategory{ name=" + mName + " types=" + typesToString(mTypes) +
-                    " groupable=" + mGroupable + " routes=" + mRoutes.size() + " }";
+                    " groupable=" + mGroupable + " routes=" + sStatic.mRoutes.size() + " }";
         }
     }
 
     static class CallbackInfo {
         public int type;
-        public Callback cb;
+        public final Callback cb;
+        public final MediaRouter router;
 
-        public CallbackInfo(Callback cb, int type) {
+        public CallbackInfo(Callback cb, int type, MediaRouter router) {
             this.cb = cb;
             this.type = type;
+            this.router = router;
         }
     }
 
@@ -937,24 +937,24 @@ public class MediaRouter {
         }
     }
 
-    class HeadphoneChangedBroadcastReceiver extends BroadcastReceiver {
+    static class HeadphoneChangedBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (Intent.ACTION_HEADSET_PLUG.equals(action)) {
                 final boolean plugged = intent.getIntExtra("state", 0) != 0;
-                final String name = mAppContext.getString(
+                final String name = sStatic.mResources.getString(
                         com.android.internal.R.string.default_audio_route_name_headphones);
                 onHeadphonesPlugged(plugged, name);
             } else if (Intent.ACTION_ANALOG_AUDIO_DOCK_PLUG.equals(action) ||
                     Intent.ACTION_DIGITAL_AUDIO_DOCK_PLUG.equals(action)) {
                 final boolean plugged = intent.getIntExtra("state", 0) != 0;
-                final String name = mAppContext.getString(
+                final String name = sStatic.mResources.getString(
                         com.android.internal.R.string.default_audio_route_name_dock_speakers);
                 onHeadphonesPlugged(plugged, name);
             } else if (Intent.ACTION_HDMI_AUDIO_PLUG.equals(action)) {
                 final boolean plugged = intent.getIntExtra("state", 0) != 0;
-                final String name = mAppContext.getString(
+                final String name = sStatic.mResources.getString(
                         com.android.internal.R.string.default_audio_route_name_hdmi);
                 onHeadphonesPlugged(plugged, name);
             }
