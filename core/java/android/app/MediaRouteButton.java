@@ -43,6 +43,8 @@ public class MediaRouteButton extends View {
     private int mMinWidth;
     private int mMinHeight;
 
+    private OnClickListener mExtendedSettingsClickListener;
+
     private static final int[] ACTIVATED_STATE_SET = {
         R.attr.state_activated
     };
@@ -258,6 +260,11 @@ public class MediaRouteButton extends View {
 
         mRemoteIndicator.setBounds(drawLeft, drawTop, drawLeft + drawWidth, drawTop + drawHeight);
         mRemoteIndicator.draw(canvas);
+    }
+
+    public void setExtendedSettingsClickListener(OnClickListener listener) {
+        // TODO: if dialog is already open, propagate so that it updates live.
+        mExtendedSettingsClickListener = listener;
     }
 
     private class MediaRouteCallback extends MediaRouter.SimpleCallback {

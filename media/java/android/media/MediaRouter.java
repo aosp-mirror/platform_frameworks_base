@@ -45,21 +45,21 @@ public class MediaRouter {
     private static final String TAG = "MediaRouter";
 
     static class Static {
-        private final Resources mResources;
-        private final AudioManager mAudioManager;
-        private final Handler mHandler;
-        private final ArrayList<CallbackInfo> mCallbacks = new ArrayList<CallbackInfo>();
+        final Resources mResources;
+        final AudioManager mAudioManager;
+        final Handler mHandler;
+        final ArrayList<CallbackInfo> mCallbacks = new ArrayList<CallbackInfo>();
 
-        private final ArrayList<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
-        private final ArrayList<RouteCategory> mCategories = new ArrayList<RouteCategory>();
+        final ArrayList<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
+        final ArrayList<RouteCategory> mCategories = new ArrayList<RouteCategory>();
 
-        private final RouteCategory mSystemCategory;
-        private final HeadphoneChangedBroadcastReceiver mHeadphoneChangedReceiver;
+        final RouteCategory mSystemCategory;
+        final HeadphoneChangedBroadcastReceiver mHeadphoneChangedReceiver;
 
-        private RouteInfo mDefaultAudio;
-        private RouteInfo mBluetoothA2dpRoute;
+        RouteInfo mDefaultAudio;
+        RouteInfo mBluetoothA2dpRoute;
 
-        private RouteInfo mSelectedRoute;
+        RouteInfo mSelectedRoute;
 
         Static(Context appContext) {
             mResources = Resources.getSystem();
@@ -78,7 +78,10 @@ public class MediaRouter {
             speakerFilter.addAction(Intent.ACTION_HDMI_AUDIO_PLUG);
             mHeadphoneChangedReceiver = new HeadphoneChangedBroadcastReceiver();
             appContext.registerReceiver(mHeadphoneChangedReceiver, speakerFilter);
+        }
 
+        // Called after sStatic is initialized
+        void initDefaultRoutes() {
             mDefaultAudio = new RouteInfo(mSystemCategory);
             mDefaultAudio.mName = mResources.getText(
                     com.android.internal.R.string.default_audio_route_name);
@@ -130,6 +133,7 @@ public class MediaRouter {
         synchronized (Static.class) {
             if (sStatic == null) {
                 sStatic = new Static(context.getApplicationContext());
+                sStatic.initDefaultRoutes();
             }
         }
     }
