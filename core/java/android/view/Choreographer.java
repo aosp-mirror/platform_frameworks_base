@@ -103,6 +103,11 @@ public final class Choreographer {
     private static final boolean USE_FRAME_TIME = SystemProperties.getBoolean(
             "debug.choreographer.frametime", true);
 
+    // Set a limit to warn about skipped frames.
+    // Skipped frames imply jank.
+    private static final int SKIPPED_FRAME_WARNING_LIMIT = SystemProperties.getInt(
+            "debug.choreographer.skipwarning", 30);
+
     private static final long NANOS_PER_MS = 1000000;
 
     private static final int MSG_DO_FRAME = 0;
@@ -486,13 +491,18 @@ public final class Choreographer {
             startNanos = System.nanoTime();
             final long jitterNanos = startNanos - frameTimeNanos;
             if (jitterNanos >= mFrameIntervalNanos) {
+                final long skippedFrames = jitterNanos / mFrameIntervalNanos;
+                if (skippedFrames >= SKIPPED_FRAME_WARNING_LIMIT) {
+                    Log.w(TAG, "Skipped " + skippedFrames + " frames!  "
+                            + "The application may be doing too much work on its main thread.");
+                }
                 final long lastFrameOffset = jitterNanos % mFrameIntervalNanos;
                 if (DEBUG) {
                     Log.d(TAG, "Missed vsync by " + (jitterNanos * 0.000001f) + " ms "
                             + "which is more than the frame interval of "
                             + (mFrameIntervalNanos * 0.000001f) + " ms!  "
-                            + "Setting frame time to " + (lastFrameOffset * 0.000001f)
-                            + " ms in the past.");
+                            + "Skipping " + skippedFrames + " frames and setting frame "
+                            + "time to " + (lastFrameOffset * 0.000001f) + " ms in the past.");
                 }
                 frameTimeNanos = startNanos - lastFrameOffset;
             }
@@ -500,7 +510,7 @@ public final class Choreographer {
             if (frameTimeNanos < mLastFrameTimeNanos) {
                 if (DEBUG) {
                     Log.d(TAG, "Frame time appears to be going backwards.  May be due to a "
-                            + "previously skipped frame.  Waiting for next vsync");
+                            + "previously skipped frame.  Waiting for next vsync.");
                 }
                 scheduleVsyncLocked();
                 return;
@@ -658,6 +668,7 @@ public final class Choreographer {
 
     private final class FrameDisplayEventReceiver extends DisplayEventReceiver
             implements Runnable {
+        private boolean mHavePendingVsync;
         private long mTimestampNanos;
         private int mFrame;
 
@@ -672,6 +683,21 @@ public final class Choreographer {
             // the message queue.  If there are no messages in the queue with timestamps
             // earlier than the frame time, then the vsync event will be processed immediately.
             // Otherwise, messages that predate the vsync event will be handled first.
+            long now = System.nanoTime();
+            if (timestampNanos > now) {
+                Log.w(TAG, "Frame time is " + ((timestampNanos - now) * 0.000001f)
+                        + " ms in the future!  Check that graphics HAL is generating vsync "
+                        + "timestamps using the correct timebase.");
+                timestampNanos = now;
+            }
+
+            if (mHavePendingVsync) {
+                Log.w(TAG, "Already have a pending vsync event.  There should only be "
+                        + "one at a time.");
+            } else {
+                mHavePendingVsync = true;
+            }
+
             mTimestampNanos = timestampNanos;
             mFrame = frame;
             Message msg = Message.obtain(mHandler, this);
@@ -681,6 +707,7 @@ public final class Choreographer {
 
         @Override
         public void run() {
+            mHavePendingVsync = false;
             doFrame(mTimestampNanos, mFrame);
         }
     }
