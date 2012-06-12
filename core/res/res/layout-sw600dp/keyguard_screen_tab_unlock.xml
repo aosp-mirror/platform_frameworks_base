@@ -31,7 +31,7 @@
     <!-- top: status -->
     <RelativeLayout
         android:layout_height="0dip"
-        android:layout_weight="1"
+        android:layout_weight="0.42"
         android:layout_width="match_parent"
         android:gravity="center">
 
@@ -39,6 +39,15 @@
             android:layout_width="512dip"
             android:layout_height="wrap_content"
             android:gravity="center">
+
+            <!-- Status -->
+            <include layout="@layout/keyguard_screen_status_port"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="50dip"
+                android:layout_marginTop="50dip"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"/>
 
             <!-- Music transport control -->
             <include android:id="@+id/transport"
@@ -52,16 +61,6 @@
                 android:layout_height="512dip"
                 />
 
-            <include layout="@layout/keyguard_screen_status_port"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="50dip"
-                android:layout_marginTop="50dip"
-                android:layout_marginBottom="100dip"
-                android:layout_marginRight="64dip"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentLeft="true"/>
-
         </RelativeLayout>
 
     </RelativeLayout>
@@ -69,8 +68,9 @@
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dip"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_weight="0.58"
+            android:orientation="vertical"
+            android:gravity="bottom">
 
         <TextView
             android:id="@+id/screenLocked"
@@ -82,27 +82,27 @@
             android:drawablePadding="4dip"
             />
 
-        <com.android.internal.widget.multiwaveview.MultiWaveView
+        <com.android.internal.widget.multiwaveview.GlowPadView
             android:id="@+id/unlock_widget"
             android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentBottom="true"
-            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:focusable="true"
 
             android:targetDrawables="@array/lockscreen_targets_with_camera"
             android:targetDescriptions="@array/lockscreen_target_descriptions_with_camera"
             android:directionDescriptions="@array/lockscreen_direction_descriptions"
             android:handleDrawable="@drawable/ic_lockscreen_handle"
-            android:waveDrawable="@drawable/ic_lockscreen_outerring"
-            android:outerRadius="@dimen/multiwaveview_target_placement_radius"
-            android:snapMargin="@dimen/multiwaveview_snap_margin"
-            android:hitRadius="@dimen/multiwaveview_hit_radius"
-            android:rightChevronDrawable="@drawable/ic_lockscreen_chevron_right"
-            android:horizontalOffset="0dip"
-            android:verticalOffset="60dip"
-            android:feedbackCount="3"
+            android:outerRingDrawable="@drawable/ic_lockscreen_outerring"
+            android:outerRadius="@dimen/glowpadview_target_placement_radius"
+            android:innerRadius="@dimen/glowpadview_inner_radius"
+            android:snapMargin="@dimen/glowpadview_snap_margin"
+            android:feedbackCount="1"
             android:vibrationDuration="20"
+            android:glowRadius="@dimen/glowpadview_glow_radius"
+            android:pointDrawable="@drawable/ic_lockscreen_glowdot"
             />
 
         <!-- emergency call button shown when sim is PUKd and tab_selector is hidden -->

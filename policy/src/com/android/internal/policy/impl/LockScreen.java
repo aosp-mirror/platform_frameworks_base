@@ -17,16 +17,22 @@
 package com.android.internal.policy.impl;
 
 import com.android.internal.R;
+import com.android.internal.policy.impl.KeyguardUpdateMonitor.InfoCallbackImpl;
+import com.android.internal.policy.impl.KeyguardUpdateMonitor.SimStateCallback;
+import com.android.internal.telephony.IccCard.State;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.SlidingTab;
 import com.android.internal.widget.WaveView;
-import com.android.internal.widget.multiwaveview.MultiWaveView;
+import com.android.internal.widget.multiwaveview.GlowPadView;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Vibrator;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,8 +40,8 @@ import android.view.ViewGroup;
 import android.widget.*;
 import android.util.Log;
 import android.media.AudioManager;
+import android.os.RemoteException;
 import android.provider.MediaStore;
-import android.provider.Settings;
 
 import java.io.File;
 
@@ -57,8 +63,10 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
     private KeyguardUpdateMonitor mUpdateMonitor;
     private KeyguardScreenCallback mCallback;
 
+    // set to 'true' to show the ring/silence target when camera isn't available
+    private boolean mEnableRingSilenceFallback = false;
+
     // current configuration state of keyboard and display
-    private int mKeyboardHidden;
     private int mCreationOrientation;
 
     private boolean mSilentMode;
@@ -68,6 +76,33 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
     private KeyguardStatusViewManager mStatusViewManager;
     private UnlockWidgetCommonMethods mUnlockWidgetMethods;
     private View mUnlockWidget;
+    private boolean mCameraDisabled;
+    // Is there a vibrator
+    private final boolean mHasVibrator;
+
+    InfoCallbackImpl mInfoCallback = new InfoCallbackImpl() {
+
+        @Override
+        public void onRingerModeChanged(int state) {
+            boolean silent = AudioManager.RINGER_MODE_NORMAL != state;
+            if (silent != mSilentMode) {
+                mSilentMode = silent;
+                mUnlockWidgetMethods.updateResources();
+            }
+        }
+
+        @Override
+        public void onDevicePolicyManagerStateChanged() {
+            updateTargets();
+        }
+
+    };
+
+    SimStateCallback mSimStateCallback = new SimStateCallback() {
+        public void onSimStateChanged(State simState) {
+            updateTargets();
+        }
+    };
 
     private interface UnlockWidgetCommonMethods {
         // Update resources based on phone state
@@ -81,6 +116,16 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
 
         // Animate the widget if it supports ping()
         public void ping();
+
+        // Enable or disable a target. ResourceId is the id of the *drawable* associated with the
+        // target.
+        public void setEnabled(int resourceId, boolean enabled);
+
+        // Get the target position for the given resource. Returns -1 if not found.
+        public int getTargetPosition(int resourceId);
+
+        // Clean up when this widget is going away
+        public void cleanUp();
     }
 
     class SlidingTabMethods implements SlidingTab.OnTriggerListener, UnlockWidgetCommonMethods {
@@ -141,6 +186,18 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
 
         public void ping() {
         }
+
+        public void setEnabled(int resourceId, boolean enabled) {
+            // Not used
+        }
+
+        public int getTargetPosition(int resourceId) {
+            return -1; // Not supported
+        }
+
+        public void cleanUp() {
+            mSlidingTab.setOnTriggerListener(null);
+        }
     }
 
     class WaveViewMethods implements WaveView.OnTriggerListener, UnlockWidgetCommonMethods {
@@ -178,39 +235,43 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         }
         public void ping() {
         }
+        public void setEnabled(int resourceId, boolean enabled) {
+            // Not used
+        }
+        public int getTargetPosition(int resourceId) {
+            return -1; // Not supported
+        }
+        public void cleanUp() {
+            mWaveView.setOnTriggerListener(null);
+        }
     }
 
-    class MultiWaveViewMethods implements MultiWaveView.OnTriggerListener,
+    class GlowPadViewMethods implements GlowPadView.OnTriggerListener,
             UnlockWidgetCommonMethods {
+        private final GlowPadView mGlowPadView;
 
-        private final MultiWaveView mMultiWaveView;
-        private boolean mCameraDisabled;
+        GlowPadViewMethods(GlowPadView glowPadView) {
+            mGlowPadView = glowPadView;
+        }
 
-        MultiWaveViewMethods(MultiWaveView multiWaveView) {
-            mMultiWaveView = multiWaveView;
-            final boolean cameraDisabled = mLockPatternUtils.getDevicePolicyManager()
-                    .getCameraDisabled(null);
-            if (cameraDisabled) {
-                Log.v(TAG, "Camera disabled by Device Policy");
-                mCameraDisabled = true;
-            } else {
-                // Camera is enabled if resource is initially defined for MultiWaveView
-                // in the lockscreen layout file
-                mCameraDisabled = mMultiWaveView.getTargetResourceId()
-                        != R.array.lockscreen_targets_with_camera;
-            }
+        public boolean isTargetPresent(int resId) {
+            return mGlowPadView.getTargetPosition(resId) != -1;
         }
 
         public void updateResources() {
             int resId;
-            if (mCameraDisabled) {
-                // Fall back to showing ring/silence if camera is disabled by DPM...
+            if (mCameraDisabled && mEnableRingSilenceFallback) {
+                // Fall back to showing ring/silence if camera is disabled...
                 resId = mSilentMode ? R.array.lockscreen_targets_when_silent
                     : R.array.lockscreen_targets_when_soundon;
             } else {
                 resId = R.array.lockscreen_targets_with_camera;
             }
-            mMultiWaveView.setTargetResources(resId);
+            if (mGlowPadView.getTargetResourceId() != resId) {
+                mGlowPadView.setTargetResources(resId);
+            }
+
+            setEnabled(com.android.internal.R.drawable.ic_lockscreen_camera, !mCameraDisabled);
         }
 
         public void onGrabbed(View v, int handle) {
@@ -222,20 +283,38 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         }
 
         public void onTrigger(View v, int target) {
-            if (target == 0 || target == 1) { // 0 = unlock/portrait, 1 = unlock/landscape
-                mCallback.goToUnlockScreen();
-            } else if (target == 2 || target == 3) { // 2 = alt/portrait, 3 = alt/landscape
-                if (!mCameraDisabled) {
-                    // Start the Camera
-                    Intent intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(intent);
-                    mCallback.goToUnlockScreen();
-                } else {
-                    toggleRingMode();
-                    mUnlockWidgetMethods.updateResources();
+            final int resId = mGlowPadView.getResourceIdForTarget(target);
+            switch (resId) {
+                case com.android.internal.R.drawable.ic_lockscreen_camera:
+                    launchActivity(new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA));
                     mCallback.pokeWakelock();
-                }
+                    break;
+
+                case com.android.internal.R.drawable.ic_lockscreen_silent:
+                    toggleRingMode();
+                    mCallback.pokeWakelock();
+                break;
+
+                case com.android.internal.R.drawable.ic_lockscreen_unlock:
+                    mCallback.goToUnlockScreen();
+                break;
+            }
+        }
+
+        private void launchActivity(Intent intent) {
+            intent.setFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            try {
+                ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+            } catch (RemoteException e) {
+                Log.w(TAG, "can't dismiss keyguard on launch");
+            }
+            try {
+                mContext.startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Log.w(TAG, "Activity not found for intent + " + intent.getAction());
             }
         }
 
@@ -243,21 +322,37 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
             // Don't poke the wake lock when returning to a state where the handle is
             // not grabbed since that can happen when the system (instead of the user)
             // cancels the grab.
-            if (handle != MultiWaveView.OnTriggerListener.NO_HANDLE) {
+            if (handle != GlowPadView.OnTriggerListener.NO_HANDLE) {
                 mCallback.pokeWakelock();
             }
         }
 
         public View getView() {
-            return mMultiWaveView;
+            return mGlowPadView;
         }
 
         public void reset(boolean animate) {
-            mMultiWaveView.reset(animate);
+            mGlowPadView.reset(animate);
         }
 
         public void ping() {
-            mMultiWaveView.ping();
+            mGlowPadView.ping();
+        }
+
+        public void setEnabled(int resourceId, boolean enabled) {
+            mGlowPadView.setEnableTarget(resourceId, enabled);
+        }
+
+        public int getTargetPosition(int resourceId) {
+            return mGlowPadView.getTargetPosition(resourceId);
+        }
+
+        public void cleanUp() {
+            mGlowPadView.setOnTriggerListener(null);
+        }
+
+        public void onFinishFinalAnimation() {
+
         }
     }
 
@@ -274,11 +369,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         // toggle silent mode
         mSilentMode = !mSilentMode;
         if (mSilentMode) {
-            final boolean vibe = (Settings.System.getInt(
-                mContext.getContentResolver(),
-                Settings.System.VIBRATE_IN_SILENT, 1) == 1);
-
-            mAudioManager.setRingerMode(vibe
+            mAudioManager.setRingerMode(mHasVibrator
                 ? AudioManager.RINGER_MODE_VIBRATE
                 : AudioManager.RINGER_MODE_SILENT);
         } else {
@@ -316,12 +407,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         mLockPatternUtils = lockPatternUtils;
         mUpdateMonitor = updateMonitor;
         mCallback = callback;
-
         mEnableMenuKeyInLockScreen = shouldEnableMenuKey();
-
         mCreationOrientation = configuration.orientation;
-
-        mKeyboardHidden = configuration.hardKeyboardHidden;
 
         if (LockPatternKeyguardView.DEBUG_CONFIGURATION) {
             Log.v(TAG, "***** CREATING LOCK SCREEN", new RuntimeException());
@@ -344,12 +431,20 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         setFocusableInTouchMode(true);
         setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
 
+        Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        mHasVibrator = vibrator == null ? false : vibrator.hasVibrator();
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mSilentMode = isSilentMode();
-
         mUnlockWidget = findViewById(R.id.unlock_widget);
-        if (mUnlockWidget instanceof SlidingTab) {
-            SlidingTab slidingTabView = (SlidingTab) mUnlockWidget;
+        mUnlockWidgetMethods = createUnlockMethods(mUnlockWidget);
+
+        if (DBG) Log.v(TAG, "*** LockScreen accel is "
+                + (mUnlockWidget.isHardwareAccelerated() ? "on":"off"));
+    }
+
+    private UnlockWidgetCommonMethods createUnlockMethods(View unlockWidget) {
+        if (unlockWidget instanceof SlidingTab) {
+            SlidingTab slidingTabView = (SlidingTab) unlockWidget;
             slidingTabView.setHoldAfterTrigger(true, false);
             slidingTabView.setLeftHintText(R.string.lockscreen_unlock_label);
             slidingTabView.setLeftTabResources(
@@ -359,26 +454,38 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
                     R.drawable.jog_tab_left_unlock);
             SlidingTabMethods slidingTabMethods = new SlidingTabMethods(slidingTabView);
             slidingTabView.setOnTriggerListener(slidingTabMethods);
-            mUnlockWidgetMethods = slidingTabMethods;
-        } else if (mUnlockWidget instanceof WaveView) {
-            WaveView waveView = (WaveView) mUnlockWidget;
+            return slidingTabMethods;
+        } else if (unlockWidget instanceof WaveView) {
+            WaveView waveView = (WaveView) unlockWidget;
             WaveViewMethods waveViewMethods = new WaveViewMethods(waveView);
             waveView.setOnTriggerListener(waveViewMethods);
-            mUnlockWidgetMethods = waveViewMethods;
-        } else if (mUnlockWidget instanceof MultiWaveView) {
-            MultiWaveView multiWaveView = (MultiWaveView) mUnlockWidget;
-            MultiWaveViewMethods multiWaveViewMethods = new MultiWaveViewMethods(multiWaveView);
-            multiWaveView.setOnTriggerListener(multiWaveViewMethods);
-            mUnlockWidgetMethods = multiWaveViewMethods;
+            return waveViewMethods;
+        } else if (unlockWidget instanceof GlowPadView) {
+            GlowPadView glowPadView = (GlowPadView) unlockWidget;
+            GlowPadViewMethods glowPadViewMethods = new GlowPadViewMethods(glowPadView);
+            glowPadView.setOnTriggerListener(glowPadViewMethods);
+            return glowPadViewMethods;
         } else {
-            throw new IllegalStateException("Unrecognized unlock widget: " + mUnlockWidget);
+            throw new IllegalStateException("Unrecognized unlock widget: " + unlockWidget);
         }
+    }
 
-        // Update widget with initial ring state
+    private void updateTargets() {
+        boolean disabledByAdmin = mLockPatternUtils.getDevicePolicyManager()
+                .getCameraDisabled(null);
+        boolean disabledBySimState = mUpdateMonitor.isSimLocked();
+        boolean cameraTargetPresent = (mUnlockWidgetMethods instanceof GlowPadViewMethods)
+                ? ((GlowPadViewMethods) mUnlockWidgetMethods)
+                        .isTargetPresent(com.android.internal.R.drawable.ic_lockscreen_camera)
+                        : false;
+
+        if (disabledByAdmin) {
+            Log.v(TAG, "Camera disabled by Device Policy");
+        } else if (disabledBySimState) {
+            Log.v(TAG, "Camera disabled by Sim State");
+        }
+        mCameraDisabled = disabledByAdmin || disabledBySimState || !cameraTargetPresent;
         mUnlockWidgetMethods.updateResources();
-
-        if (DBG) Log.v(TAG, "*** LockScreen accel is "
-                + (mUnlockWidget.isHardwareAccelerated() ? "on":"off"));
     }
 
     private boolean isSilentMode() {
@@ -397,12 +504,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         Configuration newConfig = getResources().getConfiguration();
         if (newConfig.orientation != mCreationOrientation) {
             mCallback.recreateMe(newConfig);
-        } else if (newConfig.hardKeyboardHidden != mKeyboardHidden) {
-            mKeyboardHidden = newConfig.hardKeyboardHidden;
-            final boolean isKeyboardOpen = mKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO;
-            if (mUpdateMonitor.isKeyguardBypassEnabled() && isKeyboardOpen) {
-                mCallback.goToUnlockScreen();
-            }
         }
     }
 
@@ -436,6 +537,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
 
     /** {@inheritDoc} */
     public void onPause() {
+        mUpdateMonitor.removeCallback(mInfoCallback);
+        mUpdateMonitor.removeCallback(mSimStateCallback);
         mStatusViewManager.onPause();
         mUnlockWidgetMethods.reset(false);
     }
@@ -448,27 +551,22 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
 
     /** {@inheritDoc} */
     public void onResume() {
+        // We don't want to show the camera target if SIM state prevents us from
+        // launching the camera. So watch for SIM changes...
+        mUpdateMonitor.registerSimStateCallback(mSimStateCallback);
+        mUpdateMonitor.registerInfoCallback(mInfoCallback);
+
         mStatusViewManager.onResume();
         postDelayed(mOnResumePing, ON_RESUME_PING_DELAY);
     }
 
     /** {@inheritDoc} */
     public void cleanUp() {
-        mUpdateMonitor.removeCallback(this); // this must be first
+        mUpdateMonitor.removeCallback(mInfoCallback); // this must be first
+        mUpdateMonitor.removeCallback(mSimStateCallback);
+        mUnlockWidgetMethods.cleanUp();
         mLockPatternUtils = null;
         mUpdateMonitor = null;
         mCallback = null;
-    }
-
-    /** {@inheritDoc} */
-    public void onRingerModeChanged(int state) {
-        boolean silent = AudioManager.RINGER_MODE_NORMAL != state;
-        if (silent != mSilentMode) {
-            mSilentMode = silent;
-            mUnlockWidgetMethods.updateResources();
-        }
-    }
-
-    public void onPhoneStateChanged(String newState) {
     }
 }

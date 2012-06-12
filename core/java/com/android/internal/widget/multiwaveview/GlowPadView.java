@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -48,11 +47,10 @@ import com.android.internal.R;
 import java.util.ArrayList;
 
 /**
- * A special widget containing a center and outer ring. Moving the center ring to the outer ring
- * causes an event that can be caught by implementing OnTriggerListener.
+ * A re-usable widget containing a center, outer ring and wave animation.
  */
-public class MultiWaveView extends View {
-    private static final String TAG = "MultiWaveView";
+public class GlowPadView extends View {
+    private static final String TAG = "GlowPadView";
     private static final boolean DEBUG = false;
 
     // Wave state machine
@@ -77,8 +75,7 @@ public class MultiWaveView extends View {
     }
 
     // Tuneable parameters for animation
-    private static final int CHEVRON_INCREMENTAL_DELAY = 160;
-    private static final int CHEVRON_ANIMATION_DURATION = 850;
+    private static final int WAVE_ANIMATION_DURATION = 1350;
     private static final int RETURN_TO_HOME_DELAY = 1200;
     private static final int RETURN_TO_HOME_DURATION = 200;
     private static final int HIDE_ANIMATION_DELAY = 200;
@@ -86,6 +83,8 @@ public class MultiWaveView extends View {
     private static final int SHOW_ANIMATION_DURATION = 200;
     private static final int SHOW_ANIMATION_DELAY = 50;
     private static final int INITIAL_SHOW_HANDLE_DURATION = 200;
+    private static final int REVEAL_GLOW_DELAY = 0;
+    private static final int REVEAL_GLOW_DURATION = 0;
 
     private static final float TAP_RADIUS_SCALE_ACCESSIBILITY_ENABLED = 1.3f;
     private static final float TARGET_SCALE_EXPANDED = 1.0f;
@@ -93,13 +92,10 @@ public class MultiWaveView extends View {
     private static final float RING_SCALE_EXPANDED = 1.0f;
     private static final float RING_SCALE_COLLAPSED = 0.5f;
 
-    private TimeInterpolator mChevronAnimationInterpolator = Ease.Quad.easeOut;
-
     private ArrayList<TargetDrawable> mTargetDrawables = new ArrayList<TargetDrawable>();
-    private ArrayList<TargetDrawable> mChevronDrawables = new ArrayList<TargetDrawable>();
-    private AnimationBundle mChevronAnimations = new AnimationBundle();
+    private AnimationBundle mWaveAnimations = new AnimationBundle();
     private AnimationBundle mTargetAnimations = new AnimationBundle();
-    private AnimationBundle mHandleAnimations = new AnimationBundle();
+    private AnimationBundle mGlowAnimations = new AnimationBundle();
     private ArrayList<String> mTargetDescriptions;
     private ArrayList<String> mDirectionDescriptions;
     private OnTriggerListener mOnTriggerListener;
@@ -111,7 +107,7 @@ public class MultiWaveView extends View {
     private int mVibrationDuration = 0;
     private int mGrabbedState;
     private int mActiveTarget = -1;
-    private float mTapRadius;
+    private float mGlowRadius;
     private float mWaveCenterX;
     private float mWaveCenterY;
     private int mMaxTargetHeight;
@@ -157,10 +153,9 @@ public class MultiWaveView extends View {
         public void setSuspended(boolean suspend) {
             mSuspended = suspend;
         }
-    }
+    };
 
     private AnimatorListener mResetListener = new AnimatorListenerAdapter() {
-        @Override
         public void onAnimationEnd(Animator animator) {
             switchToState(STATE_IDLE, mWaveCenterX, mWaveCenterY);
             dispatchOnFinishFinalAnimation();
@@ -168,7 +163,6 @@ public class MultiWaveView extends View {
     };
 
     private AnimatorListener mResetListenerWithPing = new AnimatorListenerAdapter() {
-        @Override
         public void onAnimationEnd(Animator animator) {
             ping();
             switchToState(STATE_IDLE, mWaveCenterX, mWaveCenterY);
@@ -177,16 +171,13 @@ public class MultiWaveView extends View {
     };
 
     private AnimatorUpdateListener mUpdateListener = new AnimatorUpdateListener() {
-        @Override
         public void onAnimationUpdate(ValueAnimator animation) {
-            invalidateGlobalRegion(mHandleDrawable);
             invalidate();
         }
     };
 
     private boolean mAnimatingTargets;
     private AnimatorListener mTargetUpdateListener = new AnimatorListenerAdapter() {
-        @Override
         public void onAnimationEnd(Animator animator) {
             if (mNewTargetResources != 0) {
                 internalSetTargetResources(mNewTargetResources);
@@ -205,44 +196,42 @@ public class MultiWaveView extends View {
     private int mGravity = Gravity.TOP;
     private boolean mInitialLayout = true;
     private Tweener mBackgroundAnimator;
+    private PointCloud mPointCloud;
+    private float mInnerRadius;
 
-    public MultiWaveView(Context context) {
+    public GlowPadView(Context context) {
         this(context, null);
     }
 
-    public MultiWaveView(Context context, AttributeSet attrs) {
+    public GlowPadView(Context context, AttributeSet attrs) {
         super(context, attrs);
         Resources res = context.getResources();
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MultiWaveView);
-        mOuterRadius = a.getDimension(R.styleable.MultiWaveView_outerRadius, mOuterRadius);
-        mHitRadius = a.getDimension(R.styleable.MultiWaveView_hitRadius, mHitRadius);
-        mSnapMargin = a.getDimension(R.styleable.MultiWaveView_snapMargin, mSnapMargin);
-        mVibrationDuration = a.getInt(R.styleable.MultiWaveView_vibrationDuration,
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.GlowPadView);
+        mInnerRadius = a.getDimension(R.styleable.GlowPadView_innerRadius, mInnerRadius);
+        mOuterRadius = a.getDimension(R.styleable.GlowPadView_outerRadius, mOuterRadius);
+        mHitRadius = a.getDimension(R.styleable.GlowPadView_hitRadius, mHitRadius);
+        mSnapMargin = a.getDimension(R.styleable.GlowPadView_snapMargin, mSnapMargin);
+        mVibrationDuration = a.getInt(R.styleable.GlowPadView_vibrationDuration,
                 mVibrationDuration);
-        mFeedbackCount = a.getInt(R.styleable.MultiWaveView_feedbackCount,
+        mFeedbackCount = a.getInt(R.styleable.GlowPadView_feedbackCount,
                 mFeedbackCount);
         mHandleDrawable = new TargetDrawable(res,
-                a.peekValue(R.styleable.MultiWaveView_handleDrawable).resourceId);
-        mTapRadius = mHandleDrawable.getWidth()/2;
+                a.peekValue(R.styleable.GlowPadView_handleDrawable).resourceId);
+        mHandleDrawable.setState(TargetDrawable.STATE_INACTIVE);
         mOuterRing = new TargetDrawable(res,
-                a.peekValue(R.styleable.MultiWaveView_waveDrawable).resourceId);
-        mAlwaysTrackFinger = a.getBoolean(R.styleable.MultiWaveView_alwaysTrackFinger, false);
+                getResourceId(a, R.styleable.GlowPadView_outerRingDrawable));
 
-        // Read array of chevron drawables
+        mAlwaysTrackFinger = a.getBoolean(R.styleable.GlowPadView_alwaysTrackFinger, false);
+
+        int pointId = getResourceId(a, R.styleable.GlowPadView_pointDrawable);
+        Drawable pointDrawable = pointId != 0 ? res.getDrawable(pointId) : null;
+        mGlowRadius = a.getDimension(R.styleable.GlowPadView_glowRadius, 0.0f);
+
         TypedValue outValue = new TypedValue();
-        if (a.getValue(R.styleable.MultiWaveView_chevronDrawables, outValue)) {
-            ArrayList<TargetDrawable> chevrons = loadDrawableArray(outValue.resourceId);
-            for (int i = 0; i < chevrons.size(); i++) {
-                final TargetDrawable chevron = chevrons.get(i);
-                for (int k = 0; k < mFeedbackCount; k++) {
-                    mChevronDrawables.add(chevron == null ? null : new TargetDrawable(chevron));
-                }
-            }
-        }
 
         // Read array of target drawables
-        if (a.getValue(R.styleable.MultiWaveView_targetDrawables, outValue)) {
+        if (a.getValue(R.styleable.GlowPadView_targetDrawables, outValue)) {
             internalSetTargetResources(outValue.resourceId);
         }
         if (mTargetDrawables == null || mTargetDrawables.size() == 0) {
@@ -250,7 +239,7 @@ public class MultiWaveView extends View {
         }
 
         // Read array of target descriptions
-        if (a.getValue(R.styleable.MultiWaveView_targetDescriptions, outValue)) {
+        if (a.getValue(R.styleable.GlowPadView_targetDescriptions, outValue)) {
             final int resourceId = outValue.resourceId;
             if (resourceId == 0) {
                 throw new IllegalStateException("Must specify target descriptions");
@@ -259,7 +248,7 @@ public class MultiWaveView extends View {
         }
 
         // Read array of direction descriptions
-        if (a.getValue(R.styleable.MultiWaveView_directionDescriptions, outValue)) {
+        if (a.getValue(R.styleable.GlowPadView_directionDescriptions, outValue)) {
             final int resourceId = outValue.resourceId;
             if (resourceId == 0) {
                 throw new IllegalStateException("Must specify direction descriptions");
@@ -275,7 +264,17 @@ public class MultiWaveView extends View {
         a.recycle();
 
         setVibrateEnabled(mVibrationDuration > 0);
+
         assignDefaultsIfNeeded();
+
+        mPointCloud = new PointCloud(pointDrawable);
+        mPointCloud.makePointCloud(mInnerRadius, mOuterRadius);
+        mPointCloud.glowManager.setRadius(mGlowRadius);
+    }
+
+    private int getResourceId(TypedArray a, int id) {
+        TypedValue tv = a.peekValue(id);
+        return tv == null ? 0 : tv.resourceId;
     }
 
     private void dump() {
@@ -284,24 +283,24 @@ public class MultiWaveView extends View {
         Log.v(TAG, "SnapMargin = " + mSnapMargin);
         Log.v(TAG, "FeedbackCount = " + mFeedbackCount);
         Log.v(TAG, "VibrationDuration = " + mVibrationDuration);
-        Log.v(TAG, "TapRadius = " + mTapRadius);
+        Log.v(TAG, "GlowRadius = " + mGlowRadius);
         Log.v(TAG, "WaveCenterX = " + mWaveCenterX);
         Log.v(TAG, "WaveCenterY = " + mWaveCenterY);
     }
 
     public void suspendAnimations() {
-        mChevronAnimations.setSuspended(true);
+        mWaveAnimations.setSuspended(true);
         mTargetAnimations.setSuspended(true);
-        mHandleAnimations.setSuspended(true);
+        mGlowAnimations.setSuspended(true);
     }
 
     public void resumeAnimations() {
-        mChevronAnimations.setSuspended(false);
+        mWaveAnimations.setSuspended(false);
         mTargetAnimations.setSuspended(false);
-        mHandleAnimations.setSuspended(false);
-        mChevronAnimations.start();
+        mGlowAnimations.setSuspended(false);
+        mWaveAnimations.start();
         mTargetAnimations.start();
-        mHandleAnimations.start();
+        mGlowAnimations.start();
     }
 
     @Override
@@ -350,20 +349,20 @@ public class MultiWaveView extends View {
         switch (state) {
             case STATE_IDLE:
                 deactivateTargets();
-                hideTargets(true, false);
+                hideGlow(0, 0, 0.0f, null);
                 startBackgroundAnimation(0, 0.0f);
                 mHandleDrawable.setState(TargetDrawable.STATE_INACTIVE);
+                mHandleDrawable.setAlpha(1.0f);
                 break;
 
             case STATE_START:
-                deactivateHandle(0, 0, 1.0f, null);
                 startBackgroundAnimation(0, 0.0f);
                 break;
 
             case STATE_FIRST_TOUCH:
+                mHandleDrawable.setAlpha(0.0f);
                 deactivateTargets();
                 showTargets(true);
-                mHandleDrawable.setState(TargetDrawable.STATE_ACTIVE);
                 startBackgroundAnimation(INITIAL_SHOW_HANDLE_DURATION, 1.0f);
                 setGrabbedState(OnTriggerListener.CENTER_HANDLE);
                 if (AccessibilityManager.getInstance(mContext).isEnabled()) {
@@ -372,9 +371,14 @@ public class MultiWaveView extends View {
                 break;
 
             case STATE_TRACKING:
+                mHandleDrawable.setAlpha(0.0f);
+                showGlow(REVEAL_GLOW_DURATION , REVEAL_GLOW_DELAY, 1.0f, null);
                 break;
 
             case STATE_SNAP:
+                // TODO: Add transition states (see list_selector_background_transition.xml)
+                mHandleDrawable.setAlpha(0.0f);
+                showGlow(REVEAL_GLOW_DURATION , REVEAL_GLOW_DELAY, 0.0f, null);
                 break;
 
             case STATE_FINISH:
@@ -383,74 +387,30 @@ public class MultiWaveView extends View {
         }
     }
 
-    private void activateHandle(int duration, int delay, float finalAlpha,
+    private void showGlow(int duration, int delay, float finalAlpha,
             AnimatorListener finishListener) {
-        mHandleAnimations.cancel();
-        mHandleAnimations.add(Tweener.to(mHandleDrawable, duration,
+        mGlowAnimations.cancel();
+        mGlowAnimations.add(Tweener.to(mPointCloud.glowManager, duration,
                 "ease", Ease.Cubic.easeIn,
                 "delay", delay,
                 "alpha", finalAlpha,
                 "onUpdate", mUpdateListener,
                 "onComplete", finishListener));
-        mHandleAnimations.start();
+        mGlowAnimations.start();
     }
 
-    private void deactivateHandle(int duration, int delay, float finalAlpha,
+    private void hideGlow(int duration, int delay, float finalAlpha,
             AnimatorListener finishListener) {
-        mHandleAnimations.cancel();
-        mHandleAnimations.add(Tweener.to(mHandleDrawable, duration,
-            "ease", Ease.Quart.easeOut,
-            "delay", delay,
-            "alpha", finalAlpha,
-            "x", 0,
-            "y", 0,
-            "onUpdate", mUpdateListener,
-            "onComplete", finishListener));
-        mHandleAnimations.start();
-    }
-
-    /**
-     * Animation used to attract user's attention to the target button.
-     * Assumes mChevronDrawables is an a list with an even number of chevrons filled with
-     * mFeedbackCount items in the order: left, right, top, bottom.
-     */
-    private void startChevronAnimation() {
-        final float chevronStartDistance = mHandleDrawable.getWidth() * 0.8f;
-        final float chevronStopDistance = mOuterRadius * 0.9f / 2.0f;
-        final float startScale = 0.5f;
-        final float endScale = 2.0f;
-        final int directionCount = mFeedbackCount > 0 ? mChevronDrawables.size()/mFeedbackCount : 0;
-
-        mChevronAnimations.stop();
-
-        // Add an animation for all chevron drawables.  There are mFeedbackCount drawables
-        // in each direction and directionCount directions.
-        for (int direction = 0; direction < directionCount; direction++) {
-            double angle = 2.0 * Math.PI * direction / directionCount;
-            final float sx = (float) Math.cos(angle);
-            final float sy = 0.0f - (float) Math.sin(angle);
-            final float[] xrange = new float[]
-                 {sx * chevronStartDistance, sx * chevronStopDistance};
-            final float[] yrange = new float[]
-                 {sy * chevronStartDistance, sy * chevronStopDistance};
-            for (int count = 0; count < mFeedbackCount; count++) {
-                int delay = count * CHEVRON_INCREMENTAL_DELAY;
-                final TargetDrawable icon = mChevronDrawables.get(direction*mFeedbackCount + count);
-                if (icon == null) {
-                    continue;
-                }
-                mChevronAnimations.add(Tweener.to(icon, CHEVRON_ANIMATION_DURATION,
-                        "ease", mChevronAnimationInterpolator,
-                        "delay", delay,
-                        "x", xrange,
-                        "y", yrange,
-                        "alpha", new float[] {1.0f, 0.0f},
-                        "scaleX", new float[] {startScale, endScale},
-                        "scaleY", new float[] {startScale, endScale},
-                        "onUpdate", mUpdateListener));
-            }
-        }
-        mChevronAnimations.start();
+        mGlowAnimations.cancel();
+        mGlowAnimations.add(Tweener.to(mPointCloud.glowManager, duration,
+                "ease", Ease.Quart.easeOut,
+                "delay", delay,
+                "alpha", finalAlpha,
+                "x", 0.0f,
+                "y", 0.0f,
+                "onUpdate", mUpdateListener,
+                "onComplete", finishListener));
+        mGlowAnimations.start();
     }
 
     private void deactivateTargets() {
@@ -460,22 +420,6 @@ public class MultiWaveView extends View {
             target.setState(TargetDrawable.STATE_INACTIVE);
         }
         mActiveTarget = -1;
-    }
-
-    void invalidateGlobalRegion(TargetDrawable drawable) {
-        int width = drawable.getWidth();
-        int height = drawable.getHeight();
-        RectF childBounds = new RectF(0, 0, width, height);
-        childBounds.offset(drawable.getX() - width/2, drawable.getY() - height/2);
-        View view = this;
-        while (view.getParent() != null && view.getParent() instanceof View) {
-            view = (View) view.getParent();
-            view.getMatrix().mapRect(childBounds);
-            view.invalidate((int) Math.floor(childBounds.left),
-                    (int) Math.floor(childBounds.top),
-                    (int) Math.ceil(childBounds.right),
-                    (int) Math.ceil(childBounds.bottom));
-        }
     }
 
     /**
@@ -505,7 +449,7 @@ public class MultiWaveView extends View {
             highlightSelected(activeTarget);
 
             // Inform listener of any active targets.  Typically only one will be active.
-            deactivateHandle(RETURN_TO_HOME_DURATION, RETURN_TO_HOME_DELAY, 0.0f, mResetListener);
+            hideGlow(RETURN_TO_HOME_DURATION, RETURN_TO_HOME_DELAY, 0.0f, mResetListener);
             dispatchTriggerEvent(activeTarget);
             if (!mAlwaysTrackFinger) {
                 // Force ring and targets to finish animation to final expanded state
@@ -513,8 +457,7 @@ public class MultiWaveView extends View {
             }
         } else {
             // Animate handle back to the center based on current state.
-            deactivateHandle(HIDE_ANIMATION_DURATION, HIDE_ANIMATION_DELAY, 1.0f,
-                    mResetListenerWithPing);
+            hideGlow(HIDE_ANIMATION_DURATION, 0, 0.0f, mResetListenerWithPing);
             hideTargets(true, false);
         }
 
@@ -543,13 +486,15 @@ public class MultiWaveView extends View {
         final int duration = animate ? HIDE_ANIMATION_DURATION : 0;
         final int delay = animate ? HIDE_ANIMATION_DELAY : 0;
 
-        final float targetScale = expanded ? TARGET_SCALE_EXPANDED : TARGET_SCALE_COLLAPSED;
+        final float targetScale = expanded ?
+                TARGET_SCALE_EXPANDED : TARGET_SCALE_COLLAPSED;
         final int length = mTargetDrawables.size();
+        final TimeInterpolator interpolator = Ease.Cubic.easeOut;
         for (int i = 0; i < length; i++) {
             TargetDrawable target = mTargetDrawables.get(i);
             target.setState(TargetDrawable.STATE_INACTIVE);
             mTargetAnimations.add(Tweener.to(target, duration,
-                    "ease", Ease.Cubic.easeOut,
+                    "ease", interpolator,
                     "alpha", 0.0f,
                     "scaleX", targetScale,
                     "scaleY", targetScale,
@@ -557,9 +502,10 @@ public class MultiWaveView extends View {
                     "onUpdate", mUpdateListener));
         }
 
-        final float ringScaleTarget = expanded ? RING_SCALE_EXPANDED : RING_SCALE_COLLAPSED;
+        final float ringScaleTarget = expanded ?
+                RING_SCALE_EXPANDED : RING_SCALE_COLLAPSED;
         mTargetAnimations.add(Tweener.to(mOuterRing, duration,
-                "ease", Ease.Cubic.easeOut,
+                "ease", interpolator,
                 "alpha", 0.0f,
                 "scaleX", ringScaleTarget,
                 "scaleY", ringScaleTarget,
@@ -620,13 +566,15 @@ public class MultiWaveView extends View {
     }
 
     private void internalSetTargetResources(int resourceId) {
-        mTargetDrawables = loadDrawableArray(resourceId);
+        final ArrayList<TargetDrawable> targets = loadDrawableArray(resourceId);
+        mTargetDrawables = targets;
         mTargetResourceId = resourceId;
-        final int count = mTargetDrawables.size();
+
         int maxWidth = mHandleDrawable.getWidth();
         int maxHeight = mHandleDrawable.getHeight();
+        final int count = targets.size();
         for (int i = 0; i < count; i++) {
-            TargetDrawable target = mTargetDrawables.get(i);
+            TargetDrawable target = targets.get(i);
             maxWidth = Math.max(maxWidth, target.getWidth());
             maxHeight = Math.max(maxHeight, target.getHeight());
         }
@@ -636,7 +584,7 @@ public class MultiWaveView extends View {
             requestLayout(); // required to resize layout and call updateTargetPositions()
         } else {
             updateTargetPositions(mWaveCenterX, mWaveCenterY);
-            updateChevronPositions(mWaveCenterX, mWaveCenterY);
+            updatePointCloudPosition(mWaveCenterX, mWaveCenterY);
         }
     }
 
@@ -714,12 +662,50 @@ public class MultiWaveView extends View {
     }
 
     /**
-     * Starts chevron animation. Example use case: show chevron animation whenever the phone rings
-     * or the user touches the screen.
+     * Starts wave animation.
      *
      */
     public void ping() {
-        startChevronAnimation();
+        if (mFeedbackCount > 0) {
+            boolean doWaveAnimation = true;
+            final AnimationBundle waveAnimations = mWaveAnimations;
+
+            // Don't do a wave if there's already one in progress
+            if (waveAnimations.size() > 0 && waveAnimations.get(0).animator.isRunning()) {
+                long t = waveAnimations.get(0).animator.getCurrentPlayTime();
+                if (t < WAVE_ANIMATION_DURATION/2) {
+                    doWaveAnimation = false;
+                }
+            }
+
+            if (doWaveAnimation) {
+                startWaveAnimation();
+            }
+        }
+    }
+
+    private void stopAndHideWaveAnimation() {
+        mWaveAnimations.cancel();
+        mPointCloud.waveManager.setAlpha(0.0f);
+    }
+
+    private void startWaveAnimation() {
+        mWaveAnimations.cancel();
+        mPointCloud.waveManager.setAlpha(1.0f);
+        mPointCloud.waveManager.setRadius(mHandleDrawable.getWidth()/2.0f);
+        mWaveAnimations.add(Tweener.to(mPointCloud.waveManager, WAVE_ANIMATION_DURATION,
+                "ease", Ease.Quad.easeOut,
+                "delay", 0,
+                "radius", 2.0f * mOuterRadius,
+                "onUpdate", mUpdateListener,
+                "onComplete",
+                new AnimatorListenerAdapter() {
+                    public void onAnimationEnd(Animator animator) {
+                        mPointCloud.waveManager.setRadius(0.0f);
+                        mPointCloud.waveManager.setAlpha(0.0f);
+                    }
+                }));
+        mWaveAnimations.start();
     }
 
     /**
@@ -729,25 +715,24 @@ public class MultiWaveView extends View {
      * @param animate
      */
     public void reset(boolean animate) {
-        mChevronAnimations.stop();
-        mHandleAnimations.stop();
+        mGlowAnimations.stop();
         mTargetAnimations.stop();
         startBackgroundAnimation(0, 0.0f);
-        hideChevrons();
+        stopAndHideWaveAnimation();
         hideTargets(animate, false);
-        deactivateHandle(0, 0, 1.0f, null);
+        hideGlow(0, 0, 0.0f, null);
         Tweener.reset();
     }
 
     private void startBackgroundAnimation(int duration, float alpha) {
-        Drawable background = getBackground();
+        final Drawable background = getBackground();
         if (mAlwaysTrackFinger && background != null) {
             if (mBackgroundAnimator != null) {
-                mBackgroundAnimator.animator.end();
+                mBackgroundAnimator.animator.cancel();
             }
             mBackgroundAnimator = Tweener.to(background, duration,
                     "ease", Ease.Cubic.easeIn,
-                    "alpha", new int[] {0, (int)(255.0f * alpha)},
+                    "alpha", (int)(255.0f * alpha),
                     "delay", SHOW_ANIMATION_DELAY);
             mBackgroundAnimator.animator.start();
         }
@@ -761,6 +746,7 @@ public class MultiWaveView extends View {
             case MotionEvent.ACTION_DOWN:
                 if (DEBUG) Log.v(TAG, "*** DOWN ***");
                 handleDown(event);
+                handleMove(event);
                 handled = true;
                 break;
 
@@ -788,9 +774,9 @@ public class MultiWaveView extends View {
         return handled ? true : super.onTouchEvent(event);
     }
 
-    private void moveHandleTo(float x, float y, boolean animate) {
-        mHandleDrawable.setX(x);
-        mHandleDrawable.setY(y);
+    private void updateGlowPosition(float x, float y) {
+        mPointCloud.glowManager.setX(x);
+        mPointCloud.glowManager.setY(y);
     }
 
     private void handleDown(MotionEvent event) {
@@ -799,7 +785,8 @@ public class MultiWaveView extends View {
         switchToState(STATE_START, eventX, eventY);
         if (!trySwitchToFirstTouchState(eventX, eventY)) {
             mDragging = false;
-            ping();
+        } else {
+            updateGlowPosition(eventX, eventY);
         }
     }
 
@@ -881,14 +868,11 @@ public class MultiWaveView extends View {
             TargetDrawable target = targets.get(activeTarget);
             final float newX = singleTarget ? x : target.getX();
             final float newY = singleTarget ? y : target.getY();
-            moveHandleTo(newX, newY, false);
+            updateGlowPosition(newX, newY);
         } else {
             switchToState(STATE_TRACKING, x, y);
-            moveHandleTo(x, y, false);
+            updateGlowPosition(x, y);
         }
-
-        // Draw handle outside parent's bounds
-        invalidateGlobalRegion(mHandleDrawable);
 
         if (mActiveTarget != activeTarget) {
             // Defocus the old target
@@ -908,9 +892,6 @@ public class MultiWaveView extends View {
                     String targetContentDescription = getTargetDescription(activeTarget);
                     announceText(targetContentDescription);
                 }
-                activateHandle(0, 0, 0.0f, null);
-            } else {
-                activateHandle(0, 0, 1.0f, null);
             }
         }
         mActiveTarget = activeTarget;
@@ -961,10 +942,10 @@ public class MultiWaveView extends View {
     private boolean trySwitchToFirstTouchState(float x, float y) {
         final float tx = x - mWaveCenterX;
         final float ty = y - mWaveCenterY;
-        if (mAlwaysTrackFinger || dist2(tx,ty) <= getScaledTapRadiusSquared()) {
+        if (mAlwaysTrackFinger || dist2(tx,ty) <= getScaledGlowRadiusSquared()) {
             if (DEBUG) Log.v(TAG, "** Handle HIT");
             switchToState(STATE_FIRST_TOUCH, x, y);
-            moveHandleTo(tx, ty, false);
+            updateGlowPosition(tx, ty);
             mDragging = true;
             return true;
         }
@@ -977,11 +958,21 @@ public class MultiWaveView extends View {
         }
         if (mHitRadius == 0.0f) {
             // Use the radius of inscribed circle of the first target.
-            mHitRadius = mTargetDrawables.get(0).getWidth() / 2.0f;
+            final int drawableCount = mTargetDrawables.size();
+            for (int i = 0; i < drawableCount; i++) {
+                TargetDrawable drawable = mTargetDrawables.get(i);
+                if (drawable.isEnabled()) {
+                    mHitRadius = drawable.getWidth() / 2.0f;
+                    break;
+                }
+            }
         }
         if (mSnapMargin == 0.0f) {
             mSnapMargin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                     SNAP_MARGIN_DEFAULT, getContext().getResources().getDisplayMetrics());
+        }
+        if (mInnerRadius == 0.0f) {
+            mInnerRadius = mHandleDrawable.getWidth() / 10.0f;
         }
     }
 
@@ -1031,9 +1022,8 @@ public class MultiWaveView extends View {
                 + Math.max(height, + mMaxTargetHeight + placementHeight) / 2;
 
         if (mInitialLayout) {
-            hideChevrons();
+            stopAndHideWaveAnimation();
             hideTargets(false, false);
-            moveHandleTo(0, 0, false);
             mInitialLayout = false;
         }
 
@@ -1044,7 +1034,8 @@ public class MultiWaveView extends View {
         mHandleDrawable.setPositionY(newWaveCenterY);
 
         updateTargetPositions(newWaveCenterX, newWaveCenterY);
-        updateChevronPositions(newWaveCenterX, newWaveCenterY);
+        updatePointCloudPosition(newWaveCenterX, newWaveCenterY);
+        updateGlowPosition(newWaveCenterX, newWaveCenterY);
 
         mWaveCenterX = newWaveCenterX;
         mWaveCenterY = newWaveCenterY;
@@ -1067,44 +1058,19 @@ public class MultiWaveView extends View {
         }
     }
 
-    private void updateChevronPositions(float centerX, float centerY) {
-        ArrayList<TargetDrawable> chevrons = mChevronDrawables;
-        final int size = chevrons.size();
-        for (int i = 0; i < size; i++) {
-            TargetDrawable target = chevrons.get(i);
-            if (target != null) {
-                target.setPositionX(centerX);
-                target.setPositionY(centerY);
-            }
-        }
-    }
-
-    private void hideChevrons() {
-        ArrayList<TargetDrawable> chevrons = mChevronDrawables;
-        final int size = chevrons.size();
-        for (int i = 0; i < size; i++) {
-            TargetDrawable chevron = chevrons.get(i);
-            if (chevron != null) {
-                chevron.setAlpha(0.0f);
-            }
-        }
+    private void updatePointCloudPosition(float centerX, float centerY) {
+        mPointCloud.setCenter(centerX, centerY);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
+        mPointCloud.draw(canvas);
         mOuterRing.draw(canvas);
         final int ntargets = mTargetDrawables.size();
         for (int i = 0; i < ntargets; i++) {
             TargetDrawable target = mTargetDrawables.get(i);
             if (target != null) {
                 target.draw(canvas);
-            }
-        }
-        final int nchevrons = mChevronDrawables.size();
-        for (int i = 0; i < nchevrons; i++) {
-            TargetDrawable chevron = mChevronDrawables.get(i);
-            if (chevron != null) {
-                chevron.draw(canvas);
             }
         }
         mHandleDrawable.draw(canvas);
@@ -1122,12 +1088,12 @@ public class MultiWaveView extends View {
         return dx*dx + dy*dy;
     }
 
-    private float getScaledTapRadiusSquared() {
+    private float getScaledGlowRadiusSquared() {
         final float scaledTapRadius;
         if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-            scaledTapRadius = TAP_RADIUS_SCALE_ACCESSIBILITY_ENABLED * mTapRadius;
+            scaledTapRadius = TAP_RADIUS_SCALE_ACCESSIBILITY_ENABLED * mGlowRadius;
         } else {
-            scaledTapRadius = mTapRadius;
+            scaledTapRadius = mGlowRadius;
         }
         return square(scaledTapRadius);
     }
@@ -1160,7 +1126,7 @@ public class MultiWaveView extends View {
             mTargetDescriptions = loadDescriptions(mTargetDescriptionsResourceId);
             if (mTargetDrawables.size() != mTargetDescriptions.size()) {
                 Log.w(TAG, "The number of target drawables must be"
-                        + " euqal to the number of target descriptions.");
+                        + " equal to the number of target descriptions.");
                 return null;
             }
         }
@@ -1172,7 +1138,7 @@ public class MultiWaveView extends View {
             mDirectionDescriptions = loadDescriptions(mDirectionDescriptionsResourceId);
             if (mTargetDrawables.size() != mDirectionDescriptions.size()) {
                 Log.w(TAG, "The number of target drawables must be"
-                        + " euqal to the number of direction descriptions.");
+                        + " equal to the number of direction descriptions.");
                 return null;
             }
         }
@@ -1257,25 +1223,32 @@ public class MultiWaveView extends View {
                 int existingResId) {
         if (existingResId == 0) return false;
 
-        try {
-            PackageManager packageManager = mContext.getPackageManager();
-            // Look for the search icon specified in the activity meta-data
-            Bundle metaData = packageManager.getActivityInfo(
-                    component, PackageManager.GET_META_DATA).metaData;
-            if (metaData != null) {
-                int iconResId = metaData.getInt(name);
-                if (iconResId != 0) {
-                    Resources res = packageManager.getResourcesForActivity(component);
-                    return replaceTargetDrawables(res, existingResId, iconResId);
+        boolean replaced = false;
+        if (component != null) {
+            try {
+                PackageManager packageManager = mContext.getPackageManager();
+                // Look for the search icon specified in the activity meta-data
+                Bundle metaData = packageManager.getActivityInfo(
+                        component, PackageManager.GET_META_DATA).metaData;
+                if (metaData != null) {
+                    int iconResId = metaData.getInt(name);
+                    if (iconResId != 0) {
+                        Resources res = packageManager.getResourcesForActivity(component);
+                        replaced = replaceTargetDrawables(res, existingResId, iconResId);
+                    }
                 }
+            } catch (NameNotFoundException e) {
+                Log.w(TAG, "Failed to swap drawable; "
+                        + component.flattenToShortString() + " not found", e);
+            } catch (Resources.NotFoundException nfe) {
+                Log.w(TAG, "Failed to swap drawable from "
+                        + component.flattenToShortString(), nfe);
             }
-        } catch (NameNotFoundException e) {
-            Log.w(TAG, "Failed to swap drawable; "
-                    + component.flattenToShortString() + " not found", e);
-        } catch (Resources.NotFoundException nfe) {
-            Log.w(TAG, "Failed to swap drawable from "
-                    + component.flattenToShortString(), nfe);
         }
-        return false;
+        if (!replaced) {
+            // Restore the original drawable
+            replaceTargetDrawables(mContext.getResources(), existingResId, existingResId);
+        }
+        return replaced;
     }
 }

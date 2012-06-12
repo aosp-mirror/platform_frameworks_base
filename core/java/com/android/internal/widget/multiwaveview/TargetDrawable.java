@@ -32,14 +32,19 @@ public class TargetDrawable {
     public static final int[] STATE_INACTIVE =
             { android.R.attr.state_enabled, -android.R.attr.state_active };
     public static final int[] STATE_FOCUSED =
-            { android.R.attr.state_enabled, android.R.attr.state_focused };
+            { android.R.attr.state_enabled, -android.R.attr.state_active,
+                android.R.attr.state_focused };
 
     private float mTranslationX = 0.0f;
     private float mTranslationY = 0.0f;
+    private float mPositionX = 0.0f;
+    private float mPositionY = 0.0f;
     private float mScaleX = 1.0f;
     private float mScaleY = 1.0f;
     private float mAlpha = 1.0f;
     private Drawable mDrawable;
+    private boolean mEnabled = true;
+    private final int mResourceId;
 
     /* package */ static class DrawableWithAlpha extends Drawable {
         private float mAlpha = 1.0f;
@@ -72,12 +77,24 @@ public class TargetDrawable {
     }
 
     public TargetDrawable(Resources res, int resId) {
-        this(res, resId == 0 ? null : res.getDrawable(resId));
+        mResourceId = resId;
+        setDrawable(res, resId);
     }
 
-    public TargetDrawable(Resources res, Drawable drawable) {
+    public void setDrawable(Resources res, int resId) {
+        // Note we explicitly don't set mResourceId to resId since we allow the drawable to be
+        // swapped at runtime and want to re-use the existing resource id for identification.
+        Drawable drawable = resId == 0 ? null : res.getDrawable(resId);
         // Mutate the drawable so we can animate shared drawable properties.
         mDrawable = drawable != null ? drawable.mutate() : null;
+        resizeDrawables();
+        setState(STATE_INACTIVE);
+    }
+
+    public TargetDrawable(TargetDrawable other) {
+        mResourceId = other.mResourceId;
+        // Mutate the drawable so we can animate shared drawable properties.
+        mDrawable = other.mDrawable != null ? other.mDrawable.mutate() : null;
         resizeDrawables();
         setState(STATE_INACTIVE);
     }
@@ -122,8 +139,8 @@ public class TargetDrawable {
      *
      * @return
      */
-    public boolean isValid() {
-        return mDrawable != null;
+    public boolean isEnabled() {
+        return mDrawable != null && mEnabled;
     }
 
     /**
@@ -196,6 +213,22 @@ public class TargetDrawable {
         return mAlpha;
     }
 
+    public void setPositionX(float x) {
+        mPositionX = x;
+    }
+
+    public void setPositionY(float y) {
+        mPositionY = y;
+    }
+
+    public float getPositionX() {
+        return mPositionX;
+    }
+
+    public float getPositionY() {
+        return mPositionY;
+    }
+
     public int getWidth() {
         return mDrawable != null ? mDrawable.getIntrinsicWidth() : 0;
     }
@@ -205,15 +238,23 @@ public class TargetDrawable {
     }
 
     public void draw(Canvas canvas) {
-        if (mDrawable == null) {
+        if (mDrawable == null || !mEnabled) {
             return;
         }
         canvas.save(Canvas.MATRIX_SAVE_FLAG);
-        canvas.translate(mTranslationX, mTranslationY);
-        canvas.scale(mScaleX, mScaleY);
+        canvas.scale(mScaleX, mScaleY, mPositionX, mPositionY);
+        canvas.translate(mTranslationX + mPositionX, mTranslationY + mPositionY);
         canvas.translate(-0.5f * getWidth(), -0.5f * getHeight());
         mDrawable.setAlpha((int) Math.round(mAlpha * 255f));
         mDrawable.draw(canvas);
         canvas.restore();
+    }
+
+    public void setEnabled(boolean enabled) {
+        mEnabled  = enabled;
+    }
+
+    public int getResourceId() {
+        return mResourceId;
     }
 }
