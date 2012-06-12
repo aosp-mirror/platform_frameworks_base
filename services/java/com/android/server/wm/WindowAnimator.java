@@ -496,7 +496,15 @@ public class WindowAnimator {
 
             final int N = mWinAnimators.size();
             for (int i = 0; i < N; i++) {
-                mWinAnimators.get(i).prepareSurfaceLocked(true);
+                final WindowStateAnimator winAnimator = mWinAnimators.get(i);
+                if (winAnimator.mWin.mIsWallpaper && mService.mWallpaperTarget == null) {
+                    if (!winAnimator.mWin.mWallpaperVisible && !winAnimator.mLastHidden) {
+                        // Wallpaper is no longer visible and there is no wp target => hide it.
+                        winAnimator.hide();
+                    }
+                    continue;
+                }
+                winAnimator.prepareSurfaceLocked(true);
             }
 
             if (mDimParams != null) {
