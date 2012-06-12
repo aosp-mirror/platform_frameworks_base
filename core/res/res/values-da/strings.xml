@@ -1036,7 +1036,7 @@
     <string name="sms_control_no" msgid="625438561395534982">"Afvis"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kort blev fjernet"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Det mobile netværk er utilgængeligt, indtil du genstarter med et gyldigt SIM-kort."</string>
-    <string name="sim_done_button" msgid="827949989369963775">"Udfør"</string>
+    <string name="sim_done_button" msgid="827949989369963775">"Afslut"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-kort blev tilføjet"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Genstart din enhed for at få adgang til mobilnetværket."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Genstart"</string>
@@ -1127,7 +1127,7 @@
     <string name="ime_action_search" msgid="658110271822807811">"Søg"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Send"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Næste"</string>
-    <string name="ime_action_done" msgid="8971516117910934605">"Udfør"</string>
+    <string name="ime_action_done" msgid="8971516117910934605">"Afslut"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Forrige"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Udfør"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Ring til nummer"\n"ved hjælp af <xliff:g id="NUMBER">%s</xliff:g>"</string>

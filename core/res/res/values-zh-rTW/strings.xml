@@ -196,9 +196,9 @@
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"重設撥號路徑"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"允許應用程式處理撥出電話及更改撥打的號碼。這項權限可讓應用程式監控、轉接或阻止撥出的電話。"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"接收簡訊 (SMS)"</string>
-    <string name="permdesc_receiveSms" msgid="6424387754228766939">"允許應用程式接收和處理簡訊。這樣可讓應用程式監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
+    <string name="permdesc_receiveSms" msgid="6424387754228766939">"允許應用程式接收和處理簡訊。這項設定可讓應用程式監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"接收簡訊 (MMS)"</string>
-    <string name="permdesc_receiveMms" msgid="533019437263212260">"允許應用程式接收和處理 MMS 訊息。這樣可讓應用程式監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
+    <string name="permdesc_receiveMms" msgid="533019437263212260">"允許應用程式接收和處理 MMS 訊息。這項設定可讓應用程式監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"接收緊急廣播"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"允許應用程式接收及處理緊急廣播訊息，只有系統應用程式可以具備這項權限。"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"讀取區域廣播訊息"</string>
@@ -216,7 +216,7 @@
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"接收簡訊 (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"允許應用程式接收和處理 WAP 訊息。這項權限也能讓應用程式監控訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"擷取執行中的應用程式"</string>
-    <string name="permdesc_getTasks" msgid="7454215995847658102">"允許應用程式擷取最近執行工作的資訊。這樣可能會讓應用程式找出裝置上所使用應用程式的相關資訊。"</string>
+    <string name="permdesc_getTasks" msgid="7454215995847658102">"允許應用程式擷取最近執行工作的資訊。這項設定可讓應用程式找出裝置所用程式的相關資訊。"</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"擷取執行中應用程式的詳細資訊"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"允許應用程式擷取目前及最近所執行任務的詳細資訊。請注意，惡意應用程式可能會找出其他應用程式的不公開資訊。"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"重新排序正在執行的應用程式"</string>
@@ -234,7 +234,7 @@
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"啟用行車模式"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"允許應用程式啟用車用模式。"</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"關閉其他應用程式"</string>
-    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"允許應用程式終止其他應用程式的背景處理程序。這樣可能會導致其他應用程式停止執行。"</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"允許應用程式終止其他應用程式的背景處理程序。這項設定可能會導致其他應用程式停止執行。"</string>
     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"強制停止其他應用程式"</string>
     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"允許應用程式強制停止其他應用程式。"</string>
     <string name="permlab_forceBack" msgid="652935204072584616">"強制關閉應用程式"</string>
@@ -301,8 +301,8 @@
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"將 Linux 訊號傳送給應用程式"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"允許應用程式要求將提供的訊號傳送給所有持續運作中的處理程序。"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"一律執行應用程式"</string>
-    <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"允許應用程式讓部分內容佔用記憶體，持續執行。這樣可能會限制其他應用程式可用的記憶體，並拖慢平板電腦運作速度。"</string>
-    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"允許應用程式讓部分內容佔用記憶體，持續執行。這樣可能會限制其他應用程式可用的記憶體，並拖慢手機運作速度。"</string>
+    <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"允許應用程式的部分內容常駐在記憶體中。這項設定可能會限制其他應用程式可用的記憶體，並拖慢平板電腦運作速度。"</string>
+    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"允許應用程式讓部分內容佔用記憶體，持續執行。這項設定可能會限制其他應用程式可用的記憶體，並拖慢手機運作速度。"</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"刪除應用程式"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"允許應用程式刪除 Android 套件。請注意，惡意應用程式可能利用此功能刪除重要應用程式。"</string>
     <string name="permlab_clearAppUserData" msgid="274109191845842756">"刪除其他應用程式資料"</string>
@@ -359,23 +359,23 @@
     <string name="permlab_readProfile" msgid="4701889852612716678">"讀取自己的聯絡資訊"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"允許應用程式讀取裝置上儲存的個人資料，例如您的姓名和聯絡資訊。這表示應用程式可以識別您的身分，並將您的個人資料傳送給他人。"</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"修改自己的聯絡資訊"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"允許應用程式新增或變更裝置上儲存的個人資料，例如您的姓名和聯絡資訊。這樣可讓應用程式識別您的身分，並可能將您的個人資料傳送給他人。"</string>
+    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"允許應用程式新增或變更裝置上儲存的個人資料，例如您的姓名和聯絡資訊。這項設定可讓應用程式識別您的身分，並可能將您的個人資料傳送給他人。"</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"讀取您的社交串流"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"允許應用程式存取並同步處理您和好友的最新動態。因此，當您分享資訊時請小心，因為這項權限可讓應用程式讀取您和好友在社交網路上的私人通訊，包括機密通訊。注意：並非所有社交網路皆適用於這項權限。"</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"寫入您的社交串流"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"允許應用程式顯示好友的最新動態。因此，當您分享資訊時請小心，因為這項權限可讓應用程式偽裝好友產生訊息。注意：並非所有社交網路皆適用於這項權限。"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"讀取日曆活動與機密資訊"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"允許應用程式讀取平板電腦上儲存的所有日曆活動，包括好友或同事的活動。這樣可能會讓應用程式共用或儲存您的日曆資料，甚至包括機密或敏感的資料。"</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"允許應用程式讀取手機上儲存的所有日曆活動，包括好友或同事的活動。這樣可能會讓應用程式共用或儲存您的日曆資料，甚至包括機密或敏感的資料。"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"允許應用程式讀取平板電腦上儲存的所有日曆活動，包括好友或同事的活動。這項設定會讓應用程式共用或儲存您的日曆資料，甚至包括機密或敏感的資料。"</string>
+    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"允許應用程式讀取手機上儲存的所有日曆活動，包括好友或同事的活動。這項設定可能會讓應用程式共用或儲存您的日曆資料，甚至包括機密或敏感的資料。"</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"在未經擁有者同意的情況下新增或修改日曆活動，以及傳送電子郵件給邀請對象"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"允許應用程式新增、移除、變更您可以在平板電腦上修改的活動，包括好友或同事的活動。這樣可能會讓應用程式偽裝日曆擁有者傳送訊息，或私自修改活動。"</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"允許應用程式新增、移除、變更您可以在手機上修改的活動，包括好友或同事的活動。這樣可能會讓應用程式偽裝日曆擁有者傳送訊息，或私自修改活動。"</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"允許應用程式新增、移除、變更您可以在平板電腦上修改的活動，包括好友或同事的活動。這項設定可能會讓應用程式偽裝日曆擁有者傳送訊息，或私自修改活動。"</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"允許應用程式新增、移除、變更您可以在手機上修改的活動，包括好友或同事的活動。這項設定可能會讓應用程式偽裝日曆擁有者傳送訊息，或私自修改活動。"</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"模擬位置來源以供測試"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"建立虛構的位置資訊來源以供測試，或安裝新的位置資訊提供者。這樣可讓應用程式覆寫 GPS 或位置資訊提供者等其他位置資訊來源所傳回的位置資訊和/或狀態。"</string>
+    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"建立虛構的位置資訊來源以供測試，或安裝新的位置資訊提供者。這項設定可讓應用程式覆寫 GPS 或位置資訊提供者等其他位置資訊來源所傳回的位置資訊和/或狀態。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"接收額外的位置提供者指令"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"允許應用程式存取額外位置資訊提供者指令。這樣可能會讓應用程式干擾 GPS 或其他位置資訊來源的運作。"</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"允許應用程式存取額外位置資訊提供者指令。這項設定可能會造成應用程式干擾 GPS 或其他位置資訊來源的運作。"</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"准許安裝位置提供者"</string>
-    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"建立虛構的位置資訊來源以供測試，或安裝新的位置資訊提供者。這樣可讓應用程式覆寫 GPS 或位置資訊提供者等其他位置資訊來源所傳回的位置資訊和/或狀態。"</string>
+    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"建立虛構的位置資訊來源以供測試，或安裝新的位置資訊提供者。這項設定可讓應用程式覆寫 GPS 或位置資訊提供者等其他位置資訊來源所傳回的位置資訊和/或狀態。"</string>
     <string name="permlab_accessFineLocation" msgid="5885550969882561436">"精確位置 (GPS)"</string>
     <string name="permdesc_accessFineLocation" product="tablet" msgid="8960597421469894181">"存取平板電腦 GPS 等精確位置資訊來源。當位置資訊服務可以使用且已開啟時，這項權限即可讓應用程式判斷您的精確位置。"</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="239268765496141815">"存取手機 GPS 等精確位置資訊來源。當位置資訊服務可以使用且已開啟時，這項權限即可讓應用程式判斷您的精確位置。"</string>
@@ -493,8 +493,8 @@
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"建立及中斷 WiFi 連線"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"允許應用程式與 Wi-Fi 存取點連線或中斷連線，並可變更 Wi-Fi 網路的裝置設定。"</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"允許接收 Wi-Fi 多點傳播封包"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"允許應用程式接收透過多點傳播位址傳送給 Wi-Fi 網路上所有裝置 (而不只是傳送給您的平板電腦) 的封包。這樣會比非多點傳播模式使用更多電力。"</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"允許應用程式接收透過多點傳播位址傳送給 Wi-Fi 網路上所有裝置 (而不只是傳送給您的手機) 的封包。這樣會比非多點傳播模式使用更多電力。"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"允許應用程式接收透過多點傳播位址傳送給 Wi-Fi 網路上所有裝置 (而不只是傳送給您的平板電腦) 的封包。這項設定會比非多點傳播模式耗用更多電力。"</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"允許應用程式接收透過多點傳播位址傳送給 Wi-Fi 網路上所有裝置 (而不只是傳送給您的手機) 的封包。這項設定會比非多點傳播模式耗用更多電力。"</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"存取藍牙設定"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"允許應用程式設定本機藍牙平板電腦，以及搜尋遠端裝置並配對連線。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"允許應用程式設定本機藍牙手機，以及搜尋遠端裝置並配對連線。"</string>
@@ -786,8 +786,8 @@
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"讀取您的網路書籤和紀錄"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"允許應用程式讀取瀏覽器造訪過的所有網址紀錄，以及瀏覽器的所有書籤。注意：這項權限不適用於第三方瀏覽器或其他具備網頁瀏覽功能的應用程式。"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"寫入網路書籤和紀錄"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"允許應用程式修改平板電腦上儲存的瀏覽紀錄或書籤。這樣可能會讓應用程式清除或修改瀏覽資料。注意：這項權限不適用於第三方瀏覽器或其他具備網頁瀏覽功能的應用程式。"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"允許應用程式修改手機上儲存的瀏覽紀錄或書籤。這樣可能會讓應用程式清除或修改瀏覽資料。注意：這項權限不適用於第三方瀏覽器或其他具備網頁瀏覽功能的應用程式。"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"允許應用程式修改平板電腦上儲存的瀏覽紀錄或書籤。這項設定會讓應用程式具有清除或修改瀏覽資料的權限。注意：這項權限不適用於第三方瀏覽器或其他具備網頁瀏覽功能的應用程式。"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"允許應用程式修改手機上儲存的瀏覽紀錄或書籤。這項設定會讓應用程式具有清除或修改瀏覽資料的權限。注意：這項權限不適用於第三方瀏覽器或其他具備網頁瀏覽功能的應用程式。"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"設定鬧鐘"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"允許應用程式在安裝的鬧鐘應用程式中設定鬧鐘，某些鬧鐘應用程式可能無法執行這項功能。"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"新增語音留言"</string>

@@ -1011,7 +1011,7 @@
     <item quantity="one" msgid="1634101450343277345">"打开可用的 Wi-Fi 网络"</item>
     <item quantity="other" msgid="7915895323644292768">"打开可用的 Wi-Fi 网络"</item>
   </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"连接到 Wi-Fi 网络"</string>
+    <string name="wifi_available_sign_in" msgid="4029489716605255386">"登录到 Wi-Fi 网络"</string>
     <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"无法连接到 Wi-Fi"</string>
