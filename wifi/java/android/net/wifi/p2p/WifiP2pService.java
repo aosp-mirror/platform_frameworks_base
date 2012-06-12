@@ -1192,7 +1192,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     }
 
                     if (mGroup.isGroupOwner()) {
-                        stopDhcpServer();
+                        stopDhcpServer(mGroup.getInterface());
                     } else {
                         if (DBG) logd("stop DHCP client");
                         mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_STOP_DHCP);
@@ -1412,9 +1412,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         logd("Started Dhcp server on " + intf);
    }
 
-    private void stopDhcpServer() {
+    private void stopDhcpServer(String intf) {
         try {
             mNwService.stopTethering();
+            mNwService.clearInterfaceAddresses(intf);
         } catch (Exception e) {
             loge("Error stopping Dhcp server" + e);
             return;
