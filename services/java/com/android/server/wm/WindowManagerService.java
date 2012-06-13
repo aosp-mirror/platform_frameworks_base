@@ -1872,16 +1872,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 // First, make sure the client has the current visibility
                 // state.
-                if (wallpaper.mWallpaperVisible != visible) {
-                    wallpaper.mWallpaperVisible = visible;
-                    try {
-                        if (DEBUG_VISIBILITY || DEBUG_WALLPAPER) Slog.v(TAG,
-                                "Setting visibility of wallpaper " + wallpaper
-                                + ": " + visible);
-                        wallpaper.mClient.dispatchAppVisibility(visible);
-                    } catch (RemoteException e) {
-                    }
-                }
+                dispatchWallpaperVisibility(wallpaper, visible);
 
                 wallpaper.mWinAnimator.mAnimLayer = wallpaper.mLayer + mWallpaperAnimLayerAdjustment;
                 if (DEBUG_LAYERS || DEBUG_WALLPAPER) Slog.v(TAG, "adjustWallpaper win "
@@ -2091,6 +2082,24 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /**
+     * Check wallpaper for visiblity change and notify window if so.
+     * @param wallpaper The wallpaper to test and notify.
+     * @param visible Current visibility.
+     */
+    void dispatchWallpaperVisibility(final WindowState wallpaper, final boolean visible) {
+        if (wallpaper.mWallpaperVisible != visible) {
+            wallpaper.mWallpaperVisible = visible;
+            try {
+                if (DEBUG_VISIBILITY || DEBUG_WALLPAPER) Slog.v(TAG,
+                        "Updating visibility of wallpaper " + wallpaper
+                        + ": " + visible + " Callers=" + Debug.getCallers(2));
+                wallpaper.mClient.dispatchAppVisibility(visible);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
     void updateWallpaperVisibilityLocked() {
         final boolean visible = isWallpaperVisible(mWallpaperTarget);
         final int dw = mAppDisplayWidth;
@@ -2115,16 +2124,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     updateWallpaperOffsetLocked(wallpaper, dw, dh, false);
                 }
 
-                if (wallpaper.mWallpaperVisible != visible) {
-                    wallpaper.mWallpaperVisible = visible;
-                    try {
-                        if (DEBUG_VISIBILITY || DEBUG_WALLPAPER) Slog.v(TAG,
-                                "Updating visibility of wallpaper " + wallpaper
-                                + ": " + visible);
-                        wallpaper.mClient.dispatchAppVisibility(visible);
-                    } catch (RemoteException e) {
-                    }
-                }
+                dispatchWallpaperVisibility(wallpaper, visible);
             }
         }
     }
