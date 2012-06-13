@@ -1407,7 +1407,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @Override
     public void snoozeLimit(NetworkTemplate template) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
-        performSnooze(template, TYPE_LIMIT);
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            performSnooze(template, TYPE_LIMIT);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private void performSnooze(NetworkTemplate template, int type) {
