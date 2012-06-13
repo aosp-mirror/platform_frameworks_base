@@ -12,13 +12,14 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                             </div><!-- end homeTitle -->
                             <div id="announcement-block">
                             <!-- total max width is 520px -->
-                                  <img src="{@docRoot}images/home/play_logo.png"
-alt="Google Play" width="120px" style="padding:10px 52px"/>
+                                  <img src="{@docRoot}images/home/io12-promo-android.jpg"
+alt="Google Play" width="225px" style="padding:0"/>
                                   <div id="announcement" style="width:275px">
-    <p>Introducing <strong>Google Play</strong>: An integrated digital content destination where
-users buy and enjoy all of their favorite content in one place. It's the new destination for
-Android apps!</p>
-    <p><a href="http://android-developers.blogspot.com/2012/03/introducing-google-play.html">Read more &raquo;</a></p>
+    <p>This year, we're bringing Google I/O to you. Be among the first to catch the latest
+demos and developments from Android. Check out the keynote and over 40 technical sessions live
+streamed from Google I/O! It all begins June 27, at 9am.</p>
+    <p><a href="http://developers.google.com/events/io/sessions#android">See the Android
+sessions &raquo;</a></p>
                                 </div> <!-- end annoucement -->
                             </div> <!-- end annoucement-block -->
                         </div><!-- end topAnnouncement -->
