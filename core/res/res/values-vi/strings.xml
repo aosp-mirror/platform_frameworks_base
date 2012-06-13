@@ -220,7 +220,7 @@
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"truy xuất chi tiết về các ứng dụng đang chạy"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Cho phép ứng dụng truy xuất thông tin chi tiết về các tác vụ đã và đang chạy gần đây. Ứng dụng độc hại có thể phát hiện thông tin riêng tư về các ứng dụng khác."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"sắp xếp lại những ứng dụng đang chạy"</string>
-    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Cho phép ứng dụng di chuyển công việc sang nền trước và nền sau. Ứng dụng có thể thực hiện việc này mà không cần thiết bị vào của bạn."</string>
+    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Cho phép ứng dụng di chuyển công việc sang nền trước và nền sau. Ứng dụng có thể thực hiện việc này mà không cần bạn nhập."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"dừng các ứng dụng đang chạy"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Cho phép ứng dụng xóa công việc và loại bỏ các ứng dụng của chúng. Ứng dụng độc hại có thể làm gián đoạn hoạt động của các ứng dụng khác."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"bắt đầu mọi hoạt động"</string>
@@ -301,8 +301,8 @@
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"gửi tín hiệu Linux đến ứng dụng"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Cho phép ứng dụng yêu cầu tín hiệu đã cung cấp được gửi đến tất cả các quá trình liên tục."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"đặt ứng dụng luôn chạy"</string>
-    <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Cho phép ứng dụng tạo sự đồng nhất cho các phần của mình trong bộ nhớ. Việc này có thể hạn chế bộ nhớ có đối với các ứng dụng khác đang làm chậm máy tính bảng."</string>
-    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Cho phép ứng dụng tạo sự đồng nhất cho các phần của mình trong bộ nhớ. Việc này có thể hạn chế bộ nhớ có đối với các ứng dụng khác đang làm chậm điện thoại."</string>
+    <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Cho phép ứng dụng tạo sự đồng nhất cho các phần của mình trong bộ nhớ. Việc này có thể hạn chế bộ nhớ đối với các ứng dụng khác đang làm chậm máy tính bảng."</string>
+    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Cho phép ứng dụng tạo sự đồng nhất cho các phần của mình trong bộ nhớ. Việc này có thể hạn chế bộ nhớ đối với các ứng dụng khác đang làm chậm điện thoại."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"xóa ứng dụng"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Cho phép ứng dụng xóa các gói Android. Ứng dụng độc hại có thể sử dụng quyền này để xóa các ứng dụng quan trọng."</string>
     <string name="permlab_clearAppUserData" msgid="274109191845842756">"xóa dữ liệu của ứng dụng khác"</string>
@@ -342,8 +342,8 @@
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Cho phép ứng dụng tự khởi chạy ngay khi hệ thống khởi động xong. Quyền này có thể khiến máy tính bảng mất nhiều thời gian khởi động hơn và cho phép ứng dụng làm chậm toàn bộ máy tính bảng do ứng dụng luôn chạy."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Cho phép ứng dụng tự khởi chạy ngay khi hệ thống khởi động xong. Quyền này có thể khiến điện thoại mất nhiều thời gian khởi động hơn và cho phép ứng dụng làm chậm toàn bộ điện thoại do ứng dụng luôn chạy."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"gửi truyền phát hấp dẫn người xem"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Cho phép ứng dụng gửi nội dung truyền phát hấp dẫn người xem. Nội dung này sẽ vẫn còn sau khi quá trình truyền phát kết thúc. Việc sử dụng quá mức có thể làm cho máy tính bảng bị chậm hoặc không ổn định bằng cách khiến máy tính bảng sử dụng quá nhiều bộ nhớ."</string>
-    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Cho phép ứng dụng gửi nội dung truyền phát hấp dẫn người xem. Nội dung này sẽ vẫn còn sau khi quá trình truyền phát kết thúc. Việc sử dụng quá mức có thể làm cho điện thoại bị chậm hoặc không ổn định bằng cách khiến điện thoại sử dụng quá nhiều bộ nhớ."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Cho phép ứng dụng gửi nội dung truyền phát hấp dẫn người xem. Nội dung này sẽ vẫn còn sau khi quá trình truyền phát kết thúc. Việc sử dụng quá mức có thể làm cho máy tính bảng bị chậm hoặc không ổn định do khiến máy tính bảng sử dụng quá nhiều bộ nhớ."</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Cho phép ứng dụng gửi nội dung truyền phát hấp dẫn người xem. Nội dung này sẽ vẫn còn sau khi quá trình truyền phát kết thúc. Việc sử dụng quá mức có thể làm cho điện thoại bị chậm hoặc không ổn định do khiến điện thoại sử dụng quá nhiều bộ nhớ."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"đọc danh sách liên hệ của bạn"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Cho phép ứng dụng đọc dữ liệu về các liên hệ được lưu trữ trên máy tính bảng của bạn, bao gồm tần suất bạn đã gọi điện, gửi email hoặc liên lạc theo các cách khác với những người cụ thể. Quyền này cho phép ứng dụng lưu dữ liệu liên lạc của bạn và các ứng dụng độc hại có thể chia sẻ dữ liệu liên lạc mà bạn không biết."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Cho phép ứng dụng đọc dữ liệu về các liên hệ được lưu trữ trên điện thoại của bạn, bao gồm tần suất bạn đã gọi điện, gửi email hoặc liên lạc theo các cách khác với những người cụ thể. Quyền này cho phép ứng dụng lưu dữ liệu liên lạc của bạn và các ứng dụng độc hại có thể chia sẻ dữ liệu liên lạc mà bạn không biết."</string>
@@ -426,7 +426,7 @@
     <string name="permlab_hardware_test" msgid="4148290860400659146">"kiểm tra phần cứng"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Cho phép ứng dụng kiểm soát các thiết bị ngoại vi khác nhau nhằm mục đích kiểm tra phần cứng."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"gọi trực tiếp số điện thoại"</string>
-    <string name="permdesc_callPhone" msgid="3740797576113760827">"Cho phép ứng dụng gọi các số điện thoại mà không cần sự can thiệp của bạn. Việc này có thể dẫn đến các khoản phí hoặc cuộc gọi không mong muốn. Lưu ý rằng quyền này không cho phép ứng dụng gọi các số khẩn cấp. Các ứng dụng độc hại có thể khiến bạn tốn tiền bằng cách thực hiện cuộc gọi mà không cần sự xác nhận của bạn."</string>
+    <string name="permdesc_callPhone" msgid="3740797576113760827">"Cho phép ứng dụng gọi các số điện thoại mà không cần sự can thiệp của bạn. Việc này có thể dẫn đến các khoản phí hoặc cuộc gọi không mong muốn. Lưu ý rằng quyền này không cho phép ứng dụng gọi các số khẩn cấp. Các ứng dụng độc hại có thể khiến bạn tốn tiền do thực hiện cuộc gọi mà không cần sự xác nhận của bạn."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"gọi trực tiếp số điện thoại bất kỳ"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Cho phép ứng dụng gọi bất kỳ số điện thoại nào, bao gồm cả số khẩn cấp mà không có sự can thiệp của bạn. Ứng dụng độc hại có thể thực hiện những cuộc gọi không cần thiết và bất hợp pháp đến các dịch vụ khẩn cấp."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"trực tiếp bắt đầu thiết lập máy tính bảng CDMA"</string>
@@ -505,7 +505,7 @@
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Cho phép ứng dụng kết nối điện thoại và ngắt kết nối điện thoại khỏi mạng WiMAX."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"ghép nối với thiết bị Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Cho phép ứng dụng xem cấu hình của Bluetooth trên máy tính bảng và tạo và chấp nhận các kết nối với các thiết bị được ghép nối."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Cho phép ứng dụng xem cấu hình của Bluetooth trên điện thoại và tạo và chấp nhận các kết nối với các thiết bị được ghép nối."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Cho phép ứng dụng xem cấu hình của Bluetooth trên điện thoại, tạo và chấp nhận các kết nối với các thiết bị được ghép nối."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kiểm soát Liên lạc trường gần"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Cho phép ứng dụng giao tiếp với thẻ Giao tiếp trường gần (NFC), thẻ và trình đọc."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"vô hiệu hóa khóa màn hình của bạn"</string>
@@ -521,13 +521,13 @@
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"ghi nguồn cấp dữ liệu đã đăng ký"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Cho phép ứng dụng sửa đổi nguồn cấp dữ liệu hiện đã được đồng bộ hóa của bạn. Ứng dụng độc hại có thể thay đổi nguồn cấp dữ liệu đã đồng bộ hóa của bạn."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"đọc cụm từ bạn đã thêm vào từ điển"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Cho phép ứng dụng đọc các từ, tên và cụm từ mà người dùng có thể đã lưu trữ trong từ điển của người dùng."</string>
+    <string name="permdesc_readDictionary" msgid="659614600338904243">"Cho phép ứng dụng đọc tất cả các từ, tên và cụm từ mà người dùng có thể đã lưu trữ trong từ điển của người dùng."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"ghi vào từ điển do người dùng xác định"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Cho phép ứng dụng ghi từ mới vào từ điển của người dùng."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"kiểm tra quyền truy cập vào bộ nhớ được bảo vệ"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"kiểm tra quyền truy cập vào bộ nhớ được bảo vệ"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Cho phép ứng dụng kiểm tra quyền cho bộ lưu trữ USB sẽ có trên các thiết bị trong tương lai."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Cho phép ứng dụng kiểm tra quyền cho thẻ SD sẽ có trên các thiết bị trong tương lai."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Cho phép ứng dụng kiểm tra quyền cho bộ lưu trữ USB trên các thiết bị trong tương lai."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Cho phép ứng dụng kiểm tra quyền cho thẻ SD sẽ các thiết bị trong tương lai."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"sửa đổi hoặc xóa nội dung của bộ lưu trữ USB của bạn"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"sửa đổi hoặc xóa nội dung của thẻ SD của bạn"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Cho phép ứng dụng ghi vào bộ lưu trữ USB."</string>
@@ -934,9 +934,10 @@
     <string name="deleteText" msgid="7070985395199629156">"xóa"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Phương thức nhập"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tác vụ văn bản"</string>
-    <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Còn ít dung lượng"</string>
-    <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"Dung lượng lưu trữ của máy tính bảng thấp."</string>
-    <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"Dung lượng lưu trữ của điện thoại thấp."</string>
+    <!-- no translation found for low_internal_storage_view_title (5576272496365684834) -->
+    <skip />
+    <!-- no translation found for low_internal_storage_view_text (6640505817617414371) -->
+    <skip />
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"Hủy"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
