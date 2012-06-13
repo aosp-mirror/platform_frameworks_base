@@ -18,6 +18,8 @@ package com.android.tools.layoutlib.create;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -47,6 +49,8 @@ public class Main {
 
     public static class Options {
         public boolean generatePublicAccess = true;
+        public boolean listAllDeps = false;
+        public boolean listOnlyMissingDeps = false;
     }
 
     public static final Options sOptions = new Options();
@@ -60,16 +64,29 @@ public class Main {
 
         if (!processArgs(log, args, osJarPath, osDestJar)) {
             log.error("Usage: layoutlib_create [-v] [-p] output.jar input.jar ...");
+            log.error("Usage: layoutlib_create [-v] [--list-deps|--missing-deps] input.jar ...");
             System.exit(1);
         }
 
-        log.info("Output: %1$s", osDestJar[0]);
+        if (sOptions.listAllDeps || sOptions.listOnlyMissingDeps) {
+            System.exit(listDeps(osJarPath, log));
+
+        } else {
+            System.exit(createLayoutLib(osDestJar[0], osJarPath, log));
+        }
+
+
+        System.exit(1);
+    }
+
+    private static int createLayoutLib(String osDestJar, ArrayList<String> osJarPath, Log log) {
+        log.info("Output: %1$s", osDestJar);
         for (String path : osJarPath) {
             log.info("Input :      %1$s", path);
         }
 
         try {
-            AsmGenerator agen = new AsmGenerator(log, osDestJar[0], new CreateInfo());
+            AsmGenerator agen = new AsmGenerator(log, osDestJar, new CreateInfo());
 
             AsmAnalyzer aa = new AsmAnalyzer(log, osJarPath, agen,
                     new String[] {                          // derived from
@@ -116,17 +133,33 @@ public class Main {
                 for (String path : osJarPath) {
                     log.info("- Input JAR : %1$s", path);
                 }
-                System.exit(1);
+                return 1;
             }
 
-            System.exit(0);
+            return 0;
         } catch (IOException e) {
             log.exception(e, "Failed to load jar");
         } catch (LogAbortException e) {
             e.error(log);
         }
 
-        System.exit(1);
+        return 1;
+    }
+
+    private static int listDeps(ArrayList<String> osJarPath, Log log) {
+        DependencyFinder df = new DependencyFinder(log);
+        try {
+            List<Map<String, Set<String>>> result = df.findDeps(osJarPath);
+            if (sOptions.listAllDeps) {
+                df.printAllDeps(result);
+            } else if (sOptions.listOnlyMissingDeps) {
+                df.printMissingDeps(result);
+            }
+        } catch (IOException e) {
+            log.exception(e, "Failed to load jar");
+        }
+
+        return 0;
     }
 
     /**
@@ -138,14 +171,21 @@ public class Main {
      */
     private static boolean processArgs(Log log, String[] args,
             ArrayList<String> osJarPath, String[] osDestJar) {
+        boolean needs_dest = true;
         for (int i = 0; i < args.length; i++) {
             String s = args[i];
             if (s.equals("-v")) {
                 log.setVerbose(true);
             } else if (s.equals("-p")) {
                 sOptions.generatePublicAccess = false;
+            } else if (s.equals("--list-deps")) {
+                sOptions.listAllDeps = true;
+                needs_dest = false;
+            } else if (s.equals("--missing-deps")) {
+                sOptions.listOnlyMissingDeps = true;
+                needs_dest = false;
             } else if (!s.startsWith("-")) {
-                if (osDestJar[0] == null) {
+                if (needs_dest && osDestJar[0] == null) {
                     osDestJar[0] = s;
                 } else {
                     osJarPath.add(s);
@@ -160,7 +200,7 @@ public class Main {
             log.error("Missing parameter: path to input jar");
             return false;
         }
-        if (osDestJar[0] == null) {
+        if (needs_dest && osDestJar[0] == null) {
             log.error("Missing parameter: path to output jar");
             return false;
         }
