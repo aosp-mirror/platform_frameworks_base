@@ -2705,11 +2705,9 @@
     <string name="editTextMenuTitle">Text actions</string>
 
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the title of that notification. -->
-    <string name="low_internal_storage_view_title">Low on space</string>
+    <string name="low_internal_storage_view_title">Storage space running out</string>
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the message of that notification. -->
-    <string name="low_internal_storage_view_text" product="tablet">Tablet storage space is getting low.</string>
-    <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the message of that notification. -->
-    <string name="low_internal_storage_view_text" product="default">Phone storage space is getting low.</string>
+    <string name="low_internal_storage_view_text">Some system functions may not work</string>
 
     <!-- Preference framework strings. -->
     <string name="ok">OK</string>
