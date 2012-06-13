@@ -3551,24 +3551,26 @@
     <string name="activity_resolver_use_once">Just once</string>
 
     <!-- Name of the default audio route for tablets when nothing
-         is connected to a headphone or other wired audio output jack. [CHAR LIMIT=25] -->
+         is connected to a headphone or other wired audio output jack. [CHAR LIMIT=50] -->
     <string name="default_audio_route_name" product="tablet">Tablet speakers</string>
 
     <!-- Name of the default audio route when nothing is connected to
-         a headphone or other wired audio output jack. [CHAR LIMIT=25] -->
+         a headphone or other wired audio output jack. [CHAR LIMIT=50] -->
     <string name="default_audio_route_name" product="default">Phone speaker</string>
 
     <!-- Name of the default audio route when wired headphones are
-         connected. [CHAR LIMIT=25] -->
+         connected. [CHAR LIMIT=50] -->
     <string name="default_audio_route_name_headphones">Headphones</string>
 
-    <!-- Name of the default audio route when an audio dock is connected. [CHAR LIMIT=25] -->
+    <!-- Name of the default audio route when an audio dock is connected. [CHAR LIMIT=50] -->
     <string name="default_audio_route_name_dock_speakers">Dock speakers</string>
 
-    <!-- Name of the default audio route when HDMI is connected. [CHAR LIMIT=25] -->
+    <!-- Name of the default audio route when HDMI is connected. [CHAR LIMIT=50] -->
     <string name="default_audio_route_name_hdmi">HDMI audio</string>
 
-    <!-- Name of the default audio route category. [CHAR LIMIT=25] -->
+    <!-- Name of the default audio route category. [CHAR LIMIT=50] -->
     <string name="default_audio_route_category_name">System</string>
 
+    <!-- "Done" button for MediaRouter chooser dialog when grouping routes. [CHAR LIMIT=NONE] -->
+    <string name="media_route_chooser_grouping_done">Done</string>
 </resources>

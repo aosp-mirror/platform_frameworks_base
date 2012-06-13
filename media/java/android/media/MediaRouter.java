@@ -581,6 +581,7 @@ public class MediaRouter {
      */
     public static class UserRouteInfo extends RouteInfo {
         RemoteControlClient mRcc;
+        private Object mTag;
 
         UserRouteInfo(RouteCategory category) {
             super(category);
@@ -637,6 +638,29 @@ public class MediaRouter {
          */
         public void setIconResource(int resId) {
             setIconDrawable(sStatic.mResources.getDrawable(resId));
+        }
+
+        /**
+         * Set an application-specific tag object for this route.
+         * The application may use this to store arbitrary data associated with the
+         * route for internal tracking.
+         *
+         * <p>Note that the lifespan of a route may be well past the lifespan of
+         * an Activity or other Context; take care that objects you store here
+         * will not keep more data in memory alive than you intend.</p>
+         *
+         * @param tag Arbitrary, app-specific data for this route to hold for later use
+         */
+        public void setTag(Object tag) {
+            mTag = tag;
+        }
+
+        /**
+         * @return The tag object previously set by the application
+         * @see #setTag(Object)
+         */
+        public Object getTag() {
+            return mTag;
         }
     }
 

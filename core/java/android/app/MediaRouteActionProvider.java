@@ -16,7 +16,10 @@
 
 package android.app;
 
+import com.android.internal.app.MediaRouteChooserDialogFragment;
+
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.media.MediaRouter;
 import android.media.MediaRouter.RouteInfo;
 import android.util.Log;
@@ -83,8 +86,35 @@ public class MediaRouteActionProvider extends ActionProvider {
 
     @Override
     public boolean onPerformDefaultAction() {
-        // Show routing dialog
+        final FragmentManager fm = getActivity().getFragmentManager();
+        // See if one is already attached to this activity.
+        MediaRouteChooserDialogFragment dialogFragment =
+                (MediaRouteChooserDialogFragment) fm.findFragmentByTag(
+                MediaRouteChooserDialogFragment.FRAGMENT_TAG);
+        if (dialogFragment != null) {
+            Log.w(TAG, "onPerformDefaultAction(): Chooser dialog already showing!");
+            return false;
+        }
+
+        dialogFragment = new MediaRouteChooserDialogFragment();
+        dialogFragment.setExtendedSettingsClickListener(mExtendedSettingsListener);
+        dialogFragment.setRouteTypes(mRouteTypes);
+        dialogFragment.show(fm, MediaRouteChooserDialogFragment.FRAGMENT_TAG);
         return true;
+    }
+
+    private Activity getActivity() {
+        // Gross way of unwrapping the Activity so we can get the FragmentManager
+        Context context = mContext;
+        while (context instanceof ContextWrapper && !(context instanceof Activity)) {
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        if (!(context instanceof Activity)) {
+            throw new IllegalStateException("The MediaRouteActionProvider's Context " +
+                    "is not an Activity.");
+        }
+
+        return (Activity) context;
     }
 
     public void setExtendedSettingsClickListener(View.OnClickListener listener) {

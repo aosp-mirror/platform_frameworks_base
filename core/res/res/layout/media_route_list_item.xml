@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2012 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="?android:attr/listPreferredItemHeight"
+              android:background="?android:attr/activatedBackgroundIndicator"
+              android:gravity="center_vertical">
+
+    <ImageView android:layout_width="56dp"
+               android:layout_height="56dp"
+               android:scaleType="center"
+               android:id="@+id/icon"
+               android:visibility="gone" />
+
+    <LinearLayout android:layout_width="0dp"
+                  android:layout_height="match_parent"
+                  android:layout_weight="1"
+                  android:orientation="vertical"
+                  android:gravity="left|center_vertical"
+                  android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
+                  android:paddingRight="?android:attr/listPreferredItemPaddingRight">
+
+        <TextView android:id="@android:id/text1"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <TextView android:id="@android:id/text2"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:textAppearance="?android:attr/textAppearanceSmall" />
+    </LinearLayout>
+
+    <!-- TODO Make this not glow when pressed from above, and give it a divider. -->
+    <ImageButton android:layout_width="56dp"
+                 android:layout_height="56dp"
+                 android:id="@+id/group_button"
+                 android:background="?android:attr/selectableItemBackground"
+                 android:scaleType="center"
+                 android:visibility="gone" />
+
+</LinearLayout>
