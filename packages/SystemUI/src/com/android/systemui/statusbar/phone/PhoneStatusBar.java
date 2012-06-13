@@ -167,6 +167,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     int mNotificationPanelMarginBottomPx, mNotificationPanelMarginLeftPx;
     int mNotificationPanelGravity;
     int mNotificationPanelMinHeight;
+    boolean mNotificationPanelIsFullScreenWidth;
 
     // top bar
     View mClearButton;
@@ -350,9 +351,11 @@ public class PhoneStatusBar extends BaseStatusBar {
                 return true;
             }
         });
+        mNotificationPanelIsFullScreenWidth =
+            (mNotificationPanel.getLayoutParams().width == ViewGroup.LayoutParams.MATCH_PARENT);
         mNotificationPanel.setSystemUiVisibility(
                   View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER
-                | View.STATUS_BAR_DISABLE_SYSTEM_INFO);
+                | (mNotificationPanelIsFullScreenWidth ? 0 : View.STATUS_BAR_DISABLE_SYSTEM_INFO));
 
         if (!ActivityManager.isHighEndGfx(mDisplay)) {
             mStatusBarWindow.setBackground(null);
