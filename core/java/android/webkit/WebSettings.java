@@ -921,23 +921,27 @@ public abstract class WebSettings {
 
     /**
      * Sets the path to where database storage API databases should be saved.
-     * Note that the WebCore Database Tracker only allows the path to be set once.
+     * In order for the database storage API to function correctly, this method
+     * must be called with a path to which the application can write. This
+     * method should only be called once: repeated calls are ignored.
      *
-     * @param databasePath a String path to the directory where databases should
-     *                     be saved. May be the empty string but should never
-     *                     be null.
+     * @param databasePath a path to the directory where databases should be
+     *                     saved.
      */
     // This will update WebCore when the Sync runs in the C++ side.
+    // Note that the WebCore Database Tracker only allows the path to be set
+    // once.
     public synchronized void setDatabasePath(String databasePath) {
         throw new MustOverrideException();
     }
 
     /**
-     * Sets the path where the Geolocation permissions database should be saved.
+     * Sets the path where the Geolocation databases should be saved. In order
+     * for Geolocation permissions and cached positions to be persisted, this
+     * method must be called with a path to which the application can write.
      *
-     * @param databasePath a String path to the directory where the Geolocation
-     *                     permissions database should be saved. May be the
-     *                     empty string but should never be null.
+     * @param databasePath a path to the directory where databases should be
+     *                     saved.
      */
     // This will update WebCore when the Sync runs in the C++ side.
     public synchronized void setGeolocationDatabasePath(String databasePath) {
@@ -945,7 +949,10 @@ public abstract class WebSettings {
     }
 
     /**
-     * Tells the WebView to enable Application Caches API.
+     * Sets whether the Application Caches API should be enabled. The default
+     * is false. Note that in order for the Application Caches API to be
+     * enabled, a valid database path must also be supplied to
+     * {@link #setAppCachePath}.
      *
      * @param flag true if the WebView should enable Application Caches
      */
@@ -954,13 +961,14 @@ public abstract class WebSettings {
     }
 
     /**
-     * Sets a custom path to the Application Caches files. The client
-     * must ensure it exists before this call.
+     * Sets the path to the Application Caches files. In order for the
+     * Application Caches API to be enabled, this method must be called with a
+     * path to which the application can write. This method should only be
+     * called once: repeated calls are ignored.
      *
      * @param appCachePath a String path to the directory containing
-     *                     Application Caches files. The appCache path can be
-     *                     the empty string but should not be null. Passing
-     *                     null for this parameter will result in a no-op.
+     *                     Application Caches files.
+     * @see setAppCacheEnabled
      */
     public synchronized void setAppCachePath(String appCachePath) {
         throw new MustOverrideException();
