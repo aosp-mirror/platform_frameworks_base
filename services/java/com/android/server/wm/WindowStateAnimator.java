@@ -1122,6 +1122,9 @@ class WindowStateAnimator {
                                 + " during relayout");
                         if (showSurfaceRobustlyLocked()) {
                             mLastHidden = false;
+                            if (w.mIsWallpaper) {
+                                mService.dispatchWallpaperVisibility(w, true);
+                            }
                         } else {
                             w.mOrientationChanging = false;
                         }
