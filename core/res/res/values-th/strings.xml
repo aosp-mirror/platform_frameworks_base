@@ -934,9 +934,10 @@
     <string name="deleteText" msgid="7070985395199629156">"ลบ"</string>
     <string name="inputMethod" msgid="1653630062304567879">"วิธีป้อนข้อมูล"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"การทำงานของข้อความ"</string>
-    <string name="low_internal_storage_view_title" msgid="1399732408701697546">"เหลือที่ว่างน้อย"</string>
-    <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"ที่เก็บข้อมูลแท็บเล็ตมีพื้นที่เหลือน้อย"</string>
-    <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"พื้นที่เก็บข้อมูลบนโทรศัพท์เหลือน้อย"</string>
+    <!-- no translation found for low_internal_storage_view_title (5576272496365684834) -->
+    <skip />
+    <!-- no translation found for low_internal_storage_view_text (6640505817617414371) -->
+    <skip />
     <string name="ok" msgid="5970060430562524910">"ตกลง"</string>
     <string name="cancel" msgid="6442560571259935130">"ยกเลิก"</string>
     <string name="yes" msgid="5362982303337969312">"ตกลง"</string>
