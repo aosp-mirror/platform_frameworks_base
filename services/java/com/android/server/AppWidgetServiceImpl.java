@@ -223,6 +223,7 @@ class AppWidgetServiceImpl {
         final String action = intent.getAction();
         boolean added = false;
         boolean changed = false;
+        boolean providersModified = false;
         String pkgList[] = null;
         if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
             pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
@@ -254,12 +255,12 @@ class AppWidgetServiceImpl {
                         || (extras != null && extras.getBoolean(Intent.EXTRA_REPLACING, false))) {
                     for (String pkgName : pkgList) {
                         // The package was just upgraded
-                        updateProvidersForPackageLocked(pkgName);
+                        providersModified |= updateProvidersForPackageLocked(pkgName);
                     }
                 } else {
                     // The package was just added
                     for (String pkgName : pkgList) {
-                        addProvidersForPackageLocked(pkgName);
+                        providersModified |= addProvidersForPackageLocked(pkgName);
                     }
                 }
                 saveStateLocked();
@@ -272,10 +273,18 @@ class AppWidgetServiceImpl {
                 synchronized (mAppWidgetIds) {
                     ensureStateLoadedLocked();
                     for (String pkgName : pkgList) {
-                        removeProvidersForPackageLocked(pkgName);
+                        providersModified |= removeProvidersForPackageLocked(pkgName);
                         saveStateLocked();
                     }
                 }
+            }
+        }
+
+        if (providersModified) {
+            // If the set of providers has been modified, notify each active AppWidgetHost
+            synchronized (mAppWidgetIds) {
+                ensureStateLoadedLocked();
+                notifyHostsForProvidersChangedLocked();
             }
         }
     }
@@ -1637,7 +1646,8 @@ class AppWidgetServiceImpl {
         getSettingsFile(mUserId).delete();
     }
 
-    void addProvidersForPackageLocked(String pkgName) {
+    boolean addProvidersForPackageLocked(String pkgName) {
+        boolean providersAdded = false;
         Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
         intent.setPackage(pkgName);
         List<ResolveInfo> broadcastReceivers;
@@ -1647,7 +1657,7 @@ class AppWidgetServiceImpl {
                     PackageManager.GET_META_DATA, mUserId);
         } catch (RemoteException re) {
             // Shouldn't happen, local call
-            return;
+            return false;
         }
         final int N = broadcastReceivers == null ? 0 : broadcastReceivers.size();
         for (int i = 0; i < N; i++) {
@@ -1658,11 +1668,15 @@ class AppWidgetServiceImpl {
             }
             if (pkgName.equals(ai.packageName)) {
                 addProviderLocked(ri);
+                providersAdded = true;
             }
         }
+
+        return providersAdded;
     }
 
-    void updateProvidersForPackageLocked(String pkgName) {
+    boolean updateProvidersForPackageLocked(String pkgName) {
+        boolean providersUpdated = false;
         HashSet<String> keep = new HashSet<String>();
         Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
         intent.setPackage(pkgName);
@@ -1673,7 +1687,7 @@ class AppWidgetServiceImpl {
                 PackageManager.GET_META_DATA, mUserId);
         } catch (RemoteException re) {
             // Shouldn't happen, local call
-            return;
+            return false;
         }
 
         // add the missing ones and collect which ones to keep
@@ -1690,6 +1704,7 @@ class AppWidgetServiceImpl {
                 if (p == null) {
                     if (addProviderLocked(ri)) {
                         keep.add(ai.name);
+                        providersUpdated = true;
                     }
                 } else {
                     Provider parsed = parseProviderInfoXml(component, ri);
@@ -1724,6 +1739,7 @@ class AppWidgetServiceImpl {
                             }
                             // Now that we've told the host, push out an update.
                             sendUpdateIntentLocked(p, appWidgetIds);
+                            providersUpdated = true;
                         }
                     }
                 }
@@ -1737,16 +1753,21 @@ class AppWidgetServiceImpl {
             if (pkgName.equals(p.info.provider.getPackageName())
                     && !keep.contains(p.info.provider.getClassName())) {
                 removeProviderLocked(i, p);
+                providersUpdated = true;
             }
         }
+
+        return providersUpdated;
     }
 
-    void removeProvidersForPackageLocked(String pkgName) {
+    boolean removeProvidersForPackageLocked(String pkgName) {
+        boolean providersRemoved = false;
         int N = mInstalledProviders.size();
         for (int i = N - 1; i >= 0; i--) {
             Provider p = mInstalledProviders.get(i);
             if (pkgName.equals(p.info.provider.getPackageName())) {
                 removeProviderLocked(i, p);
+                providersRemoved = true;
             }
         }
 
@@ -1759,6 +1780,25 @@ class AppWidgetServiceImpl {
             Host host = mHosts.get(i);
             if (pkgName.equals(host.packageName)) {
                 deleteHostLocked(host);
+            }
+        }
+
+        return providersRemoved;
+    }
+
+    void notifyHostsForProvidersChangedLocked() {
+        final int N = mHosts.size();
+        for (int i = N - 1; i >= 0; i--) {
+            Host host = mHosts.get(i);
+            try {
+                if (host.callbacks != null) {
+                    host.callbacks.providersChanged();
+                }
+            } catch (RemoteException ex) {
+                // It failed; remove the callback. No need to prune because
+                // we know that this host is still referenced by this
+                // instance.
+                host.callbacks = null;
             }
         }
     }

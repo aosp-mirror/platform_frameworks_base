@@ -4336,6 +4336,7 @@ package android.appwidget {
     method public void deleteHost();
     method protected android.appwidget.AppWidgetHostView onCreateView(android.content.Context, int, android.appwidget.AppWidgetProviderInfo);
     method protected void onProviderChanged(int, android.appwidget.AppWidgetProviderInfo);
+    method protected void onProvidersChanged();
     method public void startListening();
     method public void stopListening();
   }
