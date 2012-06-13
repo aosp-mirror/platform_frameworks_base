@@ -1702,7 +1702,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
         mProximityAlerts.remove(intent);
         if (mProximityAlerts.size() == 0) {
-            removeUpdatesLocked(mProximityReceiver);
+            if (mProximityReceiver != null) {
+                removeUpdatesLocked(mProximityReceiver);
+            }
             mProximityReceiver = null;
             mProximityListener = null;
         }
