@@ -293,7 +293,7 @@ public class WindowAnimator {
                             + " anim=" + win.mWinAnimator.mAnimation);
                 } else if (mPolicy.canBeForceHidden(win, win.mAttrs)) {
                     final boolean changed;
-                    if (mForceHiding) {
+                    if (mForceHiding && !winAnimator.isAnimating()) {
                         changed = win.hideLw(false, false);
                         if (WindowManagerService.DEBUG_VISIBILITY && changed) Slog.v(TAG,
                                 "Now policy hidden: " + win);
