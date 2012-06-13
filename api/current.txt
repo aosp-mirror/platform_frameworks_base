@@ -3690,6 +3690,7 @@ package android.app {
     method public int getRouteTypes();
     method public void setExtendedSettingsClickListener(android.view.View.OnClickListener);
     method public void setRouteTypes(int);
+    method public void showDialog();
   }
 
   public class NativeActivity extends android.app.Activity implements android.view.InputQueue.Callback android.view.SurfaceHolder.Callback2 android.view.ViewTreeObserver.OnGlobalLayoutListener {
@@ -11575,11 +11576,13 @@ package android.media {
   }
 
   public static class MediaRouter.UserRouteInfo extends android.media.MediaRouter.RouteInfo {
+    method public java.lang.Object getTag();
     method public void setIconDrawable(android.graphics.drawable.Drawable);
     method public void setIconResource(int);
     method public void setName(java.lang.CharSequence);
     method public void setRemoteControlClient(android.media.RemoteControlClient);
     method public void setStatus(java.lang.CharSequence);
+    method public void setTag(java.lang.Object);
   }
 
   public class MediaScannerConnection implements android.content.ServiceConnection {

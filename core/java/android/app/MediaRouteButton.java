@@ -17,8 +17,10 @@
 package android.app;
 
 import com.android.internal.R;
+import com.android.internal.app.MediaRouteChooserDialogFragment;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -44,6 +46,7 @@ public class MediaRouteButton extends View {
     private int mMinHeight;
 
     private OnClickListener mExtendedSettingsClickListener;
+    private MediaRouteChooserDialogFragment mDialogFragment;
 
     private static final int[] ACTIVATED_STATE_SET = {
         R.attr.state_activated
@@ -112,7 +115,7 @@ public class MediaRouteButton extends View {
                 }
             }
         } else {
-            Log.d(TAG, "TODO: Implement the dialog!");
+            showDialog();
         }
 
         return handled;
@@ -263,8 +266,51 @@ public class MediaRouteButton extends View {
     }
 
     public void setExtendedSettingsClickListener(OnClickListener listener) {
-        // TODO: if dialog is already open, propagate so that it updates live.
         mExtendedSettingsClickListener = listener;
+        if (mDialogFragment != null) {
+            mDialogFragment.setExtendedSettingsClickListener(listener);
+        }
+    }
+
+    /**
+     * Asynchronously show the route chooser dialog.
+     * This will attach a {@link DialogFragment} to the containing Activity.
+     */
+    public void showDialog() {
+        final FragmentManager fm = getActivity().getFragmentManager();
+        if (mDialogFragment == null) {
+            // See if one is already attached to this activity.
+            mDialogFragment = (MediaRouteChooserDialogFragment) fm.findFragmentByTag(
+                    MediaRouteChooserDialogFragment.FRAGMENT_TAG);
+        }
+        if (mDialogFragment != null) {
+            Log.w(TAG, "showDialog(): Already showing!");
+            return;
+        }
+
+        mDialogFragment = new MediaRouteChooserDialogFragment();
+        mDialogFragment.setExtendedSettingsClickListener(mExtendedSettingsClickListener);
+        mDialogFragment.setLauncherListener(new MediaRouteChooserDialogFragment.LauncherListener() {
+            @Override
+            public void onDetached(MediaRouteChooserDialogFragment detachedFragment) {
+                mDialogFragment = null;
+            }
+        });
+        mDialogFragment.setRouteTypes(mRouteTypes);
+        mDialogFragment.show(fm, MediaRouteChooserDialogFragment.FRAGMENT_TAG);
+    }
+
+    private Activity getActivity() {
+        // Gross way of unwrapping the Activity so we can get the FragmentManager
+        Context context = getContext();
+        while (context instanceof ContextWrapper && !(context instanceof Activity)) {
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        if (!(context instanceof Activity)) {
+            throw new IllegalStateException("The MediaRouteButton's Context is not an Activity.");
+        }
+
+        return (Activity) context;
     }
 
     private class MediaRouteCallback extends MediaRouter.SimpleCallback {
