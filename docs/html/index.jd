@@ -12,11 +12,11 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                             </div><!-- end homeTitle -->
                             <div id="announcement-block">
                             <!-- total max width is 520px -->
-                                  <img src="{@docRoot}images/home/io12-promo-android.jpg"
-alt="Google Play" width="225px" style="padding:0"/>
+                                  <img src="{@docRoot}images/home/io12-promo.jpg"
+alt="Google Play" width="230px" style="padding:15px 0;margin-right:25px"/>
                                   <div id="announcement" style="width:275px">
-    <p>This year, we're bringing Google I/O to you. Be among the first to catch the latest
-demos and developments from Android. Check out the keynote and over 40 technical sessions live
+    <p><b>Watch Android Sessions Live!</b></p><p>Be among the first to see the latest
+demos and developments from Android. Watch the keynote and over 40 sessions live
 streamed from Google I/O! It all begins June 27, at 9am.</p>
     <p><a href="http://developers.google.com/events/io/sessions#android">See the Android
 sessions &raquo;</a></p>
