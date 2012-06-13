@@ -1740,8 +1740,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             mWallpaperTarget = oldW;
                             foundW = oldW;
                             foundI = oldI;
-                            mLowerWallpaperTarget = null;
-                            mUpperWallpaperTarget = null;
                         } 
                         // Now set the upper and lower wallpaper targets
                         // correctly, and make sure that we are positioning
@@ -3162,6 +3160,7 @@ public class WindowManagerService extends IWindowManager.Stub
             set.addAnimation(scale);
             alpha.setDuration(duration);
             set.addAnimation(alpha);
+            set.setDetachWallpaper(true);
             a = set;
         } else {
             a = createExitAnimationLocked(transit, duration);
