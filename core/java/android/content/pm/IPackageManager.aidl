@@ -376,4 +376,7 @@ interface IPackageManager {
 
     void setPermissionEnforced(String permission, boolean enforced);
     boolean isPermissionEnforced(String permission);
+
+    /** Reflects current DeviceStorageMonitorService state */
+    boolean isStorageLow();
 }

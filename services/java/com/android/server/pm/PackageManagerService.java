@@ -9397,4 +9397,15 @@ public class PackageManagerService extends IPackageManager.Stub {
             return true;
         }
     }
+
+    public boolean isStorageLow() {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            final DeviceStorageMonitorService dsm = (DeviceStorageMonitorService) ServiceManager
+                    .getService(DeviceStorageMonitorService.SERVICE);
+            return dsm.isMemoryLow();
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
 }
