@@ -104,8 +104,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         mClearButton.setOnClickListener(mClearButtonListener);
 
         mShowing = false;
-
-        setContentFrameVisible(mNotificationCount > 0, false);
     }
 
     @Override
@@ -129,10 +127,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     }
 
     public void show(boolean show, boolean animate) {
-        if (show && !mShowing) {
-            setContentFrameVisible(mSettingsView != null || mNotificationCount > 0, false);
-        }
-
         if (animate) {
             if (mShowing != show) {
                 mShowing = show;
@@ -226,53 +220,10 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     }
 
     public void setNotificationCount(int n) {
-//        Slog.d(TAG, "notificationCount=" + n);
-        if (!mShowing) {
-            // just do it, already
-            setContentFrameVisible(n > 0, false);
-        } else if (mSettingsView == null) {
-            // we're looking at the notifications; time to maybe make some changes
-            if ((mNotificationCount > 0) != (n > 0)) {
-                setContentFrameVisible(n > 0, true);
-            }
-        }
         mNotificationCount = n;
     }
 
     public void setContentFrameVisible(final boolean showing, boolean animate) {
-        if (!animate) {
-            mContentFrame.setVisibility(showing ? View.VISIBLE : View.GONE);
-            mContentFrame.setAlpha(1f);
-            // the translation will be patched up when the window is slid into place
-            return;
-        }
-
-        if (showing) {
-            mContentFrame.setVisibility(View.VISIBLE);
-        }
-        AnimatorSet set = new AnimatorSet();
-        set.play(ObjectAnimator.ofFloat(
-                mContentFrame, "alpha",
-                showing ? 0f : 1f,
-                showing ? 1f : 0f))
-            .with(ObjectAnimator.ofFloat(
-                mContentParent, "translationY",
-                showing ? mContentFrameMissingTranslation : 0f,
-                showing ? 0f : mContentFrameMissingTranslation))
-              ;
-
-        set.setDuration(200);
-        set.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator _a) {
-                if (!showing) {
-                    mContentFrame.setVisibility(View.GONE);
-                    mContentFrame.setAlpha(1f);
-                }
-                updateClearButton();
-            }
-        });
-        set.start();
     }
 
     public void swapPanels() {
@@ -292,11 +243,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
             public void onAnimationEnd(Animator _a) {
                 toHide.setVisibility(View.GONE);
                 if (toShow != null) {
-                    if (mNotificationCount == 0) {
-                        // show the frame for settings, hide for notifications
-                        setContentFrameVisible(toShow == mSettingsView, true);
-                    }
-
                     toShow.setVisibility(View.VISIBLE);
                     if (toShow == mSettingsView || mNotificationCount > 0) {
                         ObjectAnimator.ofFloat(toShow, "alpha", 0f, 1f)
