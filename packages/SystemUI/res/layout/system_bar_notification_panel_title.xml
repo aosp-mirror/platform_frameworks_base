@@ -18,7 +18,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/title_area"
-    android:background="@color/notification_panel_solid_background"
+    android:background="@drawable/system_bar_notification_header_bg"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:clickable="true"
