@@ -1211,15 +1211,16 @@ public abstract class HardwareRenderer {
             }
 
             if ((status & DisplayList.STATUS_INVOKE) != 0) {
-                scheduleFunctors(attachInfo);
+                scheduleFunctors(attachInfo, true);
             }
         }
 
-        private void scheduleFunctors(View.AttachInfo attachInfo) {
+        private void scheduleFunctors(View.AttachInfo attachInfo, boolean delayed) {
             mFunctorsRunnable.attachInfo = attachInfo;
             if (!attachInfo.mHandler.hasCallbacks(mFunctorsRunnable)) {
                 // delay the functor callback by a few ms so it isn't polled constantly
-                attachInfo.mHandler.postDelayed(mFunctorsRunnable, FUNCTOR_PROCESS_DELAY);
+                attachInfo.mHandler.postDelayed(mFunctorsRunnable,
+                                                delayed ? FUNCTOR_PROCESS_DELAY : 0);
             }
         }
 
@@ -1234,7 +1235,7 @@ public abstract class HardwareRenderer {
         boolean attachFunctor(View.AttachInfo attachInfo, int functor) {
             if (mCanvas != null) {
                 mCanvas.attachFunctor(functor);
-                scheduleFunctors(attachInfo);
+                scheduleFunctors(attachInfo, false);
                 return true;
             }
             return false;
