@@ -93,6 +93,7 @@ public class WindowAnimator {
                     final WindowStateAnimator winAnimator = wallpaper.mWinAnimator;
                     if (!winAnimator.mLastHidden) {
                         winAnimator.hide();
+                        mService.dispatchWallpaperVisibility(wallpaper, false);
                         mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                     }
                 }
