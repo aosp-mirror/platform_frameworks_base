@@ -934,9 +934,10 @@
     <string name="deleteText" msgid="7070985395199629156">"ሰርዝ"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ግቤት ሜተድ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"የፅሁፍ እርምጃዎች"</string>
-    <string name="low_internal_storage_view_title" msgid="1399732408701697546">"ቦታ አንሷል"</string>
-    <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"የጡባዊ ማከማቻ ቦታ እያነሰ ነው።"</string>
-    <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"የስልክ ማከማቻ ቦታ እያነሰ ነው።"</string>
+    <!-- no translation found for low_internal_storage_view_title (5576272496365684834) -->
+    <skip />
+    <!-- no translation found for low_internal_storage_view_text (6640505817617414371) -->
+    <skip />
     <string name="ok" msgid="5970060430562524910">"እሺ"</string>
     <string name="cancel" msgid="6442560571259935130">"ይቅር"</string>
     <string name="yes" msgid="5362982303337969312">"እሺ"</string>
