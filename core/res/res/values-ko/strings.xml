@@ -934,9 +934,10 @@
     <string name="deleteText" msgid="7070985395199629156">"삭제"</string>
     <string name="inputMethod" msgid="1653630062304567879">"입력 방법"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"텍스트 작업"</string>
-    <string name="low_internal_storage_view_title" msgid="1399732408701697546">"저장공간 부족"</string>
-    <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"태블릿 저장공간이 부족합니다."</string>
-    <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"휴대전화 저장공간이 부족합니다."</string>
+    <!-- no translation found for low_internal_storage_view_title (5576272496365684834) -->
+    <skip />
+    <!-- no translation found for low_internal_storage_view_text (6640505817617414371) -->
+    <skip />
     <string name="ok" msgid="5970060430562524910">"확인"</string>
     <string name="cancel" msgid="6442560571259935130">"취소"</string>
     <string name="yes" msgid="5362982303337969312">"확인"</string>
