@@ -376,6 +376,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             mIntruderAlertView.setBar(this);
         }
 
+        updateShowSearchHoldoff();
+
         mStatusBarView.mService = this;
 
         mChoreographer = Choreographer.getInstance();
@@ -663,7 +665,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         lp.setTitle("NavigationBar");
         lp.windowAnimations = 0;
-
         return lp;
     }
 
@@ -808,8 +809,12 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         updateRecentsPanel();
-        mShowSearchHoldoff  = mContext.getResources().getInteger(
-                R.integer.config_show_search_delay);
+        updateShowSearchHoldoff();
+    }
+
+    private void updateShowSearchHoldoff() {
+        mShowSearchHoldoff = mContext.getResources().getInteger(
+            R.integer.config_show_search_delay);
     }
 
     private void loadNotificationShade() {
@@ -1174,7 +1179,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mExpandedVisible = true;
         mPile.setLayoutTransitionsEnabled(true);
-        makeSlippery(mNavigationBarView, true);
+        if (mNavigationBarView != null)
+            mNavigationBarView.setSlippery(true);
 
         updateCarrierLabelVisibility(true);
 
@@ -1196,19 +1202,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         visibilityChanged(true);
-    }
-
-    private static void makeSlippery(View view, boolean slippery) {
-        if (view == null) {
-            return;
-        }
-        WindowManager.LayoutParams lp = (WindowManager.LayoutParams) view.getLayoutParams();
-        if (slippery) {
-            lp.flags |= WindowManager.LayoutParams.FLAG_SLIPPERY;
-        } else {
-            lp.flags &= ~WindowManager.LayoutParams.FLAG_SLIPPERY;
-        }
-        WindowManagerImpl.getDefault().updateViewLayout(view, lp);
     }
 
     public void animateExpand() {
@@ -1295,8 +1288,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
         mExpandedVisible = false;
         mPile.setLayoutTransitionsEnabled(false);
+        if (mNavigationBarView != null)
+            mNavigationBarView.setSlippery(false);
         visibilityChanged(false);
-        makeSlippery(mNavigationBarView, false);
 
         // Shrink the window to the size of the status bar only
         WindowManager.LayoutParams lp = (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
