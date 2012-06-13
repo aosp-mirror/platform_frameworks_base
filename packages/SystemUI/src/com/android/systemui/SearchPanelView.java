@@ -35,8 +35,8 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.widget.FrameLayout;
-import com.android.internal.widget.multiwaveview.MultiWaveView;
-import com.android.internal.widget.multiwaveview.MultiWaveView.OnTriggerListener;
+import com.android.internal.widget.multiwaveview.GlowPadView;
+import com.android.internal.widget.multiwaveview.GlowPadView.OnTriggerListener;
 import com.android.systemui.R;
 import com.android.systemui.recent.StatusBarTouchProxy;
 import com.android.systemui.statusbar.BaseStatusBar;
@@ -58,7 +58,7 @@ public class SearchPanelView extends FrameLayout implements
 
     private boolean mShowing;
     private View mSearchTargetsContainer;
-    private MultiWaveView mMultiWaveView;
+    private GlowPadView mGlowPadView;
 
     public SearchPanelView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -125,7 +125,7 @@ public class SearchPanelView extends FrameLayout implements
         }
     }
 
-    class MultiWaveTriggerListener implements MultiWaveView.OnTriggerListener {
+    class GlowPadTriggerListener implements GlowPadView.OnTriggerListener {
         boolean mWaitingForLaunch;
 
         public void onGrabbed(View v, int handle) {
@@ -141,7 +141,7 @@ public class SearchPanelView extends FrameLayout implements
         }
 
         public void onTrigger(View v, final int target) {
-            final int resId = mMultiWaveView.getResourceIdForTarget(target);
+            final int resId = mGlowPadView.getResourceIdForTarget(target);
             switch (resId) {
                 case com.android.internal.R.drawable.ic_lockscreen_search:
                     mWaitingForLaunch = true;
@@ -154,13 +154,13 @@ public class SearchPanelView extends FrameLayout implements
         public void onFinishFinalAnimation() {
         }
     }
-    final MultiWaveTriggerListener mMultiWaveViewListener = new MultiWaveTriggerListener();
+    final GlowPadTriggerListener mGlowPadViewListener = new GlowPadTriggerListener();
 
     @Override
     public void onAnimationStarted() {
         postDelayed(new Runnable() {
             public void run() {
-                mMultiWaveViewListener.mWaitingForLaunch = false;
+                mGlowPadViewListener.mWaitingForLaunch = false;
                 mBar.hideSearchPanel();
             }
         }, SEARCH_PANEL_HOLD_DURATION);
@@ -173,13 +173,13 @@ public class SearchPanelView extends FrameLayout implements
         mSearchTargetsContainer = findViewById(R.id.search_panel_container);
         mStatusBarTouchProxy = (StatusBarTouchProxy) findViewById(R.id.status_bar_touch_proxy);
         // TODO: fetch views
-        mMultiWaveView = (MultiWaveView) findViewById(R.id.multi_wave_view);
-        mMultiWaveView.setOnTriggerListener(mMultiWaveViewListener);
+        mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
+        mGlowPadView.setOnTriggerListener(mGlowPadViewListener);
         SearchManager searchManager = getSearchManager();
         if (searchManager != null) {
             ComponentName component = searchManager.getGlobalSearchActivity();
             if (component != null) {
-                if (!mMultiWaveView.replaceTargetDrawablesIfPresent(component,
+                if (!mGlowPadView.replaceTargetDrawablesIfPresent(component,
                         ASSIST_ICON_METADATA_NAME,
                         com.android.internal.R.drawable.ic_lockscreen_search)) {
                     Slog.w(TAG, "Couldn't grab icon from component " + component);
@@ -214,7 +214,7 @@ public class SearchPanelView extends FrameLayout implements
     private final OnPreDrawListener mPreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
         public boolean onPreDraw() {
             getViewTreeObserver().removeOnPreDrawListener(this);
-            mMultiWaveView.resumeAnimations();
+            mGlowPadView.resumeAnimations();
             return false;
         }
     };
@@ -240,7 +240,8 @@ public class SearchPanelView extends FrameLayout implements
                 setVisibility(View.VISIBLE);
                 // Don't start the animation until we've created the layer, which is done
                 // right before we are drawn
-                mMultiWaveView.suspendAnimations();
+                mGlowPadView.suspendAnimations();
+                mGlowPadView.ping();
                 getViewTreeObserver().addOnPreDrawListener(mPreDrawListener);
                 vibrate();
             }
@@ -299,7 +300,7 @@ public class SearchPanelView extends FrameLayout implements
     public void setStatusBarView(final View statusBarView) {
         if (mStatusBarTouchProxy != null) {
             mStatusBarTouchProxy.setStatusBar(statusBarView);
-//            mMultiWaveView.setOnTouchListener(new OnTouchListener() {
+//            mGlowPadView.setOnTouchListener(new OnTouchListener() {
 //                public boolean onTouch(View v, MotionEvent event) {
 //                    return statusBarView.onTouchEvent(event);
 //                }

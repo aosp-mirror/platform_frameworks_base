@@ -123,7 +123,7 @@
         android:layout_width="match_parent"
         android:layout_height="302dip">
 
-        <com.android.internal.widget.multiwaveview.MultiWaveView
+        <com.android.internal.widget.multiwaveview.GlowPadView
             android:id="@+id/unlock_widget"
             android:orientation="horizontal"
             android:layout_width="match_parent"
@@ -135,13 +135,15 @@
             android:targetDescriptions="@array/lockscreen_target_descriptions_with_camera"
             android:directionDescriptions="@array/lockscreen_direction_descriptions"
             android:handleDrawable="@drawable/ic_lockscreen_handle"
-            android:waveDrawable="@drawable/ic_lockscreen_outerring"
-            android:outerRadius="@dimen/multiwaveview_target_placement_radius"
-            android:snapMargin="@dimen/multiwaveview_snap_margin"
-            android:hitRadius="@dimen/multiwaveview_hit_radius"
-            android:chevronDrawables="@array/lockscreen_chevron_drawables"
-            android:feedbackCount="3"
+            android:outerRingDrawable="@drawable/ic_lockscreen_outerring"
+            android:outerRadius="@dimen/glowpadview_target_placement_radius"
+            android:innerRadius="@dimen/glowpadview_inner_radius"
+            android:snapMargin="@dimen/glowpadview_snap_margin"
+            android:hitRadius="@dimen/glowpadview_hit_radius"
+            android:feedbackCount="1"
             android:vibrationDuration="20"
+            android:glowRadius="@dimen/glowpadview_glow_radius"
+            android:pointDrawable="@drawable/ic_lockscreen_glowdot"
             />
 
         <TextView
