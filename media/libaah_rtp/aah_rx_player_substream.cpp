@@ -200,7 +200,8 @@ void AAH_RXPlayer::Substream::processPayloadStart(uint8_t* buf,
     if (ts_valid) {
         uint32_t ts_upper = U32_AT(buf + parse_offset);
         parse_offset += 4;
-        ts = (static_cast<int64_t>(ts_upper) << 32) | ts_lower;
+        ts = (static_cast<int64_t>(ts_upper) << 32) |
+              static_cast<uint32_t>(ts_lower);
     }
 
     // Check the flags to see if there is another 24 bytes of timestamp
