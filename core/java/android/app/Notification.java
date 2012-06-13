@@ -911,7 +911,7 @@ public class Notification implements Parcelable
      * </pre>
      */
     public static class Builder {
-        private static final int MAX_ACTION_BUTTONS = 2;
+        private static final int MAX_ACTION_BUTTONS = 3;
 
         private Context mContext;
 
