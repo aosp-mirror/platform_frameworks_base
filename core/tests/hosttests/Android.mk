@@ -16,17 +16,5 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-#LOCAL_TEST_TYPE := hostSideOnly
-
-# Only compile source java files in this apk.
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
-
-LOCAL_MODULE := FrameworkCoreHostTests
-
-LOCAL_JAVA_LIBRARIES := hosttestlib ddmlib-prebuilt junit
-
-include $(BUILD_HOST_JAVA_LIBRARY)
-
 # Build the test APKs using their own makefiles
 include $(call all-makefiles-under,$(LOCAL_PATH))
-
