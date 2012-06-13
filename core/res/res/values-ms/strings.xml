@@ -301,8 +301,8 @@
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"hantar isyarat Linux kepada apl"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Membenarkan apl meminta isyarat yang dibekalkan dihantar kepada semua proses yang berterusan."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"buatkan apl sentiasa berjalan"</string>
-    <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Membenarkan apl untuk membuat sebahagian dari dirinya berterusan dalam memori. Ini boleh menghadkan memori yang tersedia kepada apl lain menjadikan tablet perlahan."</string>
-    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Membenarkan apl untuk membuat sebahagian dari dirinya berterusan dalam memori. Ini boleh menghadkan memori yang tersedia kepada apl lain menjadikan telefon perlahan."</string>
+    <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Membenarkan apl untuk membuat sebahagian dirinya berterusan dalam memori. Ini boleh mengehadkan memori yang tersedia kepada apl lain dan menjadikan tablet perlahan."</string>
+    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Membenarkan apl untuk membuat sebahagian dari dirinya berterusan dalam memori. Ini boleh mengehadkan memori yang tersedia kepada apl lain dan menjadikan telefon perlahan."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"padam apl"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Membenarkan apl untuk memadam pakej Android. Apl hasad boleh menggunakannya untuk memadam apl penting."</string>
     <string name="permlab_clearAppUserData" msgid="274109191845842756">"padamkan data apl lain"</string>
@@ -342,7 +342,7 @@
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Membenarkan apl untuk memulakan dirinya sendiri sebaik sahaja sistem selesai mengebut. Ini boleh membuat masa untuk menghidupkan tablet menjadi lebih lama dan membenarkan apl untuk memperlahankan keseluruhan tablet dengan sentiasa berjalan."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Membenarkan apl bermula sendiri sebaik sahaja sistem telah selesai mengebut. Ini boleh menjadikannya mengambil masa yang lama untuk menghidupkan telefon dan membenarkan apl untuk melambatkan keseluruhan telefon dengan sentiasa berjalan."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"hantar siaran lekit"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Membenarkan apl untuk menghantar siaran melekit, yang kekal selepas siaran berakhir. Penggunaan berlebihan boleh membuat tablet perlahan atau tidak stabil dengan menyebabkannya menggunakan memori yang terlalu banyak."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Membenarkan apl untuk menghantar siaran melekit, yang kekal selepas siaran berakhir. Penggunaan berlebihan boleh membuatkan tablet perlahan atau tidak stabil kerana menggunakan terlalu banyak memori."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Membenarkan apl untuk menghantar siaran melekit, yang kekal selepas siaran berakhir. Penggunaan berlebihan boleh membuat telefon perlahan atau tidak stabil dengan menyebabkannya menggunakan memori yang terlalu banyak."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"baca kenalan anda"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Membenarkan apl membaca data tentang kenalan anda yang tersimpan di tablet anda, termasuk kekerapan anda memanggil, menghantar e-mel atau berkomunikasi dalam cara lain dengan individu tertentu. Kebenaran ini membenarkan apl untuk menyimpan data kenalan anda dan apl hasad boleh berkongsi data kenalan anda tanpa pengetahuan anda."</string>
@@ -351,8 +351,8 @@
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Membenarkan apl mengubah suai data tentang kenalan anda yang tersimpan pada tablet anda, termasuk kekerapan siapa anda panggil, hantar e-mel atau berkomunikasi dalam cara lain dengan kenalan tertentu. Kebenaran ini membenarkan apl untuk memadam data kenalan."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Membenarkan apl mengubah suai data tentang kenalan anda yang tersimpan pada telefon anda, termasuk kekerapan siapa anda panggil, hantar e-mel atau berkomunikasi dalam cara lain dengan kenalan tertentu. Kebenaran ini membenarkan apl untuk memadam data kenalan."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"baca log panggilan"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Membenarkan apl  membaca log panggilan tablet anda, termasuk data tentang panggilan masuk dan keluar. Kebenaran ini membenarkan apl untuk menyimpan data log panggilan anda dan apl hasad boleh berkongsi data panggilan tanpa pengetahuan anda."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Membenarkan apl  membaca log panggilan telefon anda, termasuk data tentang panggilan masuk dan keluar. Kebenaran ini membenarkan apl untuk menyimpan data log panggilan anda dan apl hasad boleh berkongsi data panggilan tanpa pengetahuan anda."</string>
+    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Membenarkan apl membaca log panggilan tablet anda, termasuk data tentang panggilan masuk dan keluar. Kebenaran ini membenarkan apl untuk menyimpan data log panggilan anda dan apl hasad boleh berkongsi data panggilan tanpa pengetahuan anda."</string>
+    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Membenarkan apl membaca log panggilan telefon anda, termasuk data tentang panggilan masuk dan keluar. Kebenaran ini membenarkan apl untuk menyimpan data log panggilan anda dan apl hasad boleh berkongsi data panggilan tanpa pengetahuan anda."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"tulis log panggilan"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Membenarkan apl untuk mengubah suai panggilan tablet anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakannya untuk memadam atau mengubah suai log panggilan anda."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Membenarkan apl untuk mengubah suai panggilan telefon anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakannya untuk memadam atau mengubah suai log panggilan anda."</string>
@@ -371,11 +371,11 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Membenarkan apl menambah, mengalih keluar, mengubah acara yang anda boleh ubah suai pada tablet anda, termasuk milik rakan atau rakan sekerja. Ini boleh membenarkan apl menghantar mesej yang kelihatan seperti datang dari pemilik kalendar atau mengubah suai acara tanpa pengetahuan pemilik."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Membenarkan apl menambah, mengalih keluar, mengubah acara yang anda boleh ubah suai pada telefon anda, termasuk milik rakan atau rakan sekerja. Ini boleh membenarkan apl menghantar mesej yang kelihatan seperti datang dari pemilik kalendar atau mengubah suai acara tanpa pengetahuan pemilik."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"gunakan sumber lokasi olok-olok untuk pengujian"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Buat sumber lokasi palsu untuk menguji atau memasang pembekal lokasi baharu. Ini membenarkan apl untuk mengatasi lokasi dan/atau status yang dikembalikan oleh sumber lokasi lain seperti GPS atau pembekal lokasi."</string>
+    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Buat sumber lokasi palsu untuk menguji atau memasang pembekal lokasi baharu. Ini membenarkan apl untuk membatalkan lokasi dan/atau status yang dikembalikan oleh sumber lokasi lain seperti GPS atau pembekal lokasi."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"akses perintah tambahan pembekal lokasi"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Membenarkan apl untuk mengakses arahan pembekal lokasi tambahan. Ini boleh membenarkan apl untuk campur tangan dengan operasi GPS atau sumber lokasi lain."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"kebenaran untuk memasang pembekal lokasi"</string>
-    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Buat sumber lokasi palsu untuk menguji atau memasang pembekal lokasi baharu. Ini membenarkan apl untuk mengatasi lokasi dan/atau status yang dikembalikan oleh sumber lokasi lain seperti GPS atau pembekal lokasi."</string>
+    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Buat sumber lokasi palsu untuk menguji atau memasang pembekal lokasi baharu. Ini membenarkan apl untuk membatalkan lokasi dan/atau status yang dikembalikan oleh sumber lokasi lain seperti GPS atau pembekal lokasi."</string>
     <string name="permlab_accessFineLocation" msgid="5885550969882561436">"lokasi (GPS) tepat"</string>
     <string name="permdesc_accessFineLocation" product="tablet" msgid="8960597421469894181">"Akses sumber lokasi yang tepat seperti Sistem Kedudukan Global pada tablet. Apabila perkhidmatan lokasi tersedia dan dihidupkan, kebenaran ini membenarkan apl menentukan lokasi tepat anda."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="239268765496141815">"Akses sumber lokasi yang tepat seperti Sistem Kedudukan Global pada telefon. Apabila perkhidmatan lokasi tersedia dan dihidupkan, kebenaran ini membenarkan apl menentukan lokasi tepat anda."</string>
@@ -468,8 +468,8 @@
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"bertindak sebagai PerkhidmatanPengurusAkaun"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Membenarkan apl membuat panggilan ke Pengesah Akaun."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"cari akaun pada peranti"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Membenarkan apl mendapatkan senarai akaun yang dikenali oleh tablet. Ini mungkin termasuk sebarang akaun yang dibuat oleh aplikasi yang anda telah pasang."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Membenarkan apl mendapatkan senarai akaun yang dikenali oleh telefon. Ini mungkin termasuk sebarang akaun yang dibuat oleh aplikasi yang anda telah pasang."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Membenarkan apl mendapatkan senarai akaun yang dikenali oleh tablet. Ini mungkin termasuk sebarang akaun yang dibuat oleh aplikasi yang telah anda pasang."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Membenarkan apl mendapatkan senarai akaun yang dikenali oleh telefon. Ini mungkin termasuk sebarang akaun yang dibuat oleh aplikasi yang telah anda pasang."</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"buat akaun dan tetapkan kata laluan"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Membenarkan apl menggunakan kebolehan pengesah akaun Pengurus Akaun, termasuk membuat akaun dan mendapatkan serta menetapkan kata laluannya."</string>
     <string name="permlab_manageAccounts" msgid="4983126304757177305">"tambah atau alih keluar akaun"</string>
@@ -493,8 +493,8 @@
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"sambung dan putuskan dari Wi-Fi"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Membenarkan apl menyambung ke dan memutuskan sambungan dari titik capaian Wi-Fi dan membuat perubahan kepada konfigurasi peranti untuk rangkaian Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"benarkan penerimaan Wi-Fi Multisiar"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Membenarkan apl menerima paket yang dihantar kepada semua peranti pada rangkaian Wi-Fi menggunakan alamat berbilang acuan, bukan hanya tablet anda. Ia menggunakan lebih kuasa berbanding mod bukan berbilang acuan."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Membenarkan apl menerima paket yang dihantar kepada semua peranti pada rangkaian Wi-Fi menggunakan alamat berbilang acuan, bukan hanya telefon anda. Ia menggunakan lebih kuasa berbanding mod bukan berbilang acuan."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Membenarkan apl menerima paket yang dihantar kepada semua peranti pada rangkaian Wi-Fi menggunakan alamat multisiar, bukan hanya tablet anda. Apl menggunakan lebih kuasa berbanding mod bukan multisiar."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Membenarkan apl menerima paket yang dihantar kepada semua peranti pada rangkaian Wi-Fi menggunakan alamat multisiar, bukan hanya telefon anda. Ia menggunakan lebih kuasa berbanding mod bukan multisiar."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"akses tetapan Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Membenarkan apl mengkonfigurasikan tablet Bluetooth setempat dan menemui serta berpasangan dengan peranti jauh."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Membenarkan apl mengkonfigurasikan telefon Bluetooth setempat dan menemui serta berpasangan dengan peranti jauh."</string>
@@ -504,7 +504,7 @@
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Membenarkan apl untuk menyambungkan tablet ke dan menyahsambungkan tablet dari rangkaian WiMaX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Membenarkan apl untuk menyambungkan telefon ke dan menyahsambung telefon dari rangkaian WiMaX."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"berpasangan dengan peranti Bluetooth"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Membenarkan apl melihat konfigurasi Bluetooth pada tablet dan untuk membuat dan menerima sambungan dengan peranti yang dipasangkan."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Membenarkan apl melihat konfigurasi Bluetooth pada tablet dan untuk membuat serta menerima sambungan dengan peranti yang dipasangkan."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Membenarkan apl melihat konfigurasi Bluetooth pada telefon dan membuat serta menerima sambungan dengan peranti yang dipasangkan."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"mengawal Komunikasi Medan Dekat"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Membenarkan apl berkomunikasi dengan teg, kad dan pembaca Komunikasi Medan Dekat (NFC)."</string>
@@ -934,9 +934,10 @@
     <string name="deleteText" msgid="7070985395199629156">"padam"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Kaedah input"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tindakan teks"</string>
-    <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Kekurangan ruang"</string>
-    <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"Ruang storan tablet semakin rendah."</string>
-    <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"Ruang simpanan telefon semakin habis."</string>
+    <!-- no translation found for low_internal_storage_view_title (5576272496365684834) -->
+    <skip />
+    <!-- no translation found for low_internal_storage_view_text (6640505817617414371) -->
+    <skip />
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"Batal"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
