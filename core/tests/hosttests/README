@@ -1,6 +1,0 @@
-This dir contains tests which run on a host machine, and test aspects of
-package install etc via adb.
-
-To run, do:
-runtest framework-core-host
-
