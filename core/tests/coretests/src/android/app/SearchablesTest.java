@@ -71,7 +71,7 @@ public class SearchablesTest extends AndroidTestCase {
      */
     public void testNonSearchable() {
         // test basic array & hashmap
-        Searchables searchables = new Searchables(mContext);
+        Searchables searchables = new Searchables(mContext, 0);
         searchables.buildSearchableList();
 
         // confirm that we return null for non-searchy activities
@@ -103,7 +103,7 @@ public class SearchablesTest extends AndroidTestCase {
 
         // build item list with real-world source data
         mockPM.setSearchablesMode(MyMockPackageManager.SEARCHABLES_PASSTHROUGH);
-        Searchables searchables = new Searchables(mockContext);
+        Searchables searchables = new Searchables(mockContext, 0);
         searchables.buildSearchableList();
         // tests with "real" searchables (deprecate, this should be a unit test)
         ArrayList<SearchableInfo> searchablesList = searchables.getSearchablesList();
@@ -122,7 +122,7 @@ public class SearchablesTest extends AndroidTestCase {
         MyMockContext mockContext = new MyMockContext(mContext, mockPM);
 
         mockPM.setSearchablesMode(MyMockPackageManager.SEARCHABLES_MOCK_ZERO);
-        Searchables searchables = new Searchables(mockContext);
+        Searchables searchables = new Searchables(mockContext, 0);
         searchables.buildSearchableList();
         ArrayList<SearchableInfo> searchablesList = searchables.getSearchablesList();
         assertNotNull(searchablesList);
