@@ -243,6 +243,7 @@ static const KeycodeLabel KEYCODES[] = {
     { "YEN", 216 },
     { "RO", 217 },
     { "KANA", 218 },
+    { "ASSIST", 219 },
 
     // NOTE: If you add a new keycode here you must also add it to several other files.
     //       Refer to frameworks/base/core/java/android/view/KeyEvent.java for the full list.

@@ -23197,6 +23197,7 @@ package android.view {
     field public static final int KEYCODE_ALT_RIGHT = 58; // 0x3a
     field public static final int KEYCODE_APOSTROPHE = 75; // 0x4b
     field public static final int KEYCODE_APP_SWITCH = 187; // 0xbb
+    field public static final int KEYCODE_ASSIST = 219; // 0xdb
     field public static final int KEYCODE_AT = 77; // 0x4d
     field public static final int KEYCODE_AVR_INPUT = 182; // 0xb6
     field public static final int KEYCODE_AVR_POWER = 181; // 0xb5
