@@ -33,11 +33,19 @@ public class Log {
         }
     }
 
+    /** Similar to debug() but doesn't do a \n automatically. */
+    public void debugNoln(String format, Object... args) {
+        if (mVerbose) {
+            String s = String.format(format, args);
+            System.out.print(s);
+        }
+    }
+
     public void info(String format, Object... args) {
         String s = String.format(format, args);
         outPrintln(s);
     }
-    
+
     public void error(String format, Object... args) {
         String s = String.format(format, args);
         errPrintln(s);
@@ -50,15 +58,15 @@ public class Log {
         pw.flush();
         error(format + "\n" + sw.toString(), args);
     }
-    
+
     /** for unit testing */
     protected void errPrintln(String msg) {
         System.err.println(msg);
     }
-    
+
     /** for unit testing */
     protected void outPrintln(String msg) {
         System.out.println(msg);
     }
-    
+
 }
