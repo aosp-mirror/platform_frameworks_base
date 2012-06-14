@@ -22,7 +22,8 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.util.DisplayMetrics;
+import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.util.EventLog;
 
 import java.util.Locale;
@@ -122,6 +123,7 @@ public class WebSettingsClassic extends WebSettings {
     private boolean         mLoadWithOverviewMode = false;
     private boolean         mEnableSmoothTransition = false;
     private boolean         mForceUserScalable = false;
+    private boolean         mPasswordEchoEnabled = true;
 
     // AutoFill Profile data
     public static class AutoFillProfile {
@@ -294,6 +296,13 @@ public class WebSettingsClassic extends WebSettings {
                 Build.VERSION_CODES.JELLY_BEAN) {
             mAllowUniversalAccessFromFileURLs = true;
             mAllowFileAccessFromFileURLs = true;
+        }
+        try {
+            mPasswordEchoEnabled =
+                    Settings.System.getInt(context.getContentResolver(),
+                        Settings.System.TEXT_SHOW_PASSWORD) != 0;
+        } catch (SettingNotFoundException e) {
+            mPasswordEchoEnabled = true;
         }
     }
 
