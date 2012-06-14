@@ -11514,6 +11514,7 @@ package android.media {
     method public void addUserRoute(android.media.MediaRouter.UserRouteInfo);
     method public void clearUserRoutes();
     method public android.media.MediaRouter.RouteCategory createRouteCategory(java.lang.CharSequence, boolean);
+    method public android.media.MediaRouter.RouteCategory createRouteCategory(int, boolean);
     method public android.media.MediaRouter.UserRouteInfo createUserRoute(android.media.MediaRouter.RouteCategory);
     method public android.media.MediaRouter.RouteCategory getCategoryAt(int);
     method public int getCategoryCount();
@@ -11527,7 +11528,8 @@ package android.media {
     field public static final int ROUTE_TYPE_USER = 8388608; // 0x800000
   }
 
-  public static abstract interface MediaRouter.Callback {
+  public static abstract class MediaRouter.Callback {
+    ctor public MediaRouter.Callback();
     method public abstract void onRouteAdded(android.media.MediaRouter, android.media.MediaRouter.RouteInfo);
     method public abstract void onRouteChanged(android.media.MediaRouter, android.media.MediaRouter.RouteInfo);
     method public abstract void onRouteGrouped(android.media.MediaRouter, android.media.MediaRouter.RouteInfo, android.media.MediaRouter.RouteGroup, int);
@@ -11539,6 +11541,7 @@ package android.media {
 
   public static class MediaRouter.RouteCategory {
     method public java.lang.CharSequence getName();
+    method public java.lang.CharSequence getName(android.content.Context);
     method public java.util.List<android.media.MediaRouter.RouteInfo> getRoutes(java.util.List<android.media.MediaRouter.RouteInfo>);
     method public int getSupportedTypes();
     method public boolean isGroupable();
@@ -11560,11 +11563,12 @@ package android.media {
     method public android.media.MediaRouter.RouteGroup getGroup();
     method public android.graphics.drawable.Drawable getIconDrawable();
     method public java.lang.CharSequence getName();
+    method public java.lang.CharSequence getName(android.content.Context);
     method public java.lang.CharSequence getStatus();
     method public int getSupportedTypes();
   }
 
-  public static class MediaRouter.SimpleCallback implements android.media.MediaRouter.Callback {
+  public static class MediaRouter.SimpleCallback extends android.media.MediaRouter.Callback {
     ctor public MediaRouter.SimpleCallback();
     method public void onRouteAdded(android.media.MediaRouter, android.media.MediaRouter.RouteInfo);
     method public void onRouteChanged(android.media.MediaRouter, android.media.MediaRouter.RouteInfo);
@@ -11580,6 +11584,7 @@ package android.media {
     method public void setIconDrawable(android.graphics.drawable.Drawable);
     method public void setIconResource(int);
     method public void setName(java.lang.CharSequence);
+    method public void setName(int);
     method public void setRemoteControlClient(android.media.RemoteControlClient);
     method public void setStatus(java.lang.CharSequence);
     method public void setTag(java.lang.Object);

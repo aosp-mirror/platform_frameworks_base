@@ -77,7 +77,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
     private GroupAdapter mGroupAdapter;
     private ListView mListView;
 
-    static final RouteComparator sComparator = new RouteComparator();
+    final RouteComparator mComparator = new RouteComparator();
 
     public MediaRouteChooserDialogFragment() {
         setStyle(STYLE_NO_TITLE, R.style.Theme_DeviceDefault_Dialog);
@@ -100,11 +100,11 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
             mLauncherListener.onDetached(this);
         }
         if (mGroupAdapter != null) {
-            mRouter.removeCallback(mGroupAdapter);
+            mRouter.removeCallback(mGroupAdapter.mCallback);
             mGroupAdapter = null;
         }
         if (mAdapter != null) {
-            mRouter.removeCallback(mAdapter);
+            mRouter.removeCallback(mAdapter.mCallback);
             mAdapter = null;
         }
         mInflater = null;
@@ -146,14 +146,14 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
         list.setOnItemClickListener(mAdapter);
 
         mListView = list;
-        mRouter.addCallback(mRouteTypes, mAdapter);
+        mRouter.addCallback(mRouteTypes, mAdapter.mCallback);
 
         return layout;
     }
 
     void onExpandGroup(RouteGroup info) {
         mGroupAdapter = new GroupAdapter(info);
-        mRouter.addCallback(mRouteTypes, mGroupAdapter);
+        mRouter.addCallback(mRouteTypes, mGroupAdapter.mCallback);
         mListView.setAdapter(mGroupAdapter);
         mListView.setOnItemClickListener(mGroupAdapter);
         mListView.setItemsCanFocus(false);
@@ -172,7 +172,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
         mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         mListView.setItemChecked(mAdapter.getSelectedRoutePosition(), true);
 
-        mRouter.removeCallback(mGroupAdapter);
+        mRouter.removeCallback(mGroupAdapter.mCallback);
         mGroupAdapter = null;
 
         getDialog().setCanceledOnTouchOutside(true);
@@ -205,14 +205,14 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
         public int position;
     }
 
-    private class RouteAdapter extends BaseAdapter implements MediaRouter.Callback,
-            ListView.OnItemClickListener {
+    private class RouteAdapter extends BaseAdapter implements ListView.OnItemClickListener {
         private static final int VIEW_TOP_HEADER = 0;
         private static final int VIEW_SECTION_HEADER = 1;
         private static final int VIEW_ROUTE = 2;
 
         private int mSelectedItemPosition;
         private final ArrayList<Object> mItems = new ArrayList<Object>();
+        final MediaRouterCallback mCallback = new MediaRouterCallback();
 
         RouteAdapter() {
             update();
@@ -333,7 +333,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
 
         void bindItemView(int position, ViewHolder holder) {
             RouteInfo info = (RouteInfo) mItems.get(position);
-            holder.text1.setText(info.getName());
+            holder.text1.setText(info.getName(getActivity()));
             final CharSequence status = info.getStatus();
             if (TextUtils.isEmpty(status)) {
                 holder.text2.setVisibility(View.GONE);
@@ -363,47 +363,11 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
 
         void bindHeaderView(int position, ViewHolder holder) {
             RouteCategory cat = (RouteCategory) mItems.get(position);
-            holder.text1.setText(cat.getName());
+            holder.text1.setText(cat.getName(getActivity()));
         }
 
         public int getSelectedRoutePosition() {
             return mSelectedItemPosition;
-        }
-
-        @Override
-        public void onRouteSelected(MediaRouter router, int type, RouteInfo info) {
-            update();
-        }
-
-        @Override
-        public void onRouteUnselected(MediaRouter router, int type, RouteInfo info) {
-            update();
-        }
-
-        @Override
-        public void onRouteAdded(MediaRouter router, RouteInfo info) {
-            update();
-        }
-
-        @Override
-        public void onRouteRemoved(MediaRouter router, RouteInfo info) {
-            update();
-        }
-
-        @Override
-        public void onRouteChanged(MediaRouter router, RouteInfo info) {
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public void onRouteGrouped(MediaRouter router, RouteInfo info,
-                RouteGroup group, int index) {
-            update();
-        }
-
-        @Override
-        public void onRouteUngrouped(MediaRouter router, RouteInfo info, RouteGroup group) {
-            update();
         }
 
         @Override
@@ -414,7 +378,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
                 // Oops. Stale event running around? Skip it.
                 return;
             }
-            mRouter.selectRoute(mRouteTypes, (RouteInfo) item);
+            mRouter.selectRouteInt(mRouteTypes, (RouteInfo) item);
             dismiss();
         }
 
@@ -428,10 +392,47 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
                 onExpandGroup((RouteGroup) getItem(position));
             }
         }
+
+        class MediaRouterCallback extends MediaRouter.Callback {
+            @Override
+            public void onRouteSelected(MediaRouter router, int type, RouteInfo info) {
+                update();
+            }
+
+            @Override
+            public void onRouteUnselected(MediaRouter router, int type, RouteInfo info) {
+                update();
+            }
+
+            @Override
+            public void onRouteAdded(MediaRouter router, RouteInfo info) {
+                update();
+            }
+
+            @Override
+            public void onRouteRemoved(MediaRouter router, RouteInfo info) {
+                update();
+            }
+
+            @Override
+            public void onRouteChanged(MediaRouter router, RouteInfo info) {
+                notifyDataSetChanged();
+            }
+
+            @Override
+            public void onRouteGrouped(MediaRouter router, RouteInfo info,
+                    RouteGroup group, int index) {
+                update();
+            }
+
+            @Override
+            public void onRouteUngrouped(MediaRouter router, RouteInfo info, RouteGroup group) {
+                update();
+            }
+        }
     }
 
-    private class GroupAdapter extends BaseAdapter implements MediaRouter.Callback,
-            ListView.OnItemClickListener {
+    private class GroupAdapter extends BaseAdapter implements ListView.OnItemClickListener {
         private static final int VIEW_HEADER = 0;
         private static final int VIEW_ROUTE = 1;
         private static final int VIEW_DONE = 2;
@@ -441,6 +442,8 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
         private final ArrayList<RouteInfo> mTempList = new ArrayList<RouteInfo>();
         private final ArrayList<RouteInfo> mFlatRoutes = new ArrayList<RouteInfo>();
         private boolean mIgnoreUpdates;
+        
+        final MediaRouterCallback mCallback = new MediaRouterCallback();
 
         public GroupAdapter(RouteGroup primary) {
             mPrimary = primary;
@@ -493,7 +496,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
 
             // Sort by name. This will keep the route positions relatively stable even though they
             // will be repeatedly added and removed.
-            Collections.sort(mFlatRoutes, sComparator);
+            Collections.sort(mFlatRoutes, mComparator);
             notifyDataSetChanged();
         }
 
@@ -563,7 +566,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
 
         void bindItemView(int position, ViewHolder holder) {
             RouteInfo info = (RouteInfo) getItem(position);
-            holder.text1.setText(info.getName());
+            holder.text1.setText(info.getName(getActivity()));
             final CharSequence status = info.getStatus();
             if (TextUtils.isEmpty(status)) {
                 holder.text2.setVisibility(View.GONE);
@@ -574,49 +577,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
         }
 
         void bindHeaderView(int position, ViewHolder holder) {
-            holder.text1.setText(mCategory.getName());
-        }
-
-        @Override
-        public void onRouteSelected(MediaRouter router, int type, RouteInfo info) {
-        }
-
-        @Override
-        public void onRouteUnselected(MediaRouter router, int type, RouteInfo info) {
-        }
-
-        @Override
-        public void onRouteAdded(MediaRouter router, RouteInfo info) {
-            update();
-            initCheckedItems();
-        }
-
-        @Override
-        public void onRouteRemoved(MediaRouter router, RouteInfo info) {
-            if (info == mPrimary) {
-                // Can't keep grouping, clean it up.
-                onDoneGrouping();
-            } else {
-                update();
-                initCheckedItems();
-            }
-        }
-
-        @Override
-        public void onRouteChanged(MediaRouter router, RouteInfo info) {
-            update();
-        }
-
-        @Override
-        public void onRouteGrouped(MediaRouter router, RouteInfo info, RouteGroup group, int index) {
-            update();
-            initCheckedItems();
-        }
-
-        @Override
-        public void onRouteUngrouped(MediaRouter router, RouteInfo info, RouteGroup group) {
-            update();
-            initCheckedItems();
+            holder.text1.setText(mCategory.getName(getActivity()));
         }
 
         @Override
@@ -641,7 +602,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
                     if (mRouter.getSelectedRoute(mRouteTypes) == oldGroup) {
                         // Old group was selected but is now empty. Select the group
                         // we're manipulating since that's where the last route went.
-                        mRouter.selectRoute(mRouteTypes, mPrimary);
+                        mRouter.selectRouteInt(mRouteTypes, mPrimary);
                     }
                     mRouter.removeRouteInt(oldGroup);
                 }
@@ -664,12 +625,58 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
             update();
             initCheckedItems();
         }
+
+        class MediaRouterCallback extends MediaRouter.Callback {
+            @Override
+            public void onRouteSelected(MediaRouter router, int type, RouteInfo info) {
+            }
+
+            @Override
+            public void onRouteUnselected(MediaRouter router, int type, RouteInfo info) {
+            }
+
+            @Override
+            public void onRouteAdded(MediaRouter router, RouteInfo info) {
+                update();
+                initCheckedItems();
+            }
+
+            @Override
+            public void onRouteRemoved(MediaRouter router, RouteInfo info) {
+                if (info == mPrimary) {
+                    // Can't keep grouping, clean it up.
+                    onDoneGrouping();
+                } else {
+                    update();
+                    initCheckedItems();
+                }
+            }
+
+            @Override
+            public void onRouteChanged(MediaRouter router, RouteInfo info) {
+                update();
+            }
+
+            @Override
+            public void onRouteGrouped(MediaRouter router, RouteInfo info, RouteGroup group,
+                    int index) {
+                update();
+                initCheckedItems();
+            }
+
+            @Override
+            public void onRouteUngrouped(MediaRouter router, RouteInfo info, RouteGroup group) {
+                update();
+                initCheckedItems();
+            }
+        }
     }
 
-    static class RouteComparator implements Comparator<RouteInfo> {
+    class RouteComparator implements Comparator<RouteInfo> {
         @Override
         public int compare(RouteInfo lhs, RouteInfo rhs) {
-            return lhs.getName().toString().compareTo(rhs.getName().toString());
+            return lhs.getName(getActivity()).toString()
+                    .compareTo(rhs.getName(getActivity()).toString());
         }
     }
 
