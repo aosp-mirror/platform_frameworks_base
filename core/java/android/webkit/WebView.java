@@ -1660,7 +1660,7 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * See {@link ViewDebug.HierarchyHandler#dumpViewHierarchyWithProperties(String, int)}
+     * See {@link ViewDebug.HierarchyHandler#dumpViewHierarchyWithProperties(BufferedWriter, int)}
      * @hide
      */
     @Override

@@ -263,7 +263,7 @@ public class ViewDebug {
     public interface HierarchyHandler {
         /**
          * Dumps custom children to hierarchy viewer.
-         * See {@link ViewDebug#dumpViewWithProperties(Context, View, BufferedWriter, int)}
+         * See ViewDebug.dumpViewWithProperties(Context, View, BufferedWriter, int)
          * for the format
          *
          * An empty implementation should simply do nothing
