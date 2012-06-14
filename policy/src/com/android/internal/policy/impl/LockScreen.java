@@ -32,7 +32,6 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Vibrator;
@@ -254,29 +253,14 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         }
     }
 
-    // This code should be the same as that in SearchPanelView
-    public boolean isAssistantAvailable() {
-        Intent intent = getAssistIntent();
-        return intent == null ? false
-                : mContext.getPackageManager().queryIntentActivities(intent,
-                        PackageManager.MATCH_DEFAULT_ONLY).size() > 0;
+    private boolean isAssistantAvailable() {
+        SearchManager searchManager = getSearchManager();
+        return searchManager != null && searchManager.isAssistantAvailable();
     }
 
     private Intent getAssistIntent() {
-        Intent intent = null;
         SearchManager searchManager = getSearchManager();
-        if (searchManager != null) {
-            ComponentName globalSearchActivity = searchManager.getGlobalSearchActivity();
-            if (globalSearchActivity != null) {
-                intent = new Intent(Intent.ACTION_ASSIST);
-                intent.setPackage(globalSearchActivity.getPackageName());
-            } else {
-                Slog.w(TAG, "No global search activity");
-            }
-        } else {
-            Slog.w(TAG, "No SearchManager");
-        }
-        return intent;
+        return searchManager != null ? searchManager.getAssistIntent() : null;
     }
 
     private SearchManager getSearchManager() {
