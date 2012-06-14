@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
+import android.widget.ScrollView;
 import android.widget.TextSwitcher;
 
 import com.android.systemui.ExpandHelper;
@@ -47,6 +48,7 @@ public class StatusBarWindowView extends FrameLayout
     protected void onAttachedToWindow () {
         super.onAttachedToWindow();
         latestItems = (NotificationRowLayout) findViewById(R.id.latestItems);
+        ScrollView scroller = (ScrollView) findViewById(R.id.scroll);
         int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
         int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_max_height);
         mExpandHelper = new ExpandHelper(mContext, latestItems, minHeight, maxHeight);

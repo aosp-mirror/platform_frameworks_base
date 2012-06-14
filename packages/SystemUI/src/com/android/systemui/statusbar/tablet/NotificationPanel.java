@@ -24,6 +24,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Slog;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -33,6 +34,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
@@ -114,6 +116,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_max_height);
         mExpandHelper = new ExpandHelper(mContext, latestItems, minHeight, maxHeight);
         mExpandHelper.setEventSource(this);
+        mExpandHelper.setGravity(Gravity.BOTTOM);
     }
 
     private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
