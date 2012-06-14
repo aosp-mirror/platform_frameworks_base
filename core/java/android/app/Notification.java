@@ -1670,6 +1670,9 @@ public class Notification implements Parcelable
                 contentView.setTextViewText(R.id.text, overflowText);
                 contentView.setViewVisibility(R.id.overflow_divider, View.VISIBLE);
                 contentView.setViewVisibility(R.id.line3, View.VISIBLE);
+            } else {
+                contentView.setViewVisibility(R.id.overflow_divider, View.GONE);
+                contentView.setViewVisibility(R.id.line3, View.GONE);
             }
 
             return contentView;
@@ -1812,6 +1815,7 @@ public class Notification implements Parcelable
             // Remove the content text so line3 only shows if you have a summary
             final boolean hadThreeLines = (mBuilder.mContentText != null && mBuilder.mSubText != null);
             mBuilder.mContentText = null;
+
             RemoteViews contentView = getStandardView(R.layout.notification_template_big_text);
             
             if (hadThreeLines) {
