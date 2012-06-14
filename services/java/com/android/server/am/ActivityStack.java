@@ -1474,6 +1474,21 @@ final class ActivityStack {
             return true;
         }
 
+        // If the most recent activity was noHistory but was only stopped rather
+        // than stopped+finished because the device went to sleep, we need to make
+        // sure to finish it as we're making a new activity topmost.
+        final ActivityRecord last = mLastPausedActivity;
+        if (mService.mSleeping && last != null && !last.finishing) {
+            if ((last.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_HISTORY) != 0
+                    || (last.info.flags&ActivityInfo.FLAG_NO_HISTORY) != 0) {
+                if (DEBUG_STATES) {
+                    Slog.d(TAG, "no-history finish of " + last + " on new resume");
+                }
+                requestFinishActivityLocked(last.appToken, Activity.RESULT_CANCELED, null,
+                "no-history");
+            }
+        }
+
         if (prev != null && prev != next) {
             if (!prev.waitingVisible && next != null && !next.nowVisible) {
                 prev.waitingVisible = true;
@@ -3279,8 +3294,16 @@ final class ActivityStack {
         if ((r.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_HISTORY) != 0
                 || (r.info.flags&ActivityInfo.FLAG_NO_HISTORY) != 0) {
             if (!r.finishing) {
-                requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
-                        "no-history");
+                if (!mService.mSleeping) {
+                    if (DEBUG_STATES) {
+                        Slog.d(TAG, "no-history finish of " + r);
+                    }
+                    requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
+                            "no-history");
+                } else {
+                    if (DEBUG_STATES) Slog.d(TAG, "Not finishing noHistory " + r
+                            + " on stop because we're just sleeping");
+                }
             }
         }
 
@@ -3526,9 +3549,10 @@ final class ActivityStack {
     final boolean requestFinishActivityLocked(IBinder token, int resultCode,
             Intent resultData, String reason) {
         int index = indexOfTokenLocked(token);
-        if (DEBUG_RESULTS) Slog.v(
+        if (DEBUG_RESULTS || DEBUG_STATES) Slog.v(
                 TAG, "Finishing activity @" + index + ": token=" + token
-                + ", result=" + resultCode + ", data=" + resultData);
+                + ", result=" + resultCode + ", data=" + resultData
+                + ", reason=" + reason);
         if (index < 0) {
             return false;
         }
