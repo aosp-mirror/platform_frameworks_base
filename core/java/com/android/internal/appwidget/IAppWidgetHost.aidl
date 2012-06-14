@@ -24,6 +24,7 @@ import android.widget.RemoteViews;
 oneway interface IAppWidgetHost {
     void updateAppWidget(int appWidgetId, in RemoteViews views);
     void providerChanged(int appWidgetId, in AppWidgetProviderInfo info);
+    void providersChanged();
     void viewDataChanged(int appWidgetId, int viewId);
 }
 

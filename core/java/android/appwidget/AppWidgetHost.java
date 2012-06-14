@@ -41,7 +41,8 @@ public class AppWidgetHost {
 
     static final int HANDLE_UPDATE = 1;
     static final int HANDLE_PROVIDER_CHANGED = 2;
-    static final int HANDLE_VIEW_DATA_CHANGED = 3;
+    static final int HANDLE_PROVIDERS_CHANGED = 3;
+    static final int HANDLE_VIEW_DATA_CHANGED = 4;
 
     final static Object sServiceLock = new Object();
     static IAppWidgetService sService;
@@ -62,6 +63,11 @@ public class AppWidgetHost {
             Message msg = mHandler.obtainMessage(HANDLE_PROVIDER_CHANGED);
             msg.arg1 = appWidgetId;
             msg.obj = info;
+            msg.sendToTarget();
+        }
+
+        public void providersChanged() {
+            Message msg = mHandler.obtainMessage(HANDLE_PROVIDERS_CHANGED);
             msg.sendToTarget();
         }
 
@@ -86,6 +92,10 @@ public class AppWidgetHost {
                 }
                 case HANDLE_PROVIDER_CHANGED: {
                     onProviderChanged(msg.arg1, (AppWidgetProviderInfo)msg.obj);
+                    break;
+                }
+                case HANDLE_PROVIDERS_CHANGED: {
+                    onProvidersChanged();
                     break;
                 }
                 case HANDLE_VIEW_DATA_CHANGED: {
@@ -272,6 +282,14 @@ public class AppWidgetHost {
         if (v != null) {
             v.resetAppWidget(appWidget);
         }
+    }
+
+    /**
+     * Called when the set of available widgets changes (ie. widget containing packages
+     * are added, updated or removed, or widget components are enabled or disabled.)
+     */
+    protected void onProvidersChanged() {
+        // Do nothing
     }
 
     void updateAppWidgetView(int appWidgetId, RemoteViews views) {
