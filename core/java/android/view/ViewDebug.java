@@ -255,6 +255,35 @@ public class ViewDebug {
         boolean retrieveReturn() default false;
     }
 
+    /**
+     * Allows a View to inject custom children into HierarchyViewer. For example,
+     * WebView uses this to add its internal layer tree as a child to itself
+     * @hide
+     */
+    public interface HierarchyHandler {
+        /**
+         * Dumps custom children to hierarchy viewer.
+         * See {@link ViewDebug#dumpViewWithProperties(Context, View, BufferedWriter, int)}
+         * for the format
+         *
+         * An empty implementation should simply do nothing
+         *
+         * @param out The output writer
+         * @param level The indentation level
+         */
+        public void dumpViewHierarchyWithProperties(BufferedWriter out, int level);
+
+        /**
+         * Returns a View to enable grabbing screenshots from custom children
+         * returned in dumpViewHierarchyWithProperties.
+         *
+         * @param className The className of the view to find
+         * @param hashCode The hashCode of the view to find
+         * @return the View to capture from, or null if not found
+         */
+        public View findHierarchyView(String className, int hashCode);
+    }
+
     private static HashMap<Class<?>, Method[]> mCapturedViewMethodsForClasses = null;
     private static HashMap<Class<?>, Field[]> mCapturedViewFieldsForClasses = null;
 
@@ -759,6 +788,13 @@ public class ViewDebug {
             } else if (isRequestedView(view, className, hashCode)) {
                 return view;
             }
+            if (view instanceof HierarchyHandler) {
+                final View found = ((HierarchyHandler)view)
+                        .findHierarchyView(className, hashCode);
+                if (found != null) {
+                    return found;
+                }
+            }
         }
 
         return null;
@@ -782,6 +818,9 @@ public class ViewDebug {
             } else {
                 dumpViewWithProperties(context, view, out, level + 1);
             }
+        }
+        if (group instanceof HierarchyHandler) {
+            ((HierarchyHandler)group).dumpViewHierarchyWithProperties(out, level + 1);
         }
     }
 
