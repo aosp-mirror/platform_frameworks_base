@@ -1696,8 +1696,14 @@ public abstract class Layout {
         return text.getSpans(start, end, type);
     }
 
+    private char getEllipsisChar(TextUtils.TruncateAt method) {
+        return (method == TextUtils.TruncateAt.END_SMALL) ?
+                ELLIPSIS_TWO_DOTS[0] :
+                ELLIPSIS_NORMAL[0];
+    }
+
     private void ellipsize(int start, int end, int line,
-                           char[] dest, int destoff) {
+                           char[] dest, int destoff, TextUtils.TruncateAt method) {
         int ellipsisCount = getEllipsisCount(line);
 
         if (ellipsisCount == 0) {
@@ -1711,7 +1717,7 @@ public abstract class Layout {
             char c;
 
             if (i == ellipsisStart) {
-                c = '\u2026'; // ellipsis
+                c = getEllipsisChar(method); // ellipsis
             } else {
                 c = '\uFEFF'; // 0-width space
             }
@@ -1785,7 +1791,7 @@ public abstract class Layout {
             TextUtils.getChars(mText, start, end, dest, destoff);
 
             for (int i = line1; i <= line2; i++) {
-                mLayout.ellipsize(start, end, i, dest, destoff);
+                mLayout.ellipsize(start, end, i, dest, destoff, mMethod);
             }
         }
 
@@ -1890,4 +1896,6 @@ public abstract class Layout {
     /* package */ static final Directions DIRS_ALL_RIGHT_TO_LEFT =
         new Directions(new int[] { 0, RUN_LENGTH_MASK | RUN_RTL_FLAG });
 
+    /* package */ static final char[] ELLIPSIS_NORMAL = { '\u2026' }; // this is "..."
+    /* package */ static final char[] ELLIPSIS_TWO_DOTS = { '\u2025' }; // this is ".."
 }
