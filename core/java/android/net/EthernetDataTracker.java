@@ -221,6 +221,10 @@ public class EthernetDataTracker implements NetworkStateTracker {
                             mNetworkInfo.setExtraInfo(mHwAddr);
                         }
                     }
+
+                    // if a DHCP client had previously been started for this interface, then stop it
+                    NetworkUtils.stopDhcp(mIface);
+
                     reconnect();
                     break;
                 }
