@@ -22,6 +22,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Rect;
@@ -32,6 +33,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Slog;
 import android.view.KeyEvent;
 
 import java.util.List;
@@ -837,4 +839,32 @@ public class SearchManager
         }
     }
 
+    /**
+     * Returns true if the global assist activity is available.
+     * @return True if the assistant is available.
+     *
+     * @hide
+     */
+    public final boolean isAssistantAvailable() {
+        Intent intent = getAssistIntent();
+        return intent != null
+                && mContext.getPackageManager().queryIntentActivities(intent,
+                        PackageManager.MATCH_DEFAULT_ONLY).size() > 0;
+    }
+
+    /**
+     * Gets an intent to launch the global assist activity, or null if not available.
+     * @return The assist intent.
+     *
+     * @hide
+     */
+    public final Intent getAssistIntent() {
+        ComponentName globalSearchActivity = getGlobalSearchActivity();
+        if (globalSearchActivity != null) {
+            Intent intent = new Intent(Intent.ACTION_ASSIST);
+            intent.setPackage(globalSearchActivity.getPackageName());
+            return intent;
+        }
+        return null;
+    }
 }

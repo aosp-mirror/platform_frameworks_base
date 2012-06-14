@@ -620,8 +620,11 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_RO              = 217;
     /** Key code constant: Japanese kana key. */
     public static final int KEYCODE_KANA            = 218;
+    /** Key code constant: Assist key.
+     * Launches the global assist activity.  Not delivered to applications. */
+    public static final int KEYCODE_ASSIST          = 219;
 
-    private static final int LAST_KEYCODE           = KEYCODE_KANA;
+    private static final int LAST_KEYCODE           = KEYCODE_ASSIST;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -862,6 +865,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         names.append(KEYCODE_YEN, "KEYCODE_YEN");
         names.append(KEYCODE_RO, "KEYCODE_RO");
         names.append(KEYCODE_KANA, "KEYCODE_KANA");
+        names.append(KEYCODE_ASSIST, "KEYCODE_ASSIST");
     };
 
     // Symbolic names of all metakeys in bit order from least significant to most significant.
