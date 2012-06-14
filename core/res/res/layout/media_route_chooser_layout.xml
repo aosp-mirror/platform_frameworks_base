@@ -45,10 +45,4 @@
     <ListView android:id="@id/list"
               android:layout_width="match_parent"
               android:layout_height="wrap_content" />
-    <Button android:id="@+id/done"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="?android:attr/borderlessButtonStyle"
-            android:text="@string/media_route_chooser_grouping_done"
-            android:visibility="gone" />
 </LinearLayout>
