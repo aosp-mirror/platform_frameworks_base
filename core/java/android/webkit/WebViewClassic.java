@@ -1318,7 +1318,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         case WebViewInputDispatcher.EVENT_TYPE_LONG_PRESS:
             HitTestResult hitTest = getHitTestResult();
             if (hitTest != null) {
-                performLongClick();
+                mWebView.performLongClick();
             }
             break;
         case WebViewInputDispatcher.EVENT_TYPE_DOUBLE_TAP:
@@ -7337,7 +7337,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     // the states
                     mGotCenterDown = false;
                     mTrackballDown = false;
-                    performLongClick();
+                    mWebView.performLongClick();
                     break;
 
                 case WEBCORE_NEED_TOUCH_EVENTS:
