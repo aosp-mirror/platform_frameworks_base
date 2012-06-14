@@ -3926,10 +3926,9 @@ public final class ViewRootImpl implements ViewParent,
     }
     
     public void dumpGfxInfo(int[] info) {
+        info[0] = info[1] = 0;
         if (mView != null) {
             getGfxInfo(mView, info);
-        } else {
-            info[0] = info[1] = 0;
         }
     }
 
