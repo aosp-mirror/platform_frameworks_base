@@ -5405,9 +5405,6 @@
         <!-- Outer radius of glow area. Target icons will be drawn on this circle. -->
         <attr name="outerRadius"/>
 
-        <!-- Size of target radius. Points within this distance of target center is a "hit". -->
-        <attr name="hitRadius"/>
-
         <!-- Radius of glow under finger. -->
         <attr name="glowRadius" format="dimension" />
 
@@ -5449,9 +5446,6 @@
 
         <!-- Outer radius of target circle. Icons will be drawn on this circle. -->
         <attr name="outerRadius" format="dimension" />
-
-        <!-- Size of target radius. Points within this distance of target center is a "hit". -->
-        <attr name="hitRadius" format="dimension" />
 
         <!-- Tactile feedback duration for actions. Set to '0' for no vibration. -->
         <attr name="vibrationDuration" format="integer"/>
