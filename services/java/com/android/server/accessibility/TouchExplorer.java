@@ -312,9 +312,9 @@ public class TouchExplorer {
         switch (eventType) {
             case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
             case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED: {
-                if (mInjectedPointerTracker.mLastInjectedHoverEvent != null) {
-                    mInjectedPointerTracker.mLastInjectedHoverEvent.recycle();
-                    mInjectedPointerTracker.mLastInjectedHoverEvent = null;
+                if (mInjectedPointerTracker.mLastInjectedHoverEventForClick != null) {
+                    mInjectedPointerTracker.mLastInjectedHoverEventForClick.recycle();
+                    mInjectedPointerTracker.mLastInjectedHoverEventForClick = null;
                 }
                 mLastTouchedWindowId = -1;
             } break;
@@ -1077,7 +1077,8 @@ public class TouchExplorer {
             final int pointerId = secondTapUp.getPointerId(secondTapUp.getActionIndex());
             final int pointerIndex = secondTapUp.findPointerIndex(pointerId);
 
-            MotionEvent lastExploreEvent = mInjectedPointerTracker.getLastInjectedHoverEvent();
+            MotionEvent lastExploreEvent =
+                mInjectedPointerTracker.getLastInjectedHoverEventForClick();
             if (lastExploreEvent == null) {
                 // No last touch explored event but there is accessibility focus in
                 // the active window. We click in the middle of the focus bounds.
@@ -1328,7 +1329,8 @@ public class TouchExplorer {
             final int pointerId = mEvent.getPointerId(mEvent.getActionIndex());
             final int pointerIndex = mEvent.findPointerIndex(pointerId);
 
-            MotionEvent lastExploreEvent = mInjectedPointerTracker.getLastInjectedHoverEvent();
+            MotionEvent lastExploreEvent =
+                mInjectedPointerTracker.getLastInjectedHoverEventForClick();
             if (lastExploreEvent == null) {
                 // No last touch explored event but there is accessibility focus in
                 // the active window. We click in the middle of the focus bounds.
@@ -1482,6 +1484,9 @@ public class TouchExplorer {
         // The last injected hover event.
         private MotionEvent mLastInjectedHoverEvent;
 
+        // The last injected hover event used for performing clicks.
+        private MotionEvent mLastInjectedHoverEventForClick;
+
         /**
          * Processes an injected {@link MotionEvent} event.
          *
@@ -1513,6 +1518,10 @@ public class TouchExplorer {
                         mLastInjectedHoverEvent.recycle();
                     }
                     mLastInjectedHoverEvent = MotionEvent.obtain(event);
+                    if (mLastInjectedHoverEventForClick != null) {
+                        mLastInjectedHoverEventForClick.recycle();
+                    }
+                    mLastInjectedHoverEventForClick = MotionEvent.obtain(event);
                 } break;
             }
             if (DEBUG) {
@@ -1564,6 +1573,13 @@ public class TouchExplorer {
          */
         public MotionEvent getLastInjectedHoverEvent() {
             return mLastInjectedHoverEvent;
+        }
+
+        /**
+         * @return The the last injected hover event.
+         */
+        public MotionEvent getLastInjectedHoverEventForClick() {
+            return mLastInjectedHoverEventForClick;
         }
 
         @Override
