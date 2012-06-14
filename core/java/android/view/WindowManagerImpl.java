@@ -530,13 +530,16 @@ public class WindowManagerImpl implements WindowManager {
 
                     for (int i = 0; i < count; i++) {
                         ViewRootImpl root = mRoots[i];
+                        String name = getWindowName(root);
+                        pw.printf("\n\t%s", name);
+
                         HardwareRenderer renderer = root.getView().mAttachInfo.mHardwareRenderer;
                         if (renderer != null) {
                             renderer.dumpGfxInfo(pw);
                         }
                     }
 
-                    pw.println("\nView hierarchy:");
+                    pw.println("\nView hierarchy:\n");
 
                     int viewsCount = 0;
                     int displayListsSize = 0;
@@ -546,15 +549,14 @@ public class WindowManagerImpl implements WindowManager {
                         ViewRootImpl root = mRoots[i];
                         root.dumpGfxInfo(info);
 
-                        String name = root.getClass().getName() + '@' +
-                                Integer.toHexString(hashCode());                        
-                        pw.printf("  %s: %d views, %.2f kB (display lists)",
+                        String name = getWindowName(root);
+                        pw.printf("  %s\n  %d views, %.2f kB of display lists",
                                 name, info[0], info[1] / 1024.0f);
                         HardwareRenderer renderer = root.getView().mAttachInfo.mHardwareRenderer;
                         if (renderer != null) {
                             pw.printf(", %d frames rendered", renderer.getFrameCount());
                         }
-                        pw.printf("\n");
+                        pw.printf("\n\n");
 
                         viewsCount += info[0];
                         displayListsSize += info[1];
@@ -568,6 +570,11 @@ public class WindowManagerImpl implements WindowManager {
         } finally {
             pw.flush();
         }        
+    }
+
+    private static String getWindowName(ViewRootImpl root) {
+        return root.mWindowAttributes.getTitle() + "/" +
+                root.getClass().getName() + '@' + Integer.toHexString(root.hashCode());
     }
 
     public void setStoppedState(IBinder token, boolean stopped) {
