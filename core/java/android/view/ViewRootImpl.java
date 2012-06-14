@@ -76,7 +76,6 @@ import android.widget.Scroller;
 import com.android.internal.R;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.view.BaseSurfaceHolder;
-import com.android.internal.view.IInputMethodCallback;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.RootViewSurfaceTaker;
 
@@ -4667,22 +4666,19 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
     
-    static class InputMethodCallback extends IInputMethodCallback.Stub {
+    static final class InputMethodCallback implements InputMethodManager.FinishedEventCallback {
         private WeakReference<ViewRootImpl> mViewAncestor;
 
         public InputMethodCallback(ViewRootImpl viewAncestor) {
             mViewAncestor = new WeakReference<ViewRootImpl>(viewAncestor);
         }
 
+        @Override
         public void finishedEvent(int seq, boolean handled) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchImeFinishedEvent(seq, handled);
             }
-        }
-
-        public void sessionCreated(IInputMethodSession session) {
-            // Stub -- not for use in the client.
         }
     }
 

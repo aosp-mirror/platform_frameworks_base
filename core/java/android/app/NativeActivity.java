@@ -1,6 +1,5 @@
 package android.app;
 
-import com.android.internal.view.IInputMethodCallback;
 import com.android.internal.view.IInputMethodSession;
 
 import android.content.Context;
@@ -119,7 +118,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
         }
     }
     
-    static class InputMethodCallback extends IInputMethodCallback.Stub {
+    static final class InputMethodCallback implements InputMethodManager.FinishedEventCallback {
         WeakReference<NativeActivity> mNa;
 
         InputMethodCallback(NativeActivity na) {
@@ -132,11 +131,6 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
             if (na != null) {
                 na.finishPreDispatchKeyEventNative(na.mNativeHandle, seq, handled);
             }
-        }
-
-        @Override
-        public void sessionCreated(IInputMethodSession session) {
-            // Stub -- not for use in the client.
         }
     }
 
