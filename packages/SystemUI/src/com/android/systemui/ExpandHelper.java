@@ -23,11 +23,14 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.widget.ScrollView;
+import android.widget.FrameLayout;
 
 public class ExpandHelper implements Gefingerpoken, OnClickListener {
     public interface Callback {
@@ -38,7 +41,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     }
 
     private static final String TAG = "ExpandHelper";
-    protected static final boolean DEBUG = false;
+    protected static final boolean DEBUG = true;
     private static final long EXPAND_DURATION = 250;
     private static final long GLOW_DURATION = 150;
 
@@ -82,8 +85,11 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     private int mLargeSize;
     private float mMaximumStretch;
 
+    private int mGravity;
+
     private class ViewScaler {
         View mView;
+
         public ViewScaler() {}
         public void setView(View v) {
             mView = v;
@@ -119,6 +125,15 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         }
     }
 
+    /**
+     * Handle expansion gestures to expand and contract children of the callback.
+     *
+     * @param context application context
+     * @param callback the container that holds the items to be manipulated
+     * @param small the smallest allowable size for the manuipulated items.
+     * @param large the largest allowable size for the manuipulated items.
+     * @param scoller if non-null also manipulate the scroll position to obey the gravity.
+     */
     public ExpandHelper(Context context, Callback callback, int small, int large) {
         mSmallSize = small;
         mMaximumStretch = mSmallSize * STRETCH_INTERVAL;
@@ -126,7 +141,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         mContext = context;
         mCallback = callback;
         mScaler = new ViewScaler();
-
+        mGravity = Gravity.TOP;
         mScaleAnimation = ObjectAnimator.ofFloat(mScaler, "height", 0f);
         mScaleAnimation.setDuration(EXPAND_DURATION);
 
@@ -194,6 +209,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
                 span *= USE_SPAN ? 1f : 0f;
                 float drag = detector.getFocusY() - mInitialTouchFocusY;
                 drag *= USE_DRAG ? 1f : 0f;
+                drag *= mGravity == Gravity.BOTTOM ? -1f : 1f;
                 float pull = Math.abs(drag) + Math.abs(span) + 1f;
                 float hand = drag * Math.abs(drag) / pull + span * Math.abs(span) / pull;
                 if (DEBUG) Log.d(TAG, "current span handle is: " + hand);
@@ -225,6 +241,10 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
 
     public void setEventSource(View eventSource) {
         mEventSource = eventSource;
+    }
+
+    public void setGravity(int gravity) {
+        mGravity = gravity;
     }
 
     public void setGlow(float glow) {
