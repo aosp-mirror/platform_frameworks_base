@@ -934,10 +934,8 @@
     <string name="deleteText" msgid="7070985395199629156">"elimina"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Metodo inserimento"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Azioni testo"</string>
-    <!-- no translation found for low_internal_storage_view_title (5576272496365684834) -->
-    <skip />
-    <!-- no translation found for low_internal_storage_view_text (6640505817617414371) -->
-    <skip />
+    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Spazio di archiviazione in esaurimento"</string>
+    <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Alcune funzioni di sistema potrebbero non funzionare"</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"Annulla"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
@@ -1290,4 +1288,5 @@
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Altoparlanti dock"</string>
     <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"Audio HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
+    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Fine"</string>
 </resources>
