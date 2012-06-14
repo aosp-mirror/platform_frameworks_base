@@ -3237,7 +3237,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (delayed) {
                 a = new AlphaAnimation(1, 0);
                 a.setStartOffset(0);
-                a.setDuration(delayDuration - 50);
+                a.setDuration(delayDuration - 120);
                 a.setBackgroundColor(0xFF000000);
             } else {
                 a = createExitAnimationLocked(transit, duration);
