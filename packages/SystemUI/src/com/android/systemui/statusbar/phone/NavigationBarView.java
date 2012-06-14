@@ -225,9 +225,26 @@ public class NavigationBarView extends LinearLayout {
         final boolean disableRecent = ((disabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0);
         final boolean disableBack = ((disabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0);
 
+        setSlippery(disableHome && disableRecent && disableBack);
+
         getBackButton()   .setVisibility(disableBack       ? View.INVISIBLE : View.VISIBLE);
         getHomeButton()   .setVisibility(disableHome       ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent     ? View.INVISIBLE : View.VISIBLE);
+    }
+
+    public void setSlippery(boolean newSlippery) {
+        WindowManager.LayoutParams lp = (WindowManager.LayoutParams) getLayoutParams();
+        if (lp != null) {
+            boolean oldSlippery = (lp.flags & WindowManager.LayoutParams.FLAG_SLIPPERY) != 0;
+            if (!oldSlippery && newSlippery) {
+                lp.flags |= WindowManager.LayoutParams.FLAG_SLIPPERY;
+            } else if (oldSlippery && !newSlippery) {
+                lp.flags &= ~WindowManager.LayoutParams.FLAG_SLIPPERY;
+            } else {
+                return;
+            }
+            WindowManagerImpl.getDefault().updateViewLayout(this, lp);
+        }
     }
 
     public void setMenuVisibility(final boolean show) {
