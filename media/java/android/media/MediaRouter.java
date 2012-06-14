@@ -237,6 +237,13 @@ public class MediaRouter {
         addRoute(info);
     }
 
+    /**
+     * @hide Framework use only
+     */
+    public void addRouteInt(RouteInfo info) {
+        addRoute(info);
+    }
+
     static void addRoute(RouteInfo info) {
         final RouteCategory cat = info.getCategory();
         if (!sStatic.mCategories.contains(cat)) {
@@ -246,12 +253,9 @@ public class MediaRouter {
         if (cat.isGroupable() && !(info instanceof RouteGroup)) {
             // Enforce that any added route in a groupable category must be in a group.
             final RouteGroup group = new RouteGroup(info.getCategory());
+            group.addRoute(info);
             sStatic.mRoutes.add(group);
             dispatchRouteAdded(group);
-
-            final int at = group.getRouteCount();
-            group.addRoute(info);
-            dispatchRouteGrouped(info, group, at);
 
             info = group;
         } else {
@@ -282,11 +286,20 @@ public class MediaRouter {
     public void clearUserRoutes() {
         for (int i = 0; i < sStatic.mRoutes.size(); i++) {
             final RouteInfo info = sStatic.mRoutes.get(i);
-            if (info instanceof UserRouteInfo) {
+            // TODO Right now, RouteGroups only ever contain user routes.
+            // The code below will need to change if this assumption does.
+            if (info instanceof UserRouteInfo || info instanceof RouteGroup) {
                 removeRouteAt(i);
                 i--;
             }
         }
+    }
+
+    /**
+     * @hide internal use only
+     */
+    public void removeRouteInt(RouteInfo info) {
+        removeRoute(info);
     }
 
     static void removeRoute(RouteInfo info) {
@@ -300,6 +313,11 @@ public class MediaRouter {
                     found = true;
                     break;
                 }
+            }
+            if (info == sStatic.mSelectedRoute) {
+                // Removing the currently selected route? Select the default before we remove it.
+                // TODO: Be smarter about the route types here; this selects for all valid.
+                selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO | ROUTE_TYPE_USER, sStatic.mDefaultAudio);
             }
             if (!found) {
                 sStatic.mCategories.remove(removingCat);
@@ -320,6 +338,11 @@ public class MediaRouter {
                     found = true;
                     break;
                 }
+            }
+            if (info == sStatic.mSelectedRoute) {
+                // Removing the currently selected route? Select the default before we remove it.
+                // TODO: Be smarter about the route types here; this selects for all valid.
+                selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO | ROUTE_TYPE_USER, sStatic.mDefaultAudio);
             }
             if (!found) {
                 sStatic.mCategories.remove(removingCat);
@@ -478,7 +501,8 @@ public class MediaRouter {
 
     static void onA2dpDeviceConnected() {
         final RouteInfo info = new RouteInfo(sStatic.mSystemCategory);
-        info.mName = "Bluetooth"; // TODO Fetch the real name of the device
+        info.mName = sStatic.mResources.getString(
+                com.android.internal.R.string.bluetooth_a2dp_audio_route_name);
         sStatic.mBluetoothA2dpRoute = info;
         addRoute(sStatic.mBluetoothA2dpRoute);
     }
@@ -567,9 +591,9 @@ public class MediaRouter {
 
         @Override
         public String toString() {
-            String supportedTypes = typesToString(mSupportedTypes);
-            return "RouteInfo{ name=" + mName + ", status=" + mStatus +
-                    " category=" + mCategory +
+            String supportedTypes = typesToString(getSupportedTypes());
+            return getClass().getSimpleName() + "{ name=" + getName() + ", status=" + getStatus() +
+                    " category=" + getCategory() +
                     " supportedTypes=" + supportedTypes + "}";
         }
     }
@@ -698,6 +722,7 @@ public class MediaRouter {
             }
             final int at = mRoutes.size();
             mRoutes.add(route);
+            route.mGroup = this;
             mUpdateName = true;
             dispatchRouteGrouped(route, this, at);
             routeUpdated();
@@ -720,6 +745,7 @@ public class MediaRouter {
                             " group category=" + mCategory + ")");
             }
             mRoutes.add(insertAt, route);
+            route.mGroup = this;
             mUpdateName = true;
             dispatchRouteGrouped(route, this, insertAt);
             routeUpdated();
@@ -736,6 +762,7 @@ public class MediaRouter {
                         " is not a member of this group.");
             }
             mRoutes.remove(route);
+            route.mGroup = null;
             mUpdateName = true;
             dispatchRouteUngrouped(route, this);
             routeUpdated();
@@ -748,6 +775,7 @@ public class MediaRouter {
          */
         public void removeRoute(int index) {
             RouteInfo route = mRoutes.remove(index);
+            route.mGroup = null;
             mUpdateName = true;
             dispatchRouteUngrouped(route, this);
             routeUpdated();
@@ -799,6 +827,18 @@ public class MediaRouter {
             setStatusInt(status);
         }
 
+        @Override
+        void routeUpdated() {
+            int types = 0;
+            final int count = mRoutes.size();
+            for (int i = 0; i < count; i++) {
+                types |= mRoutes.get(i).mSupportedTypes;
+            }
+            mSupportedTypes = types;
+            mIcon = count == 1 ? mRoutes.get(0).getIconDrawable() : null;
+            super.routeUpdated();
+        }
+
         void updateName() {
             final StringBuilder sb = new StringBuilder();
             final int count = mRoutes.size();
@@ -809,6 +849,19 @@ public class MediaRouter {
             }
             mName = sb.toString();
             mUpdateName = false;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(super.toString());
+            sb.append('[');
+            final int count = mRoutes.size();
+            for (int i = 0; i < count; i++) {
+                if (i > 0) sb.append(", ");
+                sb.append(mRoutes.get(i));
+            }
+            sb.append(']');
+            return sb.toString();
         }
     }
 
@@ -884,7 +937,7 @@ public class MediaRouter {
 
         public String toString() {
             return "RouteCategory{ name=" + mName + " types=" + typesToString(mTypes) +
-                    " groupable=" + mGroupable + " routes=" + sStatic.mRoutes.size() + " }";
+                    " groupable=" + mGroupable + " }";
         }
     }
 

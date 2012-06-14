@@ -14,10 +14,9 @@
      limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.internal.view.CheckableLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="?android:attr/listPreferredItemHeight"
-              android:background="@drawable/item_background_activated_holo_dark"
               android:gravity="center_vertical">
 
     <ImageView android:layout_width="56dp"
@@ -49,13 +48,12 @@
                   android:textAppearance="?android:attr/textAppearanceSmall" />
     </LinearLayout>
 
-    <com.android.internal.view.ImageButtonNoParentPress
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:id="@+id/expand_button"
-        android:background="?android:attr/selectableItemBackground"
-        android:src="@drawable/ic_media_group_expand"
-        android:scaleType="center"
-        android:visibility="gone" />
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="16dp"
+        android:id="@+id/check"
+        android:focusable="false"
+        android:clickable="false" />
 
-</LinearLayout>
+</com.android.internal.view.CheckableLinearLayout>
