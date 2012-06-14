@@ -110,11 +110,8 @@
     <!-- The width of the view containing the menu status bar icon -->
     <dimen name="navigation_menu_key_width">40dip</dimen>
 
-    <!-- Default distance beyond which snaps to the target radius -->
-    <dimen name="navbar_search_snap_margin">20dip</dimen>
-
-    <!-- Default distance from each snap target considers a "hit" -->
-    <dimen name="navbar_search_hit_radius">60dip</dimen>
+    <!-- Default distance beyond which snaps to the matching target -->
+    <dimen name="navbar_search_snap_margin">40dip</dimen>
 
     <!-- Diameter of outer shape drawable shown in navbar search-->
     <dimen name="navbar_search_outerring_diameter">340dp</dimen>

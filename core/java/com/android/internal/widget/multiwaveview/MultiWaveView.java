@@ -119,7 +119,6 @@ public class MultiWaveView extends View {
     private int mMaxTargetWidth;
 
     private float mOuterRadius = 0.0f;
-    private float mHitRadius = 0.0f;
     private float mSnapMargin = 0.0f;
     private boolean mDragging;
     private int mNewTargetResources;
@@ -213,7 +212,6 @@ public class MultiWaveView extends View {
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MultiWaveView);
         mOuterRadius = a.getDimension(R.styleable.MultiWaveView_outerRadius, mOuterRadius);
-        mHitRadius = a.getDimension(R.styleable.MultiWaveView_hitRadius, mHitRadius);
         mSnapMargin = a.getDimension(R.styleable.MultiWaveView_snapMargin, mSnapMargin);
         mVibrationDuration = a.getInt(R.styleable.MultiWaveView_vibrationDuration,
                 mVibrationDuration);
@@ -277,7 +275,6 @@ public class MultiWaveView extends View {
 
     private void dump() {
         Log.v(TAG, "Outer Radius = " + mOuterRadius);
-        Log.v(TAG, "HitRadius = " + mHitRadius);
         Log.v(TAG, "SnapMargin = " + mSnapMargin);
         Log.v(TAG, "FeedbackCount = " + mFeedbackCount);
         Log.v(TAG, "VibrationDuration = " + mVibrationDuration);
@@ -823,7 +820,6 @@ public class MultiWaveView extends View {
         final int historySize = event.getHistorySize();
         ArrayList<TargetDrawable> targets = mTargetDrawables;
         int ntargets = targets.size();
-        final boolean singleTarget = ntargets == 1;
         float x = 0.0f;
         float y = 0.0f;
         for (int k = 0; k < historySize + 1; k++) {
@@ -836,31 +832,29 @@ public class MultiWaveView extends View {
             final float scale = touchRadius > mOuterRadius ? mOuterRadius / touchRadius : 1.0f;
             float limitX = tx * scale;
             float limitY = ty * scale;
+            double angleRad = Math.atan2(-ty, tx);
 
             if (!mDragging) {
                 trySwitchToFirstTouchState(eventX, eventY);
             }
 
             if (mDragging) {
-                if (singleTarget) {
-                    // Snap to outer ring if there's only one target
-                    float snapRadius = mOuterRadius - mSnapMargin;
-                    if (touchRadius > snapRadius) {
-                        activeTarget = 0;
-                    }
-                } else {
-                    // For more than one target, snap to the closest one less than hitRadius away.
-                    float best = Float.MAX_VALUE;
-                    final float hitRadius2 = mHitRadius * mHitRadius;
-                    // Find first target in range
-                    for (int i = 0; i < ntargets; i++) {
-                        TargetDrawable target = targets.get(i);
-                        float dx = limitX - target.getX();
-                        float dy = limitY - target.getY();
-                        float dist2 = dx*dx + dy*dy;
-                        if (target.isEnabled() && dist2 < hitRadius2 && dist2 < best) {
+                // For multiple targets, snap to the one that matches
+                final float snapRadius = mOuterRadius - mSnapMargin;
+                final float snapDistance2 = snapRadius * snapRadius;
+                // Find first target in range
+                for (int i = 0; i < ntargets; i++) {
+                    TargetDrawable target = targets.get(i);
+
+                    double targetMinRad = (i - 0.5) * 2 * Math.PI / ntargets;
+                    double targetMaxRad = (i + 0.5) * 2 * Math.PI / ntargets;
+                    if (target.isEnabled()) {
+                        boolean angleMatches =
+                            (angleRad > targetMinRad && angleRad <= targetMaxRad) ||
+                            (angleRad + 2 * Math.PI > targetMinRad &&
+                             angleRad + 2 * Math.PI <= targetMaxRad);
+                        if (angleMatches && (dist2(tx, ty) > snapDistance2)) {
                             activeTarget = i;
-                            best = dist2;
                         }
                     }
                 }
@@ -875,10 +869,7 @@ public class MultiWaveView extends View {
 
         if (activeTarget != -1) {
             switchToState(STATE_SNAP, x,y);
-            TargetDrawable target = targets.get(activeTarget);
-            final float newX = singleTarget ? x : target.getX();
-            final float newY = singleTarget ? y : target.getY();
-            moveHandleTo(newX, newY, false);
+            moveHandleTo(x, y, false);
         } else {
             switchToState(STATE_TRACKING, x, y);
             moveHandleTo(x, y, false);
@@ -971,10 +962,6 @@ public class MultiWaveView extends View {
     private void assignDefaultsIfNeeded() {
         if (mOuterRadius == 0.0f) {
             mOuterRadius = Math.max(mOuterRing.getWidth(), mOuterRing.getHeight())/2.0f;
-        }
-        if (mHitRadius == 0.0f) {
-            // Use the radius of inscribed circle of the first target.
-            mHitRadius = mTargetDrawables.get(0).getWidth() / 2.0f;
         }
         if (mSnapMargin == 0.0f) {
             mSnapMargin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
