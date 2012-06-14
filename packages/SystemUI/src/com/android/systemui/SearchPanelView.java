@@ -23,7 +23,6 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -35,6 +34,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.widget.FrameLayout;
+
 import com.android.internal.widget.multiwaveview.GlowPadView;
 import com.android.internal.widget.multiwaveview.GlowPadView.OnTriggerListener;
 import com.android.systemui.R;
@@ -53,6 +53,7 @@ public class SearchPanelView extends FrameLayout implements
     private static final String ASSIST_ICON_METADATA_NAME =
             "com.android.systemui.action_assist_icon";
     private final Context mContext;
+    private final SearchManager mSearchManager;
     private BaseStatusBar mBar;
     private StatusBarTouchProxy mStatusBarTouchProxy;
 
@@ -73,38 +74,12 @@ public class SearchPanelView extends FrameLayout implements
         }
     }
 
-    private SearchManager mSearchManager;
-
-    // This code should be the same as that used in LockScreen.java
     public boolean isAssistantAvailable() {
-        Intent intent = getAssistIntent();
-        return intent == null ? false
-                : mContext.getPackageManager().queryIntentActivities(intent,
-                PackageManager.MATCH_DEFAULT_ONLY).size() > 0;
+        return mSearchManager != null && mSearchManager.isAssistantAvailable();
     }
 
     private Intent getAssistIntent() {
-        Intent intent = null;
-        SearchManager searchManager = getSearchManager();
-        if (searchManager != null) {
-            ComponentName globalSearchActivity = searchManager.getGlobalSearchActivity();
-            if (globalSearchActivity != null) {
-                intent = new Intent(Intent.ACTION_ASSIST);
-                intent.setPackage(globalSearchActivity.getPackageName());
-            } else {
-                Slog.w(TAG, "No global search activity");
-            }
-        } else {
-            Slog.w(TAG, "No SearchManager");
-        }
-        return intent;
-    }
-
-    private SearchManager getSearchManager() {
-        if (mSearchManager == null) {
-            mSearchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
-        }
-        return mSearchManager;
+        return mSearchManager != null ? mSearchManager.getAssistIntent() : null;
     }
 
     private void startAssistActivity() {
@@ -175,9 +150,8 @@ public class SearchPanelView extends FrameLayout implements
         // TODO: fetch views
         mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
         mGlowPadView.setOnTriggerListener(mGlowPadViewListener);
-        SearchManager searchManager = getSearchManager();
-        if (searchManager != null) {
-            ComponentName component = searchManager.getGlobalSearchActivity();
+        if (mSearchManager != null) {
+            ComponentName component = mSearchManager.getGlobalSearchActivity();
             if (component != null) {
                 if (!mGlowPadView.replaceTargetDrawablesIfPresent(component,
                         ASSIST_ICON_METADATA_NAME,

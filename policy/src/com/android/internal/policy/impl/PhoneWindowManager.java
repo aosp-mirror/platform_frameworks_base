@@ -19,6 +19,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IUiModeManager;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
 import android.app.UiModeManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -235,6 +236,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static public final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
     static public final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
     static public final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
+    static public final String SYSTEM_DIALOG_REASON_ASSIST = "assist";
 
     /**
      * These are the system UI flags that, when changing, can cause the layout
@@ -279,6 +281,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     LocalPowerManager mPowerManager;
     IStatusBarService mStatusBarService;
     Vibrator mVibrator; // Vibrator for giving feedback of orientation changes
+    SearchManager mSearchManager;
 
     // Vibrator pattern for haptic feedback of a long press.
     long[] mLongPressVibePattern;
@@ -462,6 +465,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Intent mDeskDockIntent;
     boolean mSearchKeyShortcutPending;
     boolean mConsumeSearchKeyUp;
+    boolean mAssistKeyLongPressed;
 
     // support for activating the lock screen while the screen is on
     boolean mAllowLockscreenWhenOn;
@@ -1860,6 +1864,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 showOrHideRecentAppsDialog(RECENT_APPS_BEHAVIOR_SHOW_OR_DISMISS);
             }
             return -1;
+        } else if (keyCode == KeyEvent.KEYCODE_ASSIST) {
+            if (down) {
+                if (repeatCount == 0) {
+                    mAssistKeyLongPressed = false;
+                } else if (repeatCount == 1) {
+                    mAssistKeyLongPressed = true;
+                    if (!keyguardOn) {
+                         launchAssistLongPressAction();
+                    }
+                }
+            } else {
+                if (mAssistKeyLongPressed) {
+                    mAssistKeyLongPressed = false;
+                } else {
+                    if (!keyguardOn) {
+                        launchAssistAction();
+                    }
+                }
+            }
+            return -1;
         }
 
         // Shortcuts are invoked through Search+key, so intercept those here
@@ -2048,6 +2072,50 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         return false;
+    }
+
+    private void launchAssistLongPressAction() {
+        performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+        sendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
+
+        // launch the search activity
+        Intent intent = new Intent(Intent.ACTION_SEARCH_LONG_PRESS);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        try {
+            SearchManager searchManager = getSearchManager();
+            if (searchManager != null) {
+                searchManager.stopSearch();
+            }
+            mContext.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Slog.w(TAG, "No activity to handle assist long press action.", e);
+        }
+    }
+
+    private void launchAssistAction() {
+        sendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
+
+        SearchManager searchManager = getSearchManager();
+        if (searchManager != null) {
+            Intent intent = searchManager.getAssistIntent();
+            if (intent != null) {
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                try {
+                    mContext.startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    Slog.w(TAG, "No activity to handle assist action.", e);
+                }
+            }
+        }
+    }
+
+    private SearchManager getSearchManager() {
+        if (mSearchManager == null) {
+            mSearchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
+        }
+        return mSearchManager;
     }
 
     /**
