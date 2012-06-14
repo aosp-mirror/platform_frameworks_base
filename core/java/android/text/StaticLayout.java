@@ -745,7 +745,8 @@ public class StaticLayout extends Layout {
         }
 
         float ellipsisWidth = paint.measureText(
-                (where == TextUtils.TruncateAt.END_SMALL) ? ELLIPSIS_TWO_DOTS : ELLIPSIS_NORMAL);
+                (where == TextUtils.TruncateAt.END_SMALL) ?
+                        ELLIPSIS_TWO_DOTS : ELLIPSIS_NORMAL, 0, 1);
         int ellipsisStart = 0;
         int ellipsisCount = 0;
         int len = lineEnd - lineStart;
@@ -984,9 +985,6 @@ public class StaticLayout extends Layout {
     private static final char CHAR_HYPHEN = '-';
 
     private static final double EXTRA_ROUNDING = 0.5;
-
-    private static final String ELLIPSIS_NORMAL = "\u2026"; // this is "..."
-    private static final String ELLIPSIS_TWO_DOTS = "\u2025"; // this is ".."
 
     private static final int CHAR_FIRST_HIGH_SURROGATE = 0xD800;
     private static final int CHAR_LAST_LOW_SURROGATE = 0xDFFF;
