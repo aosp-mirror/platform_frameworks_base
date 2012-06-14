@@ -790,7 +790,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             if (DEBUG) Log.v(TAG, "Starting activity " + intent);
             context.startActivity(intent, opts.toBundle());
         }
-        if (!usingDrawingCache) {
+        if (usingDrawingCache) {
             holder.thumbnailViewImage.setDrawingCacheEnabled(false);
         }
     }
