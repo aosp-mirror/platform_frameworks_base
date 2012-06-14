@@ -98,6 +98,9 @@ public class TouchExplorer {
     // the two dragging pointers as opposed to use the location of the primary one.
     private static final int MIN_POINTER_DISTANCE_TO_USE_MIDDLE_LOCATION_DIP = 200;
 
+    // The timeout after which we are no longer trying to detect a gesture.
+    private static final int EXIT_GESTURE_DETECTION_TIMEOUT = 2000;
+
     // Temporary array for storing pointer IDs.
     private final int[] mTempPointerIds = new int[MAX_POINTER_COUNT];
 
@@ -137,6 +140,9 @@ public class TouchExplorer {
 
     // Command for delayed sending of a long press.
     private final PerformLongPressDelayed mPerformLongPressDelayed;
+
+    // Command for exiting gesture detection mode after a timeout.
+    private final ExitGestureDetectionModeDelayed mExitGestureDetectionModeDelayed;
 
     // Helper to detect and react to double tap in touch explore mode.
     private final DoubleTapDetector mDoubleTapDetector;
@@ -212,6 +218,7 @@ public class TouchExplorer {
         mDoubleTapSlop = ViewConfiguration.get(context).getScaledDoubleTapSlop();
         mHandler = new Handler(context.getMainLooper());
         mPerformLongPressDelayed = new PerformLongPressDelayed();
+        mExitGestureDetectionModeDelayed = new ExitGestureDetectionModeDelayed();
         mGestureLibrary = GestureLibraries.fromRawResource(context, R.raw.accessibility_gestures);
         mGestureLibrary.setOrientationStyle(4);
         mGestureLibrary.load();
@@ -257,6 +264,7 @@ public class TouchExplorer {
         mSendHoverEnterDelayed.remove();
         mSendHoverExitDelayed.remove();
         mPerformLongPressDelayed.remove();
+        mExitGestureDetectionModeDelayed.remove();
         // Reset the pointer trackers.
         mReceivedPointerTracker.clear();
         mInjectedPointerTracker.clear();
@@ -420,6 +428,7 @@ public class TouchExplorer {
                                     mSendHoverEnterDelayed.remove();
                                     mSendHoverExitDelayed.remove();
                                     mPerformLongPressDelayed.remove();
+                                    mExitGestureDetectionModeDelayed.post();
                                 } else {
                                     // We have just decided that the user is touch,
                                     // exploring so start sending events.
@@ -727,6 +736,7 @@ public class TouchExplorer {
                 }
 
                 mStrokeBuffer.clear();
+                mExitGestureDetectionModeDelayed.remove();
                 mCurrentState = STATE_TOUCH_EXPLORING;
             } break;
             case MotionEvent.ACTION_CANCEL: {
@@ -1260,6 +1270,25 @@ public class TouchExplorer {
         final int pointerState = receivedTracker.getActivePointers()
                 & ~injectedTracker.getInjectedPointersDown();
         return Integer.bitCount(pointerState);
+    }
+
+    /**
+     * Class for delayed exiting from gesture detecting mode.
+     */
+    private final class ExitGestureDetectionModeDelayed implements Runnable {
+
+        public void post() {
+            mHandler.postDelayed(this, EXIT_GESTURE_DETECTION_TIMEOUT);
+        }
+
+        public void remove() {
+            mHandler.removeCallbacks(this);
+        }
+
+        @Override
+        public void run() {
+            clear();
+        }
     }
 
     /**
