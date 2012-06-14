@@ -500,8 +500,13 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     mUsbTetherRequested = false;
                 }
             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                if (VDBG) Log.d(TAG, "Tethering got CONNECTIVITY_ACTION");
-                mTetherMasterSM.sendMessage(TetherMasterSM.CMD_UPSTREAM_CHANGED);
+                NetworkInfo networkInfo = (NetworkInfo)intent.getParcelableExtra(
+                        ConnectivityManager.EXTRA_NETWORK_INFO);
+                if (networkInfo != null &&
+                        networkInfo.getDetailedState() != NetworkInfo.DetailedState.FAILED) {
+                    if (VDBG) Log.d(TAG, "Tethering got CONNECTIVITY_ACTION");
+                    mTetherMasterSM.sendMessage(TetherMasterSM.CMD_UPSTREAM_CHANGED);
+                }
             }
         }
     }
