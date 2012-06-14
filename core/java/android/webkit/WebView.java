@@ -35,8 +35,8 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -44,6 +44,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.AbsoluteLayout;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.util.Map;
 
@@ -263,7 +264,7 @@ import java.util.Map;
 @Widget
 public class WebView extends AbsoluteLayout
         implements ViewTreeObserver.OnGlobalFocusChangeListener,
-        ViewGroup.OnHierarchyChangeListener {
+        ViewGroup.OnHierarchyChangeListener, ViewDebug.HierarchyHandler {
 
     private static final String LOGTAG = "webview_proxy";
 
@@ -1004,6 +1005,7 @@ public class WebView extends AbsoluteLayout
      *
      * @return the current scale
      */
+    @ViewDebug.ExportedProperty(category = "webview")
     public float getScale() {
         checkThread();
         return mProvider.getScale();
@@ -1094,6 +1096,7 @@ public class WebView extends AbsoluteLayout
      *
      * @return the URL for the current page
      */
+    @ViewDebug.ExportedProperty(category = "webview")
     public String getUrl() {
         checkThread();
         return mProvider.getUrl();
@@ -1108,6 +1111,7 @@ public class WebView extends AbsoluteLayout
      *
      * @return the URL that was originally requested for the current page
      */
+    @ViewDebug.ExportedProperty(category = "webview")
     public String getOriginalUrl() {
         checkThread();
         return mProvider.getOriginalUrl();
@@ -1119,6 +1123,7 @@ public class WebView extends AbsoluteLayout
      *
      * @return the title for the current page
      */
+    @ViewDebug.ExportedProperty(category = "webview")
     public String getTitle() {
         checkThread();
         return mProvider.getTitle();
@@ -1161,6 +1166,7 @@ public class WebView extends AbsoluteLayout
      *
      * @return the height of the HTML content
      */
+    @ViewDebug.ExportedProperty(category = "webview")
     public int getContentHeight() {
         checkThread();
         return mProvider.getContentHeight();
@@ -1172,6 +1178,7 @@ public class WebView extends AbsoluteLayout
      * @return the width of the HTML content
      * @hide
      */
+    @ViewDebug.ExportedProperty(category = "webview")
     public int getContentWidth() {
         return mProvider.getContentWidth();
     }
@@ -1650,6 +1657,24 @@ public class WebView extends AbsoluteLayout
     public void debugDump() {
         checkThread();
         mProvider.debugDump();
+    }
+
+    /**
+     * See {@link ViewDebug.HierarchyHandler#dumpViewHierarchyWithProperties(String, int)}
+     * @hide
+     */
+    @Override
+    public void dumpViewHierarchyWithProperties(BufferedWriter out, int level) {
+        mProvider.dumpViewHierarchyWithProperties(out, level);
+    }
+
+    /**
+     * See {@link ViewDebug.HierarchyHandler#findHierarchyView(String, int)}
+     * @hide
+     */
+    @Override
+    public View findHierarchyView(String className, int hashCode) {
+        return mProvider.findHierarchyView(className, hashCode);
     }
 
     //-------------------------------------------------------------------------

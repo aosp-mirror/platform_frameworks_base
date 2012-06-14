@@ -117,6 +117,8 @@ import android.widget.Toast;
 
 import junit.framework.Assert;
 
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -132,6 +134,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -8594,6 +8597,54 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         WebViewCore.setShouldMonitorWebCoreThread();
     }
 
+    @Override
+    public void dumpViewHierarchyWithProperties(BufferedWriter out, int level) {
+        int layer = getBaseLayer();
+        if (layer != 0) {
+            try {
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                ViewStateSerializer.dumpLayerHierarchy(layer, stream, level);
+                stream.close();
+                byte[] buf = stream.toByteArray();
+                out.write(new String(buf, "ascii"));
+            } catch (IOException e) {}
+        }
+    }
+
+    @Override
+    public View findHierarchyView(String className, int hashCode) {
+        if (mNativeClass == 0) return null;
+        Picture pic = new Picture();
+        if (!nativeDumpLayerContentToPicture(mNativeClass, className, hashCode, pic)) {
+            return null;
+        }
+        return new PictureWrapperView(getContext(), pic, mWebView);
+    }
+
+    private static class PictureWrapperView extends View {
+        Picture mPicture;
+        WebView mWebView;
+
+        public PictureWrapperView(Context context, Picture picture, WebView parent) {
+            super(context);
+            mPicture = picture;
+            mWebView = parent;
+            setWillNotDraw(false);
+            setRight(mPicture.getWidth());
+            setBottom(mPicture.getHeight());
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            canvas.drawPicture(mPicture);
+        }
+
+        @Override
+        public boolean post(Runnable action) {
+            return mWebView.post(action);
+        }
+    }
+
     private native void     nativeCreate(int ptr, String drawableDir, boolean isHighEndGfx);
     private native void     nativeDebugDump();
     private static native void nativeDestroy(int ptr);
@@ -8614,6 +8665,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             int scrollingLayer);
     private native int      nativeGetBaseLayer(int nativeInstance);
     private native void     nativeCopyBaseContentToPicture(Picture pict);
+    private native boolean     nativeDumpLayerContentToPicture(int nativeInstance,
+            String className, int layerId, Picture pict);
     private native boolean  nativeHasContent();
     private native void     nativeStopGL(int ptr);
     private native void     nativeDiscardAllTextures();
