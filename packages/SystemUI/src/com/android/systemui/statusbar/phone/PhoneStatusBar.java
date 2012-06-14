@@ -1376,10 +1376,57 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (!mTracking)
             return;
         mTracking = false;
-        mPile.setLayerType(View.LAYER_TYPE_NONE, null);
+        setPileLayers(View.LAYER_TYPE_NONE);
         mVelocityTracker.recycle();
         mVelocityTracker = null;
         mCloseView.setPressed(false);
+    }
+
+    /**
+     * Enables or disables layers on the children of the notifications pile.
+     * 
+     * When layers are enabled, this method attempts to enable layers for the minimal
+     * number of children. Only children visible when the notification area is fully
+     * expanded will receive a layer. The technique used in this method might cause
+     * more children than necessary to get a layer (at most one extra child with the
+     * current UI.)
+     * 
+     * @param layerType {@link View#LAYER_TYPE_NONE} or {@link View#LAYER_TYPE_HARDWARE}
+     */
+    private void setPileLayers(int layerType) {
+        final int count = mPile.getChildCount();
+
+        switch (layerType) {
+            case View.LAYER_TYPE_NONE:
+                for (int i = 0; i < count; i++) {
+                    mPile.getChildAt(i).setLayerType(layerType, null);
+                }
+                break;
+            case View.LAYER_TYPE_HARDWARE:
+                final int[] location = new int[2]; 
+                mNotificationPanel.getLocationInWindow(location);
+
+                final int left = location[0];
+                final int top = location[1];
+                final int right = left + mNotificationPanel.getWidth();
+                final int bottom = top + getExpandedViewMaxHeight();
+
+                final Rect childBounds = new Rect();
+
+                for (int i = 0; i < count; i++) {
+                    final View view = mPile.getChildAt(i);
+                    view.getLocationInWindow(location);
+
+                    childBounds.set(location[0], location[1],
+                            location[0] + view.getWidth(), location[1] + view.getHeight());
+
+                    if (childBounds.intersects(left, top, right, bottom)) {
+                        view.setLayerType(layerType, null);
+                    }
+                }
+
+                break;
+        }
     }
 
     void incrementAnim(long frameTimeNanos) {
@@ -1421,7 +1468,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mCloseView.setPressed(true);
 
         mTracking = true;
-        mPile.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        setPileLayers(View.LAYER_TYPE_HARDWARE);
         mVelocityTracker = VelocityTracker.obtain();
         if (opening) {
             makeExpandedVisible(true);
