@@ -279,7 +279,7 @@ public class WindowAnimator {
                         }
                         mService.mFocusMayChange = true;
                     }
-                    if (win.isReadyForDisplay()) {
+                    if (win.isReadyForDisplay() && !winAnimator.isAnimating()) {
                         mForceHiding = true;
                     }
                     if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,

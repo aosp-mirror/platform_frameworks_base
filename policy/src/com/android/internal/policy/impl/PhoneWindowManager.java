@@ -2968,7 +2968,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     public boolean allowAppAnimationsLw() {
-        if (mKeyguard != null && mKeyguard.isVisibleLw()) {
+        if (mKeyguard != null && mKeyguard.isVisibleLw() && !mKeyguard.isAnimatingLw()) {
             // If keyguard is currently visible, no reason to animate
             // behind it.
             return false;
