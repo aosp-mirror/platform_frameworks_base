@@ -934,10 +934,8 @@
     <string name="deleteText" msgid="7070985395199629156">"poista"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Syöttötapa"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tekstitoiminnot"</string>
-    <!-- no translation found for low_internal_storage_view_title (5576272496365684834) -->
-    <skip />
-    <!-- no translation found for low_internal_storage_view_text (6640505817617414371) -->
-    <skip />
+    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Tallennustila loppumassa"</string>
+    <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Kaikki järjestelmätoiminnot eivät välttämättä toimi"</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"Peruuta"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
