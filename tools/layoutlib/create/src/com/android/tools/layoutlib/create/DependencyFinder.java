@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 
 package com.android.tools.layoutlib.create;
+
+import com.android.tools.layoutlib.annotations.VisibleForTesting;
+import com.android.tools.layoutlib.annotations.VisibleForTesting.Visibility;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
@@ -32,67 +35,115 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.Map.Entry;
-import java.util.regex.Pattern;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /**
  * Analyzes the input JAR using the ASM java bytecode manipulation library
- * to list the desired classes and their dependencies.
+ * to list the classes and their dependencies. A "dependency" is a class
+ * used by another class.
  */
-public class AsmAnalyzer {
+public class DependencyFinder {
 
     // Note: a bunch of stuff has package-level access for unit tests. Consider it private.
 
     /** Output logger. */
     private final Log mLog;
-    /** The input source JAR to parse. */
-    private final List<String> mOsSourceJar;
-    /** The generator to fill with the class list and dependency list. */
-    private final AsmGenerator mGen;
-    /** Keep all classes that derive from these one (these included). */
-    private final String[] mDeriveFrom;
-    /** Glob patterns of classes to keep, e.g. "com.foo.*" */
-    private final String[] mIncludeGlobs;
 
     /**
      * Creates a new analyzer.
      *
      * @param log The log output.
-     * @param osJarPath The input source JARs to parse.
-     * @param gen The generator to fill with the class list and dependency list.
-     * @param deriveFrom Keep all classes that derive from these one (these included).
-     * @param includeGlobs Glob patterns of classes to keep, e.g. "com.foo.*"
-     *        ("*" does not matches dots whilst "**" does, "." and "$" are interpreted as-is)
      */
-    public AsmAnalyzer(Log log, List<String> osJarPath, AsmGenerator gen,
-            String[] deriveFrom, String[] includeGlobs) {
+    public DependencyFinder(Log log) {
         mLog = log;
-        mGen = gen;
-        mOsSourceJar = osJarPath != null ? osJarPath : new ArrayList<String>();
-        mDeriveFrom = deriveFrom != null ? deriveFrom : new String[0];
-        mIncludeGlobs = includeGlobs != null ? includeGlobs : new String[0];
     }
 
     /**
      * Starts the analysis using parameters from the constructor.
-     * Fills the generator with classes & dependencies found.
+     *
+     * @param osJarPath The input source JARs to parse.
+     * @return A pair: [0]: map { class FQCN => set of FQCN class dependencies }.
+     *                 [1]: map { missing class FQCN => set of FQCN class that uses it. }
      */
-    public void analyze() throws IOException, LogAbortException {
-        Map<String, ClassReader> zipClasses = parseZip(mOsSourceJar);
-        mLog.info("Found %d classes in input JAR%s.", zipClasses.size(),
-                mOsSourceJar.size() > 1 ? "s" : "");
+    public List<Map<String, Set<String>>> findDeps(List<String> osJarPath) throws IOException {
 
-        Map<String, ClassReader> found = findIncludes(zipClasses);
-        Map<String, ClassReader> deps = findDeps(zipClasses, found);
+        Map<String, ClassReader> zipClasses = parseZip(osJarPath);
+        mLog.info("Found %d classes in input JAR%s.",
+                zipClasses.size(),
+                osJarPath.size() > 1 ? "s" : "");
 
-        if (mGen != null) {
-            mGen.setKeep(found);
-            mGen.setDeps(deps);
+        Map<String, Set<String>> deps = findClassesDeps(zipClasses);
+
+        Map<String, Set<String>> missing = findMissingClasses(deps, zipClasses.keySet());
+
+        List<Map<String, Set<String>>> result = new ArrayList<Map<String,Set<String>>>(2);
+        result.add(deps);
+        result.add(missing);
+        return result;
+    }
+
+    /**
+     * Prints dependencies to the current logger, found stuff and missing stuff.
+     */
+    public void printAllDeps(List<Map<String, Set<String>>> result) {
+        assert result.size() == 2;
+        Map<String, Set<String>> deps = result.get(0);
+        Map<String, Set<String>> missing = result.get(1);
+
+        // Print all dependences found in the format:
+        // +Found: <FQCN from zip>
+        //     uses: FQCN
+
+        mLog.info("++++++ %d Entries found in source JARs", deps.size());
+        mLog.info("");
+
+        for (Entry<String, Set<String>> entry : deps.entrySet()) {
+            mLog.info(    "+Found  : %s", entry.getKey());
+            for (String dep : entry.getValue()) {
+                mLog.info("    uses: %s", dep);
+            }
+
+            mLog.info("");
+        }
+
+
+        // Now print all missing dependences in the format:
+        // -Missing <FQCN>:
+        //     used by: <FQCN>
+
+        mLog.info("");
+        mLog.info("------ %d Entries missing from source JARs", missing.size());
+        mLog.info("");
+
+        for (Entry<String, Set<String>> entry : missing.entrySet()) {
+            mLog.info(    "-Missing  : %s", entry.getKey());
+            for (String dep : entry.getValue()) {
+                mLog.info("   used by: %s", dep);
+            }
+
+            mLog.info("");
         }
     }
+
+    /**
+     * Prints only a summary of the missing dependencies to the current logger.
+     */
+    public void printMissingDeps(List<Map<String, Set<String>>> result) {
+        assert result.size() == 2;
+        @SuppressWarnings("unused") Map<String, Set<String>> deps = result.get(0);
+        Map<String, Set<String>> missing = result.get(1);
+
+        for (String fqcn : missing.keySet()) {
+            mLog.info("%s", fqcn);
+        }
+    }
+
+    // ----------------
 
     /**
      * Parses a JAR file and returns a list of all classes founds using a map
@@ -143,170 +194,83 @@ public class AsmAnalyzer {
     }
 
     /**
-     * Process the "includes" arrays.
-     * <p/>
-     * This updates the in_out_found map.
+     * Finds all dependencies for all classes in keepClasses which are also
+     * listed in zipClasses. Returns a map of all the dependencies found.
      */
-    Map<String, ClassReader> findIncludes(Map<String, ClassReader> zipClasses)
-            throws LogAbortException {
-        TreeMap<String, ClassReader> found = new TreeMap<String, ClassReader>();
+    Map<String, Set<String>> findClassesDeps(Map<String, ClassReader> zipClasses) {
 
-        mLog.debug("Find classes to include.");
+        // The dependencies that we'll collect.
+        // It's a map Class name => uses class names.
+        Map<String, Set<String>> dependencyMap = new TreeMap<String, Set<String>>();
 
-        for (String s : mIncludeGlobs) {
-            findGlobs(s, zipClasses, found);
-        }
-        for (String s : mDeriveFrom) {
-            findClassesDerivingFrom(s, zipClasses, found);
-        }
+        DependencyVisitor visitor = getVisitor();
 
-        return found;
-    }
+        int count = 0;
+        try {
+            for (Entry<String, ClassReader> entry : zipClasses.entrySet()) {
+                String name = entry.getKey();
 
+                TreeSet<String> set = new TreeSet<String>();
+                dependencyMap.put(name, set);
+                visitor.setDependencySet(set);
 
-    /**
-     * Uses ASM to find the class reader for the given FQCN class name.
-     * If found, insert it in the in_out_found map.
-     * Returns the class reader object.
-     */
-    ClassReader findClass(String className, Map<String, ClassReader> zipClasses,
-            Map<String, ClassReader> inOutFound) throws LogAbortException {
-        ClassReader classReader = zipClasses.get(className);
-        if (classReader == null) {
-            throw new LogAbortException("Class %s not found by ASM in %s",
-                    className, mOsSourceJar);
-        }
+                ClassReader cr = entry.getValue();
+                cr.accept(visitor, 0 /* flags */);
 
-        inOutFound.put(className, classReader);
-        return classReader;
-    }
+                visitor.setDependencySet(null);
 
-    /**
-     * Insert in the inOutFound map all classes found in zipClasses that match the
-     * given glob pattern.
-     * <p/>
-     * The glob pattern is not a regexp. It only accepts the "*" keyword to mean
-     * "anything but a period". The "." and "$" characters match themselves.
-     * The "**" keyword means everything including ".".
-     * <p/>
-     * Examples:
-     * <ul>
-     * <li>com.foo.* matches all classes in the package com.foo but NOT sub-packages.
-     * <li>com.foo*.*$Event matches all internal Event classes in a com.foo*.* class.
-     * </ul>
-     */
-    void findGlobs(String globPattern, Map<String, ClassReader> zipClasses,
-            Map<String, ClassReader> inOutFound) throws LogAbortException {
-        // transforms the glob pattern in a regexp:
-        // - escape "." with "\."
-        // - replace "*" by "[^.]*"
-        // - escape "$" with "\$"
-        // - add end-of-line match $
-        globPattern = globPattern.replaceAll("\\$", "\\\\\\$");
-        globPattern = globPattern.replaceAll("\\.", "\\\\.");
-        // prevent ** from being altered by the next rule, then process the * rule and finally
-        // the real ** rule (which is now @)
-        globPattern = globPattern.replaceAll("\\*\\*", "@");
-        globPattern = globPattern.replaceAll("\\*", "[^.]*");
-        globPattern = globPattern.replaceAll("@", ".*");
-        globPattern += "$";
-
-        Pattern regexp = Pattern.compile(globPattern);
-
-        for (Entry<String, ClassReader> entry : zipClasses.entrySet()) {
-            String class_name = entry.getKey();
-            if (regexp.matcher(class_name).matches()) {
-                findClass(class_name, zipClasses, inOutFound);
+                mLog.debugNoln("Visited %d classes\r", ++count);
             }
+        } finally {
+            mLog.debugNoln("\n");
         }
+
+        return dependencyMap;
     }
 
     /**
-     * Checks all the classes defined in the JarClassName instance and uses BCEL to
-     * determine if they are derived from the given FQCN super class name.
-     * Inserts the super class and all the class objects found in the map.
+     * Computes which classes FQCN were found as dependencies that are NOT listed
+     * in the original JAR classes.
+     *
+     * @param deps The map { FQCN => dependencies[] } returned by {@link #findClassesDeps(Map)}.
+     * @param zipClasses The set of all classes FQCN found in the JAR files.
+     * @return A map { FQCN not found in the zipClasses => classes using it }
      */
-    void findClassesDerivingFrom(String super_name,
-            Map<String, ClassReader> zipClasses,
-            Map<String, ClassReader> inOutFound) {
-        for (Entry<String, ClassReader> entry : zipClasses.entrySet()) {
-            String className = entry.getKey();
-            if (super_name.equals(className)) {
-                continue;
-            }
-            ClassReader classReader = entry.getValue();
-            ClassReader parent_cr = classReader;
-            while (parent_cr != null) {
-                String parent_name = internalToBinaryClassName(parent_cr.getSuperName());
-                if (parent_name == null) {
-                    // not found
-                    break;
-                } else if (super_name.equals(parent_name)) {
-                    inOutFound.put(className, classReader);
-                    break;
+    private Map<String, Set<String>> findMissingClasses(
+            Map<String, Set<String>> deps,
+            Set<String> zipClasses) {
+        Map<String, Set<String>> missing = new TreeMap<String, Set<String>>();
+
+        for (Entry<String, Set<String>> entry : deps.entrySet()) {
+            String name = entry.getKey();
+
+            for (String dep : entry.getValue()) {
+                if (!zipClasses.contains(dep)) {
+                    // This dependency doesn't exist in the zip classes.
+                    Set<String> set = missing.get(dep);
+                    if (set == null) {
+                        set = new TreeSet<String>();
+                        missing.put(dep, set);
+                    }
+                    set.add(name);
                 }
-                parent_cr = zipClasses.get(parent_name);
             }
+
         }
+
+        return missing;
     }
+
+
+    // ----------------------------------
 
     /**
      * Instantiates a new DependencyVisitor. Useful for unit tests.
      */
-    DependencyVisitor getVisitor(Map<String, ClassReader> zipClasses,
-            Map<String, ClassReader> inKeep,
-            Map<String, ClassReader> outKeep,
-            Map<String, ClassReader> inDeps,
-            Map<String, ClassReader> outDeps) {
-        return new DependencyVisitor(zipClasses, inKeep, outKeep, inDeps, outDeps);
+    @VisibleForTesting(visibility=Visibility.PRIVATE)
+    DependencyVisitor getVisitor() {
+        return new DependencyVisitor();
     }
-
-    /**
-     * Finds all dependencies for all classes in keepClasses which are also
-     * listed in zipClasses. Returns a map of all the dependencies found.
-     */
-    Map<String, ClassReader> findDeps(Map<String, ClassReader> zipClasses,
-            Map<String, ClassReader> inOutKeepClasses) {
-
-        TreeMap<String, ClassReader> deps = new TreeMap<String, ClassReader>();
-        TreeMap<String, ClassReader> new_deps = new TreeMap<String, ClassReader>();
-        TreeMap<String, ClassReader> new_keep = new TreeMap<String, ClassReader>();
-        TreeMap<String, ClassReader> temp = new TreeMap<String, ClassReader>();
-
-        DependencyVisitor visitor = getVisitor(zipClasses,
-                inOutKeepClasses, new_keep,
-                deps, new_deps);
-
-        for (ClassReader cr : inOutKeepClasses.values()) {
-            cr.accept(visitor, 0 /* flags */);
-        }
-
-        while (new_deps.size() > 0 || new_keep.size() > 0) {
-            deps.putAll(new_deps);
-            inOutKeepClasses.putAll(new_keep);
-
-            temp.clear();
-            temp.putAll(new_deps);
-            temp.putAll(new_keep);
-            new_deps.clear();
-            new_keep.clear();
-            mLog.debug("Found %1$d to keep, %2$d dependencies.",
-                    inOutKeepClasses.size(), deps.size());
-
-            for (ClassReader cr : temp.values()) {
-                cr.accept(visitor, 0 /* flags */);
-            }
-        }
-
-        mLog.info("Found %1$d classes to keep, %2$d class dependencies.",
-                inOutKeepClasses.size(), deps.size());
-
-        return deps;
-    }
-
-
-
-    // ----------------------------------
 
     /**
      * Visitor to collect all the type dependencies from a class.
@@ -314,42 +278,24 @@ public class AsmAnalyzer {
     public class DependencyVisitor
         implements ClassVisitor, FieldVisitor, MethodVisitor, SignatureVisitor, AnnotationVisitor {
 
-        /** All classes found in the source JAR. */
-        private final Map<String, ClassReader> mZipClasses;
-        /** Classes from which dependencies are to be found. */
-        private final Map<String, ClassReader> mInKeep;
-        /** Dependencies already known. */
-        private final Map<String, ClassReader> mInDeps;
-        /** New dependencies found by this visitor. */
-        private final Map<String, ClassReader> mOutDeps;
-        /** New classes to keep as-is found by this visitor. */
-        private final Map<String, ClassReader> mOutKeep;
+        private Set<String> mCurrentDepSet;
 
         /**
          * Creates a new visitor that will find all the dependencies for the visited class.
-         * Types which are already in the zipClasses, keepClasses or inDeps are not marked.
-         * New dependencies are marked in outDeps.
-         *
-         * @param zipClasses All classes found in the source JAR.
-         * @param inKeep Classes from which dependencies are to be found.
-         * @param inDeps Dependencies already known.
-         * @param outDeps New dependencies found by this visitor.
          */
-        public DependencyVisitor(Map<String, ClassReader> zipClasses,
-                Map<String, ClassReader> inKeep,
-                Map<String, ClassReader> outKeep,
-                Map<String,ClassReader> inDeps,
-                Map<String,ClassReader> outDeps) {
-            mZipClasses = zipClasses;
-            mInKeep = inKeep;
-            mOutKeep = outKeep;
-            mInDeps = inDeps;
-            mOutDeps = outDeps;
+        public DependencyVisitor() {
+        }
+
+        /**
+         * Sets the {@link Set} where to record direct dependencies for this class.
+         * This will change before each {@link ClassReader#accept(ClassVisitor, int)} call.
+         */
+        public void setDependencySet(Set<String> set) {
+            mCurrentDepSet = set;
         }
 
         /**
          * Considers the given class name as a dependency.
-         * If it does, add to the mOutDeps map.
          */
         public void considerName(String className) {
             if (className == null) {
@@ -357,20 +303,6 @@ public class AsmAnalyzer {
             }
 
             className = internalToBinaryClassName(className);
-
-            // exclude classes that have already been found
-            if (mInKeep.containsKey(className) ||
-                    mOutKeep.containsKey(className) ||
-                    mInDeps.containsKey(className) ||
-                    mOutDeps.containsKey(className)) {
-                return;
-            }
-
-            // exclude classes that are not part of the JAR file being examined
-            ClassReader cr = mZipClasses.get(className);
-            if (cr == null) {
-                return;
-            }
 
             try {
                 // exclude classes that are part of the default JRE (the one executing this program)
@@ -381,14 +313,10 @@ public class AsmAnalyzer {
                 // ignore
             }
 
-            // accept this class:
-            // - android classes are added to dependencies
-            // - non-android classes are added to the list of classes to keep as-is (they don't need
-            //   to be stubbed).
-            if (className.indexOf("android") >= 0) {  // TODO make configurable
-                mOutDeps.put(className, cr);
-            } else {
-                mOutKeep.put(className, cr);
+            // Add it to the dependency set for the currently visited class, as needed.
+            assert mCurrentDepSet != null;
+            if (mCurrentDepSet != null) {
+                mCurrentDepSet.add(className);
             }
         }
 
@@ -435,15 +363,28 @@ public class AsmAnalyzer {
          * Considers a descriptor string. The descriptor is converted to a {@link Type}
          * and then considerType() is invoked.
          */
-        public void considerDesc(String desc) {
+        public boolean considerDesc(String desc) {
             if (desc != null) {
                 try {
-                    Type t = Type.getType(desc);
-                    considerType(t);
+                    if (desc.length() > 0 && desc.charAt(0) == '(') {
+                        // This is a method descriptor with arguments and a return type.
+                        Type t = Type.getReturnType(desc);
+                        considerType(t);
+
+                        for (Type arg : Type.getArgumentTypes(desc)) {
+                            considerType(arg);
+                        }
+
+                    } else {
+                        Type t = Type.getType(desc);
+                        considerType(t);
+                    }
+                    return true;
                 } catch (ArrayIndexOutOfBoundsException e) {
                     // ignore, not a valid type.
                 }
             }
+            return false;
         }
 
 
@@ -499,7 +440,11 @@ public class AsmAnalyzer {
 
         public void visitInnerClass(String name, String outerName, String innerName, int access) {
             // name is the internal name of an inner class (see getInternalName).
-            considerName(name);
+            // Note: outerName/innerName seems to be null when we're reading the
+            // _Original_ClassName classes generated by layoutlib_create.
+            if (outerName != null) {
+                considerName(name);
+            }
         }
 
         public MethodVisitor visitMethod(int access, String name, String desc,
@@ -537,8 +482,7 @@ public class AsmAnalyzer {
 
         // field instruction
         public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-            // name is the field's name.
-            considerName(name);
+            // name is the field's name, not a type.
             // desc is the field's descriptor (see Type).
             considerDesc(desc);
         }
@@ -599,7 +543,9 @@ public class AsmAnalyzer {
         public void visitMethodInsn(int opcode, String owner, String name, String desc) {
 
             // owner is the internal name of the method's owner class
-            considerName(owner);
+            if (!considerDesc(owner) && owner.indexOf('/') != -1) {
+                considerName(owner);
+            }
             // desc is the method's descriptor (see Type).
             considerDesc(desc);
         }
@@ -633,7 +579,9 @@ public class AsmAnalyzer {
         public void visitTypeInsn(int opcode, String type) {
             // type is the operand of the instruction to be visited. This operand must be the
             // internal name of an object or array class.
-            considerName(type);
+            if (!considerDesc(type) && type.indexOf('/') != -1) {
+                considerName(type);
+            }
         }
 
         public void visitVarInsn(int opcode, int var) {
@@ -742,6 +690,5 @@ public class AsmAnalyzer {
             // desc is the class descriptor of the enumeration class.
             considerDesc(desc);
         }
-
     }
 }
