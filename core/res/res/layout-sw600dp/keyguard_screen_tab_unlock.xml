@@ -98,7 +98,6 @@
             android:outerRadius="@dimen/glowpadview_target_placement_radius"
             android:innerRadius="@dimen/glowpadview_inner_radius"
             android:snapMargin="@dimen/glowpadview_snap_margin"
-            android:hitRadius="@dimen/glowpadview_hit_radius"
             android:feedbackCount="1"
             android:vibrationDuration="20"
             android:glowRadius="@dimen/glowpadview_glow_radius"

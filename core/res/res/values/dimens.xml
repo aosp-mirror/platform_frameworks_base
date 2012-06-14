@@ -79,11 +79,8 @@
     <!-- Default glow radius for GlowPadView -->
     <dimen name="glowpadview_glow_radius">75dip</dimen>
 
-    <!-- Default distance beyond which GlowPadView snaps to the target radius -->
-    <dimen name="glowpadview_snap_margin">20dip</dimen>
-
-    <!-- Default distance from each snap target that GlowPadView considers a "hit" -->
-    <dimen name="glowpadview_hit_radius">60dip</dimen>
+    <!-- Default distance beyond which GlowPadView snaps to the matching target -->
+    <dimen name="glowpadview_snap_margin">40dip</dimen>
 
     <!-- Default distance from each snap target that GlowPadView considers a "hit" -->
     <dimen name="glowpadview_inner_radius">15dip</dimen>
