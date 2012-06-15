@@ -202,8 +202,21 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
     private Runnable mRecreateRunnable = new Runnable() {
         public void run() {
-            updateScreen(mMode, true);
+            Mode mode = mMode;
+            // If we were previously in a locked state but now it's Unknown, it means the phone
+            // was previously locked because of SIM state and has since been resolved. This
+            // bit of code checks this condition and dismisses keyguard.
+            boolean dismissAfterCreation = false;
+            if (mode == Mode.UnlockScreen && getUnlockMode() == UnlockMode.Unknown) {
+                if (DEBUG) Log.v(TAG, "Switch to Mode.LockScreen because SIM unlocked");
+                mode = Mode.LockScreen;
+                dismissAfterCreation = true;
+            }
+            updateScreen(mode, true);
             restoreWidgetState();
+            if (dismissAfterCreation) {
+                mKeyguardScreenCallback.keyguardDone(false);
+            }
         }
     };
 
@@ -307,6 +320,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         }
 
         public void recreateMe(Configuration config) {
+            if (DEBUG) Log.v(TAG, "recreateMe()");
             removeCallbacks(mRecreateRunnable);
             post(mRecreateRunnable);
         }
@@ -524,6 +538,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     public void reset() {
         mIsVerifyUnlockOnly = false;
         mForgotPattern = false;
+        if (DEBUG) Log.v(TAG, "reset()");
         post(mRecreateRunnable);
     }
 
@@ -673,6 +688,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         if (DEBUG_CONFIGURATION) Log.v(TAG, "**** re-creating lock screen since config changed");
         saveWidgetState();
         removeCallbacks(mRecreateRunnable);
+        if (DEBUG) Log.v(TAG, "recreating lockscreen because config changed");
         post(mRecreateRunnable);
     }
 

@@ -105,6 +105,8 @@ public class KeyguardUpdateMonitor {
     protected static final int MSG_DPM_STATE_CHANGED = 309;
     protected static final int MSG_USER_CHANGED = 310;
 
+    protected static final boolean DEBUG_SIM_STATES = DEBUG || false;
+
     /**
      * When we receive a
      * {@link com.android.internal.telephony.TelephonyIntents#ACTION_SIM_STATE_CHANGED} broadcast,
@@ -292,6 +294,10 @@ public class KeyguardUpdateMonitor {
                             MSG_BATTERY_UPDATE, new BatteryStatus(status, level, plugged, health));
                     mHandler.sendMessage(msg);
                 } else if (TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(action)) {
+                    if (DEBUG_SIM_STATES) {
+                        Log.v(TAG, "action " + action + " state" +
+                            intent.getStringExtra(IccCard.INTENT_KEY_ICC_STATE));
+                    }
                     mHandler.sendMessage(mHandler.obtainMessage(
                             MSG_SIM_STATE_CHANGE, SimArgs.fromIntent(intent)));
                 } else if (AudioManager.RINGER_MODE_CHANGED_ACTION.equals(action)) {
@@ -407,6 +413,7 @@ public class KeyguardUpdateMonitor {
         }
 
         if (state != IccCard.State.UNKNOWN && state != mSimState) {
+            if (DEBUG_SIM_STATES) Log.v(TAG, "dispatching state: " + state);
             mSimState = state;
             for (int i = 0; i < mSimStateCallbacks.size(); i++) {
                 mSimStateCallbacks.get(i).onSimStateChanged(state);
