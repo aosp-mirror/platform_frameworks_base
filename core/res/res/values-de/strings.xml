@@ -1290,6 +1290,8 @@
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Dock-Lautsprecher"</string>
     <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"HDMI-Audio"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
+    <!-- no translation found for bluetooth_a2dp_audio_route_name (8575624030406771015) -->
+    <skip />
     <!-- no translation found for media_route_chooser_grouping_done (7966438307723317169) -->
     <skip />
 </resources>

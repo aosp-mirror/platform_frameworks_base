@@ -822,8 +822,8 @@
     <string name="searchview_description_submit" msgid="2688450133297983542">"Sorguyu gönder"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Sesli arama"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Dokunarak Keşfet etkinleştirilsin mi?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> Dokunarak Keşfet özelliğini etkinleştirmek istiyor. Dokunarak Keşfet açık olduğunda, parmağınızın altındaki öğelere ait açıklamaları duyabilir veya görebilir ya da tabletle etkileşimde bulunmak için ilgili hareketleri yapabilirsiniz."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>, Dokunarak Keşfet özelliğini etkinleştirmek istiyor. Dokunarak Keşfet açık olduğunda parmağınızın altındaki öğelere ait açıklamaları duyabilir veya görebilir ya da telefonla etkileşimde bulunmak için ilgili hareketleri yapabilirsiniz."</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> Dokunarak Keşfet özelliğini etkinleştirmek istiyor. Dokunarak Keşfet açık olduğunda, parmağınızın altındaki öğelere ait açıklamaları duyabilir veya görebilir ya da tabletle etkileşimde bulunmak için birtakım hareketler yapabilirsiniz."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>, Dokunarak Keşfet özelliğini etkinleştirmek istiyor. Dokunarak Keşfet açık olduğunda parmağınızın altındaki öğelere ait açıklamaları duyabilir veya görebilir ya da telefonla etkileşimde bulunmak için birtakım hareketler yapabilirsiniz."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 ay önce"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1 ay önce"</string>
   <plurals name="num_seconds_ago">
@@ -1060,7 +1060,7 @@
     <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"SD kartınızı USB yığın depolama birimi olarak kullanmada sorun var."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB bağlandı"</string>
     <string name="usb_storage_notification_message" msgid="939822783828183763">"Bilgisayarınıza/bilgisayarınızdan dosya kopyalamak için dokunun."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB depolama birimini kapat"</string>
+    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB belleğini kapat"</string>
     <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"USB depolama birimini kapatmak için dokunun."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB depolama birimi kullanılıyor"</string>
     <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"USB depolama birimini kapatmadan önce Android\'inizin USB depolama biriminin bilgisayarınızla olan bağlantısını kesin (\"çıkarın\")."</string>
@@ -1094,7 +1094,7 @@
     <string name="candidates_style" msgid="4333913089637062257"><u>"adaylar"</u></string>
     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"USB depolm birimi hazırlanıyor"</string>
     <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"SD kart hazırlanıyor"</string>
-    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Hatalar denetleniyor."</string>
+    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Hata kontrolü yapılıyor"</string>
     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Boş USB depolama birimi"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Boş SD kart"</string>
     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"USB depolama birimi boş veya desteklenmeyen bir dosya sistemine sahip."</string>
@@ -1290,6 +1290,8 @@
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Yuva hoparlörleri"</string>
     <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"HDMI ses"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistem"</string>
+    <!-- no translation found for bluetooth_a2dp_audio_route_name (8575624030406771015) -->
+    <skip />
     <!-- no translation found for media_route_chooser_grouping_done (7966438307723317169) -->
     <skip />
 </resources>

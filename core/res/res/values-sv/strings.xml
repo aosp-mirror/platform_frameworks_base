@@ -934,10 +934,8 @@
     <string name="deleteText" msgid="7070985395199629156">"ta bort"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Indatametod"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Textåtgärder"</string>
-    <!-- no translation found for low_internal_storage_view_title (5576272496365684834) -->
-    <skip />
-    <!-- no translation found for low_internal_storage_view_text (6640505817617414371) -->
-    <skip />
+    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Lagringsutrymmet börjar ta slut"</string>
+    <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Det kan hända att vissa systemfunktioner inte fungerar"</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"Avbryt"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
@@ -1290,6 +1288,7 @@
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Dockningsstationens högtalare"</string>
     <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"HDMI-ljud"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
-    <!-- no translation found for media_route_chooser_grouping_done (7966438307723317169) -->
+    <!-- no translation found for bluetooth_a2dp_audio_route_name (8575624030406771015) -->
     <skip />
+    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Klar"</string>
 </resources>
