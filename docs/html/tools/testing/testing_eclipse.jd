@@ -21,7 +21,7 @@ Eclipse</a>
     and <a href="{@docRoot}guide/developing/building/building-eclipse.html">Building and Running
 from Eclipse</a>.
     You may also want to read
-    <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing Fundamentals</a>,
+    <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>,
     which provides an overview of the Android testing framework.
 </p>
 <p>
@@ -107,7 +107,7 @@ from Eclipse</a>.
         path where you want your project.
         <p>
             To learn more about choosing the location of test projects, please read
-            <a href="{@docRoot}guide/topics/testing/testing_android.html#TestProjectPaths">
+            <a href="{@docRoot}tools/testing/testing_android.html#TestProjectPaths">
             Testing Fundamentals</a>.
         </p>
     </li>
@@ -145,14 +145,14 @@ from Eclipse</a>.
     {@link android.test android.test}. These extend the JUnit
     {@link junit.framework.TestCase TestCase} class. The Android test classes for Activity objects
     also provide instrumentation for testing an Activity. To learn more about test case
-    classes, please read the topic <a href="{@docRoot}guide/topics/testing/testing_android.html">
+    classes, please read the topic <a href="{@docRoot}tools/testing/testing_android.html">
     Testing Fundamentals</a>.
 </p>
 <p>
     Before you create your test package, you choose the Java package identifier you want to use
     for your test case classes and the Android package name you want to use. To learn more
     about this, please read
-    <a href="{@docRoot}guide/topics/testing/testing_android.html#PackageNames">
+    <a href="{@docRoot}tools/testing/testing_android.html#PackageNames">
     Testing Fundamentals</a>.
 </p>
 <p>

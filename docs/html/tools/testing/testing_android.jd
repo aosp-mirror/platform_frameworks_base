@@ -62,7 +62,7 @@ parent.link=index.html
   <h2>Related tutorials</h2>
     <ol>
         <li>
-            <a href="{@docRoot}guide/topics/testing/activity_test.html">Activity Testing Tutorial</a>
+            <a href="{@docRoot}tools/testing/activity_test.html">Activity Testing Tutorial</a>
         </li>
     </ol>
   <h2>See also</h2>
@@ -327,14 +327,14 @@ parent.link=index.html
 </p>
 <ul>
     <li>
-        <a href="{@docRoot}guide/topics/testing/activity_testing.html">Activity Testing</a>
+        <a href="{@docRoot}tools/testing/activity_testing.html">Activity Testing</a>
     </li>
     <li>
-        <a href="{@docRoot}guide/topics/testing/contentprovider_testing.html">
+        <a href="{@docRoot}tools/testing/contentprovider_testing.html">
         Content Provider Testing</a>
     </li>
     <li>
-        <a href="{@docRoot}guide/topics/testing/service_testing.html">Service Testing</a>
+        <a href="{@docRoot}tools/testing/service_testing.html">Service Testing</a>
     </li>
 </ul>
 <p>
@@ -610,15 +610,15 @@ The <a href="{@docRoot}guide/developing/tools/monkey.html">UI/Application Exerci
 </p>
 <h2 id="WhatToTest">What to Test</h2>
 <p>
-    The topic <a href="{@docRoot}guide/topics/testing/what_to_test.html">What To Test</a>
+    The topic <a href="{@docRoot}tools/testing/what_to_test.html">What To Test</a>
     describes the key functionality you should test in an Android application, and the key
     situations that might affect that functionality.
 </p>
 <p>
     Most unit testing is specific to the Android component you are testing.
-    The topics <a href="{@docRoot}guide/topics/testing/activity_testing.html">Activity Testing</a>,
-    <a href="{@docRoot}guide/topics/testing/contentprovider_testing.html">
-    Content Provider Testing</a>, and <a href="{@docRoot}guide/topics/testing/service_testing.html">
+    The topics <a href="{@docRoot}tools/testing/activity_testing.html">Activity Testing</a>,
+    <a href="{@docRoot}tools/testing/contentprovider_testing.html">
+    Content Provider Testing</a>, and <a href="{@docRoot}tools/testing/service_testing.html">
     Service Testing</a> each have a section entitled "What To Test" that lists possible testing
     areas.
 </p>
@@ -636,5 +636,5 @@ The <a href="{@docRoot}guide/developing/tools/monkey.html">UI/Application Exerci
 </p>
 <p>
     If you want a step-by-step introduction to Android testing, try the
-    <a href="{@docRoot}guide/topics/testing/activity_test.html">Activity Testing Tutorial</a>.
+    <a href="{@docRoot}tools/testing/activity_test.html">Activity Testing Tutorial</a>.
 </p>

@@ -733,7 +733,7 @@ newdevice = MonkeyRunner.waitForConnection()
         </p>
         <p>
             Use this method to start a test case that uses one of Android's test case classes.
-            See <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing
+            See <a href="{@docRoot}tools/testing/testing_android.html">Testing
             Fundamentals</a> to learn more about unit testing with the Android testing
             framework.
         </p>

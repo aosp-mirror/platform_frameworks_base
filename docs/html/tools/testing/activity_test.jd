@@ -63,7 +63,7 @@ parent.link=index.html
 <h2>See Also</h2>
 <ol>
     <li>
-        <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing Fundamentals</a>
+        <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>
     </li>
     <li>
         {@link android.test.ActivityInstrumentationTestCase2}
@@ -80,7 +80,7 @@ parent.link=index.html
 <p>
   Android includes powerful tools for testing applications. The tools extend JUnit with additional features, provide convenience classes for mock Android system objects, and use
   instrumentation to give you control over your main application while you are testing it. The entire Android testing environment is discussed in the document
-  <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing Fundamentals</a>.
+  <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>.
 </p>
 <p>
   This tutorial demonstrates the Android testing tools by presenting a simple Android application and then leading you step-by-step through the creation of a test application for it.
@@ -138,7 +138,7 @@ parent.link=index.html
     <li>
       Some familiarity with the Android testing framework and concepts. If you haven't explored
       Android testing yet, start by reading the
-      <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing Fundamentals</a>
+      <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>
       guide.
     </li>
     <li>
@@ -1075,7 +1075,7 @@ lifecycle</a>.
 <ul>
     <li>
         If you haven't done so already, read the
-        <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing Fundamentals</a>
+        <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>
         document in the <em>Dev Guide</em>. It provides an overview of how testing on Android
         works. If you are just getting started with Android testing, reading that document will
         help you understand the tools available to you, so that you can develop effective

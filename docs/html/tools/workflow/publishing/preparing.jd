@@ -347,7 +347,7 @@ one handset-sized device and one tablet-sized device to verify that your user in
 sized correctly and that your application's performance and battery efficiency are acceptable.</p>
 
 <p>As a starting point for testing, see
-<a href="{@docRoot}guide/topics/testing/what_to_test.html">What to Test</a>. This article provides
+<a href="{@docRoot}tools/testing/what_to_test.html">What to Test</a>. This article provides
 a summary of common Android situations that you should consider when you are testing. When you are
 done testing and you are satisfied that the release version of your application
 behaves correctly, you can release your application to users. For more information, see

@@ -363,7 +363,7 @@ be added in a future
   <h2 id="TestProjects">Test Projects</h2>
 
   <p>Test projects contain Android applications that you write using the
-  <a href="{@docRoot}guide/topics/testing/index.html">Testing and
+  <a href="{@docRoot}tools/testing/index.html">Testing and
   Instrumentation framework</a>. The framework is an extension of the JUnit test framework and adds
   access to Android system objects. The file structure of a test project is the same as an
   Android project.</p>

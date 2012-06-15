@@ -85,7 +85,7 @@ parent.link=index.html
 <p>
     This document describes how to test activities using instrumentation and other test
     facilities. The document assumes you have already read
-    <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing Fundamentals</a>,
+    <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>,
     the introduction to the Android testing and instrumentation framework.
 </p>
 <h2 id="ActivityTestAPI">The Activity Testing API</h2>
@@ -222,7 +222,7 @@ parent.link=index.html
 </p>
 <p>
     If you want a step-by-step introduction to testing activities, try the 
-    <a href="{@docRoot}guide/topics/testing/activity_test.html">Activity Testing Tutorial</a>, which
+    <a href="{@docRoot}tools/testing/activity_test.html">Activity Testing Tutorial</a>, which
     guides you through a testing scenario that you develop against an activity-oriented application.
 </p>
 <h2 id="UITesting">Appendix: UI Testing Notes</h2>

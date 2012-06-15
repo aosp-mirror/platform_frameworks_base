@@ -26,7 +26,7 @@ parent.link=index.html
   <h2>See Also</h2>
       <ol>
         <li>
-            <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing Fundamentals</a>
+            <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>
         </li>
       </ol>
   </div>

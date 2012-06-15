@@ -30,7 +30,7 @@ parent.link=index.html
   <h2>Related Tutorials</h2>
     <ol>
         <li>
-            <a href="{@docRoot}guide/topics/testing/activity_test.html">Activity Testing Tutorial</a>
+            <a href="{@docRoot}tools/testing/activity_test.html">Activity Testing Tutorial</a>
         </li>
     </ol>
   <h2>See Also</h2>
@@ -56,7 +56,7 @@ parent.link=index.html
     This document describes techniques for testing Service objects. If you aren't familiar with the
     Service class, please read the <a href="{@docRoot}guide/topics/fundamentals/services.html">
     Services</a> document. If you aren't familiar with Android testing, please read
-    <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing Fundamentals</a>,
+    <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>,
     the introduction to the Android testing and instrumentation framework.
 </p>
 <h2 id="DesignAndTest">Service Design and Testing</h2>
@@ -137,12 +137,12 @@ parent.link=index.html
     You inject a mock Context into the Service under test with the
     {@link android.test.AndroidTestCase#setContext(Context) setContext()} method. The mock
     Context classes you can use are described in more detail in
-    <a href="{@docRoot}guide/topics/testing/testing_android.html#MockObjectClasses">
+    <a href="{@docRoot}tools/testing/testing_android.html#MockObjectClasses">
     Testing Fundamentals</a>.
 </p>
 <h2 id="TestAreas">What to Test</h2>
 <p>
-    The topic <a href="{@docRoot}guide/topics/testing/what_to_test.html">What To Test</a>
+    The topic <a href="{@docRoot}tools/testing/what_to_test.html">What To Test</a>
     lists general considerations for testing Android components.
     Here are some specific guidelines for testing a Service:
 </p>

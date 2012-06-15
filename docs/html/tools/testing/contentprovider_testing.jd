@@ -38,14 +38,14 @@ parent.link=index.html
   <h2>Related Tutorials</h2>
     <ol>
         <li>
-            <a href="{@docRoot}guide/topics/testing/activity_test.html">Activity Testing Tutorial</a>
+            <a href="{@docRoot}tools/testing/activity_test.html">Activity Testing Tutorial</a>
         </li>
     </ol>
   <h2>See Also</h2>
       <ol>
         <li>
           <a
-          href="{@docRoot}guide/topics/testing/testing_android.html">
+          href="{@docRoot}tools/testing/testing_android.html">
           Testing Fundamentals</a>
         </li>
         <li>
@@ -71,7 +71,7 @@ parent.link=index.html
     familiar with content  providers or the Android testing framework, please read
     <a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>,
     the guide to developing content providers, and
-    <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing Fundamentals</a>,
+    <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>,
     the introduction to the Android testing and instrumentation framework.
 </p>
 <h2 id="DesignAndTest">Content Provider Design and Testing</h2>
@@ -92,7 +92,7 @@ parent.link=index.html
 <p>
     As with other Android tests, provider test packages are run under the control of the test
     runner {@link android.test.InstrumentationTestRunner}. The section
-    <a href="{@docRoot}guide/topics/testing/testing_android.html#InstrumentationTestRunner">
+    <a href="{@docRoot}tools/testing/testing_android.html#InstrumentationTestRunner">
     Running Tests With InstrumentationTestRunner</a> describes the test runner in
     more detail. The topic <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">
     Testing From Eclipse with ADT</a> shows you how to run a test package in Eclipse, and the
@@ -131,7 +131,7 @@ parent.link=index.html
     The constructor then creates a {@link android.test.mock.MockContentResolver} to use as the
     resolver for the test. The {@link android.test.mock.MockContentResolver} class is described in
     detail in the section
-    <a href="{@docRoot}guide/topics/testing/testing_android.html#MockObjectClasses">Mock object
+    <a href="{@docRoot}tools/testing/testing_android.html#MockObjectClasses">Mock object
 classes</a>.
 </p>
 <p>
@@ -146,12 +146,12 @@ classes</a>.
     {@link android.test.ProviderTestCase2} uses {@link android.test.IsolatedContext} and
     {@link android.test.mock.MockContentResolver}, which are standard mock object classes. To
     learn more about them, please read
-    <a href="{@docRoot}guide/topics/testing/testing_android.html#MockObjectClasses">
+    <a href="{@docRoot}tools/testing/testing_android.html#MockObjectClasses">
     Testing Fundamentals</a>.
 </p>
 <h2 id="WhatToTest">What To Test</h2>
 <p>
-    The topic <a href="{@docRoot}guide/topics/testing/what_to_test.html">What To Test</a>
+    The topic <a href="{@docRoot}tools/testing/what_to_test.html">What To Test</a>
     lists general considerations for testing Android components.
     Here are some specific guidelines for testing content providers.
 </p>
@@ -211,7 +211,7 @@ classes</a>.
 </p>
 <p>
     If you want a step-by-step introduction to testing activities, try the 
-    <a href="{@docRoot}guide/topics/testing/activity_test.html">Activity Testing Tutorial</a>, which
+    <a href="{@docRoot}tools/testing/activity_test.html">Activity Testing Tutorial</a>, which
     guides you through a testing scenario that you develop against an activity-oriented application.
 </p>
 

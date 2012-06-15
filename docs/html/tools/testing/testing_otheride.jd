@@ -47,7 +47,7 @@ parent.link=index.html
         <h2>See Also</h2>
             <ol>
                 <li>
-                    <a href="{@docRoot}guide/topics/testing/testing_android.html">
+                    <a href="{@docRoot}tools/testing/testing_android.html">
                         Testing Fundamentals</a>
                 </li>
                 <li>
@@ -62,7 +62,7 @@ parent.link=index.html
     or if you prefer to work from the command line. This document assumes that you already know how
     to create a Android application in your programming environment. Before you start this
     document, you should read the topic
-    <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing Fundamentals</a>,
+    <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>,
     which provides an overview of Android testing.
 </p>
 <p>
@@ -108,7 +108,7 @@ android create test-project -m &lt;main_path&gt; -n &lt;project_name&gt; -p &lt;
             value of <code>--main</code> should be <code>../HelloAndroid</code>.
         <p>
             To learn more about choosing the location of test projects, please read
-            <a href="{@docRoot}guide/topics/testing/testing_android.html#TestProjects">
+            <a href="{@docRoot}tools/testing/testing_android.html#TestProjects">
             Testing Fundamentals</a>.
         </p>
         </td>
@@ -290,7 +290,7 @@ $ android create test-project -m ../HelloAndroid -n HelloAndroidTest -p HelloAnd
 </p>
 <p>
     To learn more about creating test packages, see the topic <a
-    href="{@docRoot}guide/topics/testing/testing_android.html">Testing Fundamentals</a>,
+    href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>,
     which provides an overview of Android testing. If you prefer to follow a tutorial,
     try the <a href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity Testing</a>
     tutorial, which leads you through the creation of tests for an actual Android application.
