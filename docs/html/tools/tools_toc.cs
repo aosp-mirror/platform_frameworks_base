@@ -61,6 +61,44 @@ class="en">Revision History</span></a></li>
 
 
   <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot?>tools/testing/index.html">
+            <span class="en">Testing</span>
+          </a></div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot?>tools/testing/testing_android.html">
+            <span class="en">Fundamentals</span></a>
+          </li>
+          <li><a href="<?cs var:toroot ?>tools/testing/testing_eclipse.html">
+            <span class="en">From Eclipse</span></a>
+          </li>
+          <li><a href="<?cs var:toroot ?>tools/testing/testing_otheride.html">
+            <span class="en">From Other IDEs</span></a>
+          </li>  
+          <li>
+            <a href="<?cs var:toroot?>tools/testing/activity_testing.html">
+            <span class="en">Activity Testing</span></a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot?>tools/testing/service_testing.html">
+            <span class="en">Service Testing</span></a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot?>tools/testing/contentprovider_testing.html">
+            <span class="en">Content Provider Testing</span></a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>tools/testing/what_to_test.html">
+            <span class="en">What To Test</span></a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>tools/testing/activity_test.html">
+            <span class="en">Activity Testing Tutorial</span></a>
+          </li>
+        </ul>
+  </li><!-- end of testing -->
+
+  <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/debugging/index.html"><span class="en">Debugging</span></a></div>
     <ul>
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-projects.html"><span class="en">From Eclipse with ADT</span></a></li>
@@ -70,13 +108,6 @@ class="en">Revision History</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-ui.html"><span class="en">Optimizing your UI</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-tracing.html"><span class="en">Profiling with Traceview and dmtracedump</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-devtools.html"><span class="en">Using the Dev Tools App</span></a></li>
-    </ul>
-  </li>
-  <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/testing/index.html"><span class="en">Testing</span></a></div>
-    <ul>
-      <li><a href="<?cs var:toroot ?>tools/testing/testing_eclipse.html"><span class="en">From Eclipse with ADT</span></a></li>
-      <li><a href="<?cs var:toroot ?>tools/testing/testing_otheride.html"><span class="en">From Other IDEs</span></a></li>      
     </ul>
   </li>
   </li>

@@ -446,38 +446,6 @@
       </ul>
     </li><!-- end of data storage -->
 
-      <li class="nav-section">
-           <div class="nav-section-header"><a href="<?cs var:toroot?>guide/topics/testing/index.html">
-               <span class="en">Testing</span>
-             </a></div>
-           <ul>
-              <li>
-                <a href="<?cs var:toroot?>guide/topics/testing/testing_android.html">
-                <span class="en">Testing Fundamentals</span></a>
-              </li>
-              <li>
-                <a href="<?cs var:toroot?>guide/topics/testing/activity_testing.html">
-                <span class="en">Activity Testing</span></a>
-              </li>
-              <li>
-                <a href="<?cs var:toroot?>guide/topics/testing/contentprovider_testing.html">
-                <span class="en">Content Provider Testing</span></a>
-              </li>
-              <li>
-                <a href="<?cs var:toroot?>guide/topics/testing/service_testing.html">
-                <span class="en">Service Testing</span></a>
-              </li>
-              <li>
-                <a href="<?cs var:toroot ?>guide/topics/testing/what_to_test.html">
-                <span class="en">What To Test</span></a>
-              </li>
-              <li>
-                <a href="<?cs var:toroot ?>guide/topics/testing/activity_test.html">
-                <span class="en">Activity Testing Tutorial</span></a>
-              </li>
-           </ul>
-      </li><!-- end of testing -->
-
   
   <li class="nav-section">
            <div class="nav-section-header"><a href="<?cs var:toroot?>guide/topics/admin/index.html">
@@ -637,16 +605,6 @@
       <li><a href="<?cs var:toroot ?>guide/google/play/expansion-files.html">
           <span class="en">APK Expansion Files</span></a>
       </li>
-      <li class="nav-section">
-        <div class="nav-section-header"><a href="">
-            <span class="en">Google Cloud Messaging<span>
-          </a></div>
-          <ul>
-            <li><a href="">
-                <span class="en">Getting Started</span></a>
-            </li>
-          </ul>
-      </li><!-- end GCM -->
     </ul>
   </li><!-- end Google Play -->
   
