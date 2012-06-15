@@ -5,9 +5,12 @@
       <span class="en">Google Play</span></a>
     </div>
     <ul>
-      <li><a href="<?cs var:toroot ?>distribute/googleplay/about/visibility.html">Visibility</a></li>
-      <li><a href="<?cs var:toroot ?>distribute/googleplay/about/monetizing.html">Monetizing</a></li>
-       <li><a href="<?cs var:toroot ?>distribute/googleplay/about/distribution.html">Distribution</a></li>
+      <li><a href="<?cs var:toroot ?>distribute/googleplay/about/visibility.html">
+           <span class="en">Visibility</a></li>
+      <li><a href="<?cs var:toroot ?>distribute/googleplay/about/monetizing.html">
+           <span class="en">Monetizing</a></li>
+       <li><a href="<?cs var:toroot ?>distribute/googleplay/about/distribution.html">
+           <span class="en">Distribution</a></li>
     </ul>  
   </li>
 
@@ -16,10 +19,19 @@
       <span class="en">Publishing</span></a>
     </div>
     <ul>
-       <li><a href="<?cs var:toroot ?>distribute/googleplay/publish/register.html">Get Started</a></li>
-       <li><a href="<?cs var:toroot ?>distribute/googleplay/publish/console.html">Developer Console</a></li>
-       <li><a href="<?cs var:toroot ?>distribute/googleplay/publish/preparing.html">Publishing Checklist</a></li>
-    </ul>
+       <li><a href="<?cs var:toroot ?>distribute/googleplay/publish/register.html">
+           <span class="en">Get Started</span>
+          </a></li>
+       <li><a href="<?cs var:toroot ?>distribute/googleplay/publish/console.html">
+           <span class="en">Developer Console</span>
+          </a></li>
+       <li><a href="<?cs var:toroot ?>distribute/googleplay/publish/preparing.html">
+           <span class="en">Publishing Checklist</span>
+          </a></li>
+       <li><a href="<?cs var:toroot ?>distribute/googleplay/strategies/app-quality.html">
+          <span class="en">App Quality</span>
+         </a></li>
+     </ul>
   </li>
   
 <!--  <li class="nav-section">
@@ -45,9 +57,6 @@
       <li><a href="<?cs var:toroot ?>distribute/googleplay/publishing.html">
         <span class="en">Publishing and Updating</span>
         </a></li>
-      <li><a href="<?cs var:toroot ?>distribute/googleplay/strategies/app-quality.html">
-        <span class="en">App Quality</span>
-      </a></li>
     </ul>
   </li> end of Developer Console -->
   
@@ -56,9 +65,14 @@
        <span class="en">Promoting</span></a>
      </div>
      <ul>
-<!--   <li><a href="<?cs var:toroot ?>distribute/googleplay/promote/product-pages.html">Your Product Pages</a></li> -->
-       <li><a href="<?cs var:toroot ?>distribute/googleplay/promote/linking.html">Linking to Your Products</a></li>
-       <li><a href="<?cs var:toroot ?>distribute/googleplay/promote/badges.html">Google Play Badges</a></li>
+<!--   <li><a href="<?cs var:toroot ?>distribute/googleplay/promote/product-pages.html">
+        <span class="en">Your Product Pages</a></li> -->
+       <li><a href="<?cs var:toroot ?>distribute/googleplay/promote/linking.html">
+        <span class="en">Linking to Your Products</a></li>
+       <li><a href="<?cs var:toroot ?>distribute/googleplay/promote/badges.html">
+        <span class="en">Google Play Badges</a></li>
+       <li><a href="<?cs var:toroot ?>distribute/googleplay/promote/brand.html">
+        <span class="en">Brand Assets and Guidelines</a></li>
      </ul>
    </li>
 

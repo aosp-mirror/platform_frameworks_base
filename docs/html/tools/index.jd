@@ -2,7 +2,7 @@ page.title=Android IDE
 @jd:body
 
     
-<img src="{@docRoot}images/tools-home.png" style="float:right;" height="441" />
+<img src="{@docRoot}images/tools-home.png" style="float:right;" height="415" width="763" />
 
 <div style="position:relative;height:0">
 <div style="position:absolute;width:420px"> 
@@ -37,11 +37,6 @@ page.title=Android IDE
     <li>Editor support for working with custom UI components</li>
   </ul>
 </div>
-
-<!--</div>
-  <div class="col-6">
-  <img src="{@docRoot}images/layout-editing2-sm.png">
-</div>-->
 
 <div class="col-6" style="clear:both">
 <h3>Develop on Hardware Devices</h3>

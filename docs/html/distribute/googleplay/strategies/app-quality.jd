@@ -7,7 +7,6 @@ page.title=Improving App Quality
 <ul>
 <li><a href="#listen">Listen to Your Users</a></li>
 <li><a href="#stability">Improve Stability and Eliminate Bugs</a></li>
-<li><a href="#listen">Designing for Sseamlessness</a></li>
 <li><a href="#responsiveness">Improve UI Responsiveness</a></li>
 <li><a href="#usability">Improve Usability</a></li>
 <li><a href="#appearance">Professional Appearance and Aesthetics</a></li>
@@ -34,6 +33,7 @@ The most obvious way to listen to users is by reading and addressing comments on
 One way to reach users and help them address their concerns is to set up your own support and discussion destination(s). There are some great support tools out there that can put you in touch with your users directly such as <a href="http://groups.google.com">Google Groups</a>, <a href="http://discussions.zoho.com/">Zoho Discussions</a>, <a href="http://getsatisfaction.com">getsatisfaction.com</a> and <a href="http://uservoice.com">uservoice.com</a>. Once you get set up with such a tool, make sure to fill in the support link in your Google Play product details page &mdash; users do click through to these.</p>
 <p>
 Another way to better listen to your users is by having a public beta or trusted tester program. It's crucial to have some amount of real user testing before releasing something in Google Play. Fortunately, you can distribute your apps to users outside of Google Play via a website; this website can require a login or be publicly accessible&nbsp;&mdash;&nbsp;it's entirely up to you. Take advantage of this opportunity by offering your next planned update to some early adopters, before submitting to Google Play. You'll be surprised by how many little, yet impactful, improvements can come out of crowd-sourced, real-user testing.</p>
+
 
 <h2 id="stability">Improve Stability and Eliminate Bugs</h2>
 
@@ -70,8 +70,6 @@ A great way to improve UI performance is to minimize the complexity of your layo
 Lastly, pointed out in the blog post <a href="http://android-developers.blogspot.com/2010/10/traceview-war-story.html">Traceview War Story</a>, tools like <a href="{@docRoot}tools/traceview.html">traceview</code> and <a href="{@docRoot}tools/ddms.html">ddms</a> can be your best frends in improving your app by profiling method calls and monitoring VM memory allocations, respectively.</p>
 
 
-
-
 <h2 id="usability">Improve Usability</h2>
 <p>
 In usability and app design, too, you should listen carefully to your users. Ask a handful of real Android device users (friends, family, etc.) to try out your app and observe them as they interact with it. Look for cases where they get confused, are unsure how to proceed, or are surprised by certain behaviors. Minimize these cases by rethinking some of the interactions in your app, perhaps working in some of the <a href="http://www.youtube.com/watch?v=M1ZBjlCRfz0">user interface patterns</a> the Android UI team discussed at Google I/O.</p>
@@ -105,7 +103,7 @@ Having the <em>right</em> set of features in your app is important. It's often e
 <p>
 Again, listen to your users by collecting and responding to feature requests. Be careful, though, to take feature requests with grains of salt. Requests can be very useful in aggregate, to get a sense of what kinds of functionality you should be working on, but not every feature request needs to be implemented.</p>
 
-<h2>Integrate with the System and Third-Party apps</h2>
+<h2 id="integrate">Integrate with the System and Third-Party apps</h2>
 <p>
 A great way to deliver a delightful user experience is to integrate tightly with the operating system. Features like <a href="{@docRoot}guide/topics/appwidgets/index.html">Home screen widgets</a>, <a href={@docRoot}design/patterns/notifications.html">rich notifications</a>, <a href="{@docRoot}guide/components/ui/search/index.html">global search integration</a>, and {@link android.widget.QuickContactBadge Quick Contacts} are fairly low-hanging fruit in this regard. </p>
 

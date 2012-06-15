@@ -35,7 +35,7 @@ and creating the product page and graphic assets for your app.</p>
 
 <p>The preparation and publishing tasks are numbered to give you a rough idea of
 sequence. However, you can handle the tasks in any sequence that works for you
-or skip steps as appropriate.</p>
+or you can skip steps as appropriate.</p>
 
 <p>As you move toward publishing, a variety of support resources are available to
 you. Relevant links are provided in each step.</p>
@@ -45,9 +45,9 @@ you. Relevant links are provided in each step.</p>
 
 <p>Before you begin the steps in this checklist, you should take a moment to
 read and understand the overall publishing workflow and become familiar with how
-the process works. In particular, You or your development team will need to
-prepare the app for release using a process common to all Android apps,
-regardless of how they are distributed. The <a
+the process works. In particular, you or your development team will need to
+prepare your app for release using a process common to all Android apps.
+The <a
 href="{@docRoot}tools/publishing/publishing_overview.html">Publishing
 Workflow</a> documents provide the details on how publishing works and how to
 get an APK ready for release. </p>
@@ -190,16 +190,16 @@ want to target.
 <p>From an app-compatibility perspective, Android platform versions are defined
 by <a href="{@docRoot}about/framework/api-levels.html">API Level</a>. You should
 confirm the minimum version that your app is compatible with (<a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;
-minSdkVersion&gt;</code></a>)), as that will affect it's distribution to Android
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;minSdkVersion&gt;</code></a>)),
+as that will affect it's distribution to Android
 devices once it is published. </p>
 
 <p>For screen sizes, you should confirm that the app runs properly and looks
 good on the range of screen sizes and densities that you want to support. You
 should confirm the minimum screen-size and densitiy support that your app
 declares (<a
-href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;
-supports-screens&gt;</code></a>), since that can affect its distribution to
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a>),
+since that can affect its distribution to
 Android devices once it is published. </p>
 
 <p>To get a better understanding of the current device penetration of Android
@@ -230,16 +230,15 @@ Play, <strong>free apps must remain free</strong>.</p>
 
 <ul>
 <li>Once you publish your app as a free app, you cannot ever change it to being
-a priced app</li>
-<li>On the other hand, if you publish your app as a priced app, you can change
+a priced app. However, you can still sell in-app products and
+subscriptions through Google Play's In-app Billing service.</li>
+<li>If you publish your app as a priced app, you <em>can</em> change
 it at any time to being a free app (but cannot then change it back to
-priced).</li>
+priced). You can also sell in-app products and subscriptions. </li>
 </ul>
 
-<p>If you do publish your app as free, you can still sell in-app products and
-subscriptions through Google Play In-app Billing. If your app is be priced, or
-if you'll be selling in-app products in a free app, you need set up a Checkout
-Merchant Account before you can publish.</p>
+<p> If your app is be priced, or if you'll be selling in-app products,
+you need set up a Checkout Merchant Account before you can publish.</p>
 
 <table>
 <tr>
@@ -385,10 +384,10 @@ release-ready APK is what you you will upload to the Developer Console and
 distribute to users. 
 
 <p>The process for preparing a release-ready APK is the same for all apps,
-regardless of how they are distributed. Generally the process basic code cleanup
+regardless of how they are distributed. Generally the process includes basic code cleanup
 and optimization, building and signing with your release key, and final testing.
-When you are finished preparing your application for release, you'll a signed
-.apk file that you can upload to the Developer Console for distribution to
+When you are finished preparing your application for release, you'll have a signed
+APK file that you can upload to the Developer Console for distribution to
 users. </p>
 
 <p>For complete details on how to create a release-ready version of your app,

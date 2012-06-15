@@ -1,0 +1,174 @@
+page.title=Brand Assets, Icons, and Guidelines
+@jd:body
+
+<p>We encourage you to use the Android and Google Play brands in your
+promotional materials. You can use the icons and other assets on this page in
+any way you want, provided that you follow the guidelines described below.</p>
+
+<h2 id="brand-android">Android Brand</h2>
+
+<div>
+  <div style="float:right;width:50%;padding:1.5em;">
+    <img alt="" src="{@docRoot}images/brand/droid.gif">
+  </div>
+
+  <div style="width:45%;">
+    <h4>01/ Android Robot</h4>
+
+    <p> Can be used, reproduced, and modified freely in marketing
+    communications. Our standard color value for print is PMS 376C. Our online hex
+    color is <span id= "android-green">#A4C639</span>.</p>
+
+    <p>When using the Android Robot or any modification of it, proper attribution is
+    required under the terms of the Creative Commons Attribution license. For more
+    details on proper attribution, please see the <a
+    href="{@docRoot}license.html#attribution">Content License</a> document. </p>
+  </div>
+<div>
+
+<div style="clear:both">
+  <div style="float:right;width:50%;padding:1.5em;">
+    <img alt="" src="{@docRoot}images/brand/logo_android.gif">
+  </div>
+
+  <div style="width:45%;">
+    <h4>02/ Android Logo</h4>
+
+    <p>The Android logo may not be used.</p>
+  </div>
+<div>
+
+<div style="clear:both">
+  <div style="float:right;width:50%;padding:1.5em;">
+    <img alt="" src="{@docRoot}images/brand/norad.gif">
+  </div>
+
+  <div style="width:45%;">
+    <h4>03/ Android Custom Typeface</h4>
+
+    <p>The custom typeface may not be used.</p>
+  </div>
+<div>
+
+<div style="clear:both">
+  <div style="float:right;width:50%;padding:1.5em;">
+    <img alt="" src="{@docRoot}images/brand/mediaplayer.gif">
+  </div>
+
+  <div style="width:45%;">
+    <h4>04/ Android in Official Names</h4>
+<p>Any name with 'Android' alone may not be used in a name without permission. Any name
+            with 'Droid' alone may not be used in a name.</p>
+            
+          <p>The word 'Android' may be used only as a descriptor, 'for Android'. If used with your
+            logo, 'for Android' needs to be smaller in size than your logo. First instance of this
+            use should be followed by a TM symbol, 'for Android™'.</p>
+            
+          <p>If you are not sure you meet these criteria, <a href=
+            "http://services.google.com/permissions/application">please contact us</a>. </p>
+  </div>
+<div>
+
+<div style="clear:both">
+  <div style="float:right;width:50%;padding:1.5em;">
+    <img alt="" src="{@docRoot}images/brand/learnmore.gif">
+  </div>
+
+  <div style="width:45%;">
+    <h4>05/ Android in Messaging</h4>
+          <p>
+            May be used in text as a descriptor, as long as it is followed by a proper generic term
+            (e.g. "Android™ application"). First instance of this use should be followed by a TM
+            symbol.
+          </p>       
+  </div>
+<div>
+          <p class="caution"><strong>Note: Any usage of #04 or #05 needs to include footer attribution in your
+          communication:</strong><br /><span style="margin-left:1.5em">
+          "Android is a trademark of Google Inc."</span>
+        </p>
+
+<h2 id="brand-google_play">Google Play Brand</h2>
+
+<div style="clear:both">
+  <div style="float:right;width:50%;padding:1.5em;">
+    <p>
+      <img alt="Google Play logo" src="{@docRoot}images/brand/google_play_logo_450.png">
+    </p>
+    <p>
+    <img alt="Get it on Google Play badge, large" src=
+            "/images/brand/get_it_on_play_logo_large.png"><br>
+            Download: <a href="{@docRoot}images/brand/get_it_on_play_logo_small.png">Small</a> | <a href=
+            "/images/brand/get_it_on_play_logo_large.png">Large</a>
+          </p>
+          <p>
+            <img alt="Android App on Google Play badge, large" src=
+            "/images/brand/android_app_on_play_logo_large.png"><br>
+            Download: <a href="{@docRoot}images/brand/android_app_on_play_logo_small.png">Small</a> |
+            <a href="{@docRoot}images/brand/android_app_on_play_large.png">Large</a>
+          </p>
+  </div> 
+        
+  <div style="width:45%;">
+    <h4>06/ <em>Get it on Google Play</em> Badge
+          </h4>
+          <p>
+            The "Get it on Google Play" and "Android App on Google Play" logos are badges that you
+            can use on your web site and promotional materials, to point to your products on Google
+            Play.
+          </p>
+          <p>
+            The logos are available in two sizes:
+          </p>
+          <ul>
+            <li>Large: 60(h) x 172(w)</li>
+            </li>
+            <li>Small 45(h) x 129(w)
+            </li>
+          </ul>
+          <p>
+            Guidelines for usage:
+          </p>
+          <ul>
+            <li>Never separate the phrase “Get it on Google Play” or "Android App on Google Play"
+            from the Google Play logo, and do not change the color, proportions, spacing or any
+            other aspect of the logo.
+            </li>
+     </ul>
+     </div>
+     
+     <ul>
+            <li>When used online, the badge logo should be used to direct users to:
+              <ul>
+                <li>The Google Play landing page: <br /><span style="margin-left:1em;"><a href=
+                "http://play.google.com/">play.google.com</a></span>
+                </li>
+                <li>The Google Play Apps landing page: <br /><a href="http://play.google.com/store/apps">
+                 <span style="margin-left:1em;"> play.google.com/store/apps</a></span>
+                </li>
+                <li>A list of products that include your company name, for example, <br />
+                <span style="margin-left:1em;">http://play.google.com/store/search?q=<em>yourCompanyName</em></span>
+                </li>
+                <li>A list of products published by you, for example,<br />
+                <span style="margin-left:1em;">play.google.com/store/search?q=<em>publisherName</em>M/span>
+                </li>
+                <li>A specific app product details page within Google Play, for example,<br />
+                <span style="margin-left:1em;">play.google.com/store/apps/details?id=<em>packageName</em></span>
+                </li>
+              </ul>
+            </li>
+            <li>When used alongside logos for other application marketplaces, the Google Play logo
+            should be of equal or greater size</li>
+  </ul>
+            
+            <p>For details on all the ways that you can link to your product details page in Google Play, 
+            see <a href="{@docRoot}distribute/googleplay/promote/linking.html">Linking to your products</a></p>
+
+          <p>For convenience, if you are using the logos online, you can use the 
+            <a href="{@docRoot}distribute/googleplay/promote/badges.html">badge generator</a>
+            to create the appropriate markup and link to your apps.</p>
+
+<h2>Other Brands</h2>
+
+<p>Any other brands or icons depicted on this site are <em>not</em> are the property of their
+repective owners and usage is reserved. You must seek the developer for appropriate permission to use them.</p>

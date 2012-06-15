@@ -85,7 +85,7 @@ class="button">See the Android sessions</a>
                         </div>
                         <div class="content-right col-6">
                         <h1>Publish your apps on Google Play</h1>
-                        <p>Google Play is an integrated digital content destination where users buy and enjoy all of their favorite content in one place. It's the new destination for Android apps!.</p>
+                        <p>The most visited store in the world for Android apps. Cloud-connected and always synced, it's never been easier for users to find and download your apps.</p>
                         <a href="{@docRoot}distribute/index.html" class="button">Learn More</a>
                         </div> 
                 </li>
@@ -103,9 +103,9 @@ class="button">See the Android sessions</a>
         <ul>
             <li><a href="{@docRoot}about/index.html">About Android</a></li>
             <li><a href="{@docRoot}sdk/index.html">Get the SDK</a></li>
-            <li><a href="{@docRoot}legal.html">Legal</a></li>
+            <li><a href="http://source.android.com">Open Source</a></li>
             <li><a href="{@docRoot}support.html">Support</a></li>
-            <li class="last"><a href="http://source.android.com">Open Source</a></li>
+            <li class="last"><a href="{@docRoot}legal.html">Legal</a></li>
         </ul>
     </div>
     <!-- /Section links -->
