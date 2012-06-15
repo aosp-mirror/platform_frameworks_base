@@ -83,8 +83,7 @@ public class MediaRouter {
         // Called after sStatic is initialized
         void initDefaultRoutes() {
             mDefaultAudio = new RouteInfo(mSystemCategory);
-            mDefaultAudio.mName = mResources.getText(
-                    com.android.internal.R.string.default_audio_route_name);
+            mDefaultAudio.mNameResId = com.android.internal.R.string.default_audio_route_name;
             mDefaultAudio.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO;
             addRoute(mDefaultAudio);
         }
@@ -156,10 +155,15 @@ public class MediaRouter {
     }
 
     static void onHeadphonesPlugged(boolean headphonesPresent, String headphonesName) {
-        sStatic.mDefaultAudio.mName = headphonesPresent
-                ? headphonesName
-                : sStatic.mResources.getText(
-                        com.android.internal.R.string.default_audio_route_name);
+        if (headphonesPresent) {
+            sStatic.mDefaultAudio.mName = headphonesName;
+            sStatic.mDefaultAudio.mNameResId = 0;
+        } else {
+            sStatic.mDefaultAudio.mName = null;
+            sStatic.mDefaultAudio.mNameResId =
+                    com.android.internal.R.string.default_audio_route_name;
+        }
+
         dispatchRouteChanged(sStatic.mDefaultAudio);
     }
 
@@ -207,11 +211,25 @@ public class MediaRouter {
      * @param route Route to select
      */
     public void selectRoute(int types, RouteInfo route) {
+        // Applications shouldn't programmatically change anything but user routes.
+        types &= ROUTE_TYPE_USER;
+        selectRouteStatic(types, route);
+    }
+    
+    /**
+     * @hide internal use
+     */
+    public void selectRouteInt(int types, RouteInfo route) {
         selectRouteStatic(types, route);
     }
 
     static void selectRouteStatic(int types, RouteInfo route) {
         if (sStatic.mSelectedRoute == route) return;
+        if ((route.getSupportedTypes() & types) == 0) {
+            Log.w(TAG, "selectRoute ignored; cannot select route with supported types " +
+                    typesToString(route.getSupportedTypes()) + " into route types " +
+                    typesToString(types));
+        }
 
         if (sStatic.mSelectedRoute != null) {
             // TODO filter types properly
@@ -424,6 +442,17 @@ public class MediaRouter {
     public RouteCategory createRouteCategory(CharSequence name, boolean isGroupable) {
         return new RouteCategory(name, ROUTE_TYPE_USER, isGroupable);
     }
+    
+    /**
+     * Create a new route category. Each route must belong to a category.
+     *
+     * @param nameResId Resource ID of the name of the new category
+     * @param isGroupable true if routes in this category may be grouped with one another
+     * @return the new RouteCategory
+     */
+    public RouteCategory createRouteCategory(int nameResId, boolean isGroupable) {
+        return new RouteCategory(nameResId, ROUTE_TYPE_USER, isGroupable);
+    }
 
     static void updateRoute(final RouteInfo info) {
         dispatchRouteChanged(info);
@@ -501,8 +530,7 @@ public class MediaRouter {
 
     static void onA2dpDeviceConnected() {
         final RouteInfo info = new RouteInfo(sStatic.mSystemCategory);
-        info.mName = sStatic.mResources.getString(
-                com.android.internal.R.string.bluetooth_a2dp_audio_route_name);
+        info.mNameResId = com.android.internal.R.string.bluetooth_a2dp_audio_route_name;
         sStatic.mBluetoothA2dpRoute = info;
         addRoute(sStatic.mBluetoothA2dpRoute);
     }
@@ -517,6 +545,7 @@ public class MediaRouter {
      */
     public static class RouteInfo {
         CharSequence mName;
+        int mNameResId;
         private CharSequence mStatus;
         int mSupportedTypes;
         RouteGroup mGroup;
@@ -532,6 +561,24 @@ public class MediaRouter {
          * to users who may select this as the active route.
          */
         public CharSequence getName() {
+            return getName(sStatic.mResources);
+        }
+        
+        /**
+         * Return the properly localized/resource selected name of this route.
+         * 
+         * @param context Context used to resolve the correct configuration to load
+         * @return The user-friendly name of the media route. This is the string presented
+         * to users who may select this as the active route.
+         */
+        public CharSequence getName(Context context) {
+            return getName(context.getResources());
+        }
+        
+        CharSequence getName(Resources res) {
+            if (mNameResId != 0) {
+                return mName = res.getText(mNameResId);
+            }
             return mName;
         }
 
@@ -620,6 +667,16 @@ public class MediaRouter {
             mName = name;
             routeUpdated();
         }
+        
+        /**
+         * Set the user-visible name of this route.
+         * @param resId Resource ID of the name to display to the user to describe this route
+         */
+        public void setName(int resId) {
+            mNameResId = resId;
+            mName = null;
+            routeUpdated();
+        }
 
         /**
          * Set the current user-visible status for this route.
@@ -700,9 +757,9 @@ public class MediaRouter {
             mGroup = this;
         }
 
-        public CharSequence getName() {
+        CharSequence getName(Resources res) {
             if (mUpdateName) updateName();
-            return super.getName();
+            return super.getName(res);
         }
 
         /**
@@ -870,6 +927,7 @@ public class MediaRouter {
      */
     public static class RouteCategory {
         CharSequence mName;
+        int mNameResId;
         int mTypes;
         final boolean mGroupable;
 
@@ -879,10 +937,33 @@ public class MediaRouter {
             mGroupable = groupable;
         }
 
+        RouteCategory(int nameResId, int types, boolean groupable) {
+            mNameResId = nameResId;
+            mTypes = types;
+            mGroupable = groupable;
+        }
+
         /**
          * @return the name of this route category
          */
         public CharSequence getName() {
+            return getName(sStatic.mResources);
+        }
+        
+        /**
+         * Return the properly localized/configuration dependent name of this RouteCategory.
+         * 
+         * @param context Context to resolve name resources
+         * @return the name of this route category
+         */
+        public CharSequence getName(Context context) {
+            return getName(context.getResources());
+        }
+        
+        CharSequence getName(Resources res) {
+            if (mNameResId != 0) {
+                return res.getText(mNameResId);
+            }
             return mName;
         }
 
@@ -963,7 +1044,7 @@ public class MediaRouter {
      * @see MediaRouter#addCallback(int, Callback)
      * @see MediaRouter#removeCallback(Callback)
      */
-    public interface Callback {
+    public static abstract class Callback {
         /**
          * Called when the supplied route becomes selected as the active route
          * for the given route type.
@@ -972,7 +1053,7 @@ public class MediaRouter {
          * @param type Type flag set indicating the routes that have been selected
          * @param info Route that has been selected for the given route types
          */
-        public void onRouteSelected(MediaRouter router, int type, RouteInfo info);
+        public abstract void onRouteSelected(MediaRouter router, int type, RouteInfo info);
 
         /**
          * Called when the supplied route becomes unselected as the active route
@@ -982,7 +1063,7 @@ public class MediaRouter {
          * @param type Type flag set indicating the routes that have been unselected
          * @param info Route that has been unselected for the given route types
          */
-        public void onRouteUnselected(MediaRouter router, int type, RouteInfo info);
+        public abstract void onRouteUnselected(MediaRouter router, int type, RouteInfo info);
 
         /**
          * Called when a route for the specified type was added.
@@ -990,7 +1071,7 @@ public class MediaRouter {
          * @param router the MediaRouter reporting the event
          * @param info Route that has become available for use
          */
-        public void onRouteAdded(MediaRouter router, RouteInfo info);
+        public abstract void onRouteAdded(MediaRouter router, RouteInfo info);
 
         /**
          * Called when a route for the specified type was removed.
@@ -998,7 +1079,7 @@ public class MediaRouter {
          * @param router the MediaRouter reporting the event
          * @param info Route that has been removed from availability
          */
-        public void onRouteRemoved(MediaRouter router, RouteInfo info);
+        public abstract void onRouteRemoved(MediaRouter router, RouteInfo info);
 
         /**
          * Called when an aspect of the indicated route has changed.
@@ -1009,7 +1090,7 @@ public class MediaRouter {
          * @param router the MediaRouter reporting the event
          * @param info The route that was changed
          */
-        public void onRouteChanged(MediaRouter router, RouteInfo info);
+        public abstract void onRouteChanged(MediaRouter router, RouteInfo info);
 
         /**
          * Called when a route is added to a group.
@@ -1019,7 +1100,8 @@ public class MediaRouter {
          * @param group The group the route was added to
          * @param index The route index within group that info was added at
          */
-        public void onRouteGrouped(MediaRouter router, RouteInfo info, RouteGroup group, int index);
+        public abstract void onRouteGrouped(MediaRouter router, RouteInfo info, RouteGroup group,
+                int index);
 
         /**
          * Called when a route is removed from a group.
@@ -1028,15 +1110,15 @@ public class MediaRouter {
          * @param info The route that was removed
          * @param group The group the route was removed from
          */
-        public void onRouteUngrouped(MediaRouter router, RouteInfo info, RouteGroup group);
+        public abstract void onRouteUngrouped(MediaRouter router, RouteInfo info, RouteGroup group);
     }
 
     /**
-     * Stub implementation of the {@link MediaRouter.Callback} interface.
-     * Each interface method is defined as a no-op. Override just the ones
+     * Stub implementation of {@link MediaRouter.Callback}.
+     * Each abstract method is defined as a no-op. Override just the ones
      * you need.
      */
-    public static class SimpleCallback implements Callback {
+    public static class SimpleCallback extends Callback {
 
         @Override
         public void onRouteSelected(MediaRouter router, int type, RouteInfo info) {
