@@ -117,7 +117,7 @@
     </string>
 
     <!-- Separator for PLMN and SPN in network name. -->
-    <string name="status_bar_network_name_separator" translatable="false">"\n"</string>
+    <string name="status_bar_network_name_separator" translatable="false">|</string>
 
     <!-- Network connection string for Bluetooth Reverse Tethering -->
     <string name="bluetooth_tethered">Bluetooth tethered</string>
