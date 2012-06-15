@@ -16,14 +16,14 @@
 
 package android.media;
 
-import android.bluetooth.BluetoothA2dp;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class MediaRouter {
 
     static class Static {
         final Resources mResources;
-        final AudioManager mAudioManager;
+        final IAudioService mAudioService;
         final Handler mHandler;
         final ArrayList<CallbackInfo> mCallbacks = new ArrayList<CallbackInfo>();
 
@@ -54,38 +54,89 @@ public class MediaRouter {
         final ArrayList<RouteCategory> mCategories = new ArrayList<RouteCategory>();
 
         final RouteCategory mSystemCategory;
-        final HeadphoneChangedBroadcastReceiver mHeadphoneChangedReceiver;
+
+        final AudioRoutesInfo mCurRoutesInfo = new AudioRoutesInfo();
 
         RouteInfo mDefaultAudio;
         RouteInfo mBluetoothA2dpRoute;
 
         RouteInfo mSelectedRoute;
 
+        final IAudioRoutesObserver.Stub mRoutesObserver = new IAudioRoutesObserver.Stub() {
+            public void dispatchAudioRoutesChanged(final AudioRoutesInfo newRoutes) {
+                mHandler.post(new Runnable() {
+                    @Override public void run() {
+                        updateRoutes(newRoutes);
+                    }
+                });
+            }
+        };
+
         Static(Context appContext) {
             mResources = Resources.getSystem();
             mHandler = new Handler(appContext.getMainLooper());
 
-            mAudioManager = (AudioManager)appContext.getSystemService(Context.AUDIO_SERVICE);
+            IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
+            mAudioService = IAudioService.Stub.asInterface(b);
 
             // XXX this doesn't deal with locale changes!
             mSystemCategory = new RouteCategory(mResources.getText(
                     com.android.internal.R.string.default_audio_route_category_name),
                     ROUTE_TYPE_LIVE_AUDIO, false);
-
-            final IntentFilter speakerFilter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
-            speakerFilter.addAction(Intent.ACTION_ANALOG_AUDIO_DOCK_PLUG);
-            speakerFilter.addAction(Intent.ACTION_DIGITAL_AUDIO_DOCK_PLUG);
-            speakerFilter.addAction(Intent.ACTION_HDMI_AUDIO_PLUG);
-            mHeadphoneChangedReceiver = new HeadphoneChangedBroadcastReceiver();
-            appContext.registerReceiver(mHeadphoneChangedReceiver, speakerFilter);
         }
 
         // Called after sStatic is initialized
-        void initDefaultRoutes() {
+        void startMonitoringRoutes() {
             mDefaultAudio = new RouteInfo(mSystemCategory);
             mDefaultAudio.mNameResId = com.android.internal.R.string.default_audio_route_name;
             mDefaultAudio.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO;
             addRoute(mDefaultAudio);
+
+            AudioRoutesInfo newRoutes = null;
+            try {
+                newRoutes = mAudioService.startWatchingRoutes(mRoutesObserver);
+            } catch (RemoteException e) {
+            }
+            if (newRoutes != null) {
+                updateRoutes(newRoutes);
+            }
+        }
+
+        void updateRoutes(AudioRoutesInfo newRoutes) {
+            if (newRoutes.mMainType != mCurRoutesInfo.mMainType) {
+                mCurRoutesInfo.mMainType = newRoutes.mMainType;
+                int name;
+                if ((newRoutes.mMainType&AudioRoutesInfo.MAIN_HEADPHONES) != 0
+                        || (newRoutes.mMainType&AudioRoutesInfo.MAIN_HEADSET) != 0) {
+                    name = com.android.internal.R.string.default_audio_route_name_headphones;
+                } else if ((newRoutes.mMainType&AudioRoutesInfo.MAIN_DOCK_SPEAKERS) != 0) {
+                    name = com.android.internal.R.string.default_audio_route_name_dock_speakers;
+                } else if ((newRoutes.mMainType&AudioRoutesInfo.MAIN_HDMI) != 0) {
+                    name = com.android.internal.R.string.default_audio_route_name_hdmi;
+                } else {
+                    name = com.android.internal.R.string.default_audio_route_name;
+                }
+                sStatic.mDefaultAudio.mNameResId = name;
+                dispatchRouteChanged(sStatic.mDefaultAudio);
+            }
+            if (!TextUtils.equals(newRoutes.mBluetoothName, mCurRoutesInfo.mBluetoothName)) {
+                mCurRoutesInfo.mBluetoothName = newRoutes.mBluetoothName;
+                if (mCurRoutesInfo.mBluetoothName != null) {
+                    if (sStatic.mBluetoothA2dpRoute == null) {
+                        final RouteInfo info = new RouteInfo(sStatic.mSystemCategory);
+                        info.mName = mCurRoutesInfo.mBluetoothName;
+                        info.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO;
+                        sStatic.mBluetoothA2dpRoute = info;
+                        addRoute(sStatic.mBluetoothA2dpRoute);
+                    } else {
+                        sStatic.mBluetoothA2dpRoute.mName = mCurRoutesInfo.mBluetoothName;
+                        dispatchRouteChanged(sStatic.mBluetoothA2dpRoute);
+                    }
+                } else if (sStatic.mBluetoothA2dpRoute != null) {
+                    removeRoute(sStatic.mBluetoothA2dpRoute);
+                    sStatic.mBluetoothA2dpRoute = null;
+                }
+            }
         }
     }
 
@@ -132,7 +183,7 @@ public class MediaRouter {
         synchronized (Static.class) {
             if (sStatic == null) {
                 sStatic = new Static(context.getApplicationContext());
-                sStatic.initDefaultRoutes();
+                sStatic.startMonitoringRoutes();
             }
         }
     }
@@ -152,19 +203,6 @@ public class MediaRouter {
      */
     public RouteInfo getSelectedRoute(int type) {
         return sStatic.mSelectedRoute;
-    }
-
-    static void onHeadphonesPlugged(boolean headphonesPresent, String headphonesName) {
-        if (headphonesPresent) {
-            sStatic.mDefaultAudio.mName = headphonesName;
-            sStatic.mDefaultAudio.mNameResId = 0;
-        } else {
-            sStatic.mDefaultAudio.mName = null;
-            sStatic.mDefaultAudio.mNameResId =
-                    com.android.internal.R.string.default_audio_route_name;
-        }
-
-        dispatchRouteChanged(sStatic.mDefaultAudio);
     }
 
     /**
@@ -526,18 +564,6 @@ public class MediaRouter {
                 cbi.cb.onRouteUngrouped(cbi.router, info, group);
             }
         }
-    }
-
-    static void onA2dpDeviceConnected() {
-        final RouteInfo info = new RouteInfo(sStatic.mSystemCategory);
-        info.mNameResId = com.android.internal.R.string.bluetooth_a2dp_audio_route_name;
-        sStatic.mBluetoothA2dpRoute = info;
-        addRoute(sStatic.mBluetoothA2dpRoute);
-    }
-
-    static void onA2dpDeviceDisconnected() {
-        removeRoute(sStatic.mBluetoothA2dpRoute);
-        sStatic.mBluetoothA2dpRoute = null;
     }
 
     /**
@@ -1157,45 +1183,5 @@ public class MediaRouter {
         public void onRouteUngrouped(MediaRouter router, RouteInfo info, RouteGroup group) {
         }
 
-    }
-
-    class BtChangedBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {
-                final int state = intent.getIntExtra(BluetoothA2dp.EXTRA_STATE, -1);
-                if (state == BluetoothA2dp.STATE_CONNECTED) {
-                    onA2dpDeviceConnected();
-                } else if (state == BluetoothA2dp.STATE_DISCONNECTING ||
-                        state == BluetoothA2dp.STATE_DISCONNECTED) {
-                    onA2dpDeviceDisconnected();
-                }
-            }
-        }
-    }
-
-    static class HeadphoneChangedBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (Intent.ACTION_HEADSET_PLUG.equals(action)) {
-                final boolean plugged = intent.getIntExtra("state", 0) != 0;
-                final String name = sStatic.mResources.getString(
-                        com.android.internal.R.string.default_audio_route_name_headphones);
-                onHeadphonesPlugged(plugged, name);
-            } else if (Intent.ACTION_ANALOG_AUDIO_DOCK_PLUG.equals(action) ||
-                    Intent.ACTION_DIGITAL_AUDIO_DOCK_PLUG.equals(action)) {
-                final boolean plugged = intent.getIntExtra("state", 0) != 0;
-                final String name = sStatic.mResources.getString(
-                        com.android.internal.R.string.default_audio_route_name_dock_speakers);
-                onHeadphonesPlugged(plugged, name);
-            } else if (Intent.ACTION_HDMI_AUDIO_PLUG.equals(action)) {
-                final boolean plugged = intent.getIntExtra("state", 0) != 0;
-                final String name = sStatic.mResources.getString(
-                        com.android.internal.R.string.default_audio_route_name_hdmi);
-                onHeadphonesPlugged(plugged, name);
-            }
-        }
     }
 }
