@@ -36,6 +36,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.Checkable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -44,6 +46,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * This class implements the route chooser dialog for {@link MediaRouter}.
@@ -58,11 +61,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
     private static final int[] ITEM_LAYOUTS = new int[] {
         R.layout.media_route_list_item_top_header,
         R.layout.media_route_list_item_section_header,
-        R.layout.media_route_list_item
-    };
-
-    private static final int[] GROUP_ITEM_LAYOUTS = new int[] {
-        R.layout.media_route_list_item_top_header,
+        R.layout.media_route_list_item,
         R.layout.media_route_list_item_checkable,
         R.layout.media_route_list_item_collapse_group
     };
@@ -74,7 +73,6 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
     private LauncherListener mLauncherListener;
     private View.OnClickListener mExtendedSettingsListener;
     private RouteAdapter mAdapter;
-    private GroupAdapter mGroupAdapter;
     private ListView mListView;
 
     final RouteComparator mComparator = new RouteComparator();
@@ -98,10 +96,6 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
         super.onDetach();
         if (mLauncherListener != null) {
             mLauncherListener.onDetached(this);
-        }
-        if (mGroupAdapter != null) {
-            mRouter.removeCallback(mGroupAdapter.mCallback);
-            mGroupAdapter = null;
         }
         if (mAdapter != null) {
             mRouter.removeCallback(mAdapter.mCallback);
@@ -139,43 +133,16 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
         }
 
         final ListView list = (ListView) layout.findViewById(R.id.list);
-        list.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         list.setItemsCanFocus(true);
         list.setAdapter(mAdapter = new RouteAdapter());
-        list.setItemChecked(mAdapter.getSelectedRoutePosition(), true);
         list.setOnItemClickListener(mAdapter);
 
         mListView = list;
         mRouter.addCallback(mRouteTypes, mAdapter.mCallback);
 
+        mAdapter.scrollToSelectedItem();
+
         return layout;
-    }
-
-    void onExpandGroup(RouteGroup info) {
-        mGroupAdapter = new GroupAdapter(info);
-        mRouter.addCallback(mRouteTypes, mGroupAdapter.mCallback);
-        mListView.setAdapter(mGroupAdapter);
-        mListView.setOnItemClickListener(mGroupAdapter);
-        mListView.setItemsCanFocus(false);
-        mListView.clearChoices();
-        mListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        mGroupAdapter.initCheckedItems();
-
-        getDialog().setCanceledOnTouchOutside(false);
-    }
-
-    void onDoneGrouping() {
-        mListView.setAdapter(mAdapter);
-        mListView.setOnItemClickListener(mAdapter);
-        mListView.setItemsCanFocus(true);
-        mListView.clearChoices();
-        mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        mListView.setItemChecked(mAdapter.getSelectedRoutePosition(), true);
-
-        mRouter.removeCallback(mGroupAdapter.mCallback);
-        mGroupAdapter = null;
-
-        getDialog().setCanceledOnTouchOutside(true);
     }
 
     @Override
@@ -186,14 +153,6 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        if (mListView != null) {
-            if (mGroupAdapter != null) {
-                mGroupAdapter.initCheckedItems();
-            } else {
-                mListView.setItemChecked(mAdapter.getSelectedRoutePosition(), true);
-            }
-        }
     }
 
     private static class ViewHolder {
@@ -203,50 +162,137 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
         public ImageButton expandGroupButton;
         public RouteAdapter.ExpandGroupListener expandGroupListener;
         public int position;
+        public CheckBox check;
     }
 
     private class RouteAdapter extends BaseAdapter implements ListView.OnItemClickListener {
         private static final int VIEW_TOP_HEADER = 0;
         private static final int VIEW_SECTION_HEADER = 1;
         private static final int VIEW_ROUTE = 2;
+        private static final int VIEW_GROUPING_ROUTE = 3;
+        private static final int VIEW_GROUPING_DONE = 4;
 
-        private int mSelectedItemPosition;
+        private int mSelectedItemPosition = -1;
         private final ArrayList<Object> mItems = new ArrayList<Object>();
         final MediaRouterCallback mCallback = new MediaRouterCallback();
+
+        private RouteCategory mCategoryEditingGroups;
+        private RouteGroup mEditingGroup;
+
+        // Temporary lists for manipulation
+        private final ArrayList<RouteInfo> mCatRouteList = new ArrayList<RouteInfo>();
+        private final ArrayList<RouteInfo> mSortRouteList = new ArrayList<RouteInfo>();
+
+        private boolean mIgnoreUpdates;
 
         RouteAdapter() {
             update();
         }
 
         void update() {
-            // TODO this is kind of naive, but our data sets are going to be
-            // fairly small on average.
+            /*
+             * This is kind of wacky, but our data sets are going to be
+             * fairly small on average. Ideally we should be able to do some of this stuff
+             * in-place instead.
+             *
+             * Basic idea: each entry in mItems represents an item in the list for quick access.
+             * Entries can be a RouteCategory (section header), a RouteInfo with a category of
+             * mCategoryEditingGroups (a flattened RouteInfo pulled out of its group, allowing
+             * the user to change the group),
+             */
+            if (mIgnoreUpdates) return;
+
             mItems.clear();
 
             final RouteInfo selectedRoute = mRouter.getSelectedRoute(mRouteTypes);
+            mSelectedItemPosition = -1;
 
-            final ArrayList<RouteInfo> routes = new ArrayList<RouteInfo>();
+            List<RouteInfo> routes;
             final int catCount = mRouter.getCategoryCount();
             for (int i = 0; i < catCount; i++) {
                 final RouteCategory cat = mRouter.getCategoryAt(i);
-                cat.getRoutes(routes);
+                routes = cat.getRoutes(mCatRouteList);
 
                 mItems.add(cat);
 
-                final int routeCount = routes.size();
-                for (int j = 0; j < routeCount; j++) {
-                    final RouteInfo info = routes.get(j);
-                    if (info == selectedRoute) {
-                        mSelectedItemPosition = mItems.size();
-                    }
-                    mItems.add(info);
+                if (cat == mCategoryEditingGroups) {
+                    addGroupEditingCategoryRoutes(routes);
+                } else {
+                    addSelectableRoutes(selectedRoute, routes);
                 }
+
+                routes.clear();
             }
 
             notifyDataSetChanged();
-            if (mListView != null) {
+            if (mListView != null && mSelectedItemPosition >= 0) {
                 mListView.setItemChecked(mSelectedItemPosition, true);
             }
+        }
+
+        void scrollToEditingGroup() {
+            if (mCategoryEditingGroups == null || mListView == null) return;
+
+            int pos = 0;
+            int bound = 0;
+            final int itemCount = mItems.size();
+            for (int i = 0; i < itemCount; i++) {
+                final Object item = mItems.get(i);
+                if (item != null && item == mCategoryEditingGroups) {
+                    bound = i;
+                }
+                if (item == null) {
+                    pos = i;
+                    break; // this is always below the category header; we can stop here.
+                }
+            }
+
+            mListView.smoothScrollToPosition(pos, bound);
+        }
+
+        void scrollToSelectedItem() {
+            if (mListView == null || mSelectedItemPosition < 0) return;
+
+            mListView.smoothScrollToPosition(mSelectedItemPosition);
+        }
+
+        void addSelectableRoutes(RouteInfo selectedRoute, List<RouteInfo> from) {
+            final int routeCount = from.size();
+            for (int j = 0; j < routeCount; j++) {
+                final RouteInfo info = from.get(j);
+                if (info == selectedRoute) {
+                    mSelectedItemPosition = mItems.size();
+                }
+                mItems.add(info);
+            }
+        }
+
+        void addGroupEditingCategoryRoutes(List<RouteInfo> from) {
+            // Unpack groups and flatten for presentation
+            // mSortRouteList will always be empty here.
+            final int topCount = from.size();
+            for (int i = 0; i < topCount; i++) {
+                final RouteInfo route = from.get(i);
+                final RouteGroup group = route.getGroup();
+                if (group == route) {
+                    // This is a group, unpack it.
+                    final int groupCount = group.getRouteCount();
+                    for (int j = 0; j < groupCount; j++) {
+                        final RouteInfo innerRoute = group.getRouteAt(j);
+                        mSortRouteList.add(innerRoute);
+                    }
+                } else {
+                    mSortRouteList.add(route);
+                }
+            }
+            // Sort by name. This will keep the route positions relatively stable even though they
+            // will be repeatedly added and removed.
+            Collections.sort(mSortRouteList, mComparator);
+
+            mItems.addAll(mSortRouteList);
+            mSortRouteList.clear();
+
+            mItems.add(null); // Sentinel reserving space for the "done" button.
         }
 
         @Override
@@ -256,7 +302,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
 
         @Override
         public int getViewTypeCount() {
-            return 3;
+            return 5;
         }
 
         @Override
@@ -264,7 +310,13 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
             final Object item = getItem(position);
             if (item instanceof RouteCategory) {
                 return position == 0 ? VIEW_TOP_HEADER : VIEW_SECTION_HEADER;
+            } else if (item == null) {
+                return VIEW_GROUPING_DONE;
             } else {
+                final RouteInfo info = (RouteInfo) item;
+                if (info.getCategory() == mCategoryEditingGroups) {
+                    return VIEW_GROUPING_ROUTE;
+                }
                 return VIEW_ROUTE;
             }
         }
@@ -276,7 +328,14 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
 
         @Override
         public boolean isEnabled(int position) {
-            return getItemViewType(position) == VIEW_ROUTE;
+            switch (getItemViewType(position)) {
+                case VIEW_ROUTE:
+                case VIEW_GROUPING_ROUTE:
+                case VIEW_GROUPING_DONE:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         @Override
@@ -301,6 +360,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
                 holder.text1 = (TextView) convertView.findViewById(R.id.text1);
                 holder.text2 = (TextView) convertView.findViewById(R.id.text2);
                 holder.icon = (ImageView) convertView.findViewById(R.id.icon);
+                holder.check = (CheckBox) convertView.findViewById(R.id.check);
                 holder.expandGroupButton = (ImageButton) convertView.findViewById(
                         R.id.expand_button);
                 if (holder.expandGroupButton != null) {
@@ -322,11 +382,18 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
                 holder.position = position;
             }
 
-            if (viewType == VIEW_ROUTE) {
-                bindItemView(position, holder);
-            } else {
-                bindHeaderView(position, holder);
+            switch (viewType) {
+                case VIEW_ROUTE:
+                case VIEW_GROUPING_ROUTE:
+                    bindItemView(position, holder);
+                    break;
+                case VIEW_SECTION_HEADER:
+                case VIEW_TOP_HEADER:
+                    bindHeaderView(position, holder);
+                    break;
             }
+
+            convertView.setActivated(position == mSelectedItemPosition);
 
             return convertView;
         }
@@ -351,14 +418,24 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
 
             RouteCategory cat = info.getCategory();
             boolean canGroup = false;
-            if (cat.isGroupable()) {
-                final RouteGroup group = (RouteGroup) info;
-                canGroup = group.getRouteCount() > 1 ||
-                        getItemViewType(position - 1) == VIEW_ROUTE ||
-                        (position < getCount() - 1 && getItemViewType(position + 1) == VIEW_ROUTE);
+            if (cat == mCategoryEditingGroups) {
+                RouteGroup group = info.getGroup();
+                holder.check.setEnabled(group.getRouteCount() > 1);
+                holder.check.setChecked(group == mEditingGroup);
+            } else {
+                if (cat.isGroupable()) {
+                    final RouteGroup group = (RouteGroup) info;
+                    canGroup = group.getRouteCount() > 1 ||
+                            getItemViewType(position - 1) == VIEW_ROUTE ||
+                            (position < getCount() - 1 &&
+                                    getItemViewType(position + 1) == VIEW_ROUTE);
+                }
             }
-            holder.expandGroupButton.setVisibility(canGroup ? View.VISIBLE : View.GONE);
-            holder.expandGroupListener.position = position;
+
+            if (holder.expandGroupButton != null) {
+                holder.expandGroupButton.setVisibility(canGroup ? View.VISIBLE : View.GONE);
+                holder.expandGroupListener.position = position;
+            }
         }
 
         void bindHeaderView(int position, ViewHolder holder) {
@@ -372,14 +449,62 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            ListView lv = (ListView) parent;
-            final Object item = getItem(lv.getCheckedItemPosition());
-            if (!(item instanceof RouteInfo)) {
-                // Oops. Stale event running around? Skip it.
+            final int type = getItemViewType(position);
+            if (type == VIEW_SECTION_HEADER || type == VIEW_TOP_HEADER) {
                 return;
+            } else if (type == VIEW_GROUPING_DONE) {
+                finishGrouping();
+                return;
+            } else {
+                final Object item = getItem(position);
+                if (!(item instanceof RouteInfo)) {
+                    // Oops. Stale event running around? Skip it.
+                    return;
+                }
+
+                final RouteInfo route = (RouteInfo) item;
+                if (type == VIEW_ROUTE) {
+                    mRouter.selectRouteInt(mRouteTypes, route);
+                    dismiss();
+                } else if (type == VIEW_GROUPING_ROUTE) {
+                    final Checkable c = (Checkable) view;
+                    final boolean wasChecked = c.isChecked();
+
+                    mIgnoreUpdates = true;
+                    RouteGroup oldGroup = route.getGroup();
+                    if (!wasChecked && oldGroup != mEditingGroup) {
+                        // Assumption: in a groupable category oldGroup will never be null.
+                        if (mRouter.getSelectedRoute(mRouteTypes) == oldGroup) {
+                            // Old group was selected but is now empty. Select the group
+                            // we're manipulating since that's where the last route went.
+                            mRouter.selectRouteInt(mRouteTypes, mEditingGroup);
+                        }
+                        oldGroup.removeRoute(route);
+                        mEditingGroup.addRoute(route);
+                        c.setChecked(true);
+                    } else if (wasChecked && mEditingGroup.getRouteCount() > 1) {
+                        mEditingGroup.removeRoute(route);
+
+                        // In a groupable category this will add
+                        // the route into its own new group.
+                        mRouter.addRouteInt(route);
+                    }
+                    mIgnoreUpdates = false;
+                    update();
+                }
             }
-            mRouter.selectRouteInt(mRouteTypes, (RouteInfo) item);
-            dismiss();
+        }
+
+        boolean isGrouping() {
+            return mCategoryEditingGroups != null;
+        }
+
+        void finishGrouping() {
+            mCategoryEditingGroups = null;
+            mEditingGroup = null;
+            getDialog().setCanceledOnTouchOutside(true);
+            update();
+            scrollToSelectedItem();
         }
 
         class ExpandGroupListener implements View.OnClickListener {
@@ -389,7 +514,13 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
             public void onClick(View v) {
                 // Assumption: this is only available for the user to click if we're presenting
                 // a groupable category, where every top-level route in the category is a group.
-                onExpandGroup((RouteGroup) getItem(position));
+                final RouteGroup group = (RouteGroup) getItem(position);
+                mEditingGroup = group;
+                mCategoryEditingGroups = group.getCategory();
+                getDialog().setCanceledOnTouchOutside(false);
+                mRouter.selectRouteInt(mRouteTypes, mEditingGroup);
+                update();
+                scrollToEditingGroup();
             }
         }
 
@@ -411,6 +542,9 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
 
             @Override
             public void onRouteRemoved(MediaRouter router, RouteInfo info) {
+                if (info == mEditingGroup) {
+                    finishGrouping();
+                }
                 update();
             }
 
@@ -432,246 +566,6 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
         }
     }
 
-    private class GroupAdapter extends BaseAdapter implements ListView.OnItemClickListener {
-        private static final int VIEW_HEADER = 0;
-        private static final int VIEW_ROUTE = 1;
-        private static final int VIEW_DONE = 2;
-
-        private RouteGroup mPrimary;
-        private RouteCategory mCategory;
-        private final ArrayList<RouteInfo> mTempList = new ArrayList<RouteInfo>();
-        private final ArrayList<RouteInfo> mFlatRoutes = new ArrayList<RouteInfo>();
-        private boolean mIgnoreUpdates;
-        
-        final MediaRouterCallback mCallback = new MediaRouterCallback();
-
-        public GroupAdapter(RouteGroup primary) {
-            mPrimary = primary;
-            mCategory = primary.getCategory();
-            update();
-        }
-
-        @Override
-        public int getCount() {
-            return mFlatRoutes.size() + 2;
-        }
-
-        @Override
-        public int getViewTypeCount() {
-            return 3;
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            if (position == 0) {
-                return VIEW_HEADER;
-            } else if (position == getCount() - 1) {
-                return VIEW_DONE;
-            }
-            return VIEW_ROUTE;
-        }
-
-        void update() {
-            if (mIgnoreUpdates) return;
-            mFlatRoutes.clear();
-            mCategory.getRoutes(mTempList);
-
-            // Unpack groups and flatten for presentation
-            final int topCount = mTempList.size();
-            for (int i = 0; i < topCount; i++) {
-                final RouteInfo route = mTempList.get(i);
-                final RouteGroup group = route.getGroup();
-                if (group == route) {
-                    // This is a group, unpack it.
-                    final int groupCount = group.getRouteCount();
-                    for (int j = 0; j < groupCount; j++) {
-                        final RouteInfo innerRoute = group.getRouteAt(j);
-                        mFlatRoutes.add(innerRoute);
-                    }
-                } else {
-                    mFlatRoutes.add(route);
-                }
-            }
-            mTempList.clear();
-
-            // Sort by name. This will keep the route positions relatively stable even though they
-            // will be repeatedly added and removed.
-            Collections.sort(mFlatRoutes, mComparator);
-            notifyDataSetChanged();
-        }
-
-        void initCheckedItems() {
-            if (mIgnoreUpdates) return;
-            mListView.clearChoices();
-            int count = mFlatRoutes.size();
-            for (int i = 0; i < count; i++){
-                final RouteInfo route = mFlatRoutes.get(i);
-                if (route.getGroup() == mPrimary) {
-                    mListView.setItemChecked(i + 1, true);
-                }
-            }
-        }
-
-        @Override
-        public Object getItem(int position) {
-            if (position == 0) {
-                return mCategory;
-            } else if (position == getCount() - 1) {
-                return null; // Done
-            }
-            return mFlatRoutes.get(position - 1);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public boolean areAllItemsEnabled() {
-            return false;
-        }
-
-        @Override
-        public boolean isEnabled(int position) {
-            return position > 0;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            final int viewType = getItemViewType(position);
-
-            ViewHolder holder;
-            if (convertView == null) {
-                convertView = mInflater.inflate(GROUP_ITEM_LAYOUTS[viewType], parent, false);
-                holder = new ViewHolder();
-                holder.position = position;
-                holder.text1 = (TextView) convertView.findViewById(R.id.text1);
-                holder.text2 = (TextView) convertView.findViewById(R.id.text2);
-                holder.icon = (ImageView) convertView.findViewById(R.id.icon);
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
-                holder.position = position;
-            }
-
-            if (viewType == VIEW_ROUTE) {
-                bindItemView(position, holder);
-            } else if (viewType == VIEW_HEADER) {
-                bindHeaderView(position, holder);
-            }
-
-            return convertView;
-        }
-
-        void bindItemView(int position, ViewHolder holder) {
-            RouteInfo info = (RouteInfo) getItem(position);
-            holder.text1.setText(info.getName(getActivity()));
-            final CharSequence status = info.getStatus();
-            if (TextUtils.isEmpty(status)) {
-                holder.text2.setVisibility(View.GONE);
-            } else {
-                holder.text2.setVisibility(View.VISIBLE);
-                holder.text2.setText(status);
-            }
-        }
-
-        void bindHeaderView(int position, ViewHolder holder) {
-            holder.text1.setText(mCategory.getName(getActivity()));
-        }
-
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if (getItemViewType(position) == VIEW_DONE) {
-                onDoneGrouping();
-                return;
-            }
-
-            final ListView lv = (ListView) parent;
-            final RouteInfo route = mFlatRoutes.get(position - 1);
-            final boolean checked = lv.isItemChecked(position);
-
-            mIgnoreUpdates = true;
-            RouteGroup oldGroup = route.getGroup();
-            if (checked && oldGroup != mPrimary) {
-                // Assumption: in a groupable category oldGroup will never be null.
-                oldGroup.removeRoute(route);
-
-                // If the group is now empty, remove the group too.
-                if (oldGroup.getRouteCount() == 0) {
-                    if (mRouter.getSelectedRoute(mRouteTypes) == oldGroup) {
-                        // Old group was selected but is now empty. Select the group
-                        // we're manipulating since that's where the last route went.
-                        mRouter.selectRouteInt(mRouteTypes, mPrimary);
-                    }
-                    mRouter.removeRouteInt(oldGroup);
-                }
-
-                mPrimary.addRoute(route);
-            } else if (!checked) {
-                if (mPrimary.getRouteCount() > 1) {
-                    mPrimary.removeRoute(route);
-
-                    // In a groupable category this will add the route into its own new group.
-                    mRouter.addRouteInt(route);
-                } else {
-                    // We're about to remove the last route.
-                    // Don't let this happen, as it would be silly.
-                    // Turn the checkmark back on again. Silly user!
-                    lv.setItemChecked(position, true);
-                }
-            }
-            mIgnoreUpdates = false;
-            update();
-            initCheckedItems();
-        }
-
-        class MediaRouterCallback extends MediaRouter.Callback {
-            @Override
-            public void onRouteSelected(MediaRouter router, int type, RouteInfo info) {
-            }
-
-            @Override
-            public void onRouteUnselected(MediaRouter router, int type, RouteInfo info) {
-            }
-
-            @Override
-            public void onRouteAdded(MediaRouter router, RouteInfo info) {
-                update();
-                initCheckedItems();
-            }
-
-            @Override
-            public void onRouteRemoved(MediaRouter router, RouteInfo info) {
-                if (info == mPrimary) {
-                    // Can't keep grouping, clean it up.
-                    onDoneGrouping();
-                } else {
-                    update();
-                    initCheckedItems();
-                }
-            }
-
-            @Override
-            public void onRouteChanged(MediaRouter router, RouteInfo info) {
-                update();
-            }
-
-            @Override
-            public void onRouteGrouped(MediaRouter router, RouteInfo info, RouteGroup group,
-                    int index) {
-                update();
-                initCheckedItems();
-            }
-
-            @Override
-            public void onRouteUngrouped(MediaRouter router, RouteInfo info, RouteGroup group) {
-                update();
-                initCheckedItems();
-            }
-        }
-    }
-
     class RouteComparator implements Comparator<RouteInfo> {
         @Override
         public int compare(RouteInfo lhs, RouteInfo rhs) {
@@ -687,8 +581,8 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
 
         @Override
         public void onBackPressed() {
-            if (mGroupAdapter != null) {
-                onDoneGrouping();
+            if (mAdapter != null && mAdapter.isGrouping()) {
+                mAdapter.finishGrouping();
             } else {
                 super.onBackPressed();
             }

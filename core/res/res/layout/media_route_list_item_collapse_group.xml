@@ -14,26 +14,31 @@
      limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="?android:attr/listPreferredItemHeightSmall"
-              android:background="#19ffffff"
-              android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
-              android:paddingRight="?android:attr/listPreferredItemPaddingRight"
-              android:gravity="center_vertical">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:background="?android:attr/selectableItemBackground">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/listPreferredItemHeightSmall"
+        android:background="#19ffffff"
+        android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
+        android:paddingRight="?android:attr/listPreferredItemPaddingRight"
+        android:gravity="center_vertical">
 
-    <TextView android:layout_width="0dp"
-              android:layout_height="wrap_content"
-              android:layout_weight="1"
-              android:singleLine="true"
-              android:ellipsize="marquee"
-              android:text="@string/media_route_chooser_grouping_done"
-              android:textAppearance="?android:attr/textAppearanceMedium" />
+        <TextView android:layout_width="0dp"
+                  android:layout_height="wrap_content"
+                  android:layout_weight="1"
+                  android:singleLine="true"
+                  android:ellipsize="marquee"
+                  android:text="@string/media_route_chooser_grouping_done"
+                  android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_media_group_collapse"
-        android:scaleType="center" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_media_group_collapse"
+            android:scaleType="center" />
 
-</LinearLayout>
+    </LinearLayout>
+</FrameLayout>
