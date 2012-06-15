@@ -4,8 +4,7 @@ page.title=Color
 <style>
   .color-row {
     width: 740px;
-    margin-left: 10px !important;
-    margin-right: 10px !important;
+    margin:0;
 
     display: -webkit-box;
     display:    -moz-box;

@@ -49,15 +49,12 @@ page.title=What is the NDK?
   <p>The latest release of the NDK supports the following instruction sets:</p>
 
   <ul>
-    <li>ARMv5TE, including Thumb-1 instructions (see {@code docs/CPU-ARCH-ABIS.html} for more
-information)</li>
+    <li>ARMv5TE (including Thumb-1 instructions)</li>
 
-    <li>ARMv7-A, including Thumb-2 and VFPv3-D16 instructions, with optional support for
-    NEON/VFPv3-D32 instructions (see {@code docs/CPU-ARM-NEON.html} for more information)</li>
+    <li>ARMv7-A (including Thumb-2 and VFPv3-D16 instructions, with optional support for
+    NEON/VFPv3-D32 instructions)</li>
 
-    <li>x86 instructions (see {@code docs/CPU-X86.html} for more information)</li>
-
-    <li>MIPS instructions (see {@code docs/CPU-MIPS.html} for more information)</li>
+    <li>x86 instructions (see CPU-ARCH-ABIS.HTML for more information)</li>
   </ul>
 
   <p>ARMv5TE machine code will run on all ARM-based Android devices. ARMv7-A will run only on
@@ -92,14 +89,13 @@ information)</li>
   <ul>
     <li>Write your application using the Android framework and use JNI to access the APIs provided
     by the Android NDK. This technique allows you to take advantage of the convenience of the
-    Android framework, but still allows you to write native code when necessary. If you use this
-    approach, your application must target specific, minimum Android platform levels, see <a
-    href="#platform-compat">Android platform compatibility</a> for more information.</li>
+    Android framework, but still allows you to write native code when necessary. You can install
+    applications that use native code through the JNI on devices that run Android 1.5 or
+    later.</li>
 
     <li>
       <p>Write a native activity, which allows you to implement the lifecycle callbacks in native
-      code. The Android SDK provides the {@link android.app.NativeActivity} class, which is a
-      convenience class that notifies your
+      code. The Android SDK provides the {@link android.app.NativeActivity} class, which is a convenience class that notifies your
       native code of any activity lifecycle callbacks (<code>onCreate()</code>, <code>onPause()</code>,
       <code>onResume()</code>, etc). You can implement the callbacks in your native code to handle
       these events when they occur. Applications that use native activities must be run on Android
@@ -159,7 +155,7 @@ information)</li>
   <p>The NDK package includes a set of documentation that describes the capabilities of the NDK and
   how to use it to create shared libraries for your Android applications. In this release, the
   documentation is provided only in the downloadable NDK package. You can find the documentation in
-  the <code>&lt;ndk&gt;/docs/</code> directory. Included are these files (partial listing):</p>
+  the <code>&lt;ndk&gt;/docs/</code> directory. Included are these files:</p>
 
   <ul>
     <li>
@@ -180,6 +176,9 @@ information)</li>
     <li>CPU-FEATURES.HTML &mdash; a description of the <code>cpufeatures</code> static library that
     lets your application code detect the target device's CPU family and the optional features at
     runtime.</li>
+
+    <li>CPU-ARM-NEON.HTML &mdash; a description of how to build with optional ARM NEON / VFPv3-D32
+    instructions.</li>
 
     <li>CHANGES.HTML &mdash; a complete list of changes to the NDK across all releases.</li>
 
@@ -474,49 +473,21 @@ later)</li>
     will <em>not</em> work with Cygwin 1.5 installations.</li>
   </ul>
 
-  <h4 id="platform-compat">Android platform compatibility</h4>
+  <h4>Android platform compatibility</h4>
 
   <ul>
-    <li>The native libraries created by the Android NDK can only be used on devices running
-      specific minimum Android platform versions. The minimum required platform version depends on
-      the CPU architecture of the devices you are targeting. The following table details which
-      Android platform versions are compatible with native code developed for specific CPU
-      architectures.
+    <li>The native libraries created by the Android NDK can only be used on devices running the
+    Android 1.5 platform version or later. This is due to toolchain and ABI related changes that
+    make the native libraries incompatible with 1.0 and 1.1 system images.</li>
 
-    <table style="margin:1em;">
-      <tr>
-        <th>Native Code CPU Architecture Used</th>
-        <th>Compatible Android Platform(s)</th>
-      </tr>
-
-      <tr>
-        <td>ARM, ARM-NEON</td>
-        <td>Android 1.5 (API Level 3) and higher</td>
-      </tr>
-
-      <tr>
-        <td>x86</td>
-        <td>Android 2.3 (API Level 9) and higher</td>
-      </tr>
-
-      <tr>
-        <td>MIPS</td>
-        <td>Android 2.3 (API Level 9) and higher</td>
-      </tr>
-    </table>
-
-      <p>These requirements mean you can use native libraries produced with the NDK in
-      applications that are deployable to ARM-based devices running Android 1.5 or later. If you are
-      deploying native libraries to x86 and MIPS-based devices, your application must target Android
-      2.3 or later.</p>
-    </li>
+    <li>For this reason, you should use native libraries produced with the NDK in applications that
+    are deployable to devices running the Android 1.5 platform version or later.</li>
 
     <li>To ensure compatibility, an application using a native library produced with the NDK
     <em>must</em> declare a <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>
       &lt;uses-sdk&gt;</code></a> element in its manifest file, with an
       <code>android:minSdkVersion</code> attribute value of "3" or higher. For example:
-
-<pre style="margin:1em;">
+      <pre style="margin:1em;">
 &lt;manifest&gt;
   &lt;uses-sdk android:minSdkVersion="3" /&gt;
   ...
@@ -527,8 +498,8 @@ later)</li>
     <li>If you use this NDK to create a native library that uses the OpenGL ES APIs, the
     application containing the library can be deployed only to devices running the minimum platform
     versions described in the table below. To ensure compatibility, make sure that your application
-    declares the proper <code>android:minSdkVersion</code> attribute value, as shown in the
-    following table.</li>
+    declares the proper <code>android:minSdkVersion</code> attribute value, as given in the
+    table.</li>
 
     <li style="list-style: none; display: inline">
       <table style="margin:1em;">
@@ -543,7 +514,7 @@ later)</li>
         <tr>
           <td>OpenGL ES 1.1</td>
 
-          <td>Android 1.6 (API Level 4) and higher</td>
+          <td>Android 1.6 and higher</td>
 
           <td><code>android:minSdkVersion="4"</code></td>
         </tr>
@@ -551,7 +522,7 @@ later)</li>
         <tr>
           <td>OpenGL ES 2.0</td>
 
-          <td>Android 2.0 (API Level 5) and higher</td>
+          <td>Android 2.0 and higher</td>
 
           <td><code>android:minSdkVersion="5"</code></td>
         </tr>

@@ -1,16 +1,16 @@
 ndk=true
 
-ndk.win_download=android-ndk-r8-windows.zip
-ndk.win_bytes=109928336
-ndk.win_checksum=37b1a2576f28752fcc09e1b9c07e3f14
+ndk.win_download=android-ndk-r7c-windows.zip
+ndk.win_bytes=80361003
+ndk.win_checksum=e86184cdc4bf71d32fa9185fad8544e2
 
-ndk.mac_download=android-ndk-r8-darwin-x86.tar.bz2
-ndk.mac_bytes=96650992
-ndk.mac_checksum=81ce5de731f945692123b377afe0bad9
+ndk.mac_download=android-ndk-r7c-darwin-x86.tar.bz2
+ndk.mac_bytes=73836512
+ndk.mac_checksum=025f57feb5f32ed993a5fa7f5996477d
 
-ndk.linux_download=android-ndk-r8-linux-x86.tar.bz2
-ndk.linux_bytes=88310791
-ndk.linux_checksum=5c9afc9695ad67c61f82fbf896803c05
+ndk.linux_download=android-ndk-r7c-linux-x86.tar.bz2
+ndk.linux_bytes=63432410
+ndk.linux_checksum=0bc21b78823dcf6f86b988203626b1fe
 
 page.title=Android NDK
 
@@ -62,78 +62,6 @@ padding: .25em 1em;
 <div class="toggleable open">
   <a href="#" onclick="return toggleDiv(this)"><img src=
   "{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px">
-  Android NDK, Revision 8</a> <em>(May 2012)</em>
-
-  <div class="toggleme">
-    <p>This release of the NDK includes support for MIPS ABI and a few additional fixes.</p>
-
-    </dl>
-      <dt>New features:</dt>
-
-      <dd>
-        <ul>
-          <li>Added support for the MIPS ABI, which allows you to generate machine code that runs on
-            compatible MIPS-based Android devices. Major features for MIPS include MIPS-specific
-            toolchains, system headers, libraries and debugging support. For more details regarding
-            MIPS support, see {@code docs/CPU-MIPS.html} in the NDK package.
-
-              <p>By default, code is generated for ARM-based devices. You can add {@code mips} to
-              your {@code APP_ABI} definition in your {@code Application.mk} file to build
-              for MIPS platforms. For example, the following line instructs {@code ndk-build}
-              to build your code for three distinct ABIs:</p>
-
-              <pre>APP_ABI := armeabi armeabi-v7a <strong>mips</strong></pre>
-
-              <p>Unless you rely on architecture-specific assembly sources, such as ARM assembly
-              code, you should not need to touch your {@code Android.mk} files to build MIPS
-              machine code.</p>
-          </li>
-
-          <li>You can build a standalone MIPS toolchain using the {@code --arch=mips}
-          option when calling <code>make-standalone-toolchain.sh</code>. See
-          {@code docs/STANDALONE-TOOLCHAIN.html} for more details.
-          </li>
-        </ul>
-
-        <p class="note"><strong>Note:</strong> To ensure that your applications are available
-to users only if their devices are capable of running them, Google Play filters applications based
-on the instruction set information included in your application — no action is needed on your part
-to enable the filtering. Additionally, the Android system itself also checks your application at
-install time and allows the installation to continue only if the application provides a library that
-is compiled for the device's CPU architecture.</p>
-      </dd>
-
-      <dt>Important bug fixes:</dt>
-
-      <dd>
-        <ul>
-          <li>Fixed a typo in GAbi++ implementation where the result of {@code
-          dynamic_cast&lt;D&gt;(b)} of base class object {@code b} to derived class {@code D} is
-          incorrectly adjusted in the opposite direction from the base class.
-          (<a href="http://code.google.com/p/android/issues/detail?id=28721">Issue 28721</a>)
-          </li>
-          <li>Fixed an issue in which {@code make-standalone-toolchain.sh} fails to copy
-          {@code libsupc++.*}.</li>
-        </ul>
-      </dd>
-
-      <dt>Other bug fixes:</dt>
-
-      <dd>
-        <ul>
-          <li>Fixed {@code ndk-build.cmd} to ensure that {@code ndk-build.cmd} works correctly even
-          if the user has redefined the {@code SHELL} environment variable, which may be changed
-          when installing a variety of development tools in Windows environments.
-          </li>
-        </ul>
-      </dd>
-    </dl>
-  </div>
-</div>
-
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)"><img src=
-  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
   Android NDK, Revision 7c</a> <em>(April 2012)</em>
 
   <div class="toggleme">

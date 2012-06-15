@@ -1,0 +1,8 @@
+@jd:body
+
+<script type="text/javascript">
+  document.location=toRoot+"sdk/index.html"
+</script>
+
+<p>You should have already been redirected by your browser. Please go to
+<a href="{@docRoot}sdk/index.html">the Android SDK</a>.</p>

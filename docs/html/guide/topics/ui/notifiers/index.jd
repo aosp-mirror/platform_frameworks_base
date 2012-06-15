@@ -21,7 +21,7 @@ the application should show a hovering progress wheel or bar.</li>
 <ul>
   <li>A <a href="#Toast">Toast Notification</a>, for brief messages that come 
   from the background.</li>
-  <li>A <a href="#StatusBar">Status Bar Notification</a>, for persistent reminders 
+  <li>A <a href="#StatusBar">Status Notification</a>, for persistent reminders 
   that come from the background and request the user's response.</li>
   <li>A <a href="#Dialog">Dialog Notification</a>, for Activity-related notifications.</li>
 </ul>
@@ -44,16 +44,16 @@ out, and does not accept interaction events. Because a toast can be created from
 when you're fairly certain the user is paying attention 
 to the screen. A toast can not accept user interaction events; if you'd like
 the user to respond and take action, consider using a 
-<a href="#StatusBar">Status Bar Notification</a> instead.</p>
+<a href="#StatusBar">Status Notification</a> instead.</p>
 
 <p>For more information, refer to <a href="toasts.html">Toast Notifications</a>.</p>
 
 
-<h2 id="StatusBar">Status Bar Notification</h2>
+<h2 id="StatusBar">Status Notification</h2>
 
 <img src="{@docRoot}images/notifications_window.png" alt="" style="float:right; clear:right;" />
 
-<p>A status bar notification adds an icon to the system's status bar 
+<p>A status notification adds an icon to the system's status bar 
 (with an optional ticker-text message) and an expanded message in the "Notifications" window.
 When the user selects the expanded message, Android fires an 
 {@link android.content.Intent} that is defined by the notification (usually to launch an 
@@ -68,7 +68,7 @@ while your Activity is still in focus, consider using a
 <a href="#Dialog">Dialog Notification</a> instead.</p>
 
 <p>For more information, refer to 
-<a href="notifications.html">Status Bar Notifications</a>.</p>
+<a href="notifications.html">Status Notifications</a>.</p>
 
 
 <h2 id="Dialog">Dialog Notification</h2>

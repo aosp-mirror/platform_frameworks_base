@@ -1,0 +1,14 @@
+page.title=Preparing Your Computer
+walkthru=1
+
+@jd:body
+
+<p>First, you need to meet some system prerequisites.</p>
+
+<p>Confirm that your development computer meets the <a href="#Requirements">System Requirements</a> below. 
+  In particular, you might need to install the 
+  <a href="http://java.sun.com/javase/downloads/index.jsp">JDK</a>, if you don't have it already. </p>
+
+
+
+

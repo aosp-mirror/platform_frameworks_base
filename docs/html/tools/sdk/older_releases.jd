@@ -1,0 +1,613 @@
+page.title=SDK Archives
+@jd:body
+
+<p>This page provides a full list of archived and obsolete SDK releases,
+including non-current versions of active releases and "early look" versions that
+were released before Android 1.0. <strong>These are provided for
+informational and archival purposes only</strong>.</p>
+
+<div class="special">
+<p>If you are just starting to develop applications for Android, please
+download the current <a href="{@docRoot}sdk/index.html">Android
+SDK</a>. With the current Android SDK, you can add any current and previous
+version of the Android platform as a component and use it for
+development and testing.</p>
+<p>If you already have an Android SDK for platform version 1.6 or newer, then
+you do not need to install a new SDK&mdash;especially not one from this page.
+You should install older platforms as components of your existing SDK.
+See <a href="adding-components.html">Adding SDK Components</a>.</p>
+</div>
+
+
+<h2>Archived SDKs</h2>
+
+<p>The tables below provides Android SDKs that are current in terms of their
+platform version, but do not provide the latest Android development
+environment and tools. Instead of downloading one of these, as a separate
+SDK for each version of the platform, you should instead use the new
+version-neutral Android SDK to download each version of
+the Android platfrom as an individual component.</p>
+
+<p>Please download the current <a
+href="http://developer.android.com/sdk/index.html">Android SDK</a>.</p>
+
+
+<h3>Release 1.6 r1</h3>
+ <p><em>September 2009 - <a href="RELEASENOTES.html#1.6_r1">Release
+Notes</a></em></p>
+
+  <table class="download">
+    <tr>
+      <th>Platform</th>
+      <th>Package</th>
+      <th>Size</th>
+      <th>MD5 Checksum</th>
+  </tr>
+  <tr>
+    <td>Windows</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-windows-1.6_r1.zip">android-sdk-
+windows-1 .6_r1.zip</a>
+    </td>
+    <td>260529085 bytes</td>
+    <td>2bcbacbc7af0363058ca1cac6abad848</td>
+  </tr>
+  <tr class="alt-color">
+    <td>Mac OS X (intel)</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-mac_x86-1.6_r1.zip">android-sdk-
+mac_x86-1 .6_r1.zip</a>
+    </td>
+    <td>247412515 bytes</td>
+    <td>eb13cc79602d492e89103efcf48ac1f6</td>
+  </tr>
+  <tr>
+    <td>Linux (i386)</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-linux_x86-1.6_r1.tgz">android-
+sdk- linux_x86-1.6_r1.tgz</a>
+    </td>
+    <td>238224860 bytes</td>
+    <td>b4bf0e610ff6db2fb6fb09c49cba1e79</td>
+  </tr>
+  
+  </table>
+
+
+<h3>Release 1.5 r3</h3>
+ <p><em>July 2009 - <a href="RELEASENOTES.html#1.5_r3">Release
+Notes</a></em></p>
+
+  <table class="download">
+    <tr>
+      <th>Platform</th>
+      <th>Package</th>
+      <th>Size</th>
+      <th>MD5 Checksum</th>
+  </tr>
+  <tr>
+    <td>Windows</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-windows-1.5_r3.zip">android-sdk-
+windows-1 .5_r3.zip</a>
+    </td>
+    <td>191477853 bytes</td>
+    <td>1725fd6963ce69102ba7192568dfc711</td>
+  </tr>
+  <tr class="alt-color">
+    <td>Mac OS X (intel)</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-mac_x86-1.5_r3.zip">android-sdk-
+mac_x86-1 .5_r3.zip</a>
+    </td>
+    <td>183024673 bytes</td>
+    <td>b1bafdaefdcec89a14b604b504e7daec</td>
+  </tr>
+  <tr>
+    <td>Linux (i386)</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-linux_x86-1.5_r3.zip">android-
+sdk- linux_x86-1.5_r3.zip</a>
+    </td>
+    <td>178117561 bytes</td>
+    <td>350d0211678ced38da926b8c9ffa4fac</td>
+  </tr>
+  
+  </table>
+
+
+<h3>Release 1.1 r1</h3>
+ <p><em>February 2009 - <a href="RELEASENOTES.html#1.1_r1">Release
+Notes</a></em></p>
+
+  <table class="download">
+    <tr>
+      <th>Platform</th>
+      <th>Package</th>
+      <th>Size</th>
+      <th>MD5 Checksum</th>
+  </tr>
+  <tr>
+    <td>Windows</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-windows-1.1_r1.zip">android-sdk-
+windows-1
+.1_r1.zip</a>
+    </td>
+    <td>86038515 bytes</td>
+    <td>8c4b9080b430025370689e03d20842f3</td>
+  </tr>
+  <tr class="alt-color">
+    <td>Mac OS X (intel)</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-mac_x86-1.1_r1.zip">android-sdk-
+mac_x86-1
+.1_r1.zip</a>
+    </td>
+    <td>79046151 bytes</td>
+    <td>becf0f1763d61eedce15d2a903d6c1dd</td>
+  </tr>
+  <tr>
+    <td>Linux (i386)</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-linux_x86-1.1_r1.zip">android-
+sdk-
+linux_x86-1.1_r1.zip</a>
+    </td>
+    <td>79345522 bytes</td>
+    <td>ebcb16b0cd4aef198b4dd9a1418efbf1</td>
+  </tr>
+  
+  </table>
+
+
+<h3>Release 1.0 r2</h3>
+ <p><em>November 2008 - <a href="RELEASENOTES.html#1.0_r2">Release
+Notes</a></em></p>
+
+  <table class="download">
+    <tr>
+      <th>Platform</th>
+      <th>Package</th>
+      <th>Size</th>
+      <th>MD5 Checksum</th>
+  </tr>
+  <tr>
+    <td>Windows</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-windows-1.0_r2.zip">android-sdk-
+windows-1
+.0_r2.zip</a>
+    </td>
+    <td>98360564 bytes</td>
+    <td>a5e1af8ac145946b4a9627516ad4a711</td>
+  </tr>
+  <tr class="alt-color">
+    <td>Mac OS X (intel)</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-mac_x86-1.0_r2.zip">android-sdk-
+mac_x86-1
+.0_r2.zip</a>
+    </td>
+    <td>93771410 bytes</td>
+    <td>87b99d5e9f59b78363a63200c11498e8</td>
+  </tr>
+  <tr>
+    <td>Linux (i386)</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-linux_x86-1.0_r2.zip">android-
+sdk-
+linux_x86-1.0_r2.zip</a>
+    </td>
+    <td>94186463 bytes</td>
+    <td>a1f3b6d854596f850f5008856d0f380e</td>
+  </tr>
+  
+  </table>
+
+
+
+
+<h2>Obsolete SDK Releases</h2>
+
+<p>These tables provide Android SDK releases that have been superceded by
+an active release (shown above) and that are now obsolete.</p>
+
+
+<h3>Release 1.5 r2</h3>
+ <p><em>May 2009 - <a href="RELEASENOTES.html#1.5_r2">Release
+Notes</a></em></p>
+
+  <table class="download">
+    <tr>
+      <th>Platform</th>
+      <th>Package</th>
+      <th>Size</th>
+      <th>MD5 Checksum</th>
+  </tr>
+  <tr>
+    <td>Windows</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-windows-1.5_r2.zip">android-sdk-
+windows-1 .5_r2.zip</a>
+    </td>
+    <td>178346828 bytes</td>
+    <td>ba54ac6bda45921d442b74b6de6ff6a9</td>
+  </tr>
+  <tr class="alt-color">
+    <td>Mac OS X (intel)</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-mac_x86-1.5_r2.zip">android-sdk-
+mac_x86-1 .5_r2.zip</a>
+    </td>
+    <td>169945128 bytes</td>
+    <td>f4e06a5194410243f213d0177713d6c9</td>
+  </tr>
+  <tr>
+    <td>Linux (i386)</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-linux_x86-1.5_r2.zip">android-
+sdk- linux_x86-1.5_r2.zip</a>
+    </td>
+    <td>165035130 bytes</td>
+    <td>1d3c3d099e95a31c43a7b3e6ae307ed3</td>
+  </tr>
+  
+  </table>
+
+
+<h3>Release 1.5 r1</h3>
+ <p><em>April 2009 - <a href="RELEASENOTES.html#1.5_r1">Release
+Notes</a></em></p>
+
+  <table class="download">
+    <tr>
+      <th>Platform</th>
+      <th>Package</th>
+      <th>Size</th>
+      <th>MD5 Checksum</th>
+  </tr>
+  <tr>
+    <td>Windows</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-windows-1.5_r1.zip">android-sdk-
+windows-1 .5_r1.zip</a>
+    </td>
+    <td>176263368 bytes</td>
+    <td>42be980eb2d3efaced01ea6c32c0045f</td>
+  </tr>
+  <tr class="alt-color">
+    <td>Mac OS X (intel)</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-mac_x86-1.5_r1.zip">android-sdk-
+mac_x86-1 .5_r1.zip</a>
+    </td>
+    <td>167848675 bytes</td>
+    <td>5b2a8d9f096032db4a75bfa0d689a51b</td>
+  </tr>
+  <tr>
+    <td>Linux (i386)</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-linux_x86-1.5_r1.zip">android-
+sdk- linux_x86-1.5_r1.zip</a>
+    </td>
+    <td>162938845 bytes</td>
+    <td>2addfd315da0ad8b5bde6b09d5ff3b06</td>
+  </tr>
+  
+  </table>
+
+
+<h3>Release 1.0 r1</h3>
+ <p><em>September 23, 2008 - <a href="RELEASENOTES.html#1.0_r1">Release
+Notes</a></em></p>
+
+  <table class="download">
+    <tr>
+      <th>Platform</th>
+      <th>Package</th>
+      <th>Size</th>
+      <th>MD5 Checksum</th>
+  </tr>
+  <tr>
+    <td>Windows</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-windows-1.0_r1.zip">android-sdk-
+windows-1 .0_r1.zip</a>
+    </td>
+    <td>89.7 MB bytes</td>
+    <td>d69f4ee93d4010f726c04302662fd999</td>
+  </tr>
+  <tr class="alt-color">
+    <td>Mac OS X (intel)</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-mac_x86-1.0_r1.zip">android-sdk-
+mac_x86-1 .0_r1.zip</a>
+    </td>
+    <td>87.5 MB bytes</td>
+    <td>564876ada22872e50c2866806de9fc5c</td>
+  </tr>
+  <tr>
+    <td>Linux (i386)</td>
+    <td>
+  <a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-linux_x86-1.0_r1.zip">android-
+sdk- linux_x86-1.0_r1.zip</a>
+    </td>
+    <td>87.8 MB bytes</td>
+    <td>2660b4029039b7d714e59827e9a9a11d</td>
+  </tr>
+  
+  </table>
+
+
+
+
+<h2>Non-Compatible SDK Releases</h2>
+
+<!-- <div class="special"> -->
+<p>The SDKs listed below are "early-look" versions that were released in
+  the year preceding the full release of Android 1.0 in September 2008. Because
+  these early-look SDKs were released before the Android 1.0 API specification was
+  finalized, they do not provide a compliant Android execution environment.
+  Consequently, applications that you develop in these SDKs will not be able to
+  run on any Android-powered devices.</p>
+
+<p>If you have an older application that you built in one of the early-look
+SDKs, you must migrate it to the Android 1.0 SDK (or later release) before you
+will be able to deploy it to an Android-powered device. To help with this
+migration, each SDK package below provides information about API changes from
+the previous version. You can find the migration information in the
+documentation included in each SDK package.</p>
+<!-- </div> -->
+
+<h4>Version 0.9 Beta</h4>
+<p><em>August 18, 2008 - <a href="OLD_RELEASENOTES.html#0.9_beta">Release Notes</a></em></p>
+ <table>
+   <tr>
+     <th colspan="2">Package</th>
+     <th>Size</th>
+     <th>MD5 Checksum</th>
+   </tr>
+   <tr>
+     <td>Windows</td>
+     <td>
+<a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-windows-0.9_beta.zip">
+android-sdk-windows-0.9_beta.zip</a></td>
+     <td>93,126,573 bytes</td>
+     <td>305031ad8335d1b6040bdd5a65349d6d</td>
+   </tr>
+   <tr class="alt">
+     <td>Mac OS X (intel)</td>
+     <td>
+<a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-mac_x86-0.9_beta.zip">
+android-sdk-mac_x86-0.9_beta.zip</a></td>
+     <td>91,374,464 bytes</td>
+     <td>9a6969159091cede46302e11049fe3ca</td>
+   </tr>
+   <tr>
+     <td>Linux (i386)</td>
+     <td>
+<a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk-linux_x86-0.9_beta.zip"
+>android-sdk-linux_x86-0.9_beta.zip</a></td>
+     <td>91,821,068 bytes</td>
+     <td>077e5ef549dd9c5be54bd88e6a8e196c</td>
+   </tr>
+ </table>
+
+<h4>Version m5-rc15</h4>
+ <p><em>March 3, 2008 - <a href="OLD_RELEASENOTES.html#m5-rc15">Release Notes</a></em></p>
+ <table>
+   <tr>
+     <th colspan="2">Package</th>
+     <th>Size</th>
+     <th>MD5 Checksum</th>
+   </tr>
+   <tr>
+     <td>Windows</td>
+     <td>
+<a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk_m5-rc15_windows.zip">
+android-sdk_m5-rc15_windows.zip</a></td>
+     <td>79 MB</td>
+     <td>ecce40bc50201886d95ba2690cdbc5ce</td>
+   </tr>
+   <tr class="alt">
+     <td>Mac OS X (intel)</td>
+     <td>
+<a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk_m5-rc15_mac-x86.zip">
+android-sdk_m5-rc15_mac-x86.zip</a></td>
+     <td>76 MB</td>
+     <td>45a6385bbc1b2cb295409cfc81fb04b4</td>
+   </tr>
+   <tr>
+     <td>Linux (i386)</td>
+     <td>
+<a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk_m5-rc15_linux-x86.zip">
+android-sdk_m5-rc15_linux-x86.zip</a></td>
+     <td>76 MB</td>
+     <td>e913f785afecdeed34c30639fd8c5862</td>
+   </tr>
+ </table>
+
+ <h4>Version m5-rc14</h4>
+ <p><em>February 12, 2008 - <a href="OLD_RELEASENOTES.html#m5-rc14">Release Notes</a></em></p>
+ <table>
+   <tr>
+     <th colspan="2">Package</th>
+     <th>Size</th>
+     <th>MD5 Checksum</th>
+   </tr>
+   <tr>
+     <td>Windows</td>
+     <td>
+<a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk_m5-rc14_windows.zip">
+android-sdk_m5-rc14_windows.zip</a></td>
+     <td>79 MB</td>
+     <td>ecc75c1e69588350634ca25867ce05a0</td>
+   </tr>
+   <tr class="alt">
+     <td>Mac OS X (intel)</td>
+     <td>
+<a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk_m5-rc14_mac-x86.zip">
+android-sdk_m5-rc14_mac-x86.zip</a></td>
+     <td>76 MB</td>
+     <td>844c80d0adb1a326f5a9fff262c61efc</td>
+   </tr>
+   <tr>
+     <td>Linux (i386)</td>
+     <td>
+<a
+href="{@docRoot}sdk/download.html?v=archives/android-sdk_m5-rc14_linux-x86.zip">
+android-sdk_m5-rc14_linux-x86.zip</a></td>
+     <td>76 MB</td>
+     <td>f8b863c8a880afe9bb84124f5976aab1</td>
+   </tr>
+ </table>
+
+
+
+
+ <h4>Version m3-rc37a</h4>
+ <p><em>December 14, 2007 - <a href="OLD_RELEASENOTES.html#m3-rc37a">Release Notes</a></em></p>
+ <table>
+   <tr>
+     <th colspan="2">Package</th>
+     <th>Size</th>
+     <th>MD5 Checksum</th>
+   </tr>
+   <tr>
+     <td>Windows</td>
+     <td>
+<a
+href="{@docRoot}sdk/download.html?v=archives/android_sdk_windows_m3-rc37a.zip">
+android_sdk_windows_m3-rc37a.zip</a></td>
+     <td>58 MB</td>
+     <td>5db5aea20a2c2f010baefc4b1091a575</td>
+   </tr>
+   <tr class="alt">
+     <td>Mac OS X (intel)</td>
+     <td>
+<a
+href="{@docRoot}sdk/download.html?v=archives/android_sdk_darwin_m3-rc37a.zip">
+android_sdk_darwin_m3-rc37a.zip</a></td>
+     <td>54 MB</td>
+     <td>0b22e73fbd07b4af4009387afce3a37f</td>
+   </tr>
+   <tr>
+     <td>Linux (i386)</td>
+     <td>
+<a
+href="{@docRoot}sdk/download.html?v=archives/android_sdk_linux_m3-rc37a.zip">
+android_sdk_linux_m3-rc37a.zip</a></td>
+     <td>54 MB</td>
+     <td>41285beecc4f9926e6ecf5f12610b356</td>
+   </tr>
+ </table>
+
+
+
+
+ <h4>Version m3-rc22a</h4>
+ <p><em>November 16, 2007 - <a href="OLD_RELEASENOTES.html#m3-rc22a">Release Notes</a></em></p>
+ <table>
+   <tr>
+     <th colspan="2">Package</th>
+     <th>Size</th>
+     <th>MD5 Checksum</th>
+   </tr>
+   <tr>
+     <td>Windows</td>
+     <td>
+<a
+href="{@docRoot}sdk/download.html?v=archives/android_sdk_windows_m3-rc22a.zip">
+android_sdk_windows_m3-rc22a.zip</a></td>
+     <td>59 MB</td>
+     <td>aa3dee05a9872752a3bc4efd0f93e98b</td>
+   </tr>
+   <tr class="alt">
+     <td>Mac OS X (intel)</td>
+     <td>
+<a
+href="{@docRoot}sdk/download.html?v=archives/android_sdk_darwin_m3-rc22a.zip">
+android_sdk_darwin_m3-rc22a.zip</a></td>
+     <td>55 MB</td>
+     <td>0547f45614ad94c3af22c3c0aa6f709f</td>
+   </tr>
+   <tr>
+     <td>Linux (i386)</td>
+     <td>
+<a
+href="{@docRoot}sdk/download.html?v=archives/android_sdk_linux_m3-rc22a.zip">
+android_sdk_linux_m3-rc22a.zip</a></td>
+     <td>55 MB</td>
+     <td>84b3455de5cdfd841a172c13d24c382e</td>
+   </tr>
+ </table>
+
+
+
+
+ <h4>Version m3-rc20a</h4>
+ <p><em>November 12, 2007 - <a href="OLD_RELEASENOTES.html#m3-rc20a">Release Notes</a></em></p>
+ <table>
+   <tr>
+     <th colspan="2">Package</th>
+     <th>Size</th>
+     <th>MD5 Checksum</th>
+   </tr>
+   <tr>
+     <td>Windows</td>
+     <td>
+<a
+href="{@docRoot}sdk/download.html?v=archives/android_sdk_windows_m3-rc20a.zip">
+android_sdk_windows_m3-rc20a.zip</a></td>
+     <td>59 MB</td>
+     <td>a404b875708df7339ba77bdf2e08dc06</td>
+   </tr>
+   <tr class="alt">
+     <td>Mac OS X (intel)</td>
+     <td>
+<a
+href="{@docRoot}sdk/download.html?v=archives/android_sdk_darwin_m3-rc20a.zip">
+android_sdk_darwin_m3-rc20a.zip</a></td>
+     <td>55 MB</td>
+     <td>8fc29aeaa45eda84bfac854ebd02a6da</td>
+   </tr>
+   <tr>
+     <td>Linux (i386)</td>
+     <td>
+<a
+href="{@docRoot}sdk/download.html?v=archives/android_sdk_linux_m3-rc20a.zip">
+android_sdk_linux_m3-rc20a.zip</a></td>
+     <td>55 MB</td>
+     <td>9196759df9b69cd89a220b156f133364</td>
+   </tr>
+ </table>

@@ -1,0 +1,1106 @@
+page.title=Android 3.1 Platform
+sdk.platform.version=3.1
+sdk.platform.apiLevel=12
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#relnotes">Revisions</a></li>
+  <li><a href="#api">API Overview</a></li>
+  <li><a href="#api-level">API Level</a></li>
+  <li><a href="#apps">Built-in Applications</a></li>
+  <li><a href="#locs">Locales</a></li>
+  <li><a href="#skins">Emulator Skins</a></li>
+</ol>
+
+<h2>Reference</h2>
+<ol>
+<li><a
+href="{@docRoot}sdk/api_diff/12/changes.html">API
+Differences Report &raquo;</a> </li>
+</ol>
+
+<h2>See Also</h2>
+<ol>
+  <li><a href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing
+Apps for Android 3.x</a></li>
+</ol>
+
+</div>
+</div>
+
+
+<p><em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
+
+<p>For developers, the Android {@sdkPlatformVersion} platform is available as a
+downloadable component for the Android SDK. The downloadable platform includes
+an Android library and system image, as well as a set of emulator skins and
+more. The downloadable platform includes no external libraries.</p>
+
+<p>To get started developing or testing against Android {@sdkPlatformVersion},
+use the Android SDK Manager to download the platform into your SDK. For more
+information, see <a href="{@docRoot}sdk/adding-components.html">Adding SDK
+Components</a>. If you are new to Android, <a
+href="{@docRoot}sdk/index.html">download the SDK Starter Package</a> first.</p>
+
+<p>For a high-level introduction to Android {@sdkPlatformVersion}, see the <a
+href="{@docRoot}sdk/android-{@sdkPlatformVersion}-highlights.html">Platform
+Highlights</a>.</p>
+
+<p class="note"><strong>Reminder:</strong> If you've already published an
+Android application, please test and optimize your application on Android 3.0
+and Android 3.1 as soon as possible. You should do so to be sure your
+application provides the best experience possible on the latest Android-powered
+devices. For information about what you can do, read <a
+href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing Apps for
+Android 3.0</a>.</p>
+
+
+<h2 id="relnotes">Revisions</h2>
+
+<p>To determine what revision of the Android {@sdkPlatformVersion} platform you
+have installed, refer to the "Installed Packages" listing in the Android SDK and
+AVD Manager.</p>
+
+
+<div class="toggle-content opened" style="padding-left:1em;">
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />
+  Android {@sdkPlatformVersion}, Revision 3</a> <em>(July 2011)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires <a href="{@docRoot}sdk/tools-notes.html">SDK Tools r12</a> or
+higher.</p>
+</dd>
+<dt>Notes:</dt>
+<dd>
+<p>Improvements to the platform's rendering library to support the visual layout editor in the ADT
+Eclipse plugin. This revision allows for more drawing features in ADT and fixes several
+bugs in the previous rendering library. It also unlocks several editor features that were added in
+ADT 12.</p>
+</dd>
+</dl>
+
+</div>
+</div>
+
+
+<div class="toggle-content closed" style="padding-left:1em;">
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+  Android {@sdkPlatformVersion}, Revision 2</a> <em>(May 2011)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires <a href="{@docRoot}sdk/tools-notes.html">SDK Tools r11</a> or
+higher.</p>
+</dd>
+<dt>Notes:</dt>
+<dd>
+<p>Fixes an issue with the visual layout editor rendering library that prevented Android 3.1 from
+running in ADT.</p>
+</dd>
+</dl>
+
+</div>
+</div>
+
+
+<div class="toggle-content closed" style="padding-left:1em;">
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+  Android {@sdkPlatformVersion}, Revision 1</a> <em>(May 2011)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires <a href="{@docRoot}sdk/tools-notes.html">SDK Tools r11</a> or
+higher.</p>
+</dd>
+</dl>
+
+</div>
+</div>
+
+
+<h2 id="#api" style="margin-top:1.5em;">API Overview</h2>
+
+<p>The sections below provide a technical overview of what's new for developers
+in Android 3.1, including new features and changes in the framework API since
+the previous version.</p>
+
+<h3 id="usb">USB APIs</h3>
+
+<p>Android 3.1 introduces powerful new APIs for
+integrating connected peripherals with applications running on the platform.
+The APIs are based on a USB (Universal Serial Bus) stack and services that are
+built into the platform, including support for both USB host and device
+interactions. Using the APIs, developers can create applications that are able to
+discover, communicate with, and manage a variety of device types connected over
+USB. </p>
+
+<p>The stack and APIs distinguish two basic types of USB hardware, based on
+whether the Android-powered device is acting as host or the external hardware
+is acting as host: </p>
+
+<ul>
+<li>A <em>USB device</em> is a piece of connected hardware that depends on the
+Android-powered device to serve as host. For example, most input devices, mice,
+and joysticks are USB devices, as are many cameras, hubs, and so on.</li>
+<li>A <em>USB accessory</em> is a piece of connected hardware that has a USB
+host controller, provides power, and is designed to communicate with
+Android-powered devices over USB, A variety of peripherals can connect as
+accessories, from robotics controllers to musical equipment, exercise bicycles,
+and more.</li>
+</ul>
+
+<p>For both types &mdash; USB devices and USB accessories &mdash; the
+platform's USB APIs support discovery by intent broadcast when attached or
+detached, as well as standard interfaces, endpoints, and transfer modes
+(control, bulk, and interrupt).</p>
+
+<p>The USB APIs are available in the package {@link android.hardware.usb}. The
+central class is {@link android.hardware.usb.UsbManager}, which provides
+helper methods for identifying and communicating with
+both USB devices and USB accessories. Applications can acquire an instance of
+{@link android.hardware.usb.UsbManager} and then query for the list of attached
+devices or accessories and then communicate with or manage them.
+{@link android.hardware.usb.UsbManager} also declares intent actions that the
+system broadcasts, to announce when a USB device or accessory is attached or
+detached.</p>
+
+<p>Other classes include:</p>
+
+<ul>
+<li>{@link android.hardware.usb.UsbDevice}, a class representing external
+hardware connected as a USB device (with the Android-powered device acting as
+host).</li>
+<li>{@link android.hardware.usb.UsbAccessory}, representing external hardware
+connected as the USB host (with the Android-powered device acting as a USB
+device).</li>
+<li>{@link android.hardware.usb.UsbInterface} and {@link
+android.hardware.usb.UsbEndpoint}, which provide access to standard USB
+interfaces and endpoints for a device.</li>
+<li>{@link android.hardware.usb.UsbDeviceConnection} and {@link
+android.hardware.usb.UsbRequest}, for sending and receiving data and control
+messages to or from a USB device, sychronously and asynchronously.
+<li>{@link android.hardware.usb.UsbConstants}, which provides constants for
+declaring endpoint types, device classes, and so on.</li>
+</ul>
+
+<p>Note that although the USB stack is built into the platform, actual support
+for USB host and open accessory modes on specific devices is determined by
+their manufacturers. In particular, host mode relies on appropriate USB
+controller hardware in the Android-powered device. </p>
+
+<p>Additionally, developers can request filtering on Google Play, such that
+their applications are not availabe to users whose devices do not provide the
+appropriate USB support. To request filtering, add one or both of the elements
+below to the application manifest, as appropriate: </p>
+
+<ul>
+<li>If the application should only be visible to devices that support USB
+host mode (connection of USB devices), declare this element:
+  <p style="margin-left:1.5em;"><code>&lt;uses-feature
+  android:name="android.hardware.usb.host"
+  android:required="true"&gt;</code></p>
+</li>
+<li>If the application should only be visible to devices that support USB
+accessories (connection of USB hosts), declare this element:
+  <p style="margin-left:1.5em;"><code>&lt;uses-feature
+  android:name="android.hardware.usb.accessory"
+  android:required="true"&gt;</code></p>
+</li>
+</ul>
+
+<p>For complete information about how to develop applications that interact with
+USB accessories, please see the
+<a href="{@docRoot}guide/topics/usb/index.html">developer documentation</a>.</p>
+
+<p class="note">To look at sample applications that use the USB host API, see <a
+href="{@docRoot}resources/samples/USB/AdbTest/index.html">ADB Test</a> and <a
+href="{@docRoot}resources/samples/USB/MissileLauncher/index.html">Missile
+Launcher</a></p>
+
+<h3>MTP/PTP API</h3>
+
+<p>Android 3.1 exposes a new MTP API that lets applications interact directly
+with connected cameras and other PTP devices. The new API makes it easy for an
+application to receive notifications when devices are attached and removed,
+manage files and storage on those devices, and transfer files and metadata to
+and from them. The MTP API implements the PTP (Picture Transfer Protocol) subset
+of the MTP (Media Transfer Protocol) specification.</p>
+
+<p>The MTP API is available in the {@link android.mtp} package and provides
+these classes: </p>
+
+<ul>
+  <li>The {@link android.mtp.MtpDevice} encapsulates an MTP device that is
+connected over the USB host bus. An application can instantiate an object of
+this type and then use its methods to get information about the device and
+objects stored on it, as well as opening the connection and transferring data.
+Some of the methods include:
+    <ul>
+      <li>{@link android.mtp.MtpDevice#getObjectHandles(int, int, int)
+getObjectHandles()} returns a list of handles for all objects on the device that
+match a specified format and parent. To get information about an object, an
+application can pass a handle to {@link android.mtp.MtpDevice#getObjectInfo(int)
+getObjectInfo()}.</li>
+      <li>{@link android.mtp.MtpDevice#importFile(int, java.lang.String)
+importFile()} lets an application copy data for an object to a file in external
+storage. This call may block for an arbitrary amount of time depending on the
+size of the data and speed of the devices, so should be made from a spearate
+thread.</li>
+      <li>{@link
+android.mtp.MtpDevice#open(android.hardware.usb.UsbDeviceConnection) open()}
+lets an application open a connected MTP/PTP device. </li>
+      <li>{@link android.mtp.MtpDevice#getThumbnail(int) getThumbnail()} returns
+the thumbnail of the object as a byte array. </li>
+    </ul>
+  </li>
+  <li>{@link android.mtp.MtpStorageInfo} holds information about about a storage
+unit on an MTP device, corresponding to the StorageInfo Dataset described in
+section 5.2.2 of the MTP  specification. Methods in the class let an application
+get a storage unit’s description string, free space, maximum storage capacity,
+storage ID, and volume identifier.</li>
+  <li>{@link android.mtp.MtpDeviceInfo}  holds information about an MTP device
+corresponding to the DeviceInfo Dataset described in section 5.1.1 of the MTP
+specification. Methods in the class let applications get a device’s
+manufacturer, model, serial number, and version.</li>
+  <li>{@link android.mtp.MtpObjectInfo} holds information about an object stored
+on an MTP device, corresponding to the ObjectInfo Dataset described in section
+5.3.1 of the MTP specification. Methods in the class let applications get an
+object’s size, data format, association type, creation date, and thumbnail
+information.</li>
+  <li>{@link android.mtp.MtpConstants} provides constants for declaring MTP file
+format codes, association type, and protection status.</li>
+</ul>
+
+<h3 id="motionevents">Support for new input devices and motion events</h3>
+
+<p>Android 3.1 extends the input subsystem to support new input devices and new
+types of motion events, across all views and windows. Developers can build on
+these capabilities to let users interact with their applications using mice,
+trackballs, joysticks, gamepads, and other devices, in addition to keyboards and
+touchscreens. </p>
+
+<p>For handling mouse, scrollwheel, and trackball input, the platform supports
+two new motion event actions:</p>
+<ul>
+<li>{@link android.view.MotionEvent#ACTION_SCROLL}, which describes the pointer
+location at which a non-touch scroll motion, such as from a mouse scroll wheel,
+took place. In the MotionEvent, the value of the {@link
+android.view.MotionEvent#AXIS_HSCROLL} and {@link
+android.view.MotionEvent#AXIS_VSCROLL} axes specify the relative scroll
+movement. </li>
+<li>{@link android.view.MotionEvent#ACTION_HOVER_MOVE}, reports the current
+position of the mouse when no buttons are pressed, as well as any intermediate
+points since the last <code>HOVER_MOVE</code> event. Hover enter and exit
+notifications are not yet supported.</li>
+</ul>
+
+<p>To support joysticks and gamepads, the {@link android.view.InputDevice} class
+includes these new input device sources:</p>
+<ul>
+<li>{@link android.view.InputDevice#SOURCE_CLASS_JOYSTICK} &mdash; the source
+device has joystick axes.</li>
+<li>{@link android.view.InputDevice#SOURCE_CLASS_BUTTON} &mdash; the source
+device has buttons or keys.</li>
+<li>{@link android.view.InputDevice#SOURCE_GAMEPAD}  &mdash;  the source device
+has gamepad buttons such as {@link android.view.KeyEvent#KEYCODE_BUTTON_A}
+or {@link android.view.KeyEvent#KEYCODE_BUTTON_B}. Implies
+{@link android.view.InputDevice#SOURCE_CLASS_BUTTON}</li>
+<li>{@link android.view.InputDevice#SOURCE_JOYSTICK} &mdash; the source device
+has joystick axes.  Implies SOURCE_CLASS_JOYSTICK.</li>
+</ul>
+
+<p>To describe motion events from these new sources, as well as those from mice
+and trackballs, the platform now defines axis codes on {@link
+android.view.MotionEvent}, similar to how it defines key codes on {@link
+android.view.KeyEvent}. New axis codes for joysticks
+and game controllers include
+{@link android.view.MotionEvent#AXIS_HAT_X}, {@link
+android.view.MotionEvent#AXIS_HAT_Y}, {@link
+android.view.MotionEvent#AXIS_RTRIGGER}, {@link
+android.view.MotionEvent#AXIS_ORIENTATION}, {@link
+android.view.MotionEvent#AXIS_THROTTLE}, and many others. 
+Existing {@link android.view.MotionEvent} axes are represented by {@link
+android.view.MotionEvent#AXIS_X}, {@link android.view.MotionEvent#AXIS_Y},
+{@link android.view.MotionEvent#AXIS_PRESSURE}, {@link
+android.view.MotionEvent#AXIS_SIZE}, {@link
+android.view.MotionEvent#AXIS_TOUCH_MAJOR}, {@link
+android.view.MotionEvent#AXIS_TOUCH_MINOR}, {@link
+android.view.MotionEvent#AXIS_TOOL_MAJOR}, {@link
+android.view.MotionEvent#AXIS_TOOL_MINOR}, and {@link
+android.view.MotionEvent#AXIS_ORIENTATION}.</p>
+
+<p>Additionally, {@link android.view.MotionEvent} defines a number of generic
+axis codes that are used when the framework does not know how to map a
+particular axis. Specific devices can use the generic axis codes to pass custom
+motion data to applications. For a full list of axes and their intended
+interpretations, see the {@link android.view.MotionEvent} class documentation.
+</p>
+
+<p>The platform provides motion events to applications in batches, so a single
+event may contain a current position and multiple so-called historical movements.
+Applications should use {@link android.view.MotionEvent#getHistorySize()} to get
+the number of historical samples, then retrieve and process all historical
+samples in order using {@link
+android.view.MotionEvent#getHistoricalAxisValue(int, int, int)
+getHistoricalAxisValue()}.  After that, applications should process the current
+sample using {@link android.view.MotionEvent#getAxisValue(int) getAxisValue()}.
+</p>
+
+<p>Some axes can be retrieved using special accessor methods.  For example,
+instead of calling {@link android.view.MotionEvent#getAxisValue(int)
+getAxisValue()}, applications can call {@link android.view.MotionEvent#getX(int)
+getX()}.  Axes that have built-in accessors include {@link
+android.view.MotionEvent#AXIS_X}, {@link android.view.MotionEvent#AXIS_Y},
+{@link android.view.MotionEvent#AXIS_PRESSURE}, {@link
+android.view.MotionEvent#AXIS_SIZE}, {@link
+android.view.MotionEvent#AXIS_TOUCH_MAJOR}, {@link
+android.view.MotionEvent#AXIS_TOUCH_MINOR}, {@link
+android.view.MotionEvent#AXIS_TOOL_MAJOR}, {@link
+android.view.MotionEvent#AXIS_TOOL_MINOR}, and {@link
+android.view.MotionEvent#AXIS_ORIENTATION}.</p>
+
+<p>Each input device has a unique, system-assigned ID and may also provide
+multiple sources. When a device provides multiple sources, more than one source
+can provide axis data using the same axis. For example, a touch event coming
+from the touch source uses the X axis for screen position data, while a joystick
+event coming from the joystick source will use the X axis for the stick position
+instead. For this reason, it's important for applications to interpret axis
+values according to the source from which they originate. When handling a motion
+event, applications should use methods on the {@link android.view.InputDevice}
+class to determine the axes supported by a device or source. Specifically,
+applications can use {@link android.view.InputDevice#getMotionRanges()
+getMotionRanges()} to query for all axes of a device or all axes of a given
+source of the device. In both cases, the range information for axes returned in
+the {@link android.view.InputDevice.MotionRange} object specifies the source for
+each axis value.</p>
+
+<p>Finally, since the motion events from joysticks, gamepads, mice, and
+trackballs are not touch events, the platform adds a new callback method for
+passing them to a {@link android.view.View} as "generic" motion events.
+Specifically, it reports the non-touch motion events to 
+{@link android.view.View}s through a call to {@link
+android.view.View#onGenericMotionEvent(android.view.MotionEvent)
+onGenericMotionEvent()}, rather than to {@link
+android.view.View#onTouchEvent(android.view.MotionEvent)
+onTouchEvent()}.</p>
+
+<p>The platform dispatches generic motion events differently, depending on the
+event source class. {@link android.view.InputDevice#SOURCE_CLASS_POINTER} events
+go to the {@link android.view.View} under the pointer, similar to how touch
+events work.  All others go to the currently focused {@link android.view.View}.
+For example, this means a {@link android.view.View} must take focus in order to
+receive joystick events. If needed, applications can handle these events at the
+level of Activity or Dialog by implementing {@link
+android.view.View#onGenericMotionEvent(android.view.MotionEvent)
+onGenericMotionEvent()} there instead.</p>
+
+<p class="note">To look at a sample application that uses joystick motion
+events, see <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/GameControllerInput.html">GameControllerInput</a> 
+and <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/GameView.html">GameView</a>.</p>
+
+<h3>RTP API</h3>
+
+<p>Android 3.1 exposes an API to its built-in RTP (Real-time Transport Protocol)
+stack, which applications can use to manage on-demand or interactive data
+streaming. In particular, apps that provide VOIP, push-to-talk, conferencing,
+and audio streaming can use the API to initiate sessions and transmit or receive
+data streams over any available network.</p>
+
+<p>The RTP API is available in the {@link android.net.rtp} package. Classes
+include: </p>
+<ul>
+<li>{@link android.net.rtp.RtpStream}, the base class of streams that send and
+receive network packets with media payloads over RTP.</li>
+<li>{@link android.net.rtp.AudioStream}, a subclass of {@link
+android.net.rtp.RtpStream} that carries audio payloads over RTP.</li>
+<li>{@link android.net.rtp.AudioGroup}, a local audio hub for managing and
+mixing the device speaker, microphone, and {@link android.net.rtp.AudioStream}.</li>
+<li>{@link android.net.rtp.AudioCodec}, which holds a collection of codecs that
+you define for an {@link android.net.rtp.AudioStream}.</li>
+</ul>
+
+<p>To support audio conferencing and similar usages, an application instantiates
+two classes as endpoints for the stream:</p>
+
+<ul>
+<li>{@link android.net.rtp.AudioStream} specifies a remote endpoint and consists
+of network mapping and a configured {@link android.net.rtp.AudioCodec}.</li>
+<li>{@link android.net.rtp.AudioGroup} represents the local endpoint for one
+or more {@link android.net.rtp.AudioStream}s. The {@link android.net.rtp.AudioGroup} mixes
+all the {@link android.net.rtp.AudioStream}s and optionally interacts with the device
+speaker and the microphone at the same time.</li>
+</ul>
+
+<p>The simplest usage involves a single remote endpoint and local endpoint.
+For more complex usages, please refer to the limitations described for
+{@link android.net.rtp.AudioGroup}.</p>
+
+<p>To use the RTP API, applications must request permission from the user by
+declaring <code>&lt;uses-permission
+android:name="android.permission.INTERNET"&gt;</code>
+in their manifest files. To acquire the device microphone, the <code>&lt;uses-permission
+android:name="android.permission.RECORD_AUDIO"&gt;</code> permission is also required.</p>
+
+<h3 id="resizewidgets">Resizable app widgets</h3>
+
+<p>Starting in Android 3.1, developers can make their homescreen widgets
+resizeable &mdash; horizontally, vertically, or on both axes. Users touch-hold a
+widget to show its resize handles, then drag the horizontal and/or vertical
+handles to change the size on the layout grid. </p>
+
+<p>Developers can make any Home screen widget resizeable by defining a
+<code>resizeMode</code> attribute in the widget's {@link
+android.appwidget.AppWidgetProviderInfo} metadata. Values for the
+<code>resizeMode</code> attribute include "horizontal", "vertical", and "none".
+To declare a widget as resizeable horizontally and vertically, supply the value
+"horizontal|vertical".
+
+<p>Here's an example: </p>
+
+<pre>&lt;appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="294dp"
+    android:minHeight="72dp"
+    android:updatePeriodMillis="86400000"
+    android:previewImage="@drawable/preview"
+    android:initialLayout="@layout/example_appwidget"
+    android:configure="com.example.android.ExampleAppWidgetConfigure"
+    android:resizeMode="horizontal|vertical" >
+&lt;/appwidget-provider></pre>
+
+<p>For more information about Home screen widgets, see the <a
+href="{@docRoot}guide/topics/appwidgets/index.html">App Widgets</a>
+documentation.</p>
+
+<h3 id="animation" style="margin-top:1.25em;">Animation framework</h3>
+
+<ul>
+<li>New ViewPropertyAnimator class
+  <ul>
+    <li>A new {@link android.view.ViewPropertyAnimator} class provides a
+convenient
+way for developers to animate select properties on {@link android.view.View} objects. The class
+automaties and optimizes the animation of the properties and makes it easier to
+manage multiple simulataneous animations on a {@link android.view.View} object.
+<p>Using the {@link android.view.ViewPropertyAnimator} is straightforward. To animate properties for
+a {@link android.view.View}, call {@link android.view.View#animate()} to
+construct a {@link android.view.ViewPropertyAnimator} object for that {@link android.view.View}. Use the
+methods on the {@link android.view.ViewPropertyAnimator} to specify what property to
+animate and how to animate it. For example, to fade the {@link android.view.View} to transparent,
+call <code>alpha(0);</code>. The {@link android.view.ViewPropertyAnimator} object
+handles the details of configuring the underlying {@link
+android.animation.Animator} class and starting it, then rendering the
+animation.</p></li>
+  </ul>
+</li>
+<li>Animation background color
+  <ul>
+    <li>New {@link android.view.animation.Animation#getBackgroundColor()} and
+    {@link android.view.animation.Animation#setBackgroundColor(int)} methods let
+    you get/set the background color behind animations, for window animations
+only. Currently the background must be black, with any desired alpha level.</li>
+  </ul>
+</li>
+<li>Getting animated fraction from <code>ViewAnimator</code>
+  <ul>
+    <li>A new {@link android.animation.ValueAnimator#getAnimatedFraction()}
+method
+lets you get the current animation fraction &mdash; the elapsed/interpolated
+fraction used in the most recent frame update &mdash; from a {@link
+android.animation.ValueAnimator}.</li>
+  </ul>
+</li>
+</ul>
+
+<h3 "ui">UI framework</h3>
+<ul>
+<li>Forced rendering of a layer
+  <ul>
+    <li>A new {@link android.view.View#buildLayer()} method lets an application
+force a View's layer to be created and the View rendered into it immediately.
+For example, an application could use this method to render a View into its
+layer before starting an animation. If the View is complex, rendering it into
+the layer before starting the animation will avoid skipping frames.</li>
+  </ul>
+</li>
+<li>Camera distance
+  <ul>
+    <li>Applications can use a new method
+{@link android.view.View#setCameraDistance(float)} to set the distance from the
+camera
+to a View. This gives applications improved control over 3D transformations of
+the View, such as rotations. </li>
+  </ul>
+</li>
+<li>Getting a calendar view from a DatePicker
+  <ul>
+    <li>A new {@link android.widget.DatePicker#getCalendarView()} method
+    lets you get a {@link android.widget.CalendarView} from a {@link
+android.widget.DatePicker}
+    instance.</li>
+  </ul>
+</li>
+<li>Getting callbacks when views are detached
+  <ul>
+    <li>A new {@link android.view.View.OnAttachStateChangeListener} lets you
+receive
+callbacks when a View is attached or detached from its window. Use {@link
+android.view.View#addOnAttachStateChangeListener(android.view.View.OnAttachStateChangeListener) addOnAttachStateChangeListener()}
+to add a listener and {@link
+android.view.View#removeOnAttachStateChangeListener(android.view.View.OnAttachStateChangeListener) addOnAttachStateChangeListener()} to remove it.</li>
+  </ul>
+</li>
+<li>Fragment breadcrumb listener, new onInflate() signature
+  <ul>
+    <li>A new method, {@link
+android.app.FragmentBreadCrumbs#setOnBreadCrumbClickListener(android.app.FragmentBreadCrumbs.OnBreadCrumbClickListener) setOnBreadCrumbClickListener()},
+provides a hook to let
+applications intercept fragment-breadcrumb clicks and take any action needed
+before going to the backstack entry or fragment that was clicked. </li>
+    <li>In the {@link android.app.Fragment} class, {@link
+android.app.Fragment#onInflate(android.util.AttributeSet, android.os.Bundle)
+onInflate(attrs, savedInstanceState)} is deprecated. Please use {@link
+android.app.Fragment#onInflate(android.app.Activity, android.util.AttributeSet,
+android.os.Bundle) onInflate(activity, attrs, savedInstanceState)} instead.</li>
+  </ul>
+</li>
+<li>Display search result in new tab
+  <ul>
+    <li>An {@link android.app.SearchManager#EXTRA_NEW_SEARCH} data key for {@link
+android.content.Intent#ACTION_WEB_SEARCH} intents lets you open a search in a
+new browser tab, rather than in an existing one.</li>
+  </ul>
+</li>
+
+<li>Drawable text cursor
+  <ul>
+<li>You can now specify a drawable to use as the text cursor using the new
+resource attribute {@link android.R.attr#textCursorDrawable}.</li>
+  </ul>
+</li>
+<li>Setting displayed child in remote views
+  <ul>
+    <li>A new convenience method, {@link
+android.widget.RemoteViews#setDisplayedChild(int, int) setDisplayedChild(viewId,
+childIndex)}, is available in {@link android.widget.RemoteViews} subclasses, to
+let you set the child displayed in {@link android.widget.ViewAnimator} and
+{@link android.widget.AdapterViewAnimator} subclasses such as {@link
+android.widget.AdapterViewFlipper}, {@link android.widget.StackView}, {@link
+android.widget.ViewFlipper}, and {@link android.widget.ViewSwitcher}.</li>
+  </ul>
+</li>
+<li>Generic keys for gamepads and other input devices
+  <ul>
+    <li>{@link android.view.KeyEvent} adds a range of generic keycodes to
+    accommodate gamepad buttons. The class also adds
+    {@link android.view.KeyEvent#isGamepadButton(int)} and several other
+    helper methods for working with keycodes.</li>
+  </ul>
+</li>
+</ul>
+
+<h3 id="graphics" style="margin-top:1.3em;">Graphics</h3>
+
+<ul>
+<li>Helpers for managing bitmaps
+  <ul>
+  <li>{@link android.graphics.Bitmap#setHasAlpha(boolean)} lets an app indicate that
+all of the pixels in a Bitmap are known to be opaque (false) or that some of the
+pixels may contain non-opaque alpha values (true). Note, for some configs (such
+as RGB_565) this call is ignored, since it does not support per-pixel alpha
+values. This is meant as a drawing hint, as in some cases a bitmap that is known
+to be opaque can take a faster drawing case than one that may have non-opaque
+per-pixel alpha values. </li>
+  <li>{@link android.graphics.Bitmap#getByteCount()} gets a Bitmap's size in
+bytes.</li>
+  <li>{@link android.graphics.Bitmap#getGenerationId()} lets an application find
+out whether a Bitmap has been modified, such as for caching.</li>
+  <li>{@link android.graphics.Bitmap#sameAs(android.graphics.Bitmap)} determines
+whether a given Bitmap differs from the current Bitmap, in dimension,
+configuration, or pixel data. </li>
+  </ul>
+</li>
+<li>Setting camera location and rotation
+  <ul>
+  <li>{@link android.graphics.Camera} adds two new methods {@link
+android.graphics.Camera#rotate(float, float, float) rotate()} and {@link
+android.graphics.Camera#setLocation(float, float, float) setLocation()} for
+control of the
+camera's location, for 3D transformations.</li>
+</ul>
+</li>
+</ul>
+
+<h3 id="network" style="margin-top:1.25em;">Network</h3>
+
+<ul>
+<li>High-performance Wi-Fi lock
+  <ul>
+    <li>A new high-performance Wi-Fi lock lets applications maintain
+high-performance Wi-Fi connections even when the device screen is off.
+Applications that stream music, video, or voice for long periods can acquire the
+high-performance Wi-Fi lock to ensure streaming performance even when the screen
+is off. Because it uses more power, applications should acquire the
+high-performance Wi-Fi when there is a need for a long-running active
+connection.
+<p>To create a high-performance lock, pass {@link
+android.net.wifi.WifiManager#WIFI_MODE_FULL_HIGH_PERF} as the lock mode in a
+call to {@link android.net.wifi.WifiManager#createWifiLock(int,
+java.lang.String) createWifiLock()}.</p></li>
+  </ul>
+</li>
+<li>More traffic stats
+  <ul>
+    <li>Applications can now access statistics about more types of network usage
+using new methods in {@link android.net.TrafficStats}. Applications can use the
+methods to get UDP stats, packet count, TCP transmit/receive payload bytes and
+segments for a given UID.</li>
+  </ul>
+</li>
+<li>SIP auth username
+  <ul>
+    <li>Applications can now get and set the SIP auth username for a profile
+using
+the new methods {@link android.net.sip.SipProfile#getAuthUserName()
+getAuthUserName()} and {@link
+android.net.sip.SipProfile.Builder#setAuthUserName(java.lang.String)
+setAuthUserName()}.</li>
+  </ul>
+</li>
+</ul>
+
+
+<h3 id="download" style="margin-top:1.25em;">Download Manager</h3>
+<ul>
+<li>Handling of completed downloads
+  <ul>
+    <li>Applications can now initiate downloads that notify users only on
+completion. To initiate this type of download, applications pass {@link
+android.app.DownloadManager.Request#VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION}
+in the {@link
+android.app.DownloadManager.Request#setNotificationVisibility(int)
+setNotificationVisibility()} method of
+the a request object.</li>
+    <li>A new method, {@link
+android.app.DownloadManager#addCompletedDownload(java.lang.String,
+java.lang.String, boolean, java.lang.String, java.lang.String, long, boolean)
+addCompletedDownload()}, lets an application add a file to the
+downloads database, so that it can be managed by the Downloads application.</li>
+  </ul>
+</li>
+<li>Show downloads sorted by size
+  <ul>
+    <li>Applications can start the Downloads application in sort-by-size mode by
+adding the new extra {@link
+android.app.DownloadManager#INTENT_EXTRAS_SORT_BY_SIZE} to an {@link
+android.app.DownloadManager#ACTION_VIEW_DOWNLOADS} intent.</li>
+    </ul>
+</li>
+</ul>
+
+<h3 id="ime" style="margin-top:1.25em;">IME framework</h3>
+
+<ul>
+<li>Getting an input method's extra value key
+  <ul><li>The {@link android.view.inputmethod.InputMethodSubtype} adds the
+method
+{@link
+android.view.inputmethod.InputMethodSubtype#containsExtraValueKey(java.lang.String) containsExtraValueKey()} to check whether an ExtraValue string is stored
+for the subtype and
+the method {@link
+android.view.inputmethod.InputMethodSubtype#getExtraValueOf(java.lang.String)
+getExtraValueOf()} to extract a specific key value from the ExtraValue hashmap.
+</li>
+  </ul>
+</li>
+</ul>
+
+<h3 id="media" style="margin-top:1.25em;">Media</h3>
+
+<ul>
+<li>New streaming audio formats
+  <ul>
+    <li>The media framework adds built-in support for raw ADTS AAC content, for
+improved streaming audio, as well as support for FLAC audio, for highest quality
+(lossless) compressed audio content. See the <a
+href="{@docRoot}guide/appendix/media-formats.html">Supported Media Formats</a>
+document for more information.</p></li>
+  </ul>
+</li>
+</ul>
+
+<h3 id="launchcontrols" style="margin-top:1.25em;">Launch controls on stopped
+applications</h3>
+
+<p>Starting from Android 3.1, the system's package manager keeps track of
+applications that are in a stopped state and provides a means of controlling
+their launch from background processes and other applications.</p>
+
+<p>Note that an application's stopped state is not the same as an Activity's
+stopped state. The system manages those two stopped states separately.</p>
+
+<p>The platform defines two new intent flags that let a sender specify
+whether the Intent should be allowed to activate components in stopped
+application.</p>
+
+<ul>
+<li>{@link android.content.Intent#FLAG_INCLUDE_STOPPED_PACKAGES} &mdash;
+Include intent filters of stopped applications in the list of potential targets
+to resolve against. </li>
+<li>{@link android.content.Intent#FLAG_EXCLUDE_STOPPED_PACKAGES} &mdash;
+Exclude intent filters of stopped applications from the list of potential
+targets.</li>
+</ul>
+
+<p>When neither or both of these flags is defined in an intent, the default
+behavior is to include filters of stopped applications in the list of
+potential targets.</p>
+
+<p>Note that the system adds {@link
+android.content.Intent#FLAG_EXCLUDE_STOPPED_PACKAGES} <em>to all broadcast
+intents</em>. It does this to prevent broadcasts from background services from
+inadvertently or unnecessarily launching components of stoppped applications.
+A background service or application can override this behavior by adding the
+{@link android.content.Intent#FLAG_INCLUDE_STOPPED_PACKAGES} flag to broadcast
+intents that should be allowed to activate stopped applications.</p>
+
+<p>Applications are in a stopped state when they are first installed but are not
+yet launched and when they are manually stopped by the user (in Manage
+Applications).</p>
+
+<h3 id="installnotification">Notification of application first launch and upgrade</h3>
+
+<p>The platform adds improved notification of application first launch and
+upgrades through two new intent actions:</p>
+
+<ul>
+<li>{@link android.content.Intent#ACTION_PACKAGE_FIRST_LAUNCH} &mdash; Sent to
+the installer package of an application when that application is first launched
+(that is, the first time it is moved out of a stopped state). The data
+contains the name of the package. </li>
+
+<li>{@link android.content.Intent#ACTION_MY_PACKAGE_REPLACED} &mdash; Notifies
+an application that it was updated, with a new version was installed over
+an existing version.  This is only sent to the application that was replaced. It
+does not contain any additional data. To receive it, declare an intent filter
+for this action. You can use the intent to trigger code that helps get your
+application back in proper running shape after an upgrade.
+
+<p>This intent is sent directly to the application, but only if the application
+was upgraded while it was in started state (not in a stopped state).</p></li>
+
+</ul>
+
+<h3 id="other">Core utilities</h3>
+
+<ul>
+<li>LRU cache
+  <ul>
+    <li>A new {@link android.util.LruCache} class lets your applications benefit
+from efficient caching. Applications can use the class to reduce the time spent
+computing or downloading data from the network, while maintaining a sensible
+memory footprint for the cached data.{@link android.util.LruCache} is a cache
+that holds strong references to a limited number of values. Each time a value is
+accessed, it is moved to the head of a queue. When a value is added to a full
+cache, the value at the end of that queue is evicted and may become eligible for
+garbage collection.</li>
+  </ul>
+</li>
+<li>File descriptor as <code>int</code>
+  <ul>
+    <li>You can now get the native file descriptor int for a {@link
+android.os.ParcelFileDescriptor} using either of the new methods {@link
+android.os.ParcelFileDescriptor#getFd()} or {@link
+android.os.ParcelFileDescriptor#detachFd()}. </li>
+  </ul>
+</li>
+</ul>
+
+
+
+
+
+
+<h3 id="webkit" style="margin-top:1.25em;">WebKit</h3>
+
+<ul>
+
+<li>File scheme cookies
+  <ul>
+    <li>The {@link android.webkit.CookieManager} now supports cookies that use
+the
+<code>file:</code> URI scheme. You can use {@link
+android.webkit.CookieManager#setAcceptFileSchemeCookies(boolean)
+setAcceptFileSchemeCookies()} to
+enable/disable support for file scheme cookies, before constructing an instance
+of <code>WebView</code> or <code>CookieManager</code>. In a
+<code>CookieManager</code> instance, you can check whether file scheme cookies
+is enabled by calling {@link
+android.webkit.CookieManager#allowFileSchemeCookies()}.</li>
+  </ul>
+</li>
+<li>Notification of login request
+  <ul>
+  <li>To support the browser autologin features introduced in Android 3.0, the
+new
+method {@link
+android.webkit.WebViewClient#onReceivedLoginRequest(android.webkit.WebView,java.lang.String, java.lang.String, java.lang.String) onReceivedLoginRequest()}
+notifies the host
+application that an autologin request for the user was processed. </li>
+  </ul>
+</li>
+<li>Removed classes and interfaces
+  <ul>
+    <li>Several classes and interfaces were removed from the public API, after
+previously being in deprecated state. See the <a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
+Differences Report</a> for more information.</p></li>
+  </ul>
+  </li>
+</ul>
+
+
+
+<h3 id="browser" style="margin-top:1.25em;">Browser</h3>
+
+<p>The Browser application adds the following features to support web
+applications:</p>
+
+<ul>
+<li>Support for inline playback of video embedded in HTML5
+<code>&lt;video&gt;</code> tag. Playback is hardware-accelerated where possible.
+</li>
+<li>Layer support for fixed position elements for all sites (mobile and
+desktop).</li>
+</ul>
+
+
+
+
+
+<h3 id="features">New feature constants</h3>
+
+<p>The platform adds new hardware feature constants that developers can declare
+in their application manifests, to inform external entities such as Google
+Play of the application's requirement for new hardware capabilities supported
+in this version of the platform. Developers declare these and other feature
+constants in <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code
+&lt;uses-feature&gt;}</a> manifest elements.
+
+<ul>
+  <li>{@link android.content.pm.PackageManager#FEATURE_USB_ACCESSORY
+android.hardware.usb.accessory} &mdash; The application uses the <a href="#usb">USB
+API</a> to communicate with external hardware devices connected over USB and
+function as hosts.</li>
+  <li>{@link android.content.pm.PackageManager#FEATURE_USB_HOST
+android.hardware.usb.host} &mdash; The application uses the <a href="#usb">USB API</a>
+to communicate with external hardware devices connected over USB and function as
+devices.</li>
+</ul>
+
+<p>Google Play filters applications based on features declared in <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code
+&lt;uses-feature&gt;}</a> manifest elements. For more information about
+declaring features in an application manifest, read <a
+href="{@docRoot}guide/appendix/market-filters.html">Google Play
+Filters</a>.</p>
+
+
+
+<h3 id="api-diff">API Differences Report</h3>
+
+<p>For a detailed view of all API changes in Android {@sdkPlatformVersion} (API
+Level
+{@sdkPlatformApiLevel}), see the <a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
+Differences Report</a>.</p>
+
+
+
+
+
+<h2 id="api-level">API Level</h2>
+
+<p>The Android {@sdkPlatformVersion} platform delivers an updated version of
+the framework API. The Android {@sdkPlatformVersion} API
+is assigned an integer identifier &mdash;
+<strong>{@sdkPlatformApiLevel}</strong> &mdash; that is
+stored in the system itself. This identifier, called the "API Level", allows the
+system to correctly determine whether an application is compatible with
+the system, prior to installing the application. </p>
+
+<p>To use APIs introduced in Android {@sdkPlatformVersion} in your application,
+you need compile the application against the Android library that is provided in
+the Android {@sdkPlatformVersion} SDK platform. Depending on your needs, you
+might
+also need to add an <code>android:minSdkVersion="{@sdkPlatformApiLevel}"</code>
+attribute to the <code>&lt;uses-sdk&gt;</code> element in the application's
+manifest.</p>
+
+<p>For more information about how to use API Level, see the <a
+href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
+
+
+<h2 id="apps">Built-in Applications</h2>
+
+<p>The system image included in the downloadable platform provides these
+built-in applications:</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+<ul>
+<li>API Demos</li>
+<li>Browser</li>
+<li>Calculator</li>
+<li>Camera</li>
+<li>Clock</li>
+<li>Contacts</li>
+<li>Custom Locale</li>
+<li>Dev Tools</li>
+<li>Downloads</li>
+<li>Email</li>
+</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<ul>
+<li>Gallery</li>
+<li>Gestures Builder</li>
+<li>Messaging</li>
+<li>Music</li>
+<li>Search</li>
+<li>Settings</li>
+<li>Spare Parts</li>
+<li>Speech Recorder</li>
+<li>Widget Preview</li>
+</ul>
+</td>
+</tr>
+</table>
+
+
+<h2 id="locs" style="margin-top:.75em;">Locales</h2>
+
+<p>The system image included in the downloadable SDK platform provides a variety
+of
+built-in locales. In some cases, region-specific strings are available for the
+locales. In other cases, a default version of the language is used. The
+languages that are available in the Android 3.0 system
+image are listed below (with <em>language</em>_<em>country/region</em> locale
+descriptor).</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+<ul>
+<li>Arabic, Egypt (ar_EG)</li>
+<li>Arabic, Israel (ar_IL)</li>
+<li>Bulgarian, Bulgaria (bg_BG)</li>
+<li>Catalan, Spain (ca_ES)</li>
+<li>Czech, Czech Republic (cs_CZ)</li>
+<li>Danish, Denmark(da_DK)</li>
+<li>German, Austria (de_AT)</li>
+<li>German, Switzerland (de_CH)</li>
+<li>German, Germany (de_DE)</li>
+<li>German, Liechtenstein (de_LI)</li>
+<li>Greek, Greece (el_GR)</li>
+<li>English, Australia (en_AU)</li>
+<li>English, Canada (en_CA)</li>
+<li>English, Britain (en_GB)</li>
+<li>English, Ireland (en_IE)</li>
+<li>English, India (en_IN)</li>
+<li>English, New Zealand (en_NZ)</li>
+<li>English, Singapore(en_SG)</li>
+<li>English, US (en_US)</li>
+<li>English, South Africa (en_ZA)</li>
+<li>Spanish (es_ES)</li>
+<li>Spanish, US (es_US)</li>
+<li>Finnish, Finland (fi_FI)</li>
+<li>French, Belgium (fr_BE)</li>
+<li>French, Canada (fr_CA)</li>
+<li>French, Switzerland (fr_CH)</li>
+<li>French, France (fr_FR)</li>
+<li>Hebrew, Israel (he_IL)</li>
+<li>Hindi, India (hi_IN)</li>
+</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<li>Croatian, Croatia (hr_HR)</li>
+<li>Hungarian, Hungary (hu_HU)</li>
+<li>Indonesian, Indonesia (id_ID)</li>
+<li>Italian, Switzerland (it_CH)</li>
+<li>Italian, Italy (it_IT)</li>
+<li>Japanese (ja_JP)</li>
+<li>Korean (ko_KR)</li>
+<li>Lithuanian, Lithuania (lt_LT)</li>
+<li>Latvian, Latvia (lv_LV)</li>
+<li>Norwegian bokmål, Norway (nb_NO)</li>
+<li>Dutch, Belgium (nl_BE)</li>
+<li>Dutch, Netherlands (nl_NL)</li>
+<li>Polish (pl_PL)</li>
+<li>Portuguese, Brazil (pt_BR)</li>
+<li>Portuguese, Portugal (pt_PT)</li>
+<li>Romanian, Romania (ro_RO)</li>
+<li>Russian (ru_RU)</li></li>
+<li>Slovak, Slovakia (sk_SK)</li>
+<li>Slovenian, Slovenia (sl_SI)</li>
+<li>Serbian (sr_RS)</li>
+<li>Swedish, Sweden (sv_SE)</li>
+<li>Thai, Thailand (th_TH)</li>
+<li>Tagalog, Philippines (tl_PH)</li>
+<li>Turkish, Turkey (tr_TR)</li>
+<li>Ukrainian, Ukraine (uk_UA)</li>
+<li>Vietnamese, Vietnam (vi_VN)</li>
+<li>Chinese, PRC (zh_CN)</li>
+<li>Chinese, Taiwan (zh_TW)</li>
+</td>
+</tr>
+</table>
+
+<p class="note"><strong>Note:</strong> The Android platform may support more
+locales than are included in the SDK system image. All of the supported locales
+are available in the <a href="http://source.android.com/">Android Open Source
+Project</a>.</p>
+
+<h2 id="skins">Emulator Skins</h2>
+
+<p>The downloadable platform includes the following emulator skin:</p>
+
+<ul>
+  <li>
+    WXGA (1280x800, medium density, xlarge screen)
+  </li>
+</ul>
+
+<p>For more information about how to develop an application that displays
+and functions properly on all Android-powered devices, see <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>.</p>

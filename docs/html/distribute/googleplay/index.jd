@@ -1,0 +1,63 @@
+page.title=Supporting Your Users
+header.hide=1
+page.metaDescription=Get started publishing apps on Google Play.
+
+@jd:body
+
+<h3>User Reviews Filter</h3>
+<p>In your Developer Console you can view the user reviews filtered by written language, device, app version and star rating. The Developer Console will show this information about each review. You'll also be able to set up filters to view only the user reviews that meet the criteria you select. We hope you'll find this feature useful when investigating specific issues and making improvements to your apps.</p>
+
+<div class="wrap">
+
+<div class="col-13">&nbsp;</div><!-- provides top margin for content -->
+
+<div class="col-7" style="margin-left:0">
+  <img src="{@docRoot}images/sdk-cube.png" alt="" />
+</div>
+
+
+<div class="col-6" style="margin-right:0" id="intro">
+<h1 style="margin-top:0;">Register on Google Play</h1>
+<p>To get started with Google Play, visit the Developer Console and register as a Google Play developer.</p>
+
+<p><a class="button" id="download-button" href="http://play.google.com/apps/publish/" >Go to the Developer Console &raquo;</a></p>
+
+
+</div>
+
+
+<div class="col-13" style="margin-left:0;">&nbsp;</div><!-- provides padding -->
+ 
+<div class="col-13">
+
+<h3>How to register</h3>
+
+<ol>
+<li>Use the button above to go to the Developer Console. </li>
+<li>Enter basic information about your developer identity &mdash; developer name, email address, and so on. You can modify this information later.</li>
+<li>Read and accept the Developer Distribution Agreement that applies to your country or region.</li>
+<li>Pay a $25 USD registration fee using Google Checkout. If you don't have a Google Checkout account, you can quickly set one up during the process.</li>
+</ol>
+
+<p>When your registration is verified, you’ll be notified at the email address you specified during registration. If you encounter problems, you can contact <a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=136601">Google Play Developer Support</a>.</p>
+
+  <h3>Tips</h3>
+  <ul>
+    <li>You need a Google account to register. You can create one during the process, if needed. </li>
+    <li>If you are an organization, consider registering a new Google account rather than using a personal account.</li>
+    <li>Before registering, make sure to review the list of <a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=138294">developer countries</a>, and <a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=150324">merchant countries</a> where you can distribute and sell apps.</li> 
+  </ul>
+
+<h3>Selling apps and in-app products</h3>
+ 
+<p>If you want to sell products on Google Play &mdash; priced apps, in-app products, or subscriptions &mdash; you will also need to set up a Google Checkout <a href="http://checkout.google.com/sell">Merchant Account</a>. You can do that at any time, but make sure to first review the list of <a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=150324">merchant countries</a> and related information available under "Sell Your Apps" in the <a href="http://support.google.com/googleplay/android-developer/?hl=en">Developer Help Center</a>.</p>
+
+
+<h3>Understanding distribution policies</h3>
+
+<p>It's very important to understand the policies and requirements for publishing on Google Play. Any apps and store listings that you publish on Google Play must comply with the Developer Program Policies and US export law, and you must acknowledge your compliance when you publish your apps. To make sure that Google Play remains a positive experience for users and a fair environment for all developers, these guidelines and actively enforced. Violations of these policies can result in the removal of your application from Google Play (and the loss of user ratings, reviews, and downloads) and being banned from Google Play.</p>
+
+</div>
+
+</div>
+

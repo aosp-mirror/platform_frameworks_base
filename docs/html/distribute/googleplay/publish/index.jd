@@ -1,0 +1,39 @@
+page.title=Publishing on Google Play
+header.hide=1
+footer.hide=1
+page.metaDescription=Get started publishing apps on Google Play.
+
+@jd:body
+
+
+<style>
+#landing-graphic-container {
+  position: relative;
+}
+
+#text-overlay {
+  position: absolute;
+  left: 0;
+  top: 472px;
+  width: 280px;
+}
+</style>
+
+<div id="landing-graphic-container">
+  <div id="text-overlay">
+  
+Publishing in Google Play puts your apps in front of hundreds of millions of Android users.
+    <br><br>
+    <a href="{@docRoot}distribute/googleplay/promote/product-pages.html" class="landing-page-link">Your Product Pages</a>
+  </div>
+
+  <a href="{@docRoot}distribute/googleplay/promote/index.html">
+    <img src="{@docRoot}design/media/index_landing_page.png">
+  </a>
+</div>
+
+
+
+
+
+

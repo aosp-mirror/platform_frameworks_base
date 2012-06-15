@@ -1,0 +1,201 @@
+page.title=Android 2.0 Platform Highlights
+sdk.date=October 2009
+
+@jd:body
+
+
+<style type="text/css">
+#jd-content div.screenshot,
+#jd-content div.video {
+  float:right;
+  clear:right;
+  padding:15px 60px;
+  font-size:.9em;
+  font-weight:bold;
+  line-height:1.7em;
+}
+#jd-content div.video {
+  padding-top:0;
+  margin-top:-15px;
+}
+#jd-content div.screenshot.second {
+  clear:none;
+  padding:15px 0 15px 60px;
+}
+#jd-content div.screenshot img {
+  margin:0;
+  border:1px solid #ccc;
+}
+</style>
+
+<div class="video">
+<object width="278 height="180">
+<param name="movie" value="http://www.youtube.com/v/opZ69P-0Jbc&hl=en&fs=1&"></param>
+<param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param>
+<embed src="http://www.youtube.com/v/opZ69P-0Jbc&hl=en&fs=1&" type="application/x-shockwave-flash" 
+allowscriptaccess="always" allowfullscreen="true" width="278" height="180"></embed>
+</object>
+</div>
+
+
+<p>The Android 2.0 platform introduces many new and exciting features for
+users and developers. This document provides a glimpse at some of the new features
+and technologies in Android 2.0.</p>
+
+<ul>
+  <li><a href="#UserFeatures">New User Features</a></li>
+  <li><a href="#PlatformTechnologies">New Platform Technologies</a></li>
+</ul>
+
+
+    
+<h2 id="UserFeatures" style="clear:right">New User Features</h2>
+
+<!-- screenshots float right -->
+
+<div class="screenshot">
+  <img src="images/2.0/quick-connect.png" class="screenshot" alt="" /><br/>
+  Quick Contact for Android
+</div>
+
+<div class="screenshot second">
+  <img src="images/2.0/multiple-accounts.png" class="screenshot" alt="" /><br/>
+  Multiple Accounts
+</div>
+
+<div class="screenshot">
+  <img src="images/2.0/mms-search.png" class="screenshot" alt="" /><br/>
+  Messaging Search
+</div>
+
+<div class="screenshot second">
+  <img src="images/2.0/email-inbox.png" class="screenshot" alt="" /><br/>
+  Email Combined Inbox
+</div>
+
+<div class="screenshot">
+  <img src="images/2.0/camera-modes.png" class="screenshot" alt="" /><br/>
+  Camera Modes
+</div>
+
+
+
+<h3 id="Contacts">Contacts and accounts</h3>
+
+<ul>
+  <li>Multiple accounts can be added to a device for email and contact
+synchronization, including Exchange accounts. (Handset manufacturers can
+choose whether to include Exchange support in their devices.)</li>
+  <li>Developers can create sync adapters that provide synchronization with
+additional data sources.</li>
+  <li>Quick Contact for Android provides instant access to
+a contact's information and communication modes. For example, a user can tap a
+contact photo and select to call, SMS, or email the person. Other applications
+such as Email, Messaging, and Calendar can also reveal the Quick Contact widget
+when you touch a contact photo or status icon.</li>
+</ul>
+
+
+<!--
+<ul>
+  <li>Sync support for contacts from multiple data sources including Exchange. 
+  Handset manufacturers can choose whether or not to include Exchange support 
+  in their devices.</li>
+  <li>New way to hover on a person to see more info and select communication 
+  mode (for example, phone, SMS, email).</li>
+</ul>
+-->
+
+<h3 id="Email">Email</h3>
+
+<ul>
+  <li>Exchange support.</li>
+  <li>Combined inbox to browse email from multiple accounts in one page.</li>
+</ul>
+
+
+<h3 id="Messaging">Messaging</h3>
+
+<ul>
+  <li>Search functionality for all saved SMS and MMS messages.</li>
+  <li>Auto delete the oldest messages
+  in a conversation when a defined limit is reached.</li>
+</ul>
+
+
+<h3 id="Camera">Camera</h3>
+
+<ul>
+  <li>Built-in flash support</li>
+  <li>Digital zoom</li>
+  <li>Scene mode</li>
+  <li>White balance</li>
+  <li>Color effect</li>
+  <li>Macro focus</li>
+</ul>
+
+<h3 id="Keyboard">Android virtual keyboard</h3>
+
+<ul>
+  <li>An improved keyboard layout to makes it easier to hit the correct characters
+  and improve typing speed.</li>
+  <li>The framework's multi-touch support ensures that key presses aren't missed
+  while typing rapidly with two fingers.</li>
+  <li>A smarter dictionary learns from word usage and automatically includes
+  contact names as suggestions.</li>
+</ul>
+
+
+<h3 id="Browser">Browser</h3>
+
+<ul>
+  <li>Refreshed UI with actionable browser URL bar enables users to directly 
+  tap the address bar for instant searches and navigation.</li>
+  <li>Bookmarks with web page thumbnails.</li>
+  <li>Support for double-tap zoom.</li>
+  <li>Support for HTML5:</p>
+    <ul>
+      <li>Database API support, for client-side databases using SQL.</li>
+      <li>Application cache support, for offline applications.</li>
+      <li>Geolocation API support, to provide location information about the device.</li>
+      <li>{@code &lt;video>} tag support in fullscreen mode.</li>
+    </ul>
+  </li>
+</ul>
+
+
+<h3 id="Calendar">Calendar</h3>
+<ul>
+  <li>Agenda view provides infinite scrolling.</li>
+  <li>Events indicate the attending status for each invitee.</li>
+  <li>Invite new guests to events.</li>
+</ul>
+
+
+<h2 id="PlatformTechnologies" style="clear:right">New Platform Technologies</h2>
+
+<h3 id="MediaFramework">Media Framework</h3>
+
+<p>Revamped graphics architecture for improved performance that enables better
+hardware acceleration.</p>
+
+
+<h3 id="Bluetooth">Bluetooth</h3>
+
+<ul>
+  <li>Bluetooth 2.1</li>
+  <li>New BT profiles: Object Push Profile (OPP) and Phone Book Access Profile (PBAP)</li>
+</ul>
+
+
+<h3 id="DeveloperAPIs">New Framework APIs</h3>
+
+<p>Android 2.0 includes several new developer APIs.
+For an overview of new APIs, see the 
+<a href="{@docRoot}sdk/android-2.0.html#api">Android 2.0 version notes</a>.</p>
+
+<p>For a complete report of all API changes, see the 
+<a href="{@docRoot}sdk/api_diff/5/changes.html">API Differences Report</a>.</p>
+
+
+

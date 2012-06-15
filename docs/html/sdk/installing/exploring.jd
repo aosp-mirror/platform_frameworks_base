@@ -1,0 +1,123 @@
+page.title=Exploring the SDK
+walkthru=1
+
+@jd:body
+
+
+
+<p>That's it! Your Android SDK is ready for action.</p>
+
+<p>Before you get started though, we suggest that you open the SDK directory and get familiar with
+the files inside. The table below describes the full SDK directory contents, with packages
+installed. </p>
+
+<p>If you're eager to start developing, we suggest you start with <a
+href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a> or follow other
+<a href="#Next">next steps</a> below.</p>
+
+
+<table>
+<tr>
+<th colspan="3">Name</th><th>Description</th>
+</tr>
+<tr>
+<td colspan="3"><code>add-ons/</code></td>
+<td>Contains add-ons such as external libraries that are available on some
+devices and emulator skins for specific devices. </td>
+</tr>
+<tr>
+<td colspan="3"><code>docs/</code></td>
+<td>A full set of Android developer documentation in HTML format.</td>
+</tr>
+<tr>
+<td colspan="3"><code>platform-tools/</code></td>
+<td>Contains platform-dependent development tools that may be updated with each platform release.
+The platform tools include the Android Debug Bridge ({@code adb}) as well as other tools that you
+don't typically use directly.</td>
+</tr>
+<tr>
+<td colspan="3"><code>platforms/</code></td>
+<td>Contains subdirectories for each Android platform version you've downloaded.  </td>
+</tr>
+<tr>
+<td style="width:2em;"></td>
+<td colspan="2"><code>android-<em>&lt;api-level&gt;</em>/</code></td>
+<td>Contains the SDK platform for a specific version, for example "android-11". Each platform
+directory includes the
+Android library (<code>android.jar</code>) that is used to compile applications against the
+platform version among other files such as the emulator skins supported by the platform.</td>
+</tr>
+<tr>
+<td colspan="3"><code>samples/</code></td>
+<td>Contains subdirectories for each set of sample code you've downloaded for a given Android
+version.</td>
+</tr>
+<tr>
+<td colspan="3"><code>sources/</code></td>
+<td>Contains subdirectories for each set platform source code you've downloaded for a given Android
+version.</td>
+</tr>
+<tr>
+<td colspan="3"><code>tools/</code></td>
+<td>Contains the SDK Tools that are platform-independent, such
+as the emulator, the Android SDK Manager, the AVD Manager, <code>ddms</code>,
+<code>hierarchyviewer</code>
+and more.</td>
+</tr>
+<tr>
+<td colspan="3"><code>SDK Manager.exe</code></td>
+<td>On Windows only. A shortcut that launches the Android SDK
+Manager tool, which you use to add packages to your SDK.</td>
+</tr>
+
+</table>
+
+
+<p class="note"><strong>Tip:</strong> For easy access to the SDK tools from a command line, add the
+location of the SDK's <code>tools/</code> and
+<code>platform-tools</code> to your <code>PATH</code> environment variable.</p>
+
+
+<h2 id="Next">Next Steps</h2>
+
+
+<p>Now that you've completed the SDK installation, you are ready to
+develop Android apps. Here are a few ways you can get started: </p>
+
+<p><strong>Start coding</strong></p>
+<ul>
+  <li>Follow the training class for <a
+href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a>.
+    <p>This class is an essential first step for new Android developers.</p>
+    <p>It gives you step by step instructions for building a simple app. You’ll learn how to
+create an Android project and run a debuggable version of the app. You'll also learn some
+fundamentals of Android app design, including how to build a simple user interface and handle user
+input.</p>
+</li>
+</ul>
+
+
+<p><strong>Read up on the API framework</strong></p>
+<ul>
+  <li>Start reading about fundamental framework topics in the collection of <a
+href="{@docRoot}guide/index.html">Guides</a>.</li>
+  <li>Browse the Android API specifications in the <a
+  href="{@docRoot}reference/packages.html">Reference</a>.</li>
+</ul>
+
+
+<p><strong>Explore the development tools</strong></p>
+<ul>
+  <li>Learn about the process for developing an app from end to end with the <a
+  href="{@docRoot}tools/index.html">Workflow</a> documentation.</li>
+  <li>Learn about debugging your apps with the <a
+href="{@docRoot}tools/debugging/index.html">Debugging</a> guides.</li>
+</ul>
+
+
+<p><strong>Explore some code</strong></p>
+
+<ul>
+  <li>Browse the sample apps downloaded from the Android SDK Manager. You'll find them in
+<code><em>&lt;sdk&gt;</em>/samples/<em>&lt;platform-version&gt;/</em></code>. </li>
+</ul>

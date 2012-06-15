@@ -1,0 +1,942 @@
+page.title=Android 2.3 Platform
+sdk.platform.version=2.3
+sdk.platform.apiLevel=9
+
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#relnotes">Revisions</a></li>
+  <li><a href="#api">API Overview</a></li>
+  <li><a href="#api-level">API Level</a></li>
+  <li><a href="#apps">Built-in Applications</a></li>
+  <li><a href="#locs">Locales</a></li>
+  <li><a href="#skins">Emulator Skins</a></li>
+</ol>
+
+<h2>Reference</h2>
+<ol>
+<li><a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
+Differences Report &raquo;</a> </li>
+</ol>
+
+<h2>See Also</h2>
+<ol>
+  <li><a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>
+<em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
+
+<p>For developers, the Android {@sdkPlatformVersion} platform is available as a
+downloadable component for the Android SDK. The downloadable platform includes 
+an Android library and system image, as well as a set of emulator
+skins and more. The downloadable platform
+includes no external libraries.</p>
+
+<p>To get started developing or testing against Android
+{@sdkPlatformVersion}, use the Android SDK Manager to
+download the platform into your SDK. For more information,
+see <a href="{@docRoot}sdk/adding-components.html">Adding SDK
+Components</a>. If you are new to Android, <a
+href="{@docRoot}sdk/index.html">download the SDK Starter Package</a>
+first.</p>
+
+<p>For a high-level introduction to Android {@sdkPlatformVersion}, see the <a
+href="{@docRoot}sdk/android-{@sdkPlatformVersion}-highlights.html">Platform Highlights</a>.</p>
+
+
+<h2 id="relnotes">Revisions</h2>
+
+<p>The sections below provide notes about successive releases of
+the Android {@sdkPlatformVersion} platform component for the Android SDK, as denoted by
+revision number. To determine what revision(s) of the Android
+{@sdkPlatformVersion} platforms are installed in your SDK environment, refer to
+the "Installed Packages" listing in the Android SDK and AVD Manager.</p>
+
+<script type="text/javascript">
+function toggleDiv(link) {
+  var toggleable = $(link).parent();
+  if (toggleable.hasClass("closed")) {
+    //$(".toggleme", toggleable).slideDown("fast");
+    toggleable.removeClass("closed");
+    toggleable.addClass("open");
+    $(".toggle-img", toggleable).attr("title", "hide").attr("src", (toRoot + "assets/images/triangle-opened.png"));
+  } else {
+    //$(".toggleme", toggleable).slideUp("fast");
+    toggleable.removeClass("open");
+    toggleable.addClass("closed");
+    $(".toggle-img", toggleable).attr("title", "show").attr("src", (toRoot + "assets/images/triangle-closed.png"));
+  }
+  return false;
+}
+</script>
+<style>
+.toggleable {
+  padding: .25em 1em 0em 1em;
+  margin-bottom: 0;
+}
+.toggleme {
+  padding: 1em 1em 0 2em;
+  line-height:1em;
+}
+.toggleable a {
+  text-decoration:none;
+}
+.toggleme a {
+  text-decoration:underline;
+}
+.toggleable.closed .toggleme {
+  display:none;
+}
+#jd-content .toggle-img {
+  margin:0;
+}
+</style>
+
+<div class="toggleable opened">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+        Android {@sdkPlatformVersion}, Revision 1</a> <em>(December 2010)</em></a>
+  <div class="toggleme">
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires SDK Tools r8 or higher.</p>
+</dd>
+
+</dl>
+ </div>
+</div>
+
+<h2 id="api">API Overview</h2>
+
+<p>The sections below provide a technical overview of what's new for developers
+in {@sdkPlatformVersion}, including new features and changes in the framework
+API since the previous version.</p>
+
+
+<h3 id="sip">SIP-based VoIP</h3>
+
+<p>The platform now includes a SIP protocol stack and framework API that lets
+developers build internet telephony applications. Using the API, applications can offer
+voice calling features without having to manage sessions, transport-level
+communication, or audio &mdash; these are handled
+transparently by the platform's SIP API and services.</p>
+
+<p>The SIP API is available in the {@link android.net.sip android.net.sip}
+package. The key class is {@link android.net.sip.SipManager}, which applications
+use to set up and manage SIP profiles, then initiate audio calls and receive
+audio calls. Once an audio call is established, applications can mute calls,
+turn on speaker mode, send DTMF tones, and more. Applications can also use the
+{@link android.net.sip.SipManager} to create generic SIP connections.</p>
+
+<p>The platform’s underlying SIP stack and services are available on devices at
+the discretion of the manufacturer and associated carrier. For this reason,
+applications should use the  {@link android.net.sip.SipManager#isApiSupported
+isApiSupported()} method to check whether SIP support is available, before
+exposing calling functionality to users. </p>
+
+<p>To use the SIP API, applications must request permission from the user by
+declaring <code>&lt;uses-permission
+android:name="android.permission.INTERNET"&gt;</code> and <code>&lt;uses-permission
+android:name="android.permission.USE_SIP"&gt;</code> in their manifest files.</p>
+
+<p>Additionally, developers can request filtering on Google Play, such that
+their applications are not discoverable to users whose devices do not include
+the platform’s SIP stack and services. To request filtering, add <code>&lt;uses-feature
+android:name="android.software.sip"
+android:required="true"&gt;</code> and <code>&lt;uses-feature
+android:name="android.software.sip.voip"&gt;</code> to the application manifest.</p>
+
+<p class="note">To look at a sample application that uses the SIP API, see <a
+href="{@docRoot}resources/samples/SipDemo/index.html">SIP Demo</a>.</p>
+
+<h3 id="nfc">Near Field Communications (NFC)</h3>
+
+<p>Android 2.3 includes an NFC stack and framework API that lets developers
+read NDEF tags that are discovered as a user touches an NFC-enabled device
+to tag elements embedded in stickers, smart posters, and even other devices.</p>
+
+<p>The platform provides the underlying NFC services that work with the device
+hardware to discover tags when they come into range. On discovering a tag, the
+platform notifies applications by broadcasting an Intent, appending the tag's
+NDEF messages to the Intent as extras. Applications can create Intent filters to
+recognize and handle targeted tags and messages. For example, after receiving a
+tag by Intent, applications extract the NDEF messages, store them, alert the
+user, or handle them in other ways. </p>
+
+<p>The NFC API is available in the {@link android.nfc} package. The key classes are: </p>
+
+<ul><li>{@link android.nfc.NfcAdapter}, which represents the NFC hardware on the device.</li>
+<li>{@link android.nfc.NdefMessage}, which represents an NDEF data message,
+the standard format in which "records" carrying data are transmitted between
+devices and tags. Applications can receive these messages from {@link
+android.nfc.NfcAdapter#ACTION_TAG_DISCOVERED}</code> Intents.</li>
+<li>{@link android.nfc.NdefRecord}, delivered in an
+{@link android.nfc.NdefMessage}, which describes the type of data being shared and
+carries the data itself.</li>
+</ul>
+
+<p>NFC communication relies on wireless technology in the device hardware, so
+support for the platform's NFC features on specific devices is determined by
+their manufacturers. To determine the NFC support on the current device,
+applications can call {@link android.nfc.NfcAdapter#isEnabled isEnabled()} to
+query the {@link android.nfc.NfcAdapter}. The NFC API is always present,
+however, regardless of underlying hardware support.</p>
+
+<p>To use the NFC API, applications must request permission from the user by
+declaring <code>&lt;uses-permission
+android:name="android.permission.NFC"&gt;</code> in their manifest files.</p>
+
+<p>Additionally, developers can request filtering on Google Play, such that
+their applications are not discoverable to users whose devices do not support
+NFC. To request filtering, add
+<code>&lt;uses-feature android:name="android.hardware.nfc"
+android:required="true"&gt;</code> to the application's manifest.</p>
+
+<p class="note">To look at a sample application that uses the NFC API, see
+<a href="{@docRoot}resources/samples/NFCDemo/index.html">NFCDemo</a>.</p>
+
+<h3 id="sensors">Gyroscope and other sensors</h3>
+
+<p>Android 2.3 adds platform and API support for several new sensor reading
+types &mdash; gyroscope, rotation vector, linear acceleration, gravity, and barometer.
+Developers can use the new sensor readings to create applications that respond
+quickly and smoothly to precise changes in device position and motion. The
+Sensor API reports gyroscope and other sensor changes to interested
+applications, whether they are running on the application framework or in native
+code. </p>
+
+<p>Note that the specific set of hardware sensors available on any given device
+varies at the discretion of the device manufacturer. </p>
+
+<p>Developers can request filtering on Google Play, such that their
+applications are not discoverable to users whose devices do not offer a
+gyroscope sensor. To do so, add <code>&lt;uses-feature
+android:name="android.hardware.sensor.gyroscope"
+android:required="true"&gt;</code> to the application manifest.</p>
+
+<p>For API details, see {@link android.hardware.Sensor}.</p>
+
+
+<h3 id="cameras">Multiple cameras support</h3>
+
+<p>Applications can now make use of any cameras that are available on a device,
+for either photo or video capture. The {@link android.hardware.Camera} lets
+applications query for the number of cameras available and the unique
+characteristics of each. </p>
+
+<ul>
+<li>New {@link android.hardware.Camera.CameraInfo} class stores a camera's
+positional characteristics (orientation, front-facing or back-facing).</li>
+<li>New {@link android.hardware.Camera#getNumberOfCameras()} and {@link
+android.hardware.Camera#getCameraInfo(int,CameraInfo) getCameraInfo()} methods in the {@link
+android.hardware.Camera} class let applications query for the cameras available
+and open the camera that they need.</li>
+<li>New {@link android.media.CamcorderProfile#get get()} method lets
+applications retrieve a {@link android.media.CamcorderProfile} for a specific camera. </li>
+<li>New {@link android.media.CameraProfile#getJpegEncodingQualityParameter(int, int)
+getJpegEncodingQualityParameter()} lets applications obtain the still-image
+capture quality level for a specific camera.</li>
+</ul>
+
+<p class="note">To look at sample code for accessing a front-facing camera, see <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/CameraPreview.html">CameraPreview.java</a>
+in the ApiDemos sample application.</p>
+
+<p>The Camera API also adds: </p>
+<ul>
+<li>New parameters for cameras, including focus distance, focus mode, and
+preview fps maximum/minimum. New {@link
+android.hardware.Camera.Parameters#getFocusDistances(float[])
+getFocusDistances()}, {@link
+android.hardware.Camera.Parameters#getPreviewFpsRange(int[])
+getPreviewFpsRange()}, and {@link
+android.hardware.Camera.Parameters#getSupportedPreviewFpsRange()
+getSupportedPreviewFpsRange()} for getting camera parameters, as well as {@link
+android.hardware.Camera.Parameters#setPreviewFpsRange(int, int)
+setPreviewFpsRange()} for setting preview framerate. </li>
+</ul>
+
+<h3 id="media">Mixable audio effects</h3>
+
+<p>The platform's media framework adds support for new per-track or global audio effects,
+including bass boost, headphone virtualization, equalization, and reverb.</p>
+<ul>
+<li>New {@link android.media.audiofx android.media.audiofx} package provides the
+API to access audio effects.</li>
+<li>New {@link android.media.audiofx.AudioEffect AudioEffect} is the  base class
+for controlling audio effects provided by the Android audio framework.
+<li>New audio session ID that lets an application associate a set of audio
+effects with an instance of {@link android.media.AudioTrack} or {@link
+android.media.MediaPlayer}.</li>
+<li>New {@link android.media.AudioTrack#AudioTrack(int, int, int, int, int, int,
+int) AudioTrack} class constructor that lets you create an {@link
+android.media.AudioTrack} with a specific session ID. New {@link
+android.media.AudioTrack#attachAuxEffect(int) attachAuxEffect()}, {@link
+android.media.AudioTrack#getAudioSessionId() getAudioSessionId()}, and {@link
+android.media.AudioTrack#setAuxEffectSendLevel(float) setAuxEffectSendLevel()}
+methods.</li>
+<li>New {@link android.media.MediaPlayer#attachAuxEffect(int)
+attachAuxEffect()}, {@link android.media.MediaPlayer#getAudioSessionId()
+getAudioSessionId()}, {@link android.media.MediaPlayer#setAudioSessionId(int)
+setAudioSessionId(int)}, and {@link
+android.media.MediaPlayer#setAuxEffectSendLevel(float) setAuxEffectSendLevel()}
+methods and supporting types.</li>
+</ul>
+
+<p class="note">To look at sample code for audio effects, see
+<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/media/AudioFxDemo.html">AudioFxDemo.java</a>
+in the ApiDemos sample application.</p>
+
+<p>The media framework also adds:</p>
+<ul>
+<li>New support for altitude tag in EXIF metadata for JPEG files. New method
+{@link android.media.ExifInterface#getAltitude(double) getAltitude()} method to
+retrieve the value of the EXIF altitude tag.</li>
+<li>New {@link android.media.MediaRecorder#setOrientationHint(int)
+setOrientationHint()} method lets an application tell {@link
+android.media.MediaRecorder} of the orientation during video capture.</li>
+</ul>
+
+<h3 id="download">Download manager</h3>
+
+<p>The platform includes a new {@link android.app.DownloadManager} system service
+that handles long-running HTTP downloads. Applications can request that a URI be
+downloaded to a particular destination file. The <code>DownloadManager</code>
+will conduct the download in the background, taking care of HTTP interactions
+and retrying downloads after failures or across connectivity changes and system
+reboots. </p>
+<ul>
+<li>Applications can obtain an instance of the {@link android.app.DownloadManager}
+class by calling {@link
+android.content.Context#getSystemService(String)} and passing
+{@link android.content.Context#DOWNLOAD_SERVICE}. Applications that request 
+downloads through this API should register a broadcast receiver for {@link
+android.app.DownloadManager#ACTION_NOTIFICATION_CLICKED}, to appropriately
+handle when the user clicks on a running download in a notification or from the
+Downloads UI.</li>
+<li>The {@link android.app.DownloadManager.Request} class lets an
+application provide all the information necessary to request a new download,
+such as request URI and download destination. A request URI is the only required
+parameter. Note that the default download destination is a shared volume where
+the system can delete your file if it needs to reclaim space for system use. For
+persistent storage of a download, specify a download destination on external
+storage (see {@link
+android.app.DownloadManager.Request#setDestinationUri(Uri)}).</li>
+<li>The {@link android.app.DownloadManager.Query} class provides methods that let
+an application query for and filter active downloads.</li>
+</ul>
+
+<h3 id="strictmode">StrictMode</h3>
+
+<p>To help developers monitor and improve the performance of their applications,
+the platform offers a new system facility called {@link android.os.StrictMode}.
+When implemented in an application, StrictMode catches and notifies the
+developer of accidental disk or network activity that could degrade application
+performance, such as activity taking place on the application's main thread
+(where UI operations are received and animations are also taking place).
+Developers can evaluate the network and disk usages issues raised in StrictMode
+and correct them if needed, keeping the main thread more responsive and
+preventing ANR dialogs from being shown to users.
+
+<ul>
+<li>{@link android.os.StrictMode} is the core class and is the main integration
+point with the system and VM. The class provides convenience methods for
+managing the thread and VM policies that apply to the instance.</li>
+<li>{@link android.os.StrictMode.ThreadPolicy} and {@link
+android.os.StrictMode.VmPolicy} hold the policies that you define and apply to
+thread and VM instances.</li>
+</ul>
+
+<p>For more information about how to use StrictMode to optimize your
+application, see the class documentation and sample code at {@link
+android.os.StrictMode android.os.StrictMode}.</p>
+
+<h3 id="ui">UI Framework</h3>
+
+<ul>
+<li>Support for overscroll
+<ul>
+<li>New support for overscroll in Views and Widgets. In Views, applications can
+enable/disable overscroll for a given view, set the overscoll mode, control the
+overscroll distance, and handle the results of overscrolling. </li>
+<li>In Widgets, applications can control overscroll characteristics such as
+animation, springback, and overscroll distance. For more information, see {@link
+android.view.View android.view.View} and {@link android.widget.OverScroller
+android.widget.OverScroller}. </li>
+<li>{@link android.view.ViewConfiguration} also provides methods {@link
+android.view.ViewConfiguration#getScaledOverflingDistance()} and {@link
+android.view.ViewConfiguration#getScaledOverscrollDistance()}.</li>
+<li>New <code>overScrollMode</code>, <code>overScrollFooter</code>, and
+<code>overScrollHeader</code> attributes for <code>&lt;ListView&gt;</code> elements,
+for controlling overscroll behavior.</li>
+</ul>
+</li>
+
+<li>Support for touch filtering
+<ul>
+<li>New support for touch filtering, which lets an application improve the
+security of Views that provide access to sensitive functionality. For example,
+touch filtering is appropriate to ensure the security of user actions such as
+granting a permission request, making a purchase, or clicking on an
+advertisement. For details, see the <a
+href="{@docRoot}reference/android/view/View.html#Security">View class
+documentation</a>.</li>
+<li>New <code>filterTouchesWhenObscured</code> attribute for view elements,
+which declares whether to filter touches when the view's window is obscured by
+another visible window. When set to <code>"true"</code>, the view will not
+receive touches whenever a toast, dialog or other window appears above the
+view's window. Refer to <a
+href="{@docRoot}reference/android/view/View.html#Security">View security
+documentation</a> for details.</li>
+</ul>
+
+<p class="note">To look at sample code for touch filtering, see
+<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/SecureView.html">SecureView.java</a>
+in the ApiDemos sample application.</p>
+</li>
+
+<li>Improved event management
+<ul>
+<li>New base class for input events, {@link android.view.InputEvent}. The class
+provides methods that let applications determine the meaning of the event, such
+as by querying for the InputDevice from which the event orginated. The {@link
+android.view.KeyEvent} and {@link android.view.MotionEvent} are subclasses of
+{@link android.view.InputEvent}.</li>
+<li>New base class for input devices, {@link android.view.InputDevice}. The
+class stores information about the capabilities of a particular input device and
+provides methods that let applications determine how to interpret events from an
+input device.</li>
+</ul>
+</li>
+
+<li>Improved motion events
+<ul>
+<li>The {@link android.view.MotionEvent} API is extended to include "pointer ID"
+information, which lets applications to keep track of individual fingers as they
+move up and down. The class adds a variety of methods that let an application
+work efficiently with motion events.</li>
+<li>The input system now has logic to generate motion events with the new
+pointer ID information, synthesizing identifiers as new pointers are down. The
+system tracks multiple pointer IDs separately during a motion event, and
+ensures proper continuity of pointers by evaluating at the distance
+between the last and next set of pointers.</li>
+</ul>
+</li>
+
+<li>Text selection controls
+<ul>
+<li>A new <code>setComposingRegion</code> method lets an application mark a
+region of text as composing text, maintaining the current styling. A
+<code>getSelectedText</code> method returns the selected text to the
+application. The methods are available in {@link
+android.view.inputmethod.BaseInputConnection}, {@link
+android.view.inputmethod.InputConnection}, and {@link
+android.view.inputmethod.InputConnectionWrapper}.</li>
+<li>New <code>textSelectHandle</code>, <code>textSelectHandleLeft</code>,
+<code>textSelectHandleRight</code>, and <code>textSelectHandleWindowStyle</code>
+attributes for <code>&lt;TextView&gt;</code>, for referencing drawables that will be
+used to display text-selection anchors and the style for the containing
+window.</li>
+</ul>
+</li>
+
+<li>Activity controls
+<ul>
+<li>{@link android.content.pm.ActivityInfo} adds new constants for managing
+Activity orientation:
+{@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_FULL_SENSOR},
+{@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_REVERSE_LANDSCAPE},
+{@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_REVERSE_PORTRAIT},
+{@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_SENSOR_LANDSCAPE},
+and
+{@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_SENSOR_PORTRAIT}.
+</li>
+<li>New constant {@link
+android.app.ActivityManager.RunningAppProcessInfo#IMPORTANCE_PERCEPTIBLE} for
+the {@link android.app.ActivityManager.RunningAppProcessInfo#importance} field
+in {@link android.app.ActivityManager.RunningAppProcessInfo}. The value
+indicates that a specific process is running something that is considered to be
+actively perceptible to the user. An example would be an application performing
+background music playback.</li>
+<li>The Activity.setPersistent(boolean) method to mark an
+Activity as persistent is now deprecated and the implementation is a no-op.</li>
+</ul>
+</li>
+
+<li>Notification text and icon styles
+<ul>
+<li>New {@link android.R.style#TextAppearance_StatusBar_EventContent
+TextAppearance.StatusBar.EventContent},
+{@link android.R.style#TextAppearance_StatusBar_EventContent_Title
+TextAppearance.StatusBar.EventContent.Title},
+{@link android.R.style#TextAppearance_StatusBar_Icon
+TextAppearance.StatusBar.Icon}, and
+{@link android.R.style#TextAppearance_StatusBar_Title
+TextAppearance.StatusBar.Title} for managing
+notification style.</li>
+</ul>
+</li>
+
+<li>WebView
+<ul>
+<li>New {@link
+android.webkit.WebSettings#setUseWebViewBackgroundForOverscrollBackground(
+boolean) setUseWebViewBackgroundForOverscrollBackground()} method lets a {@link
+android.webkit.WebView} specify whether to use its own background for the
+overscroll background. </li>
+</ul>
+</li>
+</ul>
+
+<h3 id="extralargescreens">Extra Large Screens</h3>
+
+<p>The platform now supports extra large screen sizes, such as those that might
+be found on tablet devices. Developers can indicate that their applications are
+designed to support extra large screen sizes by adding a <code>&lt;supports
+screens ... android:xlargeScreens="true"&gt;</code> element to their manifest
+files. Applications can use a new resource qualifier, <code>xlarge</code>, to
+tag resources that are specific to extra large screens. For
+details on how to support extra large and other screen sizes, see <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>.</p>
+
+<h3 id="graphics">Graphics</h3>
+
+<ul>
+<li>Adds remaining OpenGL ES 2.0 methods {@link
+android.opengl.GLES20#glDrawElements(int, int, int, int) glDrawElements()} and
+{@link android.opengl.GLES20#glVertexAttribPointer(int, int, int, boolean, int,
+int) glVertexAttribPointer()} in the {@link android.opengl.GLES20
+android.opengl.GLES20} class.</li>
+<li>Adds support for {@link android.graphics.ImageFormat#YV12} pixel format, a
+planar 4:2:0 YCrCb format.</li>
+</ul>
+
+<h3 id="providers">Content Providers</h3>
+
+<ul>
+<li>New {@link android.provider.AlarmClock} provider class for setting an alarm
+or handling an alarm. The provider contains a <code>ACTION_SET_ALARM</code> Intent
+action and extras that can be used to start an Activity to set a new alarm in an
+alarm clock application. Applications that wish to receive the
+<code>SET_ALARM</code> Intent should create an activity that requires the
+the SET_ALARM permission. Applications that wish to create a new
+alarm should use {@link
+android.content.Context#startActivity(android.content.Intent)
+Context.startActivity()}, so that the user has the option of choosing
+which alarm clock application to use.</li>
+
+<li>{@link android.provider.MediaStore} supports a new Intent action, {@link
+android.provider.MediaStore#INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH
+PLAY_FROM_SEARCH}, that lets an application search for music media and
+automatically play content from the result when possible. For example, an
+application could fire this Intent as the result of a voice recognition command
+to listen to music.</li>
+<li>{@link android.provider.MediaStore} also adds a new {@link
+android.provider.MediaStore#MEDIA_IGNORE_FILENAME} flag that tells the media
+scanner to ignore media in the containing directory and its subdirectories.
+Developers can use this to avoid having graphics appear in the Gallery and
+likewise prevent application sounds and music from showing up in the Music
+app.</li>
+
+<li>The {@link android.provider.Settings} provider adds the new Activity actions
+{@link android.provider.Settings#ACTION_APPLICATION_DETAILS_SETTINGS
+APPLICATION_DETAILS_SETTINGS} and {@link
+android.provider.Settings#ACTION_MANAGE_ALL_APPLICATIONS_SETTINGS
+MANAGE_ALL_APPLICATIONS_SETTINGS}, which let an application show the details
+screen for a specific application or show the Manage Applications screen. </li>
+
+<li>The {@link android.provider.ContactsContract} provider adds the {@link
+android.provider.ContactsContract.CommonDataKinds.SipAddress} data kind, for
+storing a contact's SIP (Internet telephony) address. </li>
+</ul>
+
+<h3 id="location">Location</h3>
+
+<ul>
+<li>The {@link android.location.LocationManager} now tracks application
+requests that result in wake locks or wifi locks according to
+{@link android.os.WorkSource}, a system-managed class that identifies the
+application.
+<p>The <code>LocationManager</code> keeps track
+of all clients requesting periodic updates, and tells its providers
+about them as a <code>WorkSource</code> parameter, when setting their minimum
+update times.
+The network location provider uses <code>WorkSource</code> to track the
+wake and wifi locks initiated by an application and adds it to the application's
+battery usage reported in Manage Applications. </p></li>
+<li>The {@link android.location.LocationManager} adds several new methods that
+let an Activity register to receive periodic or one-time location updates based
+on specified criteria (see below).</li>
+<li>A new  {@link android.location.Criteria} class lets an application specify a
+set of criteria for selecting a location provider. For example, providers may be
+ordered according to accuracy, power usage, ability to report altitude, speed,
+and bearing, and monetary cost. </li>
+</ul>
+
+<h3 id="storage">Storage</h3>
+
+<ul>
+<li>Android 2.3 adds a new {@link android.os.storage.StorageManager} that
+supports OBB (Opaque Binary Blob) files. Although platform support for OBB is
+available in Android 2.3, development tools for creating and managing OBB files
+will not be availble until early 2011.</li>
+<li>The Android 2.3 platform adds official support for devices that do not
+include SD cards (although it provides virtual SD Card partition, when no
+physical SD card is available). A convenience method, {@link
+android.os.Environment#isExternalStorageRemovable()}, lets applications
+determine whether a physical SD card is present.</li>
+</ul>
+
+<h3 id="packagemanager">Package Manager</h3>
+
+<ul>
+<li>New constants for declaring hardware and software features. See the list in
+the <a href="#feature_constants">New Feature Constants</a> section, below.</li>
+<li>{@link android.content.pm.PackageInfo} adds new {@link
+android.content.pm.PackageInfo#firstInstallTime} and {@link
+android.content.pm.PackageInfo#lastUpdateTime} fields that store the time of the
+package installation and last update. </li>
+<li>New {@link
+android.content.pm.PackageManager#getProviderInfo(android.content.ComponentName,
+int) getProviderInfo()} method for retrieving all of the information known about
+a particular content provider class.</li>
+</ul>
+
+<h3 id="telephony">Telephony</h3>
+
+<ul>
+<li>The {@link android.telephony.TelephonyManager} adds the constant {@link
+android.telephony.TelephonyManager#NETWORK_TYPE_EVDO_B} for specifying the CDMA
+EVDO Rev B network type.</li>
+<li>New {@link android.telephony.gsm.GsmCellLocation#getPsc()} method returns
+the primary scrambling code of the serving cell on a UMTS network.</li>
+</ul>
+
+<h3 id="native">Native access to Activity lifecycle, windows</h3>
+
+<p>Android 2.3 exposes a broad set of APIs to applications that use native
+code. Framework classes of interest to such applications include: </p>
+
+<ul>
+<li>{@link android.app.NativeActivity} is a new type of Activity class, whose
+lifecycle callbacks are implemented directly in native code. A
+<code>NativeActivity</code> and its underlying native code run in the system
+just as do other Activities &mdash; specifically they run in the Android
+application's system process and execute on the application's main UI thread,
+and they receive the same lifecycle callbacks as do other Activities. </li>
+<li>New {@link android.view.InputQueue} class and callback interface lets native
+code manage event queueing. </li>
+<li>New {@link android.view.SurfaceHolder.Callback2} interface lets native code
+manage a {@link android.view.SurfaceHolder}. </li>
+<li>New {@link
+android.view.Window#takeInputQueue(android.view.InputQueue.Callback)
+takeInputQueue} and {@link
+android.view.Window#takeSurface(android.view.SurfaceHolder.Callback2)
+takeSurface()} methods in {@link android.view.Window} let native code manage
+events and surfaces.</li>
+</ul>
+
+<p>For full information on working with native code or to download the NDK,
+see the <a href="{@docRoot}sdk/ndk/index.html">Android NDK</a> page.</p>
+
+
+<h3 id="dalvik">Dalvik Runtime</h3>
+
+<ul>
+<li>{@link dalvik.system dalvik.system}
+removes several classes that were previously deprecated.</li>
+<li>Dalvik core libraries:
+<ul>
+  <li>New collections: {@link java.util.ArrayDeque}, {@link java.util.NavigableMap},
+  {@link java.util.concurrent.ConcurrentSkipListMap},
+  {@link java.util.concurrent.LinkedBlockingDeque}</li>
+  <li>New {@link java.util.Arrays} utilities: <code>binarySearch()</code>,
+  <code>copyOf()</code>, <code>copyOfRange()</code>, and others.</li>
+  <li>{@link java.net.CookieManager} for {@link java.net.HttpURLConnection}.</li>
+  <li>More complete network APIs: {@link java.net.InterfaceAddress},
+  {@link java.net.NetworkInterface} and {@link java.net.IDN}</li>
+  <li>{@link java.io.File} read and write controls</li>
+  <li>{@link java.lang.String#isEmpty() String.isEmpty()}</li>
+  <li>{@link java.text.Normalizer} and {@link java.text.Normalizer.Form}</li>
+  <li>Improved {@link javax.net.ssl} server sockets.</li>
+</ul>
+</li>
+</ul>
+
+<h3 id="manifest">New manifest elements and attributes</h3>
+
+<ul>
+<li>New <code>xlargeScreens</code> attribute for <a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens&gt;}</a>
+element, to indicate whether the application supports
+extra large screen form-factors. For details, see <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>.</li>
+<li>New values for <code>android:screenOrientation</code> attribute of
+<code>&lt;activity&gt;</code> element:
+<ul>
+<li><code>"reverseLandscape"</code> &mdash; The Activity would like to have the
+screen in landscape orientation, turned in the opposite direction from normal
+landscape.</li>
+<li><code>"reversePortrait"</code> &mdash; The Activity would like to have the
+screen in portrait orientation, turned in the opposite direction from normal
+portrait.</li>
+<li><code>"sensorLandscape"</code> &mdash; The Activity would like to have the
+screen in landscape orientation, but can use the sensor to change which
+direction the screen is facing.</li>
+<li><code>"sensorPortrait"</code> &mdash; The Activity would like to have the
+screen in portrait orientation, but can use the sensor to change which direction
+the screen is facing.</li>
+<li><code>"fullSensor"</code> &mdash; Orientation is determined by a physical
+orientation sensor: the display will rotate based on how the user moves the
+device. This allows any of the 4 possible rotations, regardless of what the
+device will normally do (for example some devices won't normally use 180 degree
+rotation).</li>
+</ul>
+</li>
+</ul>
+
+<h3 id="permissions">New Permissions</h3>
+
+<ul>
+<li><code>com.android.permission.SET_ALARM</code> &mdash; Allows an application
+to broadcast an Intent to set an alarm for the user. An Activity that handles
+the {@link android.provider.AlarmClock#ACTION_SET_ALARM SET_ALARM} Intent action
+should require this permission.</li>
+<li><code>android.permission.USE_SIP</code> &mdash; Allows an application to use
+the {@link android.net.sip SIP API} to make or receive internet calls.
+<li><code>android.permission.NFC</code> &mdash; Allows an application to use the
+{@link android.nfc NFC API} to read NFC tags.</li>
+</ul>
+
+<h3 id="feature_constants">New Feature Constants</h3>
+
+<p>The platform adds several new hardware features that developers can declare
+in their application manifests as being required by their applications. This
+lets developers control how their application is filtered, when published on
+Google Play. </p>
+
+<ul>
+<li>{@link android.content.pm.PackageManager#FEATURE_AUDIO_LOW_LATENCY
+android.hardware.audio.low_latency} &mdash; The application uses a low-latency
+audio pipeline on the device and is sensitive to delays or lag in sound input or
+output.</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_CAMERA_FRONT
+android.hardware.camera.front} &mdash; The application uses a front-facing
+camera on the device.</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_NFC android.hardware.nfc}
+&mdash; The application uses NFC radio features in the device.</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SENSOR_BAROMETER
+android.hardware.sensor.barometer} &mdash; The application uses the device's
+barometer.</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SENSOR_GYROSCOPE
+android.hardware.sensor.gyroscope} &mdash; The application uses the device's
+gyroscope sensor.</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SIP android.software.sip}
+&mdash; The application uses the SIP API on the device.</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SIP_VOIP
+android.software.sip.voip} &mdash; The application uses a SIP-based VoIP
+service on the device.</li>
+<li>{@link
+android.content.pm.PackageManager#FEATURE_TOUCHSCREEN_MULTITOUCH_JAZZHAND
+android.hardware.touchscreen.multitouch.jazzhand} &mdash; The application uses
+advanced multipoint multitouch capabilities on the device screen, for tracking
+five or more points fully independently.</li>
+</ul>
+
+<p>For full information about how to declare features and use them for
+filtering, see the documentation for <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>.</p>
+
+<h3 id="api-diff">API differences report</h3>
+
+<p>For a detailed view of all API changes in Android {@sdkPlatformVersion} (API
+Level {@sdkPlatformApiLevel}), see the <a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
+Differences Report</a>.</p>
+
+
+<h2 id="api-level">API Level</h2>
+
+<p>The Android {@sdkPlatformVersion} platform delivers an updated version of
+the framework API. The Android {@sdkPlatformVersion} API
+is assigned an integer identifier &mdash;
+<strong>{@sdkPlatformApiLevel}</strong> &mdash; that is
+stored in the system itself. This identifier, called the "API Level", allows the
+system to correctly determine whether an application is compatible with
+the system, prior to installing the application. </p>
+
+<p>To use APIs introduced in Android {@sdkPlatformVersion} in your application,
+you need compile the application against the Android library that is provided in
+the Android {@sdkPlatformVersion} SDK platform. Depending on your needs, you might 
+also need to add an <code>android:minSdkVersion="{@sdkPlatformApiLevel}"</code>
+attribute to the <code>&lt;uses-sdk&gt;</code> element in the application's
+manifest. If your application is designed to run only on Android 2.3 and higher,
+declaring the attribute prevents the application from being installed on earlier
+versions of the platform.</p>
+
+<p>For more information about how to use API Level, see the <a
+href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
+
+<h2 id="apps">Built-in Applications</h2>
+
+<p>The system image included in the downloadable platform provides these
+built-in applications:</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+<ul>
+<li>Browser</li>
+<li>Calculator</li>
+<li>Camera</li>
+<li>Clock</li>
+<li>Contacts</li>
+<li>Cusom Locale</li>
+<li>Dev Tools</li>
+<li>Downloads</li>
+<li>Email</li>
+</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<ul>
+<li>Gallery</li>
+<li>IMEs for Japanese, Chinese, and Latin text input</li>
+<li>Messaging</li>
+<li>Music</li>
+<li>Phone</li>
+<li>Search</li>
+<li>Settings</li>
+<li>Spare Parts (developer app)</li>
+<li>Speech Recorder</li>
+</ul>
+</td>
+</tr>
+</table>
+
+
+<h2 id="locs" style="margin-top:.75em;">Locales</h2>
+
+<p>The system image included in the downloadable SDK platform provides a variety of
+built-in locales. In some cases, region-specific strings are available for the
+locales. In other cases, a default version of the language is used. The
+languages that are available in the Android {@sdkPlatformVersion} system
+image are listed below (with <em>language</em>_<em>country/region</em> locale
+descriptor).</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+<ul>
+<li>Arabic, Egypt (ar_EG)</li>
+<li>Arabic, Israel (ar_IL)</li>
+<li>Bulgarian, Bulgaria (bg_BG)</li>
+<li>Catalan, Spain (ca_ES)</li>
+<li>Czech, Czech Republic (cs_CZ)</li>
+<li>Danish, Denmark(da_DK)</li>
+<li>German, Austria (de_AT)</li>
+<li>German, Switzerland (de_CH)</li>
+<li>German, Germany (de_DE)</li>
+<li>German, Liechtenstein (de_LI)</li>
+<li>Greek, Greece (el_GR)</li>
+<li>English, Australia (en_AU)</li>
+<li>English, Canada (en_CA)</li>
+<li>English, Britain (en_GB)</li>
+<li>English, Ireland (en_IE)</li>
+<li>English, India (en_IN)</li>
+<li>English, New Zealand (en_NZ)</li>
+<li>English, Singapore(en_SG)</li>
+<li>English, US (en_US)</li>
+<li>English, South Africa (en_ZA)</li>
+<li>Spanish (es_ES)</li>
+<li>Spanish, US (es_US)</li>
+<li>Finnish, Finland (fi_FI)</li>
+<li>French, Belgium (fr_BE)</li>
+<li>French, Canada (fr_CA)</li>
+<li>French, Switzerland (fr_CH)</li>
+<li>French, France (fr_FR)</li>
+<li>Hebrew, Israel (he_IL)</li>
+<li>Hindi, India (hi_IN)</li>
+</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<li>Croatian, Croatia (hr_HR)</li>
+<li>Hungarian, Hungary (hu_HU)</li>
+<li>Indonesian, Indonesia (id_ID)</li>
+<li>Italian, Switzerland (it_CH)</li>
+<li>Italian, Italy (it_IT)</li>
+<li>Japanese (ja_JP)</li>
+<li>Korean (ko_KR)</li>
+<li>Lithuanian, Lithuania (lt_LT)</li>
+<li>Latvian, Latvia (lv_LV)</li>
+<li>Norwegian-Bokmol, Norway(nb_NO)</li>
+<li>Dutch, Belgium (nl_BE)</li>
+<li>Dutch, Netherlands (nl_NL)</li>
+<li>Polish (pl_PL)</li>
+<li>Portuguese, Brazil (pt_BR)</li>
+<li>Portuguese, Portugal (pt_PT)</li>
+<li>Romanian, Romania (ro_RO)</li>
+<li>Russian (ru_RU)</li></li>
+<li>Slovak, Slovakia (sk_SK)</li>
+<li>Slovenian, Slovenia (sl_SI)</li>
+<li>Serbian (sr_RS)</li>
+<li>Swedish, Sweden (sv_SE)</li>
+<li>Thai, Thailand (th_TH)</li>
+<li>Tagalog, Philippines (tl_PH)</li>
+<li>Turkish, Turkey (tr_TR)</li>
+<li>Ukrainian, Ukraine (uk_UA)</li>
+<li>Vietnamese, Vietnam (vi_VN)</li>
+<li>Chinese, PRC (zh_CN)</li>
+<li>Chinese, Taiwan (zh_TW)</li>
+</td>
+</tr>
+</table>
+
+<p class="note"><strong>Note:</strong> The Android platform may support more
+locales than are included in the SDK system image. All of the supported locales
+are available in the <a href="http://source.android.com/">Android Open Source
+Project</a>.</p>
+
+<h2 id="skins">Emulator Skins</h2>
+
+<p>The downloadable platform includes a set of emulator skins that you can use
+for modeling your application in different screen sizes and resolutions. The
+emulator skins are:</p>
+
+<ul>
+  <li>
+    QVGA (240x320, low density, small screen)
+  </li>
+  <li>
+    WQVGA400 (240x400, low density, normal screen)
+  </li>
+  <li>
+    WQVGA432 (240x432, low density, normal screen)
+  </li>
+  <li>
+    HVGA (320x480, medium density, normal screen)
+  </li>
+  <li>
+    WVGA800 (480x800, high density, normal screen)
+  </li>
+  <li>
+    WVGA854 (480x854 high density, normal screen)
+  </li>
+</ul>
+
+<p>For more information about how to develop an application that displays
+and functions properly on all Android-powered devices, see <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>.</p>

@@ -1,0 +1,381 @@
+page.title=Android 2.3.4 Platform
+sdk.platform.version=2.3.4
+sdk.platform.apiLevel=10
+
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#relnotes">Revisions</a></li>
+  <li><a href="#api">API Overview</a></li>
+  <li><a href="#openaccessory">Open Accessory Library</a></li>
+  <li><a href="#api-level">API Level</a></li>
+  <li><a href="#apps">Built-in Applications</a></li>
+  <li><a href="#locs">Locales</a></li>
+  <li><a href="#skins">Emulator Skins</a></li>
+</ol>
+
+<h2>Reference</h2>
+<ol>
+<li><a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
+Differences Report &raquo;</a> </li>
+</ol>
+
+<h2>See Also</h2>
+<ol>
+  <li><a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>
+<em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
+
+<p>Android 2.3.4 is a maintenance release that adds several bug fixes and patches
+to the Android 2.3 platform, without any API changes from Android 2.3.3. Additionally, 
+Android 2.3.4 brings support for the Open Accessory API to mobile devices,
+through the optional <a href="#usb">Open Accessory Library</a>. </p>
+
+<p>For developers, the Android {@sdkPlatformVersion} platform and the Open
+Accessory Library are available together in the latest version of the Google
+APIs Add-On, a downloadable component for the Android SDK.</p>
+
+<p>To get started developing or testing against Android {@sdkPlatformVersion},
+use the Android SDK Manager to download the latest version of the Google APIs
+Add-On into your SDK. For more information, see <a
+href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>. If you
+are new to Android, <a href="{@docRoot}sdk/index.html">download the SDK Starter
+Package</a> first.</p>
+
+<p>For a high-level introduction to Android 2.3, see the <a
+href="{@docRoot}sdk/android-2.3-highlights.html">Platform Highlights</a>.</p>
+
+
+<h2 id="relnotes">Revisions</h2>
+
+<p>The sections below provide notes about successive releases of
+the Android {@sdkPlatformVersion} platform component for the Android SDK, as denoted by
+revision number. To determine what revision(s) of the Android
+{@sdkPlatformVersion} platforms are installed in your SDK environment, refer to
+the "Installed Packages" listing in the Android SDK and AVD Manager.</p>
+
+<script type="text/javascript">
+function toggleDiv(link) {
+  var toggleable = $(link).parent();
+  if (toggleable.hasClass("closed")) {
+    //$(".toggleme", toggleable).slideDown("fast");
+    toggleable.removeClass("closed");
+    toggleable.addClass("open");
+    $(".toggle-img", toggleable).attr("title", "hide").attr("src", (toRoot + "assets/images/triangle-opened.png"));
+  } else {
+    //$(".toggleme", toggleable).slideUp("fast");
+    toggleable.removeClass("open");
+    toggleable.addClass("closed");
+    $(".toggle-img", toggleable).attr("title", "show").attr("src", (toRoot + "assets/images/triangle-closed.png"));
+  }
+  return false;
+}
+</script>
+<style>
+.toggleable {
+  padding: .25em 1em 0em 1em;
+  margin-bottom: 0;
+}
+.toggleme {
+  padding: 1em 1em 0 2em;
+  line-height:1em;
+}
+.toggleable a {
+  text-decoration:none;
+}
+.toggleme a {
+  text-decoration:underline;
+}
+.toggleable.closed .toggleme {
+  display:none;
+}
+#jd-content .toggle-img {
+  margin:0;
+}
+</style>
+
+<div class="toggleable opened">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+        Android {@sdkPlatformVersion}, Revision 1</a> <em>(May 2011)</em></a>
+  <div class="toggleme">
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires SDK Tools r11 or higher.</p>
+</dd>
+
+</dl>
+ </div>
+</div>
+
+
+<h2 id="api">API Overview</h2>
+
+<p>Android 2.3.4 provides the same framework API to applications as Android 2.3.3
+(API level 10). For a summary of the API, see the
+<a href="{@docRoot}sdk/android-2.3.3.html">Android 2.3.3 version notes</a>.</p>
+
+
+<h2 id="openaccessory">Open Accessory Library</h2>
+
+<p><em>Open Accessory</em> is a new capability for integrating
+connected peripherals with applications running on the platform. The capability
+is based on a USB (Universal Serial Bus) stack built into the platform and an
+API exposed to applications. Peripherals that attach to Android-powered devices
+as accessories connect as USB hosts. </p>
+
+<p>Open Accessory is introduced in <a
+href="{@docRoot}sdk/android-3.1.html#usb">Android 3.1</a> (API level 12), but is
+made available to devices running Android 2.3.4 by means of an optional external
+library, the Open Accessory Library. The library exposes a framework API that
+lets applications discover, communicate with, and manage a variety of device
+types connected over USB. It also provides the implementation of the API against
+parts of the Android platform that are not directly exposed to applications in
+Android 2.3.4.</p>
+
+<p>The Open Accessory Library is optional on any given device. Device
+manufacturers may choose whether to include the Open Accessory Library in their
+products or exclude it. The library is forward-compatible with Android 3.1, so
+applications developed against Android 2.3.4 will run properly on devices
+running Android 3.1, if those devices support USB accessories. </p>
+
+<p>The API provided by the Open Accessory Library is based on the Open Accessory
+API provided in Android 3.1. In most areas, you can use the same techniques and
+APIs. However, developing for the Open Accessory Library on Android 2.3.4 differs
+from the standard USB API in these ways:
+
+<ul>
+<li>Obtaining a {@link android.hardware.usb.UsbManager} object &mdash; To obtain
+a {@link android.hardware.usb.UsbManager} object when using the add-on library,
+use the helper method <code>getInstance()</code> rather than {@link
+android.content.Context#getSystemService(java.lang.String) getSystemService()}
+For example:
+
+<pre>UsbManager manager = UsbManager.getInstance(this);</pre></li>
+
+<li>Obtaining a {@link android.hardware.usb.UsbAccessory} from a filtered intent
+&mdash; When you filter for a connected device or accessory with an intent
+filter, the {@link android.hardware.usb.UsbAccessory} object is contained
+inside the intent that is passed to your application. If you are using the
+add-on library, you can get the {@link android.hardware.usb.UsbAccessory} object
+in the following manner:
+
+<pre>UsbAccessory accessory = UsbManager.getAccessory(intent)</pre></li>
+
+<li>No USB host support &mdash; Android 2.3.4 and the Open Accessory Library do
+not support USB host mode (for example, through {@link
+android.hardware.usb.UsbDevice}), although USB host mode is supported in Android
+3.1. An Android-powered device running Android 2.3.4 can not function as a USB
+host. The library enables the Android-powered device to function as
+a peripheral only, with the connected accessory functioning as USB host
+(through {@link android.hardware.usb.UsbAccessory}).</li>
+</ul>
+
+<p>To develop apps using the Open Accessory Library, you need:</p>
+
+<ul>
+<li>The latest version of the Android SDK tools</li>
+<li>The latest version of the Google APIs add-on, which includes the library
+itself (for linking)</li>
+<li>An actual hardware device running Android 2.3.4 (or Android 3.1) with USB
+accessories support, for runtime testing against connected devices</li>
+</ul>
+
+<p>For a full discussion of how to develop applications that interact with USB
+accessories, please see the related <a
+href="{@docRoot}guide/topics/usb/index.html">developer documentation</a>.</p>
+
+<p>Additionally, developers can request filtering on Google Play, such that
+their applications are not available to users whose devices do not provide the
+appropriate accessory support. To request filtering, add the element below
+to the application manifest:</p>
+
+<pre>&lt;uses-feature
+  android:name="android.hardware.usb.accessory"
+  android:required="true"&gt;</pre>
+
+
+<h2 id="api-level">API Level</h2>
+
+<p>The Android 2.3.4 platform does <em>not</em> increment the API level &mdash;
+it uses the same API level as Android 2.3.3, API level 10.
+
+<p>To use APIs introduced in API level 10 in your application,
+you need compile the application against the Android library that is provided in
+the latest version of the Google APIs Add-On, which also includes the Open
+Accessory Library.</p>
+
+<p>Depending on your needs, you might
+also need to add an <code>android:minSdkVersion="{@sdkPlatformApiLevel}"</code>
+attribute to the <code>&lt;uses-sdk&gt;</code> element in the application's
+manifest. If your application is designed to run only on Android 2.3.3 and higher,
+declaring the attribute prevents the application from being installed on earlier
+versions of the platform.</p>
+
+<p>For more information about how to use API Level, see the <a
+href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
+
+<h2 id="apps">Built-in Applications</h2>
+
+<p>The system image included in the downloadable platform provides these
+built-in applications:</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+<ul>
+<li>Browser</li>
+<li>Calculator</li>
+<li>Camera</li>
+<li>Clock</li>
+<li>Contacts</li>
+<li>Custom Locale</li>
+<li>Dev Tools</li>
+<li>Downloads</li>
+<li>Email</li>
+</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<ul>
+<li>Gallery</li>
+<li>IMEs for Japanese, Chinese, and Latin text input</li>
+<li>Messaging</li>
+<li>Music</li>
+<li>Phone</li>
+<li>Search</li>
+<li>Settings</li>
+<li>Spare Parts (developer app)</li>
+<li>Speech Recorder</li>
+</ul>
+</td>
+</tr>
+</table>
+
+
+<h2 id="locs" style="margin-top:.75em;">Locales</h2>
+
+<p>The system image included in the downloadable SDK platform provides a variety of
+built-in locales. In some cases, region-specific strings are available for the
+locales. In other cases, a default version of the language is used. The
+languages that are available in the Android {@sdkPlatformVersion} system
+image are listed below (with <em>language</em>_<em>country/region</em> locale
+descriptor).</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+<ul>
+<li>Arabic, Egypt (ar_EG)</li>
+<li>Arabic, Israel (ar_IL)</li>
+<li>Bulgarian, Bulgaria (bg_BG)</li>
+<li>Catalan, Spain (ca_ES)</li>
+<li>Czech, Czech Republic (cs_CZ)</li>
+<li>Danish, Denmark(da_DK)</li>
+<li>German, Austria (de_AT)</li>
+<li>German, Switzerland (de_CH)</li>
+<li>German, Germany (de_DE)</li>
+<li>German, Liechtenstein (de_LI)</li>
+<li>Greek, Greece (el_GR)</li>
+<li>English, Australia (en_AU)</li>
+<li>English, Canada (en_CA)</li>
+<li>English, Britain (en_GB)</li>
+<li>English, Ireland (en_IE)</li>
+<li>English, India (en_IN)</li>
+<li>English, New Zealand (en_NZ)</li>
+<li>English, Singapore(en_SG)</li>
+<li>English, US (en_US)</li>
+<li>English, South Africa (en_ZA)</li>
+<li>Spanish (es_ES)</li>
+<li>Spanish, US (es_US)</li>
+<li>Finnish, Finland (fi_FI)</li>
+<li>French, Belgium (fr_BE)</li>
+<li>French, Canada (fr_CA)</li>
+<li>French, Switzerland (fr_CH)</li>
+<li>French, France (fr_FR)</li>
+<li>Hebrew, Israel (he_IL)</li>
+<li>Hindi, India (hi_IN)</li>
+</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<ul>
+<li>Croatian, Croatia (hr_HR)</li>
+<li>Hungarian, Hungary (hu_HU)</li>
+<li>Indonesian, Indonesia (id_ID)</li>
+<li>Italian, Switzerland (it_CH)</li>
+<li>Italian, Italy (it_IT)</li>
+<li>Japanese (ja_JP)</li>
+<li>Korean (ko_KR)</li>
+<li>Lithuanian, Lithuania (lt_LT)</li>
+<li>Latvian, Latvia (lv_LV)</li>
+<li>Norwegian-Bokmol, Norway(nb_NO)</li>
+<li>Dutch, Belgium (nl_BE)</li>
+<li>Dutch, Netherlands (nl_NL)</li>
+<li>Polish (pl_PL)</li>
+<li>Portuguese, Brazil (pt_BR)</li>
+<li>Portuguese, Portugal (pt_PT)</li>
+<li>Romanian, Romania (ro_RO)</li>
+<li>Russian (ru_RU)</li></li>
+<li>Slovak, Slovakia (sk_SK)</li>
+<li>Slovenian, Slovenia (sl_SI)</li>
+<li>Serbian (sr_RS)</li>
+<li>Swedish, Sweden (sv_SE)</li>
+<li>Thai, Thailand (th_TH)</li>
+<li>Tagalog, Philippines (tl_PH)</li>
+<li>Turkish, Turkey (tr_TR)</li>
+<li>Ukrainian, Ukraine (uk_UA)</li>
+<li>Vietnamese, Vietnam (vi_VN)</li>
+<li>Chinese, PRC (zh_CN)</li>
+<li>Chinese, Taiwan (zh_TW)</li>
+</ul>
+</td>
+</tr>
+</table>
+
+<p class="note"><strong>Note:</strong> The Android platform may support more
+locales than are included in the SDK system image. All of the supported locales
+are available in the <a href="http://source.android.com/">Android Open Source
+Project</a>.</p>
+
+<h2 id="skins">Emulator Skins</h2>
+
+<p>The downloadable platform includes a set of emulator skins that you can use
+for modeling your application in different screen sizes and resolutions. The
+emulator skins are:</p>
+
+<ul>
+  <li>
+    QVGA (240x320, low density, small screen)
+  </li>
+  <li>
+    WQVGA400 (240x400, low density, normal screen)
+  </li>
+  <li>
+    WQVGA432 (240x432, low density, normal screen)
+  </li>
+  <li>
+    HVGA (320x480, medium density, normal screen)
+  </li>
+  <li>
+    WVGA800 (480x800, high density, normal screen)
+  </li>
+  <li>
+    WVGA854 (480x854 high density, normal screen)
+  </li>
+</ul>
+
+<p>For more information about how to develop an application that displays
+and functions properly on all Android-powered devices, see <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>.</p>

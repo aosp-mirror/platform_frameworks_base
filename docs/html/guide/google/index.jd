@@ -1,0 +1,16 @@
+page.title=Google APIs
+page.landing=1
+page.landing.intro=When you ditribute your Android app using Google Play you have the opportunity to enhance your app's capabilities with several Google services such as push messaging and in-app billing.
+@jd:body
+
+
+<div class="distribute-features col-13">
+  <ul>
+    <li><h5>Monetize with Ads</h5>Lorem ipsum dolor sit amet, soldum
+consectetur adipiscing elit. <a href="#">Learn more &raquo;</a></li>
+    <li><h5>Track with Analytics</h5>Lorem ipsum dolor sit amet, soldum consectetur
+adipiscing elit. <a href="#">Learn more &raquo;</a></li>
+    <li class="last"><h5>Locate with Maps</h5>Lorem ipsum dolor sit amet, soldum
+consectetur adipiscing elit. <a href="#">Learn more &raquo;</a></li>
+  </ul>
+</div>

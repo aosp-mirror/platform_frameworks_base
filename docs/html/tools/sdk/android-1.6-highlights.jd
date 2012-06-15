@@ -1,0 +1,213 @@
+page.title=Android 1.6 Platform Highlights
+sdk.date=September 2009
+
+@jd:body
+
+
+<style type="text/css">
+#jd-content div.screenshot,
+#jd-content div.video {
+  float:right;
+  clear:right;
+  padding:15px 70px;
+  font-size:.9em;
+  font-weight:bold;
+  line-height:1.7em;
+}
+#jd-content div.video {
+  padding-top:0;
+  margin-top:-15px;
+}
+#jd-content div.screenshot img {
+  margin:0;
+}
+</style>
+
+<div class="video">
+<object width="278" height="180">
+<param name="movie" value="http://www.youtube.com/v/MBRFkLKRwFw&hl=en&fs=1&"></param>
+<param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param>
+<embed src="http://www.youtube.com/v/MBRFkLKRwFw&hl=en&fs=1&" type="application/x-shockwave-flash" 
+allowscriptaccess="always" allowfullscreen="true" width="278" height="180"></embed>
+</object>
+</div>
+
+
+<p>The Android 1.6 platform introduces new features for users and developers. 
+This page provides an overview of some new features and technologies.</p>
+
+<ul>
+  <li><a href="#UserFeatures">New User Features</a></li>
+  <li><a href="#GooglePlayUpdates">Google Play Updates</a></li>
+  <li><a href="#PlatformTechnologies">New Platform Technologies</a></li>
+</ul>
+
+
+    
+<h2 id="UserFeatures" style="clear:right">New User Features</h2>
+
+<!-- screenshots float right -->
+
+<div class="screenshot">
+<img src="images/search.png" class="screenshot" alt="" /><br/>
+Quick Search Box
+</div>
+ 
+<div class="screenshot">
+<img src="images/camera.png" class="screenshot" alt="" /><br/>
+New Camera/Camcorder UI
+</div>
+
+<div class="screenshot">
+<img src="images/battery.png" class="screenshot" alt="" /><br/>
+Battery Usage Indicator
+</div>
+
+
+<h3 id="QuickSearchBox">Quick Search Box for Android</h3>
+
+<p>Android 1.6  includes a redesigned search framework that provides a quick, 
+effective, and consistent way for users to search across multiple sources&mdash;such as 
+browser bookmarks &amp; history, contacts, and the web&mdash;directly from 
+the home screen.</p>
+
+<p>The system constantly learns which search results are more relevant based on what is 
+clicked. So popular contacts or apps that have previously been picked will bubble up to 
+the top when a user types the first few letters of a relevant query.</p>
+
+<p>The search framework also provides developers a way to easily expose relevant 
+content from their applications in Quick Search Box.</p>
+
+<h3 id="Camera">Camera, Camcorder, and Gallery</h3>
+
+<p>An updated user interface provides an integrated camera, camcorder, and gallery experience. 
+Users can quickly toggle between still and video capture modes. Additionally, the gallery 
+enables users to select multiple photos for deletion.</p>
+
+<p>Android 1.6 also provides a much faster camera experience.
+Compared to the previous release, launching the camera is now 39% faster, 
+and there is a 28% improvement in the time from completing one shot to the next.</p>
+
+
+<h3 id="VPN">VPN, 802.1x</h3>
+
+<p>A new Virtual Private Network (VPN) control panel in Settings allows users 
+to configure and connect to the following types of VPNs:</p>
+
+<ul>
+  <li>L2TP/IPSEC pre-shared key based VPN</li>
+  <li>L2TP/IPsec certificate based VPN</li>
+  <li>L2TP only VPN</li>
+  <li>PPTP only VPN</li>
+</ul>
+
+
+<h3 id="Battery">Battery usage indicator</h3>
+
+<p>A new battery usage screen lets users see which apps and services are consuming 
+battery power. If the user determines that a particular service or application is 
+using too much power, they can take action to save the battery by
+adjusting settings, stopping the application, or uninstalling the application.</p>
+
+
+<h3 id="A11y">Accessibility</h3>
+
+<p>Users will be able to download new accessibility services built
+on the new accessibility framework and enable them in Settings.</p>
+
+
+
+
+<h2 id="GooglePlayUpdates" style="clear:right">Google Play Updates</h2>
+
+<div class="screenshot" style="margin-top:-35px">
+<img src="images/market.png" class="screenshot" alt="" /><br/>
+New Google Play UI
+</div>
+
+<p>For devices with Google Play, the latest version improves the overall user experience and makes
+it easier for users to discover great apps and games from developers.</p>
+
+<ul>
+  <li>At the homescreen, users can choose among <em>Apps</em>, <em>Games</em>, and <em>Downloads</em>.</li>
+  <li>Inside a category, users can explore titles that are <em>Top paid</em>, <em>Top free</em>, and <em>Just in</em>.</li>
+  <li>For each title, users can now see screenshots submitted by developers in addition to 
+  reviews from other users.</li>
+</ul>
+    
+    
+
+
+<h2 id="PlatformTechnologies" style="clear:right">New Platform Technologies</h2>
+
+<h3 id="SearchFramework">Expanded Search Framework</h3>
+
+<p>The Android search framework has been redesigned and expanded to provide
+third-party applications the opportunity to surface
+content from their applications in Quick Search Box, the global search tool. 
+To do this, developers will need to make their app "searchable" and provide 
+suggestions in response to user queries.
+To enable application search suggestions, users simply select each application from which 
+they'd like to receive suggestions, under Searchable items in the Search settings.</p>
+
+
+<h3 id="TTS">Text-to-speech engine</h3>
+
+<p>Android 1.6 features a multi-lingual speech synthesis engine called Pico. 
+It allows any Android application to "speak" a string of text with an accent that matches the language. 
+The engine supports the following languages: English (American and British accents), French, 
+Italian, German and Spanish. If you're using a T-Mobile G1 or Dream device, you'll need to download the 
+SpeechSynthesis Data Installer from Google Play, which includes the "voices" needed by the 
+text-to-speech engine.</p>
+
+
+<h3 id="Gestures">Gestures</h3>
+
+<p>A new gestures framework provides application developers with a framework for creating, storing, 
+loading, and recognizing gestures and associating them with specific actions.</p>
+
+<p>Developers can use the new GestureBuilder tool included in the Android 1.6 SDK to generate libraries 
+of gestures to include with their application.</p>
+
+
+<h3 id="A11y">Accessibility</h3>
+
+<p>Android 1.6 provides a new accessibility framework. 
+With this framework, developers can create accessibility plugins that respond to user input, 
+such as making a sound when a new window is shown, vibrating when navigating to the top of 
+a list, and providing spoken feedback.</p>
+
+
+<h3 id="Screens">Expanded support for screen densities and resolutions</h3>
+
+<p>Android 1.6 adds screen support that enables applications to be rendered properly on different 
+display resolutions and densities. Developers can also specify the types of screens supported by their 
+application.</p>
+
+
+<h3 id="CDMA">Telephony support for CDMA</h3>
+
+<p>Android 1.6 includes support for CDMA in the telephony stack.</p>
+
+
+<h3 id="OpenCore">New version of OpenCore</h3>
+
+<p>Android 1.6 includes the updated OpenCore 2 media engine, which has:</p>
+
+<ul>
+  <li>Support for OpenMAX encoders</li>
+  <li>Support for additional audio codecs in AuthorEngine</li>
+  <li>Improved buffering model supports shared buffers allocated in the decoder</li>
+</ul>
+
+<h3 id="LinuxKernel">2.6.29 Linux kernel</h3>
+
+<p>Android 1.6 upgrades the Linux kernel from 2.6.27 to 2.6.29.</p>
+
+
+<h3 id="DeveloperAPIs">New Framework APIs</h3>
+
+<p>For a detailed overview of new APIs, see the 
+<a href="{@docRoot}sdk/android-1.6.html#api-changes">Version Notes</a>. 
+For a complete report of all API changes, see the 
+<a href="{@docRoot}sdk/api_diff/4/changes.html">API Differences Report</a>.

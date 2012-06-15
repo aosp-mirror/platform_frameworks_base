@@ -1,88 +1,56 @@
-page.title=The Developer's Guide
+page.title=App Components
+page.landing=true
+page.landing.intro=Android's application framework lets you create extremely rich and innovative apps using a set of reusable components. This section explains how Android apps work and how you use components to build them. 
+page.landing.image=images/ui/ui_index.png
+
 @jd:body
 
-<p>
-Welcome to the <i>Android Dev Guide</i>! The Dev Guide provides 
-a practical introduction to developing applications for Android and documentation about major
-platform features. It explores the concepts behind Android, the framework for 
-constructing an application, and the tools for developing, 
-testing, and publishing software for the platform.
-</p>
+<div class="landing-docs">
 
-<p>
-The Dev Guide holds most of the documentation for the Android
-platform, except for reference material on the framework API.  
-For API specifications, go to the 
-<a href="{@docRoot}reference/packages.html">Reference</a>.
-</p>  
+  <div class="col-6">
+    <h3>Blog Articles</h3>
+    
+    <a href="http://android-developers.blogspot.com/2012/05/using-dialogfragments.html">
+      <h4>Using DialogFragments</h4>
+      <p>In this post, I’ll show how to use DialogFragments with the v4 support library (for backward compatibility on pre-Honeycomb devices) to show a simple edit dialog and return a result to the calling Activity using an interface.</p>
+    </a>
 
-<p>
-As you can see in the panel on the left, the Dev Guide is 
-divided into several sections:
-<p>
+    <a href="http://android-developers.blogspot.com/2011/03/fragments-for-all.html">
+      <h4>Fragments For All</h4>
+      <p>Today we’ve released a static library that exposes the same Fragments API (as well as the new LoaderManager and a few other classes) so that applications compatible with Android 1.6 or later can use fragments to create tablet-compatible user interfaces. </p>
+    </a>
+    
+    <a
+href="http://android-developers.blogspot.com/2010/07/multithreading-for-performance.html">
+      <h4>Multithreading for Performance</h4>
+      <p>A good practice in creating responsive applications is to make sure your main UI thread
+does the minimum amount of work. Any potentially long task that may hang your application should be
+handled in a different thread.</p>
+    </a>
+  </div>
 
-<dl>
-<dt><b>Android Basics</b></dt>
-<dd>An initial orientation to Android &mdash; what it is, 
-what it offers, and how your application fits in.</dd>
+  <div class="col-6">
+    <h3>Training</h3>
+    
+    <a href="http://developer.android.com/training/basics/activity-lifecycle/index.html">
+      <h4>Managing the Activity Lifecycle</h4>
+      <p>This class explains important lifecycle callback methods that each Activity
+      instance receives and how you can use them so your activity does what the user expects and does not consume system
+      resources when your activity doesn't need them.</p>
+    </a>
 
-<dt><b>Framework Topics</b></dt>
-<dd>Discussions of particular parts of the Android framework
-and API.  For an introduction to the framework, begin with
-<a href="{@docRoot}guide/topics/fundamentals.html">Application
-Fundamentals</a>.  Then explore other topics &mdash; from 
-designing a user interface and setting up resources to storing 
-data and using permissions &mdash; as needed.</dd>
+    <a href="http://developer.android.com/training/basics/fragments/index.html">
+      <h4>Building a Dynamic UI with Fragments</h4>
+      <p>This class shows you how to create a dynamic user experience with fragments and optimize
+your app's user experience for devices with different screen sizes, all while continuing to support
+devices running versions as old as Android 1.6.</p>
+    </a>
 
-<dt><b>Google Play Topics</b></dt>
-<dd>Documentation for topics that concern publishing and monetizing applications on Google Play,
-such as how to enforce licensing policies and implement in-app billing.</dd>
+    <a href="http://developer.android.com/training/sharing/index.html">
+      <h4>Sharing Content</h4>
+      <p>This class covers some common ways you can send and receive content between
+      applications using Intent APIs and the ActionProvider object.</p>
+    </a>
+  </div>
 
-<dt><b>Developing</b></dt>
-<dd>Directions for using Android's development and debugging tools, 
-and for testing the results.</dd>
-
-<dt><b>Publishing</b></dt>
-<dd>Instructions on how to prepare your application for deployment
-and how to publish it when it's ready.</dd>
-
-<dt><b>Best Practices</b></dt> 
-<dd>Recommendations on preferred techniques for writing  
-applications that perform efficiently and work well for the
-user.</dd>
-
-<dt><b>Web Applications</b></dt> 
-<dd>Documentation about how to create web applications that work seamlessly on Android-powered
-devices and create Android applications that embed web-based content.</dd>
-
-<dt><b>Appendix</b></dt>
-<dd>Reference information and specifications, as well as FAQs, 
-a glossary of terms, and other information.</dd>
-</dl>
-
-<p>
-The first step in programming for Android is downloading the SDK
-(software development kit).  For instructions and information, visit the <a
-href="{@docRoot}sdk/index.html">SDK</a> tab.
-</p>
-
-<p>
-After you have the SDK, begin by looking through the Dev Guide.
-If you want to start by getting a quick look at some code, the 
-<a href="{@docRoot}resources/tutorials/hello-world.html">Hello World</a>
-tutorial walks you through a standard "Hello, World" application to introduce some basics of an
-Android application. The 
-<a href="{@docRoot}guide/topics/fundamentals.html">Application
-Fundamentals</a> document is a good place to start learning the basics about the application
-framework.
-</p>
-
-
-<p>
-For additional help, consider joining one or more of the Android 
-discussion groups.  Go to the 
-<a href="{@docRoot}resources/community-groups.html">Developer Forums</a> page
-for more information.
-</p>
-
-<p>To return to this page later, just click the "Dev Guide" tab while any Dev Guide page is loaded. </p>
+</div>

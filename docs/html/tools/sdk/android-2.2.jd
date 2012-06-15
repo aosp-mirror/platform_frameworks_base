@@ -1,0 +1,470 @@
+page.title=Android 2.2 Platform
+sdk.platform.version=2.2
+sdk.platform.apiLevel=8
+sdk.platform.majorMinor=minor
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#features">Platform Highlights</a></li>
+  <li><a href="#relnotes">Revisions</a></li>
+  <li><a href="#api-level">API Level</a></li>
+  <li><a href="#api">Framework API Changes</a>
+  <li><a href="#apps">Built-in Applications</a></li>
+  <li><a href="#locs">Locales</a></li>
+  <li><a href="#skins">Emulator Skins</a></li>
+
+    </ol>
+  </li>
+</ol>
+
+<h2>Reference</h2>
+<ol>
+<li><a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
+Differences Report &raquo;</a> </li>
+</ol>
+
+<h2>See Also</h2>
+<ol>
+  <li><a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>
+<em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
+
+<p>Android {@sdkPlatformVersion} is a {@sdkPlatformMajorMinor} platform release including user
+features, developer features, API changes, and bug
+fixes. For  information on developer features and API changes, see the
+<a href="#api">Framework API</a> section.</p>
+
+<p>For developers, the Android {@sdkPlatformVersion} platform is available as a
+downloadable component for the Android SDK. The downloadable platform includes a
+fully compliant Android library and system image, as well as a set of emulator
+skins, sample applications, and more. The downloadable platform
+includes no external libraries. </p>
+
+<p>To get started developing or testing against the Android
+{@sdkPlatformVersion} platform, use the Android SDK and AVD Manager tool to
+download the platform into your SDK. For more information,
+see <a href="{@docRoot}sdk/adding-components.html">Adding SDK
+Components</a>. If you are new to Android, <a
+href="{@docRoot}sdk/index.html">download the SDK Starter Package</a>
+first.</p>
+
+
+<h2 id="features">Platform Highlights</h2>
+
+<p>For a list of new user features and platform highlights, see the <a
+href="http://developer.android.com/sdk/android-2.2-highlights.html">Android
+2.2 Platform Highlights</a> document.</p>
+
+<h2 id="relnotes">Revisions</h2>
+
+<p>The sections below provide notes about successive releases of
+the Android {@sdkPlatformVersion} platform component for the Android SDK, as denoted by
+revision number. To determine what revision(s) of the Android
+{@sdkPlatformVersion} platforms are installed in your SDK environment, refer to
+the "Installed Packages" listing in the Android SDK and AVD Manager.</p>
+
+
+<div class="toggle-content opened" style="padding-left:1em;">
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />
+  Android {@sdkPlatformVersion}, Revision 3</a> <em>(July 2011)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires <a href="{@docRoot}sdk/tools-notes.html">SDK Tools r12</a> or
+higher.</p>
+</dd>
+<dt>Notes:</dt>
+<dd>
+<p>Improvements to the platform's rendering library to support the visual layout editor in the ADT
+Eclipse plugin. This revision allows for more drawing features in ADT and fixes several
+bugs in the previous rendering library. It also unlocks several editor features that were added in
+ADT 12.</p>
+</dd>
+</dl>
+
+</div>
+</div>
+
+<div class="toggle-content closed" style="padding-left:1em;">
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+  Android {@sdkPlatformVersion}, Revision 2</a> <em>(July 2010)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires SDK Tools r6 or higher.</p>
+</dd>
+
+<dt>System Image:</dt>
+<dd>
+<ul>
+<li>Adds default Search Widget.</li>
+<li>Includes proper provisioning for the platform's Backup Manager. For more information about how to use the Backup Manager, see <a href="{@docRoot}guide/topics/data/backup.html">Data Backup</a>.</li>
+<li>Updates the Android 2.2 system image to FRF91.</li>
+</ul>
+</dd>
+
+</dl>
+ </div>
+</div>
+
+<div class="toggle-content closed" style="padding-left:1em;">
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+  Android {@sdkPlatformVersion}, Revision 1</a> <em>(May 2010)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires SDK Tools r6 or higher.</p>
+</dd>
+
+<dt>Tools:</dt>
+<dd>
+<p>Adds support for building with Android library projects. See <a href="tools-notes.html">SDK Tools, r6</a> for information.</p>
+</dd>
+
+</dl>
+ </div>
+</div>
+
+<h2 id="api-level">API Level</h2>
+
+<p>The Android {@sdkPlatformVersion} platform delivers an updated version of
+the framework API. The Android {@sdkPlatformVersion} API
+is assigned an integer identifier &mdash;
+<strong>{@sdkPlatformApiLevel}</strong> &mdash; that is
+stored in the system itself. This identifier, called the "API Level", allows the
+system to correctly determine whether an application is compatible with
+the system, prior to installing the application. </p>
+
+<p>To use APIs introduced in Android {@sdkPlatformVersion} in your
+application, you need to set the proper value, "{@sdkPlatformApiLevel}", in the
+<code>android:minSdkVersion</code> attributes of the <code>&lt;uses-sdk&gt;</code>
+element in your application's manifest. </p>
+
+<p>For more information about how to use API Level, see the <a
+href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
+
+
+<h2 id="api">Framework API Changes</h2>
+
+<p>The sections below provide information about changes made to the application
+framework API provided by the Android {@sdkPlatformVersion} platform.</p>
+
+<h3 id="install-loc">App installation on external storage media</h3>
+
+<p>The Android platform now allows applications to request installation onto the
+device's external storage media (such as the SD card), as an alternative to
+installation onto the device's internal memory. </p>
+
+<p>Application developers can express the preferred installation location for
+their applications by means of a new attribute of <code>&lt;manifest&gt;</code>
+in the manifest file, <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html#install"><code>
+android:installLocation</code></a>. The attribute supports three values:
+<code>"internalOnly"</code>, <code>"preferExternal"</code>, and
+<code>"auto"</code>. At install time, the system checks the value of
+<code>android:installLocation</code> and installs the application
+<code>.apk</code> according to the preferred location, if possible. If the
+application has requested external installation, the system installs it into a
+private, encrypted partition in the external media. Once an application .apk is
+installed externally, the system lets the user change the storage location of
+the .apk and move it onto the device's internal memory if needed (and vice
+versa), through Manage Applications in the user settings.</p>
+
+<p>By default, the system installs all applications onto the device's internal
+memory, except for those that explicitly request external installation. This
+means that the system will always install legacy applications onto internal
+memory, since they do not have access to the
+<code>android:installLocation</code> attribute. However, it is possible to
+configure and compile a legacy application such that it is installed internally
+on older versions of the platform and externally on Android 2.2 and later
+platforms, if necessary. </p>
+
+<p>Note that requesting installation onto the device's external media is not
+suitable for all applications, particularly because the external media may be
+removable and unmounting/remounting may disrupt the user experience and system
+settings.</p>
+
+<p>For more information about setting a preferred install location for your
+application, including a discussion of what types of applications should and
+should not request external installation, please read the <a
+href="{@docRoot}guide/appendix/install-location.html">App Install Location</a>
+document. </p>
+
+<h3 id="backup-manager">Data backup</h3>
+
+<p>The platform now provides a generalized backup service that
+applications can use to backup and restore user data, to ensure that users can
+maintain their data when switching devices or reinstalling the application. The
+Backup Manager handles the work of transporting the application data to and from
+the backup storage area in the cloud. The Backup Manager can store any type of
+data, from arbitrary data to files, and manages backup and restore operations
+in an atomic manner. For more information, see <a
+href="{@docRoot}guide/topics/data/backup.html">Data Backup</a>.</p>
+
+<h3>Graphics</h3>
+
+<ul>
+<li>New OpenGL ES 2.0 APIs in {@link android.opengl.GLES20 android.opengl.GLES20}.</li>
+<li>New {@link android.opengl.ETC1}, {@link android.opengl.ETC1Util}, and {@link android.opengl.ETC1Util.ETC1Texture} classes and utility methods for using ETC1 for texture compression.</li>
+<li>New {@link android.graphics.ImageFormat} class.</li>
+<li>New {@link android.graphics.YuvImage YUV image format API} to enable compression from YUV to JPEG and manipulation of YUV data.</li>
+</ul>
+
+<h3>Media</h3>
+
+<ul>
+<li>New APIs in {@link android.media.AudioManager android.media.AudioManager} for managing audio focus, transport control, transient loss of audio focus, ducking.</li>
+<li>New broadcast intent for routing audio to SCO &mdash; {@link android.media.AudioManager#ACTION_SCO_AUDIO_STATE_CHANGED} with extras indicating new state.</li>
+<li>New APIs in {@link android.media.SoundPool} to detect completion of sound-loading.</li>
+<li>New APIs in {@link android.media.SoundPool} for auto pause and resume.</li>
+<li>New APIs in {@link android.media.MediaRecorder} for specifying audio settings for number of channels, encoding and sampling rates, sampling rate.</li>
+<li>New APIs for adding files to the media database, so that they are automatically scanned. See {@link android.media.MediaScannerConnection#scanFile(Context, String[], String[], OnScanCompletedListener) MediaScannerConnection.scanFile} and {@link android.media.MediaScannerConnection.OnScanCompletedListener MediaScannerConnection.OnScanCompletedListener}.</li>
+</ul>
+
+<h3>Speech recognition and third-party recognition engines</h3>
+
+<ul>
+<li>The platform provides new speech-recognition APIs that allow applications to have a richer interaction with the available voice recognizer. For example, the APIs are sufficient to integrate voice recognition deeply into an IME.</li>
+<li>The platform also provides a {@link android.speech.RecognitionService} base class that lets third-party developers create plug-in recognition engines. </li>
+<li>New {@link android.speech.RecognitionListener} interface to receive callbacks.</li>
+<li>New {@link android.speech.RecognizerIntent} extras that let a requester app specify details as preferred language, minimum length in milliseconds, and so on.</li>
+</ul>
+
+<h3>Camera and camcorder</h3>
+
+<ul>
+<li>Changes to camera preview API to improve efficieny of preview pipeline. </li>
+<li>New display orientation for camera (it can now work in portrait orientation).</li>
+<li>New APIs in {@link android.hardware.Camera android.hardware.Camera} for managing zoom level.</li>
+<li>New APIs {@link android.hardware.Camera.Parameters android.hardware.Camera.Parameters} for querying and setting device camera settings such as focal length, exposure, zoom level, view angle, and others.</li>
+<li>New {@link android.media.ThumbnailUtils thumbnail} utility for video and image thumbnails.</li>
+<li>New {@link android.media.CamcorderProfile} and {@link android.media.CamcorderProfile} classes enable apps to determine device hardware camera capablities.</li>
+<li>New support in {@link android.media.ExifInterface android.media.ExifInterface} for retrieving GPS and focal length.</li>
+</ul>
+
+<h3>Device policy manager</h3>
+
+<p>New device policy management APIs allow developers to write "device
+administrator" applications that can control security features of the device,
+such as the minimum password strength, data wipe, and so on. Users can select
+the administrators that are enabled on their devices. For more information, see
+the {@link android.app.admin android.app.admin} classees or the example
+application code in <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/DeviceAdminSample.html">DeviceAdminSample.java</a>.</p>
+
+<h3>UI Framework</h3>
+
+<ul>
+<li>New UI modes "car mode" and "night mode" and {@link android.app.UiModeManager} let applications adjust their application UI for specific user modes. </li>
+<li>New {@link android.view.ScaleGestureDetector} that lets Views detect and handle transformation gestures that involve more than one pointer (multitouch) using the supplied MotionEvents. </li>
+<li>Improvements in the way that multitouch events are reported in {@link android.view.MotionEvent} objects.</li>
+<li>The layout attribute <code>fill_parent</code> is renamed to <code>match_parent</code>. This affects both XML and Java code (see {@link android.view.ViewGroup.LayoutParams}). Note that the platform will continue to honor uses of <code>fill_parent</code> in legacy applications. </li>
+<li>New layout attributes {@link android.R.attr#tabStripEnabled}, {@link android.R.attr#tabStripRight}, and {@link android.R.attr#tabStripLeft} let developers customize the bottom strip of TabWidgets.</li>
+<li>Better support for managed dialogs in Activity.</li>
+</ul>
+
+<h3>Accounts and sync</h3>
+
+<ul>
+<li>New method {@link android.content.ContentResolver#addPeriodicSync(Account, String, Bundle, long) AddPeriodicSync()} lets you schedule a periodic sync with a specific account, authority, and extras at the given frequency.</li>
+</ul>
+
+<h3>New manifest elements and attributes</h3>
+
+<ul>
+<li>For specifying the application's preferred install location (see <a href="#install-loc">App Installation on External Storage Media</a>, above):
+
+<ul>
+  <li>New <code>android:installLocation</code> attribute of the <code>&lt;manifest&gt;</code> element. Specifies the default install location defined by an application.</li>
+</ul>
+</li>
+
+<li>For managing user data backup (see <a href="#backup-manager">Backup manager</a>, above, for more information):
+
+<ul>
+  <li> New <code>android:backupAgent</code> attribute of the
+<code>&lt;application&gt;</code> element. Specifies the component name of the
+BackupAgent subclass provided by the application to handle backup/restore
+operations, if any.</li>
+  <li> New <code>android:restoreAnyVersion</code> attribute of the
+<code>&lt;application&gt;</code> element. Boolean value that indicates whether
+the application is prepared to attempt a restore of any backed-up dataset, even
+if the backup is apparently from a newer version of the application than is
+currently installed on the device.</li>
+</ul>
+</li>
+
+<li>For managing the platform's JIT compiler:
+
+<ul>
+<li>New <code>android:vmSafeMode</code> attribute of the <code>&lt;application&gt;</code> element. Boolean value that specifies whether to disable JIT compiler optimizations when running the application.</li>
+</ul>
+</li>
+</ul>
+
+<h3>Permissions</h3>
+
+<ul>
+<li><code>android.permission.BIND_DEVICE_ADMIN</code> &mdash; Any device administration broadcast receiver must require this permission, to ensure that only the system can interact with it.</li>
+<li><code>android.permission.KILL_BACKGROUND_PROCESSES</code> &mdash; Allows an application to call {@link android.app.ActivityManager#killBackgroundProcesses(String)}.
+<li><code>android.permission.BIND_WALLPAPER</code> &mdash; Any {@link android.service.wallpaper.WallpaperService} must require this permission, to ensure that only the system can interact with it.</li>
+<li><code>android.permission.SET_TIME</code> &mdash; Allows an application to set the system time.</li>
+</ul>
+
+<h3 id="api-diff">API differences report</h3>
+
+<p>For a detailed view of all API changes in Android {@sdkPlatformVersion} (API
+Level {@sdkPlatformApiLevel}), see the <a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
+Differences Report</a>.</p>
+
+
+<h2 id="apps">Built-in Applications</h2>
+
+<p>The system image included in the downloadable platform provides these
+built-in applications:</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+	<ul>
+	<li>Alarm Clock</li>
+	<li>Browser</li>
+	<li>Calculator</li>
+	<li>Camera</li>
+	<li>Contacts</li>
+	<li>Custom Locale (developer app)</li>
+	<li>Dev Tools (developer app)</li>
+    <li>Email</li>
+	</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+	<ul>
+
+	<li>Gallery</li>
+	<li>IMEs for Japanese, Chinese, and Latin text input</li>
+	<li>Messaging</li>
+	<li>Music</li>
+	<li>Phone</li>
+	<li>Settings</li>
+	<li>Spare Parts (developer app)</li>
+	</ul>
+</td>
+</tr>
+</table>
+
+
+<h2 id="locs" style="margin-top:.75em;">Locales</h2>
+
+<p>The system image included in the downloadable platform provides a variety of
+built-in locales. In some cases, region-specific strings are available for the
+locales. In other cases, a default version of the language is used. The
+languages that are available in the Android {@sdkPlatformVersion} system
+image are listed below (with <em>language</em>_<em>country/region</em> locale
+descriptor).</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+<ul>
+<li>Chinese, PRC (zh_CN)</li>
+<li>Chinese, Taiwan (zh_TW)</li>
+<li>Czech (cs_CZ)</li>
+<li>Dutch, Netherlands (nl_NL)</li>
+<li>Dutch, Belgium (nl_BE)</li>
+<li>English, US (en_US)</li>
+<li>English, Britain (en_GB)</li>
+<li>English, Canada (en_CA)</li>
+<li>English, Australia (en_AU)</li>
+<li>English, New Zealand (en_NZ)</li>
+<li>English, Singapore(en_SG)</li>
+<li>French, France (fr_FR)</li>
+<li>French, Belgium (fr_BE)</li>
+</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<li>French, Canada (fr_CA)</li>
+<li>French, Switzerland (fr_CH)</li>
+<li>German, Germany (de_DE)</li>
+<li>German, Austria (de_AT)</li>
+<li>German, Switzerland (de_CH)</li>
+<li>German, Liechtenstein (de_LI)</li>
+<li>Italian, Italy (it_IT)</li>
+<li>Italian, Switzerland (it_CH)</li>
+<li>Japanese (ja_JP)</li>
+<li>Korean (ko_KR)</li>
+<li>Polish (pl_PL)</li>
+<li>Russian (ru_RU)</li>
+<li>Spanish (es_ES)</li>
+</td>
+</tr>
+</table>
+
+<p>Localized UI strings match the locales that are accessible
+through Settings.</p>
+
+<p class="note"><strong>Note:</strong> Android supports more locales than are listed above. However,
+the entire collection of locale strings cannot fit on a single system image, so the above list is
+only what's included in the system image for the SDK. All of Android's supported locales are
+available in the <a href="http://source.android.com/">Android Open Source Project</a>.</p>
+
+<h2 id="skins">Emulator Skins</h2>
+
+<p>The downloadable platform includes a set of emulator skins that you can use
+for modeling your application in different screen sizes and resolutions. The
+emulator skins are:</p>
+
+<ul>
+  <li>
+    QVGA (240x320, low density, small screen)
+  </li>
+  <li>
+    WQVGA (240x400, low density, normal screen)
+  </li>
+  <li>
+    FWQVGA (240x432, low density, normal screen)
+  </li>
+  <li>
+    HVGA (320x480, medium density, normal screen)
+  </li>
+  <li>
+    WVGA800 (480x800, high density, normal screen)
+  </li>
+  <li>
+    WVGA854 (480x854 high density, normal screen)
+  </li>
+</ul>
+
+<p>For more information about how to develop an application that displays
+and functions properly on all Android-powered devices, see <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>.</p>

@@ -133,7 +133,8 @@ Avoid using this unless it's critical that the item always appear in the action
 bar. Setting multiple items to always appear as action items can result in them overlapping
 with other UI in the action bar.</td></tr>
             <tr><td><code>collapseActionView</code></td><td>The action view associated
-with this action item (as declared by <code>android:actionViewLayout</code>) is
+with this action item (as declared by <code>android:actionLayout</code> or
+<code>android:actionViewClass</code>) is
 collapsible.<br/>Introduced in API Level 14.</td></tr>
           </table>
           <p>See the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer 
@@ -141,7 +142,7 @@ guide for more information.</p>
           <p>Introduced in API Level 11.</p>
         </dd>
 
-        <dt><code>android:actionViewLayout</code></dt>
+        <dt><code>android:actionLayout</code></dt>
           <dd><em>Layout resource</em>. A layout to use as the action view.
           <p>See the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer 
 guide for more information.</p>

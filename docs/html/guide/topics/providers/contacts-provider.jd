@@ -4,23 +4,12 @@ page.title=Contacts Provider
 <div id="qv">
 <h2>Quickview</h2>
 <ul>
-    <li>The Contacts Provider manages Android's repository of information about people.</li>
+    <li>Android's repository of information about people.</li>
     <li>
-        The provider accommodates different types of data from multiple
-        sources.
+        Syncs with the web.
     </li>
     <li>
-        Because the provider is powerful and flexible, it has a complex table organization.
-    </li>
-    <li>
-        Android provides a large set of contract classes to help you work with the complexity.
-    </li>
-    <li>
-        Although the provider gets data from direct user input, it also gets data from sync adapters
-        communicating with web services.
-    </li>
-    <li>
-        Social stream data for contacts is an important part of the Contacts Provider.
+        Integrates social stream data.
     </li>
 </ul>
 <h2>In this document</h2>
@@ -30,31 +19,9 @@ page.title=Contacts Provider
     </li>
     <li>
         <a href="#RawContactBasics">Raw contacts</a>
-        <ol>
-            <li>
-                <a href="#RawContactsColumns">Important raw contacts columns</a>
-            </li>
-            <li>
-                <a href="#RawContactsExample">Sources of raw contacts data</a>
-            </li>
-        </ol>
     </li>
     <li>
         <a href="#DataBasics">Data</a>
-        <ol>
-            <li>
-                <a href="#DescriptiveColumns">Descriptive column names</a>
-            </li>
-            <li>
-                <a href="#GenericColumns">Generic column names</a>
-            </li>
-            <li>
-                <a href="#TypeSpecificNames">Type-specific column names</a>
-            </li>
-            <li>
-                <a href="#ColumnMaps">Type-specific column name classes</a>
-            </li>
-        </ol>
     </li>
     <li>
         <a href="#ContactBasics">Contacts</a>
@@ -73,62 +40,16 @@ page.title=Contacts Provider
     </li>
     <li>
         <a href="#Access">Contacts Provider Access</a>
-        <ol>
-            <li>
-                <a href="#Entities">Querying entities</a>
-            </li>
-            <li>
-                <a href="#Transactions">Batch modification</a>
-            </li>
-            <li>
-                <a href="#Intents">Retrieval and modification with intents</a>
-            </li>
-            <li>
-                <a href="#DataIntegrity">Data integrity</a>
-            </li>
-            <li>
-                <a href="#CustomData">Custom data rows</a>
-            </li>
-        </ol>
     <li>
     </li>
     <li>
         <a href="#SyncAdapters">Contacts Provider Sync Adapters</a>
-        <ol>
-            <li>
-                <a href="#SyncClassesFiles">Sync adapter classes and files</a>
-            </li>
-            <li>
-                <a href="#SyncAdapterImplementing">Sync adapter implementation</a>
-            </li>
-        </ol>
     </li>
     <li>
         <a href="#SocialStream">Social Stream Data</a>
-        <ol>
-            <li>
-                <a href="#StreamText">Social stream text</a>
-            </li>
-            <li>
-                <a href="#StreamPhotos">Social stream photos</a>
-            </li>
-            <li>
-                <a href="#SocialStreamTables">Using the social stream tables</a>
-            </li>
-            <li>
-                <a href="#SocialStreamInteraction">Social stream interactions</a>
-            </li>
-            <li>
-                <a href="#ContactsFile">contacts.xml reference</a>
-            </li>
-        </ol>
     </li>
     <li>
         <a href="#AdditionalFeatures">Additional Contacts Provider Features</a>
-        <ol>
-           <li><a href="#Groups">Contact groups</a></li>
-           <li><a href="#Photos">Contact photos</a></li>
-        </ol>
     </li>
 </ol>
 <h2>Key classes</h2>

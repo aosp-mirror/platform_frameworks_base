@@ -284,8 +284,6 @@ changed.</li>
 
         <li>{@link android.graphics.Canvas#drawPicture drawPicture()}</li>
 
-        <li>{@link android.graphics.Canvas#drawPosText drawPosText()}</li>
-
         <li>{@link android.graphics.Canvas#drawTextOnPath drawTextOnPath()}</li>
 
         <li>{@link android.graphics.Canvas#drawVertices drawVertices()}</li>
@@ -303,6 +301,16 @@ changed.</li>
         <li>{@link android.graphics.Paint#setRasterizer setRasterizer()}</li>
       </ul>
     </li>
+
+    <li>
+      <strong>Xfermodes</strong>
+
+      <ul>
+        <li>{@link android.graphics.AvoidXfermode AvoidXfermode}</li>
+
+        <li>{@link android.graphics.PixelXorXfermode PixelXorXfermode}</li>
+      </ul>
+    </li>
   </ul>
 
   <p>In addition, some operations behave differently with hardware acceleration enabled:</p>
@@ -318,12 +326,6 @@ changed.</li>
 
         <li>{@link android.graphics.Canvas#drawBitmapMesh drawBitmapMesh()}: colors array is
         ignored</li>
-
-        <li>{@link android.graphics.Canvas#drawLines drawLines()}: anti-aliasing is not
-        supported</li>
-
-        <li>{@link android.graphics.Canvas#setDrawFilter setDrawFilter()}: can be set, but is
-        ignored</li>
       </ul>
     </li>
 
@@ -338,6 +340,24 @@ changed.</li>
 
         <li>{@link android.graphics.Paint#setShadowLayer setShadowLayer()}: works with text
         only</li>
+      </ul>
+    </li>
+
+    <li>
+      <strong>PorterDuffXfermode</strong>
+
+      <ul>
+        <li>{@link android.graphics.PorterDuff.Mode#DARKEN PorterDuff.Mode.DARKEN} will
+        be equivalent to {@link android.graphics.PorterDuff.Mode#SRC_OVER} when blending
+        against the framebuffer.</li>
+
+        <li>{@link android.graphics.PorterDuff.Mode#LIGHTEN PorterDuff.Mode.LIGHTEN} will
+        be equivalent to {@link android.graphics.PorterDuff.Mode#SRC_OVER} when blending
+        against the framebuffer.</li>
+
+        <li>{@link android.graphics.PorterDuff.Mode#OVERLAY PorterDuff.Mode.OVERLAY} will
+        be equivalent to {@link android.graphics.PorterDuff.Mode#SRC_OVER} when blending
+        against the framebuffer.</li>
       </ul>
     </li>
 

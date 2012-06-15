@@ -1,0 +1,527 @@
+page.title=Release Notes for Older SDK Versions
+@jd:body
+
+<div class="special">
+  <p><strong>Note:</strong> These are the release notes for the "early-look" SDK versions, released
+  before the full Android 1.0 release in September 2008.
+  Release notes for the Android 1.0 and later SDK versions are provided in the main
+  <a href="{@docRoot}sdk/RELEASENOTES.html">Release Notes</a> document.</p>
+</div>
+
+
+
+<a name="0.9_r1" id="0.9_r1"></a>
+<h2>Android 0.9 SDK Beta (r1)</h2>
+
+<p>This beta SDK release contains a large number of bug fixes and improvements from the early-look SDKs.&nbsp; 
+The sections below describe the highlights of the release.
+
+<h3>New Features and Notable Changes</h3>
+
+<p><strong>Behavior and System Changes</strong></p>
+<ul>
+	<li>New Home screen and many user interface updates
+	</li>
+	<li>Minor changes to Activity lifecycle and task management
+	</li>
+	<li>New window option to request OpenGL acceleration for certain kinds of View structures
+	</li>
+</ul>
+<p>
+	<b>
+	Significant API Changes</b>
+</p>
+<ul>
+	<li>onFreeze(Bundle) renamed to onSaveInstanceState(Bundle), to better reflect the fact that it does not represent an actual change in application lifecycle
+	</li>
+	<li>IntentReceivers are now known as BroadcastReceivers (but still operate on Intents.)
+	</li>
+	<li>Various parts of the API cleaned up to use Intents instead of Bundles; Intent itself improved to reduce the need for separate payload Bundles.</li>
+	<li>ContentProvider Cursors have had significant changes to make them easier to create and remove certain data consistency bugs.
+	</li>
+	<li>Changes to menus to make them more flexible; also added context menus (similar to "right mouse button" menus)
+	</li>
+	<li>Changes to the Sensor API to make reading sensors more convenient and reduce the need to poll
+	</li>
+	<li>Improvements to the Camera API
+	</li>
+	<li>Significant changes to the Location API to make it easier to use and better self-documenting
+	</li>
+	<li>API cleanup on MapViews
+	</li>
+	<li>Performance-related changes to the MediaPlayer, as well as support for new types of ringtones
+	</li>
+	<li>Apache HTTPClient installation upgraded to 4.x of that API; 3.x version is removed
+	</li>
+	<li>HTTPClient 4.x removes multipart methods, include HttpMime which is an extension of Mime4j (http://james.apache.org/mime4j/index.html) in your project instead
+	</li>
+	<li>Improvements to WiFi and related networking
+	</li>
+	<li>New Preferences API to easily store small amounts of data
+	</li>
+	<li>Improvements to the Telephony API, including ability to obtain source number of incoming phone calls
+	</li>
+	<li>Variety of improvements to the View API
+	</li>
+	<li>Variety of improvements to component management, such as the ability to keep components private, better control over when processes are started, and ability to "alias" an Activity to more than one entry in AndroidManifest.xml
+	</li>
+	<li>Improvements to how the Browser and WebView, such as better control over content downloads
+	</li>
+	<li>A number of enhancements to XML layouts, such as the new &lt;merge&gt; tag
+	</li>
+	<li>Numerous improvements to the standard widgets
+	</li>
+	<li>Network access now requires that applications obtain a permission in their AndroidManifest.xml files.
+	</li>
+</ul>
+<p>
+	<b>
+	Maps &amp; Location</b>
+</p>
+<ul>
+	<li>The MapView will require an API key on final Android 1.0 devices. This key can be obtained at no cost from Google, and will allow access to the full MapView API. In this release, the API key must be provided but can be any dummy value.&nbsp; In the final 1.0-compatible SDKs, this will need to be a real key.
+	</li>
+	<li>The KML-based mock location provider supported in previous releases is no longer supported. In the current SDK, you can use the emulator console to send GPS fix updates to the emulator and applications running on it. Also, the DDMS tool provides an UI that you can use to easily upload GPX and KML files. DDMS handles playback of the KML or GPX tracks automatically. </li>
+</ul>
+<p>
+	<b>ADT Plugin for Eclipse</b></p>
+	<p>The ADT Plugin that accompanies this SDK includes a preview of the Graphical Layout Editor. Files located in &lt;project&gt;/res/layout[-qualifiers]/ will be opened with the new layout editor. This is very much a work in progress, and provided here for preview purpose. The editor feature is subject to change.
+</p>
+<ul>
+	<li>Dual page editor with a WYSIWYG page (the graphical editor) and an XML page with content assist.
+	</li>
+	<li>The interactivity in the editor itself is limited to selection at the moment. Actions on the layout elements can be done from the following standard Eclipse views: Outline (add/remove/up/down), and Properties (editing of all the element properties with a tooltip in the status bar).
+	</li>
+	<li>Top part of the editor allows you to display the layout in different configurations (language, orientation, size, etc...), and different themes.
+
+		<ul>
+			<li>All referenced resources (strings, bitmaps, etc...) are resolved based on the selected configuration/theme.
+			</li>
+			<li>A green check mark next to a resource qualifier indicates that the opened file matches the value of the qualifier. A warning sign indicates that the opened file does not specifies any value for this qualifier.
+			</li>
+			<li>If a different version of the opened layout matches the new configuration selection (in a different res/layout-qualifier folder) then the editor automatically switches to that new file.
+			</li>
+		</ul>
+	</li>
+	<li>Custom Views are supported, however if they do too much in their constructor/onDraw method, it may not work (the layout library used by the editor only includes a sub-part of the Android framework). Check the android console for errors/exceptions.
+	</li>
+</ul>
+
+<p>Known issues/limitations for Graphical Layout Editor include:</p>
+	
+		<ul>
+			<li>Font display is very close but not equals to on-device rendering since the font engine in Java slightly differs from the font engine in Android. This should not have any impact on your layouts.
+			</li>
+			<li>Creating new views in a relative layout automatically puts each new elements below each other using the <i>layout_below</i> attribute. However, until the layout file is saved, they will appear stacked on top of each other.
+			</li>
+			<li>Some XML based drawables don't draw. Fading in the scroll/list view appears as a white rectangle. Generally do not expect every single fancy drawing feature of the android framework to be supported in the layout editor (but we're working on it).
+			</li>
+			<li>Themes defined in the project are not added to the theme drop-down.
+			</li>
+			<li>No animation support!
+			</li>
+			<li>No support for WebView, MapView and SurfaceView.
+			</li>
+			<li>No UI support for &lt;merge&gt;, &lt;include&gt;, &lt;ViewStub&gt; elements. You can add these elements to your manifest using the xml editor only. 
+			</li>
+			<li>If a layout fails to render in a way that prevents the whole editor from opening, you can:
+
+			<ul>
+			<li>open that particular file in a different editor: right click the file in the package explorer and choose Open With... &gt; XML editor
+			</li>
+			<li>completely disable the layout editor, by setting a system wide environment variable called ANDROID_DISABLE_LAYOUT to any value.
+			</li>
+			</ul>
+			<li>If a layout fails to render, check the android console (in the standard Eclipse Console view). Errors/Exceptions will be displayed in there.
+			</li>
+	</ul>
+	</li>
+</ul>
+<p>Other ADT features/notes include:</p>
+<ul>
+	<li>There is a new launch option for activity. You can choose to launch the default activity (finds an activity configured to show up in the home screen), or a specific activity, or none.</li>
+	<li>Normal Java resources (non Java files placed in package folders) are now properly packaged in the final package, and can be accessed through normal java API such as ClassLoader.getResourceAsStream()</li>
+	<li>Launch configuration now has an option to wipe emulator data on launch. This always asks for confirmation.</li>
+	<li>Launch configuration now has an option to disable the boot animation. This will let the emulator start faster on older computers.</li>
+	<li>Installation of application is now more robust and will notify of installation failure. Also installation is blocking, removing issues where ADT tried to launch the activity before the app was installed.</li>
+
+</ul>
+
+<p><b>Ant Build Tools</b></p>
+
+<ul>
+  <li><span>External jar libraries are now directly supported by build.xml, just drop them in the libs directory.</li>
+</ul>
+
+<p><b>Emulator</b></p>
+
+<ul>
+  <li>The console port number of a given emulator instance is now displayed in its window's title bar.</li>
+  <li>You can define the console port number used by a given emulator instance.
+To do so, start the instance with the '-port &lt;port&gt;' option and
+specify which port the emulator should bind to for the console. &lt;port&gt; must be an *even* integer between 5554 and 5584 inclusive. The corresponding ADB port will be &lt;port&gt;+1.</li>
+  <li>The <code>-adb-port</code> command is deprecated. Please do not use it, as it will be removed soon and you cannot use both -port and -adb-port at the same time.</li>
+  <li>Voice/sms are automatically forwarded to other emulator instances running on the same machine, as long as you use their console port number as the destination phone number. For example, if you have two emulators running, the first one will typically use console port 5554, and the second one will use port 5556, dialing 5556 on the first emulator will generate an incoming call on the second emulator. You can also hold/unhold calls. This also works when sending SMS messages from one emulator to the other.</li>
+  <li>A new <code>-scale &lt;fraction&gt;</code> option allows you to scale the emulator window. </li>
+  <li>A new <code>-no-boot-anim</code> option tells the emulator to disable the boot animation. On slower systems, this can significantly reduce the time to boot the system in the emulator.</li>
+
+</ul>
+
+<p>
+	<b>Other Development Tools</b>
+</p>
+
+<p>The SDK includes several new development tools, such as</p>
+<ul>
+	<li><a href="{@docRoot}guide/developing/tools/hierarchy-viewer.html">HierarchyViewer</a> is a visual tool for inspecting and debugging your user interfaces and layout. </li>
+	<li><a href="{@docRoot}guide/developing/tools/draw9patch.html">Draw 9-patch</a> allows you to easily create a NinePatch graphic using a WYSIWYG editor. </li>
+	<li>The <a href="{@docRoot}guide/developing/tools/monkey.html">UI/Application Exerciser Monkey</a> generates pseudo-random system and user events, for testing your application. </li>
+</ul>
+<p>
+	<b>Application Signing</b>
+</p>
+<ul>
+	<li>Starting with this release, Android .apk files must be cryptographically signed, or the system will reject them upon installation.&nbsp; The purpose of this requirement is to securely and uniquely identify developers, so that the system can -- for example -- safely let multiple .apk files signed by the same developer share resources.&nbsp;
+	</li>
+	<li>There are no requirements on the key used to sign .apk files;&nbsp; locally-generated and self-signed keys are allowed.&nbsp; There is no PKI, and developers will not be required to purchase certificates, or similar. &nbsp; For developers who use the Eclipse/ADT plugin, application signing will be largely automatic.&nbsp; Developers who do not use Eclipse/ADT can use the standard Java jarsigner tool to sign .apk files.
+	</li>
+</ul>
+<p>
+	<b>Sample Code</b>
+</p>
+<ul>
+	<li>LunarLander has been converted to render into a SurfaceView via a background Thread, for better performance.
+	</li>
+	<li>New sample: the source code for the now-obsolete Home screen from M5 is included as an example of how to construct a Home screen replacement.
+	</li>
+</ul>
+<p>
+	<b>
+	Removed Functionality</b>
+</p>
+<ul>
+	<li>Due to significant API changes in the upstream open-source project and due to the timeline of getting certain Bluetooth profile implementations certified, a comprehensive Bluetooth API will not be possible or present in Android 1.0.
+	</li>
+	<li>Due to the security risks inherent in accepting arbitrary data from "outside" the device, the data messaging facility of the GTalkService will not be present in Android 1.0.&nbsp; The GTalkService will provide connectivity to Google's servers for Google Talk instant messaging, but the API has been removed from this release while we improve the service.&nbsp; Note that this will be a Google-specific service and is not part of the core of Android.
+	</li>
+	<li>We know that these changes will affect many developers who have worked with the prior early looks at the SDK, and we are very sorry for the resulting inconvenience.&nbsp; We look forward to the possibilty of restoring some or all of this functionality in a later version of the Android platform.
+	</li>
+</ul>
+<p>
+	<b>
+	Miscellaneous</b>
+</p>
+<ul>
+	<li>Many internal and non-public APIs have been removed from the documentation.&nbsp; Classes and methods that are not present in the documentation are non-public and should not be used, even though they may appear in tools such as IDEs.&nbsp; A future version of the SDK will ship with an android.jar file that contains only public classes, to help developers avoid accidentally using non-public APIs.
+	</li>
+	<li>A few extraneous APIs (such as unnecessary packages under java.awt) have been removed.
+	</li>
+	<li>Several additional tools are included, such as a utility for easily drawing 9-patch images.
+	</li>
+	<li>The DDMS utility has been refactored into library form. This is not of direct interest to application developers, but may be of interest to vendors interested in integrating the Android SDK into their products. Watch for more information about the ddmlib library soon.
+	</li>
+	<li>For performance and maintainability reasons, some APIs were moved into separate modules that must be explicitly included in the application via a directive in AndroidManifest.xml.&nbsp; Notable APIs that fall into this category are the MapView, and the java.awt.* classes, which each now reside in separate modules that must be imported.&nbsp; Developers who overlook this requirement will see ClassNotFoundExceptions that seem spurious. 
+	</li>
+	<li>Developers who use 'adb push' to install applications must now use 'adb install', since the full package manager is now implemented. 'adb push' will no longer work to install .apk files.
+	</li>
+	<li>The emulator supports a variety of new options, and some existing options have been changed.&nbsp; Please consult the updated emulator documentation for details.
+	</li>
+</ul>
+
+<h3>
+	Resolved Issues
+</h3>
+<p>
+	The list below is not comprehensive, but instead highlights the most interesting fixes since the last SDK release.
+</p>
+<ul>
+	<li>More of the standard Android user applications are now included, such as the Music and Messaging applications.
+	</li>
+	<li>Many bug fixes to the Media Player
+	</li>
+	<li>Emulator performance is improved, especially for startup
+	</li>
+	<li>More internal APIs are removed from class documentation.&nbsp; (However, this work is not quite yet complete.)
+	</li>
+	<li>It's now much easier to add media content to the SD card and have the ContentProvider locate and expose it to other applications.
+	</li>
+</ul>
+
+<h3>
+	Known Issues
+</h3>
+<ul>
+	<li>The final set of Intent patterns honored by Android 1.0 has not yet been fully documented.&nbsp; Documentation will be provided in future releases.
+	</li>
+	<li>We regret to inform developers that Android 1.0 will not support 3.5" floppy disks.
+	</li>
+	<li>Unfortunately, the ability to play audio streams from memory (such as via an InputStream or Reader) will not be possible in Android 1.0.&nbsp; As a workaround, we recommend that developers save media content to SD card and use MediaPlayer to play from a file URI, or embed a small HTTP server and play from a URI on localhost (such as http://127.0.0.1:4242/something).
+	</li>
+	<li>Android now supports modules or libraries that can be optionally linked into applications; a good example is the MapView, which has been moved into such a library. However, Android 1.0 will not support the ability for third-party developers to create such libraries for sharing with other applications.
+	</li>
+	<li>We believe that we have eliminated the problem with very long emulator startups on Windows, but had some trouble reproducing the issue.&nbsp; We are interested in feedback from developers, if this issue persists.
+	</li>
+</ul>
+
+
+
+
+<a name="m5-rc15"></a>
+<h2>Version m5-rc15</h2>
+
+<h3>New Features</h3>
+<p>m5-rc15 does not introduce any new features.</p>
+
+<h3>Resolved Issues</h3>
+<ul>
+    <li>1012640: Incorrect handling of BMP images.</li>
+</ul>
+
+<h3>Known Issues</h3>
+<p>Unless otherwise noted, Known Issues from m5-rc14 also apply to m5-rc15.</p>
+
+
+
+
+<a name="m5-rc14"></a>
+<h2>Version m5-rc14</h2>
+
+<h3>New Features</h3>
+
+<p>In addition to changes in the Android APIs, m5-rc14 also introduces changes to the Android Developer Tools:</p>
+
+<h4>emulator</h4>
+<ul>
+    <li>The Android emulator now support SD card images up to 128 GB in size.  The previous limit was 2 GB.</li>
+</ul>
+
+<h4>DDMS</h4>
+<ul>
+    <li>Support for managing multiple devices has been integrated into DDMS.  This should make it easier to debug applications that are run on multiple device scenarios.</li>
+</ul>
+
+<h4>ADT</h4>
+<ul>
+    <li>ADT now attempts to connect a debugger to any application that shows up
+    in the wait-for-debugger state, even if this application was not launched
+    from Eclipse.
+    <br /><br />
+    The connection is actually established only if there exists a project
+    in the Eclipse workspace that contains an <code>AndroidManifest.xml</code>
+    declaring a package matching the name of the process.
+    To force this connection from your code, use <code>Debug.waitForDebugger()</code>. Activities declaring that they require their own process through the
+    "process" attribute with a value like ":someProcess" will be
+    recognized and a debugger will be connected accordingly.
+    This should make it easier to debug intent receivers, services,
+    providers, and other activities not launched from the standard app
+    launcher.<br /><br /></li>
+    <li>ADT has launch modes for device target selection.  Automatic mode will: 1) launch an emulator if no device is present, 2) automatically target the device if only one is connected, and 3) prompt the user if 2 or more are connected.  Manual mode will always prompt the user.<br /><br /></li>
+    <li>ADT also contains the same support for multiple devices that has been introduced into DDMS.</li>
+</ul>
+
+<h4>AIDL</h4>
+<ul>
+    <li>AIDL files that import and reuse types is now supported by activityCreator.py and ADT.</li>
+</ul>
+
+<h4>traceview</h4>
+<ul>
+    <li>The <a href="{@docRoot}guide/developing/tools/traceview.html">traceview</a> tool is now included in the SDK.</li>
+</ul>
+
+<h3>Resolved Issues</h3>
+
+<p>The following Known Issues from m3-rc20 have been resolved:</p>
+<ul>
+    <li>917572: The activityCreator created incorrect IntelliJ scripts</li>
+    <li>917465: Unanswered incoming calls placed from the emulator console will result in an unfinished call UI if you press the call back button</li>
+    <li>917247: dmtracedump and traceview tools are not available in the SDK</li>
+    <li>912168: Extremely rapid or prolonged scrolling in the Maps application or MapsView will result in application errors</li>
+    <li>905852: adb emits warnings about deprecated API use on Mac OS X 10.5</li>
+    <li>905242: The Run dialog sometimes failed to show the Android Launcher</li>
+    <li>901122: The focus ring in the browser is sometimes incorrect</li>
+    <li>896274: On Windows, the emulator sometimes starts off-screen</li>
+    <li>778432: Icons for newly installed applications do not display</li>
+</ul>
+
+<h3>Known Issues</h3>
+
+<p>The following are known issues in m5-rc14:</p>
+
+<ul>
+    <li>1017312: The emulator window size has been reduced slightly, to allow it to be fully visible on smaller screens. This causes a slight clipping of the HVGA emulator skin but does not affect its function.</li>
+    <li>1021777: Setting a power requirement in a <code>Criteria</code> object passed to <code>{@link android.location.LocationManager#getBestProvider getBestProvider()}</code> will result in a value not being returned.</li>
+    <li>1025850: Emulator failing to launch from the Eclipse plugin due to wrong custom command line parameters do not report the error anywhere and silently fails.</li>
+</ul>
+
+<p>Unless otherwise noted, Known Issues from m3-rc20a also apply to m5-rc14.</p>
+
+
+
+
+<a name="m3-rc37a"></a>
+<h2>Version m3-rc37a</h2>
+
+<p>Version m3-rc37a and ADT 0.3.3 were released on December 14, 2007.</p>
+
+<h3>New Features</h3>
+
+<h4>Android Debug Bridge (ADB)</h4>
+<ul>
+<li>Now supports multiple emulators on one host computer. Please note that you need to use the <code>-data</code> option when starting secondary emulators, to allow those instances to save their data across sessions. Also, DDMS does not yet support debugging on multiple emulators yet. </li>
+</ul>
+
+<h4>ADT Plugin for Eclipse</h4>
+<ul>
+<li>Adds editor capabilities for working with Android manifest files, such as syntax highlighting and autocompletion. The editor capabilities require the Web Tools WST plugin for Eclipse, which is included in <a href="http://www.eclipse.org/downloads/moreinfo/compare.php">most Eclipse packages</a>. Not having WST does not prevent the ADT plugin from working. If necessary, you can download and install WST from the Web Tools Project <a href="http://download.eclipse.org/webtools/downloads">downloads page</a>. To update directly from an Eclipse installation, you can add a remote update site with this URL: http://download.eclipse.org/webtools/updates . Note that installing WST on Eclipse 3.4 will require installing other packages, as detailed on the WTP downloads page</a>.
+</li>
+<li>Now retries to launch the app on the emulator if it fails due to timing issues when the emulator is booting.</li>
+<li>Adds support for loading custom skins from the &lt;SDK&gt;/lib/images/skins/ directory. The Skin dropdown in the Emulator tab is now built from the content of the skins/ directory in order to support developer-made skins.</li>
+<li>Adds an Emulator control panel. This is a UI on top of the emulator console that allows you to change the state of the network and gsm connection, and to initiate incoming voice call. (This is also present in standalone DDMS.)</li>
+<li>Adds support for referenced projects. Android projects will add to the apk package any code from referenced projects.</li>
+<li>Eclipse console now warns if an .apk that is pushed to the device declares the same package as another already installed package.</li>
+<li>Java classes generated by the Eclipse plugin are now marked as derived automatically, so that Team plugins do not consider them as regular source.</li>
+</ul>
+
+<h4>Emulator Console</h4>
+<ul>
+<li>Now provides support for emulating inbound SMS messages. The ADT plugin and DDMS provide integrated access to 
+this capability. For more information about how to emulate inbound SMS from the console, 
+see <a href="{@docRoot}guide/developing/tools/emulator.html#sms">SMS Emulation</a>. </li>
+</ul>
+
+<h4>Emulator</h4>
+<ul><li>The default emulator skin has been changed to HVGA-P from QVGA-L. For information 
+about emulator skins and how to load a specific skin when starting the emulator, see 
+<a href="{@docRoot}guide/developing/tools/emulator.html#skins">Using Emulator Skins</a>.</li>
+</ul>
+
+<h3>Resolved Issues</h3>
+
+<h4>907947</h4>
+<p><code>adb -version</code> now returns a version number.</p>
+
+<h4>917462</h4>
+<p>Audio on Windows is fixed and is no longer 'choppy'. </p>
+
+<h4>Removed Manifest File Locking on Mac OS X</h4>
+
+<p>ADT plugin now uses a custom java editor for R.java/Manifest.java, to make those files non-editable. This is to replace the current locking mechanism which causes issues on Mac OS (preventing projects from being deleted). Note that your project must recompile at least once for the lock to be removed from the files.</p>
+
+<h4>The following known issues noted in m3-rc20 are now fixed:</h4>
+<p>
+<ul>
+<li>890937: Emulator does not support non-qwerty keyboards.
+<li>894618: <code>adb shell</code> may fail to connect when used the first time.
+<li>896274: On Windows, the emulator window may start off-screen.
+<li>899949: The emulator may fail to start with <code>-useaudio</code> on some environments.
+<li>912619: Emulator console listens on non-local ports 5554-5584.
+<li>917399: On Windows, running multiple emulator consoles can result in unexpected behavior when simulating incoming telephone calls.
+</ul>
+</p>
+
+<h3>Known Issues</h3>
+
+<p>Unless otherwise noted, Known Issues from m3-rc22a also apply to m3-rc37a.</p>
+
+
+
+
+<a name="m3-rc22a"></a>
+<h2>Version m3-rc22a</h2>
+
+<p>Version m3-rc22a and ADT 0.3.1 were released on November 16, 2007.</p>
+
+<h3>Resolved Issues</h3>
+
+<h4>920067</h4>
+<p>The New Android Project wizard provided by ADT 0.3.1 now properly displays error messages when used with Eclipse 3.2 on Windows.</p>
+
+<h4>920045</h4>
+<p>The <code>AndroidManifest.xml</code> files generated by ADT 0.3.1 now include the XML element required for displaying the associated app in the "Applications" menu. If you have applications created with ADT 0.3.0, simply ensure that your <code>AndroidManifest.xml</code> file contains the following highlighted line:</p>
+<pre>
+...
+    &lt;intent-filter&gt;
+        &lt;action android:value=&quot;android.intent.action.MAIN&quot; /&gt;
+        <strong>&lt;category android:value=&quot;android.intent.category.LAUNCHER&quot; /&gt;</strong>
+    &lt;/intent-filter&gt;
+...
+</pre>
+
+<h4>920098</h4>
+<p>ADT 0.3.1 is now compatible with Eclipse 3.4.</p>
+
+<h4>920282</h4>
+<p>Fixes a NullPointerException that is thrown in certain situations with the DDMS perspective in Eclipse.</p>
+
+<h4>918637</h4>
+<p>Address a keyboard lock-up issue when using <code>adb</code> on Mac OS X 10.4 and 10.5.</p>
+
+<h3>Known Issues</h3>
+
+<p>Unless otherwise noted, known issues from m3-rc20a also apply to m3-rc22a.</p>
+
+<a name="m3-rc20a"></a>
+
+<h2>Version m3-rc20a</h2>
+<h3>Known Issues</h3>
+
+<p>The following are known issues in m3-rc20a:</p>
+
+<h4>778432 - <span style="font-weight: normal; font-size: 13px; font-style: italic">Resolved in <a href="#m5-rc14">m5</a></span></h4>
+<p>In certain circumstances, icons for newly installed applications do not display as expected.</p>
+
+<h4>890937 - <span style="font-weight: normal; font-size: 13px; font-style: italic">Resolved in <a href="#m3-rc37a">m3-rc37a</a></span></h4>
+<p>The emulator currently does not support non-QWERTY keyboards.</p>
+
+<h4>894618 - <span style="font-weight: normal; font-size: 13px; font-style: italic">Resolved in <a href="#m3-rc37a">m3-rc37a</a></span></h4>
+<p>The adb shell command may fail to connect when used for the first time.</p>
+
+<h4>896274 - <span style="font-weight: normal; font-size: 13px; font-style: italic">Resolved in <a href="#m5-rc14">m5</a></span></h4>
+<p>On Windows, the emulator screen will sometimes show up off-screen when it is started. The workaround for this is to right-click on the emulator taskbar entry, select Move, and move the window using keyboard arrow keys</p>
+
+<h4>899949 - <span style="font-weight: normal; font-size: 13px; font-style: italic">Resolved in <a href="#m3-rc37a">m3-rc37a</a></span></h4>
+<p>The emulator may fail to start when using the <code>-useaudio</code> in some environments</p>
+
+<h4>901122 - <span style="font-weight: normal; font-size: 13px; font-style: italic">Resolved in <a href="#m5-rc14">m5</a></span></h4>
+<p>The focus ring shown in the browser may sometimes not properly wrap links.</p>
+
+<h4>905242 - <span style="font-weight: normal; font-size: 13px; font-style: italic">Resolved in <a href="#m5-rc14">m5</a></span></h4>
+<p>On Mac OS X 10.5, the Eclipse plugin's Run Dialog may sometimes fail to show the option to select the Android Launcher.</p>
+
+<h4>905852 - <span style="font-weight: normal; font-size: 13px; font-style: italic">Resolved in <a href="#m5-rc14">m5</a></span></h4>
+<p>On Mac OS X 10.5, adb will emit warnings about deprecated API use when first used.</p>
+
+<h4>912168 - <span style="font-weight: normal; font-size: 13px; font-style: italic">Resolved in <a href="#m5-rc14">m5</a></span></h4>
+<p>extremely rapid or prolonged scrolling in the Maps application or in a MapView will result in application errors.</p>
+
+<h4>912619 - <span style="font-weight: normal; font-size: 13px; font-style: italic">Resolved in <a href="#m3-rc37a">m3-rc37a</a></span></h4>
+<p>The emulator console listens for connections on ports 5554-5587. Future versions will only accept connections from localhost. It is recommend that you use a firewall to block external connections to those ports on your development machine.</p>
+
+<h4>912849</h4>
+<p>On Mac OS X 10.4, the emulator may hang if started in the background (i.e. <code>./emulator &amp;</code>).</p>
+
+<h4>914692</h4>
+<p>On Mac OS X 10.5, the emulator will emit warnings about deprecated API use when started from the command line.</p>
+
+<h4>917247 - <span style="font-weight: normal; font-size: 13px; font-style: italic">Resolved in <a href="#m5-rc14">m5</a></span></h4>
+<p>The dmtracedump and traceview tools are not available in the SDK.</p>
+
+<h4>917399 - <span style="font-weight: normal; font-size: 13px; font-style: italic">Resolved in <a href="#m3-rc37a">m3-rc37a</a></span></h4>
+<p>On Windows, running multiple emulator consoles can result in unexpected behavior when simulating incoming telephone calls.</p>
+
+<h4>917465 - <span style="font-weight: normal; font-size: 13px; font-style: italic">Resolved in <a href="#m5-rc14">m5</a></span></h4>
+<p>Unanswered incoming calls placed from the emulator console, will result in an unfinished call UI if you press the call back button.</p>
+
+<h4>917572 - <span style="font-weight: normal; font-size: 13px; font-style: italic">Resolved in <a href="#m5-rc14">m5</a></span></h4>
+<p>Using activityCreator with the <code>--ide intellij</code> option creates IntelliJ scripts with incorrect documentation location specified. To correct, change value for the <code>&lt;JAVADOC&gt;</code> element in the generated .ipr file from <code>file://.../docs/framework</code> to <code>file://.../docs/reference</code>.</p>
+
+<h4>917579</h4>
+<p>On Ubuntu 7.10 (Gusty), the Eclipse package installed by the <code>apt-get install eclipse</code> command uses java-gcj by default.  This configuration is not compatible with the Android Eclipse plugin (ADT) and will result in "Class not found" errors whenever you access an ADT feature.</p>
+    <p>The resolution for this issue is to install a Sun JDK</p>
+    <pre>sudo update-java-alternatives --jre java-1.5.0-sun</pre>
+    <p>and then configure Eclipse to use it by exporting the following environment variable:</p>
+    <pre>export JAVA_HOME=/usr/lib/jvm/java-1.5.0-sun</pre>
+    <p>or by adding following to your <code>.eclipse/eclipserc file</code>:</p>
+    <pre>JAVA_HOME=/usr/lib/jvm/java-1.5.0-sun</pre>
+

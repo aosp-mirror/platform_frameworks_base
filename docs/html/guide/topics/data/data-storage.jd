@@ -1,4 +1,4 @@
-page.title=Data Storage
+page.title=Storage Options
 @jd:body
 
 
@@ -16,22 +16,9 @@ page.title=Data Storage
   <h2>In this document</h2>
   <ol>
     <li><a href="#pref">Using Shared Preferences</a></li>
-    <li><a href="#filesInternal">Using the Internal Storage</a>
-      <ol>
-        <li><a href="#InternalCache">Saving cache files</a></li>
-        <li><a href="#InternalMethods">Other useful methods</a></li>
-      </ol></li>
-    <li><a href="#filesExternal">Using the External Storage</a>
-      <ol>
-        <li><a href="#MediaAvail">Checking media availability</a></li>
-        <li><a href="#AccessingExtFiles">Accessing files on external storage</a></li>
-        <li><a href="#SavingSharedFiles">Saving files that should be shared</a></li>
-        <li><a href="#ExternalCache">Saving cache files</a></li>
-      </ol></li>
-    <li><a href="#db">Using Databases</a>
-      <ol>
-        <li><a href="#dbDebugging">Database debugging</a></li>
-      </ol></li>
+    <li><a href="#filesInternal">Using the Internal Storage</a></li>
+    <li><a href="#filesExternal">Using the External Storage</a></li>
+    <li><a href="#db">Using Databases</a></li>
     <li><a href="#netw">Using a Network Connection</a></li>
   </ol>
 

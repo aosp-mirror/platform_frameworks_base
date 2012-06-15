@@ -1,0 +1,256 @@
+page.title=Publishing and Updating on Google Play
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+<ol>
+<li><a href="#overview">About Google Play</a>
+<li><A href="#marketpublish">Publishing Apps on Google Play</a></li>
+<li><a href="#marketupgrade">Publishing Updates on Google Play</a></li>
+
+</ol>
+
+<h2>See also</h2>
+
+<ol>
+<li><a href="{@docRoot}guide/publishing/publishing_overview.html">Publishing Overview</a></li>
+<li><a href="{@docRoot}guide/publishing/preparing.html">Preparing for Release</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>Publishing your application on Google Play is a simple process that involves three basic
+tasks:</p>
+
+By now you should have followed the list of things in preparing to publish and you have your final, signed apk in hand and you've 
+
+
+<ul>
+  <li>Preparing and building the final APK for release.</li>
+  <li>Preparing your promotional materials and uploading them Creating various graphical assets that
+accompany your app on Google Play.</li>
+  <li>Using the Google Play <a
+href="http://play.google.com/apps/publish">Developer Console</a> to configure publishing options,
+specify listing details, and upload your app and graphical assets to Google Play.</li>
+  <li>Reviewing your publishing settings and changing the release
+status of your app from Unpublished to Published.</li>
+</ul>
+
+
+<p class="caution"><strong>Important:</strong> You must <a
+href="{@docRoot}guide/publishing/preparing.html">prepare your application for release</a> before you
+can publish it on Google Play. When you prepare your application for release you configure it for
+release and build it in release mode. Building in release mode signs your application's {@code .apk}
+file with your private release key. You cannot publish an application on Google Play unless it is
+signed with your own private release key.</p>
+
+<!-- move to preparing? <h3>Preparing promotional materials</h3>
+
+<p>To fully leverage the marketing and publicity capabilities of Google Play, you need to create
+several graphical assets that accompany your app on Google Play, such as screenshots, videos,
+promotional graphics, and promotional text. At a minimum you must provide two screenshots of your
+application and a high resolution application icon. The screenshots are displayed on the details
+page for your application on Google Play, and the high resolution application icon is displayed
+in various locations throughout Google Play. The high resolution icon does not replace the
+launcher icon for your application, rather, it serves as a supplemental icon and should look
+the same as your launcher icon. Promotional video,
+graphics, and text are optional, although we strongly recommended that you prepare these for your
+app. For more information about the graphic assets that accompany your application, see <a
+href="http://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=1078870">Graphic
+Assets for your Application</a>.</p> -->
+
+<h3>Uploading assets</h3>
+Confirm your profile data
+Esp
+
+Uploading your APK
+Upload graphics
+
+Listing details
+Provide Localized descriptions, listing title, recent changes, and promo text
+Set app type and category
+Set your category (can this be changed?)
+
+Set publishing options
+Content rating
+Do not use copy protection
+
+
+Set your prices
+Choose a default price in usD, this is applied to any currency for which you do not specify a price
+Set prices in any currency make sure to check the box. 
+Set rest of world to enable auto pricing based on your default price, ocnverted. 
+
+Supported Devices
+You can use this to see the devices that can download your device, based on a match between your app's requikrements in manifest and the device's caapbilities. You can also use this to exclude specific devices from your distribution if you need.
+
+In Consent check the boxes to indicate that your app meets <a href="http://www.android.com/us/developer-content-policy.html">Android Content Guidelines</a>
+
+
+what happens if you don't check a currency? 
+Set your category
+Set your country targeting
+Set your carrier targeting
+Add a link to your promo video
+Add a link to your privacy policy
+Set marketing opt-out for app
+Finish listing details 
+Configuring your distribution
+Configuring your 
+Create Product Lists for IAB products and subs
+
+Publishing options
+
+
+<p>Google Play lets you target your application to a worldwide pool of users and devices. To
+reach these users you can use the Developer Console to configure various publishing
+options and listing details for your app. For example, you can choose the <a
+href="http://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=138294&topic=
+2365624&ctx=topic">countries</a> you want to reach, the listing languages you want to use, and the
+<a
+href="http://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=138412&topic=
+15867&ctx=topic">price</a> you want to charge in each country. You can also configure listing
+details such as the application type, <a
+href="https://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=113475&topic=
+2365760&ctx=topic">category</a>, and <a
+href="http://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=188189&topic=
+2364761&ctx=topic">content rating</a>. In addition, if you want to sell items within your app using
+the in-app billing feature, you can use the Developer Console to <a
+href="http://grendel.sea.corp.google.com:48014/guide/market/billing/billing_admin.html#billing-list
+- setup">create a product list</a> and control which items are available for purchase in your
+app.</p>
+
+<p>When you are finished setting publishing options and listing details, you can upload your assets
+and your application to Google Play. You can also upload your application as a draft
+(unpublished) application, which lets you do final testing before you publish it for final
+release.</p>
+
+<p>To learn more about Google Play publishing settings, see the following resources:</p>
+
+<ul>
+  <li><a
+href="http://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=113469&topic=
+236562&ctx=topic">Upload Applications</a>&mdash;provides a summary of the publishing settings
+you can configure for an app.</li>
+  <li><a
+href="http://support.google.com/androidmarket/developer/bin/topic.py?hl=en&topic=15867">Selling
+Your Apps</a>&mdash;provides guidance about pricing, supported currencies, tax rates, and many
+other topics related to selling apps.</li>
+  <li><a
+href="https://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=1169947&topic=
+15867&ctx=topic">Selling Apps in Multiple Currencies</a>&mdash;provides a description of how
+pricing, payouts, and exchange rates work.</li>
+</ul>
+
+<h3>Publishing your application</h3>
+
+<p>When you are satisfied that your publishing settings are correctly configured and your uploaded
+application is ready to be released to the public, you can simply click <strong>Publish</strong> in
+the Developer Console to make your app available for download
+around the world. Keep in mind, it can take several hours for your app to appear on Google
+Play after you click <strong>Publish</strong> in the Developer Console.</p>
+
+<h3>Controlling Distribution to Devices</h3>
+
+<p>If your application targets different device configurations, you can control which Android-powered
+devices have access to your application on Google Play by
+using Google Play filters. Filtering compares device configurations that you declare in your
+app's manifest file to the configuration defined by a device. For example, if you declare the camera
+filter in your manifest, only those devices that have a camera will see your app on Google
+Play. Filters must be configured in your application's manifest file when you are <a
+href="{@docRoot}guide/publishing/preparing.html">preparing your app for release</a> (that is, before
+you upload your app to Google Play). For more information, see <a
+href="{@docRoot}guide/appendix/market-filters.html">Filters on Google Play</a>.</p>
+
+<p>You can also use the multiple APK feature to distribute different {@code .apk} files under the same
+application listing and the same package name; however, you should use this option only as a last
+resort. Android applications usually run on most compatible devices with a single APK, by supplying
+alternative resources for different configurations (for example, different layouts for different screen
+sizes) and the Android system selects the appropriate resources for the device at runtime. In a
+few cases, however, a single APK is unable to support all device configurations, because alternative
+resources make the APK file too big (greater than 50MB) or other technical challenges prevent a
+single APK from working on all devices. Although we encourage you to develop and publish a single
+APK that supports as many device configurations as possible, doing so is sometimes
+not possible. To help you publish your application for as many devices as possible, Google Play
+allows you to publish multiple APKs under the same application listing. Google Play then supplies
+each APK to the appropriate devices based on configuration support you've declared in the manifest
+file of each APK. To use this feature, you need to build your separate {@code .apk} files when you are <a
+href="{@docRoot}guide/publishing/preparing.html">preparing your app for release</a> (that is, before
+you upload your app to Google Play). For more information, see <a
+href="{@docRoot}guide/market/publishing/multiple-apks.html">Multiple APK Support</a>.</p>
+
+<h2 id="marketupgrade">Publishing Updates on Google Play</h2>
+
+<p>At any time after publishing an application on Google Play, you can upload
+and publish an update to the same application package. When you publish an
+update to an application, users who have already installed the
+application may receive a notification that an update is
+available for the application. They can then choose to update the application
+to the latest version.</p>
+
+<p>Before uploading the updated application, be sure that you have incremented
+the <code>android:versionCode</code> and <code>android:versionName</code>
+attributes in the <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html"><code>&lt;manifest&gt;</code></a>
+element of the manifest file. Also, the package name must be the same as the existing version and
+the {@code .apk} file must be signed with the same private key. If the package name and signing
+certificate do <em>not</em> match those of the existing version, Google Play will
+consider it a new application, publish it as such, and will not offer it to existing users as an
+update.</p>
+
+<p>If you plan to publish your application on Google Play, you must make sure
+  that it meets the requirements listed below, which are enforced by Google Play
+  when you upload the application.</p>
+
+<h2 id="marketLicensing">Using Google Play Licensing Service</h2>
+
+<p>Google Play offers a licensing service that lets you enforce licensing
+policies for paid applications that you publish through Google Play. With
+Google Play Licensing, your applications can query Google Play at runtime
+to obtain the licensing status for the current user, then allow or disallow
+further use of the application as appropriate. Using the service, you can apply a flexible
+licensing policy on an application-by-application basis&mdash;each
+application can enforce its licensing status in the way most appropriate
+for it. </p>
+
+<p>Any application that you publish through Google Play can use the Google
+Play Licensing Service. The service uses no dedicated framework APIs, so you can
+add licensing to any application that uses a minimum API Level of 3 or
+higher.</p>
+
+<p>For complete information about Google Play Licensing Service and how to
+use it in your application, read <a
+href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a>.</p>
+
+<h2 id="marketinappbilling">Using Google Play In-app Billing</h2>
+
+<p><a href="{@docRoot}guide/market/billing/billing_overview.html">Google Play In-app Billing</a>
+is a Google Play service that lets you sell digital content in your applications. You can use
+the service to sell a wide range of content, including downloadable  content such as media files or
+photos, and virtual content such as game levels or potions.</p>
+
+<p>When you use Google Play's in-app billing service to sell an item, Google Play handles all
+billing details so your application never has to directly process any financial transactions.
+Google Play uses the same checkout service that is used for application purchases, so your users
+experience a consistent and familiar purchase flow (see figure 1). Also, the transaction fee for
+in-app purchases is the same as the transaction fee for application purchases (30%).</p>
+
+<p>Any application that you publish through Google Play can implement in-app billing. No special
+account or registration is required other than a Google Play publisher account and a Google
+Checkout Merchant account. Also, because the service uses no dedicated framework APIs, you can add
+in-app billing to any application that uses a minimum API level of 4 or higher.</p>
+
+<p>To help you integrate in-app billing into your application, the Android SDK provides a <a
+href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">sample application</a>
+that demonstrates a simple implementation of in-app billing. The sample application contains
+examples of billing-related classes you can use to implement in-app billing in your application. It
+also contains examples of the database, user interface, and business logic you might use to
+implement in-app billing. For more information about the in-app billing feature, see the
+<a href="{@docRoot}guide/market/billing/index.html">In-app Billing documentation</a>.</p>
+
+
+

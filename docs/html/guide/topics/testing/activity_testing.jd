@@ -60,22 +60,18 @@ parent.link=index.html
 <h2>Related Tutorials</h2>
     <ol>
       <li>
-        <a href="{@docRoot}resources/tutorials/testing/helloandroid_test.html">
-        Hello, Testing</a>
-      </li>
-      <li>
-         <a href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity Testing</a>
+         <a href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity Testing Tutorial</a>
       </li>
     </ol>
 <h2>See Also</h2>
       <ol>
         <li>
           <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">
-          Testing in Eclipse, with ADT</a>
+          Testing from Eclipse with ADT</a>
         </li>
         <li>
           <a href="{@docRoot}guide/developing/testing/testing_otheride.html">
-          Testing in Other IDEs</a>
+          Testing from Other IDEs</a>
         </li>
       </ol>
   </div>
@@ -219,31 +215,16 @@ parent.link=index.html
 </ul>
 <h2 id="NextSteps">Next Steps</h2>
 <p>
-    To learn how to set up and run tests in Eclipse, please refer to <a
-    href="{@docRoot}guide/developing/testing/testing_eclipse.html">Testing in
-    Eclipse, with ADT</a>. If you're not working in Eclipse, refer to <a
-    href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing in Other
-    IDEs</a>.
+    To learn how to set up and run tests in Eclipse, please refer to 
+<a href="{@docRoot}guide/developing/testing/testing_eclipse.html">Testing from Eclipse with ADT</a>.
+    If you're not working in Eclipse, refer to 
+<a href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing from Other IDEs</a>.
 </p>
 <p>
-    If you want a step-by-step introduction to testing activities, try one of the
-    testing tutorials:
+    If you want a step-by-step introduction to testing activities, try the 
+    <a href="{@docRoot}guide/topics/testing/activity_test.html">Activity Testing Tutorial</a>, which
+    guides you through a testing scenario that you develop against an activity-oriented application.
 </p>
-<ul>
-    <li>
-        The <a
-        href="{@docRoot}resources/tutorials/testing/helloandroid_test.html">Hello,
-        Testing</a> tutorial introduces basic testing concepts and procedures in the
-        context of the Hello, World application.
-    </li>
-    <li>
-        The <a
-        href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity
-        Testing</a> tutorial is an excellent follow-up to the Hello, Testing tutorial.
-        It guides you through a more complex testing scenario that you develop against a
-        more realistic activity-oriented application.
-    </li>
-</ul>
 <h2 id="UITesting">Appendix: UI Testing Notes</h2>
 <p>
     The following sections have tips for testing the UI of your Android application, specifically

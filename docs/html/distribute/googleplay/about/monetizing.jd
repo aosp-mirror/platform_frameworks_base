@@ -1,0 +1,77 @@
+page.title=Flexible Monetizing and Business Tools
+page.metaDescription=
+
+@jd:body
+
+<p>Sell your app in over 130 countries. Flexible monetization options with in-app purchase, subscriptions, and more. </p>
+
+<h2>Streamlined purchase flow for users</h2>
+
+<p>When users find your app, they can purchase it instantly with a streamlined, consistent purchasing process and convenient payment methods.</p>
+
+<h3>Instant purchasing</h3>
+
+<p>Google Play makes it fast and easy for your customers to buy your products, whether from a phone, a tablet, or a desktop computer. When users find an app or game that they want to buy, they can purchase it in as few as two steps -- one to initiate the purchase and another to accept purchase details and permissions and complete the transaction.</p>
+
+<p>Google Play provides a convenient purchase experience that is the same for all products everywhere across Google Play -- apps, games, in-app products and sBillingscriptions, and other digital content. Users buy your products using the same two-click process that they use to purchase music, movies, books and all other digital content on Google Play.</p>
+
+<h3>Cloud-connected</h3>
+
+<p>Purchasing is even more convenient on Google Play because it’s cloud-connected. Users can find and purchase your products from anywhere, using any web browser on any host computer. Once they sign in, users can buy apps and games and download them instantly to their phones, tablets, or other devices, with Google Play managing the application download.</p>
+
+<p>[[screen shot of choosing the device during a purchase.]]</p>
+
+<h3>Convenient payment options</h3>
+
+<p>Users can purchase using any credit card that they’ve registered in Google Play. To make it easy for users to get started, Google Play registration is offered as a part of initial device setup process. After registering, users can purchase apps, games, and other digital content on Google Play.</p>
+
+<p>Subscribers on many popular carrier networks worldwide can charge purchases to their monthly mobile phone bills through Direct Carrier Billing, a convenient payment option offered in Google Play. This form of payment is extremely convenient and simple for users and extremely popular in regions where credit cards are less common. More than nn million users in nn countries now have access to DCB through their carriers and many more will get the option in the  months ahead.</p>
+
+<p>[[direct carrier billing impact]]</p>
+
+<p>Finally, Google Play also lets users pay for products using stored value. Through promotions and offers, users can receive credits in Google Play that they can use as a payment method when purchasing apps, games, and other content.</p>
+
+<p>[[payment options screen shot]]
+
+<h2>Choice of billing models</h2>
+
+<p>Google Play gives you a choice of billing models to let you monetize your products in the way that you want. You can offer apps to all users for free, or you can set an initial price for the app, paid before download. You can also sell one-time purchases and auto-renewing subscriptions from inside the app, and you can take advantage of AdMob integration to monetize your app through targeted advertising.</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Billing models on Google Play</h2>
+<ul>
+<li>Free (no charge to download)</li>
+<li>Priced (user charged before download)</li>
+<li>In-App Products</li>
+<li>In-App Subscriptions</li>
+</ul>
+</div></div>
+
+<p>You can combine these billing models in different ways and change how you use them, based on business needs or market conditions. For example, you can use a freemium or ad-supported model by distributing your app for free and selling in-app products or advertising. Alternatively you could set a nominal price for your app at download and sell value add-ons, gameplay levels, and upgrades as in-app products. The only restriction is that free apps must remain free (to download) for the life of the app. </p>
+
+<h2>Flexible pricing in the currencies of your customers</h2>
+
+<p>Google Play gives you complete control over how you price your products. You can set prices individually in more than nn currencies used by hundreds of millions of users in 132 countries and territories around the world. When users browse your app’s product page or initiate a purchase, Google Play shows them the final price they will be charged in their local currency -- there are no additional transaction fees for currency conversions or taxes added to the transaction (in most countries).</p>
+
+<p>[[world map of buyer countries/currencies?]]</p>
+
+<p>You can set and adjust your prices at any time, in any currency, without having to publish an update to your app. Just adjust your prices in the Developer Console and save your changes -- the new prices become effective immediately. To save you time, Google Play can autofill prices in available currencies, based on the default price you set and the exchange rate at the time you do the auto-fill. Afterward, you can fine-tune your prices in specific currencies as needed.</p>
+
+<p>[[close screenshot of Developer Console price UI]]</p>
+
+<p>The prices you set in different currencies are completely independent and you can adjust the one without affecting any of the others. This gives you the ability to run short-term promotions and discounts in specific countries and more easily manage shifts in exchange rates.</p>
+
+<h2>Monthly payouts in your local currency</h2>
+
+<p>To sell products in Google Play, all you have to do is register for a Google Checkout merchant account and link it to your Google Play publisher account (see Get Started for details). Once you’ve set up your account and published your apps, Google Play make monthly payouts of sales proceeds to your merchant account. The payouts include proceeds from priced app purchases, in-app product purchases, and subscriptions (including renewals). The sales proceeds are paid out to you in your local currency.</p>
+
+<p>The prices you set in Google Play are final, meaning that Google Play shows and charges the user the exact price that you’ve set, inclusive of applicable taxes (in most countries). This puts you in control of your prices and eliminates the uncertainties of conversions and estimates for users. At payout, Google Play calculates the taxes for each transaction based on rates that you control from the Google Checkout merchant account.</p>
+
+<h2>Detailed financial reporting</h2>
+
+<p>When you sell priced apps or in-app products on Google Play, you get a variety of financial reports to help you track and project sales, optimize your marketing campaigns, and support your customers.</p>
+
+<p>To help you keep up-to-date with the current activity, you can download daily reports summarizing recent purchases of your products. The reports include estimated sales amounts and include a variety of other data for each transaction.</p>
+
+<p>At the close of the month, you can download a complete sales report that gives you the final details of all transactions that closed in the month, including the payout amounts and other data. Additional financial reports are available in your Google Wallet merchant account. </p>

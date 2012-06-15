@@ -1,0 +1,245 @@
+page.title=Buttons
+parent.title=Input Controls
+parent.link=../controls.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+<ol>
+  <li><a href="#HandlingEvents">Responding to Click Events</a>
+    <ol>
+      <li><a href="#ClickListener">Using an OnClickListener</a></li>
+    </ol>
+  </li>
+  <li><a href="#Style">Styling Your Button</a>
+    <ol>
+      <li><a href="#Borderless">Borderless button</a></li>
+      <li><a href="#CustomBackground">Custom background</a></li>
+    </ol>
+  </li>
+</ol>
+  <h2>Key classes</h2>
+  <ol>
+    <li>{@link android.widget.Button}</li>
+    <li>{@link android.widget.ImageButton}</li>
+  </ol>
+</div>
+</div>
+
+
+<p>A button consists of text or an icon (or both text and an icon) that communicates what action
+occurs when the user touches it.</p>
+
+<img src="{@docRoot}images/ui/button-types.png" alt="" />
+
+<p>Depending on whether you want a button with text, an icon, or both, you can create the
+button in your layout in three ways:</p>
+<ul>
+  <li>With text, using the {@link android.widget.Button} class:
+<pre>
+&lt;Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/button_text"
+    ... />
+</pre>
+  </li>
+  <li>With an icon, using the {@link android.widget.ImageButton} class:
+<pre>
+&lt;ImageButton
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:src="@drawable/button_icon"
+    ... />
+</pre>
+  </li>
+  <li>With text and an icon, using the {@link android.widget.Button} class with the <a
+href="{@docRoot}reference/android/widget/TextView.html#attr_android:drawableLeft">{@code
+android:drawableLeft}</a> attribute:
+<pre>
+&lt;Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/button_text"
+    android:drawableLeft="@drawable/button_icon"
+    ... />
+</pre>
+</li>
+</ul>
+
+<h2 id="HandlingEvents">Responding to Click Events</h2>
+
+<p>When the user clicks a button, the {@link android.widget.Button} object receives
+an on-click event.</p>
+
+<p>To define the click event handler for a button, add the {@link
+android.R.attr#onClick android:onClick} attribute to the {@code &lt;Button&gt;} element in your XML
+layout. The value for this attribute must be the name of the method you want to call in response
+to a click event. The {@link android.app.Activity} hosting the layout must then implement the
+corresponding method.</p>
+
+<p>For example, here's a layout with a button using {@link
+android.R.attr#onClick android:onClick}:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;Button xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/button_send"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/button_send"
+    android:onClick="sendMessage" />
+</pre>
+
+<p>Within the {@link android.app.Activity} that hosts this layout, the following method handles
+the click event:</p>
+
+<pre>
+/** Called when the user touches the button */
+public void sendMessage(View view) {
+    // Do something in response to button click
+}
+</pre>
+
+<p>The method you declare in the {@link android.R.attr#onClick android:onClick} attribute must have
+a signature exactly as shown above. Specifically, the method must:</p>
+<ul>
+  <li>Be public</li>
+  <li>Return void</li>
+  <li>Define a {@link android.view.View} as its only parameter (this will be the {@link
+android.view.View} that was clicked)</li>
+</ul>
+
+
+<h3 id="ClickListener">Using an OnClickListener</h3>
+
+<p>You can also declare the click event handler pragmatically rather than in an XML layout. This
+might be necessary if you instantiate the {@link android.widget.Button} at runtime or you need to
+declare the click behavior in a {@link android.app.Fragment} subclass.</p>
+
+<p>To declare the event handler programmatically, create an {@link
+android.view.View.OnClickListener} object and assign it to the button by calling {@link
+android.view.View#setOnClickListener}. For example:</p>
+
+<pre>
+Button button = (Button) findViewById(R.id.button_send);
+button.setOnClickListener(new View.OnClickListener() {
+    public void onClick(View v) {
+        // Do something in response to button click
+    }
+});
+</pre>
+
+
+<h2 id="Style">Styling Your Button</h2>
+
+<p>The appearance of your button (background image and font) may vary from one device to
+another, because devices by different manufacturers often have different default styles for
+input controls.</p>
+
+<p>You can control exactly how your controls are styled using a theme that you apply to your
+entire application. For instance, to ensure that all devices running Android 4.0 and higher use
+the Holo theme in your app, declare {@code android:theme="@android:style/Theme.Holo"} in your
+manifest's {@code &lt;application&gt;} element. Also read the blog post, <a
+href="http://android-developers.blogspot.com/2012/01/holo-everywhere.html">Holo Everywhere</a>
+for information about using the Holo theme while supporting older devices.</p>
+
+<p>To customize individual buttons with a different background, specify the {@link
+android.R.attr#background android:background} attribute with a drawable or color resource.
+Alternatively, you can apply a <em>style</em> for the button, which works in a manner similar to
+HTML styles to define multiple style properties such as the background, font, size, and others.
+For more information about applying styles, see <a
+href="{@docRoot}guide/topics/ui/themes.html">Styles and Themes</a>.</p>
+
+
+<h3 id="Borderless">Borderless button</h3>
+
+<p>One design that can be useful is a "borderless" button. Borderless buttons resemble
+basic buttons except that they have no borders or background but still change appearance during
+different states, such as when clicked.</p>
+
+<p>To create a borderless button, apply the {@link android.R.attr#borderlessButtonStyle}
+style to the button. For example:</p>
+
+<pre>
+&lt;Button
+    android:id="@+id/button_send"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/button_send"
+    android:onClick="sendMessage"
+    style="?android:attr/borderlessButtonStyle" />
+</pre>
+
+
+
+<h3 id="CustomBackground">Custom background</h3>
+
+<p>If you want to truly redefine the appearance of your button, you can specify a custom
+background. Instead of supplying a simple bitmap or color, however, your background should be a
+state list resource that changes appearance depending on the button's current state.</p>
+
+<p>You can define the state list in an XML file that defines three different images or colors to use
+for the different button states.</p>
+
+<p>To create a state list drawable for your button background:</p>
+
+<ol>
+  <li>Create three bitmaps for the button background that represent the default, pressed, and
+focused button states.
+    <p>To ensure that your images fit buttons of various sizes, create the bitmaps as <a
+href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">Nine-patch</a> bitmaps.</p>
+  </li>
+  <li>Place the bitmaps into the <code>res/drawable/</code> directory of
+your project. Be sure each bitmap is named properly to reflect the button state that they each
+represent, such as {@code button_default.9.png}, {@code button_pressed.9.png}, and {@code
+button_focused.9.png}.</li>
+  <li>Create a new XML file in the <code>res/drawable/</code> directory (name it something like
+<code>button_custom.xml</code>). Insert the following XML:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;selector xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;item android:drawable="@drawable/button_pressed"
+          android:state_pressed="true" />
+    &lt;item android:drawable="@drawable/button_focused"
+          android:state_focused="true" />
+    &lt;item android:drawable="@drawable/button_default" />
+&lt;/selector>
+</pre>
+  <p>This defines a single drawable resource, which will change its image based on the current
+state of the button.</p>
+<ul>
+  <li>The first <code>&lt;item></code> defines the bitmap to use when the button is
+pressed (activated).</li>
+  <li>The second <code>&lt;item></code> defines the bitmap to use when the button is
+focused (when the button is highlighted using the trackball or directional
+pad).</li>
+  <li>The third <code>&lt;item></code> defines the bitmap to use when the button is in the 
+default state (it's neither pressed nor focused).</li>
+</ul>
+  <p class="note"><strong>Note:</strong> The order of the <code>&lt;item></code> elements is
+important. When this drawable is referenced, the  <code>&lt;item></code> elements are traversed
+in-order to determine which one is appropriate for the current button state. Because the default
+bitmap is last, it is only applied when the conditions <code>android:state_pressed</code> and
+<code>android:state_focused</code> have both evaluated as false.</p>
+  <p>This XML file now represents a single
+drawable resource and when referenced by a {@link android.widget.Button} for its background,
+the image displayed will change based on these three states.</p>
+</li>
+  <li>Then simply apply the drawable XML file as the button background:
+<pre>
+&lt;Button
+    android:id="@+id/button_send"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/button_send"
+    android:onClick="sendMessage"
+    android:background="@drawable/button_custom"  />
+</pre>
+</ol>
+
+  <p>For more information about this XML syntax, including how to define a disabled, hovered, or
+other button states, read about <a
+href="{@docRoot}guide/topics/resources/drawable-resource.html#StateList">State List
+Drawable</a>.</p>

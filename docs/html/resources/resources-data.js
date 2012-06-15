@@ -529,16 +529,6 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'new', 'media', 'gl'],
-    path: 'samples/HelloEffects/index.html',
-    title: {
-      en: 'HelloEffects'
-    },
-    description: {
-      en: 'An application that demonstrates how to use the Media Effects APIs.'
-    }
-  },
-  {
     tags: ['sample'],
     path: 'samples/Home/index.html',
     title: {
@@ -931,26 +921,6 @@ var ANDROID_RESOURCES = [
     },
     description: {
       en: 'The basics of implementing an application using the OpenGL ES 2.0 APIs.'
-    }
-  },
-  {
-    tags: ['tutorial', 'testing'],
-    path: 'tutorials/testing/helloandroid_test.html',
-    title: {
-      en: 'Hello Testing'
-    },
-    description: {
-      en: 'A basic introduction to the Android testing framework.'
-    }
-  },
-  {
-    tags: ['tutorial', 'testing'],
-    path: 'tutorials/testing/activity_test.html',
-    title: {
-      en: 'Activity Testing'
-    },
-    description: {
-      en: 'A more advanced demonstration of the Android testing framework and tools.'
     }
   }
 ];

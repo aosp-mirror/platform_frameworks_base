@@ -30,22 +30,18 @@ parent.link=index.html
   <h2>Related Tutorials</h2>
     <ol>
         <li>
-            <a href="{@docRoot}resources/tutorials/testing/helloandroid_test.html">
-            Hello, Testing</a>
-        </li>
-        <li>
-            <a href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity Testing</a>
+            <a href="{@docRoot}guide/topics/testing/activity_test.html">Activity Testing Tutorial</a>
         </li>
     </ol>
   <h2>See Also</h2>
       <ol>
         <li>
           <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">
-          Testing in Eclipse, with ADT</a>
+          Testing From Eclipse with ADT</a>
         </li>
         <li>
           <a href="{@docRoot}guide/developing/testing/testing_otheride.html">
-          Testing in Other IDEs</a>
+          Testing From Other IDEs</a>
         </li>
       </ol>
   </div>

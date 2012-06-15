@@ -1,0 +1,187 @@
+page.title=Table
+parent.title=Layouts
+parent.link=layout-objects.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+  <ol>
+    <li><a href="#example">Example</a></li>
+  </ol>
+  <h2>Key classes</h2>
+  <ol>
+  <li>{@link android.widget.TableLayout}</li>
+  <li>{@link android.widget.TableRow}</li>
+  <li>{@link android.widget.TextView}</li>
+  </ol>
+</div>
+</div>
+<p>{@link android.widget.TableLayout} is a {@link android.view.ViewGroup} that
+displays child {@link android.view.View} elements in rows and columns.</p>
+
+
+<img src="{@docRoot}images/ui/gridlayout.png" alt="" />
+
+<p>{@link android.widget.TableLayout} positions its children into rows
+    and columns. TableLayout containers do not display border lines for their rows, columns,
+    or cells. The table will have as many columns as the row with the most cells. A table can leave
+cells empty, but cells cannot span columns, as they can in HTML.</p>
+<p>{@link android.widget.TableRow} objects are the child views of a TableLayout
+(each TableRow defines a single row in the table).
+Each row has zero or more cells, each of which is defined by any kind of other View. So, the cells of a row may be
+composed of a variety of View objects, like ImageView or TextView objects.
+A cell may also be a ViewGroup object (for example, you can nest another TableLayout as a cell).</p>
+<p>The following sample layout has two rows and two cells in each. The accompanying screenshot shows the 
+result, with cell borders displayed as dotted lines (added for visual effect). </p>
+
+<table class="columns">
+    <tr>
+        <td>
+        <pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:stretchColumns="1">
+    &lt;TableRow>
+        &lt;TextView
+            android:text="@string/table_layout_4_open"
+            android:padding="3dip" />
+        &lt;TextView
+            android:text="@string/table_layout_4_open_shortcut"
+            android:gravity="right"
+            android:padding="3dip" />
+    &lt;/TableRow>
+
+    &lt;TableRow>
+        &lt;TextView
+            android:text="@string/table_layout_4_save"
+            android:padding="3dip" />
+        &lt;TextView
+            android:text="@string/table_layout_4_save_shortcut"
+            android:gravity="right"
+            android:padding="3dip" />
+    &lt;/TableRow>
+&lt;/TableLayout>
+</pre></td>
+        <td><img src="{@docRoot}images/table_layout.png" alt="" style="margin:0" /></td>
+    </tr>
+</table>
+
+<p>Columns can be hidden, marked to stretch and fill the available screen space,
+    or can be marked as shrinkable to force the column to shrink until the table
+    fits the screen. See the {@link android.widget.TableLayout TableLayout reference} 
+documentation for more details. </p>
+
+
+<h2 id="example">Example</h2>
+<ol>
+  <li>Start a new project named <em>HelloTableLayout</em>.</li>
+  <li>Open the <code>res/layout/main.xml</code> file and insert the following:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:stretchColumns="1">
+
+    &lt;TableRow>
+        &lt;TextView
+            android:layout_column="1"
+            android:text="Open..."
+            android:padding="3dip" />
+        &lt;TextView
+            android:text="Ctrl-O"
+            android:gravity="right"
+            android:padding="3dip" />
+    &lt;/TableRow>
+
+    &lt;TableRow>
+        &lt;TextView
+            android:layout_column="1"
+            android:text="Save..."
+            android:padding="3dip" />
+        &lt;TextView
+            android:text="Ctrl-S"
+            android:gravity="right"
+            android:padding="3dip" />
+    &lt;/TableRow>
+
+    &lt;TableRow>
+        &lt;TextView
+            android:layout_column="1"
+            android:text="Save As..."
+            android:padding="3dip" />
+        &lt;TextView
+            android:text="Ctrl-Shift-S"
+            android:gravity="right"
+            android:padding="3dip" />
+    &lt;/TableRow>
+
+    &lt;View
+        android:layout_height="2dip"
+        android:background="#FF909090" />
+
+    &lt;TableRow>
+        &lt;TextView
+            android:text="X"
+            android:padding="3dip" />
+        &lt;TextView
+            android:text="Import..."
+            android:padding="3dip" />
+    &lt;/TableRow>
+
+    &lt;TableRow>
+        &lt;TextView
+            android:text="X"
+            android:padding="3dip" />
+        &lt;TextView
+            android:text="Export..."
+            android:padding="3dip" />
+        &lt;TextView
+            android:text="Ctrl-E"
+            android:gravity="right"
+            android:padding="3dip" />
+    &lt;/TableRow>
+
+    &lt;View
+        android:layout_height="2dip"
+        android:background="#FF909090" />
+
+    &lt;TableRow>
+        &lt;TextView
+            android:layout_column="1"
+            android:text="Quit"
+            android:padding="3dip" />
+    &lt;/TableRow>
+&lt;/TableLayout>
+</pre>
+<p>Notice how this resembles the structure of an HTML table. The {@link android.widget.TableLayout}
+element is like the HTML <code>&lt;table&gt;</code> element; {@link android.widget.TableRow} is like
+a <code>>&lt;tr>&gt;</code> element;
+but for the cells, you can use any kind of {@link android.view.View} element. In this example, a
+{@link android.widget.TextView} is used for each cell. In between some of the rows, there is also a
+basic {@link android.view.View}, which is used to draw a horizontal line.</p>
+
+</li>
+<li>Make sure your <em>HelloTableLayout</em> Activity loads this layout in the
+{@link android.app.Activity#onCreate(Bundle) onCreate()} method:
+<pre>
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+}
+</pre>
+<p>The {@link android.app.Activity#setContentView(int)} method loads the
+layout file for the {@link android.app.Activity}, specified by the resource
+ID &mdash; <code>R.layout.main</code> refers to the <code>res/layout/main.xml</code> layout
+file.</p>
+</li>
+<li>Run the application.</li>
+</ol>
+<p>You should see the following:</p>
+<img src="images/hello-tablelayout.png" width="150px" />
+
+
+

@@ -1,0 +1,8 @@
+@jd:body
+
+<script type="text/javascript">
+  document.location=toRoot+"sdk/requirements.html"
+</script>
+
+<p>You should have already been redirected by your browser. Please go to the
+<a href="{@docRoot}sdk/requirements.html">SDK System Requirements</a>.</p>

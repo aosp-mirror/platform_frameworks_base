@@ -1,0 +1,79 @@
+page.title=About Android
+walkthru=1
+header.hide=1
+
+@jd:body
+
+<style>
+blockquote {
+  color:#9933CC;
+}
+</style>
+
+<div style="height:0;position:relative">
+  <blockquote
+style="font-size:30px;line-height:34px;text-transform:uppercase;position:absolute;top:
+60px;left:40px;font-weight:100;font-style:normal">
+    Android is the largest mobile platform in the world, and still growing
+  </blockquote>
+</div>
+
+<div style="height:0;position:relative">
+<div style="position:absolute;font-size: 15px;text-transform:uppercase;top: 280px;left:
+510px;color:#ddd;width : 180px;-webkit-transform: perspective(500px ) rotate( 1.6deg )
+rotateY(-4deg);">
+  Growth in Android device activations<br><br>Q1 2009 - Q2 2011
+</div>
+</div>
+
+<img src="{@docRoot}images/about/growth-chart.png" alt="" height="444" width="760"
+style="margin:20px 0 30px" />
+
+
+<p>Android is reshaping the way people communicate. It’s in your phone or tablet, on your wrist, in
+your car, on your TV, in your camera, at your home, and at the store. It’s practically an
+unlimited landscape for app developers.</p>
+
+<p>Android gives you an open platform for developing any app you can imagine, and an open
+marketplace for distributing your products to a large and growing user base. Whether you are just
+starting out or you are already on your way, Android has the platform, tools, and devices to make it
+happen for you.</p>
+
+<h3>Global partnerships and large installed base</h3>
+
+<p>Building on the contributions of the open-source Linux community and more than 300 hardware,
+software, and carrier partners, Android has rapidly become the fastest-growing mobile OS. As of
+February, 2012,
+there are more than 300 million activated Android devices.</p>
+
+<blockquote>Every day more than 700,000 new
+devices are activated in more than 137 countries and regions</blockquote>
+
+<p>Android’s openness has made it a favorite for consumers and developers alike, driving strong
+growth
+in app consumption. In the third quarter 2011 alone, people downloaded more than 2.4 billion apps to
+their Android devices.</p>
+
+<h3>Rapid innovation</h3>
+
+<p>Android is continuously pushing the boundaries of hardware and software forward, to bring new
+capabilities to users and developers. For developers, the rapid evolution of Android technology lets
+you stay in front with powerful, differentiated applications.</p>
+
+<p>Android gives you access to the latest technologies and innovations across a multitude of device
+form-factors, chipset architectures, and price points. From multicore processing and
+high-performance graphics to state-of-the-art sensors, vibrant touchscreens, and emerging mobile
+technologies such as Near Field Communication (NFC), Wi-Fi Direct, and face tracking.
+
+
+
+<h3>Powerful development environment</h3>
+
+<blockquote>Android gives
+you an open platform for creating any app experience that you can imagine</blockquote>
+
+<p>Android gives you everything you need to build best-in-class app experiences. It provides a
+single
+application model that runs everywhere, so you can deploy your apps to a wide range of devices, from
+phones to tablets and beyond. Across all devices, Android gives you consistent, powerful APIs to
+manage UI and take advantage of the hardware capabilities available on each device.</p>

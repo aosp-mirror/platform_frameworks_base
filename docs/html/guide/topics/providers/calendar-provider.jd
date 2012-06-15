@@ -1190,5 +1190,3 @@ However, a sync adapter is restricted to the <code>ACCOUNT_NAME</code> and
 </pre>
 <p>For a sample implementation of a sync adapter (not specifically related to Calendar), see 
 <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">SampleSyncAdapter</a>.
-</body>
-</html>

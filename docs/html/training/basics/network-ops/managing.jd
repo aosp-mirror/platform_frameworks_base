@@ -227,9 +227,9 @@ or only if Wi-Fi is available.</li>
   
 </ul>
 
-<img src="{@docRoot}images/training/network-settings1.png" alt="Preferences panel" />
+<img src="{@docRoot}images/training/basics/network-settings1.png" alt="Preferences panel" />
 
-<img src="{@docRoot}images/training/network-settings2.png" alt="Setting a network preference" />
+<img src="{@docRoot}images/training/basics/network-settings2.png" alt="Setting a network preference" />
 <p class="img-caption"><strong>Figure 1.</strong> Preferences activity.</p>
 
 <p>Here is <code>SettingsActivity</code>. Note that it implements 

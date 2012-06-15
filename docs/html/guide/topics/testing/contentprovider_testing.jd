@@ -35,6 +35,12 @@ parent.link=index.html
       <li>{@link android.test.IsolatedContext}</li>
       <li>{@link android.test.mock.MockContentResolver}</li>
     </ol>
+  <h2>Related Tutorials</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}guide/topics/testing/activity_test.html">Activity Testing Tutorial</a>
+        </li>
+    </ol>
   <h2>See Also</h2>
       <ol>
         <li>
@@ -44,11 +50,11 @@ parent.link=index.html
         </li>
         <li>
           <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">
-          Testing in Eclipse, with ADT</a>
+          Testing From Eclipse with ADT</a>
         </li>
         <li>
           <a href="{@docRoot}guide/developing/testing/testing_otheride.html">
-          Testing in Other IDEs</a>
+          Testing From Other IDEs</a>
         </li>
       </ol>
   </div>
@@ -89,9 +95,9 @@ parent.link=index.html
     <a href="{@docRoot}guide/topics/testing/testing_android.html#InstrumentationTestRunner">
     Running Tests With InstrumentationTestRunner</a> describes the test runner in
     more detail. The topic <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">
-    Testing in Eclipse, with ADT</a> shows you how to run a test package in Eclipse, and the
+    Testing From Eclipse with ADT</a> shows you how to run a test package in Eclipse, and the
     topic <a href="{@docRoot}guide/developing/testing/testing_otheride.html">
-    Testing in Other IDEs</a>
+    Testing From Other IDEs</a>
     shows you how to run a test package from the command line.
 </p>
 <h2 id="ContentProviderTestAPI">Content Provider Testing API</h2>
@@ -198,28 +204,14 @@ classes</a>.
 </ul>
 <h2 id="NextSteps">Next Steps</h2>
 <p>
-    To learn how to set up and run tests in Eclipse, please refer to <a
-    href="{@docRoot}guide/developing/testing/testing_eclipse.html">Testing in
-    Eclipse, with ADT</a>. If you're not working in Eclipse, refer to <a
-    href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing in Other
-    IDEs</a>.
+    To learn how to set up and run tests in Eclipse, please refer to 
+<a href="{@docRoot}guide/developing/testing/testing_eclipse.html">Testing from Eclipse with ADT</a>.
+    If you're not working in Eclipse, refer to 
+<a href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing From Other IDEs</a>.
 </p>
 <p>
-    If you want a step-by-step introduction to testing activities, try one of the
-    testing tutorials:
+    If you want a step-by-step introduction to testing activities, try the 
+    <a href="{@docRoot}guide/topics/testing/activity_test.html">Activity Testing Tutorial</a>, which
+    guides you through a testing scenario that you develop against an activity-oriented application.
 </p>
-<ul>
-    <li>
-        The <a
-        href="{@docRoot}resources/tutorials/testing/helloandroid_test.html">Hello,
-        Testing</a> tutorial introduces basic testing concepts and procedures in the
-        context of the Hello, World application.
-    </li>
-    <li>
-        The <a
-        href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity
-        Testing</a> tutorial is an excellent follow-up to the Hello, Testing tutorial.
-        It guides you through a more complex testing scenario that you develop against a
-        more realistic activity-oriented application.
-    </li>
-</ul>
+

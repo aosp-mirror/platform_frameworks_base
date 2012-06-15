@@ -1,0 +1,40 @@
+page.title=Text and Input
+page.landing=true
+page.landing.intro=Use text services to add conventient features such as copy/paste and spell checking to your app. You can also develop your own text services to offer custom IMEs, dictionaries, and spelling checkers that you can distribute to users as applications.
+page.landing.image=
+
+@jd:body
+
+<div class="landing-docs">
+
+  <div class="col-12">
+    <h3>Blog Articles</h3>
+    
+    <a href="http://android-developers.blogspot.com/2011/12/add-voice-typing-to-your-ime.html">
+      <h4>Add Voice Typing To Your IME</h4>
+      <p>A new feature available in Android 4.0 is voice typing: the difference for users is that
+the recognition results appear in the text box while they are still speaking. If you are an IME
+developer, you can easily integrate with voice typing.</p>
+    </a>
+
+    <a href="http://android-developers.blogspot.com/2010/03/speech-input-api-for-android.html">
+      <h4>Speech Input API for Android</h4>
+      <p>We believe speech can fundamentally change the mobile experience. We would like to invite
+every Android application developer to consider integrating speech input capabilities via the
+Android SDK.</p>
+    </a>
+
+    <a href="http://android-developers.blogspot.com/2010/06/making-sense-of-multitouch.html">
+      <h4>Making Sense of Multitouch</h4>
+      <p>The word "multitouch" gets thrown around quite a bit and it’s not always clear what people
+are referring to. For some it’s about hardware capability, for others it refers to specific gesture
+support in software. Whatever you decide to call it, today we’re going to look at how to make your
+apps and views behave nicely with multiple fingers on the screen.</p>
+    </a>
+  </div>
+
+  <div class="col-6">
+
+  </div>
+
+</div>
