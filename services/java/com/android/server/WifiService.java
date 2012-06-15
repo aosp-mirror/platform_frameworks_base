@@ -58,6 +58,7 @@ import android.os.SystemProperties;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Slog;
 
 import java.util.ArrayList;
@@ -160,6 +161,10 @@ public class WifiService extends IWifiManager.Stub {
     private AtomicBoolean mAirplaneModeOn = new AtomicBoolean(false);
     /* Tracks whether wifi is enabled from WifiStateMachine's perspective */
     private boolean mWifiEnabled;
+
+    /* The work source (UID) that triggered the current WIFI scan, synchronized
+     * on this */
+    private WorkSource mScanWorkSource;
 
     private boolean mIsReceiverRegistered = false;
 
@@ -413,6 +418,7 @@ public class WifiService extends IWifiManager.Stub {
                             }
                         } else if (intent.getAction().equals(
                                 WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
+                            noteScanEnd();
                             checkAndSetNotification();
                         }
                     }
@@ -428,6 +434,44 @@ public class WifiService extends IWifiManager.Stub {
                 Settings.Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY, 900) * 1000l;
         mNotificationEnabledSettingObserver = new NotificationEnabledSettingObserver(new Handler());
         mNotificationEnabledSettingObserver.register();
+    }
+
+    /** Tell battery stats about a new WIFI scan */
+    private void noteScanStart() {
+        WorkSource scanWorkSource = null;
+        synchronized (WifiService.this) {
+            if (mScanWorkSource != null) {
+                // Scan already in progress, don't add this one to battery stats
+                return;
+            }
+            scanWorkSource = new WorkSource(Binder.getCallingUid());
+            mScanWorkSource = scanWorkSource;
+        }
+
+        long id = Binder.clearCallingIdentity();
+        try {
+            mBatteryStats.noteWifiScanStartedFromSource(scanWorkSource);
+        } catch (RemoteException e) {
+            Log.w(TAG, e);
+        } finally {
+            Binder.restoreCallingIdentity(id);
+        }
+    }
+
+    /** Tell battery stats that the current WIFI scan has completed */
+    private void noteScanEnd() {
+        WorkSource scanWorkSource = null;
+        synchronized (WifiService.this) {
+            scanWorkSource = mScanWorkSource;
+            mScanWorkSource = null;
+        }
+        if (scanWorkSource != null) {
+            try {
+                mBatteryStats.noteWifiScanStoppedFromSource(scanWorkSource);
+            } catch (RemoteException e) {
+                Log.w(TAG, e);
+            }
+        }
     }
 
     /**
@@ -551,6 +595,7 @@ public class WifiService extends IWifiManager.Stub {
             mScanCount.put(uid, ++count);
         }
         mWifiStateMachine.startScan(forceActive);
+        noteScanStart();
     }
 
     private void enforceAccessPermission() {
@@ -1333,10 +1378,8 @@ public class WifiService extends IWifiManager.Stub {
         switch(wifiLock.mMode) {
             case WifiManager.WIFI_MODE_FULL:
             case WifiManager.WIFI_MODE_FULL_HIGH_PERF:
-                mBatteryStats.noteFullWifiLockAcquiredFromSource(wifiLock.mWorkSource);
-                break;
             case WifiManager.WIFI_MODE_SCAN_ONLY:
-                mBatteryStats.noteScanWifiLockAcquiredFromSource(wifiLock.mWorkSource);
+                mBatteryStats.noteFullWifiLockAcquiredFromSource(wifiLock.mWorkSource);
                 break;
         }
     }
@@ -1345,10 +1388,8 @@ public class WifiService extends IWifiManager.Stub {
         switch(wifiLock.mMode) {
             case WifiManager.WIFI_MODE_FULL:
             case WifiManager.WIFI_MODE_FULL_HIGH_PERF:
-                mBatteryStats.noteFullWifiLockReleasedFromSource(wifiLock.mWorkSource);
-                break;
             case WifiManager.WIFI_MODE_SCAN_ONLY:
-                mBatteryStats.noteScanWifiLockReleasedFromSource(wifiLock.mWorkSource);
+                mBatteryStats.noteFullWifiLockReleasedFromSource(wifiLock.mWorkSource);
                 break;
         }
     }
