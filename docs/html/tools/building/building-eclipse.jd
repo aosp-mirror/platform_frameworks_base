@@ -39,7 +39,7 @@ parent.link=index.html
   <h2 id="RunningOnEmulatorEclipse">Running on the emulator</h2>
 
   <p>Before you can run your application on the Android Emulator, you must <a href=
-  "{@docRoot}guide/developing/devices/managing-avds.html">create an AVD</a>.</p>
+  "{@docRoot}tools/devices/managing-avds.html">create an AVD</a>.</p>
 
   <p>To run (or debug) your application, select <strong>Run</strong> &gt; <strong>Run</strong> (or
   <strong>Run</strong> &gt; <strong>Debug</strong>) from the Eclipse menu bar. The ADT plugin will

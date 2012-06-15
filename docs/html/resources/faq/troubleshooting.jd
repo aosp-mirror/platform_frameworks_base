@@ -285,7 +285,7 @@ missing import packages, then save each file.</li>
 Make sure you have a mounted SD card," be sure that your target AVD has an 
 SD card. To create an AVD that has an SD card, specify one when creating
 an AVD with the AVD manager. See 
-<a href="{@docRoot}guide/developing/devices/managing-avds.html#createavd">
+<a href="{@docRoot}tools/devices/managing-avds.html#createavd">
 Creating and Managing AVDs with AVD Manager</a> for more information.</p>
 
 <h2 id="signingcalendar">I can't compile my app because the build tools generated an expired debug certificate</h2>

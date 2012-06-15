@@ -510,7 +510,7 @@ Manager</strong>.</p>
 <p>To run your application against different platform versions in the emulator,
 create an AVD for each platform version that you want to test. For more
 information about AVDs, see <a
-href="{@docRoot}guide/developing/devices/index.html">Creating and Managing Virtual Devices</a>. If
+href="{@docRoot}tools/devices/index.html">Creating and Managing Virtual Devices</a>. If
 you are using a physical device for testing, ensure that you know the API Level
 of the Android platform it runs. See the table at the top of this document for
 a list of platform versions and their API Levels. </p>

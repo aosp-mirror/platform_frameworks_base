@@ -76,7 +76,7 @@ class="toggle-content-img" alt="" />
     <p>Maintenance update. The system version is 4.0.4.</p>
     <p class="note"><strong>Note:</strong> This system image includes support for emulator
 hardware graphics acceleration when used with SDK Tools r17 or higher.
-(<a href="{@docRoot}guide/developing/devices/emulator.html#accel-graphics">more info</a>)</p>
+(<a href="{@docRoot}tools/devices/emulator.html#accel-graphics">more info</a>)</p>
     <dl>
       <dt>Dependencies:</dt>
       <dd>SDK Tools r17 or higher is required.</dd>

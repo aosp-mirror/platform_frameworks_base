@@ -22,9 +22,9 @@ parent.link=index.html
       </ol>
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/developing/devices/managing-avds-cmdline.html">Managing AVDs from
+    <li><a href="{@docRoot}tools/devices/managing-avds-cmdline.html">Managing AVDs from
 the Command Line</a></li>
-    <li><a href="{@docRoot}guide/developing/devices/emulator.html">Using the Android
+    <li><a href="{@docRoot}tools/devices/emulator.html">Using the Android
 Emulator</a></li>
     <li><a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a></li>
   </ol>
@@ -196,7 +196,7 @@ ant release
   <h2 id="RunningOnEmulator">Running on the Emulator</h2>
 
   <p>Before you can run your application on the Android Emulator, you must <a href=
-  "{@docRoot}guide/developing/devices/managing-avds.html">create an AVD</a>.</p>
+  "{@docRoot}tools/devices/managing-avds.html">create an AVD</a>.</p>
 
   <p>To run your application:</p>
 
@@ -284,7 +284,7 @@ adb -d install <em>path/to/your/app</em>.apk
   <ul>
     <li><a href="{@docRoot}guide/developing/tools/android.html">android Tool</a></li>
 
-    <li><a href="{@docRoot}guide/developing/devices/emulator.html">Android Emulator</a></li>
+    <li><a href="{@docRoot}tools/devices/emulator.html">Android Emulator</a></li>
 
     <li><a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> (ADB)</li>
   </ul>

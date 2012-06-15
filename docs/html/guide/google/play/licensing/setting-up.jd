@@ -199,7 +199,7 @@ Android Virtual Devices.</li>
 </ol>
 
 <p>If you are not familiar with AVDs or how to use them, see <a
-href="{@docRoot}guide/developing/devices/index.html">Managing Virtual Devices</a>.</p>
+href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>.</p>
 
 <h4 id="project-update">Updating your project configuration</h4>
 

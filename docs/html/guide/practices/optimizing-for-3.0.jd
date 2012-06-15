@@ -474,7 +474,7 @@ android:targetSdkVersion}</a> set to {@code "4"} or higher, then the Android sys
 application's layout and assets to fit the current device screen, whether the device screen is
 smaller or larger than the one for which you originally designed your application. As such, you
 should always test your application on real or <a
-href="{@docRoot}guide/developing/devices/index.html">virtual devices</a> with various screen sizes
+href="{@docRoot}tools/devices/index.html">virtual devices</a> with various screen sizes
 and densities.</p>
 
 <p>Although we recommend that you design your application to function properly on multiple

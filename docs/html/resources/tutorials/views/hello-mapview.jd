@@ -23,7 +23,7 @@ href="{@docRoot}guide/developing/projects/projects-cmdline.html#CreatingAProject
 Creating and Managing Projects on the Command Line</a>, as appropriate for your environment.</p>
 
 <p>You will also need to set up a new AVD that uses the same Google APIs deployment target. See <a
-href="{@docRoot}guide/developing/devices/index.html">Creating and Managing Virtual Devices</a> for
+href="{@docRoot}tools/devices/index.html">Creating and Managing Virtual Devices</a> for
 more information.</p>
 
 <p>For reference material, see the <a
@@ -127,7 +127,7 @@ android.app.Activity#onCreate(Bundle) onCreate()} method:</p>
 </pre>
 </li>
 <li>That's all there is to it. Run the application. (Remember, you must have an <a
-href="{@docRoot}guide/developing/devices/index.html">AVD</a> configured to use the Google APIs
+href="{@docRoot}tools/devices/index.html">AVD</a> configured to use the Google APIs
 target, or be using a development device that includes the Maps library.)</li>
 </ol>
 

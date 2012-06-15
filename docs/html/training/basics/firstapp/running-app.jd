@@ -26,7 +26,7 @@ next.link=building-ui.html
 
 <ul>
   <li><a href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a></li>
-  <li><a href="{@docRoot}guide/developing/devices/index.html">Managing Virtual Devices</a></li>
+  <li><a href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a></li>
   <li><a href="{@docRoot}guide/developing/projects/index.html">Managing Projects</a></li>
 </ul>
  
@@ -116,7 +116,7 @@ lesson</a>.</p>
 <h2 id="Emulator">Run on the Emulator</h2>
 
 <p>Whether you’re using Eclipse or the command line, you need to first create an <a
-href="{@docRoot}guide/developing/devices/index.html">Android Virtual
+href="{@docRoot}tools/devices/index.html">Android Virtual
 Device</a> (AVD). An AVD is a
 device configuration for the Android emulator that allows you to model
 different device configurations.</p>

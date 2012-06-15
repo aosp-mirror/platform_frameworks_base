@@ -195,7 +195,7 @@ parent.link=index.html
   In this tutorial, you will use the Android emulator to run applications. The emulator needs
   an Android Virtual Device (AVD) with an API level equal to or higher than the one you set for the projects in the previous step.
   To find out how to check this and create the right AVD if necessary, 
-  see <a href="{@docRoot}guide/developing/devices/managing-avds.html">Creating an AVD</a>.
+  see <a href="{@docRoot}tools/devices/managing-avds.html">Creating an AVD</a>.
 </p>
 <p>
     As a test of the AVD and emulator, run the SpinnerActivity application in Eclipse with ADT. When it starts,

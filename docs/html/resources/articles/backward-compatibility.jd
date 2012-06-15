@@ -248,5 +248,5 @@ to do this easily by creating "Android Virtual Devices" with different API
 levels. Once you create the AVDs, you can test your application with old and new
 versions of the system, perhaps running them side-by-side to see the
 differences. More information about emulator AVDs can be found in <a
-href="{@docRoot}guide/developing/devices/index.html">Creating and Managing Virtual Devices</a> and
+href="{@docRoot}tools/devices/index.html">Creating and Managing Virtual Devices</a> and
 from <code>emulator -help-virtual-device</code>.</p>

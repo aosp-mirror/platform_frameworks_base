@@ -171,11 +171,11 @@ in some cases.</li>
           <ul>
             <li>Added support for hardware accelerated graphics rendering. This feature requires an
 API Level 15, Revision 3 or later system image.
-(<a href="{@docRoot}guide/developing/devices/emulator.html#accel-graphics">more info</a>)
+(<a href="{@docRoot}tools/devices/emulator.html#accel-graphics">more info</a>)
             </li>
             <li>Added support for running Android x86 system images in virtualization mode on
 Windows and Mac OS X.
-(<a href="{@docRoot}guide/developing/devices/emulator.html#accel-vm">more info</a>)
+(<a href="{@docRoot}tools/devices/emulator.html#accel-vm">more info</a>)
               <p class="note"><strong>Note:</strong> Use the Android SDK Manager to download and
 install x86 system images. Android x86 system images are not available for all API levels.</p>
             </li>

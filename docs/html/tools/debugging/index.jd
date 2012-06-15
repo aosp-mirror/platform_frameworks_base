@@ -40,7 +40,7 @@ page.title=Debugging
     messages, and has many other features.</dd>
 
     <dt><strong><a href="{@docRoot}guide/developing/device.html">Device</a> or
-    <a href="{@docRoot}guide/developing/devices/index.html">Android Virtual Device</a></strong></dt>
+    <a href="{@docRoot}tools/devices/index.html">Android Virtual Device</a></strong></dt>
 
     <dd>Your application must run in a device or in an AVD so that it can be debugged. An <code>adb</code> device
     daemon runs on the device or emulator and provides a means for the <code>adb</code> host daemon to

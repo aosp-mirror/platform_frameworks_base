@@ -451,4 +451,4 @@ lat/long coordinates, with a GPX file for route playback, or a KML file for mult
 </ol>
 
 <p>For information about how to connect to the emulator console, see
-<a href="{@docRoot}guide/developing/devices/emulator.html#console">Using the Emulator Console</a>.</p>
+<a href="{@docRoot}tools/devices/emulator.html#console">Using the Emulator Console</a>.</p>

@@ -14,8 +14,8 @@ parent.link=index.html
 
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/developing/devices/emulator.html">Using the Android Emulator</a></li>
-    <li><a href="{@docRoot}guide/developing/devices/index.html">Managing Virtual Devices</a></li>
+    <li><a href="{@docRoot}tools/devices/emulator.html">Using the Android Emulator</a></li>
+    <li><a href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a></li>
   </ol>
 
 </div>
@@ -29,7 +29,7 @@ Android applications without using a physical device.</p>
 <p>This document is a reference to the available command line options and the keyboard mapping to
 device keys.
 For a complete guide to using the Android Emulator, see
-<a href="{@docRoot}guide/developing/devices/emulator.html">Using the Android Emulator</a>.
+<a href="{@docRoot}tools/devices/emulator.html">Using the Android Emulator</a>.
 
 
 <h2 id="KeyMapping">Keyboard Commands</h2>
@@ -154,7 +154,7 @@ Here's the command-line syntax of the options available to the {@code emulator} 
   <td><strong>Required</strong>. Specifies the AVD to load for this emulator
       instance.</td>
   <td>You must create an AVD configuration before launching the emulator. For
-      information, see <a href="{@docRoot}guide/developing/devices/managing-avds.html">Managing
+      information, see <a href="{@docRoot}tools/devices/managing-avds.html">Managing
       AVDs with AVD Manager</a>.</td>
 <tr>
   <td rowspan="7">Disk Images</td>
@@ -360,7 +360,7 @@ ANDROID_VERBOSE. Define the options you want to use in a comma-delimited list, s
   <td><code>-netdelay &lt;delay&gt;</code></td>
   <td>Set network latency emulation to &lt;delay&gt;.</td>
   <td>Default value is <code>none</code>. See the table in
-    <a href="{@docRoot}guide/developing/devices/emulator.html#netdelay">Network Delay Emulation</a>
+    <a href="{@docRoot}tools/devices/emulator.html#netdelay">Network Delay Emulation</a>
     for supported <code>&lt;delay&gt;</code> values. </td>
 </tr>
 <tr>
@@ -371,7 +371,7 @@ ANDROID_VERBOSE. Define the options you want to use in a comma-delimited list, s
   <td><code>-netspeed &lt;speed&gt;</code></td>
   <td>Set network speed emulation to &lt;speed&gt;.</td>
   <td>Default value is <code>full</code>. See the table in
-    <a href="{@docRoot}guide/developing/devices/emulator.html#netspeed">Network Speed Emulation</a> for
+    <a href="{@docRoot}tools/devices/emulator.html#netspeed">Network Speed Emulation</a> for
   supported <code>&lt;speed&gt;</code> values. </td>
 </tr>
 <tr>
@@ -425,7 +425,7 @@ scale in direct relationship with &lt;delay&gt; values.</p>
   <td><code>-qemu -enable-kvm</code></td>
   <td>Enable KVM acceleration of the emulator virtual machine.</td>
   <td>This option is only effective when your system is set up to use
-  <a href="{@docRoot}guide/developing/devices/emulator.html#vm-linux">KVM-based VM acceleration</a>.
+  <a href="{@docRoot}tools/devices/emulator.html#vm-linux">KVM-based VM acceleration</a>.
   You can optionally specify a memory size ({@code -m &lt;size&gt;}) for the VM, which should match
   your emulator's memory size:</p>
   {@code -qemu -m 512 -enable-kvm}<br>
@@ -440,7 +440,7 @@ scale in direct relationship with &lt;delay&gt; values.</p>
   <td>Turn on graphics acceleration for the emulator.</td>
   <td>This option is only available for emulators using a system image with API Level 15, revision 3
   and higher. For more information, see
-  <a href="{@docRoot}guide/developing/devices/emulator.html#accel-graphics">Using the Android
+  <a href="{@docRoot}tools/devices/emulator.html#accel-graphics">Using the Android
   Emulator</a>.</td></tr>
 <tr>
   <td><code>-radio &lt;device&gt;</code></td>
@@ -524,7 +524,7 @@ option. Using this option may yield unexpected and in some cases misleading
 results, since the density with which to render the skin may not be defined.
 AVDs let you associate each skin with a default density and override the default
 as needed. For more information, see <a
-href="{@docRoot}guide/developing/devices/managing-avds.html">Managing Virtual Devices
+href="{@docRoot}tools/devices/managing-avds.html">Managing Virtual Devices
 with AVD Manager</a>.
 </td>
 </tr>

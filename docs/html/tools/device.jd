@@ -36,7 +36,7 @@ href="http://www.google.com/phone/detail/nexus-s">google.com/phone</a>.</p>
 
 <p class="note"><strong>Note:</strong> When developing on a device, keep in mind that you should
 still use the <a
-href="{@docRoot}guide/developing/devices/emulator.html">Android emulator</a> to test your
+href="{@docRoot}tools/devices/emulator.html">Android emulator</a> to test your
 application
 on configurations that are not equivalent to those of your real device. Although the emulator
 does not allow you to test every device feature (such as the accelerometer), it does

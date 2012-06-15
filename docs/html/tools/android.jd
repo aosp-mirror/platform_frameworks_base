@@ -7,7 +7,7 @@ parent.link=index.html
 
   <ul>
     <li>Create, delete, and view Android Virtual Devices (AVDs). See <a href= 
-    "{@docRoot}guide/developing/devices/managing-avds-cmdline.html">Managing AVDs from the Command
+    "{@docRoot}tools/devices/managing-avds-cmdline.html">Managing AVDs from the Command
 Line</a>.</li>
 
     <li>Create and update Android projects. See <a href= 

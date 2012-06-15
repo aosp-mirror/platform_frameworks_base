@@ -58,7 +58,7 @@ version.</li>
 <div class="sidebox-wrapper">
   <div class="sidebox">
     <p>To learn more about how to use AVDs and the options
-       available to you, see <a href="{@docRoot}guide/developing/devices/index.html">Managing
+       available to you, see <a href="{@docRoot}tools/devices/index.html">Managing
        Virtual Devices</a>.</p>
   </div>
 </div>
@@ -475,7 +475,7 @@ layout approaches produce identical results.</p>
 
 <p class="note"><strong>Note:</strong> You may have to unlock the screen on the emulator to see
 your application &mdash; just as you would unlock the screen on a device. If you have problems
-running the emulator, see <a href="{@docRoot}guide/developing/devices/emulator.html">Using the
+running the emulator, see <a href="{@docRoot}tools/devices/emulator.html">Using the
 Android Emulator</a>.</p>
 
 <p>Continue reading for an introduction

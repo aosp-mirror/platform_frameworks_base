@@ -66,7 +66,7 @@ parent.link=index.html
   <h2>See also</h2>
   <ol>
     <li><a href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a></li>
-    <li><a href="{@docRoot}guide/developing/devices/managing-avds.html">Managing AVDs with AVD Manager</a></li>
+    <li><a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD Manager</a></li>
   </ol>
 </div>
 </div>
@@ -153,7 +153,7 @@ the emulator stores the user data, SD card data, and cache in the AVD directory.
 <p>To create and manage AVDs you use the AVD Manager UI or the <code>android</code> tool
 that is included in the SDK.
 For complete information about how to set up AVDs, see <a
-href="{@docRoot}guide/developing/devices/index.html">Managing Virtual Devices</a>.</p>
+href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>.</p>
 
 
 <h2 id="starting">Starting and Stopping the Emulator</h2>
@@ -565,7 +565,7 @@ You can also use the {@code android} command line tool when creating an AVD. Jus
 
 <p>The <code>-c</code> option can also be used to to specify a path to an SD card
 image for the new AVD. For more information, see <a
-href="{@docRoot}guide/developing/devices/managing-avds-cmdline.html">Managing Virtual Devices
+href="{@docRoot}tools/devices/managing-avds-cmdline.html">Managing Virtual Devices
 from the Command Line</a>.
 </p>
 
@@ -768,7 +768,7 @@ emulated SD card and load it in the emulator, see <a href="#sdcard">SD Card Emul
 
 <p>You can also use the android tool to automatically create an SD Card image
 for you, when creating an AVD. For more information, see <a
-href="{@docRoot}guide/developing/devices/managing-avds.html">Managing Virtual Devices with AVD
+href="{@docRoot}tools/devices/managing-avds.html">Managing Virtual Devices with AVD
 Manager</a>.
 
 

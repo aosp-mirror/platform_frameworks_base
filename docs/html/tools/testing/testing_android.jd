@@ -624,7 +624,7 @@ The <a href="{@docRoot}guide/developing/tools/monkey.html">UI/Application Exerci
 </p>
 <p>
     When possible, you should run these tests on an actual device. If this is not possible, you can
-    use the <a href="{@docRoot}guide/developing/devices/emulator.html">Android Emulator</a> with
+    use the <a href="{@docRoot}tools/devices/emulator.html">Android Emulator</a> with
     Android Virtual Devices configured for the hardware, screens, and versions you want to test.
 </p>
 <h2 id="NextSteps">Next Steps</h2>

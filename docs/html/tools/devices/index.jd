@@ -6,14 +6,14 @@ page.title=Managing Virtual Devices
   device by defining hardware and software options to be emulated by the Android Emulator.</p>
 
   <p>The easiest way to create an AVD is to use the graphical <a href= 
-  "{@docRoot}guide/developing/devices/managing-avds.html">AVD Manager</a>, which you launch
+  "{@docRoot}tools/devices/managing-avds.html">AVD Manager</a>, which you launch
   from Eclipse by clicking <strong>Window &gt; AVD Manager</strong>. You can also start the AVD
 Manager from the command line by calling the <code>android</code> tool with the <code>avd</code>
 options, from the <strong>&lt;sdk>/tools/</strong> directory.</p>
 
   <p>You can also create AVDs on the command line by passing the <code>android</code> tool options.
   For more information on how to create AVDs in this manner, see <a href= 
-  "{@docRoot}guide/developing/devices/managing-avds-cmdline.html">Managing Virtual
+  "{@docRoot}tools/devices/managing-avds-cmdline.html">Managing Virtual
   Devices from the Command Line</a>.</p>
 
   <p>An AVD consists of:</p>
@@ -66,9 +66,9 @@ options, from the <strong>&lt;sdk>/tools/</strong> directory.</p>
   </ul>
 
   <p>To learn how to manage AVDs using a graphical tool, read <a href=
-  "{@docRoot}guide/developing/devices/managing-avds.html">Managing AVDs with AVD Manager</a>. To
+  "{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD Manager</a>. To
 learn how to manage AVDs on the command line, read
-  <a href="{@docRoot}guide/developing/devices/managing-avds-cmdline.html">Managing AVDs
+  <a href="{@docRoot}tools/devices/managing-avds-cmdline.html">Managing AVDs
   from the Command Line</a>.</p>
 
 

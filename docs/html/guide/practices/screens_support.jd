@@ -57,7 +57,7 @@ href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResou
 Providing Alternative Resources</a></li>
     <li><a href="{@docRoot}guide/practices/ui_guidelines/icon_design.html">Icon Design
 Guidelines</a></li>
-    <li><a href="{@docRoot}guide/developing/devices/index.html">Managing Virtual Devices</a></li>
+    <li><a href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a></li>
   </ol>
 
 </div>
@@ -1253,7 +1253,7 @@ Manager with a selection of AVDs, for testing various screen configurations.</p>
 to emulate some of the most common screen configurations.</p>
 
 <p>For more information about creating and using AVDs to test your application, see <a
-href="{@docRoot}guide/developing/devices/managing-avds.html">Managing AVDs with AVD
+href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD
 Manager</a>.</p>
 
 
@@ -1366,5 +1366,5 @@ the emulator with the <code>-scale</code> option. For example:</p>
 between 0.1 and 3 that represents the desired scaling factor.</p>
 
 <p>For more information about creating AVDs from the command line, see <a
-href="{@docRoot}guide/developing/devices/managing-avds-cmdline.html">Managing AVDs from the
+href="{@docRoot}tools/devices/managing-avds-cmdline.html">Managing AVDs from the
 Command Line</a></p>
