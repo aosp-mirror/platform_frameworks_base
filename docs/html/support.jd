@@ -10,7 +10,7 @@ fullpage=1
 -->
     <div style="margin: 20px 0 0;">
 
-  <div class="col-7">
+  <div class="col-8" style="margin-left:0">
     <h3 style="font-size: 14px;line-height: 21px;color: #555;text-transform: uppercase;border-bottom: 1px solid #CCC;margin: 0 0 20px;">Code-Level Support</h3>
     
 <h5>Community and Office Hours</h5>
@@ -34,8 +34,11 @@ fullpage=1
   
   </div>
 
-  <div class="col-8">
-    <h3 style="font-size: 14px;line-height: 21px;color: #555;text-transform: uppercase;border-bottom: 1px solid #CCC;margin: 0 0 20px;">Google Play Support</h3>
+  
+  
+  <div class="col-8" style="margin-right:0">
+    <h3 style="font-size: 14px;line-height: 21px;color: #555;text-transform:
+uppercase;border-bottom: 1px solid #CCC;margin: 0 0 20px;">Google Play Support</h3>
 <h5>Help center</h5>
 <p style="color:#888">
   <a href="http://support.google.com/googleplay/android-developer/">Help&nbsp;Center&nbsp;Home</a><br />
