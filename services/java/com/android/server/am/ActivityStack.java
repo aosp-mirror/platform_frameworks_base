@@ -1055,7 +1055,9 @@ final class ActivityStack {
             mHandler.removeMessages(STOP_TIMEOUT_MSG, r);
             r.stopped = true;
             r.state = ActivityState.STOPPED;
-            if (!r.finishing) {
+            if (r.finishing) {
+                r.clearOptionsLocked();
+            } else {
                 if (r.configDestroy) {
                     destroyActivityLocked(r, true, false, "stop-config");
                     resumeTopActivityLocked(null);

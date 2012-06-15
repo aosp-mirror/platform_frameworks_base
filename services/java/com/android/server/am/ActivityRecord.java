@@ -164,6 +164,9 @@ final class ActivityRecord {
         if (pendingResults != null) {
             pw.print(prefix); pw.print("pendingResults="); pw.println(pendingResults);
         }
+        if (pendingOptions != null) {
+            pw.print(prefix); pw.print("pendingOptions="); pw.println(pendingOptions);
+        }
         if (uriPermissions != null) {
             if (uriPermissions.readUriPermissions != null) {
                 pw.print(prefix); pw.print("readUriPermissions=");
@@ -202,7 +205,7 @@ final class ActivityRecord {
         if (lastVisibleTime != 0 || waitingVisible || nowVisible) {
             pw.print(prefix); pw.print("waitingVisible="); pw.print(waitingVisible);
                     pw.print(" nowVisible="); pw.print(nowVisible);
-                    pw.print("lastVisibleTime=");
+                    pw.print(" lastVisibleTime=");
                     TimeUtils.formatDuration(lastVisibleTime, pw); pw.println("");
         }
         if (configDestroy || configChangeFlags != 0) {
@@ -453,6 +456,7 @@ final class ActivityRecord {
             if (task != null && !finishing) {
                 task.numActivities--;
             }
+            clearOptionsLocked();
         }
     }
 
@@ -465,6 +469,9 @@ final class ActivityRecord {
             finishing = true;
             if (task != null && inHistory) {
                 task.numActivities--;
+            }
+            if (stopped) {
+                clearOptionsLocked();
             }
         }
     }
