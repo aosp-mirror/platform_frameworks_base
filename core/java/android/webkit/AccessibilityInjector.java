@@ -43,11 +43,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * APIs.
  */
 class AccessibilityInjector {
-    // Default result returned from AndroidVox. Using true here means if the
-    // script fails, an accessibility service will always think that traversal
-    // has succeeded.
-    private static final String DEFAULT_ANDROIDVOX_RESULT = "true";
-
     // The WebViewClassic this injector is responsible for managing.
     private final WebViewClassic mWebViewClassic;
 
@@ -505,9 +500,7 @@ class AccessibilityInjector {
 
         final String jsonString = mAccessibilityJSONObject.toString();
         final String jsCode = String.format(ACCESSIBILITY_ANDROIDVOX_TEMPLATE, jsonString);
-        final String result = mCallback.performAction(mWebView, jsCode, DEFAULT_ANDROIDVOX_RESULT);
-
-        return ("true".equalsIgnoreCase(result));
+        return mCallback.performAction(mWebView, jsCode);
     }
 
     /**
@@ -518,13 +511,13 @@ class AccessibilityInjector {
                 "javascript:(function() { %s.onResult(%d, %s); })();";
 
         // Time in milliseconds to wait for a result before failing.
-        private static final long RESULT_TIMEOUT = 200;
+        private static final long RESULT_TIMEOUT = 5000;
 
         private final AtomicInteger mResultIdCounter = new AtomicInteger();
         private final Object mResultLock = new Object();
         private final String mInterfaceName;
 
-        private String mResult = null;
+        private boolean mResult = false;
         private long mResultId = -1;
 
         private CallbackHandler(String interfaceName) {
@@ -536,29 +529,27 @@ class AccessibilityInjector {
          *
          * @param webView The WebView to perform the action on.
          * @param code JavaScript code that evaluates to a result.
-         * @param defaultResult The result to return if the action times out.
          * @return The result of the action, or false if it timed out.
          */
-        private String performAction(WebView webView, String code, String defaultResult) {
+        private boolean performAction(WebView webView, String code) {
             final int resultId = mResultIdCounter.getAndIncrement();
             final String url = String.format(
                     JAVASCRIPT_ACTION_TEMPLATE, mInterfaceName, resultId, code);
             webView.loadUrl(url);
 
-            return getResultAndClear(resultId, defaultResult);
+            return getResultAndClear(resultId);
         }
 
         /**
          * Gets the result of a request to perform an accessibility action.
          *
          * @param resultId The result id to match the result with the request.
-         * @param defaultResult The default result to return on timeout.
          * @return The result of the request.
          */
-        private String getResultAndClear(int resultId, String defaultResult) {
+        private boolean getResultAndClear(int resultId) {
             synchronized (mResultLock) {
                 final boolean success = waitForResultTimedLocked(resultId);
-                final String result = success ? mResult : defaultResult;
+                final boolean result = success ? mResult : false;
                 clearResultLocked();
                 return result;
             }
@@ -569,7 +560,7 @@ class AccessibilityInjector {
          */
         private void clearResultLocked() {
             mResultId = -1;
-            mResult = null;
+            mResult = false;
         }
 
         /**
@@ -620,7 +611,7 @@ class AccessibilityInjector {
 
             synchronized (mResultLock) {
                 if (resultId > mResultId) {
-                    mResult = result;
+                    mResult = Boolean.parseBoolean(result);
                     mResultId = resultId;
                 }
                 mResultLock.notifyAll();
