@@ -194,13 +194,6 @@ public class HTML5VideoFullScreen extends HTML5VideoView
             mCanPause = mCanSeekBack = mCanSeekForward = true;
         }
 
-        // mMediaController status depends on the Metadata result, so put it
-        // after reading the MetaData
-        if (mMediaController != null) {
-            mMediaController.setEnabled(true);
-            mMediaController.show();
-        }
-
         if (mProgressView != null) {
             mProgressView.setVisibility(View.GONE);
         }
@@ -215,6 +208,16 @@ public class HTML5VideoFullScreen extends HTML5VideoView
 
         if (getStartWhenPrepared()) {
             mPlayer.start();
+            // Clear the flag.
+            setStartWhenPrepared(false);
+        }
+
+        // mMediaController status depends on the Metadata result, so put it
+        // after reading the MetaData.
+        // And make sure mPlayer state is updated before showing the controller.
+        if (mMediaController != null) {
+            mMediaController.setEnabled(true);
+            mMediaController.show();
         }
     }
 
