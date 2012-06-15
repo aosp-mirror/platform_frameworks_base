@@ -7980,9 +7980,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
         if (data.mSelectTextPtr != 0 &&
                 (data.mStart != data.mEnd ||
-                (mFieldPointer == nodePointer && mFieldPointer != 0))) {
+                (mFieldPointer == nodePointer && mFieldPointer != 0) ||
+                (nodePointer == 0 && data.mStart == 0 && data.mEnd == 0))) {
             mIsEditingText = (mFieldPointer == nodePointer) && nodePointer != 0;
-            mIsCaretSelection = (data.mStart == data.mEnd);
+            mIsCaretSelection = (data.mStart == data.mEnd && nodePointer != 0);
             if (mIsCaretSelection &&
                     (mInputConnection == null ||
                     mInputConnection.getEditable().length() == 0)) {
