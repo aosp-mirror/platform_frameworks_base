@@ -29,9 +29,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
+import android.os.Binder;
 import android.os.Process;
+import android.os.UserId;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.SparseArray;
 
 import java.util.List;
 
@@ -48,7 +51,7 @@ public class SearchManagerService extends ISearchManager.Stub {
     private final Context mContext;
 
     // This field is initialized lazily in getSearchables(), and then never modified.
-    private Searchables mSearchables;
+    private SparseArray<Searchables> mSearchables;
 
     private ContentObserver mGlobalSearchObserver;
 
@@ -66,14 +69,24 @@ public class SearchManagerService extends ISearchManager.Stub {
                 mContext.getContentResolver());
     }
 
-    private synchronized Searchables getSearchables() {
+    private synchronized Searchables getSearchables(int userId) {
         if (mSearchables == null) {
-            Log.i(TAG, "Building list of searchable activities");
             new MyPackageMonitor().register(mContext, null, true);
-            mSearchables = new Searchables(mContext);
-            mSearchables.buildSearchableList();
+            mSearchables = new SparseArray<Searchables>();
         }
-        return mSearchables;
+        Searchables searchables = mSearchables.get(userId);
+
+        long origId = Binder.clearCallingIdentity();
+        boolean userExists = mContext.getPackageManager().getUser(userId) != null;
+        Binder.restoreCallingIdentity(origId);
+
+        if (searchables == null && userExists) {
+            Log.i(TAG, "Building list of searchable activities for userId=" + userId);
+            searchables = new Searchables(mContext, userId);
+            searchables.buildSearchableList();
+            mSearchables.append(userId, searchables);
+        }
+        return searchables;
     }
 
     /**
@@ -87,7 +100,7 @@ public class SearchManagerService extends ISearchManager.Stub {
                 public void run() {
                     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                     mContext.unregisterReceiver(BootCompletedReceiver.this);
-                    getSearchables();
+                    getSearchables(0);
                 }
             }.start();
         }
@@ -109,8 +122,12 @@ public class SearchManagerService extends ISearchManager.Stub {
         }
 
         private void updateSearchables() {
-            // Update list of searchable activities
-            getSearchables().buildSearchableList();
+            synchronized (SearchManagerService.this) {
+                // Update list of searchable activities
+                for (int i = 0; i < mSearchables.size(); i++) {
+                    getSearchables(mSearchables.keyAt(i)).buildSearchableList();
+                }
+            }
             // Inform all listeners that the list of searchables has been updated.
             Intent intent = new Intent(SearchManager.INTENT_ACTION_SEARCHABLES_CHANGED);
             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
@@ -132,7 +149,11 @@ public class SearchManagerService extends ISearchManager.Stub {
 
         @Override
         public void onChange(boolean selfChange) {
-            getSearchables().buildSearchableList();
+            synchronized (SearchManagerService.this) {
+                for (int i = 0; i < mSearchables.size(); i++) {
+                    getSearchables(mSearchables.keyAt(i)).buildSearchableList();
+                }
+            }
             Intent intent = new Intent(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
             mContext.sendBroadcast(intent);
@@ -156,32 +177,32 @@ public class SearchManagerService extends ISearchManager.Stub {
             Log.e(TAG, "getSearchableInfo(), activity == null");
             return null;
         }
-        return getSearchables().getSearchableInfo(launchActivity);
+        return getSearchables(UserId.getCallingUserId()).getSearchableInfo(launchActivity);
     }
 
     /**
      * Returns a list of the searchable activities that can be included in global search.
      */
     public List<SearchableInfo> getSearchablesInGlobalSearch() {
-        return getSearchables().getSearchablesInGlobalSearchList();
+        return getSearchables(UserId.getCallingUserId()).getSearchablesInGlobalSearchList();
     }
 
     public List<ResolveInfo> getGlobalSearchActivities() {
-        return getSearchables().getGlobalSearchActivities();
+        return getSearchables(UserId.getCallingUserId()).getGlobalSearchActivities();
     }
 
     /**
      * Gets the name of the global search activity.
      */
     public ComponentName getGlobalSearchActivity() {
-        return getSearchables().getGlobalSearchActivity();
+        return getSearchables(UserId.getCallingUserId()).getGlobalSearchActivity();
     }
 
     /**
      * Gets the name of the web search activity.
      */
     public ComponentName getWebSearchActivity() {
-        return getSearchables().getWebSearchActivity();
+        return getSearchables(UserId.getCallingUserId()).getWebSearchActivity();
     }
 
 }

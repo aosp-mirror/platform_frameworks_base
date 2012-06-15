@@ -9383,7 +9383,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public UserInfo getUser(int userId) {
-        enforceSystemOrRoot("Only the system can remove users");
+        enforceSystemOrRoot("Only the system can query user");
         return sUserManager.getUser(userId);
     }
 

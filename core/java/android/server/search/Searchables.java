@@ -16,6 +16,7 @@
 
 package android.server.search;
 
+import android.app.AppGlobals;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.ComponentName;
@@ -23,9 +24,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -38,6 +41,7 @@ import java.util.List;
 
 /**
  * This class maintains the information about all searchable activities.
+ * This is a hidden class.
  */
 public class Searchables {
 
@@ -65,12 +69,18 @@ public class Searchables {
     public static String ENHANCED_GOOGLE_SEARCH_COMPONENT_NAME =
             "com.google.android.providers.enhancedgooglesearch/.Launcher";
 
+    // Cache the package manager instance
+    private IPackageManager mPm;
+    // User for which this Searchables caches information
+    private int mUserId;
+
     /**
      *
      * @param context Context to use for looking up activities etc.
      */
-    public Searchables (Context context) {
+    public Searchables (Context context, int userId) {
         mContext = context;
+        mUserId = userId;
     }
 
     /**
@@ -195,16 +205,14 @@ public class Searchables {
         ArrayList<SearchableInfo> newSearchablesInGlobalSearchList
                                 = new ArrayList<SearchableInfo>();
 
-        final PackageManager pm = mContext.getPackageManager();
-
         // Use intent resolver to generate list of ACTION_SEARCH & ACTION_WEB_SEARCH receivers.
         List<ResolveInfo> searchList;
         final Intent intent = new Intent(Intent.ACTION_SEARCH);
-        searchList = pm.queryIntentActivities(intent, PackageManager.GET_META_DATA);
+        searchList = queryIntentActivities(intent, PackageManager.GET_META_DATA);
 
         List<ResolveInfo> webSearchInfoList;
         final Intent webSearchIntent = new Intent(Intent.ACTION_WEB_SEARCH);
-        webSearchInfoList = pm.queryIntentActivities(webSearchIntent, PackageManager.GET_META_DATA);
+        webSearchInfoList = queryIntentActivities(webSearchIntent, PackageManager.GET_META_DATA);
 
         // analyze each one, generate a Searchables record, and record
         if (searchList != null || webSearchInfoList != null) {
@@ -262,10 +270,8 @@ public class Searchables {
         // Step 1 : Query the package manager for a list
         // of activities that can handle the GLOBAL_SEARCH intent.
         Intent intent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
-        PackageManager pm = mContext.getPackageManager();
         List<ResolveInfo> activities =
-                pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-
+                    queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
         if (activities != null && !activities.isEmpty()) {
             // Step 2: Rank matching activities according to our heuristics.
             Collections.sort(activities, GLOBAL_SEARCH_RANKER);
@@ -301,10 +307,8 @@ public class Searchables {
         Intent intent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
         intent.setComponent(globalSearch);
 
-        PackageManager pm = mContext.getPackageManager();
-        List<ResolveInfo> activities =
-                pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-
+        List<ResolveInfo> activities = queryIntentActivities(intent,
+                PackageManager.MATCH_DEFAULT_ONLY);
         if (activities != null && !activities.isEmpty()) {
             return true;
         }
@@ -374,9 +378,8 @@ public class Searchables {
         }
         Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
         intent.setPackage(globalSearchActivity.getPackageName());
-        PackageManager pm = mContext.getPackageManager();
         List<ResolveInfo> activities =
-                pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+                queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
 
         if (activities != null && !activities.isEmpty()) {
             ActivityInfo ai = activities.get(0).activityInfo;
@@ -385,6 +388,22 @@ public class Searchables {
         }
         Log.w(LOG_TAG, "No web search activity found");
         return null;
+    }
+
+    private List<ResolveInfo> queryIntentActivities(Intent intent, int flags) {
+        if (mPm == null) {
+            mPm = AppGlobals.getPackageManager();
+        }
+        List<ResolveInfo> activities = null;
+        try {
+            activities =
+                    mPm.queryIntentActivities(intent,
+                    intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                    flags, mUserId);
+        } catch (RemoteException re) {
+            // Local call
+        }
+        return activities;
     }
 
     /**
