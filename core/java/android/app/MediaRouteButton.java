@@ -103,7 +103,7 @@ public class MediaRouteButton extends View {
 
         if (mToggleMode) {
             if (mRemoteActive) {
-                mRouter.selectRoute(mRouteTypes, mRouter.getSystemAudioRoute());
+                mRouter.selectRouteInt(mRouteTypes, mRouter.getSystemAudioRoute());
             } else {
                 final int N = mRouter.getRouteCount();
                 for (int i = 0; i < N; i++) {
