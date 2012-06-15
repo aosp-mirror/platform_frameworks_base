@@ -272,11 +272,19 @@ class AccessibilityInjectorFallback {
     boolean performAccessibilityAction(int action, Bundle arguments) {
         switch (action) {
             case AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY:
-            case AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY:
+            case AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY: {
                 final int direction = getDirectionForAction(action);
                 final int axis = getAxisForGranularity(arguments.getInt(
                         AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT));
                 return traverseGivenAxis(direction, axis, true, null);
+            }
+            case AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT:
+            case AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT: {
+                final int direction = getDirectionForAction(action);
+                // TODO: Add support for moving by object.
+                final int axis = NAVIGATION_AXIS_SENTENCE;
+                return traverseGivenAxis(direction, axis, true, null);
+            }
             default:
                 return false;
         }
@@ -291,8 +299,10 @@ class AccessibilityInjectorFallback {
      */
     private static int getDirectionForAction(int action) {
         switch (action) {
+            case AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT:
             case AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY:
                 return NAVIGATION_DIRECTION_FORWARD;
+            case AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT:
             case AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY:
                 return NAVIGATION_DIRECTION_BACKWARD;
             default:
@@ -316,8 +326,8 @@ class AccessibilityInjectorFallback {
             case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_LINE:
                 return NAVIGATION_AXIS_SENTENCE;
             case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PARAGRAPH:
-                // TODO: Figure out what nextSibling() actually means.
-                return NAVIGATION_AXIS_SIBLING;
+                // TODO: This should map to object once we implement it.
+                return NAVIGATION_AXIS_SENTENCE;
             case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PAGE:
                 return NAVIGATION_AXIS_DOCUMENT;
             default:
