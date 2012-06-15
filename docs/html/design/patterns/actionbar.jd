@@ -34,15 +34,13 @@ if you wish.
 Important: If the app is currently not displaying the top-level screen, be sure to display the Up
 caret to the left of the app icon, so the user can navigate up the hierarchy. For more discussion of
 Up navigation, see the <a href="{@docRoot}design/patterns/navigation.html">Navigation</a> pattern.
+        </p>
 
-<div class="figure">
-  <img src="{@docRoot}design/media/action_bar_pattern_up_app_icon.png">
-  <div class="figure-caption">
-    App icon with and without "up" affordance.
-  </div>
+<img src="{@docRoot}design/media/action_bar_pattern_up_app_icon.png">
+<div class="figure-caption">
+  App icon with and without "up" affordance.
 </div>
 
-        </p>
       </li>
     </ol>
 
@@ -114,7 +112,7 @@ the top bar.</p>
 <p>To display actions and, if necessary, the action overflow, use the bottom bar.</p>
 
   </div>
-  <div class="layout-content-col span-3">
+  <div class="layout-content-col span-5">
 
     <img src="{@docRoot}design/media/action_bar_pattern_considerations.png">
 
