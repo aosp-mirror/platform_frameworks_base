@@ -1047,36 +1047,50 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * The accessibility focus which is the current user position when
      * interacting with the accessibility framework.
+     *
+     * @hide
      */
     public static final int FOCUS_ACCESSIBILITY =  0x00001000;
 
     /**
      * Use with {@link #focusSearch(int)}. Move acessibility focus left.
+     *
+     * @hide
      */
     public static final int ACCESSIBILITY_FOCUS_LEFT = FOCUS_LEFT | FOCUS_ACCESSIBILITY;
 
     /**
      * Use with {@link #focusSearch(int)}. Move acessibility focus up.
+     *
+     * @hide
      */
     public static final int ACCESSIBILITY_FOCUS_UP = FOCUS_UP | FOCUS_ACCESSIBILITY;
 
     /**
      * Use with {@link #focusSearch(int)}. Move acessibility focus right.
+     *
+     * @hide
      */
     public static final int ACCESSIBILITY_FOCUS_RIGHT = FOCUS_RIGHT | FOCUS_ACCESSIBILITY;
 
     /**
      * Use with {@link #focusSearch(int)}. Move acessibility focus down.
+     *
+     * @hide
      */
     public static final int ACCESSIBILITY_FOCUS_DOWN = FOCUS_DOWN | FOCUS_ACCESSIBILITY;
 
     /**
      * Use with {@link #focusSearch(int)}. Move acessibility focus forward.
+     *
+     * @hide
      */
     public static final int ACCESSIBILITY_FOCUS_FORWARD = FOCUS_FORWARD | FOCUS_ACCESSIBILITY;
 
     /**
      * Use with {@link #focusSearch(int)}. Move acessibility focus backward.
+     *
+     * @hide
      */
     public static final int ACCESSIBILITY_FOCUS_BACKWARD = FOCUS_BACKWARD | FOCUS_ACCESSIBILITY;
 
@@ -6333,6 +6347,31 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         }
     }
 
+    private void sendAccessibilityHoverEvent(int eventType) {
+        // Since we are not delivering to a client accessibility events from not
+        // important views (unless the clinet request that) we need to fire the
+        // event from the deepest view exposed to the client. As a consequence if
+        // the user crosses a not exposed view the client will see enter and exit
+        // of the exposed predecessor followed by and enter and exit of that same
+        // predecessor when entering and exiting the not exposed descendant. This
+        // is fine since the client has a clear idea which view is hovered at the
+        // price of a couple more events being sent. This is a simple and
+        // working solution.
+        View source = this;
+        while (true) {
+            if (source.includeForAccessibility()) {
+                source.sendAccessibilityEvent(eventType);
+                return;
+            }
+            ViewParent parent = source.getParent();
+            if (parent instanceof View) {
+                source = (View) parent;
+            } else {
+                return;
+            }
+        }
+    }
+
     private void requestAccessibilityFocusFromHover() {
         if (includeForAccessibility() && isActionableForAccessibility()) {
             requestAccessibilityFocus();
@@ -7902,16 +7941,15 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     || action == MotionEvent.ACTION_HOVER_MOVE)
                     && !hasHoveredChild()
                     && pointInView(event.getX(), event.getY())) {
-                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
+                sendAccessibilityHoverEvent(AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
                 mSendingHoverAccessibilityEvents = true;
-                requestAccessibilityFocusFromHover();
             }
         } else {
             if (action == MotionEvent.ACTION_HOVER_EXIT
                     || (action == MotionEvent.ACTION_MOVE
                             && !pointInView(event.getX(), event.getY()))) {
                 mSendingHoverAccessibilityEvents = false;
-                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
+                sendAccessibilityHoverEvent(AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
                 // If the window does not have input focus we take away accessibility
                 // focus as soon as the user stop hovering over the view.
                 if (mAttachInfo != null && !mAttachInfo.mHasWindowFocus) {

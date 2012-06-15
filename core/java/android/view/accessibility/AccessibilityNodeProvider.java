@@ -180,6 +180,8 @@ public abstract class AccessibilityNodeProvider {
      *
      * @see #createAccessibilityNodeInfo(int)
      * @see AccessibilityNodeInfo
+     *
+     * @hide
      */
     public AccessibilityNodeInfo accessibilityFocusSearch(int direction, int virtualViewId) {
         return null;

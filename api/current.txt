@@ -24369,12 +24369,6 @@ package android.view {
     method protected boolean verifyDrawable(android.graphics.drawable.Drawable);
     method public boolean willNotCacheDrawing();
     method public boolean willNotDraw();
-    field public static final int ACCESSIBILITY_FOCUS_BACKWARD = 4097; // 0x1001
-    field public static final int ACCESSIBILITY_FOCUS_DOWN = 4226; // 0x1082
-    field public static final int ACCESSIBILITY_FOCUS_FORWARD = 4098; // 0x1002
-    field public static final int ACCESSIBILITY_FOCUS_LEFT = 4113; // 0x1011
-    field public static final int ACCESSIBILITY_FOCUS_RIGHT = 4162; // 0x1042
-    field public static final int ACCESSIBILITY_FOCUS_UP = 4129; // 0x1021
     field public static final android.util.Property ALPHA;
     field public static final int DRAWING_CACHE_QUALITY_AUTO = 0; // 0x0
     field public static final int DRAWING_CACHE_QUALITY_HIGH = 1048576; // 0x100000
@@ -24396,7 +24390,6 @@ package android.view {
     field protected static final int[] FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET;
     field protected static final int[] FOCUSED_STATE_SET;
     field protected static final int[] FOCUSED_WINDOW_FOCUSED_STATE_SET;
-    field public static final int FOCUS_ACCESSIBILITY = 4096; // 0x1000
     field public static final int FOCUS_BACKWARD = 1; // 0x1
     field public static final int FOCUS_DOWN = 130; // 0x82
     field public static final int FOCUS_FORWARD = 2; // 0x2
@@ -25343,7 +25336,6 @@ package android.view.accessibility {
 
   public abstract class AccessibilityNodeProvider {
     ctor public AccessibilityNodeProvider();
-    method public android.view.accessibility.AccessibilityNodeInfo accessibilityFocusSearch(int, int);
     method public android.view.accessibility.AccessibilityNodeInfo createAccessibilityNodeInfo(int);
     method public android.view.accessibility.AccessibilityNodeInfo findAccessibilityFocus(int);
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(java.lang.String, int);
