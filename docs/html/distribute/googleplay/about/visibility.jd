@@ -29,12 +29,12 @@ Existing users return regularly to see what's trending and new. Downloading new
 apps is extremely convenient and fast&mdash; Google Play pushes  apps to the
 user's devices instantly, over the air. No cable or sync is ever needed.</p>
 
-<div style="float:left;margin:0px 20px 0px 0px;width:370px;">
-<div  style="width:370px;border:1px solid #DDD;">
-<img src="{@docRoot}images/gp-growth-downloads.png" style="width:600px;padding:4px;margin-bottom:0em;">
+<div style="float:left;margin:0px 20px 0px 0px;width:374px;">
+<div  style="width:378px;padding:2px;">
+<img src="{@docRoot}images/gp-growth-downloads.png" style="width:600px;margin-bottom:0em;">
 </div>
 <p class="image-caption" style="padding:.5em"><span
-style="font-weight:500;">Growth in app consumption</span>: Users downloaded more than 2.4 billion apps in Q3 2011 alone.</p>
+style="font-weight:500;">Growth in app consumption</span>: Users downloaded more than 3.7 billion apps in Q1 2012 alone.</p>
 </div>
 
 <div>
@@ -71,7 +71,9 @@ ranking in the various lists and search results in Google Play. It's also one of
 the key signals that the editorial staff looks for, when curating apps and games
 for promotion in the store.</p>
 
-<img src="{@docRoot}images/gp-rating-web.png" style="width:500px;margin-left:110px;margin-left:110px;">
+<div style="border:1px solid #DDD;padding:1px;margin-left:110px;width:504px;">
+<img src="{@docRoot}images/gp-rating-web.png" style="width:500px;padding:0;margin:0;">
+</div>
 
 <h3 id="category" stdle="padding-top:2em;">Category browsing</h3>
 
@@ -103,7 +105,7 @@ popular apps at the top. </p>
 <img src="{@docRoot}images/gp-top-new-paid.png" style="width:250px">
 </div>
 
-<h3 id="top-charts" style="padding-top:2em">Top charts and lists</h3>
+<h3 id="top-charts" style="padding-top:1em">Top charts and lists</h3>
 
 <p>Top charts keep users in touch with what’s popular and trending with Android
 users, right from the Apps and Games home pages. The charts are generated

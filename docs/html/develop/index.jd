@@ -98,71 +98,55 @@ href="{@docRoot}about/framework/android-4.0-highlights.html">Read the highlights
 			<div class="feed-frame">
                                 <!-- DEVELOPER NEWS -->
 				<ul>
-					<li>
-                                          <div class="feed-image" style="background:
-url('../images/emulator-wvga800l.png') no-repeat 0 0">
+					<li><a href="http://android-developers.blogspot.com/2012/04/faster-emulator-with-better-hardware.html">
+                                          <div class="feed-image" style="background:url('../images/emulator-wvga800l.png') no-repeat 0 0">
                                           </div>
-                                          <h4><a
-href="http://android-developers.blogspot.com/2012/04/faster-emulator-with-better-hardware.html">A Faster Emulator with Better...</a></h4>
-                                          <p>Today we’re thrilled to announce several significant improvements to the emulator, including a dramatic... <a
-href="http://android-developers.blogspot.com/2012/04/faster-emulator-with-better-hardware.html">read more</a></p>
-					</li>
-					<li>
-                                          <div class="feed-image" style="background:
-url('../images/develop/auth-code.png') no-repeat 0 0">
+                                          <h4>A Faster Emulator with Better...</h4>
+                                          <p>Today we’re thrilled to announce several significant improvements to the emulator, including a dramatic...</p>
+					</a></li>
+					<li><a href="http://android-developers.blogspot.com/2012/04/android-c2dm-client-login-key.html">
+                                          <div class="feed-image" style="background:url('../images/develop/auth-code.png') no-repeat 0 0">
                                           </div>
-                                          <h4><a
-href="http://android-developers.blogspot.com/2012/04/android-c2dm-client-login-key.html">Android
-C2DM — Client Login key...</a></h4>
+                                          <h4>Android C2DM — Client Login key...</h4>
                                           <p>In the upcoming weeks, some of the older Client
-Login authentication keys will expire. If you generated the token you’re... <a
-href="http://android-developers.blogspot.com/2012/04/android-c2dm-client-login-key.html">read more</a></p>
-					</li>
-					<li>
+					Login authentication keys will expire. If you generated the token you’re...</p>
+					</a></li>
+					<li><a href="http://android-developers.blogspot.com/2012/04/accessibility-are-you-serving-all-your.html">
                                           <div class="feed-image">
                                           </div>
-                                          <h4><a
-href="http://android-developers.blogspot.com/2012/04/accessibility-are-you-serving-all-your.html">
-Accessibility</a></h4>
-                                          <p>We recently published some new resources to help
-developers make their Android applications more accessible... <a
-href="http://android-developers.blogspot.com/2012/04/accessibility-are-you-serving-all-your.html">read more</a></p>
-					</li>
-					<li>
-                                          <div class="feed-image" style="background:
-url('http://developer.android.com/images/home/play_logo.png') no-repeat 0 0" >
+                                          <h4>Accessibility</h4>
+                                          <p>We recently published some new resources to help developers make their Android applications more accessible... </p>
+					</a></li>
+					<li><a href="http://android-developers.blogspot.com/2012/04/new-seller-countries-in-google-play.html">
+                                          <div class="feed-image" style="background:url('http://developer.android.com/images/home/play_logo.png') no-repeat 0 0" >
                                           </div>
-                                          <h4><a
-href="http://android-developers.blogspot.com/2012/04/new-seller-countries-in-google-play.html">New 
-                                              Seller Countries in Google Play</a></h4>
+                                          <h4>New Seller Countries in Google Play</h4>
                                           <p>Over the past year we’ve been working to expand the list of 
-                                            countries and currencies from which Android developers... <a
-href="http://android-developers.blogspot.com/2012/04/new-seller-countries-in-google-play.html">read more</a></p>
-					</li>
+                                            countries and currencies from which Android developers...</p>
+					</a></li>
 				</ul>
                                 <!-- FEATURED DOCS -->
 				<ul>
-					<li>
-						<h4><a href="{@docRoot}guide/market/billing/index.html">Google Play In-app Billing</a></h4>
+					<li><a href="{@docRoot}guide/market/billing/index.html">
+						<h4>Google Play In-app Billing</h4>
 						<p>In-app Billing is a Google Play service that lets you sell digital content from inside your applications. You can sell products as standard in-app products (one-time purchase) or with subscriptions (recurring...</p>
-					</li>
-					<li>
-						<h4><a href="{@docRoot}guide/topics/providers/contacts-provider.html">Contacts Provider</a></h4>
+					</a></li>
+					<li><a href="{@docRoot}guide/topics/providers/contacts-provider.html">
+						<h4>Contacts Provider</h4>
 						<p>The Contacts Provider is a powerful and flexible Android component that manages the device's central repository of data about people. You can use it to build powerful social features...</p>
-					</li>
-					<li>
-						<h4><a href="{@docRoot}training/efficient-downloads/index.html">Transferring Data Without Draining the Battery</a></h4>
+					</a></li>
+					<li><a href="{@docRoot}training/efficient-downloads/index.html">
+						<h4>Transferring Data Without Draining the Battery</h4>
 						<p>This training class demonstrates the best practices for scheduling and executing downloads using techniques such as caching, polling, and prefetching.</p>
-					</li>
-					<li>
-						<h4><a href="{@docRoot}training/backward-compatible-ui/index.html">Creating Backward-Compatible UIs</a></h4>
+					</a></li>
+					<li><a href="{@docRoot}training/backward-compatible-ui/index.html">
+						<h4>Creating Backward-Compatible UIs</h4>
 						<p>This training class demonstrates how to use UI components and APIs available in newer versions of Android in a backward-compatible way, ensuring that your application still runs on previous versions...</p>
-					</li>
+					</a></li>
 				</ul>
 			</div>
 		</div>
-	</div>
-	<!-- /news and feature feed -->
+	</div>	<!-- /news and feature feed -->
 	<!-- video feed -->
 	<div class="feed col-8" style="margin-right:0">
 		<ul class="feed-nav">

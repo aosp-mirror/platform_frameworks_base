@@ -22,7 +22,6 @@ fullpage=1
 
   <a href="http://webchat.freenode.net/?channels=android">#android</a>, <a href="http://webchat.freenode.net/?channels=android-dev">#android-dev</a> <span style="color:#888">(IRC via irc.freenode.net)</span><br />
   <a href="https://plus.google.com/108967384991768947849/posts">+Android Developers Office Hours</a> <span style="color:#888">(Wednesdays 2 PM PST (UTC-7))</span><br />
-  <a href="http://stackoverflow.com/questions/tagged/android">Stack Overflow</a> (use the 'android' tag)<br />
 </p>
 
 
@@ -63,7 +62,7 @@ uppercase;border-bottom: 1px solid #CCC;margin: 0 0 20px;">Google Play Support</
 
   <h5>Payment and Merchant Issues</h5>
 
-<p style="color:#888">
+<p style="color:#888;margin-bottom:1.5em;">
   <a href="http://support.google.com/checkout/sell/">Merchant&nbsp;Help&nbsp;Center&nbsp;Home<br />
   <a href="http://support.google.com/checkout/sell/bin/static.py?hl=en&page=ts.cs&ts=2472700">Issue reporting tool<br />
   <a href="https://productforums.google.com/forum/#!forum/checkout-merchant">checkout-merchant</a> support forum<br />
