@@ -483,15 +483,19 @@ class AccessibilityInjector {
             switch (action) {
                 case AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY:
                 case AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY:
-                    final int granularity = arguments.getInt(
-                            AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT);
-                    mAccessibilityJSONObject.accumulate("granularity", granularity);
+                    if (arguments != null) {
+                        final int granularity = arguments.getInt(
+                                AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT);
+                        mAccessibilityJSONObject.accumulate("granularity", granularity);
+                    }
                     break;
                 case AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT:
                 case AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT:
-                    final String element = arguments.getString(
-                            AccessibilityNodeInfo.ACTION_ARGUMENT_HTML_ELEMENT_STRING);
-                    mAccessibilityJSONObject.accumulate("element", element);
+                    if (arguments != null) {
+                        final String element = arguments.getString(
+                                AccessibilityNodeInfo.ACTION_ARGUMENT_HTML_ELEMENT_STRING);
+                        mAccessibilityJSONObject.accumulate("element", element);
+                    }
                     break;
             }
         } catch (JSONException e) {
