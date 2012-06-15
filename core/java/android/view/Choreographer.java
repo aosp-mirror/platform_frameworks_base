@@ -79,6 +79,16 @@ public final class Choreographer {
     // be dequeued.
     private static final long DEFAULT_FRAME_DELAY = 10;
 
+    // The fake vsync delay in milliseconds.
+    // When the screen is off, we might not receive real vsync pulses from the hardware
+    // which would cause posted Choreographer callbacks to not run.  This is bad because
+    // messages in the Looper might be blocked behind a barrier that is scheduled to be
+    // removed by one of those Choreographer callback (see ViewRootImpl.doTraversals).
+    // Until the barrier is removed, those messages will not run.  To prevent starvation
+    // of the Looper, we synthesize fake vsync pulses at a reduced rate whenever the
+    // display hardware stops generating them.
+    private static final long FAKE_VSYNC_DELAY = 100;
+
     // The number of milliseconds between animation frames.
     private static volatile long sFrameDelay = DEFAULT_FRAME_DELAY;
 
@@ -113,6 +123,7 @@ public final class Choreographer {
     private static final int MSG_DO_FRAME = 0;
     private static final int MSG_DO_SCHEDULE_VSYNC = 1;
     private static final int MSG_DO_SCHEDULE_CALLBACK = 2;
+    private static final int MSG_FAKE_VSYNC = 3;
 
     // All frame callbacks posted by applications have this token.
     private static final Object FRAME_CALLBACK_TOKEN = new Object() {
@@ -587,6 +598,13 @@ public final class Choreographer {
 
     private void scheduleVsyncLocked() {
         mDisplayEventReceiver.scheduleVsync();
+
+        // Post a message to simulate a fake vsync pulse at a reduced rate in case the
+        // display hardware stops generating them.  This ensures that Choreographer
+        // callbacks can continue to run even if the screen is off.
+        Message msg = mHandler.obtainMessage(MSG_FAKE_VSYNC);
+        msg.setAsynchronous(true);
+        mHandler.sendMessageDelayed(msg, FAKE_VSYNC_DELAY);
     }
 
     private boolean isRunningOnLooperThreadLocked() {
@@ -662,6 +680,12 @@ public final class Choreographer {
                 case MSG_DO_SCHEDULE_CALLBACK:
                     doScheduleCallback(msg.arg1);
                     break;
+                case MSG_FAKE_VSYNC:
+                    if (DEBUG) {
+                        Log.d(TAG, "Handling fake vsync while screen is off.");
+                    }
+                    doFrame(System.nanoTime(), 0);
+                    break;
             }
         }
     }
@@ -683,6 +707,17 @@ public final class Choreographer {
             // the message queue.  If there are no messages in the queue with timestamps
             // earlier than the frame time, then the vsync event will be processed immediately.
             // Otherwise, messages that predate the vsync event will be handled first.
+            if (mHavePendingVsync) {
+                if (DEBUG) {
+                    Log.d(TAG, "Already have a pending vsync event.  There should only be "
+                            + "one at a time but they can double up when a fake vsync "
+                            + "is handled in place of a real one.");
+                }
+                mHandler.removeCallbacks(this);
+            } else {
+                mHavePendingVsync = true;
+            }
+
             long now = System.nanoTime();
             if (timestampNanos > now) {
                 Log.w(TAG, "Frame time is " + ((timestampNanos - now) * 0.000001f)
@@ -691,12 +726,7 @@ public final class Choreographer {
                 timestampNanos = now;
             }
 
-            if (mHavePendingVsync) {
-                Log.w(TAG, "Already have a pending vsync event.  There should only be "
-                        + "one at a time.");
-            } else {
-                mHavePendingVsync = true;
-            }
+            mHandler.removeMessages(MSG_FAKE_VSYNC);
 
             mTimestampNanos = timestampNanos;
             mFrame = frame;
