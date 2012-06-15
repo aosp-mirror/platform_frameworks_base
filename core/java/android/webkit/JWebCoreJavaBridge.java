@@ -89,6 +89,7 @@ final class JWebCoreJavaBridge extends Handler {
     private void fireSharedTimer() { 
         // clear the flag so that sharedTimerFired() can set a new timer
         mHasInstantTimer = false;
+        removeMessages(TIMER_MESSAGE);
         sharedTimerFired();
     }
 

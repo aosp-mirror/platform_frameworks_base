@@ -2212,11 +2212,19 @@ public final class WebViewCore {
                 mEventHub.sendMessage(Message.obtain(null, EventHub.WEBKIT_DRAW));
             }
             m_skipDrawFlag = false;
+            m_skipDrawFlagLock.notify();
         }
     }
 
     private void webkitDraw() {
         synchronized (m_skipDrawFlagLock) {
+            if (m_skipDrawFlag) {
+                try {
+                    // Aggressively throttle webkit to give the UI more CPU
+                    // to catch up with
+                    m_skipDrawFlagLock.wait(50);
+                } catch (InterruptedException e) {}
+            }
             if (m_skipDrawFlag) {
                 m_drawWasSkipped = true;
                 return;
