@@ -976,7 +976,7 @@ put {@code normal} size resources in the corresponding default resource director
 notlong} resources in the corresponding default resource directory.</p>
   </li>
 
-  <li>Ensure that your <a href="{@docRoot}sdk/tools-notes.html">SDK Tools</a> version
+  <li>Ensure that your <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools</a> version
 is r6 or greater.
 
     <p>You need SDK Tools, Revision 6 (or greater), because it includes a new packaging tool that

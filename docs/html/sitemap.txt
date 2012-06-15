@@ -21,7 +21,7 @@ http://developer.android.com/sdk/android-1.5.html
 http://developer.android.com/sdk/android-2.0.1.html
 http://developer.android.com/sdk/android-2.0.html
 http://developer.android.com/sdk/android-1.1.html
-http://developer.android.com/sdk/tools-notes.html
+http://developer.android.com/tools/sdk/tools-notes.html
 http://developer.android.com/sdk/win-usb.html
 http://developer.android.com/sdk/eclipse-adt.html
 http://developer.android.com/sdk/ndk/index.html

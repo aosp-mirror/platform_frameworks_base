@@ -77,7 +77,7 @@ class="toggle-content-img" alt="" />
 <dl>
 <dt>Dependencies:</dt>
 <dd>
-<p>Requires <a href="{@docRoot}sdk/tools-notes.html">SDK Tools r12</a> or
+<p>Requires <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r12</a> or
 higher.</p>
 </dd>
 <dt>Notes:</dt>
@@ -104,7 +104,7 @@ ADT 12.</p>
 <dl>
 <dt>Dependencies:</dt>
 <dd>
-<p>Requires <a href="{@docRoot}sdk/tools-notes.html">SDK Tools r10</a> or higher.</p>
+<p>Requires <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r10</a> or higher.</p>
 </dd>
 </dl>
 

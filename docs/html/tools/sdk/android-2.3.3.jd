@@ -79,7 +79,7 @@ class="toggle-content-img" alt="" />
 <dl>
 <dt>Dependencies:</dt>
 <dd>
-<p>Requires <a href="{@docRoot}sdk/tools-notes.html">SDK Tools r12</a> or
+<p>Requires <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r12</a> or
 higher.</p>
 </dd>
 <dt>Notes:</dt>

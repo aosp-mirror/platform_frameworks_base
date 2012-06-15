@@ -39,7 +39,7 @@ now available from the "SDK" tab, under "Downloadable SDK Components."</p>
 <li>Notes for the Android 2.0.1 platform are in the <a
 href="{@docRoot}sdk/android-2.0.1.html">Android 2.0.1, Release 1</a> document. </li>
 <li>You can find information about tools changes in the <a
-href="{@docRoot}sdk/tools-notes.html#notes">SDK Tools</a> and <a
+href="{@docRoot}tools/sdk/tools-notes.html#notes">SDK Tools</a> and <a
 href="{@docRoot}sdk/eclipse-adt.html#notes">ADT Plugin for Eclipse</a>.</li>
 </ul>
 
