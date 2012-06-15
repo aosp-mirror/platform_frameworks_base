@@ -28,7 +28,7 @@ page.title=Preparing for Release
 </div>
 
 <p>Before you distribute your Android application to users you need to prepare it for release. The
-preparation process is a required <a href="{@docRoot}guide/developing/index.html">development
+preparation process is a required <a href="{@docRoot}tools/workflow/index.html">development
 task</a> for all Android applications and is the first step in the publishing process (see figure
 1).</p>
 
@@ -58,7 +58,7 @@ in this document.</p>
      id="figure1" />
 <p class="img-caption">
   <strong>Figure 1.</strong> Preparing for release is a required <a
-href="{@docRoot}guide/developing/index.html">development
+href="{@docRoot}tools/workflow/index.html">development
 task</a> and is the first step in the publishing process.
 </p>
 

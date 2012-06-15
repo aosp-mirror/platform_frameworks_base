@@ -47,7 +47,7 @@ However, you can also release applications by sending them directly to users or 
 download them from your own website.</p>
 
 <p>Figure 1 shows how the publishing process fits into the overall Android <a
-href="{@docRoot}guide/developing/index.html">application development process</a>.
+href="{@docRoot}tools/workflow/index.html">application development process</a>.
 The publishing process is typically performed after you finish testing your application in a debug
 environment. Also, as a best practice, your application should meet all of your release criteria for
 functionality, performance, and stability before you begin the publishing process.</p>
@@ -56,7 +56,7 @@ functionality, performance, and stability before you begin the publishing proces
        process fits into the overall development process" height="86" id="figure1" />
 <p class="img-caption">
   <strong>Figure 1.</strong> Publishing is the last phase of the Android <a
-href="{@docRoot}guide/developing/index.html">application development process</a>.
+href="{@docRoot}tools/workflow/index.html">application development process</a>.
 </p>
 
 <h2 id="publishing-prepare">Preparing Your Application for Release</h2>

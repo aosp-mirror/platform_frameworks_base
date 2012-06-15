@@ -282,7 +282,7 @@ page.title=What is the NDK?
   
   <p>For more information about developing with the Android SDK tools and what
   you need to do to create, build, and run your applications, see
-  the <a href="{@docRoot}guide/developing/index.html">Overview</a>
+  the <a href="{@docRoot}tools/workflow/index.html">Overview</a>
   section for developing on Android.</p>
 
   <h4 id="hello-jni">Exploring the hello-jni Sample</h4>
