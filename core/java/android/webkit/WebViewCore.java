@@ -621,8 +621,6 @@ public final class WebViewCore {
      */
     private native void nativeNotifyAnimationStarted(int nativeClass);
 
-    private native boolean nativeFocusBoundsChanged(int nativeClass);
-
     private native boolean nativeKey(int nativeClass, int keyCode,
             int unichar, int repeatCount, boolean isShift, boolean isAlt,
             boolean isSym, boolean isDown);
@@ -2190,7 +2188,6 @@ public final class WebViewCore {
         // only non-null if it is for the first picture set after the first layout
         ViewState mViewState;
         boolean mFirstLayoutForNonStandardLoad;
-        boolean mFocusSizeChanged;
     }
 
     DrawData mLastDrawData = null;
@@ -2245,7 +2242,6 @@ public final class WebViewCore {
 
     private void webkitDraw(DrawData draw) {
         if (mWebViewClassic != null) {
-            draw.mFocusSizeChanged = nativeFocusBoundsChanged(mNativeClass);
             draw.mViewSize = new Point(mCurrentViewWidth, mCurrentViewHeight);
             if (mSettings.getUseWideViewPort()) {
                 draw.mMinPrefWidth = Math.max(
