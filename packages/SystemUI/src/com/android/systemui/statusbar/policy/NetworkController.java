@@ -121,8 +121,12 @@ public class NetworkController extends BroadcastReceiver {
     private int mWimaxSignal = 0;
     private int mWimaxState = 0;
     private int mWimaxExtraState = 0;
+
     // data connectivity (regardless of state, can we access the internet?)
     // state of inet connection - 0 not connected, 100 connected
+    private boolean mConnected = false;
+    private int mConnectedNetworkType = ConnectivityManager.TYPE_NONE;
+    private String mConnectedNetworkTypeName;
     private int mInetCondition = 0;
     private static final int INET_CONDITION_THRESHOLD = 50;
 
@@ -868,6 +872,16 @@ public class NetworkController extends BroadcastReceiver {
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo info = connManager.getActiveNetworkInfo();
 
+        // Are we connected at all, by any interface?
+        mConnected = info != null && info.isConnected();
+        if (mConnected) {
+            mConnectedNetworkType = info.getType();
+            mConnectedNetworkTypeName = info.getTypeName();
+        } else {
+            mConnectedNetworkType = ConnectivityManager.TYPE_NONE;
+            mConnectedNetworkTypeName = null;
+        }
+
         int connectionStatus = intent.getIntExtra(ConnectivityManager.EXTRA_INET_CONDITION, 0);
 
         if (CHATTY) {
@@ -912,12 +926,13 @@ public class NetworkController extends BroadcastReceiver {
             //   - We are connected to mobile data, or
             //   - We are not connected to mobile data, as long as the *reason* packets are not
             //     being routed over that link is that we have better connectivity via wifi.
-            // If data is disconnected for some other reason but wifi is connected, we show nothing.
+            // If data is disconnected for some other reason but wifi (or ethernet/bluetooth) 
+            // is connected, we show nothing.
             // Otherwise (nothing connected) we show "No internet connection".
 
             if (mDataConnected) {
                 mobileLabel = mNetworkName;
-            } else if (mWifiConnected) {
+            } else if (mConnected) {
                 if (hasService()) {
                     mobileLabel = mNetworkName;
                 } else {
@@ -997,6 +1012,12 @@ public class NetworkController extends BroadcastReceiver {
                     R.string.accessibility_bluetooth_tether);
         }
 
+        final boolean ethernetConnected = (mConnectedNetworkType == ConnectivityManager.TYPE_ETHERNET);
+        if (ethernetConnected) {
+            // TODO: icons and strings for Ethernet connectivity
+            combinedLabel = mConnectedNetworkTypeName;
+        }
+
         if (mAirplaneMode &&
                 (mServiceState == null || (!hasService() && !mServiceState.isEmergencyOnly()))) {
             // Only display the flight-mode icon if not in "emergency calls only" mode.
@@ -1023,7 +1044,7 @@ public class NetworkController extends BroadcastReceiver {
                 combinedSignalIconId = mDataSignalIconId;
             }
         }
-        else if (!mDataConnected && !mWifiConnected && !mBluetoothTethered && !mWimaxConnected) {
+        else if (!mDataConnected && !mWifiConnected && !mBluetoothTethered && !mWimaxConnected && !ethernetConnected) {
             // pretty much totally disconnected
 
             combinedLabel = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
@@ -1224,6 +1245,9 @@ public class NetworkController extends BroadcastReceiver {
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("NetworkController state:");
+        pw.println(String.format("  %s network type %d (%s)", 
+                mConnected?"CONNECTED":"DISCONNECTED",
+                mConnectedNetworkType, mConnectedNetworkTypeName));
         pw.println("  - telephony ------");
         pw.print("  hasService()=");
         pw.println(hasService());

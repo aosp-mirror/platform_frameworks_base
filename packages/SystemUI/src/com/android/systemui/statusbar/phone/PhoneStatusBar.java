@@ -462,11 +462,12 @@ public class PhoneStatusBar extends BaseStatusBar {
         signalCluster.setNetworkController(mNetworkController);
 
         if (SHOW_CARRIER_LABEL) {
-            // for wifi-only devices, we show SSID; otherwise, we show PLMN
+            // for mobile devices, we always show mobile connection info here (SPN/PLMN)
+            // for other devices, we show whatever network is connected
             if (mNetworkController.hasMobileDataFeature()) {
                 mNetworkController.addMobileLabelView(mCarrierLabel);
             } else {
-                mNetworkController.addWifiLabelView(mCarrierLabel);
+                mNetworkController.addCombinedLabelView(mCarrierLabel);
             }
         }
 
