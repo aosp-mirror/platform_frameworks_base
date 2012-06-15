@@ -3,7 +3,7 @@ page.title=Color
 
 <style>
   .color-row {
-    width: 740px;
+    width: 760px;
     margin:0;
 
     display: -webkit-box;
