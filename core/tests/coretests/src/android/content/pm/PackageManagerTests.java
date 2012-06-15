@@ -23,6 +23,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
@@ -49,6 +50,8 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+
+import java.util.List;
 
 public class PackageManagerTests extends AndroidTestCase {
     private static final boolean localLOGV = true;
@@ -3128,6 +3131,92 @@ public class PackageManagerTests extends AndroidTestCase {
         VerifierDeviceIdentity id = pm.getVerifierDeviceIdentity();
 
         assertNotNull("Verifier device identity should not be null", id);
+    }
+
+    public void testGetInstalledPackages() {
+        List<PackageInfo> packages = getPm().getInstalledPackages(0);
+        assertNotNull("installed packages cannot be null", packages);
+        assertTrue("installed packages cannot be empty", packages.size() > 0);
+    }
+
+    public void testGetUnInstalledPackages() {
+        List<PackageInfo> packages = getPm().getInstalledPackages(
+                PackageManager.GET_UNINSTALLED_PACKAGES);
+        assertNotNull("installed packages cannot be null", packages);
+        assertTrue("installed packages cannot be empty", packages.size() > 0);
+    }
+
+    /**
+     * Test that getInstalledPackages returns all the data specified in
+     * flags.
+     */
+    public void testGetInstalledPackagesAll() {
+        int flags = PackageManager.GET_ACTIVITIES | PackageManager.GET_GIDS
+                | PackageManager.GET_CONFIGURATIONS | PackageManager.GET_INSTRUMENTATION
+                | PackageManager.GET_PERMISSIONS | PackageManager.GET_PROVIDERS
+                | PackageManager.GET_RECEIVERS | PackageManager.GET_SERVICES
+                | PackageManager.GET_SIGNATURES | PackageManager.GET_UNINSTALLED_PACKAGES;
+
+        List<PackageInfo> packages = getPm().getInstalledPackages(flags);
+        assertNotNull("installed packages cannot be null", packages);
+        assertTrue("installed packages cannot be empty", packages.size() > 0);
+
+        PackageInfo packageInfo = null;
+
+        // Find the package with all components specified in the AndroidManifest
+        // to ensure no null values
+        for (PackageInfo pi : packages) {
+            if ("com.android.frameworks.coretests.install_complete_package_info"
+                    .equals(pi.packageName)) {
+                packageInfo = pi;
+                break;
+            }
+        }
+        assertNotNull("activities should not be null", packageInfo.activities);
+        assertNotNull("configPreferences should not be null", packageInfo.configPreferences);
+        assertNotNull("instrumentation should not be null", packageInfo.instrumentation);
+        assertNotNull("permissions should not be null", packageInfo.permissions);
+        assertNotNull("providers should not be null", packageInfo.providers);
+        assertNotNull("receivers should not be null", packageInfo.receivers);
+        assertNotNull("services should not be null", packageInfo.services);
+        assertNotNull("signatures should not be null", packageInfo.signatures);
+    }
+
+    /**
+     * Test that getInstalledPackages returns all the data specified in
+     * flags when the GET_UNINSTALLED_PACKAGES flag is set.
+     */
+    public void testGetUnInstalledPackagesAll() {
+        int flags = PackageManager.GET_UNINSTALLED_PACKAGES
+                | PackageManager.GET_ACTIVITIES | PackageManager.GET_GIDS
+                | PackageManager.GET_CONFIGURATIONS | PackageManager.GET_INSTRUMENTATION
+                | PackageManager.GET_PERMISSIONS | PackageManager.GET_PROVIDERS
+                | PackageManager.GET_RECEIVERS | PackageManager.GET_SERVICES
+                | PackageManager.GET_SIGNATURES | PackageManager.GET_UNINSTALLED_PACKAGES;
+
+        List<PackageInfo> packages = getPm().getInstalledPackages(flags);
+        assertNotNull("installed packages cannot be null", packages);
+        assertTrue("installed packages cannot be empty", packages.size() > 0);
+
+        PackageInfo packageInfo = null;
+
+        // Find the package with all components specified in the AndroidManifest
+        // to ensure no null values
+        for (PackageInfo pi : packages) {
+            if ("com.android.frameworks.coretests.install_complete_package_info"
+                    .equals(pi.packageName)) {
+                packageInfo = pi;
+                break;
+            }
+        }
+        assertNotNull("activities should not be null", packageInfo.activities);
+        assertNotNull("configPreferences should not be null", packageInfo.configPreferences);
+        assertNotNull("instrumentation should not be null", packageInfo.instrumentation);
+        assertNotNull("permissions should not be null", packageInfo.permissions);
+        assertNotNull("providers should not be null", packageInfo.providers);
+        assertNotNull("receivers should not be null", packageInfo.receivers);
+        assertNotNull("services should not be null", packageInfo.services);
+        assertNotNull("signatures should not be null", packageInfo.signatures);
     }
 
     /*---------- Recommended install location tests ----*/
