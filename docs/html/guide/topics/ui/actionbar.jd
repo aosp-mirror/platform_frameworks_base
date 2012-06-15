@@ -6,13 +6,6 @@ parent.link=index.html
 <div id="qv-wrapper">
 <div id="qv">
 
-  <h2>Quickview</h2>
-  <ul>
-    <li>A title bar that includes the application icon and activity title</li>
-    <li>Provides access to menu items and navigation modes such as tabs</li>
-    <li>Requires API level 11 or greater</li>
-  </ul>
-
   <h2>In this document</h2>
 <ol>
   <li><a href="#Adding">Adding the Action Bar</a>
@@ -120,7 +113,7 @@ include a <em>Menu</em> button).</p>
 </li>
 </ul>
 
-<img src="{@docRoot}images/ui/actionbar.png" alt="" />
+<img src="{@docRoot}images/ui/actionbar.png" alt="" width="440" />
 <p class="img-caption"><strong>Figure 1.</strong> Action bar from the <a
 href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a> app (on a
 landscape handset), showing the logo on the left, navigation tabs, and an action item on the

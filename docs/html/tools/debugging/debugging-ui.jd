@@ -35,14 +35,14 @@ parent.link=index.html
           <ol>
               <li>
 <iframe title="Hierarchyviewer" 
-    width="272" height="234" 
+    width="210" height="160" 
     src="http://www.youtube.com/embed/PAgE7saQUUY?rel=0&amp;hd=1" 
     frameborder="0" allowfullscreen>
 </iframe>
               </li>
               <li>
 <iframe title="Pixel Perfect" 
-    width="272" height="234" 
+    width="210" height="160" 
     src="http://www.youtube.com/embed/C45bMZGdN7Y?rel=0&amp;hd=1" 
     frameborder="0" 
     allowfullscreen>
