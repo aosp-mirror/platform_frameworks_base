@@ -37,7 +37,7 @@ class="button">Download the demo</a>
 </div>
 
 <p>Properly stopping and restarting your activity is an important process in the activity lifecycle
-that ensures your users perceive that your app is always alive and doesn't loose their progress.
+that ensures your users perceive that your app is always alive and doesn't lose their progress.
 There are a few of key scenarios in which your activity is stopped and restarted:</p>
 
 <ul>

@@ -50,7 +50,7 @@ failing on older devices.</p>
 <p>Suppose there's a simple new call you want to use, like {@link
 android.os.Debug#dumpHprofData(java.lang.String)
 android.os.Debug.dumpHprofData(String filename)}.  The {@link android.os.Debug}
-class has existed since Android 1.0, but the method is new in Anroid 1.5 (API
+class has existed since Android 1.0, but the method is new in Android 1.5 (API
 Level 3). If you try to call it directly, your app will fail to run on devices
 running Android 1.1 or earlier.</p>
 

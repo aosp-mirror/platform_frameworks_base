@@ -440,7 +440,7 @@ and select <strong>Properties</strong>.</dd>
     project</a> that instruments an application project that depends on the library project. You
     can then add tests to the project for library-specific features.</li>
 
-    <li>You can set up a set up a standard application project that depends on the library and put
+    <li>You can set up a standard application project that depends on the library and put
     the instrumentation in that project. This lets you create a self-contained project that
     contains both the tests/instrumentations and the code to test.</li>
   </ul>
