@@ -271,9 +271,9 @@ public class MediaRouter {
         if (cat.isGroupable() && !(info instanceof RouteGroup)) {
             // Enforce that any added route in a groupable category must be in a group.
             final RouteGroup group = new RouteGroup(info.getCategory());
-            group.addRoute(info);
             sStatic.mRoutes.add(group);
             dispatchRouteAdded(group);
+            group.addRoute(info);
 
             info = group;
         } else {
@@ -552,6 +552,8 @@ public class MediaRouter {
         final RouteCategory mCategory;
         Drawable mIcon;
 
+        private Object mTag;
+
         RouteInfo(RouteCategory category) {
             mCategory = category;
         }
@@ -621,6 +623,29 @@ public class MediaRouter {
             return mIcon;
         }
 
+        /**
+         * Set an application-specific tag object for this route.
+         * The application may use this to store arbitrary data associated with the
+         * route for internal tracking.
+         *
+         * <p>Note that the lifespan of a route may be well past the lifespan of
+         * an Activity or other Context; take care that objects you store here
+         * will not keep more data in memory alive than you intend.</p>
+         *
+         * @param tag Arbitrary, app-specific data for this route to hold for later use
+         */
+        public void setTag(Object tag) {
+            mTag = tag;
+        }
+
+        /**
+         * @return The tag object previously set by the application
+         * @see #setTag(Object)
+         */
+        public Object getTag() {
+            return mTag;
+        }
+
         void setStatusInt(CharSequence status) {
             if (!status.equals(mStatus)) {
                 mStatus = status;
@@ -652,7 +677,6 @@ public class MediaRouter {
      */
     public static class UserRouteInfo extends RouteInfo {
         RemoteControlClient mRcc;
-        private Object mTag;
 
         UserRouteInfo(RouteCategory category) {
             super(category);
@@ -719,29 +743,6 @@ public class MediaRouter {
          */
         public void setIconResource(int resId) {
             setIconDrawable(sStatic.mResources.getDrawable(resId));
-        }
-
-        /**
-         * Set an application-specific tag object for this route.
-         * The application may use this to store arbitrary data associated with the
-         * route for internal tracking.
-         *
-         * <p>Note that the lifespan of a route may be well past the lifespan of
-         * an Activity or other Context; take care that objects you store here
-         * will not keep more data in memory alive than you intend.</p>
-         *
-         * @param tag Arbitrary, app-specific data for this route to hold for later use
-         */
-        public void setTag(Object tag) {
-            mTag = tag;
-        }
-
-        /**
-         * @return The tag object previously set by the application
-         * @see #setTag(Object)
-         */
-        public Object getTag() {
-            return mTag;
         }
     }
 
@@ -888,6 +889,12 @@ public class MediaRouter {
         void routeUpdated() {
             int types = 0;
             final int count = mRoutes.size();
+            if (count == 0) {
+                // Don't keep empty groups in the router.
+                MediaRouter.removeRoute(this);
+                return;
+            }
+
             for (int i = 0; i < count; i++) {
                 types |= mRoutes.get(i).mSupportedTypes;
             }
@@ -901,6 +908,7 @@ public class MediaRouter {
             final int count = mRoutes.size();
             for (int i = 0; i < count; i++) {
                 final RouteInfo info = mRoutes.get(i);
+                // TODO: There's probably a much more correct way to localize this.
                 if (i > 0) sb.append(", ");
                 sb.append(info.mName);
             }
