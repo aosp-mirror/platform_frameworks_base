@@ -115,7 +115,7 @@ again:
     pfd.fd = fd;
     pfd.events = POLLIN;
     *err = errno = 0;
-    int ret = poll(&pfd, 1, timeout_ms);
+    int ret = TEMP_FAILURE_RETRY(poll(&pfd, 1, timeout_ms));
     if (ret < 0) {
         ALOGE("poll() error\n");
         *err = errno;
@@ -136,7 +136,7 @@ again:
     while ((int)(bufit - buf) < (len - 1))
     {
         errno = 0;
-        int rc = read(fd, bufit, 1);
+        int rc = TEMP_FAILURE_RETRY(read(fd, bufit, 1));
 
         if (!rc)
             break;
@@ -427,7 +427,7 @@ static jint waitForAsyncConnectNative(JNIEnv *env, jobject obj,
             {
                 char ch;
                 errno = 0;
-                int nr = read(nat->rfcomm_sock, &ch, 1);
+                int nr = TEMP_FAILURE_RETRY(read(nat->rfcomm_sock, &ch, 1));
                 /* It should be that nr != 1 because we just opened a socket
                    and we haven't sent anything over it for the other side to
                    respond... but one can't be paranoid enough.
