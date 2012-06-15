@@ -24,7 +24,7 @@
           <span style="display:none" class="zh-TW">下載</span>
         </a></li><?cs
   /if ?>
-      <li><a href="<?cs var:toroot ?>sdk/installing.html">
+      <li><a href="<?cs var:toroot ?>sdk/installing/index.html">
           <span class="en">Installing the SDK</span>
           <span style="display:none" class="de">Installieren</span>
           <span style="display:none" class="es">Instalación</span>

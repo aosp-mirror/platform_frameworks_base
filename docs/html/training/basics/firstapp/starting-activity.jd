@@ -31,7 +31,7 @@ previous.link=building-ui.html
 <h2>You should also read</h2>
 
 <ul>
-  <li><a href="{@docRoot}sdk/installing.html">Installing the
+  <li><a href="{@docRoot}sdk/installing/index.html">Installing the
 SDK</a></li>
 </ul>
  

@@ -144,7 +144,7 @@ parent.link=index.html
     <li>
         Eclipse with ADT. This tutorial describes how to set up and run a test application using
         Eclipse with ADT. If you haven't yet installed Eclipse and the ADT plugin,
-        follow the steps in <a href="{@docRoot}sdk/installing.html">Installing the SDK</a>
+        follow the steps in <a href="{@docRoot}sdk/installing/index.html">Installing the SDK</a>
         to install them before continuing. If you are not developing in Eclipse, you will
         find instructions for setting up and running the test application in the
         <a href="#EditorCommandLine">appendix</a> of this document.

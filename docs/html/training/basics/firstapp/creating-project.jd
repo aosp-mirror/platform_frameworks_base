@@ -23,7 +23,7 @@ next.link=running-app.html
 <h2>You should also read</h2>
 
 <ul>
-  <li><a href="{@docRoot}sdk/installing.html">Installing the
+  <li><a href="{@docRoot}sdk/installing/index.html">Installing the
 SDK</a></li>
   <li><a href="{@docRoot}guide/developing/projects/index.html">Managing Projects</a></li>
 </ul>
@@ -43,7 +43,7 @@ SDK tools from a command line.</p>
 <p class="note"><strong>Note:</strong> You should already have the Android SDK installed, and if
 you're using Eclipse, you should have installed the <a
 href="{@docRoot}sdk/eclipse-adt.html">ADT plugin</a> as well. If you have not installed
-these, see <a href="{@docRoot}sdk/installing.html">Installing the Android SDK</a> and return here
+these, see <a href="{@docRoot}sdk/installing/index.html">Installing the Android SDK</a> and return here
 when you've completed the installation.</p>
 
 
@@ -68,7 +68,7 @@ href="{@docRoot}sdk/eclipse-adt.html#installing">Installing the ADT Plugin</a>).
 support older versions, but setting the build target to the latest version allows you to
 easily optimize your app for a great user experience on the latest Android-powered devices.</p>
 <p>If you don't see any built targets listed, you need to install some using the Android SDK
-Manager tool. See <a href="{@docRoot}sdk/installing.html#AddingComponents">step 4 in the
+Manager tool. See <a href="{@docRoot}sdk/installing/index.html#AddingComponents">step 4 in the
 installing guide</a>.</p>
 <p>Click <strong>Next</strong>.</p></li>
   <li>Specify other app details, such as the:
@@ -117,7 +117,7 @@ support older versions, but setting the build target to the latest version allow
 your app for the latest devices.</p>
 <p>If you don't see any targets listed, you need to
 install some using the Android SDK
-Manager tool. See <a href="{@docRoot}sdk/installing.html#AddingComponents">step 4 in the
+Manager tool. See <a href="{@docRoot}sdk/installing/index.html#AddingComponents">step 4 in the
 installing guide</a>.</p></li>
   <li>Execute:
 <pre class="no-pretty-print">

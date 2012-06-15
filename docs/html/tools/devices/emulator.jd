@@ -247,7 +247,7 @@ tools installed:</p>
   <li>Android SDK Platform API 15, Revision 3 or higher</li>
 </ul>
 
-<p>Use the <a href="{@docRoot}sdk/installing.html#AddingComponents">Android SDK
+<p>Use the <a href="{@docRoot}sdk/installing/index.html#AddingComponents">Android SDK
 Manager</a> to install these components:</p>
 
 <p class="note"><strong>Note:</strong> Not all applications are compatible with graphics hardware
@@ -348,7 +348,7 @@ same level as an actual device.</li>
 </ul>
 
 <p>To use virtual machine acceleration with the emulator, you need the following version of Android
-development tools. Use the <a href="{@docRoot}sdk/installing.html#AddingComponents">Android SDK
+development tools. Use the <a href="{@docRoot}sdk/installing/index.html#AddingComponents">Android SDK
 Manager</a> to install these components:</p>
 
 <ul>

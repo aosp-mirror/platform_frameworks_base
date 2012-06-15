@@ -29,7 +29,7 @@ Command Line</a>. You can then return to this tutorial and ignore anything about
 
 <p>Before you start, you should already have the SDK installed, and if you're
 using Eclipse, you should have installed the ADT plugin as well. If you have not
-installed these, see <a href="{@docRoot}sdk/installing.html">Installing the
+installed these, see <a href="{@docRoot}sdk/installing/index.html">Installing the
 Android SDK</a> and return here when you've completed the installation.</p>
 
 <h2 id="platform">Install a Platform</h2>

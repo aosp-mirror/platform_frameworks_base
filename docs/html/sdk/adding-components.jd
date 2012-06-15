@@ -33,7 +33,7 @@ so you don't need to update your development environment to specify a new SDK
 location.</p>
 
 <p>If you're setting up your Android SDK for the first time,
-see <a href="{@docRoot}sdk/installing.html#components">Installing the SDK</a> for information about
+see <a href="{@docRoot}sdk/installing/index.html#components">Installing the SDK</a> for information about
 what packages to install.</p>
 
 <p class="note"><strong>Note:</strong> If you develop in Eclipse, you might also need

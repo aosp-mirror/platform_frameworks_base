@@ -20,7 +20,7 @@ page.title=Hello, World
 
 <p>Eclipse を使用していない場合でも問題ありません。<a href="{@docRoot}guide/developing/other-ide.html">Developing in Other IDEs</a>に慣れてから、このチュートリアルに戻り、Eclipse に関する部分以外を参考にしてください。</p>
 
-<p>開始する前に、最新の SDK がインストールされている必要があります。また、Eclipse を使用する場合には、ADT プラグインもインストールされている必要があります。これらのプログラムがインストールされていない場合は、「<a href="{@docRoot}sdk/installing.html">Installing the Android SDK</a>」を参考にインストールを実行して、完了後にこのチュートリアルに戻ってください。</p>
+<p>開始する前に、最新の SDK がインストールされている必要があります。また、Eclipse を使用する場合には、ADT プラグインもインストールされている必要があります。これらのプログラムがインストールされていない場合は、「<a href="{@docRoot}sdk/installing/index.html">Installing the Android SDK</a>」を参考にインストールを実行して、完了後にこのチュートリアルに戻ってください。</p>
 
 <h2 id="avd">AVD の作成</h2>
 
