@@ -820,6 +820,23 @@ public class PhoneStatusBar extends BaseStatusBar {
             R.integer.config_show_search_delay);
     }
 
+    // Q: What kinds of notifications should show during setup?
+    // A: Almost none! Only things coming from the system (package is "android") that also 
+    // have special "kind" tags marking them as relevant for setup (see below).
+    private boolean showNotificationEvenIfUnprovisioned(StatusBarNotification sbn) {
+        if ("android".equals(sbn.pkg)) {
+            if (sbn.notification.kind != null) {
+                for (String aKind : sbn.notification.kind) {
+                    // IME switcher, created by InputMethodManagerService
+                    if ("android.system.imeswitcher".equals(aKind)) return true;
+                    // OTA availability & errors, created by SystemUpdateService
+                    if ("android.system.update".equals(aKind)) return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private void loadNotificationShade() {
         if (mPile == null) return;
 
@@ -831,7 +848,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         // If the device hasn't been through Setup, we only show system notifications
         for (int i=0; i<N; i++) {
             Entry ent = mNotificationData.get(N-i-1);
-            if (provisioned || "android".equals(ent.notification.pkg)) {
+            if (provisioned || showNotificationEvenIfUnprovisioned(ent.notification)) {
                 toShow.add(ent.row);
             }
         }
@@ -886,7 +903,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         for (int i=0; i<N; i++) {
             Entry ent = mNotificationData.get(N-i-1);
             if ((provisioned && ent.notification.score >= HIDE_ICONS_BELOW_SCORE)
-                    || "android".equals(ent.notification.pkg)) {
+                    || showNotificationEvenIfUnprovisioned(ent.notification)) {
                 toShow.add(ent.icon);
             }
         }
