@@ -5711,6 +5711,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         int x = viewToContentX((int) event.getX() + getScrollX());
         int y = viewToContentY((int) event.getY() + getScrollY());
         mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE, x, y);
+        mWebViewPrivate.super_onHoverEvent(event);
         return true;
     }
 
