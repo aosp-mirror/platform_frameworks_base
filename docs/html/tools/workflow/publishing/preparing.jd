@@ -97,7 +97,7 @@ and create promotional text while you are gathering materials for release.</p>
 <p>You usually perform the tasks listed in figure 2 after you have throroughly debugged and tested
 your application. The Android SDK contains several tools to help you test and debug your Android
 applications. For more information, see the <a
-href="{@docRoot}guide/developing/debugging/index.html">Debugging</a> and <a
+href="{@docRoot}tools/debugging/index.html">Debugging</a> and <a
 href="{@docRoot}guide/developing/testing/index.html">Testing</a> sections in the Dev Guide.</p>
 
 <h2 id="publishing-gather">Gathering Materials and Resources</h2>

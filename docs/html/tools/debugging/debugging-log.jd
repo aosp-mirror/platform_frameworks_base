@@ -59,7 +59,7 @@ I/MyActivity( 1557): MyClass.getView() &mdash; get item number 1
   <h2 id="startingLogcat">Using LogCat</h2>
 
   <p>You can use LogCat from within DDMS or call it on an ADB shell. For more information on how to
-  use LogCat within DDMS, see <a href="{@docRoot}guide/developing/debugging/ddms.html#logcat">Using
+  use LogCat within DDMS, see <a href="{@docRoot}tools/debugging/ddms.html#logcat">Using
   DDMS</a>. To run LogCat, through the ADB shell, the general usage is:</p>
   <pre>
 [adb] logcat [&lt;option&gt;] ... [&lt;filter-spec&gt;] ...

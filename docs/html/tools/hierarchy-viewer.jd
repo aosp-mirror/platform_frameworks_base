@@ -13,6 +13,6 @@ interface. It provides a visual representation of the layout's View hierarchy
 </ol>
 
 <p>For more information on how to use Hierarchy Viewer, see 
-<a href="{@docRoot}guide/developing/debugging/debugging-ui.html">Debugging and Profiling UIs</a>
+<a href="{@docRoot}tools/debugging/debugging-ui.html">Debugging and Profiling UIs</a>
 </p>
 

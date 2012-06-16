@@ -46,7 +46,7 @@ used to stack a {@link android.widget.TextView} on top of an
 <div style="text-align: center;"><img src="images/merge1.jpg" alt="A FrameLayout is used to overlay a title on top of an image"></div>
 
 <p>Things get more interesting when you inspect the result with <a
-href="{@docRoot}guide/developing/debugging/debugging-ui.html#hierarchyViewer">HierarchyViewer</a>. 
+href="{@docRoot}tools/debugging/debugging-ui.html#hierarchyViewer">HierarchyViewer</a>. 
 If you look closely at the resulting tree, you will notice that the
 <code>FrameLayout</code> defined in our XML file (highlighted in blue below) is
 the sole child of another <code>FrameLayout</code>:</p>

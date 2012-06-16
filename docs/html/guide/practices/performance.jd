@@ -402,7 +402,7 @@ managed to optimize all your code away). We highly recommend you use Caliper
 to run your own microbenchmarks.</p>
 
 <p>You may also find
-<a href="{@docRoot}guide/developing/debugging/debugging-tracing.html">Traceview</a> useful
+<a href="{@docRoot}tools/debugging/debugging-tracing.html">Traceview</a> useful
 for profiling, but it's important to realize that it currently disables the JIT,
 which may cause it to misattribute time to code that the JIT may be able to win
 back. It's especially important after making changes suggested by Traceview

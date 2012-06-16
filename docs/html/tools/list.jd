@@ -18,14 +18,14 @@ avd</code>) the emulator (<code>emulator</code>), and the Dalvik Debug Monitor S
 <dl>
   <dt><a href="android.html">android</a></dt>
     <dd>Lets you manage AVDs, projects, and the installed components of the SDK.</dd>
-  <dt><a href="{@docRoot}guide/developing/debugging/ddms.html">Dalvik Debug Monitor
+  <dt><a href="{@docRoot}tools/debugging/ddms.html">Dalvik Debug Monitor
 Server (ddms)</a></dt>
     <dd>Lets you debug Android applications.</dd>
   <dt><a href="dmtracedump.html">dmtracedump</a></dt>
     <dd>Generates graphical call-stack diagrams from trace log files. The tool uses the
 Graphviz Dot utility to create the graphical output, so you need to install Graphviz before
 running <code>dmtracedump</code>. For more information on using <code>dmtracedump</code>, see <a
-href="{@docRoot}guide/developing/debugging/debugging-tracing.html#dmtracedump">Profiling
+href="{@docRoot}tools/debugging/debugging-tracing.html#dmtracedump">Profiling
 with Traceview and dmtracedump</a></dd>
   <dt><a href="draw9patch.html">Draw 9-patch</a></dt>
     <dd>Allows you to easily create a {@link android.graphics.NinePatch} graphic using a

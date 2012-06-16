@@ -82,7 +82,7 @@ parent.link=index.html
   Screenshot of DDMS</p> 
 
   <p>If you are not using Eclipse and ADT, read <a href=
-  "{@docRoot}guide/developing/debugging/debugging-projects-cmdline.html#debuggingPort">Configuring
+  "{@docRoot}tools/debugging/debugging-projects-cmdline.html#debuggingPort">Configuring
   your IDE to attach to the debugging port</a>, for more information on attaching your
   debugger.</p>
 
@@ -208,7 +208,7 @@ parent.link=index.html
     <li>Interact with your application to start the methods that you want to profile.</li>
 
     <li>Click the <strong>Stop Method Profiling</strong> button. DDMS stops profiling your
-    application and opens <a href="{@docRoot}guide/developing/debugging/debugging-ui.html">Traceview</a>
+    application and opens <a href="{@docRoot}tools/debugging/debugging-ui.html">Traceview</a>
     with the method profiling information that was collected
     between the time you clicked on <strong>Start Method Profiling</strong> and <strong>Stop Method
     Profiling</strong>.</li>
@@ -279,7 +279,7 @@ displayed on devices running Android 4.0.3 or higher.</p>
 
   <p>LogCat is integrated into DDMS, and outputs the messages that you print out using the {@link android.util.Log}
   class along with other system messages such as stack traces when exceptions are thrown. View the
-  <a href="{@docRoot}guide/developing/debugging/debugging-log.html">Reading and
+  <a href="{@docRoot}tools/debugging/debugging-log.html">Reading and
   Writing Log Messages.</a> topic for more information on how to log messages to the LogCat.</p>
 
   <p>When you have set up your logging, you can use the LogCat feature of DDMS to filter certain

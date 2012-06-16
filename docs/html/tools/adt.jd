@@ -97,7 +97,7 @@ Project site.</p>
   They include:</p>
 
   <ul>
-    <li><a href="{@docRoot}guide/developing/debugging/debugging-tracing.html">Traceview</a>:
+    <li><a href="{@docRoot}tools/debugging/debugging-tracing.html">Traceview</a>:
     Allows you to profile your program's execution
     (<strong>Window &gt; Open Perspective &gt; Traceview</strong>). </li>
 
@@ -105,15 +105,15 @@ Project site.</p>
     the Android SDK Manager and AVD Manager. Other <code>android</code> features such as creating or
     updating projects (application and library) are integrated throughout the Eclipse IDE. </li>
 
-    <li><a href="{@docRoot}guide/developing/debugging/debugging-ui.html#HierarchyViewer">Hierarchy
+    <li><a href="{@docRoot}tools/debugging/debugging-ui.html#HierarchyViewer">Hierarchy
     Viewer</a>: Allows you to visualize your application's view hierarchy to find inefficiencies
     (<strong>Window &gt; Open Perspective &gt; Hierarchy Viewer</strong>).</li>
 
-    <li><a href="{@docRoot}guide/developing/debugging/debugging-ui.html#pixelperfect">Pixel
+    <li><a href="{@docRoot}tools/debugging/debugging-ui.html#pixelperfect">Pixel
     Perfect</a>: Allows you to closely examine your UI to help with designing and building.
     (<strong>Window &gt; Open Perspective &gt; Pixel Perfect</strong>).</li>
 
-    <li><a href="{@docRoot}guide/developing/debugging/ddms.html">DDMS</a>: Provides
+    <li><a href="{@docRoot}tools/debugging/ddms.html">DDMS</a>: Provides
     debugging features including: screen capturing, thread and heap information, and logcat
     (<strong>Window &gt; Open Perspective &gt; DDMS</strong>).</li>
 

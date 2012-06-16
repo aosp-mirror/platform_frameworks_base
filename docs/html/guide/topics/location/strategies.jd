@@ -422,7 +422,7 @@ lat/long coordinates, with a GPX file for route playback, or a KML file for mult
 </ul>
 
 <p>For more information on using DDMS to spoof location data, see
-<a href="{@docRoot}guide/developing/debugging/ddms.html">Using DDMS</a>.
+<a href="{@docRoot}tools/debugging/ddms.html">Using DDMS</a>.
 
 
 <h3 id="MockGeo">Using the "geo" command in the emulator console</h3>

@@ -32,7 +32,7 @@ page.title=Debugging
     UNIX shell on the device or emulator, and providing a general means to communicate with
     connected emulators and devices.</dd>
 
-    <dt><a href="{@docRoot}guide/developing/debugging/ddms.html"><strong>Dalvik Debug Monitor
+    <dt><a href="{@docRoot}tools/debugging/ddms.html"><strong>Dalvik Debug Monitor
     Server</strong></a></dt>
 
     <dd>DDMS is a graphical program that communicates with your devices through <code>adb</code>. DDMS can
@@ -91,18 +91,18 @@ page.title=Debugging
   debug and profile your applications:</p>
 
   <dl>
-    <dt><strong><a href="{@docRoot}guide/developing/debugging/debugging-ui.html">Heirarchy Viewer
+    <dt><strong><a href="{@docRoot}tools/debugging/debugging-ui.html">Heirarchy Viewer
     and layoutopt</a></strong></dt>
 
     <dd>Graphical programs that let you debug and profile user interfaces.</dd>
 
     <dt><strong><a href=
-    "{@docRoot}guide/developing/debugging/debugging-tracing.html">Traceview</a></strong></dt>
+    "{@docRoot}tools/debugging/debugging-tracing.html">Traceview</a></strong></dt>
 
     <dd>A graphical viewer that displays trace file data for method calls and times saved by your
     application, which can help you profile the performance of your application.</dd>
 
-    <dt><strong><a href="{@docRoot}guide/developing/debugging/debugging-devtools.html">Dev Tools
+    <dt><strong><a href="{@docRoot}tools/debugging/debugging-devtools.html">Dev Tools
     Android application</a></strong></dt>
 
     <dd>The Dev Tools application included in the emulator system image exposes several settings
@@ -126,7 +126,7 @@ want, and then <code>kill -3</code>. The stack trace appears in the log file.
 <dt><strong>Display useful info on the emulator screen</strong></dt>
 <dd>The device can display useful information such as CPU usage or highlights
 around redrawn areas. Turn these features on and off in the developer settings
-window as described in <a href="{@docRoot}guide/developing/debugging/debugging-devtools.html">
+window as described in <a href="{@docRoot}tools/debugging/debugging-devtools.html">
 Debugging with the Dev Tools App</a>.
 </dd>
 
@@ -145,7 +145,7 @@ radio state</strong>.</dd>
 <dt><strong>Log trace data</strong></dt>
 <dd>You can log method calls and other tracing data in an activity by calling
 {@link android.os.Debug#startMethodTracing(String) startMethodTracing()}. See <a
-href="{@docRoot}guide/developing/debugging/debugging-tracing.html">Profiling with Traceview and
+href="{@docRoot}tools/debugging/debugging-tracing.html">Profiling with Traceview and
 dmtracedump</a> for details. </dd>
 
 <dt><strong>Log radio data</strong></dt>

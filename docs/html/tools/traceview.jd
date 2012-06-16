@@ -11,6 +11,6 @@ Traceview can help you debug your application and profile its performance.</p>
 </ol>
 
 <p>For more information on how to use Traceview, see 
-<a href="{@docRoot}guide/developing/debugging/debugging-tracing.html">Profiling with Traceview and dmtracedump</a>
+<a href="{@docRoot}tools/debugging/debugging-tracing.html">Profiling with Traceview and dmtracedump</a>
 </p>
 

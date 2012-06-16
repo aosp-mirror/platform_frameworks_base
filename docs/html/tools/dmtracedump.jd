@@ -8,7 +8,7 @@ parent.link=index.html
   graphical call-stack diagrams from trace log files (instead of using Traceview).</p>
   
   <p>This document is a reference to the available command line options. For more information on generating trace
-  logs, see <a href="{@docRoot}guide/developing/debugging/debugging-tracing.html">Profiling with
+  logs, see <a href="{@docRoot}tools/debugging/debugging-tracing.html">Profiling with
   Traceview and dmtracedump</a>.</p>
 
   <p>The usage for <code>dmtracedump</code> is:</p>

@@ -6,7 +6,7 @@ parent.link=index.html
 
 <p>Here are some tips and tricks for common Android errors. Don't forget to use the
     ddms logcat capability to get a deeper view when errors occur. 
-    See the <a href="{@docRoot}guide/developing/debugging/index.html">Debugging</a> documentation for more information.</p>
+    See the <a href="{@docRoot}tools/debugging/index.html">Debugging</a> documentation for more information.</p>
 <ul>
     <li><a href="#installeclipsecomponents">ADT Installation Error: "requires plug-in org.eclipse.wst.sse.ui".</a></li>
     <li><a href="#nodevice">ADB reports &quot;no device&quot; when an emulator is running</a></li>

@@ -24,7 +24,7 @@ parent.link=index.html
   <ul>
     <li><a href="{@docRoot}guide/developing/tools/adb.html">ADB</a></li>
 
-    <li><a href="{@docRoot}guide/developing/debugging/ddms.html">DDMS</a></li>
+    <li><a href="{@docRoot}tools/debugging/ddms.html">DDMS</a></li>
 
     <li>Java Debugger</li>
   </ul>

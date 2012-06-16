@@ -54,11 +54,11 @@ application can create View and ViewGroup objects (and manipulate their properti
   Plugin for Eclipse</a> offers a layout preview of your XML &mdash; 
   with the XML file opened, select the <strong>Layout</strong> tab.</li>
   <li>You should also try the 
-  <a href="{@docRoot}guide/developing/debugging/debugging-ui.html#hierarchyViewer">Hierarchy Viewer</a> tool, 
+  <a href="{@docRoot}tools/debugging/debugging-ui.html#hierarchyViewer">Hierarchy Viewer</a> tool, 
   for debugging layouts &mdash; it reveals layout property values, 
   draws wireframes with padding/margin indicators, and full rendered views while 
   you debug on the emulator or device.</li>
-  <li>The <a href="{@docRoot}guide/developing/debugging/debugging-ui.html#layoutopt">layoutopt</a> tool lets
+  <li>The <a href="{@docRoot}tools/debugging/debugging-ui.html#layoutopt">layoutopt</a> tool lets
   you quickly analyze your layouts and hierarchies for inefficiencies or other problems.</li>
 </div>
 </div>
