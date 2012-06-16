@@ -209,7 +209,7 @@ reference.</p>
 <p>If you don't have access to Eclipse or the ADT Plugin, you can install your application on the
 emulator using the <a href="{@docRoot}guide/developing/tools/adb.html#move">adb</a> utility. Before
 installing the application, you need to build and package it into an <code>.apk</code> as described
-in <a href="{@docRoot}guide/developing/building/index.html">Building and
+in <a href="{@docRoot}tools/building/index.html">Building and
 Running Apps</a>. Once the application is installed, you can start the emulator from the command
 line as described previously, using any startup options necessary.
 When the emulator is running, you can also connect to the emulator instance's

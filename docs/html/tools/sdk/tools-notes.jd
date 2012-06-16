@@ -378,7 +378,7 @@ ignore attribute. (<a
     <li>Changed Ant <code>build.xml</code> file to support improvements to the
     build system and added and modified Ant commands to support these changes. For a list of Ant
 commands, see the
-<a href="{@docRoot}guide/developing/building/building-cmdline.html#AntReference">Ant Command
+<a href="{@docRoot}tools/building/building-cmdline.html#AntReference">Ant Command
 Reference</a>.</li>
     <li>Changed how library projects are built.</li>
     <li>Improved incremental builds, so that resource compilation runs less frequently. Builds no

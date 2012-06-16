@@ -21,7 +21,7 @@ parent.link=index.html
   </ol>
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/developing/building/building-cmdline.html">Building and Running
+    <li><a href="{@docRoot}tools/building/building-cmdline.html">Building and Running
 from the Command Line</a></li>
     <li><a href="{@docRoot}tools/devices/emulator.html">Using the Android
 Emulator</a></li>

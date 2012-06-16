@@ -214,7 +214,7 @@ following:</p>
   </li>
   <li><strong>Build the sample application in release mode and sign it.</strong>
     <p>To learn how to build and sign applications, see <a
-    href="{@docRoot}guide/developing/building/index.html">Building and Running</a>.</p>
+    href="{@docRoot}tools/building/index.html">Building and Running</a>.</p>
   </li>
 </ol>
 
@@ -274,7 +274,7 @@ onto a device to run it. To run the sample application, do the following:</p>
     <p>Even though you uploaded the application to Google Play, the application is not published,
     so you cannot download it from Google Play to a device. Instead, you must install the
     application onto your device. To learn how to install an application onto a device, see <a
-    href="{@docRoot}guide/developing/building/building-cmdline.html#RunningOnDevice">Running on a
+    href="{@docRoot}tools/building/building-cmdline.html#RunningOnDevice">Running on a
     device</a>.</p>
  </li>
  <li><strong>Make one of your test accounts the primary account on your device.</strong>

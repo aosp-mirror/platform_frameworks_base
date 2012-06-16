@@ -289,7 +289,7 @@ android.library.reference.1=path/to/library_projectC
 
   <p>To build an application project that depends on one or more library projects, you can use the
   standard Ant build commands and compile modes, as described in <a href=
-  "{@docRoot}guide/developing/building/index.html">Building and Running</a>. The tools
+  "{@docRoot}tools/building/index.html">Building and Running</a>. The tools
 compile and merge all libraries referenced by the application as part of
   compiling the dependent application project. No additional commands or steps are necessary.</p>
 

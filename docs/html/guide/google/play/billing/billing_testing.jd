@@ -178,7 +178,7 @@ application's product list you use one of the reserved product IDs.</p>
     <p>You cannot use the emulator to test in-app billing; you must install your application on a
     device to test in-app billing.</p>
     <p>To learn how to install an application on a device, see <a
-    href="{@docRoot}guide/developing/building/building-cmdline.html#RunningOnDevice">Running on a
+    href="{@docRoot}tools/building/building-cmdline.html#RunningOnDevice">Running on a
     device</a>.</p>
   </li>
   <li><strong>Sign in to your device with your developer account.</strong>
@@ -250,7 +250,7 @@ actual payouts to your merchant account.</p>
     <p>You cannot use the emulator to test in-app billing; you must install your application on a
     device to test in-app billing.</p>
     <p>To learn how to install an application on a device, see <a
-    href="{@docRoot}guide/developing/building/building-cmdline.html#RunningOnDevice">Running on a
+    href="{@docRoot}tools/building/building-cmdline.html#RunningOnDevice">Running on a
     device</a>.</p>
   </li>
  <li><strong>Make one of your test accounts the primary account on your device.</strong>

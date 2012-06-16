@@ -97,7 +97,7 @@ want to look at the sample code included with the Android SDK, in the
         the device, are described below.
         The list of files you'll need for your application are described in <a href="#filelist">List
         of Files for an Android Application</a>. </li>
-    <li><strong><a href="{@docRoot}guide/developing/building/building-cmdline.html">Build and install your
+    <li><strong><a href="{@docRoot}tools/building/building-cmdline.html">Build and install your
                 package</a>.</strong> The Android SDK has some nice tools for generating
                 projects and debugging code. </li>
 </ol>

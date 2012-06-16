@@ -309,7 +309,7 @@ signed with your private key and optimized. To learn how to run the Export Wizar
 ADT</a>. The Export Wizard compiles your application for release, signs your application with your
 private key, and optimizes your application with the zipalign tool. The Export Wizard should run
 successfully if you have run or debugged your application from Eclipse and you have no errors in
-your application (see <a href="{@docRoot}guide/developing/building/building-eclipse.html">Building
+your application (see <a href="{@docRoot}tools/building/building-eclipse.html">Building
 and Running from Eclipse with ADT</a> for more information.</p>
 
 <p>The Export Wizard assumes that you have a <a href="#billing-keys">certificate and private key</a>
@@ -322,7 +322,7 @@ information about the signing process and signing guidelines.</p>
 
 <p>You can use the Ant build script (included in the Android SDK) to build a release-ready
 <code>.apk</code> file that is signed with your private key and optimized. To learn how to do this,
-see <a href="{@docRoot}guide/developing/building/building-cmdline.html#ReleaseMode">Building in
+see <a href="{@docRoot}tools/building/building-cmdline.html#ReleaseMode">Building in
 Release Mode</a>. This build method assumes you have a <a href="#billing-keys">certificate and
 private key</a> suitable for signing your application. If you do not have a suitable certificate and
 private key, the Export Wizard will help you generate one (see

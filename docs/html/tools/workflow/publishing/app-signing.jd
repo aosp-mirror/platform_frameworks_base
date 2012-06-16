@@ -229,7 +229,7 @@ is enabled by using the <code>debug</code> option with the <code>ant</code> comm
 compile your app, the build script generates a keystore/key and signs the APK for you.
 The script then also aligns the APK with the <code>zipalign</code> tool.
 No other action on your part is needed. Read
-<a href="{@docRoot}guide/developing/building/building-cmdline.html#DebugMode">Building and Running Apps
+<a href="{@docRoot}tools/building/building-cmdline.html#DebugMode">Building and Running Apps
 on the Command Line</a> for more information.</p>
 
 
@@ -430,7 +430,7 @@ file in {@code bin/} will instead be
 <code><em>&lt;your_project_name></em>-release.apk</code>. With these steps
 automated for you, you're able to skip the manual procedures below (steps 3 and 4).
 To learn how to specify your keystore and alias in the {@code ant.properties} file,
-see <a href="{@docRoot}guide/developing/building/building-cmdline.html#ReleaseMode">
+see <a href="{@docRoot}tools/building/building-cmdline.html#ReleaseMode">
 Building and Running Apps on the Command Line</a>.</p>
 
 

@@ -18,7 +18,7 @@ parent.link=index.html
     basic processes for creating and running applications with ADT, as described in
     <a href="{@docRoot}tools/projects/projects-eclipse.html">Managing Projects from
 Eclipse</a>
-    and <a href="{@docRoot}guide/developing/building/building-eclipse.html">Building and Running
+    and <a href="{@docRoot}tools/building/building-eclipse.html">Building and Running
 from Eclipse</a>.
     You may also want to read
     <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>,
