@@ -21,7 +21,6 @@ import com.android.internal.app.MediaRouteChooserDialogFragment;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.media.MediaRouter;
-import android.media.MediaRouter.RouteInfo;
 import android.util.Log;
 import android.view.ActionProvider;
 import android.view.MenuItem;
@@ -35,7 +34,6 @@ public class MediaRouteActionProvider extends ActionProvider {
     private MenuItem mMenuItem;
     private MediaRouteButton mView;
     private int mRouteTypes;
-    private final RouterCallback mRouterCallback = new RouterCallback();
     private View.OnClickListener mExtendedSettingsListener;
 
     public MediaRouteActionProvider(Context context) {
@@ -50,18 +48,10 @@ public class MediaRouteActionProvider extends ActionProvider {
     }
 
     public void setRouteTypes(int types) {
-        if (types == mRouteTypes) {
-            // Already registered; nothing to do.
-            return;
-        }
-        if (mRouteTypes != 0) {
-            mRouter.removeCallback(mRouterCallback);
-        }
         mRouteTypes = types;
         if (mView != null) {
             mView.setRouteTypes(mRouteTypes);
         }
-        mRouter.addCallback(types, mRouterCallback);
     }
 
     @Override
@@ -124,15 +114,13 @@ public class MediaRouteActionProvider extends ActionProvider {
         }
     }
 
-    private class RouterCallback extends MediaRouter.SimpleCallback {
-        @Override
-        public void onRouteAdded(MediaRouter router, RouteInfo info) {
-            mMenuItem.setVisible(mRouter.getRouteCount() > 1);
-        }
+    @Override
+    public boolean overridesItemVisibility() {
+        return true;
+    }
 
-        @Override
-        public void onRouteRemoved(MediaRouter router, RouteInfo info) {
-            mMenuItem.setVisible(mRouter.getRouteCount() > 1);
-        }
+    @Override
+    public boolean isVisible() {
+        return mRouter.getRouteCount() > 1;
     }
 }

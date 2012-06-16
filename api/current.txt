@@ -22814,10 +22814,12 @@ package android.view {
   public abstract class ActionProvider {
     ctor public ActionProvider(android.content.Context);
     method public boolean hasSubMenu();
+    method public boolean isVisible();
     method public abstract deprecated android.view.View onCreateActionView();
     method public android.view.View onCreateActionView(android.view.MenuItem);
     method public boolean onPerformDefaultAction();
     method public void onPrepareSubMenu(android.view.SubMenu);
+    method public boolean overridesItemVisibility();
   }
 
   public final class Choreographer {
