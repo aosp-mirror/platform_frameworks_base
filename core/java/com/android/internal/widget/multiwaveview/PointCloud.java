@@ -180,8 +180,8 @@ public class PointCloud {
         float glowDistance = hypot(glowManager.x - point.x, glowManager.y - point.y);
         float glowAlpha = 0.0f;
         if (glowDistance < glowManager.radius) {
-            float cosf = FloatMath.cos(PI * 0.5f * glowDistance / glowManager.radius);
-            glowAlpha = glowManager.alpha * max(0.0f, (float) Math.pow(cosf, 0.5f));
+            float cosf = FloatMath.cos(PI * 0.25f * glowDistance / glowManager.radius);
+            glowAlpha = glowManager.alpha * max(0.0f, (float) Math.pow(cosf, 10.0f));
         }
 
         // Compute contribution from Wave
@@ -190,7 +190,7 @@ public class PointCloud {
         float waveAlpha = 0.0f;
         if (distanceToWaveRing < waveManager.width * 0.5f) {
             float cosf = FloatMath.cos(PI * 0.5f * distanceToWaveRing / waveManager.width);
-            waveAlpha = waveManager.alpha * max(0.0f, (float) Math.pow(cosf, 15.0f));
+            waveAlpha = waveManager.alpha * max(0.0f, (float) Math.pow(cosf, 20.0f));
         }
 
         return (int) (max(glowAlpha, waveAlpha) * 255);
