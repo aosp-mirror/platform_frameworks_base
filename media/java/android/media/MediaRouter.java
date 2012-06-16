@@ -198,6 +198,13 @@ public class MediaRouter {
     }
 
     /**
+     * @hide for use by framework routing UI
+     */
+    public RouteCategory getSystemAudioCategory() {
+        return sStatic.mSystemCategory;
+    }
+
+    /**
      * Return the currently selected route for the given types
      *
      * @param type route types
@@ -737,6 +744,16 @@ public class MediaRouter {
          */
         public void setRemoteControlClient(RemoteControlClient rcc) {
             mRcc = rcc;
+        }
+
+        /**
+         * Retrieve the RemoteControlClient associated with this route, if one has been set.
+         *
+         * @return the RemoteControlClient associated with this route
+         * @see #setRemoteControlClient(RemoteControlClient)
+         */
+        public RemoteControlClient getRemoteControlClient() {
+            return mRcc;
         }
 
         /**
