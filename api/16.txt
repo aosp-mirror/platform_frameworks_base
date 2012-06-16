@@ -11566,6 +11566,8 @@ package android.media {
     method public java.lang.CharSequence getName(android.content.Context);
     method public java.lang.CharSequence getStatus();
     method public int getSupportedTypes();
+    method public java.lang.Object getTag();
+    method public void setTag(java.lang.Object);
   }
 
   public static class MediaRouter.SimpleCallback extends android.media.MediaRouter.Callback {
@@ -11580,14 +11582,12 @@ package android.media {
   }
 
   public static class MediaRouter.UserRouteInfo extends android.media.MediaRouter.RouteInfo {
-    method public java.lang.Object getTag();
     method public void setIconDrawable(android.graphics.drawable.Drawable);
     method public void setIconResource(int);
     method public void setName(java.lang.CharSequence);
     method public void setName(int);
     method public void setRemoteControlClient(android.media.RemoteControlClient);
     method public void setStatus(java.lang.CharSequence);
-    method public void setTag(java.lang.Object);
   }
 
   public class MediaScannerConnection implements android.content.ServiceConnection {
@@ -17372,6 +17372,8 @@ package android.provider {
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String NORMALIZED_NUMBER = "data4";
     field public static final java.lang.String NUMBER = "data1";
+    field public static final java.lang.String SEARCH_DISPLAY_NAME_KEY = "search_display_name";
+    field public static final java.lang.String SEARCH_PHONE_NUMBER_KEY = "search_phone_number";
     field public static final int TYPE_ASSISTANT = 19; // 0x13
     field public static final int TYPE_CALLBACK = 8; // 0x8
     field public static final int TYPE_CAR = 9; // 0x9
