@@ -114,6 +114,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.text.format.Time;
 import android.util.EventLog;
+import android.util.LocaleUtil;
 import android.util.Log;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
@@ -1509,7 +1510,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
 
         mConfiguration.setToDefaults();
-        mConfiguration.locale = Locale.getDefault();
+        mConfiguration.setLocale(Locale.getDefault());
+
         mConfigurationSeq = mConfiguration.seq = 1;
         mProcessStats.init();
         

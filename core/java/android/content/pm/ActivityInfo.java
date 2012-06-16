@@ -372,6 +372,12 @@ public class ActivityInfo extends ComponentInfo
     public static final int CONFIG_DENSITY = 0x1000;
     /**
      * Bit in {@link #configChanges} that indicates that the activity
+     * can itself handle the change to layout direction. Set from the
+     * {@link android.R.attr#configChanges} attribute.
+     */
+    public static final int CONFIG_LAYOUT_DIRECTION = 0x2000;
+    /**
+     * Bit in {@link #configChanges} that indicates that the activity
      * can itself handle changes to the font scaling factor.  Set from the
      * {@link android.R.attr#configChanges} attribute.  This is
      * not a core resource configutation, but a higher-level value, so its
@@ -398,6 +404,7 @@ public class ActivityInfo extends ComponentInfo
         0x0200, // SCREEN SIZE
         0x2000, // SMALLEST SCREEN SIZE
         0x0100, // DENSITY
+        0x4000, // LAYOUT DIRECTION
     };
     /** @hide
      * Convert Java change bits to native.
@@ -434,8 +441,9 @@ public class ActivityInfo extends ComponentInfo
      * {@link #CONFIG_MCC}, {@link #CONFIG_MNC},
      * {@link #CONFIG_LOCALE}, {@link #CONFIG_TOUCHSCREEN},
      * {@link #CONFIG_KEYBOARD}, {@link #CONFIG_NAVIGATION},
-     * {@link #CONFIG_ORIENTATION}, and {@link #CONFIG_SCREEN_LAYOUT}.  Set from the
-     * {@link android.R.attr#configChanges} attribute.
+     * {@link #CONFIG_ORIENTATION}, {@link #CONFIG_SCREEN_LAYOUT} and
+     * {@link #CONFIG_LAYOUT_DIRECTION}.  Set from the {@link android.R.attr#configChanges}
+     * attribute.
      */
     public int configChanges;
     

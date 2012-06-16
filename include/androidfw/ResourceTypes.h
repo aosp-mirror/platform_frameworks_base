@@ -957,6 +957,13 @@ struct ResTable_config
         SCREENLONG_ANY = ACONFIGURATION_SCREENLONG_ANY << SHIFT_SCREENLONG,
         SCREENLONG_NO = ACONFIGURATION_SCREENLONG_NO << SHIFT_SCREENLONG,
         SCREENLONG_YES = ACONFIGURATION_SCREENLONG_YES << SHIFT_SCREENLONG,
+
+        // screenLayout bits for layout direction.
+        MASK_LAYOUTDIR = 0xC0,
+        SHIFT_LAYOUTDIR = 6,
+        LAYOUTDIR_ANY = ACONFIGURATION_LAYOUTDIR_ANY << SHIFT_LAYOUTDIR,
+        LAYOUTDIR_LTR = ACONFIGURATION_LAYOUTDIR_LTR << SHIFT_LAYOUTDIR,
+        LAYOUTDIR_RTL = ACONFIGURATION_LAYOUTDIR_RTL << SHIFT_LAYOUTDIR,
     };
     
     enum {
@@ -1020,7 +1027,8 @@ struct ResTable_config
         CONFIG_SMALLEST_SCREEN_SIZE = ACONFIGURATION_SMALLEST_SCREEN_SIZE,
         CONFIG_VERSION = ACONFIGURATION_VERSION,
         CONFIG_SCREEN_LAYOUT = ACONFIGURATION_SCREEN_LAYOUT,
-        CONFIG_UI_MODE = ACONFIGURATION_UI_MODE
+        CONFIG_UI_MODE = ACONFIGURATION_UI_MODE,
+        CONFIG_LAYOUTDIR = ACONFIGURATION_LAYOUTDIR,
     };
     
     // Compare two configuration, returning CONFIG_* flags set for each value
@@ -1061,7 +1069,7 @@ struct ResTable_config
  * There should be one of these chunks for each resource type.
  *
  * This structure is followed by an array of integers providing the set of
- * configuation change flags (ResTable_config::CONFIG_*) that have multiple
+ * configuration change flags (ResTable_config::CONFIG_*) that have multiple
  * resources for that configuration.  In addition, the high bit is set if that
  * resource has been made public.
  */
