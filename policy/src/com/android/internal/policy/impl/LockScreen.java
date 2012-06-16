@@ -301,10 +301,17 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
                 if (searchManager != null) {
                     ComponentName component = searchManager.getGlobalSearchActivity();
                     if (component != null) {
-                        if (!mGlowPadView.replaceTargetDrawablesIfPresent(component,
-                                ASSIST_ICON_METADATA_NAME,
-                                com.android.internal.R.drawable.ic_lockscreen_search)) {
-                            Slog.w(TAG, "Couldn't grab icon from package " + component);
+                        // XXX Hack. We need to substitute the icon here but haven't formalized
+                        // the public API. The "_google" metadata will be going away, so
+                        // DON'T USE IT!
+                        boolean replaced = mGlowPadView.replaceTargetDrawablesIfPresent(component,
+                                ASSIST_ICON_METADATA_NAME + "_google",
+                                com.android.internal.R.drawable.ic_action_assist_generic);
+
+                        if (!replaced && !mGlowPadView.replaceTargetDrawablesIfPresent(component,
+                                    ASSIST_ICON_METADATA_NAME,
+                                    com.android.internal.R.drawable.ic_action_assist_generic)) {
+                                Slog.w(TAG, "Couldn't grab icon from package " + component);
                         }
                     } else {
                         Slog.w(TAG, "No search icon specified in package " + component);
@@ -315,7 +322,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
             }
 
             setEnabled(com.android.internal.R.drawable.ic_lockscreen_camera, !mCameraDisabled);
-            setEnabled(com.android.internal.R.drawable.ic_lockscreen_search, !mSearchDisabled);
+            setEnabled(com.android.internal.R.drawable.ic_action_assist_generic, !mSearchDisabled);
         }
 
         public void onGrabbed(View v, int handle) {
@@ -329,7 +336,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         public void onTrigger(View v, int target) {
             final int resId = mGlowPadView.getResourceIdForTarget(target);
             switch (resId) {
-                case com.android.internal.R.drawable.ic_lockscreen_search:
+                case com.android.internal.R.drawable.ic_action_assist_generic:
                     Intent assistIntent = getAssistIntent();
                     if (assistIntent != null) {
                         launchActivity(assistIntent);
@@ -535,7 +542,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
                         : false;
         boolean searchTargetPresent = (mUnlockWidgetMethods instanceof GlowPadViewMethods)
                 ? ((GlowPadViewMethods) mUnlockWidgetMethods)
-                        .isTargetPresent(com.android.internal.R.drawable.ic_lockscreen_search)
+                        .isTargetPresent(com.android.internal.R.drawable.ic_action_assist_generic)
                         : false;
 
         if (disabledByAdmin) {
