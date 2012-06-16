@@ -980,7 +980,7 @@ called <code>src/</code>. There is now support for any number of source folders,
 with no name restriction. They can even be in subfolder such as
 <code>src/java</code>. If you are already working with library projects created
 in ADT 0.9.7, see <a
-href="{@docRoot}guide/developing/projects/index.html#libraryMigrating">Migrating
+href="{@docRoot}tools/projects/index.html#libraryMigrating">Migrating
 library projects to ADT 0.9.8</a> for important information about moving
 to the new ADT environment.</li>
 <li>Adds support for library projects that depend on other library
@@ -1018,7 +1018,7 @@ code and resources in a separate development project. You can then reference the
 library project from other Android projects and, at build time, the tools
 compile the shared code and resources as part of the dependent applications.
 More information about this feature is available in the <a
-href="{@docRoot}guide/developing/projects/index.html#LibraryProjects">Creating and Managing Projects</a> document. </p>
+href="{@docRoot}tools/projects/index.html#LibraryProjects">Creating and Managing Projects</a> document. </p>
 <p>If you are not developing in Eclipse, <a
 href="tools-notes.html">SDK Tools r6</a> provides the equivalent library
 project support through the Ant build system.</p>

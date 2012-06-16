@@ -135,7 +135,7 @@ android create test-project -m &lt;main_path&gt; -n &lt;project_name&gt; -p &lt;
     This creates a new test project with the appropriate directories and build files. The directory
     structure and build file contents are identical to those in a regular Android application
     project. They are described in detail in the topic
-    <a href="{@docRoot}guide/developing/projects/index.html">Managing Projects</a>.
+    <a href="{@docRoot}tools/projects/index.html">Managing Projects</a>.
 </p>
 <p>
     The operation also creates an <code>AndroidManifest.xml</code> file with instrumentation

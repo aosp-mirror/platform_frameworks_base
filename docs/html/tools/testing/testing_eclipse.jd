@@ -16,7 +16,7 @@ parent.link=index.html
     This topic explains how create and run tests of Android applications in Eclipse with ADT.
     Before you read this topic, you should read about how to create an Android application with the
     basic processes for creating and running applications with ADT, as described in
-    <a href="{@docRoot}guide/developing/projects/projects-eclipse.html">Managing Projects from
+    <a href="{@docRoot}tools/projects/projects-eclipse.html">Managing Projects from
 Eclipse</a>
     and <a href="{@docRoot}guide/developing/building/building-eclipse.html">Building and Running
 from Eclipse</a>.

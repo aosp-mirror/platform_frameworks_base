@@ -17,9 +17,9 @@ Components</a>.</p>
 
 <p>After installing the Google APIs add-on in your SDK, set your project properties to use the build
 target called "Google APIs by Google Inc.". See the instructions for setting a build
-target in <a href="{@docRoot}guide/developing/projects/projects-eclipse.html#CreatingAProject">
+target in <a href="{@docRoot}tools/projects/projects-eclipse.html#CreatingAProject">
 Creating and Managing Projects in Eclipse</a> or <a
-href="{@docRoot}guide/developing/projects/projects-cmdline.html#CreatingAProject">
+href="{@docRoot}tools/projects/projects-cmdline.html#CreatingAProject">
 Creating and Managing Projects on the Command Line</a>, as appropriate for your environment.</p>
 
 <p>You will also need to set up a new AVD that uses the same Google APIs deployment target. See <a

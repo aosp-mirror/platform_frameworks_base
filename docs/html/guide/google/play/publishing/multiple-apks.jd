@@ -402,7 +402,7 @@ as textures&mdash;based on the build configuration.)</p>
 
 <p class="note"><strong>Tip:</strong> One way to avoid duplicating large portions of your
 application code is to use a <a
-href="{@docRoot}guide/developing/projects/index.html#LibraryProjects">library project</a>. A library
+href="{@docRoot}tools/projects/index.html#LibraryProjects">library project</a>. A library
 project holds shared code and resources, which you can include in your actual application
 projects.</p>
 
@@ -523,7 +523,7 @@ APK&mdash;by using only one APK, you can simply increase the version code with e
 be done.</p>  </li>
   <li><strong>You need to manage only a single code base.</strong>
     <p>Although you can use a <a
-href="{@docRoot}guide/developing/projects/index.html#LibraryProjects">library project</a>
+href="{@docRoot}tools/projects/index.html#LibraryProjects">library project</a>
 to share code between multiple Android projects, it's still likely that you'll reproduce some code
 across each project and this could become difficult to manage, especially when resolving
 bugs.</p></li>

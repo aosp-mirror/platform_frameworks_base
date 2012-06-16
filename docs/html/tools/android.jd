@@ -11,7 +11,7 @@ parent.link=index.html
 Line</a>.</li>
 
     <li>Create and update Android projects. See <a href= 
-    "{@docRoot}guide/developing/projects/projects-cmdline.html">Managing Projects from
+    "{@docRoot}tools/projects/projects-cmdline.html">Managing Projects from
     the Command Line</a>.</li>
 
     <li>Update your Android SDK with new platforms, add-ons, and documentation. See <a href= 

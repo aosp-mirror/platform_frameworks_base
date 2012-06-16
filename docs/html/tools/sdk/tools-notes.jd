@@ -688,7 +688,7 @@ code and resources in a separate development project. You can then reference the
 library project from other Android projects and, at build time, the tools
 compile the shared code and resources as part of the dependent applications.
 More information about this feature is available in the <a
-href="{@docRoot}guide/developing/projects/index.html#LibraryProjects">Creating and Managing Projects</a> document.</p>
+href="{@docRoot}tools/projects/index.html#LibraryProjects">Creating and Managing Projects</a> document.</p>
 <p>If you are developing in Eclipse, <a href="eclipse-adt.html">ADT</a>
 provides the equivalent library project support.</p>
 </dd>

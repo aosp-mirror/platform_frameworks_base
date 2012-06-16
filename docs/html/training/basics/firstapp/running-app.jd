@@ -27,7 +27,7 @@ next.link=building-ui.html
 <ul>
   <li><a href="{@docRoot}tools/device.html">Using Hardware Devices</a></li>
   <li><a href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a></li>
-  <li><a href="{@docRoot}guide/developing/projects/index.html">Managing Projects</a></li>
+  <li><a href="{@docRoot}tools/projects/index.html">Managing Projects</a></li>
 </ul>
  
  

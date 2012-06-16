@@ -194,7 +194,7 @@ added to your code, such as {@link android.os.Debug#startMethodTracing()} and
 <h4>Clean up your project directories</h4>
 
 <p>Clean up your project and make sure it conforms to the directory structure described in <a
-href="{@docRoot}guide/developing/projects/index.html#ApplicationProjects">Android Projects</a>.
+href="{@docRoot}tools/projects/index.html#ApplicationProjects">Android Projects</a>.
 Leaving stray or orphaned files in your project can prevent your application from compiling and
 cause your application to behave unpredictably. At a minimum you should do the following cleanup
 tasks:</p>

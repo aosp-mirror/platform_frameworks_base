@@ -306,7 +306,7 @@ version of the LVL.</p>
 share its code and resources across multiple applications. </p>
 
 <p style="margin-top:.5em;">If you aren't familiar with library projects or how
-to use them, see <a href="{@docRoot}guide/developing/projects/index.html#LibraryProjects">
+to use them, see <a href="{@docRoot}tools/projects/index.html#LibraryProjects">
 Managing Projects</a>.
 </p>
 </div>
@@ -345,7 +345,7 @@ no further configuration is needed. </p>
 
 <p>For more information about how to create an application project or work with
 library projects in Eclipse, see <a
-href="{@docRoot}guide/developing/projects/projects-eclipse.html">Managing Projects from
+href="{@docRoot}tools/projects/projects-eclipse.html">Managing Projects from
 Eclipse with ADT</a>.</p>
 
 
@@ -379,7 +379,7 @@ haven't done that already, do it now before continuing. </p>
 Select the "Android" properties group and click <strong>Add</strong>, then
 choose the LVL library project (com_android_vending_licensing) and click
 <strong>OK</strong>. For more information, see
-<a href="{@docRoot}guide/developing/projects/projects-eclipse.html#SettingUpLibraryProject">
+<a href="{@docRoot}tools/projects/projects-eclipse.html#SettingUpLibraryProject">
 Managing Projects from Eclipse with ADT</a></p>.
 
 
@@ -407,7 +407,7 @@ properties, including the reference to the library project:</p>
 </pre>
 
 <p>For more information about working with library projects,
-see <a href="{@docRoot}guide/developing/projects/projects-cmdline.html#SettingUpLibraryProject">
+see <a href="{@docRoot}tools/projects/projects-cmdline.html#SettingUpLibraryProject">
 Setting up a Library Project</a>.</p>
 
 
