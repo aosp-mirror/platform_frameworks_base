@@ -477,6 +477,11 @@ public class PowerManagerService extends IPowerManager.Stub
         }
     }
 
+    int getStayOnConditionsLocked() {
+        return mMaximumScreenOffTimeout <= 0 || mMaximumScreenOffTimeout == Integer.MAX_VALUE
+                ? mStayOnConditions : 0;
+    }
+
     private class SettingsObserver implements Observer {
         private int getInt(String name, int defValue) {
             ContentValues values = mSettings.getValues(name);
@@ -760,7 +765,8 @@ public class PowerManagerService extends IPowerManager.Stub
     }
 
     private void updateWakeLockLocked() {
-        if (mStayOnConditions != 0 && mBatteryService.isPowered(mStayOnConditions)) {
+        final int stayOnConditions = getStayOnConditionsLocked();
+        if (stayOnConditions != 0 && mBatteryService.isPowered(stayOnConditions)) {
             // keep the device on if we're plugged in and mStayOnWhilePluggedIn is set.
             mStayOnWhilePluggedInScreenDimLock.acquire();
             mStayOnWhilePluggedInPartialLock.acquire();
@@ -2097,7 +2103,8 @@ public class PowerManagerService extends IPowerManager.Stub
                         // was dim
                         steps = (int)(ANIM_STEPS*ratio);
                     }
-                    if (mStayOnConditions != 0 && mBatteryService.isPowered(mStayOnConditions)) {
+                    final int stayOnConditions = getStayOnConditionsLocked();
+                    if (stayOnConditions != 0 && mBatteryService.isPowered(stayOnConditions)) {
                         // If the "stay on while plugged in" option is
                         // turned on, then the screen will often not
                         // automatically turn off while plugged in.  To
