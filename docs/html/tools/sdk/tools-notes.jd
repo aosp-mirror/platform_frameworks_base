@@ -621,7 +621,7 @@ build.</li>
 configuration file using the <code>android</code> tool &mdash; the build tools
 then automatically run ProGuard against the project sources during the build.
 For more information, see the <a
-href="{@docRoot}guide/developing/tools/proguard.html">ProGuard</a>
+href="{@docRoot}tools/proguard.html">ProGuard</a>
 documentation. </li>
 <li>New overridable Ant javac properties: <code>java.encoding</code>,
 <code>java.source</code>, and <code>java.target</code> (default values are
@@ -850,7 +850,7 @@ tool that helps you optimize your layout hierarchies. When run against your
 layout files, the tool analyzes their hierarchies and notifies you of
 inefficiencies and other potential issues. The tool also provides simple
 solutions for the issues it finds. For usage, see <a
-href="/guide/developing/tools/layoutopt.html">layoutopt</a>.</p>
+href="/tools/layoutopt.html">layoutopt</a>.</p>
 </dd>
 </dl>
  </div>

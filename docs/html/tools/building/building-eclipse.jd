@@ -127,7 +127,7 @@ parent.link=index.html
       <p>You can specify any emulator options to the Additional Emulator Command Line Options
       field. For example, you could add <code>-scale 96dpi</code> to scale the AVD's screen to an
       accurate size, based on the dpi of your computer monitor. For a full list of emulator
-      options, see the <a href="{@docRoot}guide/developing/tools/emulator.html">Android
+      options, see the <a href="{@docRoot}tools/emulator.html">Android
       Emulator</a> document.</p>
       </li>
       </ul>

@@ -56,7 +56,7 @@ href="{@docRoot}guide/publishing/publishing.html#market">Android マーケット
 
 <h3 id="test">1. アプリケーションを実際のデバイスで徹底的にテストする</h3>
 
-<p>アプリケーションをできる限り広範に徹底的にテストすることが重要です。この作業を支援するため、Android では多数のテスト用クラスとツールを用意しています。{@link android.app.Instrumentation Instrumentation} を使用して JUnit およびその他のテスト ケースを実行できます。また、<a href="{@docRoot}guide/developing/tools/monkey.html">UI/Application Exerciser Monkey</a> などのテスティング ツールを使用できます。  </p>
+<p>アプリケーションをできる限り広範に徹底的にテストすることが重要です。この作業を支援するため、Android では多数のテスト用クラスとツールを用意しています。{@link android.app.Instrumentation Instrumentation} を使用して JUnit およびその他のテスト ケースを実行できます。また、<a href="{@docRoot}tools/monkey.html">UI/Application Exerciser Monkey</a> などのテスティング ツールを使用できます。  </p>
 
 <ul>
 <li>ユーザーがアプリケーションを正常に実行できるようにするため、アプリケーションが実行されると予想されるタイプの携帯端末の実機を入手してください。実際のデバイスで、実際のネットワーク条件の下でアプリケーションをテストします。アプリケーションを実際のデバイスでテストすることは非常に重要です。これによって、作成したユーザー インターフェース要素のサイズが正しく（特にタッチスクリーン UI の場合）、アプリケーションのパフォーマンスと電池効率が適正であることを確認できるからです。</li>

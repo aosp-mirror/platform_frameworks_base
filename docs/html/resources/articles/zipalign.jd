@@ -4,7 +4,7 @@ parent.link=../browser.html?tag=article
 @jd:body
 
 <p>The Android SDK includes a tool called <a
-href="{@docRoot}guide/developing/tools/zipalign.html"><code>zipalign</code></a>
+href="{@docRoot}tools/zipalign.html"><code>zipalign</code></a>
 that optimizes the way an application is packaged. Running zipalign against your
 application enables Android to interact it more efficiently at run time and thus
 has the potential to make it and the overall system run faster. We strongly

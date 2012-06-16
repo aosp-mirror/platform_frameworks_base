@@ -84,7 +84,7 @@ page.title=Eclipse 内で ADT を使用
 
 <h2 id="Running">アプリケーションの実行</h2>
 
-<p>注意してください。<em></em>アプリケーションを Android エミュレータで実行する前に、Android 仮想デバイス（AVD）を作成する<strong>必要があります</strong>。AVD では、エミュレータで使用する Android プラットフォームを指定します。詳しくは <a href="{@docRoot}guide/developing/tools/avd.html">Android 仮想デバイス</a> のドキュメントをご覧ください。ただし、すぐにアプリケーションを実行したい場合は、次の簡単な手順に従って AVD を作成してください。</p>
+<p>注意してください。<em></em>アプリケーションを Android エミュレータで実行する前に、Android 仮想デバイス（AVD）を作成する<strong>必要があります</strong>。AVD では、エミュレータで使用する Android プラットフォームを指定します。詳しくは <a href="{@docRoot}tools/avd.html">Android 仮想デバイス</a> のドキュメントをご覧ください。ただし、すぐにアプリケーションを実行したい場合は、次の簡単な手順に従って AVD を作成してください。</p>
 
 <p>携帯端末の実機でのみアプリケーションを実行する場合は、AVD は必要ありません。この場合のアプリケーションの実行について詳しくは、<a href="{@docRoot}tools/device.html">Developing On a Device</a> をご覧ください。</p>
 
@@ -119,7 +119,7 @@ id:2
 
 <p>これで AVD が作成できました。次のセクションでは、エミュレータでアプリケーションを起動する際に、AVD がどのように使用されるかについて説明します。</p>
 
-<p>AVD の作成と管理について詳しくは、<a href="{@docRoot}guide/developing/tools/avd.html">Android 仮想デバイス</a> のドキュメントをご覧ください。</p>
+<p>AVD の作成と管理について詳しくは、<a href="{@docRoot}tools/avd.html">Android 仮想デバイス</a> のドキュメントをご覧ください。</p>
 
 
 <h3 id="RunningYourApplication">アプリケーションの実行</h3>
@@ -224,7 +224,7 @@ id:2
 
 <h3>DDMS の手動による実行</h3>
 
-<p>ADT プラグインを使用するデバッグをおすすめしますが、手動で DDMS を実行し、ポート 8700 でデバッグするように Eclipse を設定することができます（<strong>注:</strong> 最初に必ず <a href="{@docRoot}guide/developing/tools/ddms.html">DDMS</a> を起動してください）。 </p>
+<p>ADT プラグインを使用するデバッグをおすすめしますが、手動で DDMS を実行し、ポート 8700 でデバッグするように Eclipse を設定することができます（<strong>注:</strong> 最初に必ず <a href="{@docRoot}tools/ddms.html">DDMS</a> を起動してください）。 </p>
 
 <!-- TODO: clean this up and expand it to cover more wizards and features
 <h3>ADT Wizards</h3>

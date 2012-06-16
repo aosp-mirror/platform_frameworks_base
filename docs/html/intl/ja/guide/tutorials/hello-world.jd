@@ -26,7 +26,7 @@ page.title=Hello, World
 
 <div class="sidebox-wrapper">
   <div class="sidebox">
-    <p>AVD の使用方法と使用可能なオプションについて詳しくは、<a href="{@docRoot}guide/developing/tools/avd.html">Android 仮想デバイス</a> のドキュメントを参照してください。</p>
+    <p>AVD の使用方法と使用可能なオプションについて詳しくは、<a href="{@docRoot}tools/avd.html">Android 仮想デバイス</a> のドキュメントを参照してください。</p>
   </div>
 </div>
 
@@ -357,7 +357,7 @@ public class HelloAndroid extends Activity {
   
   <p>Eclipse を使用していない場合（普段から使用している総合開発環境がある場合や、シンプルにテキスト エディタやコマンド ライン ツールを使用している場合など）は、Eclipse プラグインを利用することはできません。しかし心配は無用です。Eclipse を使用していないからといって何らかの機能が失われることはありません。</p>
   
-  <p>Android Plugin for Eclipse は、単に Android SDK に含まれるツール セットをまとめたものに過ぎません（エミュレータ、aapt、adb、ddms などの個別のツールについては、<a href="{@docRoot}guide/developing/tools/index.html">こちらで別途説明</a>しています）。このため、これらのツールを別のツール、たとえば「Ant」のビルド ファイルなどでまとめることも可能です。</p>
+  <p>Android Plugin for Eclipse は、単に Android SDK に含まれるツール セットをまとめたものに過ぎません（エミュレータ、aapt、adb、ddms などの個別のツールについては、<a href="{@docRoot}tools/index.html">こちらで別途説明</a>しています）。このため、これらのツールを別のツール、たとえば「Ant」のビルド ファイルなどでまとめることも可能です。</p>
   
   <p>Android SDK には、「android」という名前のツールが含まれています。このツールを使用すると、作成するプロジェクトのソース コードとディレクトリ スタブすべて、および Ant と互換性のある <code>build.xml</code> ファイルを作成することができます。これにより、プロジェクトをコマンド ラインで作成したり、普段使用している総合開発環境と統合したりすることができます。</p>
   

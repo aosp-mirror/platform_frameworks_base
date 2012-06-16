@@ -118,7 +118,7 @@ parent.link=index.html
         <td class="jd-typecol">
             <nobr>
                 <code>
-                    <a href="{@docRoot}guide/developing/tools/MonkeyDevice.html">MonkeyDevice</a>
+                    <a href="{@docRoot}tools/MonkeyDevice.html">MonkeyDevice</a>
                 </code>
             </nobr>
         </td>
@@ -395,7 +395,7 @@ parent.link=index.html
     <h4 class="jd-details-title">
       <span class="normal">
           <code>
-              <a href="{@docRoot}guide/developing/tools/MonkeyDevice.html">MonkeyDevice</a>
+              <a href="{@docRoot}tools/MonkeyDevice.html">MonkeyDevice</a>
           </code>
       </span>
       <span class="sympad">waitForConnection</span>
@@ -428,7 +428,7 @@ parent.link=index.html
             <td>
                 A regular expression that specifies the serial number of the device or emulator. See
                 the topic
-                <a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a>
+                <a href="{@docRoot}tools/adb.html">Android Debug Bridge</a>
                 for a description of device and emulator serial numbers.
             </td>
         </tr>
@@ -438,7 +438,7 @@ parent.link=index.html
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist">
         <li>
-          A <code><a href="{@docRoot}guide/developing/tools/MonkeyDevice.html">MonkeyDevice</a></code>
+          A <code><a href="{@docRoot}tools/MonkeyDevice.html">MonkeyDevice</a></code>
           instance for the device or emulator. Use this object to control and communicate with the
           device or emulator.
         </li>

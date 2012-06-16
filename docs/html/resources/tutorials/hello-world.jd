@@ -580,7 +580,7 @@ just as you would for any other application.</p>
 
   <p>The Android Plugin for Eclipse is really just a wrapper around a set of tools
   included with the Android SDK. (These tools, like the emulator, aapt, adb,
-  ddms, and others are <a href="{@docRoot}guide/developing/tools/index.html">documented elsewhere.</a>)
+  ddms, and others are <a href="{@docRoot}tools/index.html">documented elsewhere.</a>)
   Thus, it's possible to
   wrap those tools with another tool, such as an 'ant' build file.</p>
 

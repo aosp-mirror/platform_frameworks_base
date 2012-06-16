@@ -26,7 +26,7 @@ underneath the title. Here is what such an item looks like:</p>
 <p>To clearly understand how the views, one {@link android.widget.ImageView} and
 two {@link android.widget.TextView}, are positioned with respect to each other,
 here is the wireframe of the layout as captured by <a
-href="{@docRoot}guide/developing/tools/hierarchy-viewer.html">HierarchyViewer</a
+href="{@docRoot}tools/hierarchy-viewer.html">HierarchyViewer</a
 >:</p>
 
 <div style="text-align: center;"><img src="images/relativelayout_wire_1.png" alt="Wireframe of the simple list item"></div>

@@ -1200,7 +1200,7 @@ finalize these details before publishing your application.
 the application as a draft, such that your application is not published for Google Play users,
 but the expansion files are available for you to test the download process.</p></li>
   <li>Install the application on your test device using the Eclipse tools or <a
-href="{@docRoot}guide/developing/tools/adb.html">{@code adb}</a>.</li>
+href="{@docRoot}tools/adb.html">{@code adb}</a>.</li>
   <li>Launch the app.</li>
 </ol>
 

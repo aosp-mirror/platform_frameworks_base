@@ -51,14 +51,14 @@ SDK packages that are available, already installed, or for which an update is av
 and other utility tools. These tools are installed with the Android SDK starter package and receive
 periodic updates. You can access these tools in the <code>&lt;sdk&gt;/tools/</code> directory of
 your SDK. To learn more about
-them, see <a href="{@docRoot}guide/developing/tools/index.html#tools-sdk">SDK Tools</a> in the
+them, see <a href="{@docRoot}tools/index.html#tools-sdk">SDK Tools</a> in the
 developer guide.</li>
 
 <li><strong>SDK Platform-tools</strong> &mdash; Contains platform-dependent tools for developing
 and debugging your application. These tools support the latest features of the Android platform and
 are typically updated only when a new platform becomes available. You can access these tools in the
 <code>&lt;sdk&gt;/platform-tools/</code> directory. To learn more about them, see <a
-href="{@docRoot}guide/developing/tools/index.html#tools-platform">Platform Tools</a> in the
+href="{@docRoot}tools/index.html#tools-platform">Platform Tools</a> in the
 developer guide.</li>
 </ul>
 

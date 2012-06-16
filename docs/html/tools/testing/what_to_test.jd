@@ -78,9 +78,9 @@ parent.link=index.html
 </p>
 <p>
     You can use the emulator to test network access and bandwidth. To learn more, please see
-    <a href="{@docRoot}guide/developing/tools/emulator.html#netspeed">Network Speed Emulation</a>.
+    <a href="{@docRoot}tools/emulator.html#netspeed">Network Speed Emulation</a>.
     To test GPS, you can use the emulator console and {@link android.location.LocationManager}. To
     learn more about the emulator console, please see
-    <a href="{@docRoot}guide/developing/tools/emulator.html#console">
+    <a href="{@docRoot}tools/emulator.html#console">
     Using the Emulator Console</a>.
 </p>

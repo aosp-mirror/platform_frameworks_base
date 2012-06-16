@@ -811,7 +811,7 @@ If the latitudeSpan, longitudeSpan, and zoomLevel attributes are not consistent,
     <code>Log.w()</code>, or <code>Log.e()</code> to log messages.
     (See the {@link android.util.Log} class.)<br/> E.g., 
     <code>Log.e(this.toString(), "error: " + err.toString())</code></li>
-    <li>Launch <a href="{@docRoot}guide/developing/tools/ddms.html">DDMS</a> from a terminal
+    <li>Launch <a href="{@docRoot}tools/ddms.html">DDMS</a> from a terminal
     by executing <code>ddms</code> in your Android SDK <code>/tools</code> path.</li>
     <li>Run your application in the Android emulator.</li>
     <li>From the DDMS application, select the emulator 

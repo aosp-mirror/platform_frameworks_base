@@ -46,7 +46,7 @@ mksdcard -l &lt;label&gt; &lt;size&gt; &lt;file&gt;
 
   <p>Once you have created the disk image file, you can load it in the emulator at startup using
   the emulator's <code>-sdcard</code> option. For more information, see <a href= 
-  "{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a>.</p>
+  "{@docRoot}tools/emulator.html">Android Emulator</a>.</p>
   
   <p>The usage for the <code>-sdcard</code> option is as follows:</p>
   <pre>emulator -sdcard &lt;file&gt;</pre>

@@ -372,7 +372,7 @@ Application (Eclipse)</a> or <a
 href="{@docRoot}guide/developing/other-ide.html#Running">Running Your
 Application (other IDEs)</a>. </p>
 
-<p>For general information about AVDs, see the <a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual
+<p>For general information about AVDs, see the <a href="{@docRoot}tools/avd.html">Android Virtual
 Devices</a> document. </p>
 
 

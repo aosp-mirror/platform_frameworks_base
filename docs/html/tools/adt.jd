@@ -101,7 +101,7 @@ Project site.</p>
     Allows you to profile your program's execution
     (<strong>Window &gt; Open Perspective &gt; Traceview</strong>). </li>
 
-    <li><a href="{@docRoot}guide/developing/tools/android.html">android</a>: Provides access to
+    <li><a href="{@docRoot}tools/android.html">android</a>: Provides access to
     the Android SDK Manager and AVD Manager. Other <code>android</code> features such as creating or
     updating projects (application and library) are integrated throughout the Eclipse IDE. </li>
 
@@ -117,15 +117,15 @@ Project site.</p>
     debugging features including: screen capturing, thread and heap information, and logcat
     (<strong>Window &gt; Open Perspective &gt; DDMS</strong>).</li>
 
-    <li><a href="{@docRoot}guide/developing/tools/adb.html">adb</a>: Provides access to
+    <li><a href="{@docRoot}tools/adb.html">adb</a>: Provides access to
       a device from your development system. Some features of
     <code>adb</code> are integrated into ADT such as project installation (Eclipse run menu),
     file transfer, device enumeration, and logcat (DDMS). You must access the more advanced
     features of <code>adb</code>, such as shell commands, from the command line.</li>
 
-    <li><a href="{@docRoot}guide/developing/tools/proguard.html">ProGuard</a>: Allows code obfuscation,
+    <li><a href="{@docRoot}tools/proguard.html">ProGuard</a>: Allows code obfuscation,
     shrinking, and optimization. ADT integrates ProGuard as part of the build, if you <a href=
-    "{@docRoot}guide/developing/tools/proguard.html#enabling">enable it</a>.</li>
+    "{@docRoot}tools/proguard.html#enabling">enable it</a>.</li>
   </ul>
 
 <h2 id="editors">Code Editors</h2>

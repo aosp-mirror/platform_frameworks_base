@@ -263,7 +263,7 @@ all}
 <p class="img-caption"><strong>그림 4.</strong> <code>button.png</code></p>
 
 <p>그 다음 이 이미지에 <ode
-href="{@docRoot}guide/developing/tools/draw9patch.html">SDK의 <code>draw9patch</code></a> 유틸리티(<code>tools/</code> 디렉토리에 있음)를 실행합니다. 이 때 왼쪽 및 상단 테두리를 따라 픽셀을 그려 확대되어야 할 영역을 표시할 수 있습니다. 또한 오른쪽 및 하단 테두리를 따라 픽셀을 그려 콘텐츠가 들어가야 할 영역을 표시할 수 있으며 그 결과는 그림 5와 같습니다.</p>
+href="{@docRoot}tools/draw9patch.html">SDK의 <code>draw9patch</code></a> 유틸리티(<code>tools/</code> 디렉토리에 있음)를 실행합니다. 이 때 왼쪽 및 상단 테두리를 따라 픽셀을 그려 확대되어야 할 영역을 표시할 수 있습니다. 또한 오른쪽 및 하단 테두리를 따라 픽셀을 그려 콘텐츠가 들어가야 할 영역을 표시할 수 있으며 그 결과는 그림 5와 같습니다.</p>
 
 <img src="{@docRoot}images/training/button_with_marks.png" />
 <p class="img-caption"><strong>그림 5.</strong> <code>button.9.png</code></p>

@@ -19,9 +19,9 @@ page.title=その他の統合開発環境
 
   <h2>関連項目</h2>
   <ol>
-    <li><a href="{@docRoot}guide/developing/tools/othertools.html#android">android ツール</a></li>
-    <li><a href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a></li>
-    <li><a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a></li>
+    <li><a href="{@docRoot}tools/othertools.html#android">android ツール</a></li>
+    <li><a href="{@docRoot}tools/emulator.html">Android Emulator</a></li>
+    <li><a href="{@docRoot}tools/adb.html">Android Debug Bridge</a></li>
   </ol>
 </div>
 </div>
@@ -36,11 +36,11 @@ page.title=その他の統合開発環境
 <p>Eclipse 以外の統合開発環境やエディタで開発する際には、次の Android SDK ツールについて知っておく必要があります:</p>
 
 <dl>
-  <dt><a href="{@docRoot}guide/developing/tools/othertools.html#android">android</a></dt>
+  <dt><a href="{@docRoot}tools/othertools.html#android">android</a></dt>
     <dd>Android プロジェクトの作成/更新、AVD の作成/移動/削除のために使用します。</dd>
-  <dt><a href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a></dt>
+  <dt><a href="{@docRoot}tools/emulator.html">Android Emulator</a></dt>
     <dd>Android のエミュレーション プラットフォームで Android アプリケーションを実行するために使用します。</dd>
-  <dt><a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a></dt>
+  <dt><a href="{@docRoot}tools/adb.html">Android Debug Bridge</a></dt>
     <dd>エミュレータまたは接続先の端末とのインターフェースとして使用します（アプリケーションのインストール、端末のシェル、コマンドの実行などに使用）。
     </dd>
 </dl>
@@ -109,7 +109,7 @@ android create project \
   <li><code>tests/</code> - テスト用に、上記のすべての複製が含まれます。</li>
 </ul>
 
-<p>プロジェクトを作成すると、開発を始める準備ができます。開発のために、プロジェクト フォルダをどこにでも移動できますが、アプリケーションをエミュレータに送信するために(方法については後述します)、SDK の <code>tools/</code> ディレクトリにある <a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a>（adb）を使用する必要があります。そのためにプロジェクト ソリューションと <code>tools/</code> フォルダ間でアクセスする必要があります。</p>
+<p>プロジェクトを作成すると、開発を始める準備ができます。開発のために、プロジェクト フォルダをどこにでも移動できますが、アプリケーションをエミュレータに送信するために(方法については後述します)、SDK の <code>tools/</code> ディレクトリにある <a href="{@docRoot}tools/adb.html">Android Debug Bridge</a>（adb）を使用する必要があります。そのためにプロジェクト ソリューションと <code>tools/</code> フォルダ間でアクセスする必要があります。</p>
 
 <p class="warning"><strong>注:</strong> SDK ディレクトリは移動させないでください。移動するとビルド スクリプトが機能しなくなります（ビルド スクリプトをもう一度機能させるには、手動でスクリプトを更新して、SDK の新しいロケーションを反映させる必要があります）。</p>
 
@@ -253,9 +253,9 @@ id:2
 
 <p>上記で使用したツールについて詳しくは、次のドキュメントをご覧ください:</p>
 <ul>
-  <li><a href="{@docRoot}guide/developing/tools/othertools.html#android">android ツール</a></li>
-  <li><a href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a></li>
-  <li><a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> (ADB)</li>
+  <li><a href="{@docRoot}tools/othertools.html#android">android ツール</a></li>
+  <li><a href="{@docRoot}tools/emulator.html">Android Emulator</a></li>
+  <li><a href="{@docRoot}tools/adb.html">Android Debug Bridge</a> (ADB)</li>
 </ul>
 
 
@@ -265,7 +265,7 @@ id:2
 
 <p>Eclipse プラグインを使用すると、デバッガへの接続は自動化されます。しかし他の総合開発環境でも、デバッグ ポートをリッスンしてデバッグ情報を受信するように設定することができます:</p>
 <ol>
-    <li>総合開発環境とエミュレータ間のポート転送サービスとして機能する <strong><a href="{@docRoot}guide/developing/tools/ddms.html">Dalvik Debug Monitor Server（DDMS）</a>ツールを起動します。</strong></li>
+    <li>総合開発環境とエミュレータ間のポート転送サービスとして機能する <strong><a href="{@docRoot}tools/ddms.html">Dalvik Debug Monitor Server（DDMS）</a>ツールを起動します。</strong></li>
     <li><strong>エミュレータでオプションのデバッグ構成を設定します</strong>。設定には、デバッガ接続まで Activity のアプリケーション起動をブロックするオプションなどが含まれます。エミュレータでの CPU 使用率や画面の更新率の表示のように、これらのデバッグ用オプションの多くは DDMS がなくても使用できます。</li>
     <li><strong>総合開発環境を設定して、デバッグ用にポート 8700 に接続します。</strong><a href="{@docRoot}guide/developing/debug-tasks.html#ide-debug-port">総合開発環境を設定してデバッグ ポートに接続する</a> をご覧ください。 </li>
 </ol>

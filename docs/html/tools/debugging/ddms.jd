@@ -51,7 +51,7 @@ parent.link=index.html
   <p>On Android, every application runs in its own process, each of which runs in its own virtual machine
   (VM). Each VM exposes a unique port that a debugger can attach to.</p>
 
-  <p>When DDMS starts, it connects to <a href="{@docRoot}guide/developing/tools/adb.html">adb</a>.
+  <p>When DDMS starts, it connects to <a href="{@docRoot}tools/adb.html">adb</a>.
   When a device is connected, a VM monitoring service is created between
   <code>adb</code> and DDMS, which notifies DDMS when a VM on the device is started or terminated. Once a VM
   is running, DDMS retrieves the the VM's process ID (pid), via <code>adb</code>, and opens a connection to the

@@ -104,7 +104,7 @@ android create project \
 
   <p>Once you've created your project, you're ready to begin development. You can move your project
   folder wherever you want for development, but keep in mind that you must use the <a href=
-  "{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> (adb) &mdash; located in the
+  "{@docRoot}tools/adb.html">Android Debug Bridge</a> (adb) &mdash; located in the
   SDK <code>platform-tools/</code> directory &mdash; to send your application to the emulator (discussed
   later). So you need access between your project solution and the <code>platform-tools/</code> folder.</p>
 

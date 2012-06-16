@@ -84,7 +84,7 @@ ant debug
       <p>This creates your debug <code>.apk</code> file inside the project <code>bin/</code> directory, named
       <code>&lt;your_project_name&gt;-debug.apk</code>. The file is already signed with
       the debug key and has been aligned with
-      <a href="{@docRoot}guide/developing/tools/zipalign.html"><code>zipalign</code></a>.
+      <a href="{@docRoot}tools/zipalign.html"><code>zipalign</code></a>.
       </p>
     </li>
   </ol>
@@ -282,11 +282,11 @@ adb -d install <em>path/to/your/app</em>.apk
   <p>For more information on the tools used above, please see the following documents:</p>
 
   <ul>
-    <li><a href="{@docRoot}guide/developing/tools/android.html">android Tool</a></li>
+    <li><a href="{@docRoot}tools/android.html">android Tool</a></li>
 
     <li><a href="{@docRoot}tools/devices/emulator.html">Android Emulator</a></li>
 
-    <li><a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> (ADB)</li>
+    <li><a href="{@docRoot}tools/adb.html">Android Debug Bridge</a> (ADB)</li>
   </ul>
 
   <h2 id="Signing">Application Signing</h2>

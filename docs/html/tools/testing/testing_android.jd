@@ -76,11 +76,11 @@ parent.link=index.html
           Testing from Other IDEs</a>
         </li>
         <li>
-          <a href="{@docRoot}guide/developing/tools/monkeyrunner_concepts.html">
+          <a href="{@docRoot}tools/monkeyrunner_concepts.html">
           monkeyrunner</a>
         </li>
         <li>
-     <a href="{@docRoot}guide/developing/tools/monkey.html">UI/Application Exerciser Monkey</a>
+     <a href="{@docRoot}tools/monkey.html">UI/Application Exerciser Monkey</a>
         </li>
       </ol>
   </div>
@@ -117,9 +117,9 @@ parent.link=index.html
     </li>
     <li>
         The SDK also provides
-  <a href="{@docRoot}guide/developing/tools/monkeyrunner_concepts.html">monkeyrunner</a>, an API
+  <a href="{@docRoot}tools/monkeyrunner_concepts.html">monkeyrunner</a>, an API
         testing devices with Python programs, and <a
-        href="{@docRoot}guide/developing/tools/monkey.html">UI/Application Exerciser Monkey</a>,
+        href="{@docRoot}tools/monkey.html">UI/Application Exerciser Monkey</a>,
         a command-line tool for stress-testing UIs by sending pseudo-random events to a device.
     </li>
 </ul>
@@ -501,7 +501,7 @@ parent.link=index.html
     To run {@link android.test.InstrumentationTestRunner}, you use internal system classes called by
     Android tools. When you run a test in Eclipse with ADT, the classes are called automatically.
     When you run a test from the command line, you run these classes with
-    <a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge (adb)</a>.
+    <a href="{@docRoot}tools/adb.html">Android Debug Bridge (adb)</a>.
 </p>
 <p>
     The system classes load and start the test package, kill any processes that
@@ -552,16 +552,16 @@ parent.link=index.html
 </p>
     <ul>
         <li>
-The <a href="{@docRoot}guide/developing/tools/monkey.html">UI/Application Exerciser Monkey</a>,
+The <a href="{@docRoot}tools/monkey.html">UI/Application Exerciser Monkey</a>,
             usually called "monkey", is a command-line tool that sends pseudo-random streams of
             keystrokes, touches, and gestures to a device. You run it with the
-            <a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> (adb) tool.
+            <a href="{@docRoot}tools/adb.html">Android Debug Bridge</a> (adb) tool.
             You use it to stress-test your application and report back errors that are encountered.
             You can repeat a stream of events by running the tool each time with the same random
             number seed.
         </li>
         <li>
-    The <a href="{@docRoot}guide/developing/tools/monkeyrunner_concepts.html">monkeyrunner</a> tool
+    The <a href="{@docRoot}tools/monkeyrunner_concepts.html">monkeyrunner</a> tool
             is an API and execution environment for test programs written in Python. The API
             includes functions for connecting to a device, installing and uninstalling packages,
             taking screenshots, comparing two images, and running a test package against an

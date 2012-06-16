@@ -550,7 +550,7 @@ private key <strong>before</strong> you optimize the package with {@code zipalig
 If you sign it after using {@code zipalign}, it will undo the alignment.</p>
 
 <p>For more information, read about the
-<a href="{@docRoot}guide/developing/tools/zipalign.html">zipalign</a> tool.
+<a href="{@docRoot}tools/zipalign.html">zipalign</a> tool.
 
 
 <h3 id="ExportWizard">Compile and sign with Eclipse ADT</h3>

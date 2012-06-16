@@ -567,7 +567,7 @@ option is not available.</p>
 
 <p>As part of your accessibility testing, you can test navigation of your application using focus,
 even if your test devices does not have a directional controller. The <a
-href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a> provides a
+href="{@docRoot}tools/emulator.html">Android Emulator</a> provides a
 simulated directional controller that you can easily use to test navigation. You can also use a
 software-based directional controller, such as the one provided by the
 <a href="https://play.google.com/store/apps/details?id=com.googlecode.eyesfree.inputmethod.latin">

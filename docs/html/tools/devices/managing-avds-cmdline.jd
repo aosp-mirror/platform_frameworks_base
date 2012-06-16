@@ -32,7 +32,7 @@ Emulator</a></li>
 
 <p>The <code>android</code> tool lets you manage AVDs on the command line. For a complete reference 
 of the command line options that you can use, see the reference for the 
-<a href="{@docRoot}guide/developing/tools/android.html"><code>android</code></a> tool.</p>
+<a href="{@docRoot}tools/android.html"><code>android</code></a> tool.</p>
 
 
 
@@ -109,7 +109,7 @@ general characteristics offered by the AVD. The target ID is an integer assigned
 version, or API Level, or other attribute, so you need to run the <code>android list targets</code>
 command to list the target ID of each system image. You should do this <em>before</em> you run
 the <code>android create avd</code> command. See the <a
-href="{@docRoot}guide/developing/tools/android.html">android</a>
+href="{@docRoot}tools/android.html">android</a>
 tool documentation for more information on the command line options.</p>
 
 
@@ -171,7 +171,7 @@ WVGA screen.</p>
 
 <p>As an alternative to adjusting the emulator skin configuration, you can use
 the emulator skin's default density and add the <code>-dpi-device</code> option
-to the <a href="{@docRoot}guide/developing/tools/emulator.html">emulator</a> command line when
+to the <a href="{@docRoot}tools/emulator.html">emulator</a> command line when
 starting the AVD. For example:</p>
 
 <pre>emulator -avd WVGA800 -scale 96dpi -dpi-device 160</pre>

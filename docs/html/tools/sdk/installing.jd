@@ -207,14 +207,14 @@ Repository</em> and <em>Third party Add-ons</em>.</p>
 and other utility tools. These tools are installed with the Android SDK starter package and receive
 periodic updates. You can access these tools in the <code>&lt;sdk&gt;/tools/</code> directory of
 your SDK. To learn more about
-them, see <a href="{@docRoot}guide/developing/tools/index.html#tools-sdk">SDK Tools</a> in the
+them, see <a href="{@docRoot}tools/index.html#tools-sdk">SDK Tools</a> in the
 developer guide.</li>
 
 <li><strong>SDK Platform-tools</strong> &mdash; Contains platform-dependent tools for developing
 and debugging your application. These tools support the latest features of the Android platform and
 are typically updated only when a new platform becomes available. You can access these tools in the
 <code>&lt;sdk&gt;/platform-tools/</code> directory. To learn more about them, see <a
-href="{@docRoot}guide/developing/tools/index.html#tools-platform">Platform Tools</a> in the
+href="{@docRoot}tools/index.html#tools-platform">Platform Tools</a> in the
 developer guide.</li>
 
 <li><strong>Android platforms</strong> &mdash; An SDK platform is
@@ -443,7 +443,7 @@ width="9px" />
   <div class="toggleme">
 
 <p>Adding both <code>tools/</code> and <code>platform-tools/</code> to your PATH lets you run
-command line <a href="{@docRoot}guide/developing/tools/index.html">tools</a> without needing to
+command line <a href="{@docRoot}tools/index.html">tools</a> without needing to
 supply the full path to the tool directories. Depending on your operating system, you can
 include these directories in your PATH in the following way:</p>
 
@@ -504,7 +504,7 @@ first step in getting started with Android development. </p>
 <p><strong>Explore the development tools</strong></p>
 <ul>
   <li>Get an overview of the <a
-  href="{@docRoot}guide/developing/tools/index.html">development
+  href="{@docRoot}tools/index.html">development
   tools</a> that are available to you.</li>
   <li>Read the <a href="{@docRoot}tools/workflow/index.html">Introduction</a> to Android
 application development.

@@ -65,7 +65,7 @@ parent.link=index.html
 
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a></li>
+    <li><a href="{@docRoot}tools/emulator.html">Android Emulator</a></li>
     <li><a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD Manager</a></li>
   </ol>
 </div>
@@ -182,7 +182,7 @@ like this: </p>
 
 <p>This initializes the emulator, loads an AVD configuration and displays the emulator
 window. For more information about command line options for the emulator, see the
-<a href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a> tool reference.</p>
+<a href="{@docRoot}tools/emulator.html">Android Emulator</a> tool reference.</p>
 
 <p class="note"><strong>Note:</strong> You can run multiple
 instances of the emulator concurrently, each with its own AVD configuration and
@@ -200,14 +200,14 @@ on the Emulator</a> for information about how to install your application.</p>
 <p>To stop an emulator instance, just close the emulator's window.</p>
 
 <p>For a reference of the emulator's startup commands and keyboard mapping, see
-the <a href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a> tool
+the <a href="{@docRoot}tools/emulator.html">Android Emulator</a> tool
 reference.</p>
 
 
 <h2 id="apps">Installing Applications on the Emulator</h2>
 
 <p>If you don't have access to Eclipse or the ADT Plugin, you can install your application on the
-emulator using the <a href="{@docRoot}guide/developing/tools/adb.html#move">adb</a> utility. Before
+emulator using the <a href="{@docRoot}tools/adb.html#move">adb</a> utility. Before
 installing the application, you need to build and package it into an <code>.apk</code> as described
 in <a href="{@docRoot}tools/building/index.html">Building and
 Running Apps</a>. Once the application is installed, you can start the emulator from the command
@@ -580,7 +580,7 @@ the tools/ directory of the SDK and create a disk image like this: </p>
 <pre>mksdcard 1024M sdcard1.iso</pre>
 
 <p>For more information, see <a
-href="{@docRoot}guide/developing/tools/mksdcard.html"><code>mksdcard</code></a>.</p>
+href="{@docRoot}tools/mksdcard.html"><code>mksdcard</code></a>.</p>
 
 
 <h3 id="sdcard-files">Copying files to an SD card image</h3>
@@ -593,7 +593,7 @@ Mac, and Windows.</p>
 
 <p>Alternatively, you can use the {@code adb push} command to move files onto an SD card image
 while it is loaded in an emulator. For more information see the <a
-href="{@docRoot}guide/developing/tools/adb.html#copyfiles">{@code adb push}</a> documentation.</p>
+href="{@docRoot}tools/adb.html#copyfiles">{@code adb push}</a> documentation.</p>
 
 <h3 id="sdcard-loading">Loading an SD card image</h3>
 
@@ -948,7 +948,7 @@ case, <code>redir</code> generates an error message to that effect. </p>
 
 <p>The Android Debug Bridge (ADB) tool provides port forwarding, an alternate
 way for you to set up network redirection. For more information, see <a
-href="{@docRoot}guide/developing/tools/adb.html#forwardports">Forwarding Ports</a> in the ADB
+href="{@docRoot}tools/adb.html#forwardports">Forwarding Ports</a> in the ADB
 documentation.</p>
 
 <p>Note that ADB does not currently offer any way to remove a redirection,
@@ -1081,7 +1081,7 @@ port 5555. Subsequent instances use port numbers increasing by two &mdash; for e
 
 <p><code>Android Emulator (5554)</code></p>
 
-<p>Alternatively, you can use the <code>adb devices</code> command, which prints a list of running emulator instances and their console port numbers. For more information, see <a href="{@docRoot}guide/developing/tools/adb.html#devicestatus">Querying for Emulator/Device Instances</a> in the adb documentation.</p>
+<p>Alternatively, you can use the <code>adb devices</code> command, which prints a list of running emulator instances and their console port numbers. For more information, see <a href="{@docRoot}tools/adb.html#devicestatus">Querying for Emulator/Device Instances</a> in the adb documentation.</p>
 
 <p class="note">Note: The emulator listens for connections on ports 5554-5587 and accepts connections only from localhost.</p>
 
@@ -1560,7 +1560,7 @@ might have to use the {@code -d} flag with some common {@code adb} commands, suc
 <code>install</code>. The {@code -d} flag lets you specify which of several connected devices to use
 as the target of a command. If you don't specify {@code -d}, the emulator targets the first
 device in its list. For more information about {@code adb}, see <a
-href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a>.</p>
+href="{@docRoot}tools/adb.html">Android Debug Bridge</a>.</p>
 
 <p>For emulators running on Mac OS X, if you see an error {@code Warning: No DNS servers found}
 when starting the emulator, check to see whether you have an <code>/etc/resolv.conf</code> file. If

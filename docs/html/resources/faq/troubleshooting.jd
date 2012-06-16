@@ -84,7 +84,7 @@ that are required to install the Android plugin (wst, emf, etc...).</li>
         will often not be caught by compilers, but will prevent your application
         from being displayed because the intent filter will not be matched. Extra
         spaces or other characters can often sneak into these strings.</li>
-    <li>Did you send your .apk file to the device (<a href="{@docRoot}guide/developing/tools/adb.html#move">adb install</a>)?</li>
+    <li>Did you send your .apk file to the device (<a href="{@docRoot}tools/adb.html#move">adb install</a>)?</li>
     <li>Run logcat on your device (<code>adb logcat</code>)
         and then install your .apk file. Check the logcat output to see whether the
         application is being installed and recognized properly. Here's sample output
@@ -101,7 +101,7 @@ D/PackageManager( 414): Activities: com.example.codelab.rssexample.MyRssReader c
 	    compiling it.</li>
 </ul>
 <a name="noupdate"></a><h2>I updated my app, but the updates don't seem to be showing up on the device</h2>
-    <p>Did you remember to send your .apk file to the device (<a href="{@docRoot}guide/developing/tools/adb.html#move">adb
+    <p>Did you remember to send your .apk file to the device (<a href="{@docRoot}tools/adb.html#move">adb
         install</a>)?</p>
 
 <a name="layout_wilih"></a><h2>I'm getting a &quot;Binary XML file line #2: You must supply a layout_wilih
@@ -234,7 +234,7 @@ commands to the emulator instance that you are targeting. To do that you can add
 
 <pre>adb -s emulator-5556 install</pre>
 
-<p>For more information about adb, see the <a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> 
+<p>For more information about adb, see the <a href="{@docRoot}tools/adb.html">Android Debug Bridge</a> 
 documentation.</p>
 
 <h2 id="gesturebuilderinstall">I can't install the GestureBuilder sample 

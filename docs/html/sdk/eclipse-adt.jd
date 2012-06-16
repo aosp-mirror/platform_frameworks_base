@@ -25,7 +25,7 @@ adt.zip.checksum=b446fa157ed97af79d1e21629201efbb
 
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/developing/tools/adt.html">Android Developer Tools</a></li>
+    <li><a href="{@docRoot}tools/adt.html">Android Developer Tools</a></li>
   </ol>
 
 </div>
@@ -57,7 +57,7 @@ how to update ADT to the latest version or how to uninstall it, if necessary.
 
 <p>For information about the features provided by the ADT plugin, such as code
 editor features, SDK tool integration, and the graphical layout editor (for drag-and-drop layout
-editing), see the <a href="{@docRoot}guide/developing/tools/adt.html">Android Developer Tools</a>
+editing), see the <a href="{@docRoot}tools/adt.html">Android Developer Tools</a>
 document.</p>
 
 
@@ -924,7 +924,7 @@ example, ADT 8.x is for SDK Tools r8.</li>
   "export signed/unsigned application package", ADT does <em>not</em> insert it.
   If you manually set <code>debuggable="true"</code> in the manifest file, then release builds will
   actually create a debug build (it does not remove it if you placed it there).</p></li>
-  <li>Automatic <a href="{@docRoot}guide/developing/tools/proguard.html">ProGuard</a> support in
+  <li>Automatic <a href="{@docRoot}tools/proguard.html">ProGuard</a> support in
   release builds. For it to work, you need to have a <code>proguard.config</code>
   property in the <code>default.properties</code> file that points to a ProGuard config file.</li>
   <li>Completely rewritten Visual Layout Editor. (This is still a work in progress.) Now includes:
