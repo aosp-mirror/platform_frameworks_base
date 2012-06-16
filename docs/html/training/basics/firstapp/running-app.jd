@@ -25,7 +25,7 @@ next.link=building-ui.html
 <h2>You should also read</h2>
 
 <ul>
-  <li><a href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a></li>
+  <li><a href="{@docRoot}tools/device.html">Using Hardware Devices</a></li>
   <li><a href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a></li>
   <li><a href="{@docRoot}guide/developing/projects/index.html">Managing Projects</a></li>
 </ul>

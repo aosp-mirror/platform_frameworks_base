@@ -200,7 +200,7 @@ android update project --target 2 --path ./myProject
 
 <p>端末のハードウェア以外でアプリケーションを実行する場合は、アプリケーションのインストール先となるエミュレータを起動する必要があります。Android エミュレータのインスタンスは、特有の端末構成に合わせて設定された、特定の Android プラットフォームを実行しています。このプラットフォームと構成は、Android 仮想デバイス（AVD）で定義されます。そのためエミュレータを起動する前に、AVD を定義しなくてはいけません。</p>
 
-<p>端末ハードウェアでアプリケーションを実行する場合は、代わりに、<a href="{@docRoot}guide/developing/device.html">端末のでの開発</a> をご覧ください。</p>
+<p>端末ハードウェアでアプリケーションを実行する場合は、代わりに、<a href="{@docRoot}tools/device.html">端末のでの開発</a> をご覧ください。</p>
 
 <ol>
   <li><strong>AVD の作成</strong>

@@ -42,7 +42,7 @@ must run a standard version of the Android 1.6 or later platform (API level 4 or
 the most current version of the Google Play application installed. If a device is not running the
 most current Google Play application, your application won't be able to send in-app billing
 requests to Google Play. For general information about how to set up a device for use in
-developing Android applications, see <a href="{@docRoot}guide/developing/device.html">Using Hardware
+developing Android applications, see <a href="{@docRoot}tools/device.html">Using Hardware
 Devices</a>.</p>
 
 <p>The following section shows you how to set up and use the in-app billing test tools.</p>

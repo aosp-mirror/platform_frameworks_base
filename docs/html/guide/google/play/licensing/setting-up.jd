@@ -146,7 +146,7 @@ be able to communicate with the Google Play licensing server. </p>
 
 <p>For general information about how to set up a device for use in developing
 Android applications, see <a
-href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a>.</p>
+href="{@docRoot}tools/device.html">Using Hardware Devices</a>.</p>
 
 <h4 id="runtime-emulator">Running on an Android emulator</h4>
 

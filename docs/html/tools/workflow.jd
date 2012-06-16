@@ -29,7 +29,7 @@ development steps encompass four development phases, which include:</p>
       Android Virtual Devices (AVDs) and connect hardware devices on which you can install your
       applications.</p>
     <p>See <a href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>
-      and <a href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a> for more
+      and <a href="{@docRoot}tools/device.html">Using Hardware Devices</a> for more
       information.
   </li>
   <li><strong>Development</strong>

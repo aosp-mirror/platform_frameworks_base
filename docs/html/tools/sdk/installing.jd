@@ -229,7 +229,7 @@ your applications on an actual device. You <em>do not</em> need the USB driver u
 you plan to debug your application on an actual Android-powered device. If you
 develop on Mac OS X or Linux, you do not need a special driver to debug
 your application on an Android-powered device. See <a
-href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a> for more information
+href="{@docRoot}tools/device.html">Using Hardware Devices</a> for more information
 about developing on a real device.</li>
 
 <li><strong>Samples</strong> &mdash; Contains the sample code and apps available
@@ -509,7 +509,7 @@ first step in getting started with Android development. </p>
   <li>Read the <a href="{@docRoot}tools/workflow/index.html">Introduction</a> to Android
 application development.
   </li>
-  <li>Read <a href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a> to learn
+  <li>Read <a href="{@docRoot}tools/device.html">Using Hardware Devices</a> to learn
 how to set up an Android-powered device so you can run and test your application.</li>
 </ul>
 

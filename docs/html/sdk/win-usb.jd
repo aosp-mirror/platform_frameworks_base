@@ -11,7 +11,7 @@ page.title=Google USB Driver
   <h2>See also</h2>
   <ol>
     <li><a href="{@docRoot}sdk/oem-usb.html#InstallingDriver">Installing a USB Driver</a></li>
-    <li><a href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a></li>
+    <li><a href="{@docRoot}tools/device.html">Using Hardware Devices</a></li>
     <li><a href="{@docRoot}sdk/adding-components.html">Adding SDK Packages</a></li>
   </ol>
 </div>
@@ -37,7 +37,7 @@ href="http://www.samsung.com/us/support/downloads/verizon-wireless/SCH-I515MSAVZ
 
 <p class="note"><strong>Note:</strong>
 If you're developing on Mac OS X or Linux, then you do not need to install a USB driver. To start
-developing with your device, also read <a href="{@docRoot}guide/developing/device.html">Using
+developing with your device, also read <a href="{@docRoot}tools/device.html">Using
 Hardware Devices</a>.</p>
 
 <p>The sections below provide instructions on how to download and install the Google USB Driver

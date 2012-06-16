@@ -90,7 +90,7 @@ parent.link=index.html
     <li>Ensure that your development computer can detect your device when connected via USB</li>
   </ul>
 
-  <p>Read <a href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a>
+  <p>Read <a href="{@docRoot}tools/device.html">Using Hardware Devices</a>
   for more information.</p>
 
   <p>Once set up and your device is connected via USB, install your application on the device by

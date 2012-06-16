@@ -267,7 +267,7 @@ adb -s emulator-5554 install <em>path/to/your/app</em>.apk
     <li>Ensure that your development computer can detect your device when connected via USB</li>
   </ul>
 
-  <p>Read <a href="{@docRoot}guide/developing/device.html#setting-up">Setting up a Device for
+  <p>Read <a href="{@docRoot}tools/device.html#setting-up">Setting up a Device for
   Development</a> for more information.</p>
 
   <p>Once your device is set up and connected via USB, navigate to your SDK's <code>platform-tools/</code>

@@ -120,7 +120,7 @@ http://developer.android.com/guide/market/billing/billing_reference.html
 http://developer.android.com/guide/appendix/market-filters.html
 http://developer.android.com/guide/developing/eclipse-adt.html
 http://developer.android.com/guide/developing/other-ide.html
-http://developer.android.com/guide/developing/device.html
+http://developer.android.com/tools/device.html
 http://developer.android.com/guide/developing/debug-tasks.html
 http://developer.android.com/guide/developing/testing/index.html
 http://developer.android.com/guide/developing/testing/testing_eclipse.html

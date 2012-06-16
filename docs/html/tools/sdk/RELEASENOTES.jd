@@ -585,7 +585,7 @@ these USB drivers that you can install, to let you develop on the device:</p>
 <p>The USB driver files are located in the
 <code>&lt;SDK&gt;/usb_driver</code> directory. For details and
 installation instructions, see <a
-href="{@docRoot}guide/developing/device.html#setting-up">Connecting Hardware Devices</a>.</p>
+href="{@docRoot}tools/device.html#setting-up">Connecting Hardware Devices</a>.</p>
 </p>
 
 <h3>Resolved Issues, Changes</h3>

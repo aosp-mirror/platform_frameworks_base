@@ -39,7 +39,7 @@ page.title=Debugging
     capture screenshots, gather thread and stack information, spoof incoming calls and SMS
     messages, and has many other features.</dd>
 
-    <dt><strong><a href="{@docRoot}guide/developing/device.html">Device</a> or
+    <dt><strong><a href="{@docRoot}tools/device.html">Device</a> or
     <a href="{@docRoot}tools/devices/index.html">Android Virtual Device</a></strong></dt>
 
     <dd>Your application must run in a device or in an AVD so that it can be debugged. An <code>adb</code> device

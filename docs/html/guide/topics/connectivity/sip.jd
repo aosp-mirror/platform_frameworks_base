@@ -479,9 +479,9 @@ wireless, so you must test on an actual device. Testing on AVD won't work.</li>
 <li>On your device, connect to wireless (<strong>Settings > Wireless & networks
 > Wi-Fi > Wi-Fi settings</strong>)</li>
 <li>Set up your mobile device for testing, as described in <a
-href="{@docRoot}guide/developing/device.html">Developing on a Device</a>.</li>
+href="{@docRoot}tools/device.html">Developing on a Device</a>.</li>
 <li>Run your application on your mobile device, as described in <a
-href="{@docRoot}guide/developing/device.html">Developing on a Device</a>.</li>
+href="{@docRoot}tools/device.html">Developing on a Device</a>.</li>
 
 <li>If you are using Eclipse, you can view the application log output in Eclipse
 using LogCat (<strong>Window > Show View > Other > Android >

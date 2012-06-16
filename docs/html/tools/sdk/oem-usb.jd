@@ -17,7 +17,7 @@ page.title=OEM USB Drivers
 
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a></li>
+    <li><a href="{@docRoot}tools/device.html">Using Hardware Devices</a></li>
     <li><a href="{@docRoot}sdk/win-usb.html">Google USB Driver</a></li>
   </ol>
 </div>
@@ -31,7 +31,7 @@ not exhaustive for all available Android-powered devices.</p>
 
 <p>If you're developing on Mac OS X or Linux, then you probably don't need to install a USB driver.
 To start developing with your device, read <a
-href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a>.</p>
+href="{@docRoot}tools/device.html">Using Hardware Devices</a>.</p>
 
 <p class="note"><strong>Note:</strong> If your device is one of the Android Developer Phones
 (ADP), a Nexus One, or a Nexus S, then you need
@@ -52,7 +52,7 @@ or upgrading an existing driver.</p>
 
 <p class="note"><strong>Tip:</strong> When you finish the USB driver installation,
 see <a
-href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a> for
+href="{@docRoot}tools/device.html">Using Hardware Devices</a> for
 other important information about using an Android-powered device for
 development.</p>
 

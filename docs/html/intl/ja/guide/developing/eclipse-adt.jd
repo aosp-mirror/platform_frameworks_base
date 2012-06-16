@@ -86,7 +86,7 @@ page.title=Eclipse 内で ADT を使用
 
 <p>注意してください。<em></em>アプリケーションを Android エミュレータで実行する前に、Android 仮想デバイス（AVD）を作成する<strong>必要があります</strong>。AVD では、エミュレータで使用する Android プラットフォームを指定します。詳しくは <a href="{@docRoot}guide/developing/tools/avd.html">Android 仮想デバイス</a> のドキュメントをご覧ください。ただし、すぐにアプリケーションを実行したい場合は、次の簡単な手順に従って AVD を作成してください。</p>
 
-<p>携帯端末の実機でのみアプリケーションを実行する場合は、AVD は必要ありません。この場合のアプリケーションの実行について詳しくは、<a href="{@docRoot}guide/developing/device.html">Developing On a Device</a> をご覧ください。</p>
+<p>携帯端末の実機でのみアプリケーションを実行する場合は、AVD は必要ありません。この場合のアプリケーションの実行について詳しくは、<a href="{@docRoot}tools/device.html">Developing On a Device</a> をご覧ください。</p>
 
 <h3 id="CreatingAnAvd">AVD の作成</h3>
 

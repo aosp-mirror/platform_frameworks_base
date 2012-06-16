@@ -202,7 +202,7 @@ a device and not just on an emulator, open <code>AndroidManifest.xml</code> and
 add <code>android:debuggable="true"</code> inside the
 <code>&lt;application&gt;</code> element. For information about setting up the
 device itself so it can run applications from your system, see <a
-href="{@docRoot}guide/developing/device.html">Developing on a Device</a>.</p>
+href="{@docRoot}tools/device.html">Developing on a Device</a>.</p>
 
 
 <h2 id="run">Run the Unlocalized Application</h2>
