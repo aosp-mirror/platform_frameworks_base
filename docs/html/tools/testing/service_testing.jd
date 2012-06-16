@@ -54,7 +54,7 @@ parent.link=index.html
 </p>
 <p>
     This document describes techniques for testing Service objects. If you aren't familiar with the
-    Service class, please read the <a href="{@docRoot}guide/topics/fundamentals/services.html">
+    Service class, please read the <a href="{@docRoot}guide/components/services.html">
     Services</a> document. If you aren't familiar with Android testing, please read
     <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>,
     the introduction to the Android testing and instrumentation framework.

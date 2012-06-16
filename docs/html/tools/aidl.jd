@@ -19,7 +19,7 @@ page.title=Android Interface Definition Language (AIDL)
 
 <h2>See also</h2>
 <ol>
-  <li><a href="{@docRoot}guide/topics/fundamentals/bound-services.html">Bound Services</a></li>
+  <li><a href="{@docRoot}guide/components/bound-services.html">Bound Services</a></li>
 </ol>
 
 </div>
@@ -38,12 +38,12 @@ do that marshalling is tedious to write, so Android handles it for you with AIDL
 different applications to access your service for IPC and want to handle multithreading in your
 service. If you do not need to perform concurrent IPC across
 different applications, you should create your interface by <a
-href="{@docRoot}guide/topics/fundamentals/bound-services.html#Binder">implementing a
+href="{@docRoot}guide/components/bound-services.html#Binder">implementing a
 Binder</a> or, if you want to perform IPC, but do <em>not</em> need to handle multithreading,
 implement your interface <a
-href="{@docRoot}guide/topics/fundamentals/bound-services.html#Messenger">using a Messenger</a>.
+href="{@docRoot}guide/components/bound-services.html#Messenger">using a Messenger</a>.
 Regardless, be sure that you understand <a
-href="{@docRoot}guide/topics/fundamentals/bound-services.html">Bound Services</a> before
+href="{@docRoot}guide/components/bound-services.html">Bound Services</a> before
 implementing an AIDL.</p>
 
 <p>Before you begin designing your AIDL interface, be aware that calls to an AIDL interface are
@@ -57,7 +57,7 @@ this is your main UI thread, that thread continues to execute in the AIDL interf
 another thread, that is the one that executes your code in the service.  Thus, if only local
 threads are accessing the service, you can completely control which threads are executing in it (but
 if that is the case, then you shouldn't be using AIDL at all, but should instead create the
-interface by <a href="{@docRoot}guide/topics/fundamentals/bound-services.html#Binder">implementing a
+interface by <a href="{@docRoot}guide/components/bound-services.html#Binder">implementing a
 Binder</a>).</li>
 
 <li>Calls from a remote process are dispatched from a thread pool the platform maintains inside of
@@ -456,7 +456,7 @@ android.content.Context#unbindService(android.content.ServiceConnection)
 </ul>
 
 <p>For more information about binding to a service, read the <a
-href="{@docRoot}guide/topics/fundamentals/bound-services.html#Binding">Bound Services</a>
+href="{@docRoot}guide/components/bound-services.html#Binding">Bound Services</a>
 document.</p>
 
 <p>Here is some sample code demonstrating calling an AIDL-created service, taken

@@ -18,7 +18,7 @@ next.link=battery-monitoring.html
 
 <h2>関連項目</h2>
 <ul>
-  <li><a href="{@docRoot}guide/topics/fundamentals/services.html">サービス</a>
+  <li><a href="{@docRoot}guide/components/services.html">サービス</a>
 </ul>
 
 </div> 

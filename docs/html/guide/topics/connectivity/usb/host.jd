@@ -380,7 +380,7 @@ mUsbManager.requestPermission(device, mPermissionIntent);
     android.hardware.usb.UsbDeviceConnection#controlTransfer controlTransfer()} method. You should
     carry out this step in another thread to prevent blocking the main UI thread. For more
     information about using threads in Android, see <a href=
-    "{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes and
+    "{@docRoot}guide/components/processes-and-threads.html#Threads">Processes and
     Threads</a>.</li>
   </ul>
 

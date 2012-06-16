@@ -150,7 +150,7 @@ JKS</pre>
   <li><a href="{@docRoot}guide/index.html">デベロッパー ガイド</a>と、ガイドに説明されている情報の種類を参照します。</li>
   <li>Android をプラットフォームとして紹介している <a
   href="{@docRoot}guide/basics/what-is-android.html">Android とは</a>を読みます。</li>
-  <li><a href="{@docRoot}guide/topics/fundamentals.html">アプリケーションの基礎</a>を参照して、Android フレームワークとそこでのアプリケーションの実行方法について学びます。</li>
+  <li><a href="{@docRoot}guide/components/fundamentals.html">アプリケーションの基礎</a>を参照して、Android フレームワークとそこでのアプリケーションの実行方法について学びます。</li>
   <li>[<a
   href="{@docRoot}reference/packages.html">リファレンス</a>] タブの Android Framework API の仕様を参照します。</li>
 </ul>

@@ -15,7 +15,7 @@ next.link=screensizes.html
 <ul>
   <li>Android 1.6 или более поздней версии (для запуска учебного приложения требуется версия 2.1 или более поздняя)</li>
   <li>Начальные знания о компонентах <a
-href="http://developer.android.com/guide/topics/fundamentals/activities.html">Activity</a> (активность) и <a href="http://developer.android.com/guide/topics/fundamentals/fragments.html">Fragment</a> (фрагмент)</li>
+href="http://developer.android.com/guide/components/activities.html">Activity</a> (активность) и <a href="http://developer.android.com/guide/components/fragments.html">Fragment</a> (фрагмент)</li>
   <li>Опыт создания <a
 href="http://developer.android.com/guide/topics/ui/index.html">пользовательских интерфейсов</a> для Android</li>
   <li>Некоторые функции требуют использования <a

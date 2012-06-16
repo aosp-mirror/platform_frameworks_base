@@ -912,7 +912,7 @@ profiles:</p>
 Bluetooth headsets to be used with mobile phones. Android provides the {@link
 android.bluetooth.BluetoothHeadset} class, which is a proxy for controlling the
 Bluetooth Headset Service via interprocess communication (<a
-href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#IPC">IPC</a
+href="{@docRoot}guide/components/processes-and-threads.html#IPC">IPC</a
 >). This includes both  Bluetooth Headset and Hands-Free (v1.5) profiles. The
 {@link android.bluetooth.BluetoothHeadset} class includes support for AT commands.
 For more discussion of this topic, see <a href="#AT-Commands">Vendor-specific AT commands</a></li>

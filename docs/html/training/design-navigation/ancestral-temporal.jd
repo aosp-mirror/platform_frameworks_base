@@ -22,7 +22,7 @@ next.link=wireframing.html
 <h2>You should also read</h2>
 <ul>
   <li><a href="{@docRoot}design/patterns/navigation.html">Android Design: Navigation</a></li>
-  <li><a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a></li>
+  <li><a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back Stack</a></li>
 </ul>
 
 </div>
@@ -58,7 +58,7 @@ the Email app from the People (or Contacts) app.</p>
 
 
 <p>Applications generally don't have to worry about managing the <em>Back</em> button themselves;
-the system handles <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">tasks and
+the system handles <a href="{@docRoot}guide/components/tasks-and-back-stack.html">tasks and
 the <em>back stack</em></a>, or the list of previous screens, automatically. The <em>Back</em>
 button by default simply traverses this list of screens, removing the current screen from the list
 upon being pressed.</p>

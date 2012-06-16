@@ -283,8 +283,8 @@ or build target, we're providing a static library called the <a
 href="{@docRoot}sdk/compatibility-library.html">Compatibility Library</a>
 (downloadable from the Android SDK Manager).</p>
 <p>This library includes APIs for <a
-href="{@docRoot}guide/topics/fundamentals/fragments.html">fragments</a>, <a
-href="{@docRoot}guide/topics/fundamentals/loaders.html">loaders</a>, and some updated classes. By
+href="{@docRoot}guide/components/fragments.html">fragments</a>, <a
+href="{@docRoot}guide/components/loaders.html">loaders</a>, and some updated classes. By
 simply adding this library to your Android project, you can use these APIs in your application and
 remain compatible with Android 1.6. For information about how to get the library and start
 using it in your application, see the <a
@@ -357,7 +357,7 @@ input events. Thus, instead of using one activity to select an article and anoth
 read the article, the user can select an article and read it all within the same activity.</p>
 
 <p>For more information, read the <a
-href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> document.</p>
+href="{@docRoot}guide/components/fragments.html">Fragments</a> document.</p>
 
 
 <h3>Use new animation APIs for transitions</h3>
@@ -641,7 +641,7 @@ orientation. When the user rotates the screen, the system restarts the current a
 onCreate()}) in immediate succession. You should design your activity to account for these changes
 in the lifecycle, so the activity can save and restore its state. You can learn about the
 necessary lifecycle callback methods and how to save and restore the activity state in the <a
-href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">Activities</a>
+href="{@docRoot}guide/components/activities.html#Lifecycle">Activities</a>
 document. If your activity state is more complex and cannot retain it using the normal
 lifecycle callback methods, you can use alternative techniques described in <a
 href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime Changes</a>.</p>

@@ -313,7 +313,7 @@ Activity, the selection is lost.
 
 <p class="note"><strong>Note:</strong> To save the selection when the user leaves or
 pauses the Activity, you must properly save and restore the setting throughout
-the <a href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">activity lifecycle</a>. 
+the <a href="{@docRoot}guide/components/activities.html#Lifecycle">activity lifecycle</a>. 
 To permanently save the selections, even when the Activity process is completely shutdown, 
 you need to save the settings
 with one of the <a href="{@docRoot}guide/topics/data/data-storage.html">Data

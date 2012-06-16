@@ -551,7 +551,7 @@ public class ExampleProvider extends ContentProvider {
         All of these methods except {@link android.content.ContentProvider#onCreate() onCreate()}
         can be called by multiple threads at once, so they must be thread-safe. To learn
         more about multiple threads, see the topic
-        <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html">
+        <a href="{@docRoot}guide/components/processes-and-threads.html">
         Processes and Threads</a>.
     </li>
     <li>

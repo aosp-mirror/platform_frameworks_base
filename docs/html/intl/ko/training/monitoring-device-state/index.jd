@@ -18,7 +18,7 @@ next.link=battery-monitoring.html
 
 <h2>참고자료</h2>
 <ul>
-  <li><a href="{@docRoot}guide/topics/fundamentals/services.html">서비스</a>
+  <li><a href="{@docRoot}guide/components/services.html">서비스</a>
 </ul>
 
 </div> 

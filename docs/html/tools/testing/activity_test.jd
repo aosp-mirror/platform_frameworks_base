@@ -742,7 +742,7 @@ import android.widget.SpinnerAdapter;
 <p>
   <strong>Note:</strong> If you would like to learn more about the difference between losing
   focus/pausing and killing an application,
-  read about the <a href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">activity
+  read about the <a href="{@docRoot}guide/components/activities.html#Lifecycle">activity
 lifecycle</a>.
 </p>
 <p>

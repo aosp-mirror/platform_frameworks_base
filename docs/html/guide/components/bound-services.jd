@@ -42,7 +42,7 @@ perform interprocess communication</li>
 
 <h2>See also</h2>
 <ol>
-  <li><a href="{@docRoot}guide/topics/fundamentals/services.html">Services</a></li>
+  <li><a href="{@docRoot}guide/components/services.html">Services</a></li>
 </ol>
 </div>
 
@@ -54,7 +54,7 @@ application component and does not run in the background indefinitely.</p>
 
 <p>This document shows you how to create a bound service, including how to bind
 to the service from other application components. However, you should also refer to the <a
-href="{@docRoot}guide/topics/fundamentals/services.html">Services</a> document for additional
+href="{@docRoot}guide/components/services.html">Services</a> document for additional
 information about services in general, such as how to deliver notifications from a service, set
 the service to run in the foreground, and more.</p>
 
@@ -71,7 +71,7 @@ clients can use to interact with the service.</p>
 <div class="sidebox">
   <h3>Binding to a Started Service</h3>
 
-<p>As discussed in the <a href="{@docRoot}guide/topics/fundamentals/services.html">Services</a>
+<p>As discussed in the <a href="{@docRoot}guide/components/services.html">Services</a>
 document, you can create a service that is both started and bound. That is, the service can be
 started by calling {@link android.content.Context#startService startService()}, which allows the
 service to run indefinitely, and also allow a client to bind to the service by calling {@link
@@ -625,7 +625,7 @@ multiple activities in your application bind to the same service and there is a 
 two of those activities, the service may be destroyed and recreated as the current activity unbinds
 (during pause) before the next one binds (during resume). (This activity transition for how
 activities coordinate their lifecycles is described in the <a
-href="{@docRoot}guide/topics/fundamentals/activities.html#CoordinatingActivities">Activities</a>
+href="{@docRoot}guide/components/activities.html#CoordinatingActivities">Activities</a>
 document.)</p>
 </ul>
 
@@ -668,7 +668,7 @@ onRebind()} returns void, but the client still receives the {@link android.os.IB
 Below, figure 1 illustrates the logic for this kind of lifecycle.</p>
 
 <p>For more information about the lifecycle of an started service, see the <a
-href="{@docRoot}guide/topics/fundamentals/services.html#Lifecycle">Services</a> document.</p>
+href="{@docRoot}guide/components/services.html#Lifecycle">Services</a> document.</p>
 
 
 

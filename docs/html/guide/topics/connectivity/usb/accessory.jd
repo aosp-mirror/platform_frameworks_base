@@ -433,7 +433,7 @@ private void openAccessory() {
   protocol bundles the packets together for both speeds into one logical packet for simplicity.</p>
 
   <p>For more information about using threads in Android, see <a href=
-  "{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes and
+  "{@docRoot}guide/components/processes-and-threads.html#Threads">Processes and
   Threads</a>.</p>
 
   <h3 id="terminating-a">Terminating communication with an accessory</h3>

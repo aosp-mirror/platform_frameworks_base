@@ -1779,7 +1779,7 @@ on handsets as well:</p>
     <ul>
       <li>{@link android.app.Fragment}: A framework component that allows you to separate distinct
 elements of an activity into self-contained modules that define their own UI and lifecycle. See the
-<a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> developer guide.</li>
+<a href="{@docRoot}guide/components/fragments.html">Fragments</a> developer guide.</li>
       <li>{@link android.app.ActionBar}: A replacement for the traditional title bar at the top of
 the activity window. It includes the application logo in the left corner and provides a new
 interface for menu items. See the
@@ -1787,7 +1787,7 @@ interface for menu items. See the
       <li>{@link android.content.Loader}: A framework component that facilitates asynchronous
 loading of data in combination with UI components to dynamically load data without blocking the
 main thread. See the
-<a href="{@docRoot}guide/topics/fundamentals/loaders.html">Loaders</a> developer guide.</li>
+<a href="{@docRoot}guide/components/loaders.html">Loaders</a> developer guide.</li>
       <li>System clipboard: Applications can copy and paste data (beyond mere text) to and from
 the system-wide clipboard. Clipped data can be plain text, a URI, or an intent. See the
 <a href="{@docRoot}guide/topics/clipboard/copy-paste.html">Copy and Paste</a> developer guide.</li>

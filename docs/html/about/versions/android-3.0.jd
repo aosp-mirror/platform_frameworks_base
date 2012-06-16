@@ -165,7 +165,7 @@ android.app.FragmentTransaction#commit commit()} and the system applies the frag
 the activity.</p>
 
 <p>For more information about using fragments, read the <a
-href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> documentation. Several
+href="{@docRoot}guide/components/fragments.html">Fragments</a> documentation. Several
 samples are also available in the <a
 href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#Fragment">
 API Demos</a> application.</p>
@@ -385,7 +385,7 @@ changed, then call {@link android.app.LoaderManager#initLoader initLoader()} to 
 loader for your activity or fragment.</p>
 
 <p>For more information, read the <a
-href="{@docRoot}guide/topics/fundamentals/loaders.html">Loaders</a> documentation. You can also see
+href="{@docRoot}guide/components/loaders.html">Loaders</a> documentation. You can also see
 example code using loaders in the <a
 href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">LoaderCursor</a>
 and <a

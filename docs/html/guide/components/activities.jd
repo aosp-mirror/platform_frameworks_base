@@ -41,7 +41,7 @@ page.title=Activities
 <h2>See also</h2>
 <ol>
   <li><a href="{@docRoot}resources/tutorials/hello-world.html">Hello World Tutorial</a></li>
-  <li><a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
+  <li><a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back
 Stack</a></li>
 </ol>
 
@@ -65,7 +65,7 @@ in a stack (the "back stack"). When a new activity starts, it is pushed onto the
 takes user focus. The back stack abides to the basic "last in, first out" stack mechanism,
 so, when the user is done with the current activity and presses the <em>Back</em> button, it
 is popped from the stack (and destroyed) and the previous activity resumes. (The back stack is
-discussed more in the <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks
+discussed more in the <a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks
 and Back Stack</a> document.)</p>
 
 <p>When an activity is stopped because a new activity starts, it is notified of this change in state
@@ -602,7 +602,7 @@ from the time {@link android.app.Activity#onPause onPause()} returns to the time
 definition in table 1 might still be killed by the system&mdash;but that would happen only in
 extreme circumstances when there is no other recourse. When an activity might be killed is
 discussed more in the <a
-href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html">Processes and
+href="{@docRoot}guide/components/processes-and-threads.html">Processes and
 Threading</a> document.</p>
 
 
@@ -772,6 +772,6 @@ android.app.Activity#onStop onStop()}.</p>
 
 <p>For more information about how Android maintains a history of activities and
 enables user multitasking, continue with the <b><a
-href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
+href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back
 Stack</a></b> document.</p>
 -->

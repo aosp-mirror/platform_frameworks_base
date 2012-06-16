@@ -123,7 +123,7 @@ activities (if the email application allows it). For example, a camera applicati
 activity in the email application that composes new mail, in order for the user to share a picture.
 
 <p>An activity is implemented as a subclass of {@link android.app.Activity} and you can learn more
-about it in the <a href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a>
+about it in the <a href="{@docRoot}guide/components/activities.html">Activities</a>
 developer guide.</p>
 </dd>
 
@@ -138,7 +138,7 @@ blocking user interaction with an activity. Another component, such as an activi
 service and let it run or bind to it in order to interact with it.
 
 <p>A service is implemented as a subclass of {@link android.app.Service} and you can learn more
-about it in the <a href="{@docRoot}guide/topics/fundamentals/services.html">Services</a> developer
+about it in the <a href="{@docRoot}guide/components/services.html">Services</a> developer
 guide.</p>
 </dd>
 
@@ -265,8 +265,8 @@ android.content.ContentProvider#query query()} on a {@link android.content.Conte
 href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and
 Intent Filters</a> document. More information about activating specific components is also provided
 in the following documents: <a
-href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a>, <a
-href="{@docRoot}guide/topics/fundamentals/services.html">Services</a>, {@link
+href="{@docRoot}guide/components/activities.html">Activities</a>, <a
+href="{@docRoot}guide/components/services.html">Services</a>, {@link
 android.content.BroadcastReceiver} and <a
 href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>.</p>
 
@@ -514,5 +514,5 @@ href="{@docRoot}guide/topics/resources/index.html">Application Resources</a> dev
 
 <p>For a close look at implementing activities&mdash;the components your users use to
 interact with your application&mdash;continue with the <b><a
-href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a></b> document.</p>
+href="{@docRoot}guide/components/activities.html">Activities</a></b> document.</p>
 -->

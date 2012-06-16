@@ -23,7 +23,7 @@ previous.link=stopping.html
 Different Screens</a></li>
       <li><a
 href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime Changes</a></li>
-      <li><a href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a>
+      <li><a href="{@docRoot}guide/components/activities.html">Activities</a>
       </li>
     </ul>
 

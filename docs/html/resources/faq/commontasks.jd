@@ -52,7 +52,7 @@ the correct project structure for your application, and keeps the resources
 compiled for you automatically.</p>
 
 <p>It is still a good idea to know what is going on though. Take a look at <a
-href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a> 
+href="{@docRoot}guide/components/fundamentals.html">Application Fundamentals</a> 
 to understand the basics of how an Android application works.</p> 
 
 <p>You should also take a look at the ApiDemos application and the other sample
@@ -70,7 +70,7 @@ excellent introduction to creating a new Android application in Eclipse.</p>
 
 <p>This topic describes the manual steps in creating an Android application.
 Before reading this, you should read <a
-href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a> 
+href="{@docRoot}guide/components/fundamentals.html">Application Fundamentals</a> 
 to understand the basics of how an Android application works. You might also 
 want to look at the sample code included with the Android SDK, in the 
 <code>&lt;sdk&gt;/samples/</code> directory. </p>
@@ -125,7 +125,7 @@ It is not necessary to put external JARs in the assets folder.
 <p>Android calls a number of callbacks to let you draw your screen, store data before
     pausing, and refresh data after closing. You must implement at least some of
     these methods. Read the <a
-href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">Activities</a>
+href="{@docRoot}guide/components/activities.html#Lifecycle">Activities</a>
     document to learn when and in what order these methods 
     are called. Here are some of the standard types of screen classes that Android provides:</p>
 <ul>
@@ -152,7 +152,7 @@ href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">Activities<
     or full-screen. The choice of new screen affects the event sequence of events
     in the old screen (if the new screen obscures the old screen, a different
     series of events is called in the old screen). See the <a
-    href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">Activities</a> document for
+    href="{@docRoot}guide/components/activities.html#Lifecycle">Activities</a> document for
 details. </p> 
 <p>Transparent or floating windows are implemented in three
     standard ways: </p>
@@ -317,7 +317,7 @@ loopback interface.
     {@link android.app.Activity#onCreate} for
     examples of storing and retrieving state.</p>
 <p>Read more about the lifecycle of an activity in <a
-href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a> document.</p>
+href="{@docRoot}guide/components/activities.html">Activities</a> document.</p>
 <h3>Storing and Retrieving Larger or More Complex Persistent Data<a name="storingandretrieving" id="storingandretrieving"></a></h3>
 <p>Your application can store files or complex collection objects, and reserve them
     for private use by itself or other activities in the application, or it can expose

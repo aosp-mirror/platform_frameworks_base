@@ -288,7 +288,7 @@ public class HelloAndroid extends Activity {
 
 <p class="note"><strong>ヒント:</strong> ショートカット キー<strong>Ctrl+F11</strong>（Mac では <strong>コマンド+Shift+F11</strong>）を使用して、現在表示されているアプリケーションを実行することができます。</p>
 
-<p>ここからは、デバッグの基礎知識と、他の総合開発環境に関する補足情報について説明します。さらに詳しく学習したい場合は、「<a href="{@docRoot}guide/topics/fundamentals.html">アプリケーションの基礎</a>」を参照してください。Android アプリケーションが動作するためのすべての要素について説明しています。また、「<a href="{@docRoot}guide/index.html">デベロッパー ガイド</a>」の導入ページを参照して、<em>デベロッパー ガイド</em> ドキュメントの概要を確認してください。</p>
+<p>ここからは、デバッグの基礎知識と、他の総合開発環境に関する補足情報について説明します。さらに詳しく学習したい場合は、「<a href="{@docRoot}guide/components/fundamentals.html">アプリケーションの基礎</a>」を参照してください。Android アプリケーションが動作するためのすべての要素について説明しています。また、「<a href="{@docRoot}guide/index.html">デベロッパー ガイド</a>」の導入ページを参照して、<em>デベロッパー ガイド</em> ドキュメントの概要を確認してください。</p>
 
 
 <div class="special">

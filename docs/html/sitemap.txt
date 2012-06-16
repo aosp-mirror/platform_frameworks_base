@@ -30,7 +30,7 @@ http://developer.android.com/sdk/oem-usb.html
 http://developer.android.com/sdk/requirements.html
 http://developer.android.com/sdk/older_releases.html
 http://developer.android.com/guide/basics/what-is-android.html
-http://developer.android.com/guide/topics/fundamentals.html
+http://developer.android.com/guide/components/fundamentals.html
 http://developer.android.com/guide/topics/ui/index.html
 http://developer.android.com/guide/topics/ui/declaring-layout.html
 http://developer.android.com/guide/topics/ui/menus.html

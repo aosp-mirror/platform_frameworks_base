@@ -54,7 +54,7 @@ parent.link=index.html
     android.app.Activity#onCreate(android.os.Bundle)} code path, which would otherwise be difficult
     to force. Choosing this option will probably reveal a number of problems in your application
     due to not saving state. For more information about saving an activity's state, see the
-    <a href="{@docRoot}guide/topics/fundamentals/activities.html#SavingActivityState">Activities</a>
+    <a href="{@docRoot}guide/components/activities.html#SavingActivityState">Activities</a>
 document.</dd>
 
     <dt><strong>Show CPU usage</strong></dt>

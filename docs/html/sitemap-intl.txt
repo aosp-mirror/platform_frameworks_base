@@ -5,7 +5,7 @@ http://developer.android.com/ja/guide/publishing/versioning.html
 http://developer.android.com/ja/guide/publishing/app-signing.html
 http://developer.android.com/ja/guide/publishing/preparing.html
 http://developer.android.com/ja/guide/tutorials/hello-world.html
-http://developer.android.com/ja/guide/topics/fundamentals.html
+http://developer.android.com/ja/guide/components/fundamentals.html
 http://developer.android.com/ja/guide/index.html
 http://developer.android.com/ja/guide/basics/what-is-android.html
 http://developer.android.com/ja/guide/developing/other-ide.html

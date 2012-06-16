@@ -158,7 +158,7 @@ recently seen by the user is the last to be killed. If an activity implements it
 correctly, and saves its current state, killing its process will not have a visible effect on
 the user experience, because when the user navigates back to the activity, the activity restores
 all of its visible state. See the <a
-href="{@docRoot}guide/topics/fundamentals/activities.html#SavingActivityState">Activities</a>
+href="{@docRoot}guide/components/activities.html#SavingActivityState">Activities</a>
 document for information about saving and restoring state.</p>
   </li>
 
@@ -183,7 +183,7 @@ as important as process B.</p>
 
   <p>Because a process running a service is ranked higher than a process with background activities,
 an activity that initiates a long-running operation might do well to start a <a
-href="{@docRoot}guide/topics/fundamentals/services.html">service</a> for that operation, rather than
+href="{@docRoot}guide/components/services.html">service</a> for that operation, rather than
 simply create a worker thread&mdash;particularly if the operation will likely outlast the activity.
 For example, an activity that's uploading a picture to a web site should start a service to perform
 the upload so that the upload can continue in the background even if the user leaves the activity.
@@ -374,7 +374,7 @@ href="http://code.google.com/p/shelves/">Shelves</a> sample application.</p>
 therefore must be written to be thread-safe. </p>
 
 <p>This is primarily true for methods that can be called remotely&mdash;such as methods in a <a
-href="{@docRoot}guide/topics/fundamentals/bound-services.html">bound service</a>. When a call on a
+href="{@docRoot}guide/components/bound-services.html">bound service</a>. When a call on a
 method implemented in an {@link android.os.IBinder} originates in the same process in which the
 {@link android.os.IBinder IBinder} is running, the method is executed in the caller's thread.
 However, when the call originates in another process, the method is executed in a thread chosen from
@@ -412,7 +412,7 @@ transactions, so you can focus on defining and implementing the RPC programming 
 
 <p>To perform IPC, your application must bind to a service, using {@link
 android.content.Context#bindService bindService()}. For more information, see the <a
-href="{@docRoot}guide/topics/fundamentals/services.html">Services</a> developer guide.</p>
+href="{@docRoot}guide/components/services.html">Services</a> developer guide.</p>
 
 
 <!--
@@ -420,5 +420,5 @@ href="{@docRoot}guide/topics/fundamentals/services.html">Services</a> developer 
 
 <p>For information about how to perform work in the background for an indefinite period of time
 (without a user interface), continue with the <b><a
-href="{@docRoot}guide/topics/fundamentals/services.html">Services</a></b> document.</p>
+href="{@docRoot}guide/components/services.html">Services</a></b> document.</p>
 -->

@@ -18,7 +18,7 @@ next.link=battery-monitoring.html
 
 <h2>您还应参阅</h2>
 <ul>
-  <li><a href="{@docRoot}guide/topics/fundamentals/services.html">服务</a>
+  <li><a href="{@docRoot}guide/components/services.html">服务</a>
 </ul>
 
 </div> 

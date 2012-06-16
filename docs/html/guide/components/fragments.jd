@@ -73,7 +73,7 @@ you can reuse in different activities).</p>
 affected by the host activity's lifecycle. For example, when the activity is paused, so are all
 fragments in it, and when the activity is destroyed, so are all fragments. However, while an
 activity is running (it is in the <em>resumed</em> <a
-href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">lifecycle state</a>), you can
+href="{@docRoot}guide/components/activities.html#Lifecycle">lifecycle state</a>), you can
 manipulate each fragment independently, such as add or remove them. When you perform such a
 fragment transaction, you can also add it to a back stack that's managed by the
 activity&mdash;each back stack entry in the activity is a record of the fragment transaction that
@@ -499,7 +499,7 @@ usually not necessary unless the transaction is a dependency for jobs in other t
 
 <p class="caution"><strong>Caution:</strong> You can commit a transaction using {@link
 android.app.FragmentTransaction#commit commit()} only prior to the activity <a
-href="{@docRoot}guide/topics/fundamentals/activities.html#SavingActivityState">saving its
+href="{@docRoot}guide/components/activities.html#SavingActivityState">saving its
 state</a> (when the user leaves the activity). If you attempt to commit after that point, an
 exception will be thrown. This is because the state after the commit can be lost if the activity
 needs to be restored. For situations in which its okay that you lose the commit, use {@link
@@ -690,14 +690,14 @@ either {@link android.app.Fragment#onCreate onCreate()}, {@link
 android.app.Fragment#onCreateView onCreateView()}, or {@link
 android.app.Fragment#onActivityCreated onActivityCreated()}. For more information about saving
 state, see the <a
-href="{@docRoot}guide/topics/fundamentals/activities.html#SavingActivityState">Activities</a>
+href="{@docRoot}guide/components/activities.html#SavingActivityState">Activities</a>
 document.</p>
 
 <p>The most significant difference in lifecycle between an activity and a fragment is how one is
 stored in its respective back stack. An activity is placed into a back stack of activities
 that's managed by the system when it's stopped, by default (so that the user can navigate back
 to it with the <em>Back</em> button, as discussed in <a
-href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a>).
+href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back Stack</a>).
 However, a fragment is placed into a back stack managed by the host activity only when you
 explicitly request that the instance be saved by calling {@link
 android.app.FragmentTransaction#addToBackStack(String) addToBackStack()} during a transaction that
@@ -705,7 +705,7 @@ removes the fragment.</p>
 
 <p>Otherwise, managing the fragment lifecycle is very similar to managing the activity
 lifecycle. So, the same practices for <a
-href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">managing the activity
+href="{@docRoot}guide/components/activities.html#Lifecycle">managing the activity
 lifecycle</a> also apply to fragments. What you also need to understand, though, is how the life
 of the activity affects the life of the fragment.</p>
 

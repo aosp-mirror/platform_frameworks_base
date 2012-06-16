@@ -495,7 +495,7 @@ first step in getting started with Android development. </p>
   href="{@docRoot}guide/basics/what-is-android.html">What is
   Android?</a></li>
   <li>Learn about the Android framework and how applications run on it in
-  <a href="{@docRoot}guide/topics/fundamentals.html">Application
+  <a href="{@docRoot}guide/components/fundamentals.html">Application
   Fundamentals</a>.</li>
   <li>Take a look at the Android framework API specification in the <a
   href="{@docRoot}reference/packages.html">Reference</a> tab.</li>

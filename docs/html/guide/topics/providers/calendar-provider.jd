@@ -254,7 +254,7 @@ and store its events on the device.</td>
 user. For simplicity's sake, in this example the query operation is shown in the
 user interface thread ("main thread"). In practice, this should be done in an asynchronous
 thread instead of on the main thread. For more discussion, see 
-<a href="{@docRoot}guide/topics/fundamentals/loaders.html">Loaders</a>. If you are not just 
+<a href="{@docRoot}guide/components/loaders.html">Loaders</a>. If you are not just 
 reading data but modifying it, see {@link android.content.AsyncQueryHandler}.
 </p>
 

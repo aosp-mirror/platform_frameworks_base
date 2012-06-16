@@ -15,7 +15,7 @@ next.link=screensizes.html
 <ul>
   <li>Android 1.6 以上（サンプル アプリを使用するには 2.1 以上）</li>
   <li><a
-href="http://developer.android.com/guide/topics/fundamentals/activities.html">アクティビティ</a>と<a href="http://developer.android.com/guide/topics/fundamentals/fragments.html">フラグメント</a>の基礎知識</li>
+href="http://developer.android.com/guide/components/activities.html">アクティビティ</a>と<a href="http://developer.android.com/guide/components/fragments.html">フラグメント</a>の基礎知識</li>
   <li>Android <a
 href="http://developer.android.com/guide/topics/ui/index.html">ユーザー インターフェース</a>の開発経験</li>
   <li><a

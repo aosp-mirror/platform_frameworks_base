@@ -50,7 +50,7 @@ TV screens are always in landscape orientation. Follow these tips to build lands
 <ul>
   <li>Put on-screen navigational controls on the left or right side of the screen and save the 
   vertical space for content.</li>
-  <li>Create UIs that are divided into sections, by using <a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> 
+  <li>Create UIs that are divided into sections, by using <a href="{@docRoot}guide/components/fragments.html">Fragments</a> 
   and use view groups like {@link android.widget.GridView} instead 
   of {@link android.widget.ListView} to make better use of the 
   horizontal screen space.</li>

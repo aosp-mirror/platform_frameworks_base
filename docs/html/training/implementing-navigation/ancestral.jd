@@ -22,7 +22,7 @@ next.link=temporal.html
 <h2>You should also read</h2>
 <ul>
   <li><a href="{@docRoot}training/design-navigation/ancestral-temporal.html">Providing Ancestral and Temporal Navigation</a></li>
-  <li><a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a></li>
+  <li><a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back Stack</a></li>
   <li><a href="{@docRoot}design/patterns/navigation.html">Android Design: Navigation</a></li>
 </ul>
 

@@ -480,7 +480,7 @@ Android Emulator</a>.</p>
 
 <p>Continue reading for an introduction
 to debugging and a little more information on using other IDEs. When you're ready to learn more,
-read <a href="{@docRoot}guide/topics/fundamentals.html">Application
+read <a href="{@docRoot}guide/components/fundamentals.html">Application
 Fundamentals</a> for an introduction to all the elements that make Android applications work.
 Also refer to the <a href="{@docRoot}guide/index.html">Developer's Guide</a>
 introduction page for an overview of the <em>Dev Guide</em> documentation.</p>

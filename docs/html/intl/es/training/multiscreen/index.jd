@@ -14,7 +14,7 @@ next.link=screensizes.html
 <ul>
   <li>Android 1.6 o superior (Android 2.1 o superior para la aplicación de ejemplo)</li>
   <li>Conocimiento básico de <a
-href="http://developer.android.com/guide/topics/fundamentals/activities.html">Actividades</a> y <a href="http://developer.android.com/guide/topics/fundamentals/fragments.html">Fragmentos</a></li>
+href="http://developer.android.com/guide/components/activities.html">Actividades</a> y <a href="http://developer.android.com/guide/components/fragments.html">Fragmentos</a></li>
   <li>Experiencia en el desarrollo de una <a
 href="http://developer.android.com/guide/topics/ui/index.html">Interfaz de usuario</a> de Android</li>
   <li>Algunas funciones requieren el uso de la <a

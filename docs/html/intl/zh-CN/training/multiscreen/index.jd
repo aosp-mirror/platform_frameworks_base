@@ -15,7 +15,7 @@ next.link=screensizes.html
 <ul>
   <li>Android 1.6 或更高版本（示例应用则需要 2.1 或更高版本）</li>
   <li><a
-href="http://developer.android.com/guide/topics/fundamentals/activities.html">活动</a>和<a href="http://developer.android.com/guide/topics/fundamentals/fragments.html">片段</a>的基本知识</li>
+href="http://developer.android.com/guide/components/activities.html">活动</a>和<a href="http://developer.android.com/guide/components/fragments.html">片段</a>的基本知识</li>
   <li>构建 Android <a
 href="http://developer.android.com/guide/topics/ui/index.html">用户界面</a>的经验</li>
   <li>多个功能需要用到<a

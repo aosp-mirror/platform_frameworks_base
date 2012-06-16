@@ -27,7 +27,7 @@ page.title=Welcome
 application</li>
     <li>Read <a href="{@docRoot}resources/browser.html?tag=sample">Sample Code</a>,
 especially <a href="{@docRoot}resources/samples/ApiDemos/index.html">API Demos</a></li>
-    <li>Read the <a href="{@docRoot}guide/topics/fundamentals/index.html">Application
+    <li>Read the <a href="{@docRoot}guide/components/index.html">Application
 Fundamentals</a></li>
     <li>Read the <a href="{@docRoot}tools/workflow/index.html">Introduction</a> for using the SDK
 tools</li>

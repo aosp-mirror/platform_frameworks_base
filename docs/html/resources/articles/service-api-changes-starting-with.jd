@@ -9,7 +9,7 @@ parent.link=../browser.html?tag=article
 
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/topics/fundamentals/services.html">Services</a></li>
+    <li><a href="{@docRoot}guide/components/services.html">Services</a></li>
   </ol>
 
   <h2>Key classes</h2>
