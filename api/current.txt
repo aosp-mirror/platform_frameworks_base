@@ -22822,6 +22822,12 @@ package android.view {
     method public boolean onPerformDefaultAction();
     method public void onPrepareSubMenu(android.view.SubMenu);
     method public boolean overridesItemVisibility();
+    method public void refreshVisibility();
+    method public void setVisibilityListener(android.view.ActionProvider.VisibilityListener);
+  }
+
+  public static abstract interface ActionProvider.VisibilityListener {
+    method public abstract void onActionProviderVisibilityChanged(boolean);
   }
 
   public final class Choreographer {
