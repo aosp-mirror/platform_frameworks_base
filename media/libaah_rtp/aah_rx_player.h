@@ -30,6 +30,7 @@
 #include <utils/threads.h>
 
 #include "aah_decoder_pump.h"
+#include "IAAHMetaData.h"
 #include "utils.h"
 
 namespace android {
@@ -192,6 +193,8 @@ class AAH_RXPlayer : public MediaPlayerHWInterface {
                                  int32_t ts_lower);
         void processPayloadCont (uint8_t* buf,
                                  uint32_t amt);
+        void processMetaData(uint8_t* buf, uint32_t amt);
+        void flushMetaDataService();
         void processTSTransform(const LinearTransform& trans);
 
         bool     isAboutToUnderflow();
@@ -260,8 +263,13 @@ class AAH_RXPlayer : public MediaPlayerHWInterface {
         uint8_t                 audio_volume_remote_;
         int                     audio_stream_type_;
 
+        MediaToSystemTransform  mMetaDataTsTransform;
+
         static const int64_t    kAboutToUnderflowThreshold;
         static const int        kInactivityTimeoutMsec;
+
+        // singleton of the IBinder service provider for metadata
+        sp<AAHMetaDataService>  aah_metadata_service_;
 
         DISALLOW_EVIL_CONSTRUCTORS(Substream);
     };
@@ -278,6 +286,8 @@ class AAH_RXPlayer : public MediaPlayerHWInterface {
     bool                processRX(PacketBuffer* pb);
     void                processRingBuffer();
     void                processCommandPacket(PacketBuffer* pb);
+    void                processMetaDataPacket(uint8_t program_id,
+                                              PacketBuffer* pb);
     bool                processGaps();
     bool                processRetransmitNAK(const uint8_t* data, size_t amt);
     void                setGapStatus(GapStatus status);

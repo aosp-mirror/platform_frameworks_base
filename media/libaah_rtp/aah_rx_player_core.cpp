@@ -595,6 +595,8 @@ void AAH_RXPlayer::processRingBuffer() {
                 goto process_next_packet;
             }
 
+            uint32_t program_id = (ssrc >> 5) & 0x1F;
+
             // Is there a timestamp transformation present on this packet?  If
             // so, extract it and pass it to the appropriate substreams.
             if (trtp_flags & 0x02) {
@@ -613,7 +615,6 @@ void AAH_RXPlayer::processRingBuffer() {
                 trans.a_to_b_denom = U32_AT(data + offset + 12);
                 foundTrans = true;
 
-                uint32_t program_id = (ssrc >> 5) & 0x1F;
                 for (size_t i = 0; i < substreams_.size(); ++i) {
                     sp<Substream> iter = substreams_.valueAt(i);
                     CHECK(iter != NULL);
@@ -629,6 +630,10 @@ void AAH_RXPlayer::processRingBuffer() {
             // packet handler and then move on.
             if (4 == payload_type) {
                 processCommandPacket(pb);
+                goto process_next_packet;
+            } else if (5 == payload_type) {
+                // if it's MetaDataPacket, send to associated substream
+                processMetaDataPacket(program_id, pb);
                 goto process_next_packet;
             }
         }
@@ -738,6 +743,7 @@ void AAH_RXPlayer::processCommandPacket(PacketBuffer* pb) {
             for (size_t i = 0; i < substreams_.size(); ++i) {
                 const sp<Substream>& stream = substreams_.valueAt(i);
                 if (stream->getProgramID() == program_id) {
+                    stream->flushMetaDataService();
                     stream->clearInactivityTimeout();
                 }
             }
@@ -793,6 +799,50 @@ void AAH_RXPlayer::processCommandPacket(PacketBuffer* pb) {
 
     if (do_cleanup_pass)
         cleanoutExpiredSubstreams();
+}
+
+void AAH_RXPlayer::processMetaDataPacket(uint8_t program_id, PacketBuffer* pb) {
+    CHECK(NULL != pb);
+
+    uint8_t* data = pb->data_;
+    ssize_t  amt  = pb->length_;
+
+    // verify that this packet meets the minimum length of a metadata packet
+    if (amt < 22) {
+        return;
+    }
+
+    uint8_t trtp_version =  data[12];
+    uint8_t trtp_flags   =  data[13] & 0xF;
+
+    if (1 != trtp_version) {
+        LOGV("Dropping packet, bad trtp version %hhu", trtp_version);
+        return;
+    }
+
+    // calculate the start of the metadata payload
+    ssize_t offset = 18;
+    if (trtp_flags & 0x01) {
+        // timestamp is present (4 bytes)
+        offset += 4;
+        // we don't sent timestamp in metadata packet header
+        // however the content of metadata may contain timestamp
+    }
+    if (trtp_flags & 0x02) {
+        // transform is present (24 bytes)
+        offset += 24;
+        // ignore for now, we don't sent transform in metadata packet
+    }
+
+    for (size_t i = 0; i < substreams_.size(); ++i) {
+        sp<Substream> iter = substreams_.valueAt(i);
+        CHECK(iter != NULL);
+
+        if (iter->getProgramID() == program_id) {
+            iter->processMetaData(data + offset, amt - offset);
+        }
+    }
+
 }
 
 bool AAH_RXPlayer::processGaps() {

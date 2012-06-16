@@ -20,6 +20,7 @@
 #include <utils/LinearTransform.h>
 #include <utils/RefBase.h>
 #include <utils/Timers.h>
+#include <utils/Vector.h>
 
 namespace android {
 
@@ -30,6 +31,7 @@ class TRTPPacket : public RefBase {
         kHeaderTypeVideo = 2,
         kHeaderTypeSubpicture = 3,
         kHeaderTypeControl = 4,
+        kHeaderTypeMetaData = 5,
     };
 
     TRTPPacket(TRTPHeaderType headerType)
@@ -86,6 +88,12 @@ class TRTPPacket : public RefBase {
     static const uint32_t kCNC_LeaveGroupID       = 'Tlgp';
     static const uint32_t kCNC_NakJoinGroupID     = 'Tngp';
 
+    static void writeU8(uint8_t*& buf, uint8_t val);
+    static void writeU16(uint8_t*& buf, uint16_t val);
+    static void writeU32(uint8_t*& buf, uint32_t val);
+    static void writeU64(uint8_t*& buf, uint64_t val);
+    static void writeFloat(uint8_t*& buf, float val);
+
   protected:
     static const int kRTPHeaderLen = 12;
     virtual int TRTPHeaderLen() const;
@@ -93,11 +101,6 @@ class TRTPPacket : public RefBase {
     void writeTRTPHeader(uint8_t*& buf,
                          bool isFirstFragment,
                          int totalPacketLen);
-
-    void writeU8(uint8_t*& buf, uint8_t val);
-    void writeU16(uint8_t*& buf, uint16_t val);
-    void writeU32(uint8_t*& buf, uint32_t val);
-    void writeU64(uint8_t*& buf, uint64_t val);
 
     bool mIsPacked;
 
@@ -214,6 +217,42 @@ class TRTPActiveProgramUpdatePacket : public TRTPControlPacket {
     uint8_t mProgramIDCnt;
     uint8_t mProgramIDs[kMaxProgramIDs];
 };
+
+enum TRTPMetaDataTypeID {
+    kMetaDataNone   = 0,
+    kMetaDataBeat   = 1,
+};
+
+class TRTPMetaDataBlock {
+  public:
+    TRTPMetaDataBlock(TRTPMetaDataTypeID typeId, uint16_t item_length)
+            : mTypeId(typeId)
+            , mItemLength(item_length) {}
+    void writeBlockHead(uint8_t*& buf) const;
+    virtual void write(uint8_t*& buf) const = 0;
+    virtual ~TRTPMetaDataBlock() {}
+
+    TRTPMetaDataTypeID mTypeId;
+    uint16_t mItemLength;
+};
+
+// TRTPMetaDataPacket contains multiple TRTPMetaDataBlocks of different types
+class TRTPMetaDataPacket : public TRTPPacket {
+  public:
+    TRTPMetaDataPacket()
+        : TRTPPacket(kHeaderTypeMetaData) {}
+
+    void append(TRTPMetaDataBlock* block);
+
+    virtual bool pack();
+
+    virtual ~TRTPMetaDataPacket();
+
+  protected:
+
+    Vector<TRTPMetaDataBlock*> mBlocks;
+};
+
 
 }  // namespace android
 

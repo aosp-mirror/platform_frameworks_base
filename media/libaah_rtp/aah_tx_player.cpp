@@ -27,7 +27,6 @@
 #include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/FileSource.h>
 #include <media/stagefright/MediaBuffer.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
 #include <utils/Timers.h>
@@ -114,6 +113,10 @@ AAH_TXPlayer::~AAH_TXPlayer() {
     if (mQueueStarted) {
         mQueue.stop();
     }
+    if (mAudioProcessor != NULL) {
+        mAudioProcessor->shutdown();
+    }
+    omx_.disconnect();
 
     reset();
 }
@@ -140,7 +143,7 @@ status_t AAH_TXPlayer::initCheck() {
         return res;
     }
 
-    return OK;
+    return omx_.connect();
 }
 
 status_t AAH_TXPlayer::setDataSource(
@@ -486,6 +489,25 @@ void AAH_TXPlayer::onPrepareAsyncEvent() {
         return;
     }
 
+    if (mAudioProcessor == NULL) {
+        mAudioProcessor = new AAH_AudioProcessor(omx_);
+        if (mAudioProcessor == NULL || OK != mAudioProcessor->initCheck()) {
+            LOGE("%s failed to initialize audio processor",
+                 __PRETTY_FUNCTION__);
+            mAudioProcessor = NULL;
+            abortPrepare_l(err);
+            return;
+        }
+    }
+    if (mEnergyProcessor == NULL) {
+        mEnergyProcessor = new BeatDetectionAlgorithm();
+        if (mEnergyProcessor == NULL) {
+            LOGE("%s failed to initialize audio processor",
+                 __PRETTY_FUNCTION__);
+        }
+        mAudioProcessor->setAlgorithm(mEnergyProcessor);
+    }
+
     mFlags |= PREPARING_CONNECTED;
 
     if (mCachedSource != NULL) {
@@ -642,6 +664,10 @@ void AAH_TXPlayer::sendEOS_l() {
 
 void AAH_TXPlayer::sendFlush_l() {
     if (mAAH_TXGroup != NULL) {
+        if (mEnergyProcessor != NULL) {
+            mEnergyProcessor->flush();
+        }
+        sendMetaPacket_l(true);
         sp<TRTPControlPacket> packet = new TRTPControlPacket();
         if (packet != NULL) {
             packet->setCommandID(TRTPControlPacket::kCommandFlush);
@@ -1349,8 +1375,26 @@ void AAH_TXPlayer::onPumpAudio() {
             }
         }
 
-        mediaBuffer->release();
+        if (mAudioProcessor != NULL) {
+            // FIXME init() should detect metadata change
+            status_t res = mAudioProcessor->init(mAudioFormat);
+            if (OK != res) {
+                LOGE("Failed to init decoder (res = %d)", res);
+                cleanupDecoder();
+                mediaBuffer->release();
+            } else {
+                // decoder_pump steals the reference, so no need to call release()
+                res = mAudioProcessor->queueForDecode(mediaBuffer);
+                if (OK != res) {
+                    LOGE("Failed in queueForDecode (res = %d)", res);
+                    cleanupDecoder();
+                    mediaBuffer->release();
+                }
+            }
+            sendMetaPacket_l(false);
+        }
 
+bailout:
         mLastQueuedMediaTimePTSValid = true;
         mLastQueuedMediaTimePTS = mediaTimeUs;
     }
@@ -1371,11 +1415,32 @@ void AAH_TXPlayer::onPumpAudio() {
     }
 }
 
+void AAH_TXPlayer::sendMetaPacket_l(bool flushOut) {
+    // collect metadata from different components and send TRTPMetaDataPacket
+    // currently only support beat processor
+    if (mEnergyProcessor == NULL) {
+        return;
+    }
+    TRTPMetaDataBlock* block = mEnergyProcessor->collectMetaData(flushOut);
+    if (block != NULL) {
+        sp<TRTPMetaDataPacket> packet = new TRTPMetaDataPacket();
+        packet->append(block);
+        sendPacket_l(packet);
+    }
+}
+
 void AAH_TXPlayer::sendPacket_l(const sp<TRTPPacket>& packet) {
     CHECK(mAAH_TXGroup != NULL);
     CHECK(packet != NULL);
     packet->setProgramID(mProgramID);
     mAAH_TXGroup->sendPacket(packet);
+}
+
+void AAH_TXPlayer::cleanupDecoder() {
+   if (mAudioProcessor != NULL) {
+        mAudioProcessor->shutdown();
+        mAudioProcessor = NULL;
+    }
 }
 
 }  // namespace android

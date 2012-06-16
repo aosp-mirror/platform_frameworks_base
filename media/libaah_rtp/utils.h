@@ -23,7 +23,13 @@
 #include <netinet/in.h>
 
 #include <media/stagefright/foundation/ABase.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <utils/Timers.h>
+#include <utils/threads.h>
+#include <utils/LinearTransform.h>
+#include <common_time/cc_helper.h>
+
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 #define IP_PRINTF_HELPER(a) ((a >> 24) & 0xFF), ((a >> 16) & 0xFF), \
                             ((a >>  8) & 0xFF),  (a        & 0xFF)
@@ -96,6 +102,100 @@ inline void clearEventFD(int fd) {
         ::read(fd, &tmp, sizeof(tmp));
     }
 }
+
+// thread safe circular array
+template<typename T, uint32_t LEN>
+class CircularArray {
+ public:
+    CircularArray()
+            : mReadIndex(0)
+            , mWriteIndex(0)
+            , mLength(0) {}
+    bool write(const T& t) {
+        Mutex::Autolock autolock(&mLock);
+        if (mLength < LEN) {
+            mData[mWriteIndex] = t;
+            mWriteIndex = (mWriteIndex + 1) % LEN;
+            mLength++;
+            return true;
+        }
+        return false;
+    }
+    void writeAllowOverflow(const T& t) {
+        Mutex::Autolock autolock(&mLock);
+        mData[mWriteIndex] = t;
+        mWriteIndex = (mWriteIndex + 1) % LEN;
+        if (mLength < LEN) {
+            mLength++;
+        } else {
+            mReadIndex = (mReadIndex + 1) % LEN;
+        }
+    }
+    bool read(T* t) {
+        CHECK(t != NULL);
+        Mutex::Autolock autolock(&mLock);
+        if (mLength > 0) {
+            *t = mData[mReadIndex];
+            mReadIndex = (mReadIndex + 1) % LEN;
+            mLength--;
+            return true;
+        }
+        return false;
+    }
+    uint32_t readBulk(T* t, uint32_t count) {
+        return readBulk(t, 0, count);
+    }
+    uint32_t readBulk(T* t, uint32_t mincount, uint32_t count) {
+        CHECK(t != NULL);
+        Mutex::Autolock autolock(&mLock);
+        if (mincount > count) {
+            // illegal argument
+            return 0;
+        }
+        if (mincount > mLength) {
+            // not enough items
+            return 0;
+        }
+        uint32_t i;
+        for (i = 0; i < count && mLength; i++) {
+            *t = mData[mReadIndex];
+            mReadIndex = (mReadIndex + 1) % LEN;
+            mLength--;
+            t++;
+        }
+        return i;
+    }
+ private:
+    Mutex mLock;
+    T mData[LEN];
+    uint32_t mReadIndex;
+    uint32_t mWriteIndex;
+    uint32_t mLength;
+};
+
+class CommonToSystemTransform {
+ public:
+    CommonToSystemTransform();
+    const LinearTransform& getCommonToSystem();
+ private:
+    LinearTransform mCommonToSystem;
+    uint64_t mCommonFreq;
+    CCHelper mCCHelper;
+    int64_t mLastTs;
+};
+
+class MediaToSystemTransform {
+ public:
+    MediaToSystemTransform();
+    void setMediaToCommonTransform(const LinearTransform&);
+    void prepareCommonToSystem();
+    bool mediaToSystem(int64_t* ts);
+ private:
+    bool mMediaToCommonValid;
+    LinearTransform mMediaToCommon;
+    LinearTransform mCommonToSystem;
+    CommonToSystemTransform mCommonToSystemTrans;
+};
 
 }  // namespace android
 

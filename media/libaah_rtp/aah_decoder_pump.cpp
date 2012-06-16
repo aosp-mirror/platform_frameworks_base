@@ -40,24 +40,17 @@ static const long long kLongDecodeErrorThreshold = 1000000ll;
 static const uint32_t kMaxLongErrorsBeforeFatal = 3;
 static const uint32_t kMaxErrorsBeforeFatal = 60;
 
-AAH_DecoderPump::AAH_DecoderPump(OMXClient& omx)
+AAH_DecoderPumpBase::AAH_DecoderPumpBase(OMXClient& omx)
     : omx_(omx)
-    , thread_status_(OK)
-    , renderer_(NULL)
-    , last_queued_pts_valid_(false)
-    , last_queued_pts_(0)
-    , last_ts_transform_valid_(false)
-    , last_left_volume_(1.0f)
-    , last_right_volume_(1.0f)
-    , last_stream_type_(AUDIO_STREAM_DEFAULT) {
+    , thread_status_(OK) {
     thread_ = new ThreadWrapper(this);
 }
 
-AAH_DecoderPump::~AAH_DecoderPump() {
+AAH_DecoderPumpBase::~AAH_DecoderPumpBase() {
     shutdown();
 }
 
-status_t AAH_DecoderPump::initCheck() {
+status_t AAH_DecoderPumpBase::initCheck() {
     if (thread_ == NULL) {
         LOGE("Failed to allocate thread");
         return NO_MEMORY;
@@ -66,7 +59,7 @@ status_t AAH_DecoderPump::initCheck() {
     return OK;
 }
 
-status_t AAH_DecoderPump::queueForDecode(MediaBuffer* buf) {
+status_t AAH_DecoderPumpBase::queueForDecode(MediaBuffer* buf) {
     if (NULL == buf) {
         return BAD_VALUE;
     }
@@ -85,7 +78,7 @@ status_t AAH_DecoderPump::queueForDecode(MediaBuffer* buf) {
     return OK;
 }
 
-void AAH_DecoderPump::queueToRenderer(MediaBuffer* decoded_sample) {
+void AAH_DecoderPump::queueToSink(MediaBuffer* decoded_sample) {
     Mutex::Autolock lock(&render_lock_);
     sp<MetaData> meta;
     int64_t ts;
@@ -173,7 +166,7 @@ void AAH_DecoderPump::queueToRenderer(MediaBuffer* decoded_sample) {
     }
 }
 
-void AAH_DecoderPump::stopAndCleanupRenderer() {
+void AAH_DecoderPump::stopAndCleanupSink() {
     if (NULL == renderer_) {
         return;
     }
@@ -297,7 +290,7 @@ bool AAH_DecoderPump::isAboutToUnderflow(int64_t threshold) {
     return ((tt_now + threshold - last_queued_pts_tt) > 0);
 }
 
-void* AAH_DecoderPump::workThread() {
+void* AAH_DecoderPumpBase::workThread() {
     // No need to lock when accessing decoder_ from the thread.  The
     // implementation of init and shutdown ensure that other threads never touch
     // decoder_ while the work thread is running.
@@ -367,7 +360,7 @@ void* AAH_DecoderPump::workThread() {
             }
 
             // If the format has actually changed, destroy our current renderer
-            // so that a new one can be created during queueToRenderer with the
+            // so that a new one can be created during queueToSink with the
             // proper format.
             //
             // TODO : In order to transition seamlessly, we should change this
@@ -375,7 +368,7 @@ void* AAH_DecoderPump::workThread() {
             // we destroy it.  We can still create a new renderer, the timed
             // nature of the renderer should ensure a seamless splice.
             if (formatActuallyChanged)
-                stopAndCleanupRenderer();
+                stopAndCleanupSink();
 
             res = OK;
         }
@@ -445,17 +438,17 @@ void* AAH_DecoderPump::workThread() {
         consecutive_errors = 0;
         consecutive_long_errors = 0;
 
-        queueToRenderer(bufOut);
+        queueToSink(bufOut);
         bufOut->release();
     }
 
     decoder_->stop();
-    stopAndCleanupRenderer();
+    stopAndCleanupSink();
 
     return NULL;
 }
 
-status_t AAH_DecoderPump::init(sp<MetaData> params) {
+status_t AAH_DecoderPumpBase::init(sp<MetaData> params) {
     Mutex::Autolock lock(&init_lock_);
 
     if (decoder_ != NULL) {
@@ -511,12 +504,12 @@ bailout:
     return OK;
 }
 
-status_t AAH_DecoderPump::shutdown() {
+status_t AAH_DecoderPumpBase::shutdown() {
     Mutex::Autolock lock(&init_lock_);
     return shutdown_l();
 }
 
-status_t AAH_DecoderPump::shutdown_l() {
+status_t AAH_DecoderPumpBase::shutdown_l() {
     thread_->requestExit();
     thread_cond_.signal();
     thread_->requestExitAndWait();
@@ -527,10 +520,6 @@ status_t AAH_DecoderPump::shutdown_l() {
     }
     in_queue_.clear();
 
-    last_queued_pts_valid_   = false;
-    last_ts_transform_valid_ = false;
-    last_left_volume_        = 1.0f;
-    last_right_volume_       = 1.0f;
     thread_status_           = OK;
 
     decoder_ = NULL;
@@ -539,7 +528,7 @@ status_t AAH_DecoderPump::shutdown_l() {
     return OK;
 }
 
-status_t AAH_DecoderPump::read(MediaBuffer **buffer,
+status_t AAH_DecoderPumpBase::read(MediaBuffer **buffer,
                                const ReadOptions *options) {
     if (!buffer) {
         return BAD_VALUE;
@@ -566,15 +555,35 @@ status_t AAH_DecoderPump::read(MediaBuffer **buffer,
     return (NULL == *buffer) ? INVALID_OPERATION : OK;
 }
 
-AAH_DecoderPump::ThreadWrapper::ThreadWrapper(AAH_DecoderPump* owner)
+AAH_DecoderPumpBase::ThreadWrapper::ThreadWrapper(AAH_DecoderPumpBase* owner)
     : Thread(false /* canCallJava*/ )
     , owner_(owner) {
 }
 
-bool AAH_DecoderPump::ThreadWrapper::threadLoop() {
+bool AAH_DecoderPumpBase::ThreadWrapper::threadLoop() {
     CHECK(NULL != owner_);
     owner_->workThread();
     return false;
+}
+
+AAH_DecoderPump::AAH_DecoderPump(OMXClient& omx)
+    : AAH_DecoderPumpBase(omx)
+    , renderer_(NULL)
+    , last_queued_pts_valid_(false)
+    , last_queued_pts_(0)
+    , last_ts_transform_valid_(false)
+    , last_left_volume_(1.0f)
+    , last_right_volume_(1.0f)
+    , last_stream_type_(AUDIO_STREAM_DEFAULT) {
+}
+
+status_t AAH_DecoderPump::shutdown_l() {
+    status_t ret = AAH_DecoderPumpBase::shutdown_l();
+    last_queued_pts_valid_   = false;
+    last_ts_transform_valid_ = false;
+    last_left_volume_        = 1.0f;
+    last_right_volume_       = 1.0f;
+    return ret;
 }
 
 }  // namespace android

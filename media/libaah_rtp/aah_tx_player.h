@@ -24,11 +24,16 @@
 #include <media/MediaPlayerInterface.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MediaSource.h>
+#include <media/stagefright/MediaBuffer.h>
+#include <media/stagefright/MediaDefs.h>
+#include <media/stagefright/MetaData.h>
+#include <media/stagefright/OMXClient.h>
 #include <utils/LinearTransform.h>
 #include <utils/String8.h>
 #include <utils/threads.h>
 
 #include "aah_tx_group.h"
+#include "aah_audio_processor.h"
 
 namespace android {
 
@@ -109,6 +114,7 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     void updateClockTransform_l(bool pause);
     void sendEOS_l();
     void sendFlush_l();
+    void sendMetaPacket_l(bool flushOut);
     void sendTSUpdateNop_l();
     void cancelPlayerEvents(bool keepBufferingGoing = false);
     void reset_l();
@@ -122,8 +128,13 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     void onBufferingUpdate();
     void onPumpAudio();
     void sendPacket_l(const sp<TRTPPacket>& packet);
+    void cleanupDecoder();
 
     Mutex mLock;
+
+    OMXClient omx_;
+    sp<AAH_AudioProcessor> mAudioProcessor;
+    sp<AudioAlgorithm> mEnergyProcessor;
 
     TimedEventQueue mQueue;
     bool mQueueStarted;
