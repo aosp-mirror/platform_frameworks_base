@@ -143,7 +143,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -4371,7 +4370,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mLastInputMethodTargetWindow = target;
     }
 
-    public void dump(String prefix, FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(String prefix, PrintWriter pw, String[] args) {
         pw.print(prefix); pw.print("mSafeMode="); pw.print(mSafeMode);
                 pw.print(" mSystemReady="); pw.print(mSystemReady);
                 pw.print(" mSystemBooted="); pw.println(mSystemBooted);
