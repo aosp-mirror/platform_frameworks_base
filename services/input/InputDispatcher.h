@@ -948,6 +948,9 @@ private:
     // Focused application.
     sp<InputApplicationHandle> mFocusedApplicationHandle;
 
+    // Dispatcher state at time of last ANR.
+    String8 mLastANRState;
+
     // Dispatch inbound events.
     bool dispatchConfigurationChangedLocked(
             nsecs_t currentTime, ConfigurationChangedEntry* entry);
