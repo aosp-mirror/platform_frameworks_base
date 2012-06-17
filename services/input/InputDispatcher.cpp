@@ -53,6 +53,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <limits.h>
+#include <time.h>
 
 #define INDENT "  "
 #define INDENT2 "    "
@@ -1073,7 +1074,7 @@ Unresponsive:
             injectionResult, timeSpentWaitingForApplication);
 #if DEBUG_FOCUS
     ALOGD("findFocusedWindow finished: injectionResult=%d, "
-            "timeSpendWaitingForApplication=%0.1fms",
+            "timeSpentWaitingForApplication=%0.1fms",
             injectionResult, timeSpentWaitingForApplication / 1000000.0);
 #endif
     return injectionResult;
@@ -3100,7 +3101,7 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
         for (EventEntry* entry = mInboundQueue.head; entry; entry = entry->next) {
             dump.append(INDENT2);
             entry->appendDescription(dump);
-            dump.appendFormat(", age=%01.1fms\n",
+            dump.appendFormat(", age=%0.1fms\n",
                     (currentTime - entry->eventTime) * 0.000001f);
         }
     } else {
@@ -3124,7 +3125,7 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
                         entry = entry->next) {
                     dump.append(INDENT4);
                     entry->eventEntry->appendDescription(dump);
-                    dump.appendFormat(", targetFlags=0x%08x, resolvedAction=%d, age=%01.1fms\n",
+                    dump.appendFormat(", targetFlags=0x%08x, resolvedAction=%d, age=%0.1fms\n",
                             entry->targetFlags, entry->resolvedAction,
                             (currentTime - entry->eventEntry->eventTime) * 0.000001f);
                 }
@@ -3140,7 +3141,7 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
                     dump.append(INDENT4);
                     entry->eventEntry->appendDescription(dump);
                     dump.appendFormat(", targetFlags=0x%08x, resolvedAction=%d, "
-                            "age=%01.1fms, wait=%01.1fms\n",
+                            "age=%0.1fms, wait=%0.1fms\n",
                             entry->targetFlags, entry->resolvedAction,
                             (currentTime - entry->eventEntry->eventTime) * 0.000001f,
                             (currentTime - entry->deliveryTime) * 0.000001f);
@@ -3154,11 +3155,17 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
     }
 
     if (isAppSwitchPendingLocked()) {
-        dump.appendFormat(INDENT "AppSwitch: pending, due in %01.1fms\n",
+        dump.appendFormat(INDENT "AppSwitch: pending, due in %0.1fms\n",
                 (mAppSwitchDueTime - now()) / 1000000.0);
     } else {
         dump.append(INDENT "AppSwitch: not pending\n");
     }
+
+    dump.append(INDENT "Configuration:\n");
+    dump.appendFormat(INDENT2 "KeyRepeatDelay: %0.1fms\n",
+            mConfig.keyRepeatDelay * 0.000001f);
+    dump.appendFormat(INDENT2 "KeyRepeatTimeout: %0.1fms\n",
+            mConfig.keyRepeatTimeout * 0.000001f);
 }
 
 status_t InputDispatcher::registerInputChannel(const sp<InputChannel>& inputChannel,
@@ -3285,11 +3292,28 @@ void InputDispatcher::onANRLocked(
         nsecs_t currentTime, const sp<InputApplicationHandle>& applicationHandle,
         const sp<InputWindowHandle>& windowHandle,
         nsecs_t eventTime, nsecs_t waitStartTime, const char* reason) {
+    float dispatchLatency = (currentTime - eventTime) * 0.000001f;
+    float waitDuration = (currentTime - waitStartTime) * 0.000001f;
     ALOGI("Application is not responding: %s.  "
-            "It has been %01.1fms since event, %01.1fms since wait started.  Reason: %s",
+            "It has been %0.1fms since event, %0.1fms since wait started.  Reason: %s",
             getApplicationWindowLabelLocked(applicationHandle, windowHandle).string(),
-            (currentTime - eventTime) / 1000000.0,
-            (currentTime - waitStartTime) / 1000000.0, reason);
+            dispatchLatency, waitDuration, reason);
+
+    // Capture a record of the InputDispatcher state at the time of the ANR.
+    time_t t = time(NULL);
+    struct tm tm;
+    localtime_r(&t, &tm);
+    char timestr[64];
+    strftime(timestr, sizeof(timestr), "%F %T", &tm);
+    mLastANRState.clear();
+    mLastANRState.append(INDENT "ANR:\n");
+    mLastANRState.appendFormat(INDENT2 "Time: %s\n", timestr);
+    mLastANRState.appendFormat(INDENT2 "Window: %s\n",
+            getApplicationWindowLabelLocked(applicationHandle, windowHandle).string());
+    mLastANRState.appendFormat(INDENT2 "DispatchLatency: %0.1fms\n", dispatchLatency);
+    mLastANRState.appendFormat(INDENT2 "WaitDuration: %0.1fms\n", waitDuration);
+    mLastANRState.appendFormat(INDENT2 "Reason: %s\n", reason);
+    dumpDispatchStateLocked(mLastANRState);
 
     CommandEntry* commandEntry = postCommandLocked(
             & InputDispatcher::doNotifyANRLockedInterruptible);
@@ -3371,7 +3395,7 @@ void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
         nsecs_t eventDuration = finishTime - dispatchEntry->deliveryTime;
         if (eventDuration > SLOW_EVENT_PROCESSING_WARNING_TIMEOUT) {
             String8 msg;
-            msg.appendFormat("Window '%s' spent %01.1fms processing the last input event: ",
+            msg.appendFormat("Window '%s' spent %0.1fms processing the last input event: ",
                     connection->getWindowName(), eventDuration * 0.000001f);
             dispatchEntry->eventEntry->appendDescription(msg);
             ALOGI("%s", msg.string());
@@ -3634,9 +3658,10 @@ void InputDispatcher::dump(String8& dump) {
     dump.append("Input Dispatcher State:\n");
     dumpDispatchStateLocked(dump);
 
-    dump.append(INDENT "Configuration:\n");
-    dump.appendFormat(INDENT2 "KeyRepeatDelay: %0.1fms\n", mConfig.keyRepeatDelay * 0.000001f);
-    dump.appendFormat(INDENT2 "KeyRepeatTimeout: %0.1fms\n", mConfig.keyRepeatTimeout * 0.000001f);
+    if (!mLastANRState.isEmpty()) {
+        dump.append("\nInput Dispatcher State at time of last ANR:\n");
+        dump.append(mLastANRState);
+    }
 }
 
 void InputDispatcher::monitor() {
