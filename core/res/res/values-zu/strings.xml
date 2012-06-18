@@ -934,10 +934,8 @@
     <string name="deleteText" msgid="7070985395199629156">"susa"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Indlela yokufakwayo"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Izenzo zombhalo"</string>
-    <!-- no translation found for low_internal_storage_view_title (5576272496365684834) -->
-    <skip />
-    <!-- no translation found for low_internal_storage_view_text (6640505817617414371) -->
-    <skip />
+    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Isikhala sokulondoloza siyaphela"</string>
+    <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Eminye imisebenzi yohlelo ingahle ingasebenzi"</string>
     <string name="ok" msgid="5970060430562524910">"KULUNGILE"</string>
     <string name="cancel" msgid="6442560571259935130">"Khansela"</string>
     <string name="yes" msgid="5362982303337969312">"KULUNGILE"</string>
@@ -1284,14 +1282,12 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Amukela ucingo?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Njalo"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Kanye nje"</string>
-    <string name="default_audio_route_name" product="tablet" msgid="6890731863195399186">"Izipika zethebhulethi"</string>
-    <string name="default_audio_route_name" product="default" msgid="4551396562363128432">"Isipika sefoni"</string>
+    <string name="default_audio_route_name" product="tablet" msgid="6890731863195399186">"Izipikha zethebhulethi"</string>
+    <string name="default_audio_route_name" product="default" msgid="4551396562363128432">"Isipikha sefoni"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Ama-headphone"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Izipika ze-Dock"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Izipikha ze-Dock"</string>
     <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"Umsindo we-HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Isistimu"</string>
-    <!-- no translation found for bluetooth_a2dp_audio_route_name (8575624030406771015) -->
-    <skip />
-    <!-- no translation found for media_route_chooser_grouping_done (7966438307723317169) -->
-    <skip />
+    <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Umsindo we-Bluetooth"</string>
+    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Qedile"</string>
 </resources>

@@ -185,7 +185,7 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Geliştirme araçları"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Yalnızca uygulama geliştiriciler için gerekli özellikler."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Depolama"</string>
-    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Payl depolama birimine erişin."</string>
+    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"USB belleğe erişin."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD karta erişin."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"durum çubuğunu devre dışı bırak veya değiştir"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Uygulamaya, durum çubuğunu devre dışı bırakma ve sistem simgelerini ekleyip kaldırma izni verir."</string>
@@ -399,10 +399,10 @@
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"telefonu yeniden başlamaya zorla"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Uygulamaya, tableti yeniden açılmaya zorlama izni verir."</string>
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Uygulamaya, telefonu yeniden başlatmaya zorlama izni verir."</string>
-    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"USB deplm dosya sistemine eriş"</string>
+    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"USB bellek dosya sistemine eriş"</string>
     <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"SD Kartın dosya sistemine eriş"</string>
     <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Uygulamaya, çıkarılabilir depolama için dosya sistemlerini ekleme veya bağlantısını kesme izni verir."</string>
-    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"USB depolamayı sil"</string>
+    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"USB belleği sil"</string>
     <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"SD Kartı sil"</string>
     <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Uygulamaya, çıkarılabilir depolama birimini biçimlendirme izni verir."</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"dahili depolama birimi hakkında bilgi al"</string>
@@ -526,11 +526,11 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Uygulamaya, kullanıcı sözlüğüne yeni kelimeler yazma izni verir."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"korumalı depolama birimine erişimi test et"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"korumalı depolama birimine erişimi test et"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Uygulamaya gelecekteki cihazlarda kullanılabilecek USB depolama birimine ilişkin bir izni test etme izni verir."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Uygulamaya gelecekteki cihazlarda kullanılabilecek USB belleğe ilişkin bir izni test etme izni verir."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Uygulamaya gelecekteki cihazlarda kullanılabilecek SD karta ilişkin bir izni test etme olanağı verir."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB depolamamın içeriğini değiştir veya sil"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB belleğimin içeriğini değiştir veya sil"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD kartın içeriğini değiştir veya sil"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Uygulamaya USB depolama birimine yazma izni verir."</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Uygulamaya USB belleğe yazma izni verir."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Uygulamaya, SD karta yazma izni verir."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"dahili medya depolama birimi içeriğini değiştir/sil"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Uygulamaya, dahili medya depolama içeriğini değiştirme izni verir."</string>
@@ -934,10 +934,8 @@
     <string name="deleteText" msgid="7070985395199629156">"sil"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Giriş yöntemi"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Metin eylemleri"</string>
-    <!-- no translation found for low_internal_storage_view_title (5576272496365684834) -->
-    <skip />
-    <!-- no translation found for low_internal_storage_view_text (6640505817617414371) -->
-    <skip />
+    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Depolama alanı bitiyor"</string>
+    <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Bazı sistem işlevleri çalışmayabilir"</string>
     <string name="ok" msgid="5970060430562524910">"Tamam"</string>
     <string name="cancel" msgid="6442560571259935130">"İptal"</string>
     <string name="yes" msgid="5362982303337969312">"Tamam"</string>
@@ -1051,24 +1049,24 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Tümünü göster"</b></string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"YENİ: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Sağlayan: <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB yığın depolama"</string>
+    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB yığın belleği"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB bağlandı"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Cihazınızı USB ile bilgisayarınıza bağladınız. Bilgisayarınız ile Android\'inizin USB depolama birimi arasında dosya kopyalamak istiyorsanız aşağıdaki düğmeye dokunun."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Cihazınızı USB ile bilgisayarınıza bağladınız. Bilgisayarınız ile Android\'inizin USB belleği arasında dosya kopyalamak istiyorsanız aşağıdaki düğmeye dokunun."</string>
     <string name="usb_storage_message" product="default" msgid="805351000446037811">"Cihazınızı USB ile bilgisayarınıza bağladınız. Bilgisayarınız ile Android\'inizin SD kartı arasında dosya kopyalamak istiyorsanız aşağıdaki düğmeye dokunun."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB depolama birimini aç"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"USB depolama biriminizi USB yığın depolama amaçlı kullanmayla ilgili bir sorun var."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"SD kartınızı USB yığın depolama birimi olarak kullanmada sorun var."</string>
+    <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB belleği aç"</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"USB belleğinizi USB yığın belleği amaçlı kullanmayla ilgili bir sorun var."</string>
+    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"SD kartınızı USB yığın belleği olarak kullanmada sorun var."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB bağlandı"</string>
     <string name="usb_storage_notification_message" msgid="939822783828183763">"Bilgisayarınıza/bilgisayarınızdan dosya kopyalamak için dokunun."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB belleğini kapat"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"USB depolama birimini kapatmak için dokunun."</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB depolama birimi kullanılıyor"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"USB depolama birimini kapatmadan önce Android\'inizin USB depolama biriminin bilgisayarınızla olan bağlantısını kesin (\"çıkarın\")."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"USB depolama birimini kapatmadan önce Android\'inizin SD kartının bilgisayarınızla olan bağlantısını kesin (\"çıkarın\")."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB depolama birimini kapat"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"USB depolama birimini kapatırken bir sorun oluştu. USB birimini kaldırdığınızdan emin olun ve daha sonra tekrar deneyin."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB depolama birimini aç"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"USB depolama birimini açarsanız, kullanmakta olduğunuz bazı uygulamalar durur ve USB depolama birimi kapatılıncaya kadar kullanılamayabilir."</string>
+    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB belleği kapat"</string>
+    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"USB belleği kapatmak için dokunun."</string>
+    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB bellek kullanılıyor"</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"USB belleği kapatmadan önce Android\'inizin USB belleğin bilgisayarınızla olan bağlantısını kesin (\"çıkarın\")."</string>
+    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"USB belleği kapatmadan önce Android\'inizin SD kartının bilgisayarınızla olan bağlantısını kesin (\"çıkarın\")."</string>
+    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB belleği kapat"</string>
+    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"USB belleği kapatırken bir sorun oluştu. USB birimini kaldırdığınızdan emin olun ve daha sonra tekrar deneyin."</string>
+    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB belleği aç"</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"USB belleği açarsanız, kullanmakta olduğunuz bazı uygulamalar durur ve USB bellek kapatılıncaya kadar kullanılamayabilir."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB işlemi başarısız oldu"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Tamam"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Medya cihazı olarak bağlandı"</string>
@@ -1076,9 +1074,9 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Yükleyici olarak bağlandı"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB aksesuarına bağlandı"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"Diğer USB seçenekleri için dokunun."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB dp br biçimlendirilsin mi?"</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB bellek biçimlendirilsin mi?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD kart biçimlendirilsin mi?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB depolama biriminizdeki tüm dosyalar silinecek. Bu işlem geri alınamaz!"</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB belleğinizdeki tüm dosyalar silinecek. Bu işlem geri alınamaz!"</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Kartınızdaki tüm veriler kaybolacak."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Biçimlendir"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB hata ayıklaması bağlandı"</string>
@@ -1092,28 +1090,28 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"adaylar"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"USB depolm birimi hazırlanıyor"</string>
+    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"USB bellek hazırlanıyor"</string>
     <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"SD kart hazırlanıyor"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Hata kontrolü yapılıyor"</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Boş USB depolama birimi"</string>
+    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Boş USB bellek"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Boş SD kart"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"USB depolama birimi boş veya desteklenmeyen bir dosya sistemine sahip."</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"USB bellek boş veya desteklenmeyen bir dosya sistemine sahip."</string>
     <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"SD kart boş veya desteklenmeyen dosya sistemi içeriyor."</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"USB depolm birimi zarar görmüş"</string>
+    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"USB bellek zarar görmüş"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Hasarlı SD kart"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"USB depolama birimi bozuk. Yeniden biçimlendirmeyi deneyin."</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"USB bellek bozuk. Yeniden biçimlendirmeyi deneyin."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"SD kart bozuk. Yeniden biçimlendirmeyi deneyin."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB dep br bklnmd şekl çıkarld"</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB bellek bklnmd şekl çıkarld"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD kart beklenmedik biçimde çıkarıldı"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Veri kaybı olmaması için çıkarmadan önce USB depolama biriminin bağlantısını kesin."</string>
+    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Veri kaybı olmaması için çıkarmadan önce USB belleğin bağlantısını kesin."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Veri kaybından kaçınmak için SD kartı çıkarmadan önce bağlantısını kesin."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"USB depl birm güvenle çıkrlblr"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"USB bellek güvenle çıkarılablr"</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD kart güvenle çıkarılabilir"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"USB depolama birimini güvenli bir şekilde çıkarabilirsiniz."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"USB belleği güvenli bir şekilde çıkarabilirsiniz."</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"SD kartı güvenle kaldırabilirsiniz."</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"USB depolama birimi çıkarıldı"</string>
+    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"USB bellek çıkarıldı"</string>
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"SD kart çıkarılmış"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB depolama birimi çıkarıldı. Yeni medyayı takın."</string>
+    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB bellek çıkarıldı. Yeni medyayı takın."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD kart çıkarıldı. Yeni bir SD kart takın."</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Eşleşen hiçbir etkinlik bulunamadı."</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"bileşen kullanım istatistiklerini güncelle"</string>
@@ -1171,17 +1169,17 @@
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> / <xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Bitti"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB depolama biriminin bağlantısı kesiliyor…"</string>
+    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB belleğin bağlantısı kesiliyor…"</string>
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD kartın bağlantısı kesiliyor…"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB depolama birimi siliniyor…"</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB bellek siliniyor…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD kart siliniyor…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB depolama birimi silinemedi."</string>
+    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB bellek silinemedi."</string>
     <string name="format_error" product="default" msgid="7315248696644510935">"SD kart silinemedi."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"SD kart, bağlantısı kesilmeden çıkarıldı."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB depolama birimi şu anda denetleniyor."</string>
+    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB bellek şu anda denetleniyor."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"SD kart şu anda denetleniyor."</string>
     <string name="media_removed" msgid="7001526905057952097">"SD kart çıkarıldı."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB depolama birimi, şu anda bir bilgisayar tarafından kullanılıyor."</string>
+    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB bellek şu anda bir bilgisayar tarafından kullanılıyor."</string>
     <string name="media_shared" product="default" msgid="5706130568133540435">"SD kart şu anda bir bilgisayar tarafından kullanılıyor."</string>
     <string name="media_unknown_state" msgid="729192782197290385">"Harici medyanın durumu bilinmiyor."</string>
     <string name="share" msgid="1778686618230011964">"Paylaş"</string>
@@ -1244,7 +1242,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Diğer seçenekler"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Dahili depolama birimi"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD kart"</string>
-    <string name="storage_usb" msgid="3017954059538517278">"USB depolama birimi"</string>
+    <string name="storage_usb" msgid="3017954059538517278">"USB bellek"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Düzenle"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Veri kullanım uyarısı"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Kullanımı ve ayarları görmek için dokunun."</string>
@@ -1292,6 +1290,5 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistem"</string>
     <!-- no translation found for bluetooth_a2dp_audio_route_name (8575624030406771015) -->
     <skip />
-    <!-- no translation found for media_route_chooser_grouping_done (7966438307723317169) -->
-    <skip />
+    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Tamamlandı"</string>
 </resources>
