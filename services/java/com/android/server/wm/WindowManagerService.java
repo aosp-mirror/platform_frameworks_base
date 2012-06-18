@@ -9860,14 +9860,16 @@ public class WindowManagerService extends IWindowManager.Stub
      * the time an ANR occurred before anything else in the system changes
      * in response.
      *
-     * @param appWindowToken The application that ANR'd, never null.
+     * @param appWindowToken The application that ANR'd, may be null.
      * @param windowState The window that ANR'd, may be null.
      */
     public void saveANRStateLocked(AppWindowToken appWindowToken, WindowState windowState) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         pw.println("  ANR time: " + DateFormat.getInstance().format(new Date()));
-        pw.println("  Application at fault: " + appWindowToken.stringName);
+        if (appWindowToken != null) {
+            pw.println("  Application at fault: " + appWindowToken.stringName);
+        }
         if (windowState != null) {
             pw.println("  Window at fault: " + windowState.mAttrs.getTitle());
         }
