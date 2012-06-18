@@ -480,7 +480,10 @@ final class AccessibilityInteractionController {
                         // focus instead fetching all provider nodes to do the search here.
                         AccessibilityNodeProvider provider = host.getAccessibilityNodeProvider();
                         if (provider != null) {
-                            focused = provider.findAccessibilityFocus(virtualDescendantId);
+                            if (mViewRootImpl.mAccessibilityFocusedVirtualView != null) {
+                                focused = AccessibilityNodeInfo.obtain(
+                                        mViewRootImpl.mAccessibilityFocusedVirtualView);
+                            }
                         } else if (virtualDescendantId == View.NO_ID) {
                             focused = host.createAccessibilityNodeInfo();
                         }
@@ -804,7 +807,6 @@ final class AccessibilityInteractionController {
             if (!(root instanceof ViewGroup)) {
                 return;
             }
-            ViewGroup rootGroup = (ViewGroup) root;
             HashMap<View, AccessibilityNodeInfo> addedChildren =
                 new HashMap<View, AccessibilityNodeInfo>();
             ArrayList<View> children = mTempViewList;

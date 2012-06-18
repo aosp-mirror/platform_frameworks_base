@@ -489,7 +489,7 @@ public final class ViewRootImpl implements ViewParent,
                 // Keep track of the actual window flags supplied by the client.
                 mClientWindowLayoutFlags = attrs.flags;
 
-                setAccessibilityFocusedHost(null);
+                setAccessibilityFocus(null, null);
 
                 if (view instanceof RootViewSurfaceTaker) {
                     mSurfaceHolderCallback =
@@ -558,7 +558,7 @@ public final class ViewRootImpl implements ViewParent,
                     mInputChannel = null;
                     mFallbackEventHandler.setView(null);
                     unscheduleTraversals();
-                    setAccessibilityFocusedHost(null);
+                    setAccessibilityFocus(null, null);
                     throw new RuntimeException("Adding window failed", e);
                 } finally {
                     if (restore) {
@@ -578,7 +578,7 @@ public final class ViewRootImpl implements ViewParent,
                     mAdded = false;
                     mFallbackEventHandler.setView(null);
                     unscheduleTraversals();
-                    setAccessibilityFocusedHost(null);
+                    setAccessibilityFocus(null, null);
                     switch (res) {
                         case WindowManagerImpl.ADD_BAD_APP_TOKEN:
                         case WindowManagerImpl.ADD_BAD_SUBWINDOW_TOKEN:
@@ -2320,9 +2320,6 @@ public final class ViewRootImpl implements ViewParent,
             }
         } else {
             if (mAccessibilityFocusedVirtualView == null) {
-                mAccessibilityFocusedVirtualView = provider.findAccessibilityFocus(View.NO_ID);
-            }
-            if (mAccessibilityFocusedVirtualView == null) {
                 return;
             }
             mAccessibilityFocusedVirtualView.getBoundsInScreen(bounds);
@@ -2498,7 +2495,7 @@ public final class ViewRootImpl implements ViewParent,
         return mAccessibilityFocusedVirtualView;
     }
 
-    void setAccessibilityFocusedHost(View host) {
+    void setAccessibilityFocus(View view, AccessibilityNodeInfo node) {
         // If we have a virtual view with accessibility focus we need
         // to clear the focus and invalidate the virtual view bounds.
         if (mAccessibilityFocusedVirtualView != null) {
@@ -2526,24 +2523,16 @@ public final class ViewRootImpl implements ViewParent,
                 provider.performAction(virtualNodeId,
                         AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS, null);
             }
+            focusNode.recycle();
         }
         if (mAccessibilityFocusedHost != null) {
             // Clear accessibility focus in the view.
             mAccessibilityFocusedHost.clearAccessibilityFocusNoCallbacks();
         }
 
-        // Set the new focus host.
-        mAccessibilityFocusedHost = host;
-
-        // If the host has a provide find the virtual descendant that has focus.
-        if (mAccessibilityFocusedHost != null) {
-            AccessibilityNodeProvider provider =
-                mAccessibilityFocusedHost.getAccessibilityNodeProvider();
-            if (provider != null) {
-                mAccessibilityFocusedVirtualView = provider.findAccessibilityFocus(View.NO_ID);
-                return;
-            }
-        }
+        // Set the new focus host and node.
+        mAccessibilityFocusedHost = view;
+        mAccessibilityFocusedVirtualView = node;
     }
 
     public void requestChildFocus(View child, View focused) {
@@ -2629,7 +2618,7 @@ public final class ViewRootImpl implements ViewParent,
 
         destroyHardwareRenderer();
 
-        setAccessibilityFocusedHost(null);
+        setAccessibilityFocus(null, null);
 
         mView = null;
         mAttachInfo.mRootView = null;
@@ -2910,7 +2899,7 @@ public final class ViewRootImpl implements ViewParent,
                         mHasHadWindowFocus = true;
                     }
 
-                    setAccessibilityFocusedHost(null);
+                    setAccessibilityFocus(null, null);
 
                     if (mView != null && mAccessibilityManager.isEnabled()) {
                         if (hasWindowFocus) {
@@ -2982,7 +2971,7 @@ public final class ViewRootImpl implements ViewParent,
                 invalidateDisplayLists();
             } break;
             case MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST: {
-                setAccessibilityFocusedHost(null);
+                setAccessibilityFocus(null, null);
             } break;
             case MSG_DISPATCH_DONE_ANIMATING: {
                 handleDispatchDoneAnimating();
@@ -4538,29 +4527,35 @@ public final class ViewRootImpl implements ViewParent,
         if (mView == null) {
             return false;
         }
-        // Watch for accessibility focus change events from virtual nodes
-        // to keep track of accessibility focus being on a virtual node.
+        // Intercept accessibility focus events fired by virtual nodes to keep
+        // track of accessibility focus position in such nodes.
         final int eventType = event.getEventType();
         switch (eventType) {
             case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED: {
-                final long sourceId = event.getSourceNodeId();
-                // If the event is not from a virtual node we are not interested.
-                final int virtualViewId = AccessibilityNodeInfo.getVirtualDescendantId(sourceId);
-                if (virtualViewId == AccessibilityNodeInfo.UNDEFINED) {
-                    break;
+                final long sourceNodeId = event.getSourceNodeId();
+                final int accessibilityViewId = AccessibilityNodeInfo.getAccessibilityViewId(
+                        sourceNodeId);
+                View source = mView.findViewByAccessibilityId(accessibilityViewId);
+                if (source != null) {
+                    AccessibilityNodeProvider provider = source.getAccessibilityNodeProvider();
+                    if (provider != null) {
+                        AccessibilityNodeInfo node = provider.createAccessibilityNodeInfo(
+                                AccessibilityNodeInfo.getVirtualDescendantId(sourceNodeId));
+                        setAccessibilityFocus(source, node);
+                    }
                 }
-                final int realViewId = AccessibilityNodeInfo.getAccessibilityViewId(sourceId);
-                View focusHost = mView.findViewByAccessibilityId(realViewId);
-                setAccessibilityFocusedHost(focusHost);
             } break;
             case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED: {
-                final long sourceId = event.getSourceNodeId();
-                // If the event is not from a virtual node we are not interested.
-                final int virtualViewId = AccessibilityNodeInfo.getVirtualDescendantId(sourceId);
-                if (virtualViewId == AccessibilityNodeInfo.UNDEFINED) {
-                    break;
+                final long sourceNodeId = event.getSourceNodeId();
+                final int accessibilityViewId = AccessibilityNodeInfo.getAccessibilityViewId(
+                        sourceNodeId);
+                View source = mView.findViewByAccessibilityId(accessibilityViewId);
+                if (source != null) {
+                    AccessibilityNodeProvider provider = source.getAccessibilityNodeProvider();
+                    if (provider != null) {
+                        setAccessibilityFocus(null, null);
+                    }
                 }
-                setAccessibilityFocusedHost(null);
             } break;
         }
         mAccessibilityManager.sendAccessibilityEvent(event);
