@@ -8,7 +8,7 @@
   
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot
-?>sdk/index.html"><span class="en">Android SDK</span></a></div>
+?>sdk/index.html"><span class="en">Download</span></a></div>
     <ul>
       <li class="nav-section">
         <div class="nav-section-header">
@@ -19,12 +19,12 @@
               <span class="en">Adding Platforms and Packages</span></a></li>
           <li><a href="<?cs var:toroot ?>sdk/installing/installing-adt.html">
               <span class="en">Installing the Eclipse Plugin</span></a></li>
-          <li><a href="<?cs var:toroot ?>sdk/installing/exploring.html">
-              <span class="en">Exploring the SDK</span></a></li>
+          <li><a href="<?cs var:toroot ?>sdk/installing/next.html">
+              <span class="en">Next Steps</span></a></li>
         </ul>
       </li>
-      <li><a href="<?cs var:toroot ?>tools/sdk/tools-notes.html"><span
-class="en">Revision History</span></a></li>
+          <li><a href="<?cs var:toroot ?>sdk/installing/exploring.html">
+              <span class="en">Exploring the SDK</span></a></li>
     </ul>
   </li>
   
@@ -122,57 +122,74 @@ class="en">Revision History</span></a></li>
 </ul>
 </li>
   <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/list.html"><span class="en">Tools Help</span></a></div>
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/help/index.html"><span
+class="en">Tools Help</span></a></div>
     <ul>
-      <li><a href="<?cs var:toroot ?>tools/adb.html">adb</a></li>
-      <li><a href="<?cs var:toroot ?>tools/adt.html">ADT</a></li>
-      <li><a href="<?cs var:toroot ?>tools/android.html">android</a></li>
-      <li><a href="<?cs var:toroot ?>tools/bmgr.html">bmgr</a>
-      <li><a href="<?cs var:toroot ?>tools/dmtracedump.html">dmtracedump</a></li>
-      <li><a href="<?cs var:toroot ?>tools/draw9patch.html">Draw 9-Patch</a></li>
-      <li><a href="<?cs var:toroot ?>tools/emulator.html">Emulator</a></li>
-      <li><a href="<?cs var:toroot ?>tools/etc1tool.html">etc1tool</a></li>
-      <li><a href="<?cs var:toroot ?>tools/hierarchy-viewer.html">Hierarchy Viewer</a></li>
-      <li><a href="<?cs var:toroot ?>tools/hprof-conv.html">hprof-conv</a></li>
-      <li><a href="<?cs var:toroot ?>tools/layoutopt.html">layoutopt</a></li>
-      <li><a href="<?cs var:toroot ?>tools/logcat.html">logcat</a></li>
-      <li><a href="<?cs var:toroot ?>tools/mksdcard.html">mksdcard</a></li>
-      <li><a href="<?cs var:toroot ?>tools/monkey.html">monkey</a></li>
+      <li><a href="<?cs var:toroot ?>tools/help/adb.html">adb</a></li>
+      <li><a href="<?cs var:toroot ?>tools/help/adt.html">ADT</a></li>
+      <li><a href="<?cs var:toroot ?>tools/help/android.html">android</a></li>
+      <li><a href="<?cs var:toroot ?>tools/help/bmgr.html">bmgr</a>
+      <li><a href="<?cs var:toroot ?>tools/help/dmtracedump.html">dmtracedump</a></li>
+      <li><a href="<?cs var:toroot ?>tools/help/draw9patch.html">Draw 9-Patch</a></li>
+      <li><a href="<?cs var:toroot ?>tools/help/emulator.html">Emulator</a></li>
+      <li><a href="<?cs var:toroot ?>tools/help/etc1tool.html">etc1tool</a></li>
+      <li><a href="<?cs var:toroot ?>tools/help/hierarchy-viewer.html">Hierarchy Viewer</a></li>
+      <li><a href="<?cs var:toroot ?>tools/help/hprof-conv.html">hprof-conv</a></li>
+      <li><a href="<?cs var:toroot ?>tools/help/layoutopt.html">layoutopt</a></li>
+      <li><a href="<?cs var:toroot ?>tools/help/logcat.html">logcat</a></li>
+      <li><a href="<?cs var:toroot ?>tools/help/mksdcard.html">mksdcard</a></li>
+      <li><a href="<?cs var:toroot ?>tools/help/monkey.html">monkey</a></li>
       <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/monkeyrunner_concepts.html"><span class="en">monkeyrunner</span></a></div>
+        <div class="nav-section-header"><a href="<?cs var:toroot
+?>tools/help/monkeyrunner_concepts.html"><span class="en">monkeyrunner</span></a></div>
         <ul>
-          <li><a href="<?cs var:toroot ?>tools/MonkeyDevice.html"><span class="en">MonkeyDevice</span></a></li>
-          <li><a href="<?cs var:toroot ?>tools/MonkeyImage.html"><span class="en">MonkeyImage</span></a></li>
-          <li><a href="<?cs var:toroot ?>tools/MonkeyRunner.html"><span class="en">MonkeyRunner</span></a></li>
+          <li><a href="<?cs var:toroot ?>tools/help/MonkeyDevice.html"><span
+class="en">MonkeyDevice</span></a></li>
+          <li><a href="<?cs var:toroot ?>tools/help/MonkeyImage.html"><span
+class="en">MonkeyImage</span></a></li>
+          <li><a href="<?cs var:toroot ?>tools/help/MonkeyRunner.html"><span
+class="en">MonkeyRunner</span></a></li>
         </ul>
       </li>
-       <li><a href="<?cs var:toroot ?>tools/proguard.html">ProGuard</a></li>
-       <li><a href="<?cs var:toroot ?>tools/traceview.html">Traceview</a></li>
-       <li><a href="<?cs var:toroot ?>tools/zipalign.html">zipalign</a></li>
+       <li><a href="<?cs var:toroot ?>tools/help/proguard.html">ProGuard</a></li>
+       <li><a href="<?cs var:toroot ?>tools/help/traceview.html">Traceview</a></li>
+       <li><a href="<?cs var:toroot ?>tools/help/zipalign.html">zipalign</a></li>
     </ul>
   </li>
   
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot
-?>tools/other/index.html"><span class="en">Other Tools</span></a></div>
+?>tools/revisions/index.html"><span class="en">Revisions</span></a></div>
     <ul>
+      <li><a href="<?cs var:toroot ?>tools/sdk/tools-notes.html"><span
+class="en">Tools</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/sdk/eclipse-adt.html"><span class="en">ADT
 Plugin</span></a></li>
-      <li><a href="<?cs var:toroot ?>tools/sdk/support-package.html"><span class="en">Support
-Library</span></a></li>
       </li>
       <!--
       <li><a href="<?cs var:toroot ?>tools/sdk/addons.html"><span class="en">Add-ons</span></a></li>
       -->
-      <li><a href="<?cs var:toroot ?>tools/sdk/oem-usb.html"><span
-class="en">USB Drivers</span></a>
-      </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/sdk/ndk/index.html"><span
 class="en">NDK</span></a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>tools/sdk/ndk/overview.html">What is the NDK?</a></li>
         </ul>
+      </li>
+      <li><a href="<?cs var:toroot ?>tools/revisions/platforms.html"><span
+class="en">Platforms</span></a></li>
+    </ul>
+  </li>
+  
+  
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot
+?>tools/extras/index.html"><span class="en">Extras</span></a></div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>tools/sdk/support-package.html"><span class="en">Support
+Library</span></a></li>
+      <li><a href="<?cs var:toroot ?>tools/sdk/oem-usb.html"><span
+class="en">USB Drivers</span></a>
       </li>
     </ul>
   </li>

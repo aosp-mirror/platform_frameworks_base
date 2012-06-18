@@ -1,0 +1,45 @@
+page.title=Next Steps
+walkthru=1
+
+@jd:body
+
+
+<p>That's it! Your Android SDK is ready for action. Here are a few ways you can get started: </p>
+
+<p><strong>Start coding</strong></p>
+<ul>
+  <li>Follow the training class for <a
+href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a>.
+    <p>This class is an essential first step for new Android developers.</p>
+    <p>It gives you step by step instructions for building a simple app. You’ll learn how to
+create an Android project and run a debuggable version of the app. You'll also learn some
+fundamentals of Android app design, including how to build a simple user interface and handle user
+input.</p>
+</li>
+</ul>
+
+
+<p><strong>Read up on the API framework</strong></p>
+<ul>
+  <li>Start reading about fundamental framework topics in the collection of <a
+href="{@docRoot}guide/index.html">Guides</a>.</li>
+  <li>Browse the Android API specifications in the <a
+  href="{@docRoot}reference/packages.html">Reference</a>.</li>
+</ul>
+
+
+<p><strong>Explore the development tools</strong></p>
+<ul>
+  <li>Learn about the process for developing an app from end to end with the <a
+  href="{@docRoot}tools/index.html">Workflow</a> documentation.</li>
+  <li>Learn about debugging your apps with the <a
+href="{@docRoot}tools/debugging/index.html">Debugging</a> guides.</li>
+</ul>
+
+
+<p><strong>Explore some code</strong></p>
+
+<ul>
+  <li>Browse the sample apps downloaded from the Android SDK Manager. You'll find them in
+<code><em>&lt;sdk&gt;</em>/samples/<em>&lt;platform-version&gt;/</em></code>. </li>
+</ul>
