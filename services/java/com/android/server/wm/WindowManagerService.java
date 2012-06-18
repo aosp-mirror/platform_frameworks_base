@@ -507,9 +507,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     // State while inside of layoutAndPlaceSurfacesLocked().
     boolean mFocusMayChange;
-    
+
     Configuration mCurConfiguration = new Configuration();
-    
+
     // This is held as long as we have the screen frozen, to give us time to
     // perform a rotation animation when turning off shows the lock screen which
     // changes the orientation.
@@ -636,7 +636,17 @@ public class WindowManagerService extends IWindowManager.Stub
         private float mButtonBrightness = -1;
         private boolean mUpdateRotation = false;
     }
-    LayoutFields mInnerFields = new LayoutFields();
+    final LayoutFields mInnerFields = new LayoutFields();
+
+    static class AnimatorToLayoutParams {
+      int mBulkUpdateParams;
+      int mPendingLayoutChanges;
+      WindowState mWindowDetachedWallpaper;
+    }
+    final AnimatorToLayoutParams mAnimToLayout = new AnimatorToLayoutParams();
+
+    /** The lowest wallpaper target with a detached wallpaper animation on it. */
+    WindowState mWindowDetachedWallpaper = null;
 
     /** Only do a maximum of 6 repeated layouts. After that quit */
     private int mLayoutRepeatCount;
@@ -667,7 +677,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
     final AnimationRunnable mAnimationRunnable = new AnimationRunnable();
     boolean mAnimationScheduled;
-    
+
     final WindowAnimator mAnimator;
 
     final class DragInputEventReceiver extends InputEventReceiver {
@@ -1572,9 +1582,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.v(TAG, "List with no IM target:");
                     logWindowList("  ");
                 }
-                if (DN > 0) moveInputMethodDialogsLocked(-1);;
+                if (DN > 0) moveInputMethodDialogsLocked(-1);
             } else {
-                moveInputMethodDialogsLocked(-1);;
+                moveInputMethodDialogsLocked(-1);
             }
 
         }
@@ -1636,7 +1646,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 continue;
             }
             topCurW = null;
-            if (w != mAnimator.mWindowDetachedWallpaper && w.mAppToken != null) {
+            if (w != mWindowDetachedWallpaper && w.mAppToken != null) {
                 // If this window's app token is hidden and not animating,
                 // it is of no interest to us.
                 if (w.mAppToken.hidden && w.mAppToken.mAppAnimator.animation == null) {
@@ -1662,7 +1672,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     continue;
                 }
                 break;
-            } else if (w == mAnimator.mWindowDetachedWallpaper) {
+            } else if (w == mWindowDetachedWallpaper) {
                 windowDetachedI = i;
             }
         }
@@ -3104,12 +3114,11 @@ public class WindowManagerService extends IWindowManager.Stub
             a.setDetachWallpaper(true);
             a.setDuration(duration);
             return a;
-        } else {
-            // For normal animations, the exiting element just holds in place.
-            Animation a = new AlphaAnimation(1, 1);
-            a.setDuration(duration);
-            return a;
         }
+        // For normal animations, the exiting element just holds in place.
+        Animation a = new AlphaAnimation(1, 1);
+        a.setDuration(duration);
+        return a;
     }
 
     /**
@@ -6822,7 +6831,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int REPORT_HARD_KEYBOARD_STATUS_CHANGE = 22;
         public static final int BOOT_TIMEOUT = 23;
         public static final int WAITING_FOR_DRAWN_TIMEOUT = 24;
-        public static final int BULK_UPDATE_PARAMETERS = 25;
+        public static final int UPDATE_ANIM_PARAMETERS = 25;
         public static final int SHOW_STRICT_MODE_VIOLATION = 26;
         public static final int DO_ANIMATION_CALLBACK = 27;
 
@@ -7249,44 +7258,49 @@ public class WindowManagerService extends IWindowManager.Stub
                     break;
                 }
 
-                case BULK_UPDATE_PARAMETERS: {
+                case UPDATE_ANIM_PARAMETERS: {
                     // Used to send multiple changes from the animation side to the layout side.
                     synchronized (mWindowMap) {
-                        boolean doRequest = false;
-                        // TODO(cmautner): As the number of bits grows, use masks of bit groups to
-                        //  eliminate unnecessary tests.
-                        if ((msg.arg1 & LayoutFields.SET_UPDATE_ROTATION) != 0) {
-                            mInnerFields.mUpdateRotation = true;
-                            doRequest = true;
-                        }
-                        if ((msg.arg1 & LayoutFields.SET_WALLPAPER_MAY_CHANGE) != 0) {
-                            mInnerFields.mWallpaperMayChange = true;
-                            doRequest = true;
-                        }
-                        if ((msg.arg1 & LayoutFields.SET_FORCE_HIDING_CHANGED) != 0) {
-                            mInnerFields.mWallpaperForceHidingChanged = true;
-                            doRequest = true;
-                        }
-                        if ((msg.arg1 & LayoutFields.CLEAR_ORIENTATION_CHANGE_COMPLETE) != 0) {
-                            mInnerFields.mOrientationChangeComplete = false;
-                        } else {
-                            mInnerFields.mOrientationChangeComplete = true;
-                            if (mWindowsFreezingScreen) {
+                        synchronized (mAnimToLayout) {
+                            boolean doRequest = false;
+                            final int bulkUpdateParams = mAnimToLayout.mBulkUpdateParams;
+                            // TODO(cmautner): As the number of bits grows, use masks of bit groups to
+                            //  eliminate unnecessary tests.
+                            if ((bulkUpdateParams & LayoutFields.SET_UPDATE_ROTATION) != 0) {
+                                mInnerFields.mUpdateRotation = true;
                                 doRequest = true;
                             }
-                        }
-                        if ((msg.arg1 & LayoutFields.SET_TURN_ON_SCREEN) != 0) {
-                            mTurnOnScreen = true;
-                        }
+                            if ((bulkUpdateParams & LayoutFields.SET_WALLPAPER_MAY_CHANGE) != 0) {
+                                mInnerFields.mWallpaperMayChange = true;
+                                doRequest = true;
+                            }
+                            if ((bulkUpdateParams & LayoutFields.SET_FORCE_HIDING_CHANGED) != 0) {
+                                mInnerFields.mWallpaperForceHidingChanged = true;
+                                doRequest = true;
+                            }
+                            if ((bulkUpdateParams & LayoutFields.CLEAR_ORIENTATION_CHANGE_COMPLETE) != 0) {
+                                mInnerFields.mOrientationChangeComplete = false;
+                            } else {
+                                mInnerFields.mOrientationChangeComplete = true;
+                                if (mWindowsFreezingScreen) {
+                                    doRequest = true;
+                                }
+                            }
+                            if ((bulkUpdateParams & LayoutFields.SET_TURN_ON_SCREEN) != 0) {
+                                mTurnOnScreen = true;
+                            }
 
-                        mPendingLayoutChanges |= msg.arg2;
-                        if (mPendingLayoutChanges != 0) {
-                            doRequest = true;
-                        }
+                            mPendingLayoutChanges |= mAnimToLayout.mPendingLayoutChanges;
+                            if (mPendingLayoutChanges != 0) {
+                                doRequest = true;
+                            }
 
-                        if (doRequest) {
-                            mH.sendEmptyMessage(CLEAR_PENDING_ACTIONS);
-                            performLayoutAndPlaceSurfacesLocked();
+                            mWindowDetachedWallpaper = mAnimToLayout.mWindowDetachedWallpaper;
+
+                            if (doRequest) {
+                                mH.sendEmptyMessage(CLEAR_PENDING_ACTIONS);
+                                performLayoutAndPlaceSurfacesLocked();
+                            }
                         }
                     }
                     break;
@@ -9957,8 +9971,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void bulkSetParameters(final int bulkUpdateParams, int pendingLayoutChanges) {
-        mH.sendMessage(mH.obtainMessage(H.BULK_UPDATE_PARAMETERS, bulkUpdateParams,
-                pendingLayoutChanges));
+    void setAnimatorParameters() {
+        mH.sendMessage(mH.obtainMessage(H.UPDATE_ANIM_PARAMETERS));
     }
 }
