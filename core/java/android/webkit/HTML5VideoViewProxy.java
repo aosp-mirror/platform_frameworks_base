@@ -147,6 +147,7 @@ class HTML5VideoViewProxy extends Handler
                 // Save the inline video info and inherit it in the full screen
                 int savePosition = 0;
                 boolean canSkipPrepare = false;
+                boolean forceStart = false;
                 if (mHTML5VideoView != null) {
                     // We don't allow enter full screen mode while the previous
                     // full screen video hasn't finished yet.
@@ -154,11 +155,11 @@ class HTML5VideoViewProxy extends Handler
                         Log.w(LOGTAG, "Try to reenter the full screen mode");
                         return;
                     }
+                    int playerState = mHTML5VideoView.getCurrentState();
                     // If we are playing the same video, then it is better to
                     // save the current position.
                     if (layerId == mHTML5VideoView.getVideoLayerId()) {
                         savePosition = mHTML5VideoView.getCurrentPosition();
-                        int playerState = mHTML5VideoView.getCurrentState();
                         canSkipPrepare = (playerState == HTML5VideoView.STATE_PREPARING
                                 || playerState == HTML5VideoView.STATE_PREPARED
                                 || playerState == HTML5VideoView.STATE_PLAYING)
@@ -166,10 +167,14 @@ class HTML5VideoViewProxy extends Handler
                     }
                     if (!canSkipPrepare) {
                         mHTML5VideoView.reset();
+                    } else {
+                        forceStart = playerState == HTML5VideoView.STATE_PREPARING
+                                || playerState == HTML5VideoView.STATE_PLAYING;
                     }
                 }
                 mHTML5VideoView = new HTML5VideoFullScreen(proxy.getContext(),
                         layerId, savePosition, canSkipPrepare);
+                mHTML5VideoView.setStartWhenPrepared(forceStart);
                 mCurrentProxy = proxy;
                 mHTML5VideoView.setVideoURI(url, mCurrentProxy);
                 mHTML5VideoView.enterFullScreenVideoState(layerId, proxy, webView);
