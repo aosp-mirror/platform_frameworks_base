@@ -1373,6 +1373,7 @@ public abstract class Context {
      *      description (action, category, etc) to match an
      *      {@link IntentFilter} published by a service.
      * @param conn Receives information as the service is started and stopped.
+     *      This must be a valid ServiceConnection object; it must not be null.
      * @param flags Operation options for the binding.  May be 0,
      *          {@link #BIND_AUTO_CREATE}, {@link #BIND_DEBUG_UNBIND},
      *          {@link #BIND_NOT_FOREGROUND}, {@link #BIND_ABOVE_CLIENT},
@@ -1408,7 +1409,7 @@ public abstract class Context {
      * stop at any time.
      *
      * @param conn The connection interface previously supplied to
-     *             bindService().
+     *             bindService().  This parameter must not be null.
      *
      * @see #bindService
      */

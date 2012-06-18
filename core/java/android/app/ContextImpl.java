@@ -1181,6 +1181,9 @@ class ContextImpl extends Context {
     @Override
     public boolean bindService(Intent service, ServiceConnection conn, int flags, int userId) {
         IServiceConnection sd;
+        if (conn == null) {
+            throw new IllegalArgumentException("connection is null");
+        }
         if (mPackageInfo != null) {
             sd = mPackageInfo.getServiceDispatcher(conn, getOuterContext(),
                     mMainThread.getHandler(), flags);
@@ -1211,6 +1214,9 @@ class ContextImpl extends Context {
 
     @Override
     public void unbindService(ServiceConnection conn) {
+        if (conn == null) {
+            throw new IllegalArgumentException("connection is null");
+        }
         if (mPackageInfo != null) {
             IServiceConnection sd = mPackageInfo.forgetServiceDispatcher(
                     getOuterContext(), conn);
