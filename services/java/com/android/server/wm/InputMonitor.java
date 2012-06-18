@@ -94,6 +94,7 @@ final class InputMonitor implements InputManagerService.Callbacks {
                     Slog.i(WindowManagerService.TAG, "Input event dispatching timed out sending to "
                             + windowState.mAttrs.getTitle());
                     appWindowToken = windowState.mAppToken;
+                    mService.saveANRStateLocked(appWindowToken, windowState);
                 }
             }
         }
@@ -104,6 +105,7 @@ final class InputMonitor implements InputManagerService.Callbacks {
                 Slog.i(WindowManagerService.TAG,
                         "Input event dispatching timed out sending to application "
                                 + appWindowToken.stringName);
+                mService.saveANRStateLocked(appWindowToken, null);
             }
         }
 

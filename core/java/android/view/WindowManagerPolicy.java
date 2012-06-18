@@ -26,7 +26,6 @@ import android.os.LocalPowerManager;
 import android.os.Looper;
 import android.view.animation.Animation;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -1122,10 +1121,9 @@ public interface WindowManagerPolicy {
      * Print the WindowManagerPolicy's state into the given stream.
      *
      * @param prefix Text to print at the front of each line.
-     * @param fd The raw file descriptor that the dump is being sent to.
      * @param writer The PrintWriter to which you should dump your state.  This will be
      * closed for you after you return.
      * @param args additional arguments to the dump request.
      */
-    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args);
+    public void dump(String prefix, PrintWriter writer, String[] args);
 }
