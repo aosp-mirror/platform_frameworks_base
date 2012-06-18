@@ -21,10 +21,13 @@ import com.android.internal.app.MediaRouteChooserDialogFragment;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.media.MediaRouter;
+import android.media.MediaRouter.RouteInfo;
 import android.util.Log;
 import android.view.ActionProvider;
 import android.view.MenuItem;
 import android.view.View;
+
+import java.lang.ref.WeakReference;
 
 public class MediaRouteActionProvider extends ActionProvider {
     private static final String TAG = "MediaRouteActionProvider";
@@ -35,11 +38,13 @@ public class MediaRouteActionProvider extends ActionProvider {
     private MediaRouteButton mView;
     private int mRouteTypes;
     private View.OnClickListener mExtendedSettingsListener;
+    private RouterCallback mCallback;
 
     public MediaRouteActionProvider(Context context) {
         super(context);
         mContext = context;
         mRouter = (MediaRouter) context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
+        mCallback = new RouterCallback(this);
 
         // Start with live audio by default.
         // TODO Update this when new route types are added; segment by API level
@@ -48,7 +53,14 @@ public class MediaRouteActionProvider extends ActionProvider {
     }
 
     public void setRouteTypes(int types) {
+        if (mRouteTypes == types) return;
+        if (mRouteTypes != 0) {
+            mRouter.removeCallback(mCallback);
+        }
         mRouteTypes = types;
+        if (types != 0) {
+            mRouter.addCallback(types, mCallback);
+        }
         if (mView != null) {
             mView.setRouteTypes(mRouteTypes);
         }
@@ -68,7 +80,6 @@ public class MediaRouteActionProvider extends ActionProvider {
         }
         mMenuItem = item;
         mView = new MediaRouteButton(mContext);
-        mMenuItem.setVisible(mRouter.getRouteCount() > 1);
         mView.setRouteTypes(mRouteTypes);
         mView.setExtendedSettingsClickListener(mExtendedSettingsListener);
         return mView;
@@ -122,5 +133,35 @@ public class MediaRouteActionProvider extends ActionProvider {
     @Override
     public boolean isVisible() {
         return mRouter.getRouteCount() > 1;
+    }
+
+    private static class RouterCallback extends MediaRouter.SimpleCallback {
+        private WeakReference<MediaRouteActionProvider> mAp;
+
+        RouterCallback(MediaRouteActionProvider ap) {
+            mAp = new WeakReference<MediaRouteActionProvider>(ap);
+        }
+
+        @Override
+        public void onRouteAdded(MediaRouter router, RouteInfo info) {
+            final MediaRouteActionProvider ap = mAp.get();
+            if (ap == null) {
+                router.removeCallback(this);
+                return;
+            }
+
+            ap.refreshVisibility();
+        }
+
+        @Override
+        public void onRouteRemoved(MediaRouter router, RouteInfo info) {
+            final MediaRouteActionProvider ap = mAp.get();
+            if (ap == null) {
+                router.removeCallback(this);
+                return;
+            }
+
+            ap.refreshVisibility();
+        }
     }
 }

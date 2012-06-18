@@ -17,6 +17,7 @@
 package android.view;
 
 import android.content.Context;
+import android.util.Log;
 
 /**
  * An ActionProvider defines rich menu interaction in a single component.
@@ -55,7 +56,9 @@ import android.content.Context;
  * @see MenuItem#getActionProvider()
  */
 public abstract class ActionProvider {
+    private static final String TAG = "ActionProvider";
     private SubUiVisibilityListener mSubUiVisibilityListener;
+    private VisibilityListener mVisibilityListener;
 
     /**
      * Creates a new instance. ActionProvider classes should always implement a
@@ -119,6 +122,18 @@ public abstract class ActionProvider {
      */
     public boolean isVisible() {
         return true;
+    }
+
+    /**
+     * If this ActionProvider is associated with an item in a menu,
+     * refresh the visibility of the item based on {@link #overridesItemVisibility()} and
+     * {@link #isVisible()}. If {@link #overridesItemVisibility()} returns false, this call
+     * will have no effect.
+     */
+    public void refreshVisibility() {
+        if (mVisibilityListener != null && overridesItemVisibility()) {
+            mVisibilityListener.onActionProviderVisibilityChanged(isVisible());
+        }
     }
 
     /**
@@ -207,9 +222,34 @@ public abstract class ActionProvider {
     }
 
     /**
+     * Set a listener to be notified when this ActionProvider's overridden visibility changes.
+     * This should only be used by MenuItem implementations.
+     *
+     * @param listener listener to set
+     */
+    public void setVisibilityListener(VisibilityListener listener) {
+        if (mVisibilityListener != null) {
+            Log.w(TAG, "setVisibilityListener: Setting a new ActionProvider.VisibilityListener " +
+                    "when one is already set. Are you reusing this " + getClass().getSimpleName() +
+                    " instance while it is still in use somewhere else?");
+        }
+        mVisibilityListener = listener;
+    }
+
+    /**
      * @hide Internal use only
      */
     public interface SubUiVisibilityListener {
         public void onSubUiVisibilityChanged(boolean isVisible);
+    }
+
+    /**
+     * Listens to changes in visibility as reported by {@link ActionProvider#refreshVisibility()}.
+     *
+     * @see ActionProvider#overridesItemVisibility()
+     * @see ActionProvider#isVisible()
+     */
+    public interface VisibilityListener {
+        public void onActionProviderVisibilityChanged(boolean isVisible);
     }
 }
