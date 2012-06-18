@@ -12,7 +12,7 @@ parent.link=../../browser.html?tag=tutorial
 to get you started quickly with common Android layouts and widgets.</p>
 
 <p>A certain amount of knowledge is assumed for these tutorials. Before you start,
-you should have completed the <a href="{@docRoot}resources/tutorials/hello-world.html">Hello,
+you should have completed the <a href="{@docRoot}training/basics/firstapp/index.html">Hello,
 World</a> tutorial&mdash;it will teach you several things about basic
 Android development. More specifically, you should know:</p>
 <ul>

@@ -46,7 +46,8 @@ parent.link=index.html
 
         <li><a href="{@docRoot}resources/samples/RenderScript/FountainFbo/index.html">FountainFbo</a></li>        
 
-        <li><a href="{@docRoot}resources/samples/RenderScript/HelloWorld/index.html">Hello World</a></li>
+        <li><a href="{@docRoot}resources/samples/RenderScript/HelloWorld/index.html">Hello
+World</a></li>
 
         <li><a
 href="{@docRoot}resources/samples/RenderScript/MiscSamples/index.html">Misc Samples</a></li>

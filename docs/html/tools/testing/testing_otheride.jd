@@ -143,9 +143,8 @@ android create test-project -m &lt;main_path&gt; -n &lt;project_name&gt; -p &lt;
     are testing and control it with instrumentation.
 </p>
 <p>
-    For example, suppose you create the <a href="{@docRoot}resources/tutorials/hello-world.html">
-    Hello, World</a> tutorial application in the directory <code>~/source/HelloAndroid</code>.
-    In the tutorial, this application uses the package name <code>com.example.helloandroid</code>
+    For example, suppose you create a project in the directory <code>~/source/HelloAndroid</code>,
+with the package name <code>com.example.helloandroid</code>,
     and the activity name <code>HelloAndroid</code>. You can to create the test for this in
     <code>~/source/HelloAndroidTest</code>. To do so, you enter:
 </p>
@@ -181,7 +180,7 @@ $ android create test-project -m ../HelloAndroid -n HelloAndroidTest -p HelloAnd
                 that the tests in HelloAndroidTest should be run against the application with the
                 <em>Android</em> package name <code>com.example.helloandroid</code>. This is the
                 package name of the <a
-                href="{@docRoot}resources/tutorials/hello-world.html">Hello, World</a>
+                href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a>
                 tutorial application.
             </li>
             <li>

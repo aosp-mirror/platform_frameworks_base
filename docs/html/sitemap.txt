@@ -209,7 +209,7 @@ http://developer.android.com/resources/articles/wikinotes-linkify.html
 http://developer.android.com/resources/articles/wikinotes-intents.html
 http://developer.android.com/resources/articles/window-bg-speed.html
 http://developer.android.com/resources/articles/zipalign.html
-http://developer.android.com/resources/tutorials/hello-world.html
+http://developer.android.com/training/basics/firstapp/index.html
 http://developer.android.com/resources/tutorials/views/index.html
 http://developer.android.com/resources/tutorials/localization/index.html
 http://developer.android.com/resources/tutorials/testing/helloandroid_test.html

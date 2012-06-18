@@ -61,7 +61,7 @@ Version</a>. If you would prefer to use OpenGL ES 2.0, see the <a
 href="{@docRoot}resources/tutorials/opengl/opengl-es20.html">OpenGL ES 2.0 tutorial</a>.</p>
 
 <p>Before you start, you should understand how to create a basic Android application. If you do not
-know how to create an app, follow the <a href="{@docRoot}resources/tutorials/hello-world.html">Hello
+know how to create an app, follow the <a href="{@docRoot}training/basics/firstapp/index.html">Hello
 World Tutorial</a> to familiarize yourself with the process.</p>
 
 <h2 id="creating">Create an Activity with GLSurfaceView</h2>

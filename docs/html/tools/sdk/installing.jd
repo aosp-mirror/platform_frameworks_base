@@ -236,7 +236,7 @@ about developing on a real device.</li>
 for each Android development platform. If you are just getting started with
 Android development, make sure to download the samples to your SDK. <!--The download
 includes not only a set of very useful sample apps, but also the source for <a
-href="{@docRoot}resources/tutorials/hello-world.html">Hello World</a> and other
+href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a> and other
 tutorials. --></li>
 
 <li><strong>Documentation</strong> &mdash; Contains a local copy of the latest
@@ -477,7 +477,7 @@ begin developing applications. Here are a few ways you can get started: </p>
 <p><strong>Set up the Hello World application</strong></p>
 <ul>
   <li>If you have just installed the SDK for the first time, go to the <a
-  href="{@docRoot}resources/tutorials/hello-world.html">Hello
+  href="{@docRoot}training/basics/firstapp/index.html">Hello
   World tutorial</a>. The tutorial takes you step-by-step through the process
   of setting up your first Android project, including setting up an Android
   Virtual Device (AVD) on which to run the application.

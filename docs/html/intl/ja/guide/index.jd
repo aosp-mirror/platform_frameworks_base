@@ -41,7 +41,7 @@ Android 向けプログラム開発の最初のステップは、SDK（ソフト
 </p>
 
 <p>
-SDK のダウンロード後は、まずはじめにデベロッパー ガイドを参照してください。コードを実際に見てみることから始めたい場合は、簡単な <a href="{@docRoot}resources/tutorials/hello-world.html">Hello World</a> チュートリアルを参照してください。Android プラットフォーム向けに作成された標準的な「Hello, World」アプリケーションについて説明しています。<a href="{@docRoot}guide/components/fundamentals.html">アプリケーションの基礎</a>ドキュメントは、アプリケーション フレームワークを理解したいユーザーに最適な出発点となります。
+SDK のダウンロード後は、まずはじめにデベロッパー ガイドを参照してください。コードを実際に見てみることから始めたい場合は、簡単な <a href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a> チュートリアルを参照してください。Android プラットフォーム向けに作成された標準的な「Hello, World」アプリケーションについて説明しています。<a href="{@docRoot}guide/components/fundamentals.html">アプリケーションの基礎</a>ドキュメントは、アプリケーション フレームワークを理解したいユーザーに最適な出発点となります。
 </p>
 
 

@@ -23,7 +23,7 @@ page.title=Welcome
 <div id="qv">
   <h2>Get Started</h2>
   <ul>
-    <li>Create a <a href="{@docRoot}resources/tutorials/hello-world.html">Hello World</a>
+    <li>Create a <a href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a>
 application</li>
     <li>Read <a href="{@docRoot}resources/browser.html?tag=sample">Sample Code</a>,
 especially <a href="{@docRoot}resources/samples/ApiDemos/index.html">API Demos</a></li>
