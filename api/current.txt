@@ -11582,6 +11582,7 @@ package android.media {
   }
 
   public static class MediaRouter.UserRouteInfo extends android.media.MediaRouter.RouteInfo {
+    method public android.media.RemoteControlClient getRemoteControlClient();
     method public void setIconDrawable(android.graphics.drawable.Drawable);
     method public void setIconResource(int);
     method public void setName(java.lang.CharSequence);
