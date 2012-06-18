@@ -19,7 +19,9 @@ package android.media;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
+import android.media.AudioRoutesInfo;
 import android.media.IAudioFocusDispatcher;
+import android.media.IAudioRoutesObserver;
 import android.media.IRemoteControlClient;
 import android.media.IRemoteControlDisplay;
 import android.media.IRingtonePlayer;
@@ -137,4 +139,6 @@ interface IAudioService {
 
     void setWiredDeviceConnectionState(int device, int state, String name);
     int setBluetoothA2dpDeviceConnectionState(in BluetoothDevice device, int state);
+
+    AudioRoutesInfo startWatchingRoutes(in IAudioRoutesObserver observer);
 }

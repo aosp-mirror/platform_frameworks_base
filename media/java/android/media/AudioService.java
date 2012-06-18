@@ -53,6 +53,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -62,6 +63,7 @@ import android.provider.Settings.System;
 import android.speech.RecognizerIntent;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.VolumePanel;
@@ -135,10 +137,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private static final int MSG_RCDISPLAY_UPDATE = 13;
     private static final int MSG_SET_ALL_VOLUMES = 14;
     private static final int MSG_PERSIST_MASTER_VOLUME_MUTE = 15;
+    private static final int MSG_REPORT_NEW_ROUTES = 16;
     // messages handled under wakelock, can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
-    private static final int MSG_SET_WIRED_DEVICE_CONNECTION_STATE = 16;
-    private static final int MSG_SET_A2DP_CONNECTION_STATE = 17;
+    private static final int MSG_SET_WIRED_DEVICE_CONNECTION_STATE = 17;
+    private static final int MSG_SET_A2DP_CONNECTION_STATE = 18;
 
 
     // flags for MSG_PERSIST_VOLUME indicating if current and/or last audible volume should be
@@ -396,6 +399,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     // Request to override default use of A2DP for media.
     private boolean mBluetoothA2dpEnabled;
     private final Object mBluetoothA2dpEnabledLock = new Object();
+
+    // Monitoring of audio routes.  Protected by mCurAudioRoutes.
+    final AudioRoutesInfo mCurAudioRoutes = new AudioRoutesInfo();
+    final RemoteCallbackList<IAudioRoutesObserver> mRoutesObservers
+            = new RemoteCallbackList<IAudioRoutesObserver>();
 
     ///////////////////////////////////////////////////////////////////////////
     // Construction
@@ -3011,6 +3019,26 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     onSetA2dpConnectionState((BluetoothDevice)msg.obj, msg.arg1);
                     mMediaEventWakeLock.release();
                     break;
+
+                case MSG_REPORT_NEW_ROUTES: {
+                    int N = mRoutesObservers.beginBroadcast();
+                    if (N > 0) {
+                        AudioRoutesInfo routes;
+                        synchronized (mCurAudioRoutes) {
+                            routes = new AudioRoutesInfo(mCurAudioRoutes);
+                        }
+                        while (N > 0) {
+                            N--;
+                            IAudioRoutesObserver obs = mRoutesObservers.getBroadcastItem(N);
+                            try {
+                                obs.dispatchAudioRoutesChanged(routes);
+                            } catch (RemoteException e) {
+                            }
+                        }
+                    }
+                    mRoutesObservers.finishBroadcast();
+                    break;
+                }
             }
         }
     }
@@ -3127,6 +3155,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 } else {
                     makeA2dpDeviceUnavailableNow(address);
                 }
+                synchronized (mCurAudioRoutes) {
+                    if (mCurAudioRoutes.mBluetoothName != null) {
+                        mCurAudioRoutes.mBluetoothName = null;
+                        sendMsg(mAudioHandler, MSG_REPORT_NEW_ROUTES,
+                                SENDMSG_NOOP, 0, 0, null, 0);
+                    }
+                }
             } else if (!isConnected && state == BluetoothProfile.STATE_CONNECTED) {
                 if (btDevice.isBluetoothDock()) {
                     // this could be a reconnection after a transient disconnection
@@ -3141,6 +3176,14 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     }
                 }
                 makeA2dpDeviceAvailable(address);
+                synchronized (mCurAudioRoutes) {
+                    String name = btDevice.getAliasName();
+                    if (!TextUtils.equals(mCurAudioRoutes.mBluetoothName, name)) {
+                        mCurAudioRoutes.mBluetoothName = name;
+                        sendMsg(mAudioHandler, MSG_REPORT_NEW_ROUTES,
+                                SENDMSG_NOOP, 0, 0, null, 0);
+                    }
+                }
             }
         }
     }
@@ -3204,18 +3247,41 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         intent.putExtra("name", name);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
 
+        int connType = 0;
+
         if (device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) {
+            connType = AudioRoutesInfo.MAIN_HEADSET;
             intent.setAction(Intent.ACTION_HEADSET_PLUG);
             intent.putExtra("microphone", 1);
         } else if (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE) {
+            connType = AudioRoutesInfo.MAIN_HEADPHONES;
             intent.setAction(Intent.ACTION_HEADSET_PLUG);
             intent.putExtra("microphone", 0);
         } else if (device == AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET) {
+            connType = AudioRoutesInfo.MAIN_DOCK_SPEAKERS;
             intent.setAction(Intent.ACTION_ANALOG_AUDIO_DOCK_PLUG);
         } else if (device == AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET) {
+            connType = AudioRoutesInfo.MAIN_DOCK_SPEAKERS;
             intent.setAction(Intent.ACTION_DIGITAL_AUDIO_DOCK_PLUG);
         } else if (device == AudioSystem.DEVICE_OUT_AUX_DIGITAL) {
+            connType = AudioRoutesInfo.MAIN_HDMI;
             intent.setAction(Intent.ACTION_HDMI_AUDIO_PLUG);
+        }
+
+        synchronized (mCurAudioRoutes) {
+            if (connType != 0) {
+                int newConn = mCurAudioRoutes.mMainType;
+                if (state != 0) {
+                    newConn |= connType;
+                } else {
+                    newConn &= ~connType;
+                }
+                if (newConn != mCurAudioRoutes.mMainType) {
+                    mCurAudioRoutes.mMainType = newConn;
+                    sendMsg(mAudioHandler, MSG_REPORT_NEW_ROUTES,
+                            SENDMSG_NOOP, 0, 0, null, 0);
+                }
+            }
         }
 
         ActivityManagerNative.broadcastStickyIntent(intent, null);
@@ -4796,6 +4862,15 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     }
 
     @Override
+    public AudioRoutesInfo startWatchingRoutes(IAudioRoutesObserver observer) {
+        synchronized (mCurAudioRoutes) {
+            AudioRoutesInfo routes = new AudioRoutesInfo(mCurAudioRoutes);
+            mRoutesObservers.register(observer);
+            return routes;
+        }
+    }
+
+    @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
 
@@ -4803,5 +4878,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         dumpFocusStack(pw);
         dumpRCStack(pw);
         dumpStreamStates(pw);
+        pw.println("\nAudio routes:");
+        pw.print("  mMainType=0x"); pw.println(Integer.toHexString(mCurAudioRoutes.mMainType));
+        pw.print("  mBluetoothName="); pw.println(mCurAudioRoutes.mBluetoothName);
     }
 }
