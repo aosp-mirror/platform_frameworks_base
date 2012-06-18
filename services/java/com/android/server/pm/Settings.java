@@ -1174,13 +1174,7 @@ final class Settings {
                 writeDisabledSysPackageLPr(serializer, pkg);
             }
 
-            serializer.startTag(null, "preferred-activities");
-            for (final PreferredActivity pa : mPreferredActivities.filterSet()) {
-                serializer.startTag(null, TAG_ITEM);
-                pa.writeToXml(serializer);
-                serializer.endTag(null, TAG_ITEM);
-            }
-            serializer.endTag(null, "preferred-activities");
+            writePreferredActivitiesLPr(serializer);
 
             for (final SharedUserSetting usr : mSharedUsers.values()) {
                 serializer.startTag(null, "shared-user");
@@ -1304,6 +1298,17 @@ final class Settings {
             }
         }
         //Debug.stopMethodTracing();
+    }
+
+    void writePreferredActivitiesLPr(XmlSerializer serializer)
+            throws IllegalArgumentException, IllegalStateException, IOException {
+        serializer.startTag(null, "preferred-activities");
+        for (final PreferredActivity pa : mPreferredActivities.filterSet()) {
+            serializer.startTag(null, TAG_ITEM);
+            pa.writeToXml(serializer);
+            serializer.endTag(null, TAG_ITEM);
+        }
+        serializer.endTag(null, "preferred-activities");
     }
 
     void writeDisabledSysPackageLPr(XmlSerializer serializer, final PackageSetting pkg)
@@ -1477,6 +1482,7 @@ final class Settings {
                     mReadMessages.append("No settings file found\n");
                     PackageManagerService.reportSettingsProblem(Log.INFO,
                             "No settings file; creating initial state");
+                    readDefaultPreferredAppsLPw();
                     return false;
                 }
                 str = new FileInputStream(mSettingsFilename);
@@ -1639,6 +1645,65 @@ final class Settings {
                 + mSharedUsers.size() + " shared uids\n");
 
         return true;
+    }
+
+    private void readDefaultPreferredAppsLPw() {
+        // Read preferred apps from .../etc/preferred-apps directory.
+        File preferredDir = new File(Environment.getRootDirectory(), "etc/preferred-apps");
+        if (!preferredDir.exists() || !preferredDir.isDirectory()) {
+            return;
+        }
+        if (!preferredDir.canRead()) {
+            Slog.w(TAG, "Directory " + preferredDir + " cannot be read");
+            return;
+        }
+
+        // Iterate over the files in the directory and scan .xml files
+        for (File f : preferredDir.listFiles()) {
+            if (!f.getPath().endsWith(".xml")) {
+                Slog.i(TAG, "Non-xml file " + f + " in " + preferredDir + " directory, ignoring");
+                continue;
+            }
+            if (!f.canRead()) {
+                Slog.w(TAG, "Preferred apps file " + f + " cannot be read");
+                continue;
+            }
+
+            FileInputStream str = null;
+            try {
+                str = new FileInputStream(f);
+                XmlPullParser parser = Xml.newPullParser();
+                parser.setInput(str, null);
+
+                int type;
+                while ((type = parser.next()) != XmlPullParser.START_TAG
+                        && type != XmlPullParser.END_DOCUMENT) {
+                    ;
+                }
+
+                if (type != XmlPullParser.START_TAG) {
+                    Slog.w(TAG, "Preferred apps file " + f + " does not have start tag");
+                    continue;
+                }
+                if (!"preferred-activities".equals(parser.getName())) {
+                    Slog.w(TAG, "Preferred apps file " + f
+                            + " does not start with 'preferred-activities'");
+                    continue;
+                }
+                readPreferredActivitiesLPw(parser);
+            } catch (XmlPullParserException e) {
+                Slog.w(TAG, "Error reading apps file " + f, e);
+            } catch (IOException e) {
+                Slog.w(TAG, "Error reading apps file " + f, e);
+            } finally {
+                if (str != null) {
+                    try {
+                        str.close();
+                    } catch (IOException e) {
+                    }
+                }
+            }
+        }
     }
 
     private int readInt(XmlPullParser parser, String ns, String name, int defValue) {
