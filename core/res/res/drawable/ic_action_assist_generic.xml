@@ -19,18 +19,18 @@
         android:state_enabled="true"
         android:state_active="false"
         android:state_focused="false"
-        android:drawable="@drawable/ic_lockscreen_google_normal" />
+        android:drawable="@drawable/ic_action_assist_generic_normal" />
 
     <item
         android:state_enabled="true"
         android:state_active="true"
         android:state_focused="false"
-        android:drawable="@drawable/ic_lockscreen_google_activated" />
+        android:drawable="@drawable/ic_action_assist_generic_activated" />
 
     <item
         android:state_enabled="true"
         android:state_active="false"
         android:state_focused="true"
-        android:drawable="@drawable/ic_lockscreen_google_focused" />
+        android:drawable="@drawable/ic_action_assist_generic_activated" />
 
 </selector>
