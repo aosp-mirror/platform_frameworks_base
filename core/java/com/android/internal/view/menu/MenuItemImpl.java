@@ -589,9 +589,17 @@ public final class MenuItemImpl implements MenuItem {
     }
 
     public MenuItem setActionProvider(ActionProvider actionProvider) {
+        if (mActionProvider != null) {
+            mActionProvider.setVisibilityListener(null);
+        }
         mActionView = null;
         mActionProvider = actionProvider;
         mMenu.onItemsChanged(true); // Measurement can be changed
+        mActionProvider.setVisibilityListener(new ActionProvider.VisibilityListener() {
+            @Override public void onActionProviderVisibilityChanged(boolean isVisible) {
+                mMenu.onItemVisibleChanged(MenuItemImpl.this);
+            }
+        });
         return this;
     }
 
