@@ -29,6 +29,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * MediaRouter allows applications to control the routing of media channels
@@ -48,7 +49,8 @@ public class MediaRouter {
         final Resources mResources;
         final IAudioService mAudioService;
         final Handler mHandler;
-        final ArrayList<CallbackInfo> mCallbacks = new ArrayList<CallbackInfo>();
+        final CopyOnWriteArrayList<CallbackInfo> mCallbacks =
+                new CopyOnWriteArrayList<CallbackInfo>();
 
         final ArrayList<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
         final ArrayList<RouteCategory> mCategories = new ArrayList<RouteCategory>();
@@ -497,9 +499,7 @@ public class MediaRouter {
     }
 
     static void dispatchRouteSelected(int type, RouteInfo info) {
-        final int count = sStatic.mCallbacks.size();
-        for (int i = 0; i < count; i++) {
-            final CallbackInfo cbi = sStatic.mCallbacks.get(i);
+        for (CallbackInfo cbi : sStatic.mCallbacks) {
             if ((cbi.type & type) != 0) {
                 cbi.cb.onRouteSelected(cbi.router, type, info);
             }
@@ -507,9 +507,7 @@ public class MediaRouter {
     }
 
     static void dispatchRouteUnselected(int type, RouteInfo info) {
-        final int count = sStatic.mCallbacks.size();
-        for (int i = 0; i < count; i++) {
-            final CallbackInfo cbi = sStatic.mCallbacks.get(i);
+        for (CallbackInfo cbi : sStatic.mCallbacks) {
             if ((cbi.type & type) != 0) {
                 cbi.cb.onRouteUnselected(cbi.router, type, info);
             }
@@ -517,9 +515,7 @@ public class MediaRouter {
     }
 
     static void dispatchRouteChanged(RouteInfo info) {
-        final int count = sStatic.mCallbacks.size();
-        for (int i = 0; i < count; i++) {
-            final CallbackInfo cbi = sStatic.mCallbacks.get(i);
+        for (CallbackInfo cbi : sStatic.mCallbacks) {
             if ((cbi.type & info.mSupportedTypes) != 0) {
                 cbi.cb.onRouteChanged(cbi.router, info);
             }
@@ -527,9 +523,7 @@ public class MediaRouter {
     }
 
     static void dispatchRouteAdded(RouteInfo info) {
-        final int count = sStatic.mCallbacks.size();
-        for (int i = 0; i < count; i++) {
-            final CallbackInfo cbi = sStatic.mCallbacks.get(i);
+        for (CallbackInfo cbi : sStatic.mCallbacks) {
             if ((cbi.type & info.mSupportedTypes) != 0) {
                 cbi.cb.onRouteAdded(cbi.router, info);
             }
@@ -537,9 +531,7 @@ public class MediaRouter {
     }
 
     static void dispatchRouteRemoved(RouteInfo info) {
-        final int count = sStatic.mCallbacks.size();
-        for (int i = 0; i < count; i++) {
-            final CallbackInfo cbi = sStatic.mCallbacks.get(i);
+        for (CallbackInfo cbi : sStatic.mCallbacks) {
             if ((cbi.type & info.mSupportedTypes) != 0) {
                 cbi.cb.onRouteRemoved(cbi.router, info);
             }
@@ -547,9 +539,7 @@ public class MediaRouter {
     }
 
     static void dispatchRouteGrouped(RouteInfo info, RouteGroup group, int index) {
-        final int count = sStatic.mCallbacks.size();
-        for (int i = 0; i < count; i++) {
-            final CallbackInfo cbi = sStatic.mCallbacks.get(i);
+        for (CallbackInfo cbi : sStatic.mCallbacks) {
             if ((cbi.type & group.mSupportedTypes) != 0) {
                 cbi.cb.onRouteGrouped(cbi.router, info, group, index);
             }
@@ -557,9 +547,7 @@ public class MediaRouter {
     }
 
     static void dispatchRouteUngrouped(RouteInfo info, RouteGroup group) {
-        final int count = sStatic.mCallbacks.size();
-        for (int i = 0; i < count; i++) {
-            final CallbackInfo cbi = sStatic.mCallbacks.get(i);
+        for (CallbackInfo cbi : sStatic.mCallbacks) {
             if ((cbi.type & group.mSupportedTypes) != 0) {
                 cbi.cb.onRouteUngrouped(cbi.router, info, group);
             }
