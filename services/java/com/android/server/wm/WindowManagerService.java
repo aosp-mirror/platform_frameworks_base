@@ -143,7 +143,9 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.Socket;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -457,6 +459,8 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mSystemBooted = false;
     boolean mForceDisplayEnabled = false;
     boolean mShowingBootMessages = false;
+
+    String mLastANRState;
 
     // This protects the following display size properties, so that
     // getDisplaySize() doesn't need to acquire the global lock.  This is
@@ -9429,12 +9433,12 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.lockNow();
     }
 
-    void dumpPolicyLocked(FileDescriptor fd, PrintWriter pw, String[] args, boolean dumpAll) {
+    void dumpPolicyLocked(PrintWriter pw, String[] args, boolean dumpAll) {
         pw.println("WINDOW MANAGER POLICY STATE (dumpsys window policy)");
-        mPolicy.dump("    ", fd, pw, args);
+        mPolicy.dump("    ", pw, args);
     }
 
-    void dumpTokensLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll) {
+    void dumpTokensLocked(PrintWriter pw, boolean dumpAll) {
         pw.println("WINDOW MANAGER TOKENS (dumpsys window tokens)");
         if (mTokenMap.size() > 0) {
             pw.println("  All tokens:");
@@ -9542,7 +9546,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void dumpSessionsLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll) {
+    void dumpSessionsLocked(PrintWriter pw, boolean dumpAll) {
         pw.println("WINDOW MANAGER SESSIONS (dumpsys window sessions)");
         if (mSessions.size() > 0) {
             Iterator<Session> it = mSessions.iterator();
@@ -9554,9 +9558,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void dumpWindowsLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
+    void dumpWindowsLocked(PrintWriter pw, boolean dumpAll,
             ArrayList<WindowState> windows) {
         pw.println("WINDOW MANAGER WINDOWS (dumpsys window windows)");
+        dumpWindowsNoHeaderLocked(pw, dumpAll, windows);
+    }
+
+    void dumpWindowsNoHeaderLocked(PrintWriter pw, boolean dumpAll,
+            ArrayList<WindowState> windows) {
         for (int i=mWindows.size()-1; i>=0; i--) {
             WindowState w = mWindows.get(i);
             if (windows == null || windows.contains(w)) {
@@ -9793,7 +9802,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    boolean dumpWindows(FileDescriptor fd, PrintWriter pw, String name, String[] args,
+    boolean dumpWindows(PrintWriter pw, String name, String[] args,
             int opti, boolean dumpAll) {
         ArrayList<WindowState> windows = new ArrayList<WindowState>();
         if ("visible".equals(name)) {
@@ -9832,9 +9841,40 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized(mWindowMap) {
-            dumpWindowsLocked(fd, pw, dumpAll, windows);
+            dumpWindowsLocked(pw, dumpAll, windows);
         }
         return true;
+    }
+
+    void dumpLastANRLocked(PrintWriter pw) {
+        pw.println("WINDOW MANAGER LAST ANR (dumpsys window lastanr)");
+        if (mLastANRState == null) {
+            pw.println("  <no ANR has occurred since boot>");
+        } else {
+            pw.println(mLastANRState);
+        }
+    }
+
+    /**
+     * Saves information about the state of the window manager at
+     * the time an ANR occurred before anything else in the system changes
+     * in response.
+     *
+     * @param appWindowToken The application that ANR'd, never null.
+     * @param windowState The window that ANR'd, may be null.
+     */
+    public void saveANRStateLocked(AppWindowToken appWindowToken, WindowState windowState) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        pw.println("  ANR time: " + DateFormat.getInstance().format(new Date()));
+        pw.println("  Application at fault: " + appWindowToken.stringName);
+        if (windowState != null) {
+            pw.println("  Window at fault: " + windowState.mAttrs.getTitle());
+        }
+        pw.println();
+        dumpWindowsNoHeaderLocked(pw, true, null);
+        pw.close();
+        mLastANRState = sw.toString();
     }
 
     @Override
@@ -9862,6 +9902,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("Window manager dump options:");
                 pw.println("  [-a] [-h] [cmd] ...");
                 pw.println("  cmd may be one of:");
+                pw.println("    l[astanr]: last ANR information");
                 pw.println("    p[policy]: policy state");
                 pw.println("    s[essions]: active sessions");
                 pw.println("    t[okens]: token list");
@@ -9882,34 +9923,39 @@ public class WindowManagerService extends IWindowManager.Stub
         if (opti < args.length) {
             String cmd = args[opti];
             opti++;
-            if ("policy".equals(cmd) || "p".equals(cmd)) {
+            if ("lastanr".equals(cmd) || "l".equals(cmd)) {
                 synchronized(mWindowMap) {
-                    dumpPolicyLocked(fd, pw, args, true);
+                    dumpLastANRLocked(pw);
+                }
+                return;
+            } else if ("policy".equals(cmd) || "p".equals(cmd)) {
+                synchronized(mWindowMap) {
+                    dumpPolicyLocked(pw, args, true);
                 }
                 return;
             } else if ("sessions".equals(cmd) || "s".equals(cmd)) {
                 synchronized(mWindowMap) {
-                    dumpSessionsLocked(fd, pw, true);
+                    dumpSessionsLocked(pw, true);
                 }
                 return;
             } else if ("tokens".equals(cmd) || "t".equals(cmd)) {
                 synchronized(mWindowMap) {
-                    dumpTokensLocked(fd, pw, true);
+                    dumpTokensLocked(pw, true);
                 }
                 return;
             } else if ("windows".equals(cmd) || "w".equals(cmd)) {
                 synchronized(mWindowMap) {
-                    dumpWindowsLocked(fd, pw, true, null);
+                    dumpWindowsLocked(pw, true, null);
                 }
                 return;
             } else if ("all".equals(cmd) || "a".equals(cmd)) {
                 synchronized(mWindowMap) {
-                    dumpWindowsLocked(fd, pw, true, null);
+                    dumpWindowsLocked(pw, true, null);
                 }
                 return;
             } else {
                 // Dumping a single name?
-                if (!dumpWindows(fd, pw, cmd, args, opti, dumpAll)) {
+                if (!dumpWindows(pw, cmd, args, opti, dumpAll)) {
                     pw.println("Bad window command, or no windows match: " + cmd);
                     pw.println("Use -h for help.");
                 }
@@ -9921,22 +9967,27 @@ public class WindowManagerService extends IWindowManager.Stub
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
             }
-            dumpPolicyLocked(fd, pw, args, dumpAll);
+            dumpPolicyLocked(pw, args, dumpAll);
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
             }
-            dumpSessionsLocked(fd, pw, dumpAll);
+            dumpSessionsLocked(pw, dumpAll);
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
             }
-            dumpTokensLocked(fd, pw, dumpAll);
+            dumpTokensLocked(pw, dumpAll);
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
             }
-            dumpWindowsLocked(fd, pw, dumpAll, null);
+            dumpWindowsLocked(pw, dumpAll, null);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpLastANRLocked(pw);
         }
     }
 
