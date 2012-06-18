@@ -170,7 +170,7 @@
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Informació personal"</string>
     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Accés directe als contactes i al calendari emmagatzemat a la tauleta."</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Accés directe als contactes i al calendari emmagatzemats al telèfon."</string>
-    <string name="permgrouplab_location" msgid="635149742436692049">"Ubicació"</string>
+    <string name="permgrouplab_location" msgid="635149742436692049">"La teva ubicació"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Supervisa la teva ubicació física."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Comunicació de xarxa"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Accedeix a diverses funcions de xarxa."</string>
@@ -934,10 +934,8 @@
     <string name="deleteText" msgid="7070985395199629156">"suprimeix"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Mètode d\'entrada"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Accions de text"</string>
-    <!-- no translation found for low_internal_storage_view_title (5576272496365684834) -->
-    <skip />
-    <!-- no translation found for low_internal_storage_view_text (6640505817617414371) -->
-    <skip />
+    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"S\'està acabant l\'espai d\'emmagatzematge"</string>
+    <string name="low_internal_storage_view_text" msgid="6640505817617414371">"És possible que algunes funcions del sistema no funcionin"</string>
     <string name="ok" msgid="5970060430562524910">"D\'acord"</string>
     <string name="cancel" msgid="6442560571259935130">"Cancel·la"</string>
     <string name="yes" msgid="5362982303337969312">"D\'acord"</string>
@@ -1290,6 +1288,6 @@
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Altaveus del connector"</string>
     <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"Àudio HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
-    <!-- no translation found for media_route_chooser_grouping_done (7966438307723317169) -->
-    <skip />
+    <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Àudio per Bluetooth"</string>
+    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Fet"</string>
 </resources>

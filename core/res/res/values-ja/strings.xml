@@ -511,9 +511,9 @@
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"画面ロックの無効化"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"キーロックとキーロックに関連付けられたパスワードのセキュリティを無効にすることをアプリに許可します。たとえば、かかってきた電話を受ける際にキーロックを無効にし、通話が終了したらキーロックを再度有効にする場合などに使用します。"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"同期設定の読み取り"</string>
-    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"アカウントの同期設定の読み取りをアプリに許可します。たとえば、Peopleアプリがアカウントと同期しているかどうかをアプリから特定できるようになります。"</string>
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"アカウントの同期設定の読み取りをアプリに許可します。たとえば、連絡帳アプリがアカウントと同期しているかどうかをアプリから特定できるようになります。"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"同期のON/OFFの切り替え"</string>
-    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"アカウントの同期設定の変更をアプリに許可します。たとえば、Peopleアプリとアカウントの同期を有効にするために使用できます。"</string>
+    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"アカウントの同期設定の変更をアプリに許可します。たとえば、連絡帳アプリとアカウントの同期を有効にするために使用できます。"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"同期統計の読み取り"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"アカウントの同期ステータス（同期イベントの履歴、同期されたデータの量など）の読み取りをアプリに許可します。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"登録したフィードの読み取り"</string>
@@ -934,10 +934,8 @@
     <string name="deleteText" msgid="7070985395199629156">"削除"</string>
     <string name="inputMethod" msgid="1653630062304567879">"入力方法"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"テキスト操作"</string>
-    <!-- no translation found for low_internal_storage_view_title (5576272496365684834) -->
-    <skip />
-    <!-- no translation found for low_internal_storage_view_text (6640505817617414371) -->
-    <skip />
+    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"空き容量わずか"</string>
+    <string name="low_internal_storage_view_text" msgid="6640505817617414371">"一部のシステム機能が動作しない可能性があります"</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"キャンセル"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
@@ -1290,6 +1288,7 @@
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"ホルダーのスピーカー"</string>
     <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"HDMIオーディオ"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"システム"</string>
-    <!-- no translation found for media_route_chooser_grouping_done (7966438307723317169) -->
+    <!-- no translation found for bluetooth_a2dp_audio_route_name (8575624030406771015) -->
     <skip />
+    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"完了"</string>
 </resources>

@@ -371,14 +371,14 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"एप्लिकेशन को मित्रों या सहकर्मियों के ईवेंट के साथ ही वे ईवेंट जोड़ने, निकालने, बदलने देता है जिन्हें आप अपने टेबलेट पर संशोधित कर सकते हैं. इससे एप्लिकेशन, स्‍वामी की जानकारी के बिना उन संदेशों को भेज सकता है जो कैलेंडर स्वामियों की ओर से आते दिखाई देते हैं, या ईवेंट संशोधित कर सकता है."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"एप्लिकेशन को मित्रों या सहकर्मियों के ईवेंट के साथ ही वे ईवेंट जोड़ने, निकालने, बदलने देता है जिन्हें आप अपने फ़ोन पर संशोधित कर सकते हैं. इससे एप्लिकेशन, स्‍वामी की जानकारी के बिना उन संदेशों को भेज सकता है जो कैलेंडर स्वामियों की ओर से आते दिखाई देते हैं, या ईवेंट संशोधित कर सकता है."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"परीक्षण के लिए नकली स्‍थान स्रोत"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"परीक्षण के लिए कृतिम स्थान स्रोत बनाएं या एक नया स्थान प्रदाता इंस्‍टॉल करें. यह एप्लिकेशन को स्‍थान और/या अन्‍य स्थान स्रोतों जैसे GPS या स्‍थान प्रदाताओं द्वारा लौटाई गई स्थिति को ओवरराइड करने देता है."</string>
+    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"परीक्षण के लिए कृत्रिम स्थान स्रोत बनाएं या एक नया स्थान प्रदाता इंस्‍टॉल करें. यह एप्लिकेशन को स्‍थान और/या अन्‍य स्थान स्रोतों जैसे GPS या स्‍थान प्रदाताओं द्वारा लौटाई गई स्थिति को ओवरराइड करने देता है."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"अतिरिक्त स्‍थान प्रदाता आदेशों में पहुंचे"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"एप्लिकेशन को अतिरिक्त स्थान प्रदाता आदेशों पर पहुंचने देता है. यह एप्लिकेशन को GPS या अन्य स्थान स्रोतों के संचालन में बाधा पहुंचाने दे सकता है."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"किसी स्‍थान प्रदाता को इंस्‍टॉल करने की अनुमति"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"परीक्षण के लिए कृत्रिम स्थान स्रोत बनाएं या एक नए स्थान प्रदाता को इंस्‍टॉल करें. यह एप्लिकेशन को स्‍थान और/या अन्‍य स्थान स्रोतों जैसे GPS या स्‍थान प्रदाताओं द्वारा लौटाई गई स्थिति को ओवरराइड करने देता है."</string>
     <string name="permlab_accessFineLocation" msgid="5885550969882561436">"सटीक (GPS) स्‍थान"</string>
     <string name="permdesc_accessFineLocation" product="tablet" msgid="8960597421469894181">"टेबलेट पर सटीक स्थान स्रोतों जैसे ग्लोबल पोजिशनिंग सिस्टम तक पहुंचें. जब स्थान सेवाएं उपलब्ध और चालू हैं, तो यह यह अनुमति एप्लिकेशन को आपका सटीक स्थान निर्धारित करने देती है."</string>
-    <string name="permdesc_accessFineLocation" product="default" msgid="239268765496141815">"फ़ोन पर सटीक स्थान स्रोतों जैसे ग्लोबल पोजिशनिंग सिस्टम तक पहुंचें. जब स्थान सेवाएं उपलब्ध और चालू हों, तो यह यह अनुमति एप्लिकेशन को आपका सटीक स्थान निर्धारित करने देती है."</string>
+    <string name="permdesc_accessFineLocation" product="default" msgid="239268765496141815">"फ़ोन पर सटीक स्थान स्रोतों जैसे ग्लोबल पोजिशनिंग सिस्टम तक पहुंचें. जब स्थान सेवाएं उपलब्ध और चालू हों, तो यह अनुमति एप्लिकेशन को आपका सटीक स्थान निर्धारित करने देती है."</string>
     <string name="permlab_accessCoarseLocation" msgid="7422827215441638984">"अनुमानित (नेटवर्क-आधारित) स्‍थान"</string>
     <string name="permdesc_accessCoarseLocation" msgid="5383798877137640762">"उपलब्‍ध नेटवर्क स्रोतों जैसे सेल टॉवर और WI- Fi का उपयोग करते हुए स्‍थान प्रदाताओं से अनुमानित स्थान तक पहुचें. जब ये स्थान सेवाएं उपलब्ध और चालू हों, तो यह अनुमति एप्लिकेशन को आपका अनुमानित स्थान निर्धारित करते देती है."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"SurfaceFlinger में पहुंचें"</string>
@@ -526,7 +526,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"एप्लिकेशन को उपयोगकर्ता डिक्शनरी में नए शब्द लिखने देता है."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"संरक्ष‍ित संग्रहण पर पहुंच का परीक्षण करें"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"संरक्ष‍ित संग्रहण पर पहुंच का परीक्षण करें"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"एप्लि. को USB संग्रहण हेतु अनुमति का परीक्षण करने देता है जो भविष्‍य के उपकरणों में उपलब्‍ध होगा."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"एप्लि. को USB संग्रहण अनुमति जांचने देता है जो भावी उपकरणों में उपलब्‍ध होगा."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"एप्लिकेशन को SD कार्ड के लिए किसी अनुमति का परीक्षण करने देता है जो भविष्‍य के उपकरणों में उपलब्‍ध होगा."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"अपने USB संग्रहण की सामग्री संशोधित करें या हटाएं"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"अपने SD कार्ड की सामग्री संशोधित करें या हटाएं"</string>
@@ -1290,6 +1290,8 @@
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"डॉक स्‍पीकर"</string>
     <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"HDMI ऑडियो"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"सिस्‍टम"</string>
+    <!-- no translation found for bluetooth_a2dp_audio_route_name (8575624030406771015) -->
+    <skip />
     <!-- no translation found for media_route_chooser_grouping_done (7966438307723317169) -->
     <skip />
 </resources>
