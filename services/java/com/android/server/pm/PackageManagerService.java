@@ -30,6 +30,7 @@ import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
+import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.server.DeviceStorageMonitorService;
 import com.android.server.EventLogTags;
@@ -37,6 +38,7 @@ import com.android.server.IntentResolver;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
@@ -110,6 +112,7 @@ import android.util.Xml;
 import android.view.Display;
 import android.view.WindowManager;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -8362,6 +8365,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         public static final int DUMP_VERIFIERS = 1 << 8;
 
+        public static final int DUMP_PREFERRED = 1 << 9;
+
+        public static final int DUMP_PREFERRED_XML = 1 << 10;
+
         public static final int OPTION_SHOW_FILTERS = 1 << 0;
 
         private int mTypes;
@@ -8373,7 +8380,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         private SharedUserSetting mSharedUser;
 
         public boolean isDumping(int type) {
-            if (mTypes == 0) {
+            if (mTypes == 0 && type != DUMP_PREFERRED_XML) {
                 return true;
             }
 
@@ -8450,6 +8457,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pw.println("    f[ibraries]: list device features");
                 pw.println("    r[esolvers]: dump intent resolvers");
                 pw.println("    perm[issions]: dump permissions");
+                pw.println("    pref[erred]: print preferred package settings");
+                pw.println("    preferred-xml: print preferred package settings as xml");
                 pw.println("    prov[iders]: dump content providers");
                 pw.println("    p[ackages]: dump installed packages");
                 pw.println("    s[hared-users]: dump shared user IDs");
@@ -8479,6 +8488,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 dumpState.setDump(DumpState.DUMP_RESOLVERS);
             } else if ("perm".equals(cmd) || "permissions".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_PERMISSIONS);
+            } else if ("pref".equals(cmd) || "preferred".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_PREFERRED);
+            } else if ("preferred-xml".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_PREFERRED_XML);
             } else if ("p".equals(cmd) || "packages".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_PACKAGES);
             } else if ("s".equals(cmd) || "shared-users".equals(cmd)) {
@@ -8547,6 +8560,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                         dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS))) {
                     dumpState.setTitlePrinted(true);
                 }
+            }
+
+            if (dumpState.isDumping(DumpState.DUMP_PREFERRED)) {
                 if (mSettings.mPreferredActivities.dump(pw,
                         dumpState.getTitlePrinted() ? "\nPreferred Activities:"
                             : "Preferred Activities:", "  ",
@@ -8554,7 +8570,29 @@ public class PackageManagerService extends IPackageManager.Stub {
                     dumpState.setTitlePrinted(true);
                 }
             }
-            
+
+            if (dumpState.isDumping(DumpState.DUMP_PREFERRED_XML)) {
+                pw.flush();
+                FileOutputStream fout = new FileOutputStream(fd);
+                BufferedOutputStream str = new BufferedOutputStream(fout);
+                XmlSerializer serializer = new FastXmlSerializer();
+                try {
+                    serializer.setOutput(str, "utf-8");
+                    serializer.startDocument(null, true);
+                    serializer.setFeature(
+                            "http://xmlpull.org/v1/doc/features.html#indent-output", true);
+                    mSettings.writePreferredActivitiesLPr(serializer);
+                    serializer.endDocument();
+                    serializer.flush();
+                } catch (IllegalArgumentException e) {
+                    pw.println("Failed writing: " + e);
+                } catch (IllegalStateException e) {
+                    pw.println("Failed writing: " + e);
+                } catch (IOException e) {
+                    pw.println("Failed writing: " + e);
+                }
+            }
+
             if (dumpState.isDumping(DumpState.DUMP_PERMISSIONS)) {
                 mSettings.dumpPermissionsLPr(pw, packageName, dumpState);
             }
