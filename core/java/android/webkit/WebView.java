@@ -1686,6 +1686,10 @@ public class WebView extends AbsoluteLayout
             WebView.super.computeScroll();
         }
 
+        public boolean super_onHoverEvent(MotionEvent event) {
+            return WebView.super.onHoverEvent(event);
+        }
+
         public boolean super_performAccessibilityAction(int action, Bundle arguments) {
             return WebView.super.performAccessibilityAction(action, arguments);
         }
