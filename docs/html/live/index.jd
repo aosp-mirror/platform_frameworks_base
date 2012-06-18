@@ -1,7 +1,8 @@
 page.title=Live
+fullpage=1
 @jd:body
 
-<div id="mainBodyFixed" style="padding-left:2em;">
+<div class="wrap" style="width:940px;">
   
 <h1>Android Developers Live</h1>
   
@@ -61,4 +62,4 @@ livecasts on YouTube and videos of past sessions or follow us on
     </div><!-- end mainBodyRight -->
 </div><!-- interviewBlock -->
 
-  </div><!-- end mainBodyFixed -->
+</div><!-- end mainBodyFixed -->

@@ -178,10 +178,7 @@ $ android create test-project -m ../HelloAndroid -n HelloAndroidTest -p HelloAnd
             <li>
                 <code>android:targetPackage=&quot;com.example.helloandroid&quot;</code>: specifies
                 that the tests in HelloAndroidTest should be run against the application with the
-                <em>Android</em> package name <code>com.example.helloandroid</code>. This is the
-                package name of the <a
-                href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a>
-                tutorial application.
+                <em>Android</em> package name <code>com.example.helloandroid</code>.
             </li>
             <li>
                 <code>android:label=&quot;Tests for .HelloAndroid&quot;</code>: specifies a
@@ -291,7 +288,7 @@ $ android create test-project -m ../HelloAndroid -n HelloAndroidTest -p HelloAnd
     To learn more about creating test packages, see the topic <a
     href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>,
     which provides an overview of Android testing. If you prefer to follow a tutorial,
-    try the <a href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity Testing</a>
+    try the <a href="{@docRoot}tools/testing/activity_test.html">Activity Testing</a>
     tutorial, which leads you through the creation of tests for an actual Android application.
 </p>
 <h2 id="RunTestsCommand">Running Tests</h2>
