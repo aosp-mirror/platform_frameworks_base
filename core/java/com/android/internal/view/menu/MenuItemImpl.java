@@ -456,6 +456,9 @@ public final class MenuItemImpl implements MenuItem {
     }
     
     public boolean isVisible() {
+        if (mActionProvider != null && mActionProvider.overridesItemVisibility()) {
+            return (mFlags & HIDDEN) == 0 && mActionProvider.isVisible();
+        }
         return (mFlags & HIDDEN) == 0;
     }
 
