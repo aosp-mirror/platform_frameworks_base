@@ -57,19 +57,6 @@ int install(const char *pkgname, uid_t uid, gid_t gid)
         unlink(pkgdir);
         return -errno;
     }
-    if (chown(pkgdir, uid, gid) < 0) {
-        ALOGE("cannot chown dir '%s': %s\n", pkgdir, strerror(errno));
-        unlink(pkgdir);
-        return -errno;
-    }
-
-#ifdef HAVE_SELINUX
-    if (selinux_android_setfilecon(pkgdir, pkgname, uid) < 0) {
-        LOGE("cannot setfilecon dir '%s': %s\n", pkgdir, strerror(errno));
-        unlink(pkgdir);
-        return -errno;
-    }
-#endif
 
     if (mkdir(libdir, 0755) < 0) {
         ALOGE("cannot create dir '%s': %s\n", libdir, strerror(errno));
@@ -92,6 +79,22 @@ int install(const char *pkgname, uid_t uid, gid_t gid)
 #ifdef HAVE_SELINUX
     if (selinux_android_setfilecon(libdir, pkgname, AID_SYSTEM) < 0) {
         LOGE("cannot setfilecon dir '%s': %s\n", libdir, strerror(errno));
+        unlink(libdir);
+        unlink(pkgdir);
+        return -errno;
+    }
+#endif
+
+    if (chown(pkgdir, uid, gid) < 0) {
+        ALOGE("cannot chown dir '%s': %s\n", pkgdir, strerror(errno));
+        unlink(libdir);
+        unlink(pkgdir);
+        return -errno;
+    }
+
+#ifdef HAVE_SELINUX
+    if (selinux_android_setfilecon(pkgdir, pkgname, uid) < 0) {
+        LOGE("cannot setfilecon dir '%s': %s\n", pkgdir, strerror(errno));
         unlink(libdir);
         unlink(pkgdir);
         return -errno;
