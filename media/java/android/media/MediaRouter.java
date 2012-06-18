@@ -276,6 +276,7 @@ public class MediaRouter {
             Log.w(TAG, "selectRoute ignored; cannot select route with supported types " +
                     typesToString(route.getSupportedTypes()) + " into route types " +
                     typesToString(types));
+            return;
         }
 
         if (sStatic.mSelectedRoute != null) {
