@@ -92,7 +92,8 @@ Policies</a></p></dd>
   <dt>Google Maps API</dt>
     <dd>The Android Maps APIs are a collection of services (including, but not limited to, the
 MapView and MapActivity classes) that allow you to include
-maps, geocoding, and other content from Google and its content providers in your Android
+maps, geocoding, geolocation, and other content from Google and its content providers in your
+Android
 apps. If you want to develop an Android app that displays Google Maps data, you must agree
 to the terms of service, register, and get an API Key. Registration is free.    
       <p><a
