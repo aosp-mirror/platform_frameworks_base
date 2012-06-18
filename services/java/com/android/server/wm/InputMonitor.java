@@ -87,26 +87,29 @@ final class InputMonitor implements InputManagerService.Callbacks {
     public long notifyANR(InputApplicationHandle inputApplicationHandle,
             InputWindowHandle inputWindowHandle) {
         AppWindowToken appWindowToken = null;
-        if (inputWindowHandle != null) {
-            synchronized (mService.mWindowMap) {
-                WindowState windowState = (WindowState) inputWindowHandle.windowState;
+        synchronized (mService.mWindowMap) {
+            WindowState windowState = null;
+            if (inputWindowHandle != null) {
+                windowState = (WindowState) inputWindowHandle.windowState;
                 if (windowState != null) {
-                    Slog.i(WindowManagerService.TAG, "Input event dispatching timed out sending to "
-                            + windowState.mAttrs.getTitle());
                     appWindowToken = windowState.mAppToken;
-                    mService.saveANRStateLocked(appWindowToken, windowState);
                 }
             }
-        }
-        
-        if (appWindowToken == null && inputApplicationHandle != null) {
-            appWindowToken = (AppWindowToken)inputApplicationHandle.appWindowToken;
-            if (appWindowToken != null) {
-                Slog.i(WindowManagerService.TAG,
-                        "Input event dispatching timed out sending to application "
-                                + appWindowToken.stringName);
-                mService.saveANRStateLocked(appWindowToken, null);
+            if (appWindowToken == null && inputApplicationHandle != null) {
+                appWindowToken = (AppWindowToken)inputApplicationHandle.appWindowToken;
             }
+
+            if (windowState != null) {
+                Slog.i(WindowManagerService.TAG, "Input event dispatching timed out "
+                        + "sending to " + windowState.mAttrs.getTitle());
+            } else if (appWindowToken != null) {
+                Slog.i(WindowManagerService.TAG, "Input event dispatching timed out "
+                        + "sending to application " + appWindowToken.stringName);
+            } else {
+                Slog.i(WindowManagerService.TAG, "Input event dispatching timed out.");
+            }
+
+            mService.saveANRStateLocked(appWindowToken, windowState);
         }
 
         if (appWindowToken != null && appWindowToken.appToken != null) {
