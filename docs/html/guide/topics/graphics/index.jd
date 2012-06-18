@@ -37,7 +37,7 @@ applications can benefit from an extra boost in performance.</p>
 
   <div class="col-6">
     <h3>Training</h3>
-    <a href="http://smain.sea:1700/training/displaying-bitmaps/index.html">
+    <a href="{@docRoot}training/displaying-bitmaps/index.html">
       <h4>Displaying Bitmaps Efficiently</h4>
       <p>This class covers some common techniques for processing and loading Bitmap objects in a way
 that keeps your user interface (UI) components responsive and avoids exceeding your application
