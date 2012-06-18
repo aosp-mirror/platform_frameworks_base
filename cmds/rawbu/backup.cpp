@@ -38,6 +38,7 @@ static char nameBuffer[PATH_MAX];
 static struct stat statBuffer;
 
 static char copyBuffer[8192];
+static char *backupFilePath = NULL;
 
 static uint32_t inputFileVersion;
 
@@ -152,6 +153,10 @@ static int wipe (const char *path)
             strcat(nameBuffer, "/");
 
         } else {
+            // Don't delete the backup file
+            if (backupFilePath && strcmp(backupFilePath, nameBuffer) == 0) {
+                continue;
+            }
             ret = unlink(nameBuffer);
 
             if (ret != 0) {
@@ -279,7 +284,7 @@ static int backup_dir(FILE* fh, const char* srcPath)
             continue;
         }
 
-        if (fullPath == NULL) {
+        if (fullPath != NULL) {
             free(fullPath);
         }
         fullPath = (char*)malloc(srcLen + strlen(de->d_name) + 2);
@@ -320,8 +325,13 @@ static int backup_dir(FILE* fh, const char* srcPath)
                 goto done;
             }
         } else if (S_ISREG(statBuffer.st_mode)) {
-            printf("Saving file %s...\n", fullPath);
-            
+            // Skip the backup file
+            if (backupFilePath && strcmp(fullPath, backupFilePath) == 0) {
+                printf("Skipping backup file %s...\n", backupFilePath);
+                continue;
+            } else {
+                printf("Saving file %s...\n", fullPath);
+            }
             if (write_header(fh, TYPE_FILE, fullPath, &statBuffer) == 0) {
                 result = 0;
                 goto done;
@@ -372,6 +382,9 @@ static int backup_data(const char* destPath)
     }
     
     printf("Backing up /data to %s...\n", destPath);
+
+    // The path that shouldn't be backed up
+    backupFilePath = strdup(destPath);
 
     if (!write_int32(fh, FILE_VERSION)) goto done;
     if (!write_int32(fh, opt_backupAll)) goto done;
@@ -509,6 +522,9 @@ static int restore_data(const char* srcPath)
     } else {
         opt_backupAll = 0;
     }
+
+    // The path that shouldn't be deleted
+    backupFilePath = strdup(srcPath);
     
     printf("Wiping contents of /data...\n");
     if (!wipe("/data")) {
