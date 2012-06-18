@@ -25,12 +25,16 @@ import android.app.MediaRouteActionProvider;
 import android.app.MediaRouteButton;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.media.MediaRouter;
 import android.media.MediaRouter.RouteCategory;
 import android.media.MediaRouter.RouteGroup;
 import android.media.MediaRouter.RouteInfo;
+import android.media.MediaRouter.UserRouteInfo;
+import android.media.RemoteControlClient;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +45,7 @@ import android.widget.Checkable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -67,6 +72,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
     };
 
     MediaRouter mRouter;
+    AudioManager mAudio;
     private int mRouteTypes;
 
     private LayoutInflater mInflater;
@@ -74,8 +80,12 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
     private View.OnClickListener mExtendedSettingsListener;
     private RouteAdapter mAdapter;
     private ListView mListView;
+    private SeekBar mVolumeSlider;
+    private ImageView mVolumeIcon;
 
     final RouteComparator mComparator = new RouteComparator();
+    final MediaRouterCallback mCallback = new MediaRouterCallback();
+    private boolean mIgnoreVolumeChanges;
 
     public MediaRouteChooserDialogFragment() {
         setStyle(STYLE_NO_TITLE, R.style.Theme_DeviceDefault_Dialog);
@@ -89,6 +99,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mRouter = (MediaRouter) activity.getSystemService(Context.MEDIA_ROUTER_SERVICE);
+        mAudio = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
     }
 
     @Override
@@ -98,18 +109,11 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
             mLauncherListener.onDetached(this);
         }
         if (mAdapter != null) {
-            mRouter.removeCallback(mAdapter.mCallback);
             mAdapter = null;
         }
         mInflater = null;
+        mRouter.removeCallback(mCallback);
         mRouter = null;
-    }
-
-    /**
-     * Implemented by the MediaRouteButton that launched this dialog
-     */
-    public interface LauncherListener {
-        public void onDetached(MediaRouteChooserDialogFragment detachedFragment);
     }
 
     public void setExtendedSettingsClickListener(View.OnClickListener listener) {
@@ -120,14 +124,70 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
         mRouteTypes = types;
     }
 
+    void updateVolume() {
+        final RouteInfo selectedRoute = mRouter.getSelectedRoute(mRouteTypes);
+        final boolean defaultAudioSelected = selectedRoute == mRouter.getSystemAudioRoute();
+        final boolean selectedSystemRoute =
+                selectedRoute.getCategory() == mRouter.getSystemAudioCategory();
+        mVolumeIcon.setImageResource(defaultAudioSelected ?
+                R.drawable.ic_audio_vol : R.drawable.ic_media_route_on_holo_dark);
+
+        mIgnoreVolumeChanges = true;
+        mVolumeSlider.setEnabled(true);
+        if (selectedSystemRoute) {
+            // Use the standard media audio stream
+            mVolumeSlider.setMax(mAudio.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+            mVolumeSlider.setProgress(mAudio.getStreamVolume(AudioManager.STREAM_MUSIC));
+        } else {
+            final RouteInfo firstSelected;
+            if (selectedRoute instanceof RouteGroup) {
+                firstSelected = ((RouteGroup) selectedRoute).getRouteAt(0);
+            } else {
+                firstSelected = selectedRoute;
+            }
+
+            RemoteControlClient rcc = null;
+            if (firstSelected instanceof UserRouteInfo) {
+                rcc = ((UserRouteInfo) firstSelected).getRemoteControlClient();
+            }
+
+            if (rcc == null) {
+                // No RemoteControlClient? Assume volume can't be controlled.
+                // Disable the slider and show it at max volume.
+                mVolumeSlider.setMax(1);
+                mVolumeSlider.setProgress(1);
+                mVolumeSlider.setEnabled(false);
+            } else {
+                // TODO: Connect this to the remote control volume
+            }
+        }
+        mIgnoreVolumeChanges = false;
+    }
+
+    void changeVolume(int newValue) {
+        if (mIgnoreVolumeChanges) return;
+
+        RouteCategory selectedCategory = mRouter.getSelectedRoute(mRouteTypes).getCategory();
+        if (selectedCategory == mRouter.getSystemAudioCategory()) {
+            final int maxVolume = mAudio.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+            newValue = Math.max(0, Math.min(newValue, maxVolume));
+            mAudio.setStreamVolume(AudioManager.STREAM_MUSIC, newValue, 0);
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         mInflater = inflater;
         final View layout = inflater.inflate(R.layout.media_route_chooser_layout, container, false);
-        final View extendedSettingsButton = layout.findViewById(R.id.extended_settings);
+
+        mVolumeIcon = (ImageView) layout.findViewById(R.id.volume_icon);
+        mVolumeSlider = (SeekBar) layout.findViewById(R.id.volume_slider);
+        updateVolume();
+        mVolumeSlider.setOnSeekBarChangeListener(new VolumeSliderChangeListener());
 
         if (mExtendedSettingsListener != null) {
+            final View extendedSettingsButton = layout.findViewById(R.id.extended_settings);
             extendedSettingsButton.setVisibility(View.VISIBLE);
             extendedSettingsButton.setOnClickListener(mExtendedSettingsListener);
         }
@@ -138,7 +198,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
         list.setOnItemClickListener(mAdapter);
 
         mListView = list;
-        mRouter.addCallback(mRouteTypes, mAdapter.mCallback);
+        mRouter.addCallback(mRouteTypes, mCallback);
 
         mAdapter.scrollToSelectedItem();
 
@@ -174,7 +234,6 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
 
         private int mSelectedItemPosition = -1;
         private final ArrayList<Object> mItems = new ArrayList<Object>();
-        final MediaRouterCallback mCallback = new MediaRouterCallback();
 
         private RouteCategory mCategoryEditingGroups;
         private RouteGroup mEditingGroup;
@@ -443,10 +502,6 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
             holder.text1.setText(cat.getName(getActivity()));
         }
 
-        public int getSelectedRoutePosition() {
-            return mSelectedItemPosition;
-        }
-
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             final int type = getItemViewType(position);
@@ -523,46 +578,49 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
                 scrollToEditingGroup();
             }
         }
+    }
 
-        class MediaRouterCallback extends MediaRouter.Callback {
-            @Override
-            public void onRouteSelected(MediaRouter router, int type, RouteInfo info) {
-                update();
-            }
+    class MediaRouterCallback extends MediaRouter.Callback {
+        @Override
+        public void onRouteSelected(MediaRouter router, int type, RouteInfo info) {
+            mAdapter.update();
+            updateVolume();
+        }
 
-            @Override
-            public void onRouteUnselected(MediaRouter router, int type, RouteInfo info) {
-                update();
-            }
+        @Override
+        public void onRouteUnselected(MediaRouter router, int type, RouteInfo info) {
+            mAdapter.update();
+        }
 
-            @Override
-            public void onRouteAdded(MediaRouter router, RouteInfo info) {
-                update();
-            }
+        @Override
+        public void onRouteAdded(MediaRouter router, RouteInfo info) {
+            mAdapter.update();
+            updateVolume();
+        }
 
-            @Override
-            public void onRouteRemoved(MediaRouter router, RouteInfo info) {
-                if (info == mEditingGroup) {
-                    finishGrouping();
-                }
-                update();
+        @Override
+        public void onRouteRemoved(MediaRouter router, RouteInfo info) {
+            if (info == mAdapter.mEditingGroup) {
+                mAdapter.finishGrouping();
             }
+            mAdapter.update();
+            updateVolume();
+        }
 
-            @Override
-            public void onRouteChanged(MediaRouter router, RouteInfo info) {
-                notifyDataSetChanged();
-            }
+        @Override
+        public void onRouteChanged(MediaRouter router, RouteInfo info) {
+            mAdapter.notifyDataSetChanged();
+        }
 
-            @Override
-            public void onRouteGrouped(MediaRouter router, RouteInfo info,
-                    RouteGroup group, int index) {
-                update();
-            }
+        @Override
+        public void onRouteGrouped(MediaRouter router, RouteInfo info,
+                RouteGroup group, int index) {
+            mAdapter.update();
+        }
 
-            @Override
-            public void onRouteUngrouped(MediaRouter router, RouteInfo info, RouteGroup group) {
-                update();
-            }
+        @Override
+        public void onRouteUngrouped(MediaRouter router, RouteInfo info, RouteGroup group) {
+            mAdapter.update();
         }
     }
 
@@ -587,5 +645,41 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
                 super.onBackPressed();
             }
         }
+        
+        public boolean onKeyDown(int keyCode, KeyEvent event) {
+            if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN && mVolumeSlider.isEnabled()) {
+                mVolumeSlider.incrementProgressBy(-1);
+                return true;
+            } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP && mVolumeSlider.isEnabled()) {
+                mVolumeSlider.incrementProgressBy(1);
+                return true;
+            } else {
+                return super.onKeyDown(keyCode, event);
+            }
+        }
+    }
+
+    /**
+     * Implemented by the MediaRouteButton that launched this dialog
+     */
+    public interface LauncherListener {
+        public void onDetached(MediaRouteChooserDialogFragment detachedFragment);
+    }
+
+    class VolumeSliderChangeListener implements SeekBar.OnSeekBarChangeListener {
+
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            changeVolume(progress);
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+        }
+
     }
 }

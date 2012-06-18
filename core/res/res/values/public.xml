@@ -1168,6 +1168,9 @@
   <java-symbol type="attr" name="externalRouteEnabledDrawable" />
   <java-symbol type="id" name="extended_settings" />
   <java-symbol type="id" name="check" />
+  <java-symbol type="id" name="volume_slider" />
+  <java-symbol type="id" name="volume_icon" />
+  <java-symbol type="drawable" name="ic_media_route_on_holo_dark" />
   <java-symbol type="layout" name="media_route_chooser_layout" />
   <java-symbol type="layout" name="media_route_list_item_top_header" />
   <java-symbol type="layout" name="media_route_list_item_section_header" />
