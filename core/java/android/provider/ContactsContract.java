@@ -5416,6 +5416,20 @@ public final class ContactsContract {
             public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(CONTENT_URI,
                     "filter");
 
+            /**
+             * A boolean query parameter that can be used with {@link #CONTENT_FILTER_URI}.
+             * If "1" or "true", display names are searched.  If "0" or "false", display names
+             * are not searched.  Default is "1".
+             */
+            public static final String SEARCH_DISPLAY_NAME_KEY = "search_display_name";
+
+            /**
+             * A boolean query parameter that can be used with {@link #CONTENT_FILTER_URI}.
+             * If "1" or "true", phone numbers are searched.  If "0" or "false", phone numbers
+             * are not searched.  Default is "1".
+             */
+            public static final String SEARCH_PHONE_NUMBER_KEY = "search_phone_number";
+
             public static final int TYPE_HOME = 1;
             public static final int TYPE_MOBILE = 2;
             public static final int TYPE_WORK = 3;

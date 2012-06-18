@@ -17372,6 +17372,8 @@ package android.provider {
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String NORMALIZED_NUMBER = "data4";
     field public static final java.lang.String NUMBER = "data1";
+    field public static final java.lang.String SEARCH_DISPLAY_NAME_KEY = "search_display_name";
+    field public static final java.lang.String SEARCH_PHONE_NUMBER_KEY = "search_phone_number";
     field public static final int TYPE_ASSISTANT = 19; // 0x13
     field public static final int TYPE_CALLBACK = 8; // 0x8
     field public static final int TYPE_CAR = 9; // 0x9
