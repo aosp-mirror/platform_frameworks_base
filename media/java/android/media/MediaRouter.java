@@ -662,6 +662,7 @@ public class MediaRouter {
          */
         public void setTag(Object tag) {
             mTag = tag;
+            routeUpdated();
         }
 
         /**
@@ -675,7 +676,6 @@ public class MediaRouter {
         void setStatusInt(CharSequence status) {
             if (!status.equals(mStatus)) {
                 mStatus = status;
-                routeUpdated();
                 if (mGroup != null) {
                     mGroup.memberStatusChanged(this, status);
                 }

@@ -96,6 +96,32 @@ public abstract class ActionProvider {
     }
 
     /**
+     * The result of this method determines whether or not {@link #isVisible()} will be used
+     * by the {@link MenuItem} this ActionProvider is bound to help determine its visibility.
+     *
+     * @return true if this ActionProvider overrides the visibility of the MenuItem
+     *         it is bound to, false otherwise. The default implementation returns false.
+     * @see #isVisible()
+     */
+    public boolean overridesItemVisibility() {
+        return false;
+    }
+
+    /**
+     * If {@link #overridesItemVisibility()} returns true, the return value of this method
+     * will help determine the visibility of the {@link MenuItem} this ActionProvider is bound to.
+     *
+     * <p>If the MenuItem's visibility is explicitly set to false by the application,
+     * the MenuItem will not be shown, even if this method returns true.</p>
+     *
+     * @return true if the MenuItem this ActionProvider is bound to is visible, false if
+     *         it is invisible. The default implementation returns true.
+     */
+    public boolean isVisible() {
+        return true;
+    }
+
+    /**
      * Performs an optional default action.
      * <p>
      * For the case of an action provider placed in a menu item not shown as an action this
