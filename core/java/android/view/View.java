@@ -4558,31 +4558,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         if ((event.getEventType() & POPULATING_ACCESSIBILITY_EVENT_TYPES) != 0) {
             dispatchPopulateAccessibilityEvent(event);
         }
-        // Intercept accessibility focus events fired by virtual nodes to keep
-        // track of accessibility focus position in such nodes.
-        final int eventType = event.getEventType();
-        switch (eventType) {
-            case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED: {
-                final long virtualNodeId = AccessibilityNodeInfo.getVirtualDescendantId(
-                        event.getSourceNodeId());
-                if (virtualNodeId != AccessibilityNodeInfo.UNDEFINED) {
-                    ViewRootImpl viewRootImpl = getViewRootImpl();
-                    if (viewRootImpl != null) {
-                        viewRootImpl.setAccessibilityFocusedHost(this);
-                    }
-                }
-            } break;
-            case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED: {
-                final long virtualNodeId = AccessibilityNodeInfo.getVirtualDescendantId(
-                        event.getSourceNodeId());
-                if (virtualNodeId != AccessibilityNodeInfo.UNDEFINED) {
-                    ViewRootImpl viewRootImpl = getViewRootImpl();
-                    if (viewRootImpl != null) {
-                        viewRootImpl.setAccessibilityFocusedHost(null);
-                    }
-                }
-            } break;
-        }
         // In the beginning we called #isShown(), so we know that getParent() is not null.
         getParent().requestSendAccessibilityEvent(this, event);
     }
@@ -6311,7 +6286,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             mPrivateFlags2 |= ACCESSIBILITY_FOCUSED;
             ViewRootImpl viewRootImpl = getViewRootImpl();
             if (viewRootImpl != null) {
-                viewRootImpl.setAccessibilityFocusedHost(this);
+                viewRootImpl.setAccessibilityFocus(this, null);
             }
             invalidate();
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
@@ -6342,7 +6317,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         if (viewRootImpl != null) {
             View focusHost = viewRootImpl.getAccessibilityFocusedHost();
             if (focusHost != null && ViewRootImpl.isViewDescendantOf(focusHost, this)) {
-                viewRootImpl.setAccessibilityFocusedHost(null);
+                viewRootImpl.setAccessibilityFocus(null, null);
             }
         }
     }
@@ -7953,7 +7928,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 // If the window does not have input focus we take away accessibility
                 // focus as soon as the user stop hovering over the view.
                 if (mAttachInfo != null && !mAttachInfo.mHasWindowFocus) {
-                    getViewRootImpl().setAccessibilityFocusedHost(null);
+                    getViewRootImpl().setAccessibilityFocus(null, null);
                 }
             }
         }
