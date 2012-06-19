@@ -81,9 +81,8 @@ public class MediaRouter {
             IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
             mAudioService = IAudioService.Stub.asInterface(b);
 
-            // XXX this doesn't deal with locale changes!
-            mSystemCategory = new RouteCategory(mResources.getText(
-                    com.android.internal.R.string.default_audio_route_category_name),
+            mSystemCategory = new RouteCategory(
+                    com.android.internal.R.string.default_audio_route_category_name,
                     ROUTE_TYPE_LIVE_AUDIO, false);
         }
 
@@ -130,6 +129,13 @@ public class MediaRouter {
                         info.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO;
                         sStatic.mBluetoothA2dpRoute = info;
                         addRoute(sStatic.mBluetoothA2dpRoute);
+                        try {
+                            if (mAudioService.isBluetoothA2dpOn()) {
+                                selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, mBluetoothA2dpRoute);
+                            }
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Error selecting Bluetooth A2DP route", e);
+                        }
                     } else {
                         sStatic.mBluetoothA2dpRoute.mName = mCurRoutesInfo.mBluetoothName;
                         dispatchRouteChanged(sStatic.mBluetoothA2dpRoute);
@@ -277,6 +283,16 @@ public class MediaRouter {
                     typesToString(route.getSupportedTypes()) + " into route types " +
                     typesToString(types));
             return;
+        }
+
+        final RouteInfo btRoute = sStatic.mBluetoothA2dpRoute;
+        if (btRoute != null && (types & ROUTE_TYPE_LIVE_AUDIO) != 0 &&
+                (route == btRoute || route == sStatic.mDefaultAudio)) {
+            try {
+                sStatic.mAudioService.setBluetoothA2dpOn(route == btRoute);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error changing Bluetooth A2DP state", e);
+            }
         }
 
         if (sStatic.mSelectedRoute != null) {
