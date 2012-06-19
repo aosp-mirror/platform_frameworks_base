@@ -23,6 +23,7 @@
     <div class="nav-section-header"><a href="<?cs var:toroot ?>about/versions/android-3.0-highlights.html">
       <span class="en">Honeycomb</span></a></div>
       <ul>
+        <li><a href="<?cs var:toroot ?>about/versions/android-3.2.html">Android 3.2 APIs</a></li>
         <li><a href="<?cs var:toroot ?>about/versions/android-3.1.html">Android 3.1 APIs</a></li>
         <li><a href="<?cs var:toroot ?>about/versions/android-3.0.html">Android 3.0 APIs</a> </li>
       </ul>

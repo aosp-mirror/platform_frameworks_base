@@ -8,13 +8,9 @@ sdk.platform.apiLevel=13
 
 <h2>In this document</h2>
 <ol>
-  <li><a href="#relnotes">Revisions</a></li>
   <li><a href="#highlights">Highlights</a></li>
   <li><a href="#api">API Overview</a></li>
   <li><a href="#api-level">API Level</a></li>
-  <li><a href="#apps">Built-in Applications</a></li>
-  <li><a href="#locs">Locales</a></li>
-  <li><a href="#skins">Emulator Skins</a></li>
 </ol>
 
 <h2>Reference</h2>
@@ -47,46 +43,10 @@ of the new features and developer APIs.</p>
 <p>For developers, the Android {@sdkPlatformVersion} platform is available as a
 downloadable component for the Android SDK. The downloadable platform includes
 an Android library and system image, as well as a set of emulator skins and
-more. The downloadable platform includes no external libraries.</p>
-
-<p>To get started developing or testing against Android {@sdkPlatformVersion},
-use the Android SDK Manager to download the platform into your SDK. For more
-information, see <a href="{@docRoot}sdk/adding-components.html">Adding SDK
-Components</a>. If you are new to Android, <a
-href="{@docRoot}sdk/index.html">download the SDK Starter Package</a> first.</p>
-
-<p class="note"><strong>Reminder:</strong> If you've already published an
-Android application, please test and optimize your application on Android 3.2 as
-soon as possible. You should do so to be sure your application provides the best
-experience possible on the latest Android-powered devices. For information about
-what you can do, read <a
-href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing Apps for
-Android 3.x</a>.</p>
+more. To get started developing or testing against Android {@sdkPlatformVersion},
+use the Android SDK Manager to download the platform into your SDK.</p>
 
 
-<h2 id="relnotes">Revisions</h2>
-
-<p>To determine what revision of the Android {@sdkPlatformVersion} platform you
-have installed, refer to the "Installed Packages" listing in the Android SDK and
-AVD Manager.</p>
-
-
-<div class="toggle-content opened" style="padding-left:1em;">
-
-  <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png"
-class="toggle-content-img" alt="" />
-    Android {@sdkPlatformVersion}, Revision 1</a> <em>(July 2011)</em>
-  </a></p>
-
-  <div class="toggle-content-toggleme" style="padding-left:2em;">
-
-<dl>
-<dt>Initial release. SDK Tools r12 or higher is recommended.</dt>
-</dl>
-
-  </div>
-</div>
 
 <h2 id="highlights" style="margin-top:1.5em;">Platform Highlights</h2>
 
@@ -600,142 +560,7 @@ also need to add an <code>android:minSdkVersion="{@sdkPlatformApiLevel}"</code>
 attribute to the <code>&lt;uses-sdk&gt;</code> element in the application's
 manifest.</p>
 
-<p>For more information about how to use API Level, see the <a
-href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
+<p>For more information, read <a href="{@docRoot}guide/appendix/api-levels.html">What is API
+Level?</a></p>
 
 
-<h2 id="apps">Built-in Applications</h2>
-
-<p>The system image included in the downloadable platform provides these
-built-in applications:</p>
-
-<table style="border:0;padding-bottom:0;margin-bottom:0;">
-<tr>
-<td style="border:0;padding-bottom:0;margin-bottom:0;">
-<ul>
-<li>API Demos</li>
-<li>Browser</li>
-<li>Calculator</li>
-<li>Camera</li>
-<li>Clock</li>
-<li>Contacts</li>
-<li>Custom Locale</li>
-<li>Dev Tools</li>
-<li>Downloads</li>
-<li>Email</li>
-</ul>
-</td>
-<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
-<ul>
-<li>Gallery</li>
-<li>Gestures Builder</li>
-<li>Messaging</li>
-<li>Music</li>
-<li>Search</li>
-<li>Settings</li>
-<li>Spare Parts</li>
-<li>Speech Recorder</li>
-<li>Widget Preview</li>
-</ul>
-</td>
-</tr>
-</table>
-
-
-<h2 id="locs" style="margin-top:.75em;">Locales</h2>
-
-<p>The system image included in the downloadable SDK platform provides a variety
-of
-built-in locales. In some cases, region-specific strings are available for the
-locales. In other cases, a default version of the language is used. The
-languages that are available in the Android 3.0 system
-image are listed below (with <em>language</em>_<em>country/region</em> locale
-descriptor).</p>
-
-<table style="border:0;padding-bottom:0;margin-bottom:0;">
-<tr>
-<td style="border:0;padding-bottom:0;margin-bottom:0;">
-<ul>
-<li>Arabic, Egypt (ar_EG)</li>
-<li>Arabic, Israel (ar_IL)</li>
-<li>Bulgarian, Bulgaria (bg_BG)</li>
-<li>Catalan, Spain (ca_ES)</li>
-<li>Czech, Czech Republic (cs_CZ)</li>
-<li>Danish, Denmark(da_DK)</li>
-<li>German, Austria (de_AT)</li>
-<li>German, Switzerland (de_CH)</li>
-<li>German, Germany (de_DE)</li>
-<li>German, Liechtenstein (de_LI)</li>
-<li>Greek, Greece (el_GR)</li>
-<li>English, Australia (en_AU)</li>
-<li>English, Canada (en_CA)</li>
-<li>English, Britain (en_GB)</li>
-<li>English, Ireland (en_IE)</li>
-<li>English, India (en_IN)</li>
-<li>English, New Zealand (en_NZ)</li>
-<li>English, Singapore(en_SG)</li>
-<li>English, US (en_US)</li>
-<li>English, Zimbabwe (en_ZA)</li>
-<li>Spanish (es_ES)</li>
-<li>Spanish, US (es_US)</li>
-<li>Finnish, Finland (fi_FI)</li>
-<li>French, Belgium (fr_BE)</li>
-<li>French, Canada (fr_CA)</li>
-<li>French, Switzerland (fr_CH)</li>
-<li>French, France (fr_FR)</li>
-<li>Hebrew, Israel (he_IL)</li>
-<li>Hindi, India (hi_IN)</li>
-</ul>
-</td>
-<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
-<li>Croatian, Croatia (hr_HR)</li>
-<li>Hungarian, Hungary (hu_HU)</li>
-<li>Indonesian, Indonesia (id_ID)</li>
-<li>Italian, Switzerland (it_CH)</li>
-<li>Italian, Italy (it_IT)</li>
-<li>Japanese (ja_JP)</li>
-<li>Korean (ko_KR)</li>
-<li>Lithuanian, Lithuania (lt_LT)</li>
-<li>Latvian, Latvia (lv_LV)</li>
-<li>Norwegian bokmål, Norway (nb_NO)</li>
-<li>Dutch, Belgium (nl_BE)</li>
-<li>Dutch, Netherlands (nl_NL)</li>
-<li>Polish (pl_PL)</li>
-<li>Portuguese, Brazil (pt_BR)</li>
-<li>Portuguese, Portugal (pt_PT)</li>
-<li>Romanian, Romania (ro_RO)</li>
-<li>Russian (ru_RU)</li></li>
-<li>Slovak, Slovakia (sk_SK)</li>
-<li>Slovenian, Slovenia (sl_SI)</li>
-<li>Serbian (sr_RS)</li>
-<li>Swedish, Sweden (sv_SE)</li>
-<li>Thai, Thailand (th_TH)</li>
-<li>Tagalog, Philippines (tl_PH)</li>
-<li>Turkish, Turkey (tr_TR)</li>
-<li>Ukrainian, Ukraine (uk_UA)</li>
-<li>Vietnamese, Vietnam (vi_VN)</li>
-<li>Chinese, PRC (zh_CN)</li>
-<li>Chinese, Taiwan (zh_TW)</li>
-</td>
-</tr>
-</table>
-
-<p class="note"><strong>Note:</strong> The Android platform may support more
-locales than are included in the SDK system image. All of the supported locales
-are available in the <a href="http://source.android.com/">Android Open Source
-Project</a>.</p>
-
-<h2 id="skins">Emulator Skins</h2>
-
-<p>The downloadable platform includes the following emulator skin:</p>
-
-<ul>
-  <li>
-    WXGA (1280x800, medium density, xlarge screen)
-  </li>
-</ul>
-
-<p>For more information about how to develop an application that displays
-and functions properly on all Android-powered devices, see <a
-href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
-Screens</a>.</p>

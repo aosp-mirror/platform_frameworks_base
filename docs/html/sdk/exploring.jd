@@ -61,14 +61,14 @@ stepping through the code while debugging your app.</td>
     <td>{@code &lt;sdk>/sources/}</td>
   </tr>
   <tr>
-    <a><a href="{@docRoot}tools/samples/index.html">Samples for SDK</a></td>
+    <td><a href="{@docRoot}tools/samples/index.html">Samples for SDK</a></td>
     <td>A collection of sample apps that demonstrate a variety of the
 platform APIs. These are a great resource to browse Android app code. The API Demos app in
 particular provides a huge number of small demos you should explore.</td>
     <td>{@code &lt;sdk>/platforms/&lt;android-version>/samples/}</td>
   </tr>
   <tr>
-    <a><a href="http://developers.google.com/android">Google APIs</a></td>
+    <td><a href="http://developers.google.com/android">Google APIs</a></td>
     <td>An SDK add-on that provides both a platform you can use to develop an app
 using special Google APIs and a system image for the emulator so you can test your app using the
 Google APIs.</td>
@@ -76,7 +76,7 @@ Google APIs.</td>
   </tr>
   
   <tr>
-    <a><a href="{@docRoot}tools/sdk/support-library.html">Android Support</a></td>
+    <td><a href="{@docRoot}tools/sdk/support-library.html">Android Support</a></td>
     <td>A static library you can include in your app sources in order to use powerful
 APIs that aren't available in the standard platform. For example, the support library
 contains versions of the {@link android.support.v4.app.Fragment} class that's compatible with
@@ -85,13 +85,13 @@ android.support.v4.view.ViewPager} APIs that allow you to easily build a side-sw
     <td>{@code &lt;sdk>/extras/android/support/}</td>
   </tr>
   <tr>
-    <a><a href="{@docRoot}guide/google/play/billing/index.html">Google Play Billing</a></td>
+    <td><a href="{@docRoot}guide/google/play/billing/index.html">Google Play Billing</a></td>
     <td>Provides the static libraries and samples that allow you to
 integrate billing services in your app with Google Play.</td>
     <td>{@code &lt;sdk>/extras/google/}</td>
   </tr>
   <tr>
-    <a><a href="{@docRoot}guide/google/play/licensing/index.html">Google Play Licensing</a></td>
+    <td><a href="{@docRoot}guide/google/play/licensing/index.html">Google Play Licensing</a></td>
     <td>Provides the static libraries and samples that allow you to perform license verification for
 your app when distributing with Google Play.</td>
     <td>{@code &lt;sdk>/extras/google/}</td>
