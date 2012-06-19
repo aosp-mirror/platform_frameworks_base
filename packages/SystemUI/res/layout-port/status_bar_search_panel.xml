@@ -54,7 +54,7 @@
                 prvandroid:outerRadius="@dimen/navbar_search_outerring_radius"
                 prvandroid:innerRadius="@*android:dimen/glowpadview_inner_radius"
                 prvandroid:snapMargin="@dimen/navbar_search_snap_margin"
-                prvandroid:feedbackCount="0"
+                prvandroid:feedbackCount="1"
                 prvandroid:vibrationDuration="@integer/config_vibration_duration"
                 prvandroid:alwaysTrackFinger="true"
                 prvandroid:glowRadius="@*android:dimen/glowpadview_glow_radius"
