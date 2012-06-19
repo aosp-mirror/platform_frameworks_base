@@ -21,21 +21,23 @@ tabbedList=1
        <div class="frame">
            <ul>
                <li class="item carousel-home">
-                   <div class="col-8"><img
-src="http://1.bp.blogspot.com/-6qyjPxTuzv0/T6lde-Oq_fI/AAAAAAAABXc/zle7OFEGP44/s400/fddns%2Bcopy.png" 
-class="play no-shadow"></div>
-                   <div class="content-right col-6">
-                   <p class="title-intro">From the blog:</p>
-                   <h2>Using DialogFragments</h2>
-                   <p>In this post, I'll show how to use DialogFragments with the <a
+                 <div class="col-8">
+                   <img
+src="http://1.bp.blogspot.com/-6qyjPxTuzv0/T6lde-Oq_fI/AAAAAAAABXc/zle7OFEGP44/s400/fddns%2Bcopy.png"
+class="play no-shadow no-transform" />
+                 </div>
+                <div class="content-right col-6">
+                  <p class="title-intro">From the blog:</p>
+                  <h2>Using DialogFragments</h2>
+                  <p>In this post, I'll show how to use DialogFragments with the <a
 href="http://developer.android.com/reference/android/support/v4/app/DialogFragment.html">v4 support
 library</a> (for backward compatibility on pre-Honeycomb devices) to show a simple edit dialog and
 return a result to the calling Activity using an interface.</p>
-                   <a
+                  <p><a
 href="http://android-developers.blogspot.com/2012/05/using-dialogfragments.html" class="button">Read
-more</a>
-                   </div>                
-			</li>
+more</a></p>
+                </div>            
+              </li>
                <li class="item carousel-home">
                    <div class="col-8">
                      <img
@@ -46,10 +48,11 @@ src="http://1.bp.blogspot.com/-6K1kfNOdek8/T72bXvtTSQI/AAAAAAAABmw/kYzmJt0_328/s
                    <p>Starting today, developers can use In-app Billing to sell monthly or annual
 subscriptions from inside of their apps. All subscriptions are auto-renewing, for every app and game
 and every type of subscription product.</p>
-                   <a class="button"
-href="http://android-developers.blogspot.com/2012/05/in-app-subscriptions-in-google-play.html">Read more</a>
+                   <p><a class="button"
+href="http://android-developers.blogspot.com/2012/05/in-app-subscriptions-in-google-play.html">Read
+more</a></p>
                    </div>                
-			</li>
+                </li>
                <li class="item carousel-home">
                    <div class="col-8">
                      <img
@@ -59,13 +62,15 @@ src="{@docRoot}images/home/developers_live.png" class="play"></div>
                    <p>Every week we host a live broadcast in which we review a collection of apps and games
                      nominated by the creators. It's no-holds-barred and we tell you exactly what is flawed or
                      fantastic in each app and how to make improvements.</p>
-                   <a href="" class="button" onclick="$('ul#DevelopersLive li:first a').click();return false;">Watch the latest review</a>
+                   <p><a href="" class="button" onclick="$('ul#DevelopersLive li:first
+a').click();return false;">Watch the latest review</a></p>
                    </div>                
                 </li>
                <li class="item carousel-home">
                    <div class="col-8">
                      <img style="margin-top:30px;width:300px"
-src="{@docRoot}images/home/ics-android.png" class="play no-shadow no-transform"></div>
+src="{@docRoot}images/home/ics-android.png" class="play no-shadow no-transform" />
+                   </div>
                    <div class="content-right col-6">
                    <h2>Ice Cream Sandwich</h2>
                    <p>Android 4.0 brings handsets and tablets together with a unified
@@ -73,8 +78,8 @@ src="{@docRoot}images/home/ics-android.png" class="play no-shadow no-transform">
                    For information about API changes in the latest release (API level 15),
                    read the <a href='{@docRoot}about/framework/android-4.0.3.html'>platform notes</a> and <a
                    href='{@docRoot}sdk/api_diff/15/changes.html'>diff report</a>.</p>
-                   <a class="button"
-href="{@docRoot}about/framework/android-4.0-highlights.html">Read the highlights</a>
+                   <p><a class="button"
+href="{@docRoot}about/framework/android-4.0-highlights.html">Read the highlights</a></p>
                    </div>                
                 </li>
            </ul>
@@ -94,31 +99,45 @@ href="{@docRoot}about/framework/android-4.0-highlights.html">Read the highlights
                                 <!-- DEVELOPER NEWS -->
 				<ul>
 					<li>
-						<img src="http://1.bp.blogspot.com/-6qyjPxTuzv0/T6lde-Oq_fI/AAAAAAAABXc/zle7OFEGP44/s400/fddns%2Bcopy.png">
-						<h4><a href="http://android-developers.blogspot.com/2012/05/using-dialogfragments.html">Using DialogFragments</a></h4>
-						<p>Honeycomb introduced Fragments to support reusing
-portions of UI and logic across multiple activities in an app...</p>
+                                          <div class="feed-image" style="background:
+url('../images/emulator-wvga800l.png') no-repeat 0 0">
+                                          </div>
+                                          <h4><a
+href="http://android-developers.blogspot.com/2012/04/faster-emulator-with-better-hardware.html">A Faster Emulator with Better...</a></h4>
+                                          <p>Today we’re thrilled to announce several significant improvements to the emulator, including a dramatic... <a
+href="http://android-developers.blogspot.com/2012/04/faster-emulator-with-better-hardware.html">read more</a></p>
 					</li>
 					<li>
-						<img src="http://3.bp.blogspot.com/_GTM_W5mVPTU/S9fApAZheqI/AAAAAAAAAAw/RdRJF29pymw/s1600/Back-Droids.jpg">
-						<h4><a
+                                          <div class="feed-image" style="background:
+url('../images/develop/auth-code.png') no-repeat 0 0">
+                                          </div>
+                                          <h4><a
 href="http://android-developers.blogspot.com/2012/04/android-c2dm-client-login-key.html">Android
 C2DM — Client Login key...</a></h4>
-						<p>In the upcoming weeks, some of the older Client
-Login authentication keys will expire. If you generated the token you’re...</p>
+                                          <p>In the upcoming weeks, some of the older Client
+Login authentication keys will expire. If you generated the token you’re... <a
+href="http://android-developers.blogspot.com/2012/04/android-c2dm-client-login-key.html">read more</a></p>
 					</li>
 					<li>
-						<img src="../images/develop-placeholder.png">
-						<h4><a
+                                          <div class="feed-image">
+                                          </div>
+                                          <h4><a
 href="http://android-developers.blogspot.com/2012/04/accessibility-are-you-serving-all-your.html">
 Accessibility</a></h4>
-						<p>We recently published some new resources to help
-developers make their Android applications more accessible...</p>
+                                          <p>We recently published some new resources to help
+developers make their Android applications more accessible... <a
+href="http://android-developers.blogspot.com/2012/04/accessibility-are-you-serving-all-your.html">read more</a></p>
 					</li>
 					<li>
-						<img src="../images/develop-placeholder.png">
-						<h4>Friday Game Review!</h4>
-						<p>Big Pete is back! Plus, CowCopter, Robo Sockets, Cyclone, and Restroom Antics!<br><small>via <a href="#">+Android Developers</a></small></p>
+                                          <div class="feed-image" style="background:
+url('http://developer.android.com/images/home/play_logo.png') no-repeat 0 0" >
+                                          </div>
+                                          <h4><a
+href="http://android-developers.blogspot.com/2012/04/new-seller-countries-in-google-play.html">New 
+                                              Seller Countries in Google Play</a></h4>
+                                          <p>Over the past year we’ve been working to expand the list of 
+                                            countries and currencies from which Android developers... <a
+href="http://android-developers.blogspot.com/2012/04/new-seller-countries-in-google-play.html">read more</a></p>
 					</li>
 				</ul>
                                 <!-- FEATURED DOCS -->
