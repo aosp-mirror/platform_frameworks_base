@@ -82,6 +82,10 @@ class MeasuredText {
         return null;
     }
 
+    void setPos(int pos) {
+        mPos = pos;
+    }
+
     /**
      * Analyzes text for bidirectional runs.  Allocates working buffers.
      */
@@ -113,7 +117,7 @@ class MeasuredText {
                 if (startInPara < 0) startInPara = 0;
                 if (endInPara > len) endInPara = len;
                 for (int j = startInPara; j < endInPara; j++) {
-                    mChars[j] = '\uFFFC';
+                    mChars[j] = '\uFFFC'; // object replacement character
                 }
             }
         }
