@@ -18,6 +18,7 @@ package android.media;
 
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -26,9 +27,11 @@ import android.graphics.RectF;
 import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -129,6 +132,88 @@ public class RemoteControlClient
      * Intentionally hidden as an application shouldn't set such a playback state value.
      */
     public final static int PLAYSTATE_NONE               = 0;
+
+    /**
+     * @hide (to be un-hidden)
+     * The default playback type, "local", indicating the presentation of the media is happening on
+     * the same device (e.g. a phone, a tablet) as where it is controlled from.
+     */
+    public final static int PLAYBACK_TYPE_LOCAL = 0;
+    /**
+     * @hide (to be un-hidden)
+     * A playback type indicating the presentation of the media is happening on
+     * a different device (i.e. the remote device) than where it is controlled from.
+     */
+    public final static int PLAYBACK_TYPE_REMOTE = 1;
+    private final static int PLAYBACK_TYPE_MIN = PLAYBACK_TYPE_LOCAL;
+    private final static int PLAYBACK_TYPE_MAX = PLAYBACK_TYPE_REMOTE;
+    /**
+     * @hide (to be un-hidden)
+     * Playback information indicating the playback volume is fixed, i.e. it cannot be controlled
+     * from this object. An example of fixed playback volume is a remote player, playing over HDMI
+     * where the user prefer to control the volume on the HDMI sink, rather than attenuate at the
+     * source.
+     * @see #PLAYBACKINFO_VOLUME_HANDLING.
+     */
+    public final static int PLAYBACK_VOLUME_FIXED = 0;
+    /**
+     * @hide (to be un-hidden)
+     * Playback information indicating the playback volume is variable and can be controlled from
+     * this object.
+     * @see #PLAYBACKINFO_VOLUME_HANDLING.
+     */
+    public final static int PLAYBACK_VOLUME_VARIABLE = 1;
+    /**
+     * @hide (to be un-hidden)
+     * The playback information value indicating the value of a given information type is invalid.
+     * @see #PLAYBACKINFO_VOLUME_HANDLING.
+     */
+    public final static int PLAYBACKINFO_INVALID_VALUE = Integer.MIN_VALUE;
+
+    //==========================================
+    // Public keys for playback information
+    /**
+     * @hide (to be un-hidden)
+     * Playback information that defines the type of playback associated with this
+     * RemoteControlClient. See {@link #PLAYBACK_TYPE_LOCAL} and {@link #PLAYBACK_TYPE_REMOTE}.
+     */
+    public final static int PLAYBACKINFO_PLAYBACK_TYPE = 1;
+    /**
+     * @hide (to be un-hidden)
+     * Playback information that defines at what volume the playback associated with this
+     * RemoteControlClient is performed. This information is only used when the playback type is not
+     * local (see {@link #PLAYBACKINFO_PLAYBACK_TYPE}).
+     */
+    public final static int PLAYBACKINFO_VOLUME = 2;
+    /**
+     * @hide (to be un-hidden)
+     * Playback information that defines the maximum volume volume value that is supported
+     * by the playback associated with this RemoteControlClient. This information is only used
+     * when the playback type is not local (see {@link #PLAYBACKINFO_PLAYBACK_TYPE}).
+     */
+    public final static int PLAYBACKINFO_VOLUME_MAX = 3;
+    /**
+     * @hide (to be un-hidden)
+     * Playback information that defines how volume is handled for the presentation of the media.
+     * @see #PLAYBACK_VOLUME_FIXED
+     * @see #PLAYBACK_VOLUME_VARIABLE
+     */
+    public final static int PLAYBACKINFO_VOLUME_HANDLING = 4;
+    /**
+     * @hide (to be un-hidden)
+     * Playback information that defines over what stream type the media is presented.
+     */
+    public final static int PLAYBACKINFO_USES_STREAM = 5;
+
+    //==========================================
+    // Private keys for playback information
+    /**
+     * @hide
+     * Used internally to relay playback state (set by the application with
+     * {@link #setPlaybackState(int)}) to AudioService
+     */
+    public final static int PLAYBACKINFO_PLAYSTATE = 255;
+
 
     /**
      * Flag indicating a RemoteControlClient makes use of the "previous" media key.
@@ -516,6 +601,8 @@ public class RemoteControlClient
 
                 // send to remote control display if conditions are met
                 sendPlaybackState_syncCacheLock();
+                // update AudioService
+                sendAudioServiceNewPlaybackInfo_syncCacheLock(PLAYBACKINFO_PLAYSTATE, state);
             }
         }
     }
@@ -539,6 +626,122 @@ public class RemoteControlClient
 
             // send to remote control display if conditions are met
             sendTransportControlFlags_syncCacheLock();
+        }
+    }
+
+    /** @hide */
+    public final static int DEFAULT_PLAYBACK_VOLUME_HANDLING = PLAYBACK_VOLUME_VARIABLE;
+    /** @hide */
+    // hard-coded to the same number of steps as AudioService.MAX_STREAM_VOLUME[STREAM_MUSIC]
+    public final static int DEFAULT_PLAYBACK_VOLUME = 15;
+
+    private int mPlaybackType = PLAYBACK_TYPE_LOCAL;
+    private int mPlaybackVolumeMax = DEFAULT_PLAYBACK_VOLUME;
+    private int mPlaybackVolume = DEFAULT_PLAYBACK_VOLUME;
+    private int mPlaybackVolumeHandling = DEFAULT_PLAYBACK_VOLUME_HANDLING;
+    private int mPlaybackStream = AudioManager.STREAM_MUSIC;
+
+    /**
+     * @hide  (to be un-hidden)
+     * Set information describing information related to the playback of media so the system
+     * can implement additional behavior to handle non-local playback usecases.
+     * @param what a key to specify the type of information to set. Valid keys are
+     *        {@link #PLAYBACKINFO_PLAYBACK_TYPE},
+     *        {@link #PLAYBACKINFO_USES_STREAM},
+     *        {@link #PLAYBACKINFO_VOLUME},
+     *        {@link #PLAYBACKINFO_VOLUME_MAX},
+     *        and {@link #PLAYBACKINFO_VOLUME_HANDLING}.
+     * @param value the value for the supplied information to set.
+     */
+    public void setPlaybackInformation(int what, int value) {
+        synchronized(mCacheLock) {
+            switch (what) {
+                case PLAYBACKINFO_PLAYBACK_TYPE:
+                    if ((value >= PLAYBACK_TYPE_MIN) && (value <= PLAYBACK_TYPE_MAX)) {
+                        if (mPlaybackType != value) {
+                            mPlaybackType = value;
+                            sendAudioServiceNewPlaybackInfo_syncCacheLock(what, value);
+                        }
+                    } else {
+                        Log.w(TAG, "using invalid value for PLAYBACKINFO_PLAYBACK_TYPE");
+                    }
+                    break;
+                case PLAYBACKINFO_VOLUME:
+                    if ((value > -1) && (value <= mPlaybackVolumeMax)) {
+                        if (mPlaybackVolume != value) {
+                            mPlaybackVolume = value;
+                            sendAudioServiceNewPlaybackInfo_syncCacheLock(what, value);
+                        }
+                    } else {
+                        Log.w(TAG, "using invalid value for PLAYBACKINFO_VOLUME");
+                    }
+                    break;
+                case PLAYBACKINFO_VOLUME_MAX:
+                    if (value > 0) {
+                        if (mPlaybackVolumeMax != value) {
+                            mPlaybackVolumeMax = value;
+                            sendAudioServiceNewPlaybackInfo_syncCacheLock(what, value);
+                        }
+                    } else {
+                        Log.w(TAG, "using invalid value for PLAYBACKINFO_VOLUME_MAX");
+                    }
+                    break;
+                case PLAYBACKINFO_USES_STREAM:
+                    if ((value >= 0) && (value < AudioSystem.getNumStreamTypes())) {
+                        mPlaybackStream = value;
+                    } else {
+                        Log.w(TAG, "using invalid value for PLAYBACKINFO_USES_STREAM");
+                    }
+                    break;
+                case PLAYBACKINFO_VOLUME_HANDLING:
+                    if ((value >= PLAYBACK_VOLUME_FIXED) && (value <= PLAYBACK_VOLUME_VARIABLE)) {
+                        if (mPlaybackVolumeHandling != value) {
+                            mPlaybackVolumeHandling = value;
+                            sendAudioServiceNewPlaybackInfo_syncCacheLock(what, value);
+                        }
+                    } else {
+                        Log.w(TAG, "using invalid value for PLAYBACKINFO_VOLUME_HANDLING");
+                    }
+                    break;
+                default:
+                    // not throwing an exception or returning an error if more keys are to be
+                    // supported in the future
+                    Log.w(TAG, "setPlaybackInformation() ignoring unknown key " + what);
+                    break;
+            }
+        }
+    }
+
+    /**
+     * @hide  (to be un-hidden)
+     * Return playback information represented as an integer value.
+     * @param what a key to specify the type of information to retrieve. Valid keys are
+     *        {@link #PLAYBACKINFO_PLAYBACK_TYPE},
+     *        {@link #PLAYBACKINFO_USES_STREAM},
+     *        {@link #PLAYBACKINFO_VOLUME},
+     *        {@link #PLAYBACKINFO_VOLUME_MAX},
+     *        and {@link #PLAYBACKINFO_VOLUME_HANDLING}.
+     * @return the current value for the given information type, or
+     *   {@link #PLAYBACKINFO_INVALID_VALUE} if an error occurred or the request is invalid, or
+     *   the value is unknown.
+     */
+    public int getIntPlaybackInformation(int what) {
+        synchronized(mCacheLock) {
+            switch (what) {
+                case PLAYBACKINFO_PLAYBACK_TYPE:
+                    return mPlaybackType;
+                case PLAYBACKINFO_VOLUME:
+                    return mPlaybackVolume;
+                case PLAYBACKINFO_VOLUME_MAX:
+                    return mPlaybackVolumeMax;
+                case PLAYBACKINFO_USES_STREAM:
+                    return mPlaybackStream;
+                case PLAYBACKINFO_VOLUME_HANDLING:
+                    return mPlaybackVolumeHandling;
+                default:
+                    Log.e(TAG, "getIntPlaybackInformation() unknown key " + what);
+                    return PLAYBACKINFO_INVALID_VALUE;
+            }
         }
     }
 
@@ -675,6 +878,27 @@ public class RemoteControlClient
         }
     };
 
+    /**
+     * @hide
+     * Default value for the unique identifier
+     */
+    public final static int RCSE_ID_UNREGISTERED = -1;
+    /**
+     * Unique identifier of the RemoteControlStackEntry in AudioService with which
+     * this RemoteControlClient is associated.
+     */
+    private int mRcseId = RCSE_ID_UNREGISTERED;
+    /**
+     * @hide
+     * To be only used by AudioManager after it has received the unique id from
+     * IAudioService.registerRemoteControlClient()
+     * @param id the unique identifier of the RemoteControlStackEntry in AudioService with which
+     *              this RemoteControlClient is associated.
+     */
+    public void setRcseId(int id) {
+        mRcseId = id;
+    }
+
     private EventHandler mEventHandler;
     private final static int MSG_REQUEST_PLAYBACK_STATE = 1;
     private final static int MSG_REQUEST_METADATA = 2;
@@ -730,6 +954,9 @@ public class RemoteControlClient
             }
         }
     }
+
+    //===========================================================
+    // Communication with IRemoteControlDisplay
 
     private void detachFromDisplay_syncCacheLock() {
         mRcDisplay = null;
@@ -802,6 +1029,37 @@ public class RemoteControlClient
         }
     }
 
+    //===========================================================
+    // Communication with AudioService
+
+    private static IAudioService sService;
+
+    private static IAudioService getService()
+    {
+        if (sService != null) {
+            return sService;
+        }
+        IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
+        sService = IAudioService.Stub.asInterface(b);
+        return sService;
+    }
+
+    private void sendAudioServiceNewPlaybackInfo_syncCacheLock(int what, int value) {
+        if (mRcseId == RCSE_ID_UNREGISTERED) {
+            return;
+        }
+        Log.d(TAG, "sending to AudioService key=" + what + ", value=" + value);
+        IAudioService service = getService();
+        try {
+            service.setPlaybackInfoForRcc(mRcseId, what, value);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in sendAudioServiceNewPlaybackInfo_syncCacheLock", e);
+        }
+    }
+
+    //===========================================================
+    // Message handlers
+
     private void onNewInternalClientGen(Integer clientGeneration, int artWidth, int artHeight) {
         synchronized (mCacheLock) {
             // this remote control client is told it is the "focused" one:
@@ -835,6 +1093,9 @@ public class RemoteControlClient
             }
         }
     }
+
+    //===========================================================
+    // Internal utilities
 
     /**
      * Scale a bitmap to fit the smallest dimension by uniformly scaling the incoming bitmap.
