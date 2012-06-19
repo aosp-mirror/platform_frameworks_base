@@ -1288,7 +1288,6 @@
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"도크 스피커"</string>
     <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"HDMI 오디오"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"시스템"</string>
-    <!-- no translation found for bluetooth_a2dp_audio_route_name (8575624030406771015) -->
-    <skip />
+    <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"블루투스 오디오"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"완료"</string>
 </resources>
