@@ -8271,6 +8271,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mAppTransitionRunning = false;
         // Restore window app tokens to the ActivityManager views
+        for (int i = mAnimatingAppTokens.size() - 1; i >= 0; i--) {
+            mAnimatingAppTokens.get(i).sendingToBottom = false;
+        }
         mAnimatingAppTokens.clear();
         mAnimatingAppTokens.addAll(mAppTokens);
         rebuildAppWindowListLocked();
@@ -9134,6 +9137,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // If this window's application has been removed, just skip it.
             if (thisApp != null && (thisApp.removed || thisApp.sendingToBottom)) {
+                if (DEBUG_FOCUS) Slog.v(TAG, "Skipping app because " + (thisApp.removed
+                        ? "removed" : "sendingToBottom"));
                 continue;
             }
 
