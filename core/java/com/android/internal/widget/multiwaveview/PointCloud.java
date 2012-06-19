@@ -186,10 +186,10 @@ public class PointCloud {
 
         // Compute contribution from Wave
         float radius = hypot(point.x, point.y);
-        float distanceToWaveRing = Math.abs(radius - waveManager.radius);
+        float distanceToWaveRing = (radius - waveManager.radius);
         float waveAlpha = 0.0f;
-        if (distanceToWaveRing < waveManager.width * 0.5f) {
-            float cosf = FloatMath.cos(PI * 0.5f * distanceToWaveRing / waveManager.width);
+        if (distanceToWaveRing < waveManager.width * 0.5f && distanceToWaveRing < 0.0f) {
+            float cosf = FloatMath.cos(PI * 0.25f * distanceToWaveRing / waveManager.width);
             waveAlpha = waveManager.alpha * max(0.0f, (float) Math.pow(cosf, 20.0f));
         }
 
