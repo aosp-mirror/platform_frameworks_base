@@ -3,49 +3,7 @@ no_footer_links=true
 carousel=true
 page.metaDescription=The official site for Android developers. Provides the Android SDK and documentation for app developers and designers.
 @jd:body
- 
-<style>
-.grid {
-  background:url('../images/home-marquee.jpg') no-repeat center;
-}
-.home-sections ul li a,
-.home-sections ul li a:hover {
- font-weight: bold;
- margin-top: 8px;
- line-height: 18px;
- float: left;
- width: 100%;
- text-align: center;
- border-radius: 2px;
- color: #444;
-}
 
-.home-sections ul li:hover a {
- color: #258AAF;
-}
-
-.home-sections ul li {
- float: left;
- display: block;
- list-style: none;
- width: 178px;
- height: 35px;
- border: 1px solid gainsboro;
- background-color: #F3F3F3;
- margin-right: 10px;
- border-radius: 2px;
-   -webkit-border-radius: 2px;
-   -moz-border-radius: 2px;
- box-shadow: 1px 1px 5px #EEE;
-   -webkit-box-shadow: 1px 1px 5px #EEE;
-   -moz-box-shadow: 1px 1px 5px #EEE;
- background:-webkit-linear-gradient(top, #f3f3f3,#ddd);
-}
-
-.home-sections ul li:hover {
- background: #eee;
-}
-</style>
 
 <div class="wrap">
     <!-- Slideshow -->

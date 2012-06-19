@@ -89,7 +89,7 @@ href="{@docRoot}about/framework/android-4.0-highlights.html">Read the highlights
 </div>
 <div class="wrap">
 	<!-- news and feature feed -->
-	<div class="feed col-8">
+	<div class="feed col-8" style="margin-left:0">
 		<ul class="feed-nav">
 			<li class="active">DEVELOPER NEWS</li>
 			<li>FEATURED DOCS</li>
@@ -164,7 +164,7 @@ href="http://android-developers.blogspot.com/2012/04/new-seller-countries-in-goo
 	</div>
 	<!-- /news and feature feed -->
 	<!-- video feed -->
-	<div class="feed col-8">
+	<div class="feed col-8" style="margin-right:0">
 		<ul class="feed-nav">
 			<li class="active">DEVELOPERS LIVE</li>
 			<li>VIDEO PLAYLISTS</li>
