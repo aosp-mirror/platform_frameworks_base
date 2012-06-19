@@ -15979,7 +15979,7 @@ package android.os {
     field public static final int PATTERN_SIMPLE_GLOB = 2; // 0x2
   }
 
-  public class PowerManager {
+  public final class PowerManager {
     method public void goToSleep(long);
     method public boolean isScreenOn();
     method public android.os.PowerManager.WakeLock newWakeLock(int, java.lang.String);
@@ -15993,7 +15993,7 @@ package android.os {
     field public static final int SCREEN_DIM_WAKE_LOCK = 6; // 0x6
   }
 
-  public class PowerManager.WakeLock {
+  public final class PowerManager.WakeLock {
     method public void acquire();
     method public void acquire(long);
     method public boolean isHeld();
