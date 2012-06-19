@@ -101,6 +101,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /** Debug remote control client/display feature */
     protected static final boolean DEBUG_RC = false;
+    /** Debug volumes */
+    protected static final boolean DEBUG_VOL = false;
 
     /** How long to delay before persisting a change in volume/ringer mode. */
     private static final int PERSIST_DELAY = 500;
@@ -120,7 +122,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     /** If the msg is already queued, queue this one and leave the old. */
     private static final int SENDMSG_QUEUE = 2;
 
-    // AudioHandler message.whats
+    // AudioHandler messages
     private static final int MSG_SET_DEVICE_VOLUME = 0;
     private static final int MSG_PERSIST_VOLUME = 1;
     private static final int MSG_PERSIST_MASTER_VOLUME = 2;
@@ -138,11 +140,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private static final int MSG_SET_ALL_VOLUMES = 14;
     private static final int MSG_PERSIST_MASTER_VOLUME_MUTE = 15;
     private static final int MSG_REPORT_NEW_ROUTES = 16;
-    // messages handled under wakelock, can only be queued, i.e. sent with queueMsgUnderWakeLock(),
+    private static final int MSG_REEVALUATE_REMOTE = 17;
+    // start of messages handled under wakelock
+    //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
-    private static final int MSG_SET_WIRED_DEVICE_CONNECTION_STATE = 17;
-    private static final int MSG_SET_A2DP_CONNECTION_STATE = 18;
-
+    private static final int MSG_SET_WIRED_DEVICE_CONNECTION_STATE = 18;
+    private static final int MSG_SET_A2DP_CONNECTION_STATE = 19;
+    // end of messages handled under wakelock
 
     // flags for MSG_PERSIST_VOLUME indicating if current and/or last audible volume should be
     // persisted
@@ -405,6 +409,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     final RemoteCallbackList<IAudioRoutesObserver> mRoutesObservers
             = new RemoteCallbackList<IAudioRoutesObserver>();
 
+    /**
+     * A fake stream type to match the notion of remote media playback
+     */
+    public final static int STREAM_REMOTE_MUSIC = -200;
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -488,6 +497,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         mMasterVolumeRamp = context.getResources().getIntArray(
                 com.android.internal.R.array.config_masterVolumeRamp);
 
+        mMainRemote = new RemotePlaybackState(-1, MAX_STREAM_VOLUME[AudioManager.STREAM_MUSIC],
+                MAX_STREAM_VOLUME[AudioManager.STREAM_MUSIC]);
+        mHasRemotePlayback = false;
+        mMainRemoteIsActive = false;
+        postReevaluateRemote();
     }
 
     private void createAudioSystemThread() {
@@ -657,9 +671,20 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         adjustSuggestedStreamVolume(direction, AudioManager.USE_DEFAULT_STREAM_TYPE, flags);
     }
 
+    /** @see AudioManager#adjustLocalOrRemoteStreamVolume(int, int) with current assumption
+     *  on streamType: fixed to STREAM_MUSIC */
+    public void adjustLocalOrRemoteStreamVolume(int streamType, int direction) {
+        if (DEBUG_VOL) Log.d(TAG, "adjustLocalOrRemoteStreamVolume(dir="+direction+")");
+        if (checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC)) {
+            adjustRemoteVolume(AudioSystem.STREAM_MUSIC, direction, 0);
+        } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
+            adjustStreamVolume(AudioSystem.STREAM_MUSIC, direction, 0);
+        }
+    }
+
     /** @see AudioManager#adjustVolume(int, int, int) */
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags) {
-
+        if (DEBUG_VOL) Log.d(TAG, "adjustSuggestedStreamVolume() stream="+suggestedStreamType);
         int streamType;
         if (mVolumeControlStream != -1) {
             streamType = mVolumeControlStream;
@@ -668,17 +693,27 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
 
         // Play sounds on STREAM_RING only and if lock screen is not on.
-        if ((flags & AudioManager.FLAG_PLAY_SOUND) != 0 &&
+        if ((streamType != STREAM_REMOTE_MUSIC) &&
+                (flags & AudioManager.FLAG_PLAY_SOUND) != 0 &&
                 ((mStreamVolumeAlias[streamType] != AudioSystem.STREAM_RING)
                  || (mKeyguardManager != null && mKeyguardManager.isKeyguardLocked()))) {
             flags &= ~AudioManager.FLAG_PLAY_SOUND;
         }
 
-        adjustStreamVolume(streamType, direction, flags);
+        if (streamType == STREAM_REMOTE_MUSIC) {
+            // don't play sounds for remote
+            flags &= ~AudioManager.FLAG_PLAY_SOUND;
+            //if (DEBUG_VOL) Log.i(TAG, "Need to adjust remote volume: calling adjustRemoteVolume()");
+            adjustRemoteVolume(AudioSystem.STREAM_MUSIC, direction, flags);
+        } else {
+            adjustStreamVolume(streamType, direction, flags);
+        }
     }
 
     /** @see AudioManager#adjustStreamVolume(int, int, int) */
     public void adjustStreamVolume(int streamType, int direction, int flags) {
+        if (DEBUG_VOL) Log.d(TAG, "adjustStreamVolume() stream="+streamType+", dir="+direction);
+
         ensureValidDirection(direction);
         ensureValidStreamType(streamType);
 
@@ -1370,6 +1405,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 }
             }
             int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
+            if (streamType == STREAM_REMOTE_MUSIC) {
+                // here handle remote media playback the same way as local playback
+                streamType = AudioManager.STREAM_MUSIC;
+            }
             int device = getDeviceForStream(streamType);
             int index = mStreamStates[mStreamVolumeAlias[streamType]].getIndex(device, false);
             setStreamVolumeInt(mStreamVolumeAlias[streamType], index, device, true, false);
@@ -2169,40 +2208,61 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     // Log.v(TAG, "getActiveStreamType: Forcing STREAM_VOICE_CALL...");
                     return AudioSystem.STREAM_VOICE_CALL;
                 }
-            } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
-                // Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC...");
-                return AudioSystem.STREAM_MUSIC;
             } else if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
-                // Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING..."
-                //        + " b/c USE_DEFAULT_STREAM_TYPE...");
-                return AudioSystem.STREAM_RING;
+                // Having the suggested stream be USE_DEFAULT_STREAM_TYPE is how remote control
+                // volume can have priority over STREAM_MUSIC
+                if (checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC)) {
+                    if (DEBUG_VOL)
+                        Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
+                    return STREAM_REMOTE_MUSIC;
+                } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
+                    if (DEBUG_VOL)
+                        Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC stream active");
+                    return AudioSystem.STREAM_MUSIC;
+                } else {
+                    if (DEBUG_VOL)
+                        Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING b/c default");
+                    return AudioSystem.STREAM_RING;
+                }
+            } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
+                if (DEBUG_VOL)
+                    Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC stream active");
+                return AudioSystem.STREAM_MUSIC;
             } else {
-                // Log.v(TAG, "getActiveStreamType: Returning suggested type " + suggestedStreamType);
+                if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Returning suggested type "
+                        + suggestedStreamType);
                 return suggestedStreamType;
             }
         } else {
             if (isInCommunication()) {
                 if (AudioSystem.getForceUse(AudioSystem.FOR_COMMUNICATION)
                         == AudioSystem.FORCE_BT_SCO) {
-                    // Log.v(TAG, "getActiveStreamType: Forcing STREAM_BLUETOOTH_SCO...");
+                    if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Forcing STREAM_BLUETOOTH_SCO");
                     return AudioSystem.STREAM_BLUETOOTH_SCO;
                 } else {
-                    // Log.v(TAG, "getActiveStreamType: Forcing STREAM_VOICE_CALL...");
+                    if (DEBUG_VOL)  Log.v(TAG, "getActiveStreamType: Forcing STREAM_VOICE_CALL");
                     return AudioSystem.STREAM_VOICE_CALL;
                 }
             } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_NOTIFICATION,
-                            NOTIFICATION_VOLUME_DELAY_MS) ||
-                       AudioSystem.isStreamActive(AudioSystem.STREAM_RING,
+                    NOTIFICATION_VOLUME_DELAY_MS) ||
+                    AudioSystem.isStreamActive(AudioSystem.STREAM_RING,
                             NOTIFICATION_VOLUME_DELAY_MS)) {
-                // Log.v(TAG, "getActiveStreamType: Forcing STREAM_NOTIFICATION...");
+                if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Forcing STREAM_NOTIFICATION");
                 return AudioSystem.STREAM_NOTIFICATION;
-            } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0) ||
-                       (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE)) {
-                // Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC "
-                //        + " b/c USE_DEFAULT_STREAM_TYPE...");
-                return AudioSystem.STREAM_MUSIC;
+            } else if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
+                if (checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC)) {
+                    // Having the suggested stream be USE_DEFAULT_STREAM_TYPE is how remote control
+                    // volume can have priority over STREAM_MUSIC
+                    if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
+                    return STREAM_REMOTE_MUSIC;
+                } else {
+                    if (DEBUG_VOL)
+                        Log.v(TAG, "getActiveStreamType: using STREAM_MUSIC as default");
+                    return AudioSystem.STREAM_MUSIC;
+                }
             } else {
-                // Log.v(TAG, "getActiveStreamType: Returning suggested type " + suggestedStreamType);
+                if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Returning suggested type "
+                        + suggestedStreamType);
                 return suggestedStreamType;
             }
         }
@@ -3036,6 +3096,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     mRoutesObservers.finishBroadcast();
                     break;
                 }
+
+                case MSG_REEVALUATE_REMOTE:
+                    onReevaluateRemote();
+                    break;
             }
         }
     }
@@ -4103,6 +4167,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             // remote control client died, make sure the displays don't use it anymore
             //  by setting its remote control client to null
             registerRemoteControlClient(mMediaIntent, null/*rcClient*/, null/*ignored*/);
+            // the dead client was maybe handling remote playback, reevaluate
+            postReevaluateRemote();
         }
 
         public IBinder getBinder() {
@@ -4110,7 +4176,46 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     }
 
+    /**
+     * A global counter for RemoteControlClient identifiers
+     */
+    private static int sLastRccId = 0;
+
+    private class RemotePlaybackState {
+        int mRccId;
+        int mVolume;
+        int mVolumeMax;
+        int mVolumeHandling;
+
+        private RemotePlaybackState(int id, int vol, int volMax) {
+            mRccId = id;
+            mVolume = vol;
+            mVolumeMax = volMax;
+            mVolumeHandling = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME_HANDLING;
+        }
+    }
+
+    /**
+     * Internal cache for the playback information of the RemoteControlClient whose volume gets to
+     * be controlled by the volume keys ("main"), so we don't have to iterate over the RC stack
+     * every time we need this info.
+     */
+    private RemotePlaybackState mMainRemote;
+    /**
+     * Indicates whether the "main" RemoteControlClient is considered active.
+     * Use synchronized on mMainRemote.
+     */
+    private boolean mMainRemoteIsActive;
+    /**
+     * Indicates whether there is remote playback going on. True even if there is no "active"
+     * remote playback (mMainRemoteIsActive is false), but a RemoteControlClient has declared it
+     * handles remote playback.
+     * Use synchronized on mMainRemote.
+     */
+    private boolean mHasRemotePlayback;
+
     private static class RemoteControlStackEntry {
+        public int mRccId = RemoteControlClient.RCSE_ID_UNREGISTERED;
         /**
          * The target for the ACTION_MEDIA_BUTTON events.
          * Always non null.
@@ -4129,6 +4234,24 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
          *     but no remote control client has been registered) */
         public IRemoteControlClient mRcClient;
         public RcClientDeathHandler mRcClientDeathHandler;
+        /**
+         * Information only used for non-local playback
+         */
+        public int mPlaybackType;
+        public int mPlaybackVolume;
+        public int mPlaybackVolumeMax;
+        public int mPlaybackVolumeHandling;
+        public int mPlaybackStream;
+        public int mPlaybackState;
+
+        public void resetPlaybackInfo() {
+            mPlaybackType = RemoteControlClient.PLAYBACK_TYPE_LOCAL;
+            mPlaybackVolume = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME;
+            mPlaybackVolumeMax = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME;
+            mPlaybackVolumeHandling = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME_HANDLING;
+            mPlaybackStream = AudioManager.STREAM_MUSIC;
+            mPlaybackState = RemoteControlClient.PLAYSTATE_STOPPED;
+        }
 
         /** precondition: mediaIntent != null, eventReceiver != null */
         public RemoteControlStackEntry(PendingIntent mediaIntent, ComponentName eventReceiver) {
@@ -4136,6 +4259,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             mReceiverComponent = eventReceiver;
             mCallingUid = -1;
             mRcClient = null;
+            mRccId = ++sLastRccId;
+
+            resetPlaybackInfo();
         }
 
         public void unlinkToRcClientDeath() {
@@ -4185,8 +4311,43 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 pw.println("  pi: " + rcse.mMediaIntent +
                         "  -- ercvr: " + rcse.mReceiverComponent +
                         "  -- client: " + rcse.mRcClient +
-                        "  -- uid: " + rcse.mCallingUid);
+                        "  -- uid: " + rcse.mCallingUid +
+                        "  -- type: " + rcse.mPlaybackType +
+                        "  state: " + rcse.mPlaybackState);
             }
+        }
+    }
+
+    /**
+     * Helper function:
+     * Display in the log the current entries in the remote control stack, focusing
+     * on RemoteControlClient data
+     */
+    private void dumpRCCStack(PrintWriter pw) {
+        pw.println("\nRemote Control Client stack entries:");
+        synchronized(mRCStack) {
+            Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+            while(stackIterator.hasNext()) {
+                RemoteControlStackEntry rcse = stackIterator.next();
+                pw.println("  uid: " + rcse.mCallingUid +
+                        "  -- id: " + rcse.mRccId +
+                        "  -- type: " + rcse.mPlaybackType +
+                        "  -- state: " + rcse.mPlaybackState +
+                        "  -- vol handling: " + rcse.mPlaybackVolumeHandling +
+                        "  -- vol: " + rcse.mPlaybackVolume +
+                        "  -- volMax: " + rcse.mPlaybackVolumeMax);
+            }
+        }
+        synchronized (mMainRemote) {
+            pw.println("\nRemote Volume State:");
+            pw.println("  has remote: " + mHasRemotePlayback);
+            pw.println("  is remote active: " + mMainRemoteIsActive);
+            pw.println("  rccId: " + mMainRemote.mRccId);
+            pw.println("  volume handling: "
+                    + ((mMainRemote.mVolumeHandling == RemoteControlClient.PLAYBACK_VOLUME_FIXED) ?
+                            "PLAYBACK_VOLUME_FIXED(0)" : "PLAYBACK_VOLUME_VARIABLE(1)"));
+            pw.println("  volume: " + mMainRemote.mVolume);
+            pw.println("  volume steps: " + mMainRemote.mVolumeMax);
         }
     }
 
@@ -4556,13 +4717,15 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /**
      * see AudioManager.registerRemoteControlClient(ComponentName eventReceiver, ...)
+     * @return the unique ID of the RemoteControlStackEntry associated with the RemoteControlClient
      * Note: using this method with rcClient == null is a way to "disable" the IRemoteControlClient
      *     without modifying the RC stack, but while still causing the display to refresh (will
      *     become blank as a result of this)
      */
-    public void registerRemoteControlClient(PendingIntent mediaIntent,
+    public int registerRemoteControlClient(PendingIntent mediaIntent,
             IRemoteControlClient rcClient, String callingPackageName) {
         if (DEBUG_RC) Log.i(TAG, "Register remote control client rcClient="+rcClient);
+        int rccId = RemoteControlClient.RCSE_ID_UNREGISTERED;
         synchronized(mAudioFocusLock) {
             synchronized(mRCStack) {
                 // store the new display information
@@ -4581,8 +4744,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         rcse.mCallingUid = Binder.getCallingUid();
                         if (rcClient == null) {
                             // here rcse.mRcClientDeathHandler is null;
+                            rcse.resetPlaybackInfo();
                             break;
                         }
+                        rccId = rcse.mRccId;
 
                         // there is a new (non-null) client:
                         // 1/ give the new client the current display (if any)
@@ -4616,6 +4781,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 }
             }
         }
+        return rccId;
     }
 
     /**
@@ -4790,6 +4956,248 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     }
 
+    // FIXME send a message instead of updating the stack synchronously
+    public void setPlaybackInfoForRcc(int rccId, int what, int value) {
+        if(DEBUG_RC) Log.d(TAG, "setPlaybackInfoForRcc(id="+rccId+", what="+what+",val="+value+")");
+        synchronized(mRCStack) {
+            Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+            while(stackIterator.hasNext()) {
+                RemoteControlStackEntry rcse = stackIterator.next();
+                if (rcse.mRccId == rccId) {
+                    switch (what) {
+                        case RemoteControlClient.PLAYBACKINFO_PLAYBACK_TYPE:
+                            rcse.mPlaybackType = value;
+                            postReevaluateRemote();
+                            break;
+                        case RemoteControlClient.PLAYBACKINFO_VOLUME:
+                            rcse.mPlaybackVolume = value;
+                            synchronized (mMainRemote) {
+                                if (rccId == mMainRemote.mRccId) {
+                                    mMainRemote.mVolume = value;
+                                    mVolumePanel.postHasNewRemotePlaybackInfo();
+                                }
+                            }
+                            break;
+                        case RemoteControlClient.PLAYBACKINFO_VOLUME_MAX:
+                            rcse.mPlaybackVolumeMax = value;
+                            synchronized (mMainRemote) {
+                                if (rccId == mMainRemote.mRccId) {
+                                    mMainRemote.mVolumeMax = value;
+                                    mVolumePanel.postHasNewRemotePlaybackInfo();
+                                }
+                            }
+                            break;
+                        case RemoteControlClient.PLAYBACKINFO_VOLUME_HANDLING:
+                            rcse.mPlaybackVolumeHandling = value;
+                            synchronized (mMainRemote) {
+                                if (rccId == mMainRemote.mRccId) {
+                                    mMainRemote.mVolumeHandling = value;
+                                    mVolumePanel.postHasNewRemotePlaybackInfo();
+                                }
+                            }
+                            break;
+                        case RemoteControlClient.PLAYBACKINFO_USES_STREAM:
+                            rcse.mPlaybackStream = value;
+                            break;
+                        case RemoteControlClient.PLAYBACKINFO_PLAYSTATE:
+                            rcse.mPlaybackState = value;
+                            synchronized (mMainRemote) {
+                                if (rccId == mMainRemote.mRccId) {
+                                    mMainRemoteIsActive = isPlaystateActive(value);
+                                    postReevaluateRemote();
+                                }
+                            }
+                            break;
+                        default:
+                            Log.e(TAG, "unhandled key " + what + " for RCC " + rccId);
+                            break;
+                    }
+                    return;
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks if a remote client is active on the supplied stream type. Update the remote stream
+     * volume state if found and playing
+     * @param streamType
+     * @return false if no remote playing is currently playing
+     */
+    private boolean checkUpdateRemoteStateIfActive(int streamType) {
+        synchronized(mRCStack) {
+            Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+            while(stackIterator.hasNext()) {
+                RemoteControlStackEntry rcse = stackIterator.next();
+                if ((rcse.mPlaybackType == RemoteControlClient.PLAYBACK_TYPE_REMOTE)
+                        && isPlaystateActive(rcse.mPlaybackState)
+                        && (rcse.mPlaybackStream == streamType)) {
+                    if (DEBUG_RC) Log.d(TAG, "remote playback active on stream " + streamType
+                            + ", vol =" + rcse.mPlaybackVolume);
+                    synchronized (mMainRemote) {
+                        mMainRemote.mRccId = rcse.mRccId;
+                        mMainRemote.mVolume = rcse.mPlaybackVolume;
+                        mMainRemote.mVolumeMax = rcse.mPlaybackVolumeMax;
+                        mMainRemote.mVolumeHandling = rcse.mPlaybackVolumeHandling;
+                        mMainRemoteIsActive = true;
+                    }
+                    return true;
+                }
+            }
+        }
+        synchronized (mMainRemote) {
+            mMainRemoteIsActive = false;
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if the given playback state is considered "active", i.e. it describes a state
+     * where playback is happening, or about to
+     * @param playState the playback state to evaluate
+     * @return true if active, false otherwise (inactive or unknown)
+     */
+    private static boolean isPlaystateActive(int playState) {
+        switch (playState) {
+            case RemoteControlClient.PLAYSTATE_PLAYING:
+            case RemoteControlClient.PLAYSTATE_BUFFERING:
+            case RemoteControlClient.PLAYSTATE_FAST_FORWARDING:
+            case RemoteControlClient.PLAYSTATE_REWINDING:
+            case RemoteControlClient.PLAYSTATE_SKIPPING_BACKWARDS:
+            case RemoteControlClient.PLAYSTATE_SKIPPING_FORWARDS:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private void adjustRemoteVolume(int streamType, int direction, int flags) {
+        int rccId = RemoteControlClient.RCSE_ID_UNREGISTERED;
+        boolean volFixed = false;
+        synchronized (mMainRemote) {
+            if (!mMainRemoteIsActive) {
+                if (DEBUG_VOL) Log.w(TAG, "adjustRemoteVolume didn't find an active client");
+                return;
+            }
+            rccId = mMainRemote.mRccId;
+            volFixed = (mMainRemote.mVolumeHandling ==
+                    RemoteControlClient.PLAYBACK_VOLUME_FIXED);
+        }
+        // unlike "local" stream volumes, we can't compute the new volume based on the direction,
+        // we can only notify the remote that volume needs to be updated, and we'll get an async'
+        // update through setPlaybackInfoForRcc()
+        if (!volFixed) {
+            sendVolumeUpdateToRemote(rccId, direction);
+        }
+
+        // fire up the UI
+        mVolumePanel.postRemoteVolumeChanged(streamType, flags);
+    }
+
+    private void sendVolumeUpdateToRemote(int rccId, int direction) {
+        if (DEBUG_VOL) { Log.d(TAG, "sendVolumeUpdateToRemote(rccId="+rccId+" , dir="+direction); }
+        if (direction == 0) {
+            // only handling discrete events
+            return;
+        }
+        String packageForRcc = null;
+        synchronized (mRCStack) {
+            Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+            while(stackIterator.hasNext()) {
+                RemoteControlStackEntry rcse = stackIterator.next();
+                //FIXME OPTIMIZE store this info in mMainRemote so we don't have to iterate?
+                if (rcse.mRccId == rccId) {
+                    packageForRcc = rcse.mReceiverComponent.getPackageName();
+                    break;
+                }
+            }
+        }
+        if (packageForRcc != null) {
+            Intent intent = new Intent(Intent.ACTION_VOLUME_UPDATE);
+            intent.putExtra(Intent.EXTRA_VOLUME_UPDATE_DIRECTION, direction);
+            intent.setPackage(packageForRcc);
+            mContext.sendBroadcast(intent);
+        }
+    }
+
+    public int getRemoteStreamMaxVolume() {
+        synchronized (mMainRemote) {
+            if (mMainRemote.mRccId == RemoteControlClient.RCSE_ID_UNREGISTERED) {
+                return 0;
+            }
+            return mMainRemote.mVolumeMax;
+        }
+    }
+
+    public int getRemoteStreamVolume() {
+        synchronized (mMainRemote) {
+            if (mMainRemote.mRccId == RemoteControlClient.RCSE_ID_UNREGISTERED) {
+                return 0;
+            }
+            return mMainRemote.mVolume;
+        }
+    }
+
+    public void setRemoteStreamVolume(int vol) {
+        if (DEBUG_VOL) { Log.d(TAG, "setRemoteStreamVolume(vol="+vol+")"); }
+        int rccId = RemoteControlClient.RCSE_ID_UNREGISTERED;
+        synchronized (mMainRemote) {
+            if (mMainRemote.mRccId == RemoteControlClient.RCSE_ID_UNREGISTERED) {
+                return;
+            }
+            rccId = mMainRemote.mRccId;
+        }
+        String packageForRcc = null;
+        synchronized (mRCStack) {
+            Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+            while(stackIterator.hasNext()) {
+                RemoteControlStackEntry rcse = stackIterator.next();
+                if (rcse.mRccId == rccId) {
+                    //FIXME OPTIMIZE store this info in mMainRemote so we don't have to iterate?
+                    packageForRcc = rcse.mReceiverComponent.getPackageName();
+                    break;
+                }
+            }
+        }
+        if (packageForRcc != null) {
+            Intent intent = new Intent(Intent.ACTION_VOLUME_UPDATE);
+            intent.putExtra(Intent.EXTRA_VOLUME_UPDATE_VALUE, vol);
+            intent.setPackage(packageForRcc);
+            mContext.sendBroadcast(intent);
+        }
+    }
+
+    /**
+     * Call to make AudioService reevaluate whether it's in a mode where remote players should
+     * have their volume controlled. In this implementation this is only to reset whether
+     * VolumePanel should display remote volumes
+     */
+    private void postReevaluateRemote() {
+        sendMsg(mAudioHandler, MSG_REEVALUATE_REMOTE, SENDMSG_QUEUE, 0, 0, null, 0);
+    }
+
+    private void onReevaluateRemote() {
+        if (DEBUG_VOL) { Log.w(TAG, "onReevaluateRemote()"); }
+        // is there a registered RemoteControlClient that is handling remote playback
+        boolean hasRemotePlayback = false;
+        synchronized (mRCStack) {
+            Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+            while(stackIterator.hasNext()) {
+                RemoteControlStackEntry rcse = stackIterator.next();
+                if (rcse.mPlaybackType == RemoteControlClient.PLAYBACK_TYPE_REMOTE) {
+                    hasRemotePlayback = true;
+                    break;
+                }
+            }
+        }
+        synchronized (mMainRemote) {
+            if (mHasRemotePlayback != hasRemotePlayback) {
+                mHasRemotePlayback = hasRemotePlayback;
+                mVolumePanel.postRemoteSliderVisibility(hasRemotePlayback);
+            }
+        }
+    }
+
     //==========================================================================================
     // Device orientation
     //==========================================================================================
@@ -4871,9 +5279,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
 
-        // TODO probably a lot more to do here than just the audio focus and remote control stacks
         dumpFocusStack(pw);
         dumpRCStack(pw);
+        dumpRCCStack(pw);
         dumpStreamStates(pw);
         pw.println("\nAudio routes:");
         pw.print("  mMainType=0x"); pw.println(Integer.toHexString(mCurAudioRoutes.mMainType));

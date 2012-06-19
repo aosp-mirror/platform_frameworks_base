@@ -35,6 +35,8 @@ interface IAudioService {
     
     void adjustVolume(int direction, int flags);
 
+    oneway void adjustLocalOrRemoteStreamVolume(int streamType, int direction);
+
     void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags);
 
     void adjustStreamVolume(int streamType, int direction, int flags);
@@ -42,6 +44,8 @@ interface IAudioService {
     void adjustMasterVolume(int direction, int flags);
 
     void setStreamVolume(int streamType, int index, int flags);
+
+    oneway void setRemoteStreamVolume(int index);
 
     void setMasterVolume(int index, int flags);
     
@@ -119,7 +123,7 @@ interface IAudioService {
     oneway void registerMediaButtonEventReceiverForCalls(in ComponentName c);
     oneway void unregisterMediaButtonEventReceiverForCalls();
 
-    oneway void registerRemoteControlClient(in PendingIntent mediaIntent,
+    int registerRemoteControlClient(in PendingIntent mediaIntent,
            in IRemoteControlClient rcClient, in String callingPackageName);
     oneway void unregisterRemoteControlClient(in PendingIntent mediaIntent,
            in IRemoteControlClient rcClient);
@@ -127,6 +131,10 @@ interface IAudioService {
     oneway void   registerRemoteControlDisplay(in IRemoteControlDisplay rcd);
     oneway void unregisterRemoteControlDisplay(in IRemoteControlDisplay rcd);
     oneway void remoteControlDisplayUsesBitmapSize(in IRemoteControlDisplay rcd, int w, int h);
+
+    oneway void setPlaybackInfoForRcc(int rccId, int what, int value);
+           int  getRemoteStreamMaxVolume();
+           int  getRemoteStreamVolume();
 
     void startBluetoothSco(IBinder cb);
     void stopBluetoothSco(IBinder cb);
