@@ -51,6 +51,9 @@ import java.util.List;
  * Apps that request downloads through this API should register a broadcast receiver for
  * {@link #ACTION_NOTIFICATION_CLICKED} to appropriately handle when the user clicks on a running
  * download in a notification or from the downloads UI.
+ *
+ * Note that the application must have the {@link android.Manifest.permission#INTERNET}
+ * permission to use this class.
  */
 public class DownloadManager {
 

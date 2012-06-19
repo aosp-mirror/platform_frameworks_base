@@ -1415,6 +1415,8 @@ public abstract class ContentResolver {
 
     /**
      * Check if the provider should be synced when a network tickle is received
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#READ_SYNC_SETTINGS}.
      *
      * @param account the account whose setting we are querying
      * @param authority the provider whose setting we are querying
@@ -1430,6 +1432,8 @@ public abstract class ContentResolver {
 
     /**
      * Set whether or not the provider is synced when it receives a network tickle.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#WRITE_SYNC_SETTINGS}.
      *
      * @param account the account whose setting we are querying
      * @param authority the provider whose behavior is being controlled
@@ -1460,6 +1464,9 @@ public abstract class ContentResolver {
      * {@link #SYNC_EXTRAS_INITIALIZE}, {@link #SYNC_EXTRAS_FORCE},
      * {@link #SYNC_EXTRAS_EXPEDITED}, {@link #SYNC_EXTRAS_MANUAL} set to true.
      * If any are supplied then an {@link IllegalArgumentException} will be thrown.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#WRITE_SYNC_SETTINGS}.
      *
      * @param account the account to specify in the sync
      * @param authority the provider to specify in the sync request
@@ -1497,6 +1504,8 @@ public abstract class ContentResolver {
     /**
      * Remove a periodic sync. Has no affect if account, authority and extras don't match
      * an existing periodic sync.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#WRITE_SYNC_SETTINGS}.
      *
      * @param account the account of the periodic sync to remove
      * @param authority the provider of the periodic sync to remove
@@ -1519,6 +1528,8 @@ public abstract class ContentResolver {
 
     /**
      * Get the list of information about the periodic syncs for the given account and authority.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#READ_SYNC_SETTINGS}.
      *
      * @param account the account whose periodic syncs we are querying
      * @param authority the provider whose periodic syncs we are querying
@@ -1540,6 +1551,8 @@ public abstract class ContentResolver {
 
     /**
      * Check if this account/provider is syncable.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#READ_SYNC_SETTINGS}.
      * @return >0 if it is syncable, 0 if not, and <0 if the state isn't known yet.
      */
     public static int getIsSyncable(Account account, String authority) {
@@ -1552,6 +1565,8 @@ public abstract class ContentResolver {
 
     /**
      * Set whether this account/provider is syncable.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#WRITE_SYNC_SETTINGS}.
      * @param syncable >0 denotes syncable, 0 means not syncable, <0 means unknown
      */
     public static void setIsSyncable(Account account, String authority, int syncable) {
@@ -1566,6 +1581,8 @@ public abstract class ContentResolver {
     /**
      * Gets the master auto-sync setting that applies to all the providers and accounts.
      * If this is false then the per-provider auto-sync setting is ignored.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#READ_SYNC_SETTINGS}.
      *
      * @return the master auto-sync setting that applies to all the providers and accounts
      */
@@ -1580,6 +1597,8 @@ public abstract class ContentResolver {
     /**
      * Sets the master auto-sync setting that applies to all the providers and accounts.
      * If this is false then the per-provider auto-sync setting is ignored.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#WRITE_SYNC_SETTINGS}.
      *
      * @param sync the master auto-sync setting that applies to all the providers and accounts
      */
@@ -1595,6 +1614,8 @@ public abstract class ContentResolver {
     /**
      * Returns true if there is currently a sync operation for the given
      * account or authority in the pending list, or actively being processed.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#READ_SYNC_STATS}.
      * @param account the account whose setting we are querying
      * @param authority the provider whose behavior is being queried
      * @return true if a sync is active for the given account or authority.
@@ -1609,6 +1630,9 @@ public abstract class ContentResolver {
 
     /**
      * If a sync is active returns the information about it, otherwise returns null.
+     * <p>
+     * This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#READ_SYNC_STATS}.
      * <p>
      * @return the SyncInfo for the currently active sync or null if one is not active.
      * @deprecated
@@ -1633,6 +1657,10 @@ public abstract class ContentResolver {
     /**
      * Returns a list with information about all the active syncs. This list will be empty
      * if there are no active syncs.
+     * <p>
+     * This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#READ_SYNC_STATS}.
+     * <p>
      * @return a List of SyncInfo objects for the currently active syncs.
      */
     public static List<SyncInfo> getCurrentSyncs() {
@@ -1660,6 +1688,8 @@ public abstract class ContentResolver {
 
     /**
      * Return true if the pending status is true of any matching authorities.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#READ_SYNC_STATS}.
      * @param account the account whose setting we are querying
      * @param authority the provider whose behavior is being queried
      * @return true if there is a pending sync with the matching account and authority

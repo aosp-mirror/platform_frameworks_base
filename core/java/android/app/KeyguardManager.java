@@ -62,6 +62,9 @@ public class KeyguardManager {
          * Note: This call has no effect while any {@link android.app.admin.DevicePolicyManager} 
          * is enabled that requires a password.
          *
+         * <p>This method requires the caller to hold the permission
+         * {@link android.Manifest.permission#DISABLE_KEYGUARD}.
+         *
          * @see #reenableKeyguard()
          */
         public void disableKeyguard() {
@@ -79,6 +82,9 @@ public class KeyguardManager {
          *
          * Note: This call has no effect while any {@link android.app.admin.DevicePolicyManager}
          * is enabled that requires a password.
+         *
+         * <p>This method requires the caller to hold the permission
+         * {@link android.Manifest.permission#DISABLE_KEYGUARD}.
          *
          * @see #disableKeyguard()
          */
@@ -187,6 +193,9 @@ public class KeyguardManager {
      *
      * This will, if the keyguard is secure, bring up the unlock screen of
      * the keyguard.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#DISABLE_KEYGUARD}.
      *
      * @param callback Let's you know whether the operation was succesful and
      *   it is safe to launch anything that would normally be considered safe

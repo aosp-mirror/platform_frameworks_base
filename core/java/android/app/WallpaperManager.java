@@ -468,6 +468,9 @@ public class WallpaperManager {
      * wallpaper; it must be a valid PNG or JPEG image.  On success, the intent
      * {@link Intent#ACTION_WALLPAPER_CHANGED} is broadcast.
      *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#SET_WALLPAPER}.
+     *
      * @param resid The bitmap to save.
      *
      * @throws IOException If an error occurs reverting to the default
@@ -504,6 +507,9 @@ public class WallpaperManager {
      * converted to a PNG and stored as the wallpaper.  On success, the intent
      * {@link Intent#ACTION_WALLPAPER_CHANGED} is broadcast.
      *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#SET_WALLPAPER}.
+     *
      * @param bitmap The bitmap to save.
      *
      * @throws IOException If an error occurs reverting to the default
@@ -539,6 +545,9 @@ public class WallpaperManager {
      * used as the wallpaper.  Currently it must be either a JPEG or PNG
      * image.  On success, the intent {@link Intent#ACTION_WALLPAPER_CHANGED}
      * is broadcast.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#SET_WALLPAPER}.
      *
      * @param data A stream containing the raw data to install as a wallpaper.
      *
@@ -645,6 +654,9 @@ public class WallpaperManager {
      * <b>retrieve</b> the suggested size so they can construct a wallpaper
      * that matches it.
      *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#SET_WALLPAPER_HINTS}.
+     *
      * @param minimumWidth Desired minimum width
      * @param minimumHeight Desired minimum height
      */
@@ -745,6 +757,9 @@ public class WallpaperManager {
      * Remove any currently set wallpaper, reverting to the system's default
      * wallpaper. On success, the intent {@link Intent#ACTION_WALLPAPER_CHANGED}
      * is broadcast.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#SET_WALLPAPER}.
      *
      * @throws IOException If an error occurs reverting to the default
      * wallpaper.
