@@ -2115,6 +2115,10 @@ public class PowerManagerService extends IPowerManager.Stub
                     brightness = mScreenBrightnessDim;
                 }
             }
+            if (mWaitingForFirstLightSensor && (newState & SCREEN_ON_BIT) != 0) {
+                steps = IMMEDIATE_ANIM_STEPS;
+            }
+
             long identity = Binder.clearCallingIdentity();
             try {
                 mBatteryStats.noteScreenBrightness(brightness);
@@ -3357,6 +3361,7 @@ public class PowerManagerService extends IPowerManager.Stub
     }
 
     SensorEventListener mLightListener = new SensorEventListener() {
+        @Override
         public void onSensorChanged(SensorEvent event) {
             if (mDebugLightSensor) {
                 Slog.d(TAG, "onSensorChanged: light value: " + event.values[0]);
@@ -3367,12 +3372,16 @@ public class PowerManagerService extends IPowerManager.Stub
                     return;
                 }
                 handleLightSensorValue((int)event.values[0], mWaitingForFirstLightSensor);
-                if (mWaitingForFirstLightSensor) {
+                if (mWaitingForFirstLightSensor && !mPreparingForScreenOn) {
+                    if (mDebugLightAnimation) {
+                        Slog.d(TAG, "onSensorChanged: Clearing mWaitingForFirstLightSensor.");
+                    }
                     mWaitingForFirstLightSensor = false;
                 }
             }
         }
 
+        @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
             // ignore
         }
