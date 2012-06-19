@@ -225,6 +225,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_LIMIT_REACHED = 5;
     private static final int MSG_RESTRICT_BACKGROUND_CHANGED = 6;
     private static final int MSG_ADVISE_PERSIST_THRESHOLD = 7;
+    private static final int MSG_SCREEN_ON_CHANGED = 8;
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -349,7 +350,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final IntentFilter screenFilter = new IntentFilter();
         screenFilter.addAction(Intent.ACTION_SCREEN_ON);
         screenFilter.addAction(Intent.ACTION_SCREEN_OFF);
-        mContext.registerReceiver(mScreenReceiver, screenFilter, null, mHandler);
+        mContext.registerReceiver(mScreenReceiver, screenFilter);
 
         // watch for network interfaces to be claimed
         final IntentFilter connFilter = new IntentFilter(CONNECTIVITY_ACTION_IMMEDIATE);
@@ -411,7 +412,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             synchronized (mRulesLock) {
                 // screen-related broadcasts are protected by system, no need
                 // for permissions check.
-                updateScreenOn();
+                mHandler.obtainMessage(MSG_SCREEN_ON_CHANGED).sendToTarget();
             }
         }
     };
@@ -1876,6 +1877,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     } catch (RemoteException e) {
                         // ignored; service lives in system_server
                     }
+                    return true;
+                }
+                case MSG_SCREEN_ON_CHANGED: {
+                    updateScreenOn();
                     return true;
                 }
                 default: {
