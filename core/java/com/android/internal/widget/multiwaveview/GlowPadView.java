@@ -29,7 +29,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -1209,25 +1208,32 @@ public class GlowPadView extends View {
                 int existingResId) {
         if (existingResId == 0) return false;
 
-        try {
-            PackageManager packageManager = mContext.getPackageManager();
-            // Look for the search icon specified in the activity meta-data
-            Bundle metaData = packageManager.getActivityInfo(
-                    component, PackageManager.GET_META_DATA).metaData;
-            if (metaData != null) {
-                int iconResId = metaData.getInt(name);
-                if (iconResId != 0) {
-                    Resources res = packageManager.getResourcesForActivity(component);
-                    return replaceTargetDrawables(res, existingResId, iconResId);
+        boolean replaced = false;
+        if (component != null) {
+            try {
+                PackageManager packageManager = mContext.getPackageManager();
+                // Look for the search icon specified in the activity meta-data
+                Bundle metaData = packageManager.getActivityInfo(
+                        component, PackageManager.GET_META_DATA).metaData;
+                if (metaData != null) {
+                    int iconResId = metaData.getInt(name);
+                    if (iconResId != 0) {
+                        Resources res = packageManager.getResourcesForActivity(component);
+                        replaced = replaceTargetDrawables(res, existingResId, iconResId);
+                    }
                 }
+            } catch (NameNotFoundException e) {
+                Log.w(TAG, "Failed to swap drawable; "
+                        + component.flattenToShortString() + " not found", e);
+            } catch (Resources.NotFoundException nfe) {
+                Log.w(TAG, "Failed to swap drawable from "
+                        + component.flattenToShortString(), nfe);
             }
-        } catch (NameNotFoundException e) {
-            Log.w(TAG, "Failed to swap drawable; "
-                    + component.flattenToShortString() + " not found", e);
-        } catch (Resources.NotFoundException nfe) {
-            Log.w(TAG, "Failed to swap drawable from "
-                    + component.flattenToShortString(), nfe);
         }
-        return false;
+        if (!replaced) {
+            // Restore the original drawable
+            replaceTargetDrawables(mContext.getResources(), existingResId, existingResId);
+        }
+        return replaced;
     }
 }

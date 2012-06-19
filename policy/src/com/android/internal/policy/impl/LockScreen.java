@@ -83,7 +83,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
     private View mUnlockWidget;
     private boolean mCameraDisabled;
     private boolean mSearchDisabled;
-    private SearchManager mSearchManager;
     // Is there a vibrator
     private final boolean mHasVibrator;
 
@@ -253,23 +252,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         }
     }
 
-    private boolean isAssistantAvailable() {
-        SearchManager searchManager = getSearchManager();
-        return searchManager != null && searchManager.isAssistantAvailable();
-    }
-
-    private Intent getAssistIntent() {
-        SearchManager searchManager = getSearchManager();
-        return searchManager != null ? searchManager.getAssistIntent() : null;
-    }
-
-    private SearchManager getSearchManager() {
-        if (mSearchManager == null) {
-            mSearchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
-        }
-        return mSearchManager;
-    }
-
     class GlowPadViewMethods implements GlowPadView.OnTriggerListener,
             UnlockWidgetCommonMethods {
         private final GlowPadView mGlowPadView;
@@ -297,27 +279,21 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
 
             // Update the search icon with drawable from the search .apk
             if (!mSearchDisabled) {
-                SearchManager searchManager = getSearchManager();
-                if (searchManager != null) {
-                    ComponentName component = searchManager.getGlobalSearchActivity();
-                    if (component != null) {
-                        // XXX Hack. We need to substitute the icon here but haven't formalized
-                        // the public API. The "_google" metadata will be going away, so
-                        // DON'T USE IT!
-                        boolean replaced = mGlowPadView.replaceTargetDrawablesIfPresent(component,
-                                ASSIST_ICON_METADATA_NAME + "_google",
-                                com.android.internal.R.drawable.ic_action_assist_generic);
+                Intent intent = SearchManager.getAssistIntent(mContext);
+                if (intent != null) {
+                    // XXX Hack. We need to substitute the icon here but haven't formalized
+                    // the public API. The "_google" metadata will be going away, so
+                    // DON'T USE IT!
+                    ComponentName component = intent.getComponent();
+                    boolean replaced = mGlowPadView.replaceTargetDrawablesIfPresent(component,
+                            ASSIST_ICON_METADATA_NAME + "_google",
+                            com.android.internal.R.drawable.ic_action_assist_generic);
 
-                        if (!replaced && !mGlowPadView.replaceTargetDrawablesIfPresent(component,
-                                    ASSIST_ICON_METADATA_NAME,
-                                    com.android.internal.R.drawable.ic_action_assist_generic)) {
-                                Slog.w(TAG, "Couldn't grab icon from package " + component);
-                        }
-                    } else {
-                        Slog.w(TAG, "No search icon specified in package " + component);
+                    if (!replaced && !mGlowPadView.replaceTargetDrawablesIfPresent(component,
+                                ASSIST_ICON_METADATA_NAME,
+                                com.android.internal.R.drawable.ic_action_assist_generic)) {
+                            Slog.w(TAG, "Couldn't grab icon from package " + component);
                     }
-                } else {
-                    Slog.w(TAG, "No SearchManager");
                 }
             }
 
@@ -337,7 +313,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
             final int resId = mGlowPadView.getResourceIdForTarget(target);
             switch (resId) {
                 case com.android.internal.R.drawable.ic_action_assist_generic:
-                    Intent assistIntent = getAssistIntent();
+                    Intent assistIntent = SearchManager.getAssistIntent(mContext);
                     if (assistIntent != null) {
                         launchActivity(assistIntent);
                     } else {
@@ -550,7 +526,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         } else if (disabledBySimState) {
             Log.v(TAG, "Camera disabled by Sim State");
         }
-        boolean searchActionAvailable = isAssistantAvailable();
+        boolean searchActionAvailable = SearchManager.getAssistIntent(mContext) != null;
         mCameraDisabled = disabledByAdmin || disabledBySimState || !cameraTargetPresent;
         mSearchDisabled = disabledBySimState || !searchActionAvailable || !searchTargetPresent;
         mUnlockWidgetMethods.updateResources();
