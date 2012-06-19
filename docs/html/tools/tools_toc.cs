@@ -23,7 +23,7 @@
               <span class="en">Next Steps</span></a></li>
         </ul>
       </li>
-          <li><a href="<?cs var:toroot ?>sdk/installing/exploring.html">
+          <li><a href="<?cs var:toroot ?>sdk/exploring.html">
               <span class="en">Exploring the SDK</span></a></li>
     </ul>
   </li>
@@ -186,14 +186,22 @@ class="en">Platforms</span></a></li>
     <div class="nav-section-header"><a href="<?cs var:toroot
 ?>tools/extras/index.html"><span class="en">Extras</span></a></div>
     <ul>
-      <li><a href="<?cs var:toroot ?>tools/sdk/support-package.html"><span class="en">Support
+      <li><a href="<?cs var:toroot ?>tools/extras/support-library.html"><span class="en">Support
 Library</span></a></li>
-      <li><a href="<?cs var:toroot ?>tools/sdk/oem-usb.html"><span
+      <li><a href="<?cs var:toroot ?>tools/extras/oem-usb.html"><span
 class="en">USB Drivers</span></a>
       </li>
     </ul>
   </li>
 
+  
+  
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="<?cs var:toroot
+?>tools/samples/index.html"><span class="en">Samples</span></a></div>
+  </li>
+  
+  
 </ul><!-- nav -->
 
 <script type="text/javascript">

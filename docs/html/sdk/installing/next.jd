@@ -4,9 +4,10 @@ walkthru=1
 @jd:body
 
 
-<p>That's it! Your Android SDK is ready for action. Here are a few ways you can get started: </p>
+<p>Now that you've installed the Android SDK, here are are a few ways to learn Android
+and start developing: </p>
 
-<p><strong>Start coding</strong></p>
+<h3>Start coding</h3>
 <ul>
   <li>Follow the training class for <a
 href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a>.
@@ -19,27 +20,32 @@ input.</p>
 </ul>
 
 
-<p><strong>Read up on the API framework</strong></p>
+<h3>Learn how to design your app</h3>
+<ul>
+  <li>Learn the best practices for Android design and user experience by reading the Android <a
+href="{@docRoot}design/index.html">Design</a> guidelines.</li>
+</ul>
+
+
+<h3>Read up on the API framework</h3>
 <ul>
   <li>Start reading about fundamental framework topics in the collection of <a
-href="{@docRoot}guide/index.html">Guides</a>.</li>
-  <li>Browse the Android API specifications in the <a
+href="{@docRoot}guide/components/index.html">API Guides</a>.</li>
+  <li>Browse the API specifications in the <a
   href="{@docRoot}reference/packages.html">Reference</a>.</li>
 </ul>
 
 
-<p><strong>Explore the development tools</strong></p>
+<h3>Explore the development tools</h3>
 <ul>
-  <li>Learn about the process for developing an app from end to end with the <a
-  href="{@docRoot}tools/index.html">Workflow</a> documentation.</li>
-  <li>Learn about debugging your apps with the <a
-href="{@docRoot}tools/debugging/index.html">Debugging</a> guides.</li>
+  <li>Learn about developing an app with the Android IDE and other tools from the <a
+  href="{@docRoot}tools/workflow/index.html">Workflow</a>.</li>
 </ul>
 
 
-<p><strong>Explore some code</strong></p>
+<h3>Explore some code</h3>
 
 <ul>
-  <li>Browse the sample apps downloaded from the Android SDK Manager. You'll find them in
+  <li>Browse the sample apps available from the Android SDK Manager. You'll find them in
 <code><em>&lt;sdk&gt;</em>/samples/<em>&lt;platform-version&gt;/</em></code>. </li>
 </ul>
