@@ -360,7 +360,6 @@ public class GlowPadView extends View {
                 mHandleDrawable.setAlpha(0.0f);
                 deactivateTargets();
                 showTargets(true);
-                ping();
                 startBackgroundAnimation(INITIAL_SHOW_HANDLE_DURATION, 1.0f);
                 setGrabbedState(OnTriggerListener.CENTER_HANDLE);
                 if (AccessibilityManager.getInstance(mContext).isEnabled()) {
@@ -484,11 +483,7 @@ public class GlowPadView extends View {
         final int duration = animate ? HIDE_ANIMATION_DURATION : 0;
         final int delay = animate ? HIDE_ANIMATION_DELAY : 0;
 
-        // TODO: add an attribute for this. For now we'll show the expand for navbar, but not
-        // keyguard.
-        final boolean expandDisabled = !mAlwaysTrackFinger;
-
-        final float targetScale = (expanded || expandDisabled) ?
+        final float targetScale = expanded ?
                 TARGET_SCALE_EXPANDED : TARGET_SCALE_COLLAPSED;
         final int length = mTargetDrawables.size();
         final TimeInterpolator interpolator = Ease.Cubic.easeOut;
@@ -504,7 +499,7 @@ public class GlowPadView extends View {
                     "onUpdate", mUpdateListener));
         }
 
-        final float ringScaleTarget = (expanded || expandDisabled) ?
+        final float ringScaleTarget = expanded ?
                 RING_SCALE_EXPANDED : RING_SCALE_COLLAPSED;
         mTargetAnimations.add(Tweener.to(mOuterRing, duration,
                 "ease", interpolator,
