@@ -153,6 +153,8 @@ please see themes_device_defaults.xml.
                 ?android:attr/expandableListPreferredItemIndicatorLeft</item>
         <item name="expandableListPreferredChildIndicatorRight">
                 ?android:attr/expandableListPreferredItemIndicatorRight</item>
+        <item name="findOnPageNextDrawable">@android:drawable/ic_find_next_holo_dark</item>
+        <item name="findOnPagePreviousDrawable">@android:drawable/ic_find_previous_holo_dark</item>
 
         <!-- Gallery attributes -->
         <item name="galleryItemBackground">@android:drawable/gallery_item_background</item>
@@ -467,6 +469,8 @@ please see themes_device_defaults.xml.
         <item name="detailsElementBackground">@android:drawable/panel_bg_holo_light</item>
 
         <item name="mediaRouteButtonStyle">@android:style/Widget.DeviceDefault.Light.MediaRouteButton</item>
+        <item name="findOnPageNextDrawable">@android:drawable/ic_find_next_holo_light</item>
+        <item name="findOnPagePreviousDrawable">@android:drawable/ic_find_previous_holo_light</item>
     </style>
 
     <!-- Variant of {@link #Theme_Light} with no title bar -->
@@ -980,6 +984,8 @@ please see themes_device_defaults.xml.
         <item name="expandableListPreferredItemIndicatorRight">0dip</item>
         <item name="expandableListPreferredChildIndicatorLeft">?android:attr/expandableListPreferredItemIndicatorLeft</item>
         <item name="expandableListPreferredChildIndicatorRight">?android:attr/expandableListPreferredItemIndicatorRight</item>
+        <item name="findOnPageNextDrawable">@android:drawable/ic_find_next_holo_dark</item>
+        <item name="findOnPagePreviousDrawable">@android:drawable/ic_find_previous_holo_dark</item>
 
         <!-- Gallery attributes -->
         <item name="galleryItemBackground">@android:drawable/gallery_item_background</item>
@@ -1283,6 +1289,8 @@ please see themes_device_defaults.xml.
         <item name="expandableListPreferredChildIndicatorRight">?android:attr/expandableListPreferredItemIndicatorRight</item>
 
         <item name="listDividerAlertDialog">@android:drawable/list_divider_holo_light</item>
+        <item name="findOnPageNextDrawable">@android:drawable/ic_find_next_holo_light</item>
+        <item name="findOnPagePreviousDrawable">@android:drawable/ic_find_previous_holo_light</item>
 
         <!-- Gallery attributes -->
         <item name="galleryItemBackground">@android:drawable/gallery_item_background</item>
