@@ -4243,6 +4243,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         public int mPlaybackVolumeHandling;
         public int mPlaybackStream;
         public int mPlaybackState;
+        public IRemoteVolumeObserver mRemoteVolumeObs;
 
         public void resetPlaybackInfo() {
             mPlaybackType = RemoteControlClient.PLAYBACK_TYPE_LOCAL;
@@ -4251,6 +4252,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             mPlaybackVolumeHandling = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME_HANDLING;
             mPlaybackStream = AudioManager.STREAM_MUSIC;
             mPlaybackState = RemoteControlClient.PLAYSTATE_STOPPED;
+            mRemoteVolumeObs = null;
         }
 
         /** precondition: mediaIntent != null, eventReceiver != null */
@@ -4335,7 +4337,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         "  -- state: " + rcse.mPlaybackState +
                         "  -- vol handling: " + rcse.mPlaybackVolumeHandling +
                         "  -- vol: " + rcse.mPlaybackVolume +
-                        "  -- volMax: " + rcse.mPlaybackVolumeMax);
+                        "  -- volMax: " + rcse.mPlaybackVolumeMax +
+                        "  -- volObs: " + rcse.mRemoteVolumeObs);
+                
             }
         }
         synchronized (mMainRemote) {
@@ -5018,6 +5022,20 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     }
 
+    // FIXME send a message instead of updating the stack synchronously
+    public void registerRemoteVolumeObserverForRcc(int rccId, IRemoteVolumeObserver rvo) {
+        synchronized(mRCStack) {
+            Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+            while(stackIterator.hasNext()) {
+                RemoteControlStackEntry rcse = stackIterator.next();
+                if (rcse.mRccId == rccId) {
+                    rcse.mRemoteVolumeObs = rvo;
+                    break;
+                }
+            }
+        }
+    }
+
     /**
      * Checks if a remote client is active on the supplied stream type. Update the remote stream
      * volume state if found and playing
@@ -5100,23 +5118,24 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             // only handling discrete events
             return;
         }
-        String packageForRcc = null;
+        IRemoteVolumeObserver rvo = null;
         synchronized (mRCStack) {
             Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
             while(stackIterator.hasNext()) {
                 RemoteControlStackEntry rcse = stackIterator.next();
                 //FIXME OPTIMIZE store this info in mMainRemote so we don't have to iterate?
                 if (rcse.mRccId == rccId) {
-                    packageForRcc = rcse.mReceiverComponent.getPackageName();
+                    rvo = rcse.mRemoteVolumeObs;
                     break;
                 }
             }
         }
-        if (packageForRcc != null) {
-            Intent intent = new Intent(Intent.ACTION_VOLUME_UPDATE);
-            intent.putExtra(Intent.EXTRA_VOLUME_UPDATE_DIRECTION, direction);
-            intent.setPackage(packageForRcc);
-            mContext.sendBroadcast(intent);
+        if (rvo != null) {
+            try {
+                rvo.dispatchRemoteVolumeUpdate(direction, -1);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error dispatching relative volume update", e);
+            }
         }
     }
 
@@ -5147,23 +5166,24 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             }
             rccId = mMainRemote.mRccId;
         }
-        String packageForRcc = null;
+        IRemoteVolumeObserver rvo = null;
         synchronized (mRCStack) {
             Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
             while(stackIterator.hasNext()) {
                 RemoteControlStackEntry rcse = stackIterator.next();
                 if (rcse.mRccId == rccId) {
                     //FIXME OPTIMIZE store this info in mMainRemote so we don't have to iterate?
-                    packageForRcc = rcse.mReceiverComponent.getPackageName();
+                    rvo = rcse.mRemoteVolumeObs;
                     break;
                 }
             }
         }
-        if (packageForRcc != null) {
-            Intent intent = new Intent(Intent.ACTION_VOLUME_UPDATE);
-            intent.putExtra(Intent.EXTRA_VOLUME_UPDATE_VALUE, vol);
-            intent.setPackage(packageForRcc);
-            mContext.sendBroadcast(intent);
+        if (rvo != null) {
+            try {
+                rvo.dispatchRemoteVolumeUpdate(0, vol);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error dispatching absolute volume update", e);
+            }
         }
     }
 

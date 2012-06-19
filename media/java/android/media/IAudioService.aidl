@@ -24,6 +24,7 @@ import android.media.IAudioFocusDispatcher;
 import android.media.IAudioRoutesObserver;
 import android.media.IRemoteControlClient;
 import android.media.IRemoteControlDisplay;
+import android.media.IRemoteVolumeObserver;
 import android.media.IRingtonePlayer;
 import android.net.Uri;
 import android.view.KeyEvent;
@@ -135,6 +136,7 @@ interface IAudioService {
     oneway void setPlaybackInfoForRcc(int rccId, int what, int value);
            int  getRemoteStreamMaxVolume();
            int  getRemoteStreamVolume();
+    oneway void registerRemoteVolumeObserverForRcc(int rccId, in IRemoteVolumeObserver rvo);
 
     void startBluetoothSco(IBinder cb);
     void stopBluetoothSco(IBinder cb);

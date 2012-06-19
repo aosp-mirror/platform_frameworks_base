@@ -193,11 +193,12 @@ LOCAL_SRC_FILES += \
 	location/java/android/location/INetInitiatedListener.aidl \
 	media/java/android/media/IAudioService.aidl \
 	media/java/android/media/IAudioFocusDispatcher.aidl \
-    media/java/android/media/IAudioRoutesObserver.aidl \
+	media/java/android/media/IAudioRoutesObserver.aidl \
 	media/java/android/media/IMediaScannerListener.aidl \
 	media/java/android/media/IMediaScannerService.aidl \
 	media/java/android/media/IRemoteControlClient.aidl \
 	media/java/android/media/IRemoteControlDisplay.aidl \
+	media/java/android/media/IRemoteVolumeObserver.aidl \
 	media/java/android/media/IRingtonePlayer.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneStateListener.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
