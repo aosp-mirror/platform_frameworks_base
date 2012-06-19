@@ -76,7 +76,7 @@ public class GlowPadView extends View {
     }
 
     // Tuneable parameters for animation
-    private static final int WAVE_ANIMATION_DURATION = 1200;
+    private static final int WAVE_ANIMATION_DURATION = 1350;
     private static final int RETURN_TO_HOME_DELAY = 1200;
     private static final int RETURN_TO_HOME_DURATION = 200;
     private static final int HIDE_ANIMATION_DELAY = 200;
@@ -361,6 +361,7 @@ public class GlowPadView extends View {
                 mHandleDrawable.setAlpha(0.0f);
                 deactivateTargets();
                 showTargets(true);
+                ping();
                 startBackgroundAnimation(INITIAL_SHOW_HANDLE_DURATION, 1.0f);
                 setGrabbedState(OnTriggerListener.CENTER_HANDLE);
                 if (AccessibilityManager.getInstance(mContext).isEnabled()) {
@@ -484,7 +485,12 @@ public class GlowPadView extends View {
         final int duration = animate ? HIDE_ANIMATION_DURATION : 0;
         final int delay = animate ? HIDE_ANIMATION_DELAY : 0;
 
-        final float targetScale = expanded ? TARGET_SCALE_EXPANDED : TARGET_SCALE_COLLAPSED;
+        // TODO: add an attribute for this. For now we'll show the expand for navbar, but not
+        // keyguard.
+        final boolean expandDisabled = !mAlwaysTrackFinger;
+
+        final float targetScale = (expanded || expandDisabled) ?
+                TARGET_SCALE_EXPANDED : TARGET_SCALE_COLLAPSED;
         final int length = mTargetDrawables.size();
         final TimeInterpolator interpolator = Ease.Cubic.easeOut;
         for (int i = 0; i < length; i++) {
@@ -499,7 +505,8 @@ public class GlowPadView extends View {
                     "onUpdate", mUpdateListener));
         }
 
-        final float ringScaleTarget = expanded ? RING_SCALE_EXPANDED : RING_SCALE_COLLAPSED;
+        final float ringScaleTarget = (expanded || expandDisabled) ?
+                RING_SCALE_EXPANDED : RING_SCALE_COLLAPSED;
         mTargetAnimations.add(Tweener.to(mOuterRing, duration,
                 "ease", interpolator,
                 "alpha", 0.0f,
@@ -663,7 +670,20 @@ public class GlowPadView extends View {
      */
     public void ping() {
         if (mFeedbackCount > 0) {
-            startWaveAnimation();
+            boolean doWaveAnimation = true;
+            final AnimationBundle waveAnimations = mWaveAnimations;
+
+            // Don't do a wave if there's already one in progress
+            if (waveAnimations.size() > 0 && waveAnimations.get(0).animator.isRunning()) {
+                long t = waveAnimations.get(0).animator.getCurrentPlayTime();
+                if (t < WAVE_ANIMATION_DURATION/2) {
+                    doWaveAnimation = false;
+                }
+            }
+
+            if (doWaveAnimation) {
+                startWaveAnimation();
+            }
         }
     }
 
@@ -677,7 +697,7 @@ public class GlowPadView extends View {
         mPointCloud.waveManager.setAlpha(1.0f);
         mPointCloud.waveManager.setRadius(mHandleDrawable.getWidth()/2.0f);
         mWaveAnimations.add(Tweener.to(mPointCloud.waveManager, WAVE_ANIMATION_DURATION,
-                "ease", Ease.Linear.easeNone,
+                "ease", Ease.Quad.easeOut,
                 "delay", 0,
                 "radius", 2.0f * mOuterRadius,
                 "onUpdate", mUpdateListener,
