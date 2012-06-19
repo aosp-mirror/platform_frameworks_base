@@ -813,6 +813,8 @@ public abstract class Context {
     /**
      * @deprecated Use {@link android.app.WallpaperManager#setBitmap(Bitmap)
      * WallpaperManager.set()} instead.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#SET_WALLPAPER}.
      */
     @Deprecated
     public abstract void setWallpaper(Bitmap bitmap) throws IOException;
@@ -820,6 +822,8 @@ public abstract class Context {
     /**
      * @deprecated Use {@link android.app.WallpaperManager#setStream(InputStream)
      * WallpaperManager.set()} instead.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#SET_WALLPAPER}.
      */
     @Deprecated
     public abstract void setWallpaper(InputStream data) throws IOException;
@@ -827,6 +831,8 @@ public abstract class Context {
     /**
      * @deprecated Use {@link android.app.WallpaperManager#clear
      * WallpaperManager.clear()} instead.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#SET_WALLPAPER}.
      */
     @Deprecated
     public abstract void clearWallpaper() throws IOException;
