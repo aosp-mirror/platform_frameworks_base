@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import com.android.server.power.PowerManagerService;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ContentResolver;

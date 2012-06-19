@@ -17,13 +17,12 @@
 package com.android.server;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Slog;
 
-import com.android.server.pm.ShutdownThread;
+import com.android.server.power.ShutdownThread;
 
 public class ShutdownActivity extends Activity {
 

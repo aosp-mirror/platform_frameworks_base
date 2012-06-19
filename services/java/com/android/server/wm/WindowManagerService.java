@@ -42,12 +42,12 @@ import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.WindowManagerPolicyThread;
 import com.android.server.AttributeCache;
 import com.android.server.EventLogTags;
-import com.android.server.PowerManagerService;
 import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.input.InputFilter;
 import com.android.server.input.InputManagerService;
-import com.android.server.pm.ShutdownThread;
+import com.android.server.power.PowerManagerService;
+import com.android.server.power.ShutdownThread;
 
 import android.Manifest;
 import android.app.ActivityManagerNative;

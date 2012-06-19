@@ -17,6 +17,7 @@
 package com.android.server;
 
 import com.android.server.am.ActivityManagerService;
+import com.android.server.power.PowerManagerService;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;

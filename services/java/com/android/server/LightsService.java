@@ -31,29 +31,29 @@ public class LightsService {
     private static final String TAG = "LightsService";
     private static final boolean DEBUG = false;
 
-    static final int LIGHT_ID_BACKLIGHT = 0;
-    static final int LIGHT_ID_KEYBOARD = 1;
-    static final int LIGHT_ID_BUTTONS = 2;
-    static final int LIGHT_ID_BATTERY = 3;
-    static final int LIGHT_ID_NOTIFICATIONS = 4;
-    static final int LIGHT_ID_ATTENTION = 5;
-    static final int LIGHT_ID_BLUETOOTH = 6;
-    static final int LIGHT_ID_WIFI = 7;
-    static final int LIGHT_ID_COUNT = 8;
+    public static final int LIGHT_ID_BACKLIGHT = 0;
+    public static final int LIGHT_ID_KEYBOARD = 1;
+    public static final int LIGHT_ID_BUTTONS = 2;
+    public static final int LIGHT_ID_BATTERY = 3;
+    public static final int LIGHT_ID_NOTIFICATIONS = 4;
+    public static final int LIGHT_ID_ATTENTION = 5;
+    public static final int LIGHT_ID_BLUETOOTH = 6;
+    public static final int LIGHT_ID_WIFI = 7;
+    public static final int LIGHT_ID_COUNT = 8;
 
-    static final int LIGHT_FLASH_NONE = 0;
-    static final int LIGHT_FLASH_TIMED = 1;
-    static final int LIGHT_FLASH_HARDWARE = 2;
+    public static final int LIGHT_FLASH_NONE = 0;
+    public static final int LIGHT_FLASH_TIMED = 1;
+    public static final int LIGHT_FLASH_HARDWARE = 2;
 
     /**
      * Light brightness is managed by a user setting.
      */
-    static final int BRIGHTNESS_MODE_USER = 0;
+    public static final int BRIGHTNESS_MODE_USER = 0;
 
     /**
      * Light brightness is managed by a light sensor.
      */
-    static final int BRIGHTNESS_MODE_SENSOR = 1;
+    public static final int BRIGHTNESS_MODE_SENSOR = 1;
 
     private final Light mLights[] = new Light[LIGHT_ID_COUNT];
 

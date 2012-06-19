@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.power;
 
 import com.android.internal.app.IBatteryStats;
+import com.android.server.BatteryService;
+import com.android.server.EventLogTags;
+import com.android.server.LightsService;
+import com.android.server.LightsService.Light;
+import com.android.server.Watchdog;
+import com.android.server.Watchdog.Monitor;
 import com.android.server.am.BatteryStatsService;
-import com.android.server.pm.ShutdownThread;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
@@ -532,7 +537,7 @@ public class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    PowerManagerService() {
+    public PowerManagerService() {
         // Hack to get our uid...  should have a func for this.
         long token = Binder.clearCallingIdentity();
         MY_UID = Process.myUid();
@@ -550,7 +555,7 @@ public class PowerManagerService extends IPowerManager.Stub
 
     private ContentQueryMap mSettings;
 
-    void init(Context context, LightsService lights, IActivityManager activity,
+    public void init(Context context, LightsService lights, IActivityManager activity,
             BatteryService battery) {
         mLightsService = lights;
         mContext = context;
@@ -707,7 +712,7 @@ public class PowerManagerService extends IPowerManager.Stub
     /**
      * Low-level function turn the device off immediately, without trying
      * to be clean.  Most people should use
-     * {@link com.android.server.pm.internal.app.ShutdownThread} for a clean shutdown.
+     * {@link com.android.server.power.internal.app.ShutdownThread} for a clean shutdown.
      */
     public static void lowLevelShutdown() {
         nativeShutdown();
@@ -3056,7 +3061,7 @@ public class PowerManagerService extends IPowerManager.Stub
         return mPolicy;
     }
 
-    void systemReady() {
+    public void systemReady() {
         mSensorManager = new SystemSensorManager(mHandlerThread.getLooper());
         mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         // don't bother with the light sensor if auto brightness is handled in hardware

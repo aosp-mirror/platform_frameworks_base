@@ -15,7 +15,7 @@
  */
 
  
-package com.android.server.pm;
+package com.android.server.power;
 
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
@@ -43,7 +43,6 @@ import android.os.storage.IMountService;
 import android.os.storage.IMountShutdownObserver;
 
 import com.android.internal.telephony.ITelephony;
-import com.android.server.PowerManagerService;
 
 import android.util.Log;
 import android.view.WindowManager;

@@ -68,7 +68,7 @@ import java.util.Arrays;
  * a degree Centigrade</p>
  * <p>&quot;technology&quot; - String, the type of battery installed, e.g. "Li-ion"</p>
  */
-class BatteryService extends Binder {
+public class BatteryService extends Binder {
     private static final String TAG = BatteryService.class.getSimpleName();
 
     private static final boolean LOCAL_LOGV = false;
@@ -148,12 +148,12 @@ class BatteryService extends Binder {
         update();
     }
 
-    final boolean isPowered() {
+    public final boolean isPowered() {
         // assume we are powered if battery state is unknown so the "stay on while plugged in" option will work.
         return (mAcOnline || mUsbOnline || mBatteryStatus == BatteryManager.BATTERY_STATUS_UNKNOWN);
     }
 
-    final boolean isPowered(int plugTypeSet) {
+    public final boolean isPowered(int plugTypeSet) {
         // assume we are powered if battery state is unknown so
         // the "stay on while plugged in" option will work.
         if (mBatteryStatus == BatteryManager.BATTERY_STATUS_UNKNOWN) {
@@ -172,7 +172,7 @@ class BatteryService extends Binder {
         return (plugTypeSet & plugTypeBit) != 0;
     }
 
-    final int getPlugType() {
+    public final int getPlugType() {
         return mPlugType;
     }
 
@@ -195,7 +195,7 @@ class BatteryService extends Binder {
     };
 
     // returns battery level as a percentage
-    final int getBatteryLevel() {
+    public final int getBatteryLevel() {
         return mBatteryLevel;
     }
 

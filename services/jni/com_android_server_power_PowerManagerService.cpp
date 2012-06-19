@@ -35,7 +35,7 @@
 
 #include <private/gui/ComposerService.h>
 
-#include "com_android_server_PowerManagerService.h"
+#include "com_android_server_power_PowerManagerService.h"
 
 namespace android {
 
@@ -246,14 +246,14 @@ static JNINativeMethod gPowerManagerServiceMethods[] = {
         LOG_FATAL_IF(! var, "Unable to find field " fieldName);
 
 int register_android_server_PowerManagerService(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, "com/android/server/PowerManagerService",
+    int res = jniRegisterNativeMethods(env, "com/android/server/power/PowerManagerService",
             gPowerManagerServiceMethods, NELEM(gPowerManagerServiceMethods));
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
 
     // Callbacks
 
     jclass clazz;
-    FIND_CLASS(clazz, "com/android/server/PowerManagerService");
+    FIND_CLASS(clazz, "com/android/server/power/PowerManagerService");
 
     GET_METHOD_ID(gPowerManagerServiceClassInfo.goToSleep, clazz,
             "goToSleep", "(J)V");

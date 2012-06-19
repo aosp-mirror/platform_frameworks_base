@@ -55,7 +55,8 @@ import com.android.server.input.InputManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
 import com.android.server.pm.PackageManagerService;
-import com.android.server.pm.ShutdownThread;
+import com.android.server.power.PowerManagerService;
+import com.android.server.power.ShutdownThread;
 import com.android.server.usb.UsbService;
 import com.android.server.wm.WindowManagerService;
 
