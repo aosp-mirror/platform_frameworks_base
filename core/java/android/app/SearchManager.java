@@ -840,29 +840,17 @@ public class SearchManager
     }
 
     /**
-     * Returns true if the global assist activity is available.
-     * @return True if the assistant is available.
-     *
-     * @hide
-     */
-    public final boolean isAssistantAvailable() {
-        Intent intent = getAssistIntent();
-        return intent != null
-                && mContext.getPackageManager().queryIntentActivities(intent,
-                        PackageManager.MATCH_DEFAULT_ONLY).size() > 0;
-    }
-
-    /**
-     * Gets an intent to launch the global assist activity, or null if not available.
+     * Gets an intent for launching installed assistant activity, or null if not available.
      * @return The assist intent.
      *
      * @hide
      */
-    public final Intent getAssistIntent() {
-        ComponentName globalSearchActivity = getGlobalSearchActivity();
-        if (globalSearchActivity != null) {
-            Intent intent = new Intent(Intent.ACTION_ASSIST);
-            intent.setPackage(globalSearchActivity.getPackageName());
+    public static final Intent getAssistIntent(Context context) {
+        PackageManager pm = context.getPackageManager();
+        Intent intent = new Intent(Intent.ACTION_ASSIST);
+        ComponentName component = intent.resolveActivity(pm);
+        if (component != null) {
+            intent.setComponent(component);
             return intent;
         }
         return null;

@@ -2081,6 +2081,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         Intent intent = new Intent(Intent.ACTION_SEARCH_LONG_PRESS);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         try {
+            // TODO: This only stops the factory-installed search manager.  
+            // Need to formalize an API to handle others
             SearchManager searchManager = getSearchManager();
             if (searchManager != null) {
                 searchManager.stopSearch();
@@ -2093,19 +2095,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void launchAssistAction() {
         sendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
-
-        SearchManager searchManager = getSearchManager();
-        if (searchManager != null) {
-            Intent intent = searchManager.getAssistIntent();
-            if (intent != null) {
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                        | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                try {
-                    mContext.startActivity(intent);
-                } catch (ActivityNotFoundException e) {
-                    Slog.w(TAG, "No activity to handle assist action.", e);
-                }
+        Intent intent = SearchManager.getAssistIntent(mContext);
+        if (intent != null) {
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            try {
+                mContext.startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Slog.w(TAG, "No activity to handle assist action.", e);
             }
         }
     }
