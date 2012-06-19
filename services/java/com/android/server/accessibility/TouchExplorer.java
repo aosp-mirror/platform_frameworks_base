@@ -21,6 +21,7 @@ import android.gesture.Gesture;
 import android.gesture.GestureLibraries;
 import android.gesture.GestureLibrary;
 import android.gesture.GesturePoint;
+import android.gesture.GestureStore;
 import android.gesture.GestureStroke;
 import android.gesture.Prediction;
 import android.graphics.Rect;
@@ -220,7 +221,8 @@ public class TouchExplorer {
         mPerformLongPressDelayed = new PerformLongPressDelayed();
         mExitGestureDetectionModeDelayed = new ExitGestureDetectionModeDelayed();
         mGestureLibrary = GestureLibraries.fromRawResource(context, R.raw.accessibility_gestures);
-        mGestureLibrary.setOrientationStyle(4);
+        mGestureLibrary.setOrientationStyle(8);
+        mGestureLibrary.setSequenceType(GestureStore.SEQUENCE_SENSITIVE);
         mGestureLibrary.load();
         mSendHoverEnterDelayed = new SendHoverDelayed(MotionEvent.ACTION_HOVER_ENTER, true);
         mSendHoverExitDelayed = new SendHoverDelayed(MotionEvent.ACTION_HOVER_EXIT, false);
