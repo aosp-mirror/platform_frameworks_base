@@ -157,6 +157,7 @@ static jboolean mirror(JNIEnv* env, jobject obj, jcharArray charArray, int start
         return false;
     }
 
+    bool ret = false;
     for (int i = start; i < start + count; i++) {
         // XXX this thinks it knows that surrogates are never mirrored
 
@@ -165,10 +166,10 @@ static jboolean mirror(JNIEnv* env, jobject obj, jcharArray charArray, int start
 
         if (c1 != c2) {
             data[i] = c2;
-            return true;
+            ret = true;
         }
     }
-    return false;
+    return ret;
 }
 
 static jchar getMirror(JNIEnv* env, jobject obj, jchar c)
