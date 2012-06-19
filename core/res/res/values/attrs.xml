@@ -842,6 +842,12 @@
         <!-- The drawable for accessibility focused views. -->
         <attr name="accessibilityFocusedDrawable" format="reference" />
 
+        <!-- Drawable for WebView find-on-page dialogue's "next" button. @hide -->
+        <attr name="findOnPageNextDrawable" format="reference" />
+
+        <!-- Drawable for WebView find-on-page dialogue's "previous" button. @hide -->
+        <attr name="findOnPagePreviousDrawable" format="reference" />
+
     </declare-styleable>
 
     <!-- **************************************************************** -->
