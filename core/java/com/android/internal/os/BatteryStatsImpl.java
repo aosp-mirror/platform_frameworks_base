@@ -320,6 +320,18 @@ public final class BatteryStatsImpl extends BatteryStats {
         Process.PROC_TAB_TERM|Process.PROC_OUT_LONG,                  // 5: totalTime
     };
 
+    private static final int[] WAKEUP_SOURCES_FORMAT = new int[] {
+        Process.PROC_TAB_TERM|Process.PROC_OUT_STRING,                // 0: name
+        Process.PROC_TAB_TERM|Process.PROC_COMBINE|
+                              Process.PROC_OUT_LONG,                  // 1: count
+        Process.PROC_TAB_TERM|Process.PROC_COMBINE,
+        Process.PROC_TAB_TERM|Process.PROC_COMBINE,
+        Process.PROC_TAB_TERM|Process.PROC_COMBINE,
+        Process.PROC_TAB_TERM|Process.PROC_COMBINE,
+        Process.PROC_TAB_TERM|Process.PROC_COMBINE
+                             |Process.PROC_OUT_LONG,                  // 6: totalTime
+    };
+
     private final String[] mProcWakelocksName = new String[3];
     private final long[] mProcWakelocksData = new long[3];
 
@@ -1028,34 +1040,44 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     private final Map<String, KernelWakelockStats> readKernelWakelockStats() {
 
+        FileInputStream is;
         byte[] buffer = new byte[8192];
         int len;
+        boolean wakeup_sources = false;
 
         try {
-            FileInputStream is = new FileInputStream("/proc/wakelocks");
-            len = is.read(buffer);
-            is.close();
-
-            if (len > 0) {
-                int i;
-                for (i=0; i<len; i++) {
-                    if (buffer[i] == '\0') {
-                        len = i;
-                        break;
-                    }
+            try {
+                is = new FileInputStream("/proc/wakelocks");
+            } catch (java.io.FileNotFoundException e) {
+                try {
+                    is = new FileInputStream("/d/wakeup_sources");
+                    wakeup_sources = true;
+                } catch (java.io.FileNotFoundException e2) {
+                    return null;
                 }
             }
-        } catch (java.io.FileNotFoundException e) {
-            return null;
+
+            len = is.read(buffer);
+            is.close();
         } catch (java.io.IOException e) {
             return null;
         }
 
-        return parseProcWakelocks(buffer, len);
+        if (len > 0) {
+            int i;
+            for (i=0; i<len; i++) {
+                if (buffer[i] == '\0') {
+                    len = i;
+                    break;
+                }
+            }
+        }
+
+        return parseProcWakelocks(buffer, len, wakeup_sources);
     }
 
     private final Map<String, KernelWakelockStats> parseProcWakelocks(
-            byte[] wlBuffer, int len) {
+            byte[] wlBuffer, int len, boolean wakeup_sources) {
         String name;
         int count;
         long totalTime;
@@ -1092,12 +1114,20 @@ public final class BatteryStatsImpl extends BatteryStats {
                     if ((wlBuffer[j] & 0x80) != 0) wlBuffer[j] = (byte) '?';
                 }
                 boolean parsed = Process.parseProcLine(wlBuffer, startIndex, endIndex,
-                        PROC_WAKELOCKS_FORMAT, nameStringArray, wlData, null);
+                        wakeup_sources ? WAKEUP_SOURCES_FORMAT :
+                                         PROC_WAKELOCKS_FORMAT,
+                        nameStringArray, wlData, null);
 
                 name = nameStringArray[0];
                 count = (int) wlData[1];
-                // convert nanoseconds to microseconds with rounding.
-                totalTime = (wlData[2] + 500) / 1000;
+
+                if (wakeup_sources) {
+                        // convert milliseconds to microseconds
+                        totalTime = wlData[2] * 1000;
+                } else {
+                        // convert nanoseconds to microseconds with rounding.
+                        totalTime = (wlData[2] + 500) / 1000;
+                }
 
                 if (parsed && name.length() > 0) {
                     if (!m.containsKey(name)) {
