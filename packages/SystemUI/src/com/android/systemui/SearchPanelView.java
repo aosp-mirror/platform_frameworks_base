@@ -53,7 +53,6 @@ public class SearchPanelView extends FrameLayout implements
     private static final String ASSIST_ICON_METADATA_NAME =
             "com.android.systemui.action_assist_icon";
     private final Context mContext;
-    private final SearchManager mSearchManager;
     private BaseStatusBar mBar;
     private StatusBarTouchProxy mStatusBarTouchProxy;
 
@@ -68,25 +67,13 @@ public class SearchPanelView extends FrameLayout implements
     public SearchPanelView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mContext = context;
-        mSearchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
-        if (mSearchManager == null) {
-            Slog.w(TAG, "Search manager not available");
-        }
-    }
-
-    public boolean isAssistantAvailable() {
-        return mSearchManager != null && mSearchManager.isAssistantAvailable();
-    }
-
-    private Intent getAssistIntent() {
-        return mSearchManager != null ? mSearchManager.getAssistIntent() : null;
     }
 
     private void startAssistActivity() {
         // Close Recent Apps if needed
         mBar.animateCollapse(CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL);
         // Launch Assist
-        Intent intent = getAssistIntent();
+        Intent intent = SearchManager.getAssistIntent(mContext);
         if (intent == null) return;
         try {
             ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
@@ -150,19 +137,17 @@ public class SearchPanelView extends FrameLayout implements
         // TODO: fetch views
         mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
         mGlowPadView.setOnTriggerListener(mGlowPadViewListener);
-        if (mSearchManager != null) {
-            ComponentName component = mSearchManager.getGlobalSearchActivity();
-            if (component != null) {
-                if (!mGlowPadView.replaceTargetDrawablesIfPresent(component,
-                        ASSIST_ICON_METADATA_NAME,
-                        com.android.internal.R.drawable.ic_action_assist_generic)) {
-                    Slog.w(TAG, "Couldn't grab icon from component " + component);
-                }
-            } else {
-                Slog.w(TAG, "No search icon specified in component " + component);
+    }
+
+    private void maybeSwapSearchIcon() {
+        Intent intent = SearchManager.getAssistIntent(mContext);
+        if (intent != null) {
+            ComponentName component = intent.getComponent();
+            if (component == null || !mGlowPadView.replaceTargetDrawablesIfPresent(component,
+                    ASSIST_ICON_METADATA_NAME,
+                    com.android.internal.R.drawable.ic_action_assist_generic)) {
+                if (DEBUG) Slog.v(TAG, "Couldn't grab icon for component " + component);
             }
-        } else {
-            Slog.w(TAG, "No SearchManager");
         }
     }
 
@@ -210,6 +195,7 @@ public class SearchPanelView extends FrameLayout implements
         }
         mShowing = show;
         if (show) {
+            maybeSwapSearchIcon();
             if (getVisibility() != View.VISIBLE) {
                 setVisibility(View.VISIBLE);
                 // Don't start the animation until we've created the layer, which is done
@@ -288,5 +274,9 @@ public class SearchPanelView extends FrameLayout implements
         transitioner.setStartDelay(LayoutTransition.CHANGE_DISAPPEARING, 0);
         transitioner.setAnimator(LayoutTransition.DISAPPEARING, null);
         return transitioner;
+    }
+
+    public boolean isAssistantAvailable() {
+        return SearchManager.getAssistIntent(mContext) != null;
     }
 }
