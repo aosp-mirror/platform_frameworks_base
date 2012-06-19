@@ -942,8 +942,10 @@ public class LayoutTransition {
 
             @Override
             public void onAnimationStart(Animator animator) {
-                if (mListeners != null) {
-                    for (TransitionListener listener : mListeners) {
+                if (hasListeners()) {
+                    ArrayList<TransitionListener> listeners =
+                            (ArrayList<TransitionListener>) mListeners.clone();
+                    for (TransitionListener listener : listeners) {
                         listener.startTransition(LayoutTransition.this, parent, child,
                                 changeReason == APPEARING ?
                                         CHANGE_APPEARING : changeReason == DISAPPEARING ?
@@ -961,8 +963,10 @@ public class LayoutTransition {
             @Override
             public void onAnimationEnd(Animator animator) {
                 currentChangingAnimations.remove(child);
-                if (mListeners != null) {
-                    for (TransitionListener listener : mListeners) {
+                if (hasListeners()) {
+                    ArrayList<TransitionListener> listeners =
+                            (ArrayList<TransitionListener>) mListeners.clone();
+                    for (TransitionListener listener : listeners) {
                         listener.endTransition(LayoutTransition.this, parent, child,
                                 changeReason == APPEARING ?
                                         CHANGE_APPEARING : changeReason == DISAPPEARING ?
@@ -1131,8 +1135,10 @@ public class LayoutTransition {
             currentAnimation.cancel();
         }
         if (mAppearingAnim == null) {
-            if (mListeners != null) {
-                for (TransitionListener listener : mListeners) {
+            if (hasListeners()) {
+                ArrayList<TransitionListener> listeners =
+                        (ArrayList<TransitionListener>) mListeners.clone();
+                for (TransitionListener listener : listeners) {
                     listener.endTransition(LayoutTransition.this, parent, child, APPEARING);
                 }
             }
@@ -1149,8 +1155,10 @@ public class LayoutTransition {
             @Override
             public void onAnimationEnd(Animator anim) {
                 currentAppearingAnimations.remove(child);
-                if (mListeners != null) {
-                    for (TransitionListener listener : mListeners) {
+                if (hasListeners()) {
+                    ArrayList<TransitionListener> listeners =
+                            (ArrayList<TransitionListener>) mListeners.clone();
+                    for (TransitionListener listener : listeners) {
                         listener.endTransition(LayoutTransition.this, parent, child, APPEARING);
                     }
                 }
@@ -1172,8 +1180,10 @@ public class LayoutTransition {
             currentAnimation.cancel();
         }
         if (mDisappearingAnim == null) {
-            if (mListeners != null) {
-                for (TransitionListener listener : mListeners) {
+            if (hasListeners()) {
+                ArrayList<TransitionListener> listeners =
+                        (ArrayList<TransitionListener>) mListeners.clone();
+                for (TransitionListener listener : listeners) {
                     listener.endTransition(LayoutTransition.this, parent, child, DISAPPEARING);
                 }
             }
@@ -1189,8 +1199,10 @@ public class LayoutTransition {
             public void onAnimationEnd(Animator anim) {
                 currentDisappearingAnimations.remove(child);
                 child.setAlpha(preAnimAlpha);
-                if (mListeners != null) {
-                    for (TransitionListener listener : mListeners) {
+                if (hasListeners()) {
+                    ArrayList<TransitionListener> listeners =
+                            (ArrayList<TransitionListener>) mListeners.clone();
+                    for (TransitionListener listener : listeners) {
                         listener.endTransition(LayoutTransition.this, parent, child, DISAPPEARING);
                     }
                 }
@@ -1228,8 +1240,10 @@ public class LayoutTransition {
             cancel(CHANGE_APPEARING);
             cancel(CHANGING);
         }
-        if (mListeners != null && (mTransitionTypes & FLAG_APPEARING) == FLAG_APPEARING) {
-            for (TransitionListener listener : mListeners) {
+        if (hasListeners() && (mTransitionTypes & FLAG_APPEARING) == FLAG_APPEARING) {
+            ArrayList<TransitionListener> listeners =
+                    (ArrayList<TransitionListener>) mListeners.clone();
+            for (TransitionListener listener : listeners) {
                 listener.startTransition(this, parent, child, APPEARING);
             }
         }
@@ -1239,6 +1253,10 @@ public class LayoutTransition {
         if ((mTransitionTypes & FLAG_APPEARING) == FLAG_APPEARING) {
             runAppearingTransition(parent, child);
         }
+    }
+
+    private boolean hasListeners() {
+        return mListeners != null && mListeners.size() > 0;
     }
 
     /**
@@ -1328,8 +1346,10 @@ public class LayoutTransition {
             cancel(CHANGE_DISAPPEARING);
             cancel(CHANGING);
         }
-        if (mListeners != null && (mTransitionTypes & FLAG_DISAPPEARING) == FLAG_DISAPPEARING) {
-            for (TransitionListener listener : mListeners) {
+        if (hasListeners() && (mTransitionTypes & FLAG_DISAPPEARING) == FLAG_DISAPPEARING) {
+            ArrayList<TransitionListener> listeners = (ArrayList<TransitionListener>) mListeners
+                    .clone();
+            for (TransitionListener listener : listeners) {
                 listener.startTransition(this, parent, child, DISAPPEARING);
             }
         }
