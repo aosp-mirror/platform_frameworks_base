@@ -997,13 +997,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 mTransition.showChild(this, child, oldVisibility);
             } else {
                 mTransition.hideChild(this, child, newVisibility);
-                // Only track this on disappearing views - appearing views are already visible
-                // and don't need special handling during drawChild()
-                if (mVisibilityChangingChildren == null) {
-                    mVisibilityChangingChildren = new ArrayList<View>();
-                }
-                mVisibilityChangingChildren.add(child);
                 if (mTransitioningViews != null && mTransitioningViews.contains(child)) {
+                    // Only track this on disappearing views - appearing views are already visible
+                    // and don't need special handling during drawChild()
+                    if (mVisibilityChangingChildren == null) {
+                        mVisibilityChangingChildren = new ArrayList<View>();
+                    }
+                    mVisibilityChangingChildren.add(child);
                     addDisappearingView(child);
                 }
             }
