@@ -33,95 +33,6 @@ packages and more about which ones we recommend you install.</p>
 SDK packages that are available, already installed, or for which an update is available.</p>
 
 
-<h2 id="Packages">Available Packages</h2>
-
-<p>The list of SDK packages are divided into three groups:</p>
-<ul>
-  <li>Tools</li>
-  <li>Platform versions</li>
-  <li>Extras</li>
-</ul>
-
-
-<h3>Tools</h3>
-
-<p>There are two types of tools packages:</p>
-<ul>
-<li><strong>SDK Tools</strong> &mdash; Contains tools for debugging and testing your application
-and other utility tools. These tools are installed with the Android SDK starter package and receive
-periodic updates. You can access these tools in the <code>&lt;sdk&gt;/tools/</code> directory of
-your SDK. To learn more about
-them, see <a href="{@docRoot}tools/index.html#tools-sdk">SDK Tools</a> in the
-developer guide.</li>
-
-<li><strong>SDK Platform-tools</strong> &mdash; Contains platform-dependent tools for developing
-and debugging your application. These tools support the latest features of the Android platform and
-are typically updated only when a new platform becomes available. You can access these tools in the
-<code>&lt;sdk&gt;/platform-tools/</code> directory. To learn more about them, see <a
-href="{@docRoot}tools/index.html#tools-platform">Platform Tools</a> in the
-developer guide.</li>
-</ul>
-
-
-<h3 id="Versions">Platform versions</h3>
-
-<p>Each version of the Android platform has its own set of SDK packages that each serve a
-different purpose. To actually develop an app, all you need is the SDK Platform for a given
-version, but the others are useful as well:</p>
-
-<ul>
-
-<li><strong>Documentation for Android SDK</strong> &mdash; An offline copy of the latest
-documentation for the Android platform APIs. </li>
-
-<li><strong>SDK Platform</strong> &mdash; A fully compliant Android library that you must specify as
-a build target when developing an app&mdash;it includes an <code>android.jar</code> file with all
-the platform APIs.</li>
-
-<li><strong>Samples for SDK</strong> &mdash; A collection of sample apps that demonstrate a
-variety of the platform APIs. These are a great resource to browse Android app code. The API
-Demos app in particular provides a huge number of small demos you should explore.</li>
-
-<li><strong>System Images</strong> &mdash; Each platform contains one or more different system
-images you can download. A system image is required in order to run the Android emulator.</li>
-
-<li><strong>Google APIs</strong> &mdash; An <em>Add-on</em> that provides both a
-platform you can use to develop an app using special Google APIs and a system image for the
-emulator so you can test your app using the Google APIs.</li>
-
-<li><strong>Sources for Android SDK</strong> &mdash; A copy of the Android platform source
-code that's useful for stepping through the code while debugging.</li>
-</ul>
-
-
-<h3>Extras</h3>
-
-<p>The Extras folder contains a variety of optional packages that provide you additional
-libraries or tools for development. Here's a list of some such packages:</p>
-
-<ul>
-  <li><strong>Android Support</strong> &mdash; A static library that you include in your app
-sources in order to use a variety of very useful APIs that aren't available in the standard
-platform. For example, the support library contains versions of the {@link
-android.support.v4.app.Fragment} class that's compatible with Android 1.6 and higher (the APIs
-were originally introduced in Android 3.0) and the {@link android.support.v4.view.ViewPager}
-APIs that allow you to easily build a side-swipeable UI.
-  <p>We highly recommend that you use the support library if you're developing for devices
-older than Android 3.0.</p></li>
-
-  <li><strong>Google Play Billing</strong> &mdash; Provides the static libraries and samples
-that allow you to integrate billing services in your app with Google Play.</li>
-
-  <li><strong>Google Play Licensing</strong> &mdash; Provides the static libraries and samples
-that allow you to perform license verification for your app when distributing your app on
-Google Play.</li>
-
-  <li><strong>Google Web Driver</strong> &mdash; A tool set that allows you to write test for your
-Android web app. Documentation is available at the project's <a
-href="http://selenium.googlecode.com/svn/trunk/docs/api/java/index.html">host site</a>.</li>
-
-  <li>And many more.</li>
-</ul>
 
 
 <h2 id="Recommended">Recommended Packages</h2>
@@ -162,5 +73,6 @@ href="{@docRoot}tools/sdk/support-package.html">Support Library</a>.</dd>
 </dl>
 
 
-<p>For more information about using the Android SDK Manager, see the <a
-href="{@docRoot}sdk/adding-components.html">Adding SDK Packages</a> document. </p>
+<p class="note"><strong>Tip:</strong> For easy access to the SDK tools from a command line, add the
+location of the SDK's <code>tools/</code> and
+<code>platform-tools</code> to your <code>PATH</code> environment variable.</p>

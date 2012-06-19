@@ -2,7 +2,7 @@ page.title=Android IDE
 @jd:body
 
     
-<img src="{@docRoot}images/tools-home.png" style="float:right;height:414px;" />
+<img src="{@docRoot}images/tools-home.png" style="float:right;" height="441" />
 
 <div style="position:relative;height:0">
 <div style="position:absolute;width:420px"> 
