@@ -57,7 +57,7 @@
             android:id="@+id/notification_scroller"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:overScrollMode="never"
+            android:overScrollMode="ifContentScrolls"
             android:layout_weight="1"
             >
             <com.android.systemui.statusbar.policy.NotificationRowLayout

@@ -32,16 +32,21 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 
+import java.util.Stack;
+
 public class ExpandHelper implements Gefingerpoken, OnClickListener {
     public interface Callback {
         View getChildAtRawPosition(float x, float y);
         View getChildAtPosition(float x, float y);
+        View getPreviousChild(View currentChild);
         boolean canChildBeExpanded(View v);
         boolean setUserExpandedChild(View v, boolean userxpanded);
     }
 
     private static final String TAG = "ExpandHelper";
-    protected static final boolean DEBUG = false;
+    protected static final boolean DEBUG = true;
+    protected static final boolean DEBUG_SCALE = false;
+    protected static final boolean DEBUG_GLOW = true;
     private static final long EXPAND_DURATION = 250;
     private static final long GLOW_DURATION = 150;
 
@@ -106,7 +111,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
             mView = v;
         }
         public void setHeight(float h) {
-            if (DEBUG) Slog.v(TAG, "SetHeight: setting to " + h);
+            if (DEBUG_SCALE) Slog.v(TAG, "SetHeight: setting to " + h);
             ViewGroup.LayoutParams lp = mView.getLayoutParams();
             lp.height = (int)h;
             mView.setLayoutParams(lp);
@@ -121,7 +126,8 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         }
         public int getNaturalHeight(int maximum) {
             ViewGroup.LayoutParams lp = mView.getLayoutParams();
-            if (DEBUG) Slog.v(TAG, "Inspecting a child of type: " + mView.getClass().getName());
+            if (DEBUG_SCALE) Slog.v(TAG, "Inspecting a child of type: " +
+                    mView.getClass().getName());
             int oldHeight = lp.height;
             lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
             mView.setLayoutParams(lp);
@@ -135,6 +141,17 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
             return mView.getMeasuredHeight();
         }
     }
+
+    class PopState {
+        View mCurrView;
+        View mCurrViewTopGlow;
+        View mCurrViewBottomGlow;
+        float mOldHeight;
+        float mNaturalHeight;
+        float mInitialTouchY;
+    }
+
+    private Stack<PopState> popStack;
 
     /**
      * Handle expansion gestures to expand and contract children of the callback.
@@ -151,6 +168,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         mLargeSize = large;
         mContext = context;
         mCallback = callback;
+        popStack = new Stack<PopState>();
         mScaler = new ViewScaler();
         mGravity = Gravity.TOP;
         mScaleAnimation = ObjectAnimator.ofFloat(mScaler, "height", 0f);
@@ -192,14 +210,14 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
                                          new ScaleGestureDetector.SimpleOnScaleGestureListener() {
             @Override
             public boolean onScaleBegin(ScaleGestureDetector detector) {
-                if (DEBUG) Slog.v(TAG, "onscalebegin()");
+                if (DEBUG_SCALE) Slog.v(TAG, "onscalebegin()");
                 float x = detector.getFocusX();
                 float y = detector.getFocusY();
 
                 // your fingers have to be somewhat close to the bounds of the view in question
                 mInitialTouchFocusY = detector.getFocusY();
                 mInitialTouchSpan = Math.abs(detector.getCurrentSpan());
-                if (DEBUG) Slog.d(TAG, "got mInitialTouchSpan: (" + mInitialTouchSpan + ")");
+                if (DEBUG_SCALE) Slog.d(TAG, "got mInitialTouchSpan: (" + mInitialTouchSpan + ")");
 
                 mStretching = initScale(findView(x, y));
                 return mStretching;
@@ -207,7 +225,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
 
             @Override
             public boolean onScale(ScaleGestureDetector detector) {
-                if (DEBUG) Slog.v(TAG, "onscale() on " + mCurrView);
+                if (DEBUG_SCALE) Slog.v(TAG, "onscale() on " + mCurrView);
 
                 // are we scaling or dragging?
                 float span = Math.abs(detector.getCurrentSpan()) - mInitialTouchSpan;
@@ -227,10 +245,11 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
 
             @Override
             public void onScaleEnd(ScaleGestureDetector detector) {
-                if (DEBUG) Slog.v(TAG, "onscaleend()");
+                if (DEBUG_SCALE) Slog.v(TAG, "onscaleend()");
                 // I guess we're alone now
-                if (DEBUG) Slog.d(TAG, "scale end");
+                if (DEBUG_SCALE) Slog.d(TAG, "scale end");
                 finishScale(false);
+                clearView();
                 mStretching = false;
             }
         });
@@ -295,16 +314,17 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
 
     private float calculateGlow(float target, float actual) {
         // glow if overscale
+        if (DEBUG_GLOW) Slog.d(TAG, "target: " + target + " actual: " + actual);
         float stretch = (float) Math.abs((target - actual) / mMaximumStretch);
         float strength = 1f / (1f + (float) Math.pow(Math.E, -1 * ((8f * stretch) - 5f)));
-        if (DEBUG) Slog.d(TAG, "stretch: " + stretch + " strength: " + strength);
+        if (DEBUG_GLOW) Slog.d(TAG, "stretch: " + stretch + " strength: " + strength);
         return (GLOW_BASE + strength * (1f - GLOW_BASE));
     }
 
     public void setGlow(float glow) {
         if (!mGlowAnimationSet.isRunning() || glow == 0f) {
             if (mGlowAnimationSet.isRunning()) {
-                mGlowAnimationSet.cancel();
+                mGlowAnimationSet.end();
             }
             if (mCurrViewTopGlow != null && mCurrViewBottomGlow != null) {
                 if (glow == 0f || mCurrViewTopGlow.getAlpha() == 0f) {
@@ -358,13 +378,10 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
                         mLastMotionY = y;
                         mPullingWithOneFinger = initScale(findView(x, y));
                         if (mPullingWithOneFinger) {
-                            mInitialTouchFocusY = mLastMotionY;
+                            mInitialTouchY = mLastMotionY;
                             mHasPopped = false;
                         }
                     }
-                    if (DEBUG) Slog.d(TAG, "examining move: " + yDiff);
-                } else {
-                    if (DEBUG) Slog.d(TAG, "uninteresting move");
                 }
                 break;
             }
@@ -372,17 +389,16 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
             case MotionEvent.ACTION_DOWN:
                 mWatchingForPull = isInside(mScrollView, ev.getX(), ev.getY());
                 mLastMotionY = (int) ev.getY();
-                if (DEBUG) Slog.d(TAG, "action down: " + mWatchingForPull);
                 break;
 
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 if (mPullingWithOneFinger) {
                     finishScale(false);
+                    clearView();
                 }
                 mPullingWithOneFinger = false;
                 mWatchingForPull = false;
-                if (DEBUG) Slog.d(TAG, "action up: " + mWatchingForPull);
                 break;
             }
             return mPullingWithOneFinger;
@@ -391,30 +407,54 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
 
     public boolean onTouchEvent(MotionEvent ev) {
         final int action = ev.getAction();
-        if (DEBUG) Slog.d(TAG, "touch: act=" + (action) +
+        if (DEBUG_SCALE) Slog.d(TAG, "touch: act=" + (action) +
                          " stretching=" + mStretching +
                          " onefinger=" + mPullingWithOneFinger);
         if (mStretching) {
-            if (DEBUG) Slog.d(TAG, "detector ontouch");
             mDetector.onTouchEvent(ev);
         }
         switch (action) {
             case MotionEvent.ACTION_MOVE: {
                 if (mPullingWithOneFinger) {
-                    float hand = ev.getY() - mInitialTouchFocusY;
-                    if (mHasPopped || hand > mPopLimit) {
+                    float target = ev.getY() - mInitialTouchY + mOldHeight;
+                    float newHeight = clamp(target);
+                    if (mHasPopped || target > mPopLimit) {
                         if (!mHasPopped) {
                             vibrate(mPopDuration);
                             mHasPopped = true;
                         }
-                        hand = hand + mOldHeight;
-                        float target = hand;
-                        float newHeight = clamp(target);
                         mScaler.setHeight(newHeight);
                         // glow if overscale
-                        setGlow(calculateGlow(target, newHeight));
+                        if (target > mNaturalHeight) {
+                            View previous = mCallback.getPreviousChild(mCurrView);
+                            if (previous != null) {
+                                setGlow(0f);
+                                pushView(previous);
+                                initScale(previous);
+                                mInitialTouchY = ev.getY();
+                                target = mOldHeight;
+                                newHeight = clamp(target);
+                                mHasPopped = false;
+                            } else {
+                                setGlow(calculateGlow(target, newHeight));
+                            }
+                        } else if (target < mSmallSize && !popStack.empty()) {
+                            setGlow(0f);
+                            initScale(popView());
+                            mInitialTouchY = ev.getY();
+                            setGlow(GLOW_BASE);
+                        } else {
+                            setGlow(calculateGlow(target, newHeight));
+                        }
                     } else {
-                        setGlow(calculateGlow(4f * hand, 0f));
+                         if (target < mSmallSize && !popStack.empty()) {
+                            setGlow(0f);
+                            initScale(popView());
+                            mInitialTouchY = ev.getY();
+                            setGlow(GLOW_BASE);
+                         } else {
+                             setGlow(calculateGlow(4f * target, mSmallSize));
+                         }
                     }
                     return true;
                 }
@@ -464,7 +504,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         } else {
             h = (force || h < mNaturalHeight) ? mSmallSize : mNaturalHeight;
         }
-        if (DEBUG && mCurrView != null) mCurrView.setBackgroundColor(0);
         if (mScaleAnimation.isRunning()) {
             mScaleAnimation.cancel();
         }
@@ -474,10 +513,12 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         setGlow(0f);
         mCallback.setUserExpandedChild(mCurrView, h == mNaturalHeight);
         if (DEBUG) Slog.d(TAG, "scale was finished on view: " + mCurrView);
-        clearView();
     }
 
     private void clearView() {
+        while (!popStack.empty()) {
+            popStack.pop();
+        }
         mCurrView = null;
         mCurrViewTopGlow = null;
         mCurrViewBottomGlow = null;
@@ -498,10 +539,38 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         }
     }
 
+    private void pushView(View v) {
+        PopState state = new PopState();
+        state.mCurrView = mCurrView;
+        state.mCurrViewTopGlow = mCurrViewTopGlow;
+        state.mCurrViewBottomGlow = mCurrViewBottomGlow;
+        state.mOldHeight = mOldHeight;
+        state.mNaturalHeight = mNaturalHeight;
+        state.mInitialTouchY = mInitialTouchY;
+        popStack.push(state);
+    }
+
+    private View popView() {
+        if (popStack.empty()) {
+            return null;
+        }
+
+        PopState state = popStack.pop();
+        mCurrView = state.mCurrView;
+        mCurrViewTopGlow = state.mCurrViewTopGlow;
+        mCurrViewBottomGlow = state.mCurrViewBottomGlow;
+        mOldHeight = state.mOldHeight;
+        mNaturalHeight = state.mNaturalHeight;
+        mInitialTouchY = state.mInitialTouchY;
+
+        return mCurrView;
+    }
+
     @Override
     public void onClick(View v) {
         initScale(v);
         finishScale(true);
+        clearView();
     }
 
     /**
