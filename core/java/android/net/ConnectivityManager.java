@@ -137,6 +137,28 @@ public class ConnectivityManager {
     public static final String EXTRA_INET_CONDITION = "inetCondition";
 
     /**
+     * Broadcast action to indicate the change of data activity status
+     * (idle or active) on a network in a recent period.
+     * The network becomes active when data transimission is started, or
+     * idle if there is no data transimition for a period of time.
+     * {@hide}
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DATA_ACTIVITY_CHANGE = "android.net.conn.DATA_ACTIVITY_CHANGE";
+    /**
+     * The lookup key for an enum that indicates the network device type on which this data activity
+     * change happens.
+     * {@hide}
+     */
+    public static final String EXTRA_DEVICE_TYPE = "deviceType";
+    /**
+     * The lookup key for a boolean that indicates the device is active or not. {@code true} means
+     * it is actively sending or receiving data and {@code false} means it is idle.
+     * {@hide}
+     */
+    public static final String EXTRA_IS_ACTIVE = "isActive";
+
+    /**
      * Broadcast Action: The setting for background data usage has changed
      * values. Use {@link #getBackgroundDataSetting()} to get the current value.
      * <p>

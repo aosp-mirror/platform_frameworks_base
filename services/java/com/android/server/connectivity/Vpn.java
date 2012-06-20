@@ -291,6 +291,9 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
     public void limitReached(String limit, String interfaze) {
     }
 
+    public void interfaceClassDataActivityChanged(String label, boolean active) {
+    }
+
     private void enforceControlPermission() {
         // System user is allowed to control VPN.
         if (Binder.getCallingUid() == Process.SYSTEM_UID) {

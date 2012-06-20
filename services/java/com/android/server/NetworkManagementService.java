@@ -280,6 +280,20 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     /**
+     * Notify our observers of a change in the data activity state of the interface
+     */
+    private void notifyInterfaceClassActivity(String label, boolean active) {
+        final int length = mObservers.beginBroadcast();
+        for (int i = 0; i < length; i++) {
+            try {
+                mObservers.getBroadcastItem(i).interfaceClassDataActivityChanged(label, active);
+            } catch (RemoteException e) {
+            }
+        }
+        mObservers.finishBroadcast();
+    }
+
+    /**
      * Prepare native daemon once connected, enabling modules and pushing any
      * existing in-memory rules.
      */
@@ -404,6 +418,19 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                     }
                     throw new IllegalStateException(
                             String.format("Invalid event from daemon (%s)", raw));
+                    // break;
+            case NetdResponseCode.InterfaceClassActivity:
+                    /*
+                     * An network interface class state changed (active/idle)
+                     * Format: "NNN IfaceClass <active/idle> <label>"
+                     */
+                    if (cooked.length < 4 || !cooked[1].equals("IfaceClass")) {
+                        throw new IllegalStateException(
+                                String.format("Invalid event from daemon (%s)", raw));
+                    }
+                    boolean isActive = cooked[2].equals("active");
+                    notifyInterfaceClassActivity(cooked[3], isActive);
+                    return true;
                     // break;
             default: break;
             }

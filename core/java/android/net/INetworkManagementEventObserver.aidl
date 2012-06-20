@@ -62,4 +62,11 @@ interface INetworkManagementEventObserver {
      */
     void limitReached(String limitName, String iface);
 
+    /**
+     * Interface data activity status is changed.
+     *
+     * @param iface The interface.
+     * @param active  True if the interface is actively transmitting data, false if it is idle.
+     */
+    void interfaceClassDataActivityChanged(String label, boolean active);
 }

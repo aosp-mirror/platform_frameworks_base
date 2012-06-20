@@ -17,6 +17,7 @@
 package com.android.server;
 
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
+import static android.Manifest.permission.RECEIVE_DATA_ACTIVITY_CHANGE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
@@ -35,6 +36,7 @@ import android.net.ConnectivityManager;
 import android.net.DummyDataStateTracker;
 import android.net.EthernetDataTracker;
 import android.net.IConnectivityManager;
+import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
@@ -546,6 +548,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mSettingsObserver = new SettingsObserver(mHandler, EVENT_APPLY_GLOBAL_HTTP_PROXY);
         mSettingsObserver.observe(mContext);
 
+        INetworkManagementEventObserver netdObserver = new NetdObserver();
+        try {
+            mNetd.registerObserver(netdObserver);
+        } catch (RemoteException e) {
+            loge("Error registering observer :" + e);
+        }
+
         loadGlobalProxy();
     }
 private NetworkStateTracker makeWimaxStateTracker() {
@@ -921,6 +930,19 @@ private NetworkStateTracker makeWimaxStateTracker() {
         }
         NetworkStateTracker tracker = mNetTrackers[netType];
         return tracker != null && tracker.setRadio(turnOn);
+    }
+
+    private class NetdObserver extends INetworkManagementEventObserver.Stub {
+        public void interfaceClassDataActivityChanged(String label, boolean active) {
+            int deviceType = Integer.parseInt(label);
+            sendDataActivityBroadcast(deviceType, active);
+        }
+
+        public void interfaceStatusChanged(String iface, boolean up) {}
+        public void interfaceLinkStateChanged(String iface, boolean up) {}
+        public void interfaceAdded(String iface) {}
+        public void interfaceRemoved(String iface) {}
+        public void limitReached(String limitName, String iface) {}
     }
 
     /**
@@ -1757,6 +1779,13 @@ private NetworkStateTracker makeWimaxStateTracker() {
 
     private void sendGeneralBroadcastDelayed(NetworkInfo info, String bcastType, int delayMs) {
         sendStickyBroadcastDelayed(makeGeneralIntent(info, bcastType), delayMs);
+    }
+
+    private void sendDataActivityBroadcast(int deviceType, boolean active) {
+        Intent intent = new Intent(ConnectivityManager.ACTION_DATA_ACTIVITY_CHANGE);
+        intent.putExtra(ConnectivityManager.EXTRA_DEVICE_TYPE, deviceType);
+        intent.putExtra(ConnectivityManager.EXTRA_IS_ACTIVE, active);
+        mContext.sendOrderedBroadcast(intent, RECEIVE_DATA_ACTIVITY_CHANGE);
     }
 
     /**

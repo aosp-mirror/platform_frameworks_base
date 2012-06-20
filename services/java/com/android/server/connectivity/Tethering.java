@@ -319,6 +319,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     public void limitReached(String limitName, String iface) {}
 
+    public void interfaceClassDataActivityChanged(String label, boolean active) {}
+
     public int tether(String iface) {
         if (DBG) Log.d(TAG, "Tethering " + iface);
         TetherInterfaceSM sm = null;

@@ -120,6 +120,8 @@ class CommonTimeManagementService extends Binder {
             reevaluateServiceState();
         }
         public void limitReached(String limitName, String iface) { }
+
+        public void interfaceClassDataActivityChanged(String label, boolean active) {}
     };
 
     private BroadcastReceiver mConnectivityMangerObserver = new BroadcastReceiver() {

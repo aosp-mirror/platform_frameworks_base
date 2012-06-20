@@ -41,4 +41,7 @@ public abstract class NetworkAlertObserver extends INetworkManagementEventObserv
     public void interfaceAdded(String iface) {
         // ignored; interface changes come through ConnectivityService
     }
+    public void interfaceClassDataActivityChanged(String label, boolean active) {
+        // ignored; interface changes come through ConnectivityService
+    }
 }

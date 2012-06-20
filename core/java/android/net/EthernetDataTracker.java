@@ -99,6 +99,10 @@ public class EthernetDataTracker implements NetworkStateTracker {
         public void limitReached(String limitName, String iface) {
             // Ignored.
         }
+
+        public void interfaceClassDataActivityChanged(String label, boolean active) {
+            // Ignored.
+        }
     }
 
     private EthernetDataTracker() {

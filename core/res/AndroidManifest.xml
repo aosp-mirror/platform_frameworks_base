@@ -121,6 +121,7 @@
 
     <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE" />
     <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE_IMMEDIATE" />
+    <protected-broadcast android:name="android.net.conn.DATA_ACTIVITY_CHANGE" />
 
     <protected-broadcast android:name="android.nfc.action.LLCP_LINK_STATE_CHANGED" />
     <protected-broadcast android:name="com.android.nfc_extras.action.RF_FIELD_ON_DETECTED" />
@@ -505,6 +506,11 @@
     APIs.
         @hide -->
     <permission android:name="android.permission.CONNECTIVITY_INTERNAL"
+        android:permissionGroup="android.permission-group.NETWORK"
+        android:protectionLevel="signature|system" />
+
+    <!-- @hide -->
+    <permission android:name="android.permission.RECEIVE_DATA_ACTIVITY_CHANGE"
         android:permissionGroup="android.permission-group.NETWORK"
         android:protectionLevel="signature|system" />
 
