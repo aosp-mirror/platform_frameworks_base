@@ -11565,10 +11565,19 @@ package android.media {
     method public android.graphics.drawable.Drawable getIconDrawable();
     method public java.lang.CharSequence getName();
     method public java.lang.CharSequence getName(android.content.Context);
+    method public int getPlaybackStream();
+    method public int getPlaybackType();
     method public java.lang.CharSequence getStatus();
     method public int getSupportedTypes();
     method public java.lang.Object getTag();
+    method public int getVolume();
+    method public int getVolumeHandling();
+    method public int getVolumeMax();
     method public void setTag(java.lang.Object);
+    field public static final int PLAYBACK_TYPE_LOCAL = 0; // 0x0
+    field public static final int PLAYBACK_TYPE_REMOTE = 1; // 0x1
+    field public static final int PLAYBACK_VOLUME_FIXED = 0; // 0x0
+    field public static final int PLAYBACK_VOLUME_VARIABLE = 1; // 0x1
   }
 
   public static class MediaRouter.SimpleCallback extends android.media.MediaRouter.Callback {
@@ -11588,8 +11597,20 @@ package android.media {
     method public void setIconResource(int);
     method public void setName(java.lang.CharSequence);
     method public void setName(int);
+    method public void setPlaybackStream(int);
+    method public void setPlaybackType(int);
     method public void setRemoteControlClient(android.media.RemoteControlClient);
     method public void setStatus(java.lang.CharSequence);
+    method public void setVolume(int);
+    method public void setVolumeCallback(android.media.MediaRouter.VolumeCallback);
+    method public void setVolumeHandling(int);
+    method public void setVolumeMax(int);
+  }
+
+  public static abstract class MediaRouter.VolumeCallback {
+    ctor public MediaRouter.VolumeCallback();
+    method public abstract void onVolumeSetRequest(android.media.MediaRouter.RouteInfo, int);
+    method public abstract void onVolumeUpdateRequest(android.media.MediaRouter.RouteInfo, int);
   }
 
   public class MediaScannerConnection implements android.content.ServiceConnection {
