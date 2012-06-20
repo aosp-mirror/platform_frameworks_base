@@ -72,11 +72,11 @@ most applications).</li>
 <p>The sections below describe these tasks. When you are done with the
 integration, you should be able to compile your application successfully and you
 can begin testing, as described in <a
-href="{@docRoot}guide/market/licensing/setting-up.html#test-env">Setting Up the Test
+href="{@docRoot}guide/google/play/licensing/setting-up.html#test-env">Setting Up the Test
 Environment</a>.</p>
 
 <p>For an overview of the full set of source files included in the LVL, see <a
-href="{@docRoot}guide/market/licensing/licensing-reference.html#lvl-summary">Summary of LVL Classes
+href="{@docRoot}guide/google/play/licensing/licensing-reference.html#lvl-summary">Summary of LVL Classes
 and Interfaces</a>.</p>
 
 
@@ -224,7 +224,7 @@ in local persistent storage.</li>
 cached response is valid, rather than making a request to the licensing server.
 Setting the response validity according to the server-provided <code>VT</code>
 extra is highly recommended. See <a
-href="{@docRoot}guide/market/licensing/licensing-reference.html#extras">Server Response Extras</a>
+href="{@docRoot}guide/google/play/licensing/licensing-reference.html#extras">Server Response Extras</a>
 for more information.</li>
 <li>Uses an exponential backoff period, if retrying any requests the result in
 errors. Note that the Google Play client automatically retries failed
@@ -247,7 +247,7 @@ server-provided settings is straightforward and making use of them is highly
 recommended. See the ServerManagedPolicy implementation for an example of how to
 extract and use the extras. For a list of server settings and information about
 how to use them, see  <a
-href="{@docRoot}guide/market/licensing/licensing-reference.html#extras">Server Response
+href="{@docRoot}guide/google/play/licensing/licensing-reference.html#extras">Server Response
 Extras</a>.</p>
 
 <h3 id="ServerManagedPolicy">ServerManagedPolicy</h3>
@@ -261,7 +261,7 @@ settings to the responses, to help the application manage licensing effectively.
 </p>
 
 <p style="margin-top:.5em;">See <a
-href="{@docRoot}guide/market/licensing/licensing-reference.html#extras">Server Response Extras</a>
+href="{@docRoot}guide/google/play/licensing/licensing-reference.html#extras">Server Response Extras</a>
 for
 a list of settings and <code>ServerManagedPolicy.java</code> for information
 about how a {@code Policy} can use the extras.</p>
@@ -294,7 +294,7 @@ retry count, among others. ServerManagedPolicy extracts the values from the
 license response in its <code>processServerResponse()</code> method and checks
 them in its <code>allowAccess()</code> method. For a list of the server-provided
 settings used by ServerManagedPolicy, see <a
-href="{@docRoot}guide/market/licensing/licensing-reference.html#extras">Server Response
+href="{@docRoot}guide/google/play/licensing/licensing-reference.html#extras">Server Response
 Extras</a>.</p>
 
 <p>For convenience, best performance, and the benefit of using license settings
@@ -698,9 +698,9 @@ private class MyLicenseCheckerCallback implements LicenseCheckerCallback {
 <p>Additionally, you should implement the <code>applicationError()</code>
 method, which the LVL calls to let your application handle errors that are not
 retryable. For a list of such errors, see <a
-href="{@docRoot}guide/market/licensing/licensing-reference.html#server-response-codes">Server
+href="{@docRoot}guide/google/play/licensing/licensing-reference.html#server-response-codes">Server
 Response Codes</a> in the <a
-href="guide/market/licensing/licensing-reference.html">Licensing Reference</a>. You can implement
+href="guide/google/play/licensing/licensing-reference.html">Licensing Reference</a>. You can implement
 the method in any way needed. In most cases, the
 method should log the error code and call <code>dontAllow()</code>.</p>
 

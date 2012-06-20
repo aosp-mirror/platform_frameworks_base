@@ -73,8 +73,8 @@ your Android applications to users around the world. When you release your appli
 Google Play you have access to a suite of developer tools that let you analyze your sales,
 identify market trends, and control who your applications are being distributed to. You also have
 access to several revenue-enhancing features, such as <a
-href="{@docRoot}guide/market/billing/index.html">in-app billing</a> and
-<a href="{@docRoot}guide/market/licensing/index.html">application licensing</a>.</p>
+href="{@docRoot}guide/google/play/billing/index.html">in-app billing</a> and
+<a href="{@docRoot}guide/google/play/licensing/index.html">application licensing</a>.</p>
 
 <p>Before you can publish applications on Google Play, you need to <a
 href="http://play.google.com/apps/publish">register</a> as a Google Play developer. During the
@@ -150,7 +150,7 @@ href="https://support.google.com/androidmarket/developer/bin/answer.py?hl=en&ans
 href="http://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=188189&topic=
 2364761&ctx=topic">content rating</a>. In addition, if you want to sell items within your app using
 the in-app billing feature, you can use the Developer Console to <a
-href="http://grendel.sea.corp.google.com:48014/guide/market/billing/billing_admin.html#billing-list
+href="http://grendel.sea.corp.google.com:48014/guide/google/play/billing/billing_admin.html#billing-list
 - setup">create a product list</a> and control which items are available for purchase in your
 app.</p>
 
@@ -211,7 +211,7 @@ each APK to the appropriate devices based on configuration support you've declar
 file of each APK. To use this feature, you need to build your separate {@code .apk} files when you are <a
 href="{@docRoot}guide/publishing/preparing.html">preparing your app for release</a> (that is, before
 you upload your app to Google Play). For more information, see <a
-href="{@docRoot}guide/market/publishing/multiple-apks.html">Multiple APK Support</a>.</p>
+href="{@docRoot}guide/google/play/publishing/multiple-apks.html">Multiple APK Support</a>.</p>
 
 <h2 id="marketupgrade">Publishing Updates on Google Play</h2>
 
@@ -254,11 +254,11 @@ higher.</p>
 
 <p>For complete information about Google Play Licensing Service and how to
 use it in your application, read <a
-href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a>.</p>
+href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a>.</p>
 
 <h2 id="marketinappbilling">Using Google Play In-app Billing</h2>
 
-<p><a href="{@docRoot}guide/market/billing/billing_overview.html">Google Play In-app Billing</a>
+<p><a href="{@docRoot}guide/google/play/billing/billing_overview.html">Google Play In-app Billing</a>
 is a Google Play service that lets you sell digital content in your applications. You can use
 the service to sell a wide range of content, including downloadable  content such as media files or
 photos, and virtual content such as game levels or potions.</p>
@@ -275,12 +275,12 @@ Checkout Merchant account. Also, because the service uses no dedicated framework
 in-app billing to any application that uses a minimum API level of 4 or higher.</p>
 
 <p>To help you integrate in-app billing into your application, the Android SDK provides a <a
-href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">sample application</a>
+href="{@docRoot}guide/google/play/billing/billing_integrate.html#billing-download">sample application</a>
 that demonstrates a simple implementation of in-app billing. The sample application contains
 examples of billing-related classes you can use to implement in-app billing in your application. It
 also contains examples of the database, user interface, and business logic you might use to
 implement in-app billing. For more information about the in-app billing feature, see the
-<a href="{@docRoot}guide/market/billing/index.html">In-app Billing documentation</a>.</p>
+<a href="{@docRoot}guide/google/play/billing/index.html">In-app Billing documentation</a>.</p>
 
 <h2 id="marketintent">Linking to Your Apps on Google Play</h2>
 

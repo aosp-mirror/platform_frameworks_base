@@ -451,4 +451,4 @@ requires that you follow specific rules within your filters and that you pay ext
 version codes for each APK to ensure proper update paths for each configuration.</p>
 
 <p>If you need more information about how to publish multiple APKs on Google Play, read <a
-href="{@docRoot}guide/market/publishing/multiple-apks.html">Multiple APK Support</a>.</p>
+href="{@docRoot}guide/google/play/publishing/multiple-apks.html">Multiple APK Support</a>.</p>
