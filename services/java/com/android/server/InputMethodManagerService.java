@@ -2668,7 +2668,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
 
-        if (!setSubtypeOnly) {
+        // Workaround.
+        // ASEC is not ready in the IMMS constructor. Accordingly, forward-locked
+        // IMEs are not recognized and considered uninstalled.
+        // Actually, we can't move everything after SystemReady because
+        // IMMS needs to run in the encryption lock screen. So, we just skip changing
+        // the default IME here and try cheking the default IME again in systemReady().
+        // TODO: Do nothing before system ready and implement a separated logic for
+        // the encryption lock screen.
+        // TODO: ASEC should be ready before IMMS is instantiated.
+        if (mSystemReady && !setSubtypeOnly) {
             // Set InputMethod here
             mSettings.putSelectedInputMethod(imi != null ? imi.getId() : "");
         }
