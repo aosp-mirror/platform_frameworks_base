@@ -220,7 +220,7 @@
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"실행 중인 앱 세부정보 검색"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"앱이 현재 실행 중이거나 최근에 실행된 작업에 대한 상세한 정보를 검색할 수 있도록 허용합니다. 이 경우 악성 앱이 다른 앱에 대한 개인 정보를 검색할 수 있습니다."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"실행 중인 앱 순서 재지정"</string>
-    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"앱이 작업을 포그라운드나 백그라운드로 이동할 수 있도록 허용합니다. 이 경우 악성 앱이 사용자의 조작 없이 앞으로 이동할 수 있습니다. 사용자의 입력 없이 이를 수행할 수 있습니다."</string>
+    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"앱이 사용자의 입력 없이 작업을 포그라운드나 백그라운드로 이동할 수 있도록 허용합니다."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"실행 중인 앱 중지"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"애플리케이션이 작업을 삭제하거나 다른 애플리케이션을 중지시킬 수 있도록 허용합니다. 이 경우 악성 애플리케이션이 다른 애플리케이션의 동작을 멈추게 할 수 있습니다."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"원하는 활동 시작"</string>
@@ -234,7 +234,7 @@
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"운전모드 사용"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"앱이 운전모드를 사용할 수 있도록 허용합니다."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"다른 앱 종료"</string>
-    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"앱이 다른 앱의 백그라운드 프로세스를 종료할 수 있도록 허용합니다. 이 경우 해당 앱이 실행 중지될 수 있습니다."</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"앱이 다른 앱의 백그라운드 프로세스를 종료할 수 있도록 허용합니다. 이 경우 다른 앱이 실행 중지될 수 있습니다."</string>
     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"다른 앱 강제 종료"</string>
     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"앱이 다른 앱을 강제로 종료할 수 있도록 허용합니다."</string>
     <string name="permlab_forceBack" msgid="652935204072584616">"앱 강제 종료"</string>
@@ -368,8 +368,8 @@
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"앱이 친구나 동료의 일정을 포함하여 태블릿에 저장된 모든 캘린더 일정을 읽을 수 있도록 허용합니다. 이 경우 앱이 비밀유지 또는 기밀성을 무시하고 캘린더 데이터를 공유 또는 저장할 수도 있습니다."</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"앱이 친구나 동료의 일정을 포함하여 휴대전화에 저장된 모든 캘린더 일정을 읽을 수 있도록 허용합니다. 이 경우 앱이 비밀유지 또는 기밀성과 관계 없이 캘린더 데이터를 공유 또는 저장할 수도 있습니다."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"소유자 몰래 캘린더 일정을 추가 또는 수정하고 참석자에게 이메일 전송"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"앱이 친구나 동료의 일정을 포함하여 태블릿에서 수정할 수 있는 일정을 추가, 삭제, 변경할 수 있도록 허용합니다. 이 경우 앱이 캘린더 소유자로부터 온 것으로 보이는 메시지를 전송하거나 소유자 모르게 일정을 수정할 수도 있습니다."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"앱이 친구나 동료의 일정을 포함하여 휴대전화에서 수정할 수 있는 일정을 추가, 삭제, 변경할 수 있도록 허용합니다. 이 경우 앱이 캘린더 소유자로부터 온 것으로 보이는 메시지를 전송하거나 소유자 모르게 일정을 수정할 수도 있습니다."</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"앱이 친구나 동료의 일정을 포함하여 태블릿에서 수정할 수 있는 일정을 추가, 삭제, 변경할 수 있도록 허용합니다. 이 경우 앱이 캘린더 소유자가 보내는 것처럼 메시지를 전송하거나 소유자 모르게 일정을 수정할 수도 있습니다."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"앱이 친구나 동료의 일정을 포함하여 휴대전화에서 수정할 수 있는 일정을 추가, 삭제, 변경할 수 있도록 허용합니다. 이 경우 앱이 캘린더 소유자가 보내는 것처럼 메시지를 전송하거나 소유자 모르게 일정을 수정할 수도 있습니다."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"테스트를 위해 위치 정보제공자로 가장"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"테스트용 가상 위치 소스를 만들거나 새로운 위치 정보 제공업체를 설치합니다. 이 경우 앱이 GPS 또는 위치 정보 제공업체 등 기타 위치 소스가 반환한 위치 또는 상태를 덮어쓸 수 있습니다."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"추가 위치 제공업체 명령에 액세스"</string>
@@ -468,8 +468,8 @@
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"AccountManagerService로 활동"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"애플리케이션이 AccountAuthenticators를 호출할 수 있도록 허용합니다."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"기기에서 계정 검색"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"앱이 태블릿에 의해 알려진 계정 목록을 가져올 수 있도록 허용합니다. 이 경우 설치한 애플리케이션에 의해 만들어진 모든 계정을 포함할 수 있습니다."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"앱이 휴대전화에 의해 알려진 계정 목록을 가져올 수 있도록 허용합니다. 이 경우 설치한 애플리케이션에 의해 만들어진 모든 계정을 포함할 수 있습니다."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"앱이 태블릿이 알고 있는 계정 목록을 가져올 수 있도록 허용합니다. 이 경우 설치한 애플리케이션에 의해 만들어진 모든 계정을 포함할 수 있습니다."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"앱이 휴대전화가 알고 있는 계정 목록을 가져올 수 있도록 허용합니다. 이 경우 설치한 애플리케이션에 의해 만들어진 모든 계정을 포함할 수 있습니다."</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"계정 만들기 및 비밀번호 설정"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"앱이 계정 만들기, 비밀번호 가져오기 및 설정 등과 같은 관리자의 계정 인증자 기능을 사용할 수 있도록 허용합니다."</string>
     <string name="permlab_manageAccounts" msgid="4983126304757177305">"계정 추가 또는 삭제"</string>
@@ -493,8 +493,8 @@
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fi 연결 및 연결 해제"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"앱이 Wi-Fi 액세스 포인트에 연결하거나 연결을 끊고, Wi-Fi 네트워크의 기기 설정을 변경할 수 있도록 허용합니다."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi 멀티캐스트 수신 허용"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"앱이 사용자의 태블릿뿐 아니라 여러 주소를 사용하여 Wi-Fi 네트워크에서 모든 기기로 전송된 패킷을 받도록 허용합니다. 이 경우 비멀티캐스트 모드보다 전력을 더 많이 소비합니다."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"앱이 사용자의 휴대전화뿐 아니라 여러 주소를 사용하여 Wi-Fi 네트워크에서 모든 기기로 전송된 패킷을 받을 수 있도록 허용합니다. 이 경우 비멀티캐스트 모드보다 전력을 더 많이 소비합니다."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"앱이 사용자의 태블릿뿐 아니라 멀티캐스트 주소를 사용하여 Wi-Fi 네트워크에서 모든 기기로 전송된 패킷을 받도록 허용합니다. 이 경우 비멀티캐스트 모드보다 전력을 더 많이 소비합니다."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"앱이 사용자의 휴대전화뿐 아니라 멀티캐스트 주소를 사용하여 Wi-Fi 네트워크에서 모든 기기로 전송된 패킷을 받을 수 있도록 허용합니다. 이 경우 비멀티캐스트 모드보다 전력을 더 많이 소비합니다."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"블루투스 설정에 액세스"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"앱이 로컬 블루투스 태블릿을 설정한 다음 원격 기기를 검색하여 페어링할 수 있도록 허용합니다."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"앱이 로컬 블루투스 휴대전화를 설정한 다음 원격 기기를 검색하여 페어링할 수 있도록 허용합니다."</string>
@@ -511,9 +511,9 @@
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"화면 잠금 사용 중지"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"앱이 키 잠금 및 관련 비밀번호 보안을 사용중지할 수 있도록 허용합니다. 예를 들어, 휴대전화가 수신전화를 받을 때 키 잠금을 사용중지했다가 통화가 끝나면 키 잠금을 다시 사용할 수 있습니다."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"동기화 설정 읽기"</string>
-    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"앱이 계정의 동기화 설정을 읽을 수 있도록 허용합니다. 예를 들어, 계정에서 피플 앱(People app)을 동기화할지 여부를 확인할 수 있습니다."</string>
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"앱이 계정의 동기화 설정을 읽을 수 있도록 허용합니다. 예를 들어, 계정에서 피플 앱을 동기화할지 여부를 확인할 수 있습니다."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"동기화 사용 및 사용 중지 전환"</string>
-    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"앱이 계정의 동기화 설정을 수정할 수 있도록 허용합니다. 예를 들어, 계정에서 피플 앱 동기화를 사용하도록 설정할 목적으로 앱이 사용될 수 있습니다."</string>
+    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"앱이 계정의 동기화 설정을 수정할 수 있도록 허용합니다. 예를 들어, 계정에서 피플 앱을 동기화할 목적으로 앱이 사용될 수 있습니다."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"동기화 통계 읽기"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"앱이 동기화된 일정의 기록이나 동기화된 데이터의 양 등을 포함하여 계정의 동기화 통계를 읽을 수 있도록 허용합니다."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"가입된 피드 읽기"</string>
@@ -1118,7 +1118,7 @@
     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"앱이 수집된 구성요소 사용 통계를 수정하도록 합니다. 일반 앱에서는 사용하지 않습니다."</string>
     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"콘텐츠 복사"</string>
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"기본 컨테이너 서비스를 호출하여 콘텐츠를 복사할 수 있도록 허용합니다. 일반 앱에서는 사용하지 않습니다."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"미디어 출력을 연결"</string>
+    <string name="permlab_route_media_output" msgid="1642024455750414694">"미디어 출력 연결"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"앱이 미디어 출력을 기타 외부 기기에 연결할 수 있도록 허용합니다."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"확대/축소하려면 두 번 터치하세요."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"위젯을 추가할 수 없습니다."</string>
