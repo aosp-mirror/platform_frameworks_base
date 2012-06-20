@@ -4,7 +4,7 @@
   <li class="nav-section">
     <div class="nav-section-header">
       <a href="<?cs var:toroot ?>training/index.html">
-        <span class="en">Getting Started</span>
+        <span class="en">Get Started</span>
       </a>
     </div>
 
@@ -123,6 +123,17 @@
         </ul>
       </li>
 
+      
+    </ul>
+  </li><!-- end basic training -->    
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>training/advanced.html">
+      <span class="en">Advanced Training</span>
+      </a>
+    </div>
+    <ul>
+
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>training/basics/location/index.html">
             <span class="en">Making Your App Location Aware</span>
@@ -163,16 +174,6 @@
         </ul>
       </li>
       
-    </ul>
-  </li><!-- end basic training -->    
-  <li class="nav-section">
-    <div class="nav-section-header">
-      <a href>
-      <span class="en">Advanced Training</span>
-      </a>
-    </div>
-    <ul>
-
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>training/multiscreen/index.html">
             <span class="en">Designing for Multiple Screens</span>
