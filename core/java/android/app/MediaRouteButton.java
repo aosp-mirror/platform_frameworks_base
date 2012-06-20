@@ -110,7 +110,7 @@ public class MediaRouteButton extends View {
                     final RouteInfo route = mRouter.getRouteAt(i);
                     if ((route.getSupportedTypes() & mRouteTypes) != 0 &&
                             route != mRouter.getSystemAudioRoute()) {
-                        mRouter.selectRoute(mRouteTypes, route);
+                        mRouter.selectRouteInt(mRouteTypes, route);
                     }
                 }
             }
