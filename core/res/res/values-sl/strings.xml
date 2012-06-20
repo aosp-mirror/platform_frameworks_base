@@ -1079,7 +1079,7 @@
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Vse datoteke, shranjene v v pomnilniku USB, bodo izbrisane. Tega dejanja ni mogoče razveljaviti!"</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Vsi podatki v napravi bodo izgubljeni."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatiraj"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"iskanje in odpravljanje napak USB je povezano"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Iskanje in odpravljanje napak USB je povezano"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotaknite se, če želite onemogočiti iskanje in odpravljanje napak prek vrat USB."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Izberite način vnosa"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Nastavi načine vnosa"</string>
