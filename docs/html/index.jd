@@ -17,33 +17,32 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                         <img src="{@docRoot}images/home/design.png" style="margin-top:30px">
                     </div>
                     <div class="content-right col-6">
-                    <h1>Make your Android apps look great</h1>
+                    <h1>Make your Android apps<br>look great</h1>
                     <p>New templates in the design guide make it easier than ever to design apps
 that are beautiful and easy to use.</p>
-                    <a href="{@docRoot}design/index.html" class="button">Learn More</a>
+                    <a href="/design/index.html" class="button">Learn More</a>
                     </div>
                 </li>
                 <li class="item carousel-home">
                         <div class="content-left col-10">
-                        <img src="{@docRoot}images/home/google-io.png">
+                        <img src="/images/home/google-io.png">
                         </div>
                         <div class="content-right col-6">
-                        <h1>Watch Android Sessions Live!</h1>
-                        <p>Be among the first to see the latest demos and developments from Android.
-Watch the keynote and over 40 sessions live streamed from Google I/O! It all begins June 27, at
-9am.</p>
+                        <h1>Watch Android at Google I/O!</h1>
+                        <p>See the keynote and more than 40 Android developer sessions streamed live from Moscone Center in San Francisco! <div style="margin-top:-22px;">Begins June 27, 9AM PDT (UTC-7).</span></p>
                         <a href="https://developers.google.com/events/io/sessions#android"
-class="button">See the Android sessions</a>
+class="button">See the Android Sessions</a>
                         </div>
                 </li>
                 <li class="item carousel-home">
                         <div class="content-left col-10">
-                            <img src="{@docRoot}images/home/google-play.png"
+                            <img src="/images/home/google-play.png"
                                   style="margin-top:50px">
                         </div>
                         <div class="content-right col-6">
-                        <h1>Publish your apps on Google Play</h1>
+                        <h1>Publish your apps<br>in Google Play</h1>
                         <p>The most visited store in the world for Android apps. Cloud-connected and always synced, it's never been easier for users to find and download your apps.</p>
+
                         <a href="{@docRoot}distribute/index.html" class="button">Learn More</a>
                         </div> 
                 </li>
