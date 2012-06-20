@@ -20,5 +20,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="service_name" msgid="4841491635055379553">"Prieig. prie paketo pagalb. priem."</string>
+    <string name="service_name" msgid="4841491635055379553">"Pak. pagalb. prm. prieiga"</string>
 </resources>
