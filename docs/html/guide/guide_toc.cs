@@ -578,22 +578,22 @@
           <li><a href="<?cs var:toroot?>guide/google/play/billing/billing_overview.html">
               <span class="en">In-app Billing Overview</span></a>
           </li>
-          <li><a href="<?cs var:toroot?>guide/google/billing/play/billing_integrate.html">
+          <li><a href="<?cs var:toroot?>guide/google/play/billing/billing_integrate.html">
               <span class="en">Implementing In-app Billing</span></a>
           </li>
-          <li><a href="<?cs var:toroot?>guide/google/billing/billing_subscriptions.html">
+          <li><a href="<?cs var:toroot?>guide/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
           </li>
-          <li><a href="<?cs var:toroot?>guide/google/billing/play/billing_best_practices.html">
+          <li><a href="<?cs var:toroot?>guide/google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
           </li>
-          <li><a href="<?cs var:toroot?>guide/google/billing/play/billing_testing.html">
+          <li><a href="<?cs var:toroot?>guide/google/play/billing/billing_testing.html">
               <span class="en">Testing In-app Billing</span></a>
           </li>
-          <li><a href="<?cs var:toroot?>guide/google/billing/play/billing_admin.html">
+          <li><a href="<?cs var:toroot?>guide/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
           </li>
-          <li><a href="<?cs var:toroot?>guide/google/billing/play/billing_reference.html">
+          <li><a href="<?cs var:toroot?>guide/google/play/billing/billing_reference.html">
               <span class="en">In-app Billing Reference</span></a>
           </li>
         </ul>

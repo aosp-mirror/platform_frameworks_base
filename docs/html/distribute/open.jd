@@ -10,7 +10,8 @@ particular distribution platform.</p>
 
 <p>The process for building and packaging your app for distribution is the same,
 regardless of how will distribute your app. This saves you time and lets you
-automate parts of the process as needed. You can read <a href="{@docRoot}guide">Preparing 
+automate parts of the process as needed. You can read <a 
+href="{@docRoot}tools/publishing/preparing.html">Preparing 
 for Release</a> for more information.</p>
 
 <p>The sections below highlight some of the alternatives for distributing
