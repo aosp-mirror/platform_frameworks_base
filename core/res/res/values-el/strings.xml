@@ -942,8 +942,8 @@
     <string name="no" msgid="5141531044935541497">"Ακύρωση"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Προσοχή"</string>
     <string name="loading" msgid="7933681260296021180">"Φόρτωση…"</string>
-    <string name="capital_on" msgid="1544682755514494298">"Ενεργοποιημένο"</string>
-    <string name="capital_off" msgid="6815870386972805832">"Απενεργοποίηση"</string>
+    <string name="capital_on" msgid="1544682755514494298">"Ενεργό"</string>
+    <string name="capital_off" msgid="6815870386972805832">"Ανενεργό"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Ολοκλήρωση ενέργειας με τη χρήση"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Χρήση από προεπιλογή για αυτήν την ενέργεια."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Εκκθάριση προεπιλογής στις Ρυθμίσεις συστήματος &gt; Εφαρμογές &gt; Ληφθείσες."</string>

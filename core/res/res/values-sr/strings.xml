@@ -934,7 +934,7 @@
     <string name="deleteText" msgid="7070985395199629156">"избриши"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Метод уноса"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Радње у вези са текстом"</string>
-    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Недовољно простора за складиштење"</string>
+    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Простор за складиштење је на измаку"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Неке системске функције можда не функционишу"</string>
     <string name="ok" msgid="5970060430562524910">"Потврди"</string>
     <string name="cancel" msgid="6442560571259935130">"Откажи"</string>
@@ -942,8 +942,8 @@
     <string name="no" msgid="5141531044935541497">"Откажи"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Пажња"</string>
     <string name="loading" msgid="7933681260296021180">"Учитавање…"</string>
-    <string name="capital_on" msgid="1544682755514494298">"УКЉУЧЕНО"</string>
-    <string name="capital_off" msgid="6815870386972805832">"ИСКЉУЧЕНО"</string>
+    <string name="capital_on" msgid="1544682755514494298">"ДА"</string>
+    <string name="capital_off" msgid="6815870386972805832">"НЕ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Довршавање радње помоћу"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Подразумевано користи за ову радњу."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Обришите подразумевано подешавање у менију Подешавања система &gt; Апликације &gt; Преузето."</string>
