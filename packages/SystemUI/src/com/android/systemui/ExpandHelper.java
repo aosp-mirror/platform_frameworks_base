@@ -44,9 +44,9 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     }
 
     private static final String TAG = "ExpandHelper";
-    protected static final boolean DEBUG = true;
+    protected static final boolean DEBUG = false;
     protected static final boolean DEBUG_SCALE = false;
-    protected static final boolean DEBUG_GLOW = true;
+    protected static final boolean DEBUG_GLOW = false;
     private static final long EXPAND_DURATION = 250;
     private static final long GLOW_DURATION = 150;
 
