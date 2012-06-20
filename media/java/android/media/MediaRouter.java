@@ -600,21 +600,18 @@ public class MediaRouter {
         private Object mTag;
 
         /**
-         * @hide (to be un-hidden)
          * The default playback type, "local", indicating the presentation of the media is happening
          * on the same device (e.g. a phone, a tablet) as where it is controlled from.
          * @see #setPlaybackType(int)
          */
         public final static int PLAYBACK_TYPE_LOCAL = 0;
         /**
-         * @hide (to be un-hidden)
          * A playback type indicating the presentation of the media is happening on
          * a different device (i.e. the remote device) than where it is controlled from.
          * @see #setPlaybackType(int)
          */
         public final static int PLAYBACK_TYPE_REMOTE = 1;
         /**
-         * @hide (to be un-hidden)
          * Playback information indicating the playback volume is fixed, i.e. it cannot be
          * controlled from this object. An example of fixed playback volume is a remote player,
          * playing over HDMI where the user prefers to control the volume on the HDMI sink, rather
@@ -623,7 +620,6 @@ public class MediaRouter {
          */
         public final static int PLAYBACK_VOLUME_FIXED = 0;
         /**
-         * @hide (to be un-hidden)
          * Playback information indicating the playback volume is variable and can be controlled
          * from this object.
          */
@@ -723,7 +719,6 @@ public class MediaRouter {
         }
 
         /**
-         * @hide (to be un-hidden)
          * @return the type of playback associated with this route
          * @see UserRouteInfo#setPlaybackType(int)
          */
@@ -732,7 +727,6 @@ public class MediaRouter {
         }
 
         /**
-         * @hide (to be un-hidden)
          * @return the stream over which the playback associated with this route is performed
          * @see UserRouteInfo#setPlaybackStream(int)
          */
@@ -741,7 +735,6 @@ public class MediaRouter {
         }
 
         /**
-         * @hide (to be un-hidden)
          * @return the volume at which the playback associated with this route is performed
          * @see UserRouteInfo#setVolume(int)
          */
@@ -760,7 +753,6 @@ public class MediaRouter {
         }
 
         /**
-         * @hide (to be un-hidden)
          * @return the maximum volume at which the playback associated with this route is performed
          * @see UserRouteInfo#setVolumeMax(int)
          */
@@ -779,7 +771,6 @@ public class MediaRouter {
         }
 
         /**
-         * @hide (to be un-hidden)
          * @return how volume is handling on the route
          * @see UserRouteInfo#setVolumeHandling(int)
          */
@@ -918,7 +909,6 @@ public class MediaRouter {
         }
 
         /**
-         * @hide (to be un-hidden)
          * Set a callback to be notified of volume update requests
          * @param vcb
          */
@@ -927,7 +917,6 @@ public class MediaRouter {
         }
 
         /**
-         * @hide (to be un-hidden)
          * Defines whether playback associated with this route is "local"
          *    ({@link RouteInfo#PLAYBACK_TYPE_LOCAL}) or "remote"
          *    ({@link RouteInfo#PLAYBACK_TYPE_REMOTE}).
@@ -941,7 +930,6 @@ public class MediaRouter {
         }
 
         /**
-         * @hide (to be un-hidden)
          * Defines whether volume for the playback associated with this route is fixed
          * ({@link RouteInfo#PLAYBACK_VOLUME_FIXED}) or can modified
          * ({@link RouteInfo#PLAYBACK_VOLUME_VARIABLE}).
@@ -956,7 +944,6 @@ public class MediaRouter {
         }
 
         /**
-         * @hide (to be un-hidden)
          * Defines at what volume the playback associated with this route is performed (for user
          * feedback purposes). This information is only used when the playback is not local.
          * @param volume
@@ -969,7 +956,6 @@ public class MediaRouter {
         }
 
         /**
-         * @hide (to be un-hidden)
          * Defines the maximum volume at which the playback associated with this route is performed
          * (for user feedback purposes). This information is only used when the playback is not
          * local.
@@ -983,7 +969,6 @@ public class MediaRouter {
         }
 
         /**
-         * @hide (to be un-hidden)
          * Defines over what stream type the media is presented.
          * @param stream
          */
@@ -1447,7 +1432,6 @@ public class MediaRouter {
     }
 
     /**
-     * @hide (to be un-hidden)
      * Interface for receiving events about volume changes.
      * All methods of this interface will be called from the application's main thread.
      *
