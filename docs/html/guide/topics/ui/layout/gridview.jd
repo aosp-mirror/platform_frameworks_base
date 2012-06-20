@@ -182,8 +182,6 @@ array, which is set as the image resource for the {@link android.widget.ImageVie
 </li>
 <li>Run the application.</li>
 </ol>
-<p>Your grid layout should look something like this:</p>
-<img src="images/hello-gridview.png" width="150px" />
 
 <p>Try experimenting with the behaviors of the {@link android.widget.GridView} and {@link
 android.widget.ImageView} elements by adjusting their properties. For example, instead of using
