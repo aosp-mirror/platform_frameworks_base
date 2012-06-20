@@ -188,7 +188,7 @@ run properly on the Android platform versions and device screen sizes that you
 want to target. 
 
 <p>From an app-compatibility perspective, Android platform versions are defined
-by <a href="{@docRoot}about/framework/api-levels.html">API Level</a>. You should
+by <a href="{@docRoot}about/versions/api-levels.html">API Level</a>. You should
 confirm the minimum version that your app is compatible with (<a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;minSdkVersion&gt;</code></a>)),
 as that will affect it's distribution to Android

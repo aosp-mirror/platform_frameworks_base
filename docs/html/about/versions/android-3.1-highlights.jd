@@ -44,11 +44,11 @@ features introduced in Android 3.0. It builds on the same tablet-optimized UI
 and features offered in Android 3.0 and adds several new capabilities for
 users and developers. This document provides an overview of the new features and
 technologies introduced in Android 3.1. For a more detailed look at new
-developer APIs, see the <a href="{@docRoot}sdk/android-3.1.html">API
+developer APIs, see the <a href="{@docRoot}about/versions/android-3.1.html">API
 Overview</a> document.</p>
 
 <p>For a high-level introduction to Android 3.0, please see the <a
-href="{@docRoot}sdk/android-3.0-highlights.html">Android 3.0 Platform
+href="{@docRoot}about/versions/android-3.0-highlights.html">Android 3.0 Platform
 Highlights</a>.</p>
 
 <ul>

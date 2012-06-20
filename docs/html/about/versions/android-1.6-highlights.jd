@@ -208,6 +208,6 @@ application.</p>
 <h3 id="DeveloperAPIs">New Framework APIs</h3>
 
 <p>For a detailed overview of new APIs, see the 
-<a href="{@docRoot}sdk/android-1.6.html#api-changes">Version Notes</a>. 
+<a href="{@docRoot}about/versions/android-1.6.html#api-changes">Version Notes</a>. 
 For a complete report of all API changes, see the 
 <a href="{@docRoot}sdk/api_diff/4/changes.html">API Differences Report</a>.

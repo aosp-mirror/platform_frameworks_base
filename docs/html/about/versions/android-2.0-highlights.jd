@@ -192,7 +192,7 @@ hardware acceleration.</p>
 
 <p>Android 2.0 includes several new developer APIs.
 For an overview of new APIs, see the 
-<a href="{@docRoot}sdk/android-2.0.html#api">Android 2.0 version notes</a>.</p>
+<a href="{@docRoot}about/versions/android-2.0.html#api">Android 2.0 version notes</a>.</p>
 
 <p>For a complete report of all API changes, see the 
 <a href="{@docRoot}sdk/api_diff/5/changes.html">API Differences Report</a>.</p>

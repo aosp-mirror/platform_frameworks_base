@@ -50,7 +50,7 @@ use the Android SDK Manager to download the platform into your SDK.</p>
 
 <p>Android 2.3.4 provides the same framework API to applications as Android 2.3.3
 (API level 10). For a summary of the API, see the
-<a href="{@docRoot}sdk/android-2.3.3.html">Android 2.3.3 version notes</a>.</p>
+<a href="{@docRoot}about/versions/android-2.3.3.html">Android 2.3.3 version notes</a>.</p>
 
 
 <h2 id="openaccessory">Open Accessory Library</h2>
@@ -62,7 +62,7 @@ API exposed to applications. Peripherals that attach to Android-powered devices
 as accessories connect as USB hosts. </p>
 
 <p>Open Accessory is introduced in <a
-href="{@docRoot}sdk/android-3.1.html#usb">Android 3.1</a> (API level 12), but is
+href="{@docRoot}about/versions/android-3.1.html#usb">Android 3.1</a> (API level 12), but is
 made available to devices running Android 2.3.4 by means of an optional external
 library, the Open Accessory Library. The library exposes a framework API that
 lets applications discover, communicate with, and manage a variety of device
