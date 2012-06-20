@@ -14,7 +14,7 @@ page.title=Publishing Checklist for Google Play
 <li><a href="#inapp-billing">8. Consider In-app Billing</a></li>
 <li><a href="#pricing">9. Set prices for your apps</a></li>
 <li><a href="#localize">10. Start localization</a></li>
-<li><a href="#localize">11. Prepare Promotional Graphics</a></li>
+<li><a href="#localize">11. Prepare promotional graphics</a></li>
 <li><a href="#apk">12. Build the release-ready APK</a></li>
 <li><a href="#product-page">13. Complete the product details</a></li>
 <li><a href="#badges">14. Use Google Play badges and links to your promotional campaigns</a></li>
@@ -135,7 +135,7 @@ countries</li>
 </ul>
 
 <p>With your country targeting in mind, you should assess what
-your localization needs are, both in your app and in it's Google Play listing
+your localization needs are, both in your app and in its Google Play listing
 details, and start the work of localization well in advance of your
 launch target date.</p>
 
@@ -152,7 +152,7 @@ launch target date.</p>
 
 <h2 id="size">5. Confirm the app's overall size</h2>
 
-<p>The overall size of your app can affect it's design and how you publish it on
+<p>The overall size of your app can affect its design and how you publish it on
 Google Play. Currently, the maximum size for an APK published on Google Play is
 <strong>50 MB</strong>. If your app exceeds that size, or if you want to offer a
 secondary download, you can use <a
@@ -188,15 +188,15 @@ run properly on the Android platform versions and device screen sizes that you
 want to target. 
 
 <p>From an app-compatibility perspective, Android platform versions are defined
-by <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Level</a>. You should
+by <a href="{@docRoot}about/framework/api-levels.html">API Level</a>. You should
 confirm the minimum version that your app is compatible with (<a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;minSdkVersion&gt;</code></a>)),
-as that will affect it's distribution to Android
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;minSdkVersion&gt;</code></a>),
+as that will affect its distribution to Android
 devices once it is published. </p>
 
 <p>For screen sizes, you should confirm that the app runs properly and looks
 good on the range of screen sizes and densities that you want to support. You
-should confirm the minimum screen-size and densitiy support that your app
+should confirm the minimum screen-size and density support that your app
 declares (<a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a>),
 since that can affect its distribution to
@@ -324,7 +324,7 @@ launch date.</p>
 
 <p>To get started localizing your app, work with your development team to extract
 any resource or coded strings for translation. Also identify images, icons, or
-other assets that should be language- or locale-specific. Hand these off for 
+other assets that should be language- or locale-specific. Hand these off to  
 a translator.</p>
 
 <p>To localize your store listing, first create and finalize your app title, description, 
@@ -483,13 +483,13 @@ final checks:</p>
 <p>Make sure that: </p>
 
 <ul>
-<li>Your developer profile has the correct information and is linked to the proper Google Checkout Merchant account (if you are selling products)</li>
-<li>You have the right version of the app uploaded</li>
+<li>Your developer profile has the correct information and is linked to the proper Google Checkout Merchant account (if you are selling products).</li>
+<li>You have the right version of the app uploaded.</li>
 <li>All parts of your Product Details are ready, including all graphic assets, screenshots, video, localized descriptions, and so on. </li>
-<li>You have set your app's pricing to free or priced</li>
+<li>You have set your app's pricing to free or priced.</li>
 <li>You have set country (and carrier) targeting and priced your products (if appropriate) in buyer currencies</li>
 <li>"Compatible devices" shows that your app is actually reaching the devices that you are targeting. If not, you should check with your development team on the apps requirements and filtering rules. </li>
-<li>You have provided the correct link to your web site and the correct support email address</li>
+<li>You have provided the correct link to your web site and the correct support email address.</li>
 <li>Your app does not violate content policy guidelines.</li>
 <li>You have acknowledged that your app meets the guidelines for Android content on Google Play and also US export laws. </li>
 </ul>

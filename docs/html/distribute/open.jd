@@ -9,7 +9,7 @@ emailing them directly users, you are never locked into any
 particular distribution platform.</p>
 
 <p>The process for building and packaging your app for distribution is the same,
-regardless of how will distribute your app. This saves you time and lets you
+regardless of how you will distribute your app. This saves you time and lets you
 automate parts of the process as needed. You can read <a 
 href="{@docRoot}tools/publishing/preparing.html">Preparing 
 for Release</a> for more information.</p>
@@ -39,16 +39,16 @@ you can use multiple marketplaces.</p>
   </p>
 </div>
 
-<p>The easiest and quickest way to release your application is to send it to a user through
+<p>The easiest and quickest way to release your application is to send it to users through
 email. To do this, you prepare your application for release and then attach it to an email
-and send it to a user. When the user opens your email message on their Android-powered device
+and send it to a user. When users open your email message on their Android-powered device,
 the Android system will recognize the APK and display an <strong>Install Now</strong>
 button in the email message (see figure 1). Users can install your application by touching the
 button.</p>
 
 <p class="note"><strong>Note:</strong> The <strong>Install Now</strong> button
-shown in Figure 1 appears only if a user has configured their device to allow
-installation from <a href="#unknown-sources">unknown sources</a> and has opened your 
+shown in Figure 1 appears only if users have configured their device to allow
+installation from <a href="#unknown-sources">unknown sources</a> and have opened your 
 email with the native Gmail application.</p>
 
 <p>Distributing applications through email is convenient if you are sending your application to
@@ -67,7 +67,7 @@ release-ready APK file on your website and provide a download link to users.
 <p>When users browse to the download link from their Android-powered devices,
 the file is downloaded and Android system automatically starts installing it on
 the device. However, the installation process will start automatically only if
-the user has configured their Settings to allow the installation of apps from
+users have configured their Settings to allow the installation of apps from
 <a href="#unknown-sources">unknown sources</a>.</p>
 
 <p>Although it is relatively easy to release your application on your own

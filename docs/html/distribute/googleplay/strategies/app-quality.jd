@@ -18,7 +18,7 @@ page.title=Improving App Quality
 </div>
 
 <p>
-With thousands of new apps being published in Google Play every week, it's important to look for any available way to get the most visibility and the highest ratings possible.  One way of improving your app's visibility in the ecosystem is by deploying well-targeted mobile advertising campaigns and cross-app promotions. Another time-tested method offueling the impression-install-ranking cycle is simply: <em>improve the product</em>!</p>
+With thousands of new apps being published in Google Play every week, it's important to look for any available way to get the most visibility and the highest ratings possible.  One way of improving your app's visibility in the ecosystem is by deploying well-targeted mobile advertising campaigns and cross-app promotions. Another time-tested method of fueling the impression-install-ranking cycle is simply: <em>improve the product</em>!</p>
 <p>
 A better app can go a very long way: a higher quality app will translate to higher user ratings, generally better rankings, more downloads, and higher retention (longer install periods). High-quality apps also have a much higher likelihood of getting some unanticipated positive publicity such as being featured in Google Play or getting social media buzz.</p>
 <p>
@@ -40,7 +40,7 @@ Another way to better listen to your users is by having a public beta or trusted
 <p>
 The effect of overall app stability of ratings and user satisfaction is very well-known and there are many tools and techniques for testing and profiling your app on different devices and user scenarios.</p>
 <p>
-One noteworthy and yet relatively underused tool for catching stability issues such as crashes is the <a href="{@docRoot}tools/help/monkey.html">UI/Application Exerciser Monkey</a> (Monkey). Monkey will send random UI events to your app's activitie, allowing you to trigger user flows that can uncover stability problems.</p>
+One noteworthy and yet relatively underused tool for catching stability issues such as crashes is the <a href="{@docRoot}tools/help/monkey.html">UI/Application Exerciser Monkey</a> (Monkey). Monkey will send random UI events to your app's activities, allowing you to trigger user flows that can uncover stability problems.</p>
 <p>
 Also, with the Google error-reporting features built into most Android devices, users now have a way to report application crashes to developers. The error reports show up in aggregate in the Google Play Developer Console. Make sure to read these reports often and act on them appropriately.</p>
 <p>
@@ -67,12 +67,12 @@ You can improve your apps's UI responsiveness by moving long-running operations 
 <p>
 A great way to improve UI performance is to minimize the complexity of your layouts. If you open up <a href="{@docRoot}tools/help/hierarchy-viewer.html">hierarchyviewer</a> and see that your layouts are more than 5 levels deep, it may be time to simplify your layout. Consider refactoring those deeply nested LinearLayouts into RelativeLayout. The impact of View objects is cumulative &mdash; each one costs about 1 to 2 KB of memory, so large view hierarchies can be a recipe for disaster, causing frequent VM garbage collection passes which block the main (UI) thread. You can learn more in <a href="http://www.youtube.com/watch?v=wDBM6wVEO70">World of ListView</a>, another session at Google I/O.</p>
 <p>
-Lastly, pointed out in the blog post <a href="http://android-developers.blogspot.com/2010/10/traceview-war-story.html">Traceview War Story</a>, tools like <a href="{@docRoot}tools/help/traceview.html">traceview</code> and <a href="{@docRoot}tools/ddms.html">ddms</a> can be your best frends in improving your app by profiling method calls and monitoring VM memory allocations, respectively.</p>
+Lastly, pointed out in the blog post <a href="http://android-developers.blogspot.com/2010/10/traceview-war-story.html">Traceview War Story</a>, tools like <a href="{@docRoot}tools/traceview.html">traceview</code> and <a href="{@docRoot}tools/ddms.html">ddms</a> can be your best friends in improving your app by profiling method calls and monitoring VM memory allocations, respectively.</p>
 
 
 <h2 id="usability">Improve Usability</h2>
 <p>
-In usability and app design, too, you should listen carefully to your users. Ask a handful of real Android device users (friends, family, etc.) to try out your app and observe them as they interact with it. Look for cases where they get confused, are unsure how to proceed, or are surprised by certain behaviors. Minimize these cases by rethinking some of the interactions in your app, perhaps working in some of the <a href="http://www.youtube.com/watch?v=M1ZBjlCRfz0">user interface patterns</a> the Android UI team discussed at Google I/O.</p>
+In usability and in app design too, you should listen carefully to your users. Ask a handful of real Android device users (friends, family, etc.) to try out your app and observe them as they interact with it. Look for cases where they get confused, are unsure of how to proceed, or are surprised by certain behaviors. Minimize these cases by rethinking some of the interactions in your app, perhaps working in some of the <a href="http://www.youtube.com/watch?v=M1ZBjlCRfz0">user interface patterns</a> the Android UI team discussed at Google I/O.</p>
 <p>
 In the same vein, two problems that can plague some Android user interfaces are small tap targets and excessively small font sizes. These are generally easy to fix and can make a big impact on usability and user satisfaction. As a general rule, optimize for ease of use and legibility, while minimizing, or at least carefully balancing, information density.</p>
 
@@ -95,13 +95,13 @@ There's no substitute for a real user interface designer&nbsp;&mdash;&nbsp;ideal
 <p>
 If you don't have the luxury of working with a UI designer, there are some ways in which you can improve your app's appearance yourself. First, get familiar with Adobe Photoshop, Adobe Fireworks, or some other raster image editing tool. Mastering the art of the pixel in these apps takes time, but honing this skill can help build polish across your interface designs. Also, master the resources framework by studying <a href="http://android.git.kernel.org/?p=platform/frameworks/base.git;a=tree;f=core/res/res;h=a3562fe1af94134486a8a899f02a9c2f7986c8dd;hb=master">the framework UI</a> assets and layouts and reading through the new <a href="{@docRoot}guide/components/resources/available-resources.html">resources documentation</a>. Techniques such as 9-patches and resource directory qualifiers are somewhat unique to Android, and are crucial in building flexible yet aesthetic UIs.</p>
 <p>
-Before you get too far in designing your app and writing the code, make sure to visit the Android Design site and learn about the vision, the building blocks, and the tools of designing beatiful and inspiring user interfaces.</p>
+Before you get too far in designing your app and writing the code, make sure to visit the Android Design site and learn about the vision, the building blocks, and the tools of designing beautiful and inspiring user interfaces.</p>
 
 <h2 id="features">Deliver the Right Set of Features</h2>
 <p>
 Having the <em>right</em> set of features in your app is important. It's often easy to fall into the trap of feature-creep, building as much functionality into your app as possible. Providing instant gratification by immediately showing the most important or relevant information is crucial on mobile devices. Providing too much information can be as frustrating (or even more so) than not providing enough of it.</p>
 <p>
-Again, listen to your users by collecting and responding to feature requests. Be careful, though, to take feature requests with grains of salt. Requests can be very useful in aggregate, to get a sense of what kinds of functionality you should be working on, but not every feature request needs to be implemented.</p>
+Again, listen to your users by collecting and responding to feature requests. Be careful, though, to take feature requests with a grain of salt. Requests can be very useful in aggregate, to get a sense of what kinds of functionality you should be working on, but not every feature request needs to be implemented.</p>
 
 <h2 id="integrate">Integrate with the System and Third-Party apps</h2>
 <p>
@@ -113,4 +113,4 @@ Third-party integrations can provide even more user delight and give the user a 
 
 <h2 id="details">Pay Attention to Details</h2>
 <p>
-One particular detail to pay close attention to is your app's icon quality and consistency. Make sure your app icons (especially your launcher icon) are crisp and pixel-perfect at all resolutions, and follow the <a href="{@docRoot}design/style/iconography.html">icon guidelines</a> as far as possible. If you're having trouble or don't have the resources to design the icons yourself, consider using the <a href="http://android-ui-utils.googlecode.com/hg/asset-studio/dist/index.html">Android Asset Studio</a> tool to generate a set.</p>
+One particular detail to pay close attention to is your app's icon quality and consistency. Make sure your app icons (especially your launcher icon) are crisp and pixel-perfect at all resolutions, and follow the <a href="{@docRoot}guide/practices/ui_guidelines/icon_design.html">icon guidelines</a> as much as possible. If you're having trouble or don't have the resources to design the icons yourself, consider using the new <a href="http://android-ui-utils.googlecode.com/hg/asset-studio/dist/index.html">Android Asset Studio</a> tool to generate a set.</p>

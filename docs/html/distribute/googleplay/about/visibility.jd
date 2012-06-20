@@ -221,7 +221,7 @@ ratings and reviews, and show what your app can do.
 
 <p>Your product details page is the one page where your users come to find out
 everything about your app. When they see your app listed in search results, top
-charts, category listings, and collections, one tap takes them to your directly
+charts, category listings, and collections, one tap takes them directly to your 
 product details page.</p>
 
 <div style="float:right;margin-right:18px;">
@@ -239,8 +239,8 @@ on phones, tablets, or in a web browser.</p>
 
 <p>You can link web users directly to your product details page from outside
 Google Play, such as from your web site, an ad campaign, reviews, social media
-posts, and more. See <a href="{@docRoot}distribute/promote/linking.html">Linking
+posts, and more. See <a href="{@docRoot}distribute/googleplay/promote/linking.html">Linking
 to Your Products</a> to find out how. </p>
 
 <p>To learn more about how to create your product details page, see
-<a href="{@docRoot}distribute/publish/index.html">Publishing on Google Play</a>.</p>
+<a href="{@docRoot}distribute/googleplay/publish/index.html">Publishing on Google Play</a>.</p>
