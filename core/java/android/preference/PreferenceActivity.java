@@ -651,6 +651,14 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     /**
+     * Returns the Header list
+     * @hide
+     */
+    public List<Header> getHeaders() {
+        return mHeaders;
+    }
+
+    /**
      * Returns true if this activity is showing multiple panes -- the headers
      * and a preference fragment.
      */
