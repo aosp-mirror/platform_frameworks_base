@@ -1218,10 +1218,10 @@ class WindowStateAnimator {
             }
             Slog.v(TAG, "performShow on " + this
                     + ": mDrawState=" + mDrawState + " readyForDisplay="
-                    + mWin.isReadyForDisplay()
+                    + mWin.isReadyForDisplayIgnoringKeyguard()
                     + " starting=" + (mWin.mAttrs.type == TYPE_APPLICATION_STARTING), e);
         }
-        if (mDrawState == READY_TO_SHOW && mWin.isReadyForDisplay()) {
+        if (mDrawState == READY_TO_SHOW && mWin.isReadyForDisplayIgnoringKeyguard()) {
             if (SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
                 WindowManagerService.logSurface(mWin, "SHOW (performShowLocked)", null);
             if (DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + this

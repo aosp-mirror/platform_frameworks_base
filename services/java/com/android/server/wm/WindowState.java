@@ -719,6 +719,28 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     /**
+     * Like isReadyForDisplay(), but ignores any force hiding of the window due
+     * to the keyguard.
+     */
+    boolean isReadyForDisplayIgnoringKeyguard() {
+        if (mRootToken.waitingToShow &&
+                mService.mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+            return false;
+        }
+        final AppWindowToken atoken = mAppToken;
+        if (atoken == null && !mPolicyVisibility) {
+            // If this is not an app window, and the policy has asked to force
+            // hide, then we really do want to hide.
+            return false;
+        }
+        return mHasSurface && !mDestroying
+                && ((!mAttachedHidden && mViewVisibility == View.VISIBLE
+                                && !mRootToken.hidden)
+                        || mWinAnimator.mAnimation != null
+                        || ((atoken != null) && (atoken.mAppAnimator.animation != null)));
+    }
+
+    /**
      * Like isOnScreen, but returns false if the surface hasn't yet
      * been drawn.
      */

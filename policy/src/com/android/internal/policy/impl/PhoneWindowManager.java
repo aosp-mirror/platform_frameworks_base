@@ -4395,7 +4395,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pw.print(prefix); pw.print("mUserRotationMode="); pw.print(mUserRotationMode);
                 pw.print(" mUserRotation="); pw.print(mUserRotation);
                 pw.print(" mAllowAllRotations="); pw.println(mAllowAllRotations);
-        pw.print(prefix); pw.print(" mCurrentAppOrientation="); pw.println(mCurrentAppOrientation);
+        pw.print(prefix); pw.print("mCurrentAppOrientation="); pw.println(mCurrentAppOrientation);
         pw.print(prefix); pw.print("mCarDockEnablesAccelerometer=");
                 pw.print(mCarDockEnablesAccelerometer);
                 pw.print(" mDeskDockEnablesAccelerometer=");
@@ -4403,12 +4403,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pw.print(prefix); pw.print("mLidKeyboardAccessibility=");
                 pw.print(mLidKeyboardAccessibility);
                 pw.print(" mLidNavigationAccessibility="); pw.print(mLidNavigationAccessibility);
-                pw.print(" mLidControlsSleep="); pw.print(mLidControlsSleep);
-                pw.print(" mLongPressOnPowerBehavior="); pw.println(mLongPressOnPowerBehavior);
+                pw.print(" mLidControlsSleep="); pw.println(mLidControlsSleep);
+        pw.print(prefix); pw.print("mLongPressOnPowerBehavior=");
+                pw.print(mLongPressOnPowerBehavior);
+                pw.print(" mHasSoftInput="); pw.println(mHasSoftInput);
         pw.print(prefix); pw.print("mScreenOnEarly="); pw.print(mScreenOnEarly);
                 pw.print(" mScreenOnFully="); pw.print(mScreenOnFully);
-                pw.print(" mOrientationSensorEnabled="); pw.print(mOrientationSensorEnabled);
-                pw.print(" mHasSoftInput="); pw.println(mHasSoftInput);
+                pw.print(" mOrientationSensorEnabled="); pw.println(mOrientationSensorEnabled);
         pw.print(prefix); pw.print("mUnrestrictedScreen=("); pw.print(mUnrestrictedScreenLeft);
                 pw.print(","); pw.print(mUnrestrictedScreenTop);
                 pw.print(") "); pw.print(mUnrestrictedScreenWidth);
