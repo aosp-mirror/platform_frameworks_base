@@ -881,7 +881,7 @@ public class GlowPadView extends View {
                 }
                 if (AccessibilityManager.getInstance(mContext).isEnabled()) {
                     String targetContentDescription = getTargetDescription(activeTarget);
-                    announceText(targetContentDescription);
+                    announceForAccessibility(targetContentDescription);
                 }
             }
         }
@@ -1089,16 +1089,10 @@ public class GlowPadView extends View {
                 String text = String.format(directionDescription, targetDescription);
                 utterance.append(text);
             }
-            if (utterance.length() > 0) {
-                announceText(utterance.toString());
-            }
         }
-    }
-
-    private void announceText(String text) {
-        setContentDescription(text);
-        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
-        setContentDescription(null);
+        if (utterance.length() > 0) {
+            announceForAccessibility(utterance.toString());
+        }
     }
 
     private String getTargetDescription(int index) {
