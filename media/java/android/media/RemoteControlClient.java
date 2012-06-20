@@ -1055,7 +1055,7 @@ public class RemoteControlClient
         if (mRcseId == RCSE_ID_UNREGISTERED) {
             return;
         }
-        Log.d(TAG, "sending to AudioService key=" + what + ", value=" + value);
+        //Log.d(TAG, "sending to AudioService key=" + what + ", value=" + value);
         IAudioService service = getService();
         try {
             service.setPlaybackInfoForRcc(mRcseId, what, value);

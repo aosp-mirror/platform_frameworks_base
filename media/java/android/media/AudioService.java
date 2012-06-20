@@ -141,11 +141,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private static final int MSG_PERSIST_MASTER_VOLUME_MUTE = 15;
     private static final int MSG_REPORT_NEW_ROUTES = 16;
     private static final int MSG_REEVALUATE_REMOTE = 17;
+    private static final int MSG_RCC_NEW_PLAYBACK_INFO = 18;
+    private static final int MSG_RCC_NEW_VOLUME_OBS = 19;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
-    private static final int MSG_SET_WIRED_DEVICE_CONNECTION_STATE = 18;
-    private static final int MSG_SET_A2DP_CONNECTION_STATE = 19;
+    private static final int MSG_SET_WIRED_DEVICE_CONNECTION_STATE = 20;
+    private static final int MSG_SET_A2DP_CONNECTION_STATE = 21;
     // end of messages handled under wakelock
 
     // flags for MSG_PERSIST_VOLUME indicating if current and/or last audible volume should be
@@ -3100,6 +3102,15 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 case MSG_REEVALUATE_REMOTE:
                     onReevaluateRemote();
                     break;
+
+                case MSG_RCC_NEW_PLAYBACK_INFO:
+                    onNewPlaybackInfoForRcc(msg.arg1 /* rccId */, msg.arg2 /* key */,
+                            ((Integer)msg.obj).intValue() /* value */);
+                    break;
+                case MSG_RCC_NEW_VOLUME_OBS:
+                    onRegisterVolumeObserverForRcc(msg.arg1 /* rccId */,
+                            (IRemoteVolumeObserver)msg.obj /* rvo */);
+                    break;
             }
         }
     }
@@ -4960,15 +4971,21 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     }
 
-    // FIXME send a message instead of updating the stack synchronously
     public void setPlaybackInfoForRcc(int rccId, int what, int value) {
-        if(DEBUG_RC) Log.d(TAG, "setPlaybackInfoForRcc(id="+rccId+", what="+what+",val="+value+")");
+        sendMsg(mAudioHandler, MSG_RCC_NEW_PLAYBACK_INFO, SENDMSG_QUEUE,
+                rccId /* arg1 */, what /* arg2 */, Integer.valueOf(value) /* obj */, 0 /* delay */);
+    }
+
+    // handler for MSG_RCC_NEW_PLAYBACK_INFO
+    private void onNewPlaybackInfoForRcc(int rccId, int key, int value) {
+        if(DEBUG_RC) Log.d(TAG, "onNewPlaybackInfoForRcc(id=" + rccId +
+                ", what=" + key + ",val=" + value + ")");
         synchronized(mRCStack) {
             Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
             while(stackIterator.hasNext()) {
                 RemoteControlStackEntry rcse = stackIterator.next();
                 if (rcse.mRccId == rccId) {
-                    switch (what) {
+                    switch (key) {
                         case RemoteControlClient.PLAYBACKINFO_PLAYBACK_TYPE:
                             rcse.mPlaybackType = value;
                             postReevaluateRemote();
@@ -5013,7 +5030,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                             }
                             break;
                         default:
-                            Log.e(TAG, "unhandled key " + what + " for RCC " + rccId);
+                            Log.e(TAG, "unhandled key " + key + " for RCC " + rccId);
                             break;
                     }
                     return;
@@ -5022,8 +5039,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     }
 
-    // FIXME send a message instead of updating the stack synchronously
     public void registerRemoteVolumeObserverForRcc(int rccId, IRemoteVolumeObserver rvo) {
+        sendMsg(mAudioHandler, MSG_RCC_NEW_VOLUME_OBS, SENDMSG_QUEUE,
+                rccId /* arg1 */, 0, rvo /* obj */, 0 /* delay */);
+    }
+
+    // handler for MSG_RCC_NEW_VOLUME_OBS
+    private void onRegisterVolumeObserverForRcc(int rccId, IRemoteVolumeObserver rvo) {
         synchronized(mRCStack) {
             Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
             while(stackIterator.hasNext()) {
