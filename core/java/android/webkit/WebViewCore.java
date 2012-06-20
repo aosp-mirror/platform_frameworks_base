@@ -2779,14 +2779,11 @@ public final class WebViewCore {
     }
 
     // called by JNI
-    private void updateTextfield(int ptr, boolean changeToPassword,
-            String text, int textGeneration) {
+    private void updateTextfield(int ptr, String text, int textGeneration) {
         if (mWebViewClassic != null) {
-            Message msg = Message.obtain(mWebViewClassic.mPrivateHandler,
+            Message.obtain(mWebViewClassic.mPrivateHandler,
                     WebViewClassic.UPDATE_TEXTFIELD_TEXT_MSG_ID, ptr,
-                    textGeneration, text);
-            msg.getData().putBoolean("password", changeToPassword);
-            msg.sendToTarget();
+                    textGeneration, text).sendToTarget();
         }
     }
 
