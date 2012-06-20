@@ -1,0 +1,284 @@
+page.title=Custom Drawing
+parent.title=Creating Custom Views
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Creating a View Class
+previous.link=create-view.html
+next.title=Making the View Interactive
+next.link=making-interactive.html
+
+@jd:body
+
+<div id="tb-wrapper">
+    <div id="tb">
+
+        <h2>This lesson teaches you to</h2>
+        <ol>
+            <li><a href="#ondraw">Override onDraw()</a></li>
+            <li><a href="#createobject">Create Drawing Objects</a></li>
+            <li><a href="#layoutevent">Handle Layout Events</a></li>
+            <li><a href="#draw">Draw!</a></li>
+        </ol>
+
+        <h2>You should also read</h2>
+        <ul>
+            <li><a href="{@docRoot}guide/topics/graphics/2d-graphics.html">
+              Canvas and Drawables</a></li>
+        </ul>
+<h2>Try it out</h2>
+<div class="download-box">
+<a href="{@docRoot}shareables/training/CustomView.zip"
+class="button">Download the sample</a>
+<p class="filename">CustomView.zip</p>
+</div>
+    </div>
+</div>
+
+<p>The most important part of a custom view is its appearance. Custom drawing can be easy or complex
+according to your
+application's needs. This lesson covers some of the most common operations.</p>
+
+<h2 id="overrideondraw">Override onDraw()</h2>
+
+<p>The most important step in drawing a custom view is to override the {@link
+android.view.View#onDraw(android.graphics.Canvas) onDraw()} method. The parameter to {@link
+android.view.View#onDraw(android.graphics.Canvas) onDraw()} is a {@link
+android.graphics.Canvas Canvas} object that the view can use to draw itself. The {@link
+android.graphics.Canvas Canvas}
+class defines methods for drawing text, lines, bitmaps, and many other graphics primitives. You can
+use these methods in
+{@link
+android.view.View#onDraw(android.graphics.Canvas) onDraw()} to create your custom user interface (UI).</p>
+
+<p>Before you can call any drawing methods, though, it's necessary to create a {@link
+android.graphics.Paint Paint}
+object. The next section discusses {@link android.graphics.Paint Paint} in more detail.</p>
+
+<h2 id="createobject">Create Drawing Objects</h2>
+
+<p>The {@link android.graphics} framework divides drawing into two areas:</p>
+
+<ul>
+<li><i>What</i> to draw, handled by {@link android.graphics.Canvas Canvas}</li>
+<li><i>How</i> to draw, handled by {@link android.graphics.Paint}.</li>
+</ul>
+
+<p>For instance, {@link android.graphics.Canvas Canvas} provides a method to draw a line, while
+{@link
+android.graphics.Paint Paint} provides methods to define that line's color. {@link
+android.graphics.Canvas Canvas} has a
+method to draw a rectangle, while {@link android.graphics.Paint Paint} defines whether to fill that
+rectangle with a
+color or leave it empty. Simply put, {@link android.graphics.Canvas Canvas} defines shapes that you
+can draw on the
+screen, while {@link android.graphics.Paint Paint} defines the color, style, font, and so forth of
+each shape you
+draw.</p>
+
+<p>So, before you draw anything, you need to create one or more {@link android.graphics.Paint Paint}
+objects. The {@code PieChart} example does this in a method called {@code init}, which is
+called from the
+constructor:</p>
+
+<pre>
+private void init() {
+   mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+   mTextPaint.setColor(mTextColor);
+   if (mTextHeight == 0) {
+       mTextHeight = mTextPaint.getTextSize();
+   } else {
+       mTextPaint.setTextSize(mTextHeight);
+   }
+
+   mPiePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+   mPiePaint.setStyle(Paint.Style.FILL);
+   mPiePaint.setTextSize(mTextHeight);
+
+   mShadowPaint = new Paint(0);
+   mShadowPaint.setColor(0xff101010);
+   mShadowPaint.setMaskFilter(new BlurMaskFilter(8, BlurMaskFilter.Blur.NORMAL));
+
+   ...
+</pre>
+
+
+<p>Creating objects ahead of time is an important optimization. Views are redrawn very frequently,
+and many drawing
+objects require expensive initialization. Creating drawing objects within your {@link
+android.view.View#onDraw(android.graphics.Canvas) onDraw()}
+method significantly
+reduces performance and can make your UI appear sluggish.</p>
+
+<h2 id="layouteevent">Handle Layout Events</h2>
+
+<p>In order to properly draw your custom view, you need to know what size it is. Complex custom
+views often need to
+perform multiple layout calculations depending on the size and shape of their area on screen. You
+should never make
+assumptions about the size of your view on the screen. Even if only one app uses your view, that app
+needs to handle
+different screen sizes, multiple screen densities, and various aspect ratios in both portrait and
+landscape mode.</p>
+
+<p>Although {@link android.view.View} has many methods for handling measurement, most of them do not
+need to be
+overridden. If your view doesn't need special control over its size, you only need to override one
+method: {@link
+android.view.View#onSizeChanged onSizeChanged()}.</p>
+
+<p>{@link
+android.view.View#onSizeChanged onSizeChanged()} is called when your view is first assigned a size,
+and again if the size of your view changes
+for any reason. Calculate positions, dimensions, and any other values related to your view's size in
+{@link
+android.view.View#onSizeChanged onSizeChanged()}, instead of recalculating them every time you draw.
+In the {@code PieChart} example, {@link
+android.view.View#onSizeChanged onSizeChanged()} is
+where the {@code PieChart} view calculates the bounding rectangle of the pie chart and the relative position
+of the text label
+and other visual elements.</p>
+
+<p>When your view is assigned a size, the layout manager assumes that the size includes all of the
+view's padding. You
+must handle the padding values when you calculate your view's size. Here's a snippet from {@code
+PieChart.onSizeChanged()}
+that shows how to do this:</p>
+
+<pre>
+       // Account for padding
+       float xpad = (float)(getPaddingLeft() + getPaddingRight());
+       float ypad = (float)(getPaddingTop() + getPaddingBottom());
+
+       // Account for the label
+       if (mShowText) xpad += mTextWidth;
+
+       float ww = (float)w - xpad;
+       float hh = (float)h - ypad;
+
+       // Figure out how big we can make the pie.
+       float diameter = Math.min(ww, hh);
+</pre>
+
+<p>If you need finer control over your view's layout parameters, implement {@link
+android.view.View#onMeasure onMeasure()}. This method's parameters are
+{@link android.view.View.MeasureSpec} values that tell you how big your view's
+parent wants your view to be, and whether that size is a hard maximum or just a suggestion. As an
+optimization, these
+values are stored as packed integers, and you use the static methods of
+{@link android.view.View.MeasureSpec} to
+unpack the information
+stored in each integer.
+
+<p>Here's an example implementation of {@link android.view.View#onMeasure onMeasure()}.
+    In this implementation, {@code PieChart}
+    attempts to make its area
+    big enough to make the pie as big as its label:</p>
+
+<pre>
+&#64;Override
+protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+   // Try for a width based on our minimum
+   int minw = getPaddingLeft() + getPaddingRight() + getSuggestedMinimumWidth();
+   int w = resolveSizeAndState(minw, widthMeasureSpec, 1);
+
+   // Whatever the width ends up being, ask for a height that would let the pie
+   // get as big as it can
+   int minh = MeasureSpec.getSize(w) - (int)mTextWidth + getPaddingBottom() + getPaddingTop();
+   int h = resolveSizeAndState(MeasureSpec.getSize(w) - (int)mTextWidth, heightMeasureSpec, 0);
+
+   setMeasuredDimension(w, h);
+}
+</pre>
+
+<p>There are three important things to note in this code:</p>
+
+<ul>
+    <li>The calculations take into account the view's padding. As mentioned earlier, this is the
+        view's
+        responsibility.
+    </li>
+    <li>The helper method {@link android.view.View#resolveSizeAndState resolveSizeAndState()} is
+        used to create the
+        final width and height values. This helper returns an appropriate
+        {@link android.view.View.MeasureSpec} value
+        by comparing the view's desired size to the spec passed into
+        {@link android.view.View#onMeasure onMeasure()}.
+    </li>
+    <li>{@link android.view.View#onMeasure onMeasure()} has no return value.
+        Instead, the method communicates its results by
+        calling {@link
+        android.view.View#setMeasuredDimension setMeasuredDimension()}. Calling this method is
+        mandatory. If you omit
+        this call, the {@link android.view.View} class throws a runtime exception.
+    </li>
+</ul>
+
+<h2 id="draw">Draw!</h2>
+
+<p>Once you have your object creation and measuring code defined, you can implement {@link
+    android.view.View#onDraw(android.graphics.Canvas) onDraw()}. Every view
+    implements {@link
+    android.view.View#onDraw(android.graphics.Canvas) onDraw()}
+    differently, but there are some common operations that most views
+    share:</p>
+
+<ul>
+    <li>Draw text using {@link android.graphics.Canvas#drawText drawText()}. Specify the typeface by
+        calling {@link
+        android.graphics.Paint#setTypeface setTypeface()}, and the text color by calling {@link
+        android.graphics.Paint#setColor setColor()}.
+    </li>
+    <li>Draw primitive shapes using {@link android.graphics.Canvas#drawRect drawRect()}, {@link
+        android.graphics.Canvas#drawOval drawOval()}, and {@link android.graphics.Canvas#drawArc
+        drawArc()}. Change
+        whether the shapes are filled, outlined, or both by calling {@link
+        android.graphics.Paint#setStyle(android.graphics.Paint.Style) setStyle()}.
+    </li>
+    <li>Draw more complex shapes using the {@link android.graphics.Path} class.
+      Define a shape by adding lines and curves to a
+        {@link
+        android.graphics.Path} object, then draw the shape using {@link
+        android.graphics.Canvas#drawPath drawPath()}.
+        Just as with primitive shapes, paths can be outlined, filled, or both, depending on the
+        {@link android.graphics.Paint#setStyle
+        setStyle()}.
+    </li>
+    <li>
+    Define gradient fills by creating {@link android.graphics.LinearGradient} objects. Call {@link
+    android.graphics.Paint#setShader setShader()} to use your
+    {@link android.graphics.LinearGradient} on filled
+    shapes.
+    <li>Draw bitmaps using {@link android.graphics.Canvas#drawBitmap drawBitmap()}.</li>
+</ul>
+
+<p>For example, here's the code that draws {@code PieChart}. It uses a mix of text, lines, and shapes.</p>
+
+<pre>
+protected void onDraw(Canvas canvas) {
+   super.onDraw(canvas);
+
+   // Draw the shadow
+   canvas.drawOval(
+           mShadowBounds,
+           mShadowPaint
+   );
+
+   // Draw the label text
+   canvas.drawText(mData.get(mCurrentItem).mLabel, mTextX, mTextY, mTextPaint);
+
+   // Draw the pie slices
+   for (int i = 0; i &lt; mData.size(); ++i) {
+       Item it = mData.get(i);
+       mPiePaint.setShader(it.mShader);
+       canvas.drawArc(mBounds,
+               360 - it.mEndAngle,
+               it.mEndAngle - it.mStartAngle,
+               true, mPiePaint);
+   }
+
+   // Draw the pointer
+   canvas.drawLine(mTextX, mPointerY, mPointerX, mPointerY, mTextPaint);
+   canvas.drawCircle(mPointerX, mPointerY, mPointerSize, mTextPaint);
+}
+</pre>

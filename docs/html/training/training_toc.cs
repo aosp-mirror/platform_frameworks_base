@@ -346,7 +346,69 @@
           </li>
         </ul>
       </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>training/efficient-downloads/index.html">
+            <span class="en">Transferring Data Without Draining the Battery</span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/efficient-downloads/efficient-network-access.html">
+            <span class="en">Optimizing Downloads for Efficient Network Access</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/efficient-downloads/regular_updates.html">
+            <span class="en">Minimizing the Effect of Regular Updates</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/efficient-downloads/redundant_redundant.html">
+            <span class="en">Redundant Downloads are Redundant</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/efficient-downloads/connectivity_patterns.html">
+            <span class="en">Modifying Patterns Based on the Connectivity Type</span>
+          </a>
+          </li>
+        </ul>
+      </li>
 
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>training/custom-views/index.html">
+            <span class="en">Creating Custom Views</span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/custom-views/create-view.html">
+            <span class="en">Creating a Custom View Class</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/custom-views/custom-drawing.html">
+            <span class="en">Implementing Custom Drawing</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/custom-views/making-interactive.html">
+            <span class="en">Making the View Interactive</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/custom-views/optimizing-view.html">
+            <span class="en">Optimizing the View</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>training/cloudsync/index.html">
+            <span class="en">Syncing to the Cloud</span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/cloudsync/aesync.html">
+            <span class="en">Syncing with App Engine</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/cloudsync/backupapi.html">
+            <span class="en">Using the Backup API</span>
+          </a>
+          </li>
+        </ul>
+      </li>
 
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>training/search/index.html">
