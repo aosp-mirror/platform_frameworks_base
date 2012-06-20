@@ -110,7 +110,6 @@
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-devtools.html"><span class="en">Using the Dev Tools App</span></a></li>
     </ul>
   </li>
-  </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/publishing/publishing_overview.html"><span class="en">Publishing</span></a></div>
         <ul>
@@ -161,17 +160,20 @@ class="en">MonkeyRunner</span></a></li>
     <div class="nav-section-header"><a href="<?cs var:toroot
 ?>tools/revisions/index.html"><span class="en">Revisions</span></a></div>
     <ul>
-      <li><a href="<?cs var:toroot ?>tools/sdk/tools-notes.html"><span
-class="en">Tools</span></a></li>
-      <li><a href="<?cs var:toroot ?>tools/sdk/eclipse-adt.html"><span class="en">ADT
-Plugin</span></a></li>
-      </li>
+      <li><a href="<?cs var:toroot ?>tools/sdk/tools-notes.html">
+        <span class="en">Tools</span>
+      </a></li>
+      <li><a href="<?cs var:toroot ?>tools/sdk/eclipse-adt.html">
+        <span class="en">ADT Plugin</span>
+      </a></li>
       <!--
       <li><a href="<?cs var:toroot ?>tools/sdk/addons.html"><span class="en">Add-ons</span></a></li>
       -->
       <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/sdk/ndk/index.html"><span
-class="en">NDK</span></a></div>
+        <div class="nav-section-header">
+        <a href="<?cs var:toroot ?>tools/sdk/ndk/index.html">
+          <span class="en">NDK</span></a>
+        </div>
         <ul>
           <li><a href="<?cs var:toroot ?>tools/sdk/ndk/overview.html">What is the NDK?</a></li>
         </ul>

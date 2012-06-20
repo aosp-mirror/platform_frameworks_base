@@ -66,7 +66,8 @@
      </div>
      <ul>
 <!--   <li><a href="<?cs var:toroot ?>distribute/googleplay/promote/product-pages.html">
-        <span class="en">Your Product Pages</a></li> -->
+        <span class="en">Your Product Pages</a></li> 
+-->
        <li><a href="<?cs var:toroot ?>distribute/googleplay/promote/linking.html">
         <span class="en">Linking to Your Products</a></li>
        <li><a href="<?cs var:toroot ?>distribute/googleplay/promote/badges.html">
@@ -76,7 +77,8 @@
      </ul>
    </li>
 
-<!--    <li class="nav-section">
+<!--    
+   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>distribute/googleplay/after.html">
       <span class="en">After Launch</span></a>
     </div>
@@ -85,9 +87,11 @@
        <li><a href="<?cs var:toroot ?>distribute/googleplay/reviews.html">Tracking User Reviews</a></li>
        <li><a href="<?cs var:toroot ?>distribute/googleplay/supporting-users.html">Supporting Users</a></li>
     </ul>
-  </li> end of Publish -->
+  </li> 
+-->
 
-<!--  <li class="nav-section">
+<!--  
+  <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>distribute/googleplay/strategies/index.html">
       <span class="en">Strategies</span></a>
     </div>
@@ -95,9 +99,14 @@
           <li><a href="<?cs var:toroot ?>distribute/googleplay/strategies/featuring.html">Featuring</a></li>
           <li><a href="<?cs var:toroot ?>distribute/googleplay/strategies/app-quality.html">App Quality</a></li>
     </ul>
-  </li> -->
-        <li><a href="<?cs var:toroot ?>distribute/open.html">
-        <div><span class="en">Open Distribution</span>
-        </a></div></li>
+  </li> 
+-->
+  <li class="nav-section">
+    <div class="nav-section-header empty">
+      <a href="<?cs var:toroot ?>distribute/open.html">
+        <span class="en">Open Distribution</span>
+      </a>
+    </div>
+  </li>
 </ul>
   
