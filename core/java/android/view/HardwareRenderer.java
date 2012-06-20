@@ -27,6 +27,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.util.Log;
 import com.google.android.gles_jni.EGLImpl;
 
@@ -40,6 +41,7 @@ import javax.microedition.khronos.opengles.GL;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static javax.microedition.khronos.egl.EGL10.*;
 
@@ -623,6 +625,7 @@ public abstract class HardwareRenderer {
 
         final boolean mProfileEnabled;
         final float[] mProfileData;
+        final ReentrantLock mProfileLock;
         int mProfileCurrentFrame = -PROFILE_FRAME_DATA_COUNT;
         
         final boolean mDebugDirtyRegions;
@@ -663,8 +666,11 @@ public abstract class HardwareRenderer {
                 for (int i = 0; i < mProfileData.length; i += PROFILE_FRAME_DATA_COUNT) {
                     mProfileData[i] = mProfileData[i + 1] = mProfileData[i + 2] = -1;
                 }
+
+                mProfileLock = new ReentrantLock();
             } else {
                 mProfileData = null;
+                mProfileLock = null;
             }
 
             property = SystemProperties.get(DEBUG_DIRTY_REGIONS_PROPERTY, "false");
@@ -678,15 +684,21 @@ public abstract class HardwareRenderer {
         void dumpGfxInfo(PrintWriter pw) {
             if (mProfileEnabled) {
                 pw.printf("\n\tDraw\tProcess\tExecute\n");
-                for (int i = 0; i < mProfileData.length; i += PROFILE_FRAME_DATA_COUNT) {
-                    if (mProfileData[i] < 0) {
-                        break;
+
+                mProfileLock.lock();
+                try {
+                    for (int i = 0; i < mProfileData.length; i += PROFILE_FRAME_DATA_COUNT) {
+                        if (mProfileData[i] < 0) {
+                            break;
+                        }
+                        pw.printf("\t%3.2f\t%3.2f\t%3.2f\n", mProfileData[i], mProfileData[i + 1],
+                                mProfileData[i + 2]);
+                        mProfileData[i] = mProfileData[i + 1] = mProfileData[i + 2] = -1;
                     }
-                    pw.printf("\t%3.2f\t%3.2f\t%3.2f\n", mProfileData[i], mProfileData[i + 1],
-                            mProfileData[i + 2]);
-                    mProfileData[i] = mProfileData[i + 1] = mProfileData[i + 2] = -1;
+                    mProfileCurrentFrame = mProfileData.length;
+                } finally {
+                    mProfileLock.unlock();
                 }
-                mProfileCurrentFrame = mProfileData.length;
             }
         }
 
@@ -1083,7 +1095,11 @@ public abstract class HardwareRenderer {
                 if (surfaceState != SURFACE_STATE_ERROR) {
                     HardwareCanvas canvas = mCanvas;
                     attachInfo.mHardwareCanvas = canvas;
-                    
+
+                    if (mProfileEnabled) {
+                        mProfileLock.lock();
+                    }
+
                     // We had to change the current surface and/or context, redraw everything
                     if (surfaceState == SURFACE_STATE_UPDATED) {
                         dirty = null;
@@ -1121,7 +1137,14 @@ public abstract class HardwareRenderer {
                             getDisplayListStartTime = System.nanoTime();
                         }
 
-                        DisplayList displayList = view.getDisplayList();
+                        DisplayList displayList;
+
+                        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "getDisplayList");
+                        try {
+                            displayList = view.getDisplayList();
+                        } finally {
+                            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                        }
 
                         if (mProfileEnabled) {
                             long now = System.nanoTime();
@@ -1136,8 +1159,13 @@ public abstract class HardwareRenderer {
                                 drawDisplayListStartTime = System.nanoTime();
                             }
 
-                            status |= canvas.drawDisplayList(displayList, mRedrawClip,
-                                    DisplayList.FLAG_CLIP_CHILDREN);
+                            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "drawDisplayList");
+                            try {
+                                status |= canvas.drawDisplayList(displayList, mRedrawClip,
+                                        DisplayList.FLAG_CLIP_CHILDREN);
+                            } finally {
+                                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                            }
 
                             if (mProfileEnabled) {
                                 long now = System.nanoTime();
@@ -1174,7 +1202,6 @@ public abstract class HardwareRenderer {
                     attachInfo.mIgnoreDirtyState = false;
                     
                     if ((status & DisplayList.STATUS_DREW) == DisplayList.STATUS_DREW) {
-
                         long eglSwapBuffersStartTime = 0;
                         if (mProfileEnabled) {
                             eglSwapBuffersStartTime = System.nanoTime();
@@ -1189,6 +1216,10 @@ public abstract class HardwareRenderer {
                         }
     
                         checkEglErrors();
+                    }
+
+                    if (mProfileEnabled) {
+                        mProfileLock.unlock();
                     }
 
                     return dirty == null;
