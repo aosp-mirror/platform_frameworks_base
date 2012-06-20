@@ -52,8 +52,8 @@ page.title=APK Expansion Files
 
 <h2>See also</h2>
 <ol>
-  <li><a href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a></li>
-  <li><a href="{@docRoot}guide/market/publishing/multiple-apks.html">Multiple
+  <li><a href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a></li>
+  <li><a href="{@docRoot}guide/google/play/publishing/multiple-apks.html">Multiple
 APK Support</a></li>
 </ol>
 </div>
@@ -215,7 +215,7 @@ already saved on the device.
       <li>If yes, your app is ready to go.</li>
       <li>If no, your app must download the expansion files over HTTP from Google Play. Your app
 must send a request to the Google Play client using the Google Play's <a
-href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a> service, which
+href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a> service, which
 responds with the name, file size, and URL for each expansion file. With this information, you then
 download the files and save them to the proper <a href="#StorageLocation">storage location</a>.</li>
     </ol>
@@ -242,7 +242,7 @@ application:</p>
 Space is precious and you should keep your total application size as small as possible. If your app
 uses more than 50MB in order to provide multiple versions of your graphic assets for multiple screen
 densities, consider instead publishing <a
-href="{@docRoot}guide/market/publishing/multiple-apks.html">multiple APKs</a> in which each APK
+href="{@docRoot}guide/google/play/publishing/multiple-apks.html">multiple APKs</a> in which each APK
 contains only the assets required for the screens that it targets.</li>
   <li>Determine which application resources to separate from your APK and package them in a
 file to use as the main expansion file.
@@ -259,7 +259,7 @@ Library</a>.</p>
   </li>
   <li>Add logic to your application's main activity that checks whether the expansion files
 are on the device upon start-up. If the files are not on the device, use Google Play's <a
-href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a> service to request URLs
+href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a> service to request URLs
 for the expansion files, then download and save them.
     <p>To greatly reduce the amount of code you must write and ensure a good user experience
 during the download, we recommend you use the <a href="AboutLibraries">Downloader
@@ -292,12 +292,12 @@ provide the URLs for your expansion files if the application was installed by ot
 provides for each file is unique for every download and each one expires shortly after it is given
 to your application.</li>
   <li>If you update your application with a new APK or upload <a
-href="{@docRoot}guide/market/publishing/multiple-apks.html">multiple APKs</a> for the same
+href="{@docRoot}guide/google/play/publishing/multiple-apks.html">multiple APKs</a> for the same
 application, you can select expansion files that you've uploaded for a previous APK. <strong>The
 expansion file's name does not change</strong>&mdash;it retains the version received by the APK to
 which the file was originally associated.</li>
   <li>If you use expansion files in combination with <a
-href="{@docRoot}guide/market/publishing/multiple-apks.html">multiple APKs</a> in order to
+href="{@docRoot}guide/google/play/publishing/multiple-apks.html">multiple APKs</a> in order to
 provide different expansion files for different devices, you still must upload separate APKs
 for each device in order to provide a unique  <a
 href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code versionCode}</a>
@@ -333,7 +333,7 @@ time it installs or updates the APK. This way, the expansion files are available
 application launches for the first time. However, in some cases your app must download the
 expansion files itself by requesting them from a URL provided to you in a response
 from Google Play's <a
-href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a> service.</p>
+href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a> service.</p>
 
 <p>The basic logic you need to download your expansion files is the following:</p>
 
@@ -346,7 +346,7 @@ href="#StorageLocation">shared storage location</a> (in the
       <li>If the expansion files are <em>not</em> there:
         <ol>
           <li>Perform a request using Google Play's <a
-href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a> to get your
+href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a> to get your
 app's expansion file names, sizes, and URLs.</li> 
           <li>Use the URLs provided by Google Play to download the expansion files and save
 the expansion files. You <strong>must</strong> save the files to the <a
@@ -365,7 +365,7 @@ your application.</p>
 
 
 <p>If your application is free (not a paid app), then you probably haven't used the <a
-href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a> service. It's primarily
+href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a> service. It's primarily
 designed for you to enforce
 licensing policies for your application and ensure that the user has the right to
 use your app (he or she rightfully paid for it on Google Play). In order to facilitate the
@@ -409,7 +409,7 @@ download your expansion files. The information in the following sections explain
 the library into your application.</p>
 
 <p>If you'd rather develop your own solution to download the expansion files using the Google
-Play URLs, you must follow the <a href="{@docRoot}guide/market/licensing/index.html">Application
+Play URLs, you must follow the <a href="{@docRoot}guide/google/play/licensing/index.html">Application
 Licensing</a> documentation to perform a license request, then retrieve the expansion file names,
 sizes, and URLs from the response extras. You should use the <a href="#ExpansionPolicy">{@code
 APKExpansionPolicy}</a> class (included in the License Verification Library) as your licensing
@@ -571,11 +571,11 @@ DownloaderService} class and override three methods to provide specific applicat
   <dt>{@code getPublicKey()}</dt>
     <dd>This must return a string that is the Base64-encoded RSA public key for your publisher
 account, available from the profile page on the Developer Console (see <a
-href="{@docRoot}guide/market/licensing/setting-up.html">Setting Up for Licensing</a>).</dd>
+href="{@docRoot}guide/google/play/licensing/setting-up.html">Setting Up for Licensing</a>).</dd>
   <dt>{@code getSALT()}</dt>
     <dd>This must return an array of random bytes that the licensing {@code Policy} uses to
 create an <a
-href="{@docRoot}guide/market/licensing/adding-licensing.html#impl-Obfuscator">{@code
+href="{@docRoot}guide/google/play/licensing/adding-licensing.html#impl-Obfuscator">{@code
 Obfuscator}</a>. The salt ensures that your obfuscated {@link android.content.SharedPreferences}
 file in which your licensing data is saved will be unique and non-discoverable.</dd>
   <dt>{@code getAlarmReceiverClassName()}</dt>
@@ -924,7 +924,7 @@ expansion files:</p>
 <p>For more information about how to use the {@code APKExpansionPolicy} when you're <em>not</em>
 using the <a
 href="#AboutLibraries">Downloader Library</a>, see the documentation for <a
-href="{@docRoot}guide/market/licensing/adding-licensing.html">Adding Licensing to Your App</a>,
+href="{@docRoot}guide/google/play/licensing/adding-licensing.html">Adding Licensing to Your App</a>,
 which explains how to implement a license policy such as this one.</p>
 
 

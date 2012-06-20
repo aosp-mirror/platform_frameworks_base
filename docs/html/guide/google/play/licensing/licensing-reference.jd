@@ -230,7 +230,7 @@ implementation.</p>
 </table>
 
 <p class="note"><strong>Note:</strong> As documented in <a
-href="{@docRoot}guide/market/licensing/setting-up.html#test-env">
+href="{@docRoot}guide/google/play/licensing/setting-up.html#test-env">
 Setting Up The Testing Environment</a>, the response code can be manually
 overridden for the application developer and any registered test users via the
 Google Play publisher site.
@@ -251,13 +251,13 @@ testing purposes.</p>
 period and provide other information, The licensing server includes several pieces of
 information in the license responses. Specifically, the service provides recommended values for the
 application's license validity period, retry grace period, maximum allowable retry count, and other
-settings. If your application uses <a href="{@docRoot}guide/market/expansion-files.html">APK
+settings. If your application uses <a href="{@docRoot}guide/google/play/expansion-files.html">APK
 expansion files</a>, the response also includes the file names, sizes, and URLs. The server appends
 the settings as key-value pairs in the license response "extras" field. </p>
 
 <p>Any {@code Policy} implementation can extract the extras settings from the license
 response and use them as needed. The LVL default {@code Policy} implementation, <a
-href="{@docRoot}guide/market/licensing/adding-licensing.html#ServerManagedPolicy">{@code
+href="{@docRoot}guide/google/play/licensing/adding-licensing.html#ServerManagedPolicy">{@code
 ServerManagedPolicy}</a>, serves as a working
 implementation and an illustration of how to obtain, store, and use the
 settings. </p>

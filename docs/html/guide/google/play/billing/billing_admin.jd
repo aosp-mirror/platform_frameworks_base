@@ -88,7 +88,7 @@ Application's Manifest</a>.</p>
 
 <p>In addition, an application package can have only one product list. If you create a product
 list for an application, and you use the <a
-href="{@docRoot}guide/market/publishing/multiple-apks.html">multiple APK feature</a> to distribute
+href="{@docRoot}guide/google/play/publishing/multiple-apks.html">multiple APK feature</a> to distribute
 more than one APK for that application, the product list applies to all APK versions that are
 associated with the application listing. You cannot create individual product lists for each APK if
 you are using the multiple APK feature.</p>

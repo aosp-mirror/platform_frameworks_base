@@ -206,7 +206,7 @@ secure.</li>
 functions when run on a device that does not offer Google Play.</li>
 <li>You can implement licensing controls for a free app, but only if you're using the service to 
 provide <a
-href="{@docRoot}guide/market/expansion-files.html">APK expansion files</a>.</li>
+href="{@docRoot}guide/google/play/expansion-files.html">APK expansion files</a>.</li>
 </ul>
 
 
@@ -237,7 +237,7 @@ across all compatible devices, locked or unlocked, that run Android 1.5 or
 higher version of the platform.</p>
 
 <p>To begin adding application licensing to your application, continue to <a
-href="{@docRoot}guide/market/licensing/setting-up.html">Setting Up for Licensing</a>.</p>
+href="{@docRoot}guide/google/play/licensing/setting-up.html">Setting Up for Licensing</a>.</p>
 
 
 

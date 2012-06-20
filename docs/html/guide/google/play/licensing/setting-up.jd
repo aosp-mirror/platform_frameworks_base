@@ -102,7 +102,7 @@ responses, see <a href="#test-env">Setting Up a Testing Environment</a>, below.
 </ol>
 
 <p>The sections below describe these tasks. When you are done with setup,
-you can begin <a href="{@docRoot}guide/market/licensing/adding-licensing.html">Adding
+you can begin <a href="{@docRoot}guide/google/play/licensing/adding-licensing.html">Adding
 Licensing to Your App</a>.</p>
 
 <p>To get started, you need to set up a proper runtime environment on which
@@ -358,7 +358,7 @@ LVL's <code>library/src/com</code> directory into your application's
 
 <p>If you add the LVL sources directly to your application, you can skip the
 next section and start working with the library, as described in <a
-href="{@docRoot}guide/market/licensing/adding-licensing.html">Adding
+href="{@docRoot}guide/google/play/licensing/adding-licensing.html">Adding
 Licensing to Your App</a>.</p>
 
 
@@ -483,9 +483,9 @@ test in your application.</p>
 <p>In general, you should make sure to test your application's licensing
 implementation with every response code available in the Test Response menu.
 For a description of the codes, see <a
-href="{@docRoot}guide/market/licensing/licensing-reference.html#server-response-codes">Server
+href="{@docRoot}guide/google/play/licensing/licensing-reference.html#server-response-codes">Server
 Response Codes</a> in the <a
-href="{@docRoot}guide/market/licensing/licensing-reference.html">Licensing Reference</a>.</p>
+href="{@docRoot}guide/google/play/licensing/licensing-reference.html">Licensing Reference</a>.</p>
 
 <img src="{@docRoot}images/licensing_test_response.png" alt=""/>
 <p class="img-caption"><strong>Figure 4.</strong> The Licensing
@@ -506,7 +506,7 @@ sign using either your publisher account or one of the test accounts that you
 have set up. For more information about test accounts, see the next section.</p>
 
 <p>See <a
-href="{@docRoot}guide/market/licensing/licensing-reference.html#server-response-codes">Server
+href="{@docRoot}guide/google/play/licensing/licensing-reference.html#server-response-codes">Server
 Response Codes</a> for a list of
 test responses available and their meanings. </p>
 
@@ -695,7 +695,7 @@ publisher account or test account each time you wipe data when restarting the
 emulator.</p>
 
 <p>Once you've completed the setup procedures, continue to <a
-href="{@docRoot}guide/market/licensing/adding-licensing.html">Adding Licensing to Your App</a>.</p>
+href="{@docRoot}guide/google/play/licensing/adding-licensing.html">Adding Licensing to Your App</a>.</p>
 
 
 

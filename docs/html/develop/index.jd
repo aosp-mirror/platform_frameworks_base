@@ -138,7 +138,7 @@ href="{@docRoot}about/versions/android-4.0-highlights.html">Read the highlights<
 				</ul>
                                 <!-- FEATURED DOCS -->
 				<ul>
-					<li><a href="{@docRoot}guide/market/billing/index.html">
+					<li><a href="{@docRoot}guide/google/play/billing/index.html">
 						<h4>Google Play In-app Billing</h4>
 						<p>In-app Billing is a Google Play service that lets you sell digital content from inside your applications. You can sell products as standard in-app products (one-time purchase) or with subscriptions (recurring...</p>
 					</a></li>
