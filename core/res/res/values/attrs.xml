@@ -5703,6 +5703,15 @@
              @hide -->
         <attr name="externalRouteEnabledDrawable" format="reference" />
 
+        <!-- The types of media routes the button and its resulting
+             chooser will filter by. -->
+        <attr name="mediaRouteTypes" format="integer">
+            <!-- Allow selection of live audio routes. -->
+            <enum name="liveAudio" value="0x1" />
+            <!-- Allow selection of user (app-specified) routes. -->
+            <enum name="user" value="0x800000" />
+        </attr>
+
         <attr name="minWidth" />
         <attr name="minHeight" />
     </declare-styleable>
