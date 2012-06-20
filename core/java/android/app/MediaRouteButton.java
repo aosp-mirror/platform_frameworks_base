@@ -73,9 +73,14 @@ public class MediaRouteButton extends View {
                 com.android.internal.R.styleable.MediaRouteButton_minWidth, 0);
         mMinHeight = a.getDimensionPixelSize(
                 com.android.internal.R.styleable.MediaRouteButton_minHeight, 0);
+        final int routeTypes = a.getInteger(
+                com.android.internal.R.styleable.MediaRouteButton_mediaRouteTypes,
+                MediaRouter.ROUTE_TYPE_LIVE_AUDIO);
         a.recycle();
 
         setClickable(true);
+
+        setRouteTypes(routeTypes);
     }
 
     private void setRemoteIndicatorDrawable(Drawable d) {
