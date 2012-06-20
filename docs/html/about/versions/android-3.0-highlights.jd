@@ -43,7 +43,7 @@ page.title=Honeycomb
 <p>The Android 3.0 platform introduces many new and exciting features for users and developers. 
 This document provides a glimpse of some of the new features and technologies, as delivered in
 Android 3.0. For a more detailed look at new developer APIs, see the <a
-href="{@docRoot}sdk/android-3.0.html">Android 3.0 Platform</a> document.</p>
+href="{@docRoot}about/versions/android-3.0.html">Android 3.0 Platform</a> document.</p>
 
 <ul>
   <li><a href="#UserFeatures">New User Features</a></li>
@@ -273,6 +273,6 @@ allowscriptaccess="always" allowfullscreen="true" width="278" height="180"></emb
 </div>
 
 <p>For more information about the new developer APIs, see the <a
-href="{@docRoot}sdk/android-3.0.html">Android 3.0 Platform</a> document.</p>
+href="{@docRoot}about/versions/android-3.0.html">Android 3.0 Platform</a> document.</p>
 
 <p>For a video overview of platform features, see the Android 3.0 Sneak Peek. </p>

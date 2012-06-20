@@ -412,13 +412,13 @@ application, such as drag and drop APIs, new Bluetooth APIs, a system-wide clipb
 new graphics engine called Renderscript, and more.</p>
 
 <p>To learn more about the APIs mentioned above and more, see the <a
-href="{@docRoot}sdk/android-3.0.html">Android 3.0 Platform</a> document.</p>
+href="{@docRoot}about/versions/android-3.0.html">Android 3.0 Platform</a> document.</p>
 
 
 <h3>Look at some samples</h3>
 
 <p>Many of the new features and APIs that are described above and in the <a
-href="{@docRoot}sdk/android-3.0.html#api">Android 3.0 Platform</a> document also have accompanying
+href="{@docRoot}about/versions/android-3.0.html#api">Android 3.0 Platform</a> document also have accompanying
 samples that allow you to preview the effects and can help you understand how to use them. To get
 the samples, download them from the SDK repository <a href="{@docRoot}sdk/adding-components.html"
 >using the Android SDK Manager</a>. After downloading the samples ("Samples for SDK API

@@ -1649,7 +1649,7 @@ it easier for you to test apps that use {@link android.webkit.WebView}</li>
 <ul>
 <li>Updated V8 JavaScript compiler for faster performance</li>
 <li>Plus other notable enhancements carried over from <a
-href="{@docRoot}sdk/android-3.0.html">Android
+href="{@docRoot}about/versions/android-3.0.html">Android
 3.0</a> are now available for handsets:
 <ul>
 <li>Support for fixed position elements on all pages</li>

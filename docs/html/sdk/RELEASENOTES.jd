@@ -37,7 +37,7 @@ now available from the "SDK" tab, under "Downloadable SDK Components."</p>
 
 <ul>
 <li>Notes for the Android 2.0.1 platform are in the <a
-href="{@docRoot}sdk/android-2.0.1.html">Android 2.0.1, Release 1</a> document. </li>
+href="{@docRoot}about/versions/android-2.0.1.html">Android 2.0.1, Release 1</a> document. </li>
 <li>You can find information about tools changes in the <a
 href="{@docRoot}tools/sdk/tools-notes.html#notes">SDK Tools</a> and <a
 href="{@docRoot}sdk/eclipse-adt.html#notes">ADT Plugin for Eclipse</a>.</li>
@@ -352,7 +352,7 @@ Android project.</li>
 
 <p>For details about the Android platforms included in the SDK &mdash; including
 bug fixes, features, and API changes &mdash; please read the <a
-href="{@docRoot}sdk/android-1.5.html">Android 1.5 version notes</a>.</p>
+href="{@docRoot}about/versions/android-1.5.html">Android 1.5 version notes</a>.</p>
 
 <h3>Installation and Upgrade Notes</h3>
 
@@ -491,7 +491,7 @@ as well as a few minor API changes from the 1.0 version. </p>
 
 <p>For details about the Android 1.1 system image included in the SDK &mdash;
 including bug fixes, features, and API changes &mdash; please read the <a
-href="{@docRoot}sdk/android-1.1.html">Android 1.1 version notes</a>.</p>
+href="{@docRoot}about/versions/android-1.1.html">Android 1.1 version notes</a>.</p>
 
 <h3>App Versioning for Android 1.1</h3>
 

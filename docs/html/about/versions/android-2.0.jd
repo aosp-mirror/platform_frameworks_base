@@ -56,7 +56,7 @@ Components</a>.</p>
 <h2 id="features">Platform Highlights</h2>
 
 <p>For a list of new user features and platform highlights, see the <a
-href="http://developer.android.com/sdk/android-{@sdkPlatformVersion}-highlights.html">Android 
+href="http://developer.android.com/about/versions/android-{@sdkPlatformVersion}-highlights.html">Android 
 {@sdkPlatformVersion} Platform Highlights</a> document.</p>
 
 <h2 id="relnotes">Revisions</h2>

@@ -63,7 +63,7 @@ Components</a>.</p>
 <h2 id="features">Platform Highlights</h2>
 
 <p>For a list of new user features and platform highlights, see the <a
-href="http://developer.android.com/sdk/android-2.0-highlights.html">Android
+href="http://developer.android.com/about/versions/android-2.0-highlights.html">Android
 2.0 Platform Highlights</a> document.</p>
 
 <h2 id="relnotes">Revisions</h2>
@@ -257,7 +257,7 @@ through Settings.</p>
 framework API provided by the Android {@sdkPlatformVersion} platform. Note,
 however, that Android 2.0.1 is a minor release to Android 2.0, so for more
 information about the changes made to in Android 2.0, please refer to the
-<a href="{@docRoot}sdk/android-2.0.html#api">Android 2.0 version notes</a>.</p>
+<a href="{@docRoot}about/versions/android-2.0.html#api">Android 2.0 version notes</a>.</p>
 
 
 <h3 id="api-level">API level</h3>

@@ -87,10 +87,10 @@ src="{@docRoot}images/home/ics-android.png" class="play no-shadow no-transform" 
                    <p>Android 4.0 brings handsets and tablets together with a unified
                    design and a set of APIs for you to build a great user experience on all devices.
                    For information about API changes in the latest release (API level 15),
-                   read the <a href='{@docRoot}about/framework/android-4.0.3.html'>platform notes</a> and <a
+                   read the <a href='{@docRoot}about/versions/android-4.0.3.html'>platform notes</a> and <a
                    href='{@docRoot}sdk/api_diff/15/changes.html'>diff report</a>.</p>
                    <p><a class="button"
-href="{@docRoot}about/framework/android-4.0-highlights.html">Read the highlights</a></p>
+href="{@docRoot}about/versions/android-4.0-highlights.html">Read the highlights</a></p>
                    </div>                
                 </li>
            </ul>
