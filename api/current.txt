@@ -676,6 +676,7 @@ package android {
     field public static final int measureAllChildren = 16843018; // 0x101010a
     field public static final int measureWithLargestChild = 16843476; // 0x10102d4
     field public static final int mediaRouteButtonStyle = 16843693; // 0x10103ad
+    field public static final int mediaRouteTypes = 16843694; // 0x10103ae
     field public static final int menuCategory = 16843230; // 0x10101de
     field public static final int mimeType = 16842790; // 0x1010026
     field public static final int minDate = 16843583; // 0x101033f

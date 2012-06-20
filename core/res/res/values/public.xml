@@ -3644,6 +3644,7 @@
   <public type="attr" name="fontFamily" id="0x010103ac" />
 
   <public type="attr" name="mediaRouteButtonStyle" id="0x010103ad" />
+  <public type="attr" name="mediaRouteTypes" id="0x010103ae" />
   <public type="style" name="Widget.Holo.MediaRouteButton" id="0x010301d5" />
   <public type="style" name="Widget.Holo.Light.MediaRouteButton" id="0x010301d6" />
   <public type="style" name="Widget.DeviceDefault.MediaRouteButton" id="0x010301d7" />
