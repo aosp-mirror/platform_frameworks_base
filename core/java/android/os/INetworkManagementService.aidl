@@ -218,17 +218,17 @@ interface INetworkManagementService
     /**
      * Start Wifi Access Point
      */
-    void startAccessPoint(in WifiConfiguration wifiConfig, String wlanIface, String softapIface);
+    void startAccessPoint(in WifiConfiguration wifiConfig, String iface);
 
     /**
      * Stop Wifi Access Point
      */
-    void stopAccessPoint(String wlanIface);
+    void stopAccessPoint(String iface);
 
     /**
      * Set Access Point config
      */
-    void setAccessPoint(in WifiConfiguration wifiConfig, String wlanIface, String softapIface);
+    void setAccessPoint(in WifiConfiguration wifiConfig, String iface);
 
     /**
      ** DATA USAGE RELATED

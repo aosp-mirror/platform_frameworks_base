@@ -23,13 +23,8 @@ import static android.net.wifi.WifiManager.WIFI_STATE_ENABLING;
 import static android.net.wifi.WifiManager.WIFI_STATE_UNKNOWN;
 
 /**
- * TODO: Add soft AP states as part of WIFI_STATE_XXX
- * Retain WIFI_STATE_ENABLING that indicates driver is loading
- * Add WIFI_STATE_AP_ENABLED to indicate soft AP has started
- * and WIFI_STATE_FAILED for failure
+ * TODO:
  * Deprecate WIFI_STATE_UNKNOWN
- *
- * Doing this will simplify the logic for sending broadcasts
  */
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_DISABLED;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_DISABLING;
@@ -94,13 +89,10 @@ import java.util.regex.Pattern;
  * Track the state of Wifi connectivity. All event handling is done here,
  * and all changes in connectivity state are initiated here.
  *
- * Wi-Fi now supports three modes of operation: Client, Soft Ap and Direct
- * In the current implementation, we do not support any concurrency and thus only
- * one of Client, Soft Ap or Direct operation is supported at any time.
- *
- * The WifiStateMachine supports Soft Ap and Client operations while WifiP2pService
- * handles Direct. WifiP2pService and WifiStateMachine co-ordinate to ensure only
- * one exists at a certain time.
+ * Wi-Fi now supports three modes of operation: Client, SoftAp and p2p
+ * In the current implementation, we support concurrent wifi p2p and wifi operation.
+ * The WifiStateMachine handles SoftAp and Client operations while WifiP2pService
+ * handles p2p operation.
  *
  * @hide
  */
@@ -109,9 +101,6 @@ public class WifiStateMachine extends StateMachine {
     private static final String TAG = "WifiStateMachine";
     private static final String NETWORKTYPE = "WIFI";
     private static final boolean DBG = false;
-
-    /* TODO: This is no more used with the hostapd code. Clean up */
-    private static final String SOFTAP_IFACE = "wl0.1";
 
     private WifiMonitor mWifiMonitor;
     private WifiNative mWifiNative;
@@ -1794,12 +1783,12 @@ public class WifiStateMachine extends StateMachine {
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    mNwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
+                    mNwService.startAccessPoint(config, mInterfaceName);
                 } catch (Exception e) {
                     loge("Exception in softap start " + e);
                     try {
                         mNwService.stopAccessPoint(mInterfaceName);
-                        mNwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
+                        mNwService.startAccessPoint(config, mInterfaceName);
                     } catch (Exception e1) {
                         loge("Exception in softap re-start " + e1);
                         sendMessage(CMD_START_AP_FAILURE);
