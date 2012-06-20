@@ -98,10 +98,7 @@ the SDK</a>.</p>
     <ul>
       <li>GNU C Library (glibc) 2.7 or later is required.</li>
       <li>On Ubuntu Linux, version 8.04 or later is required.</li>
-      <li>64-bit distributions must be capable of running 32-bit applications. 
-      For information about how to add support for 32-bit applications, see
-      the <a href="installing.html#troubleshooting">Ubuntu Linux
-      installation notes</a>.</li>
+      <li>64-bit distributions must be capable of running 32-bit applications.</li>
     </ul>
   </li>
 </ul>
@@ -117,7 +114,7 @@ supported with the latest version of ADT.</p></li>
 in most Eclipse IDE packages) </li>
       <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK 6</a>
         (JRE alone is not sufficient)</li>
-      <li><a href="eclipse-adt.html">Android Development Tools plugin</a>
+      <li><a href="{@docRoot}tools/sdk/eclipse-adt.html">Android Development Tools plugin</a>
 (recommended)</li>
       <li><strong>Not</strong> compatible with Gnu Compiler for Java (gcj)</li>
     </ul>

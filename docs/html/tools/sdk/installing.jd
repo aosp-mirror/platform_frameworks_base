@@ -65,7 +65,7 @@ function toggleDiv(link) {
 
 <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin for Eclipse</a></li>
+    <li><a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin for Eclipse</a></li>
     <li><a href="{@docRoot}sdk/adding-components.html">Adding SDK Packages</a></li>
   </ol>
 
@@ -142,7 +142,7 @@ highly recommended approach and is the fastest way to get started with Android.
 </p>
 
 <p>If you'd like to use ADT for developing Android applications, install it now.
-Read <a href="{@docRoot}sdk/eclipse-adt.html#installing">Installing the ADT Plugin</a> for
+Read <a href="{@docRoot}tools/sdk/eclipse-adt.html#installing">Installing the ADT Plugin</a> for
 step-by-step installation instructions, then return here to continue the
 last step in setting up your Android SDK.</p>
 

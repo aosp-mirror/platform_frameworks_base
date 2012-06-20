@@ -29,8 +29,8 @@ page.title=Eclipse 内で ADT を使用
   <li>プロジェクトを、ユーザーに配布可能な署名済みの APK 形式でエクスポートすることもできます。</li>
 </ul>
 
-<p>ADT を組み込んだ Eclipse 総合開発環境で Android アプリケーションの開発を始めるには、最初に Eclipse 総合開発環境をダウンロードしてから、ADT プラグインをダウンロードしてインストールする必要があります。そのためには、<a href="{@docRoot}sdk/eclipse-adt.html#installing">Eclipse 用 ADT プラグインのインストール</a>に記載されている手順どおりに操作します。</p>
-<p>バージョン 0.9 より前の ADT を使用してアプリケーションを既に開発中の場合は、必ず最新バージョンにアップグレードしてから続行してください。<a href="{@docRoot}sdk/eclipse-adt.html#updating">Eclipse ADT プラグインをアップデート</a>するためのガイドをご覧ください。</p>
+<p>ADT を組み込んだ Eclipse 総合開発環境で Android アプリケーションの開発を始めるには、最初に Eclipse 総合開発環境をダウンロードしてから、ADT プラグインをダウンロードしてインストールする必要があります。そのためには、<a href="{@docRoot}tools/sdk/eclipse-adt.html#installing">Eclipse 用 ADT プラグインのインストール</a>に記載されている手順どおりに操作します。</p>
+<p>バージョン 0.9 より前の ADT を使用してアプリケーションを既に開発中の場合は、必ず最新バージョンにアップグレードしてから続行してください。<a href="{@docRoot}tools/sdk/eclipse-adt.html#updating">Eclipse ADT プラグインをアップデート</a>するためのガイドをご覧ください。</p>
 <p class="note"><strong>注:</strong> このガイドでは、ADT プラグインの最新バージョンを使用していることを前提としています。説明の大半は、以前のバージョンにも当てはまりますが、以前のバージョンを使用している場合は、このドキュメントのオンライン版ではなく、SDK パッケージに付属された資料内の同ドキュメントをご覧ください。</p>
 
 
