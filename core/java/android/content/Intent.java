@@ -2153,19 +2153,6 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.USB_AUDIO_DEVICE_PLUG";
 
     /**
-     * @hide (to be un-hidden)
-     * Broadcast Action: the volume handled by the receiver should be updated based on the
-     * mutually exclusive extras, {@link #EXTRA_VOLUME_UPDATE_DIRECTION}
-     * and {@link #EXTRA_VOLUME_UPDATE_VALUE}.
-     *
-     * @see #EXTRA_VOLUME_UPDATE_DIRECTION
-     * @see #EXTRA_VOLUME_UPDATE_VALUE
-     * @see android.media.RemoteControlClient
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_VOLUME_UPDATE = "android.intent.action.VOLUME_UPDATE";
-
-    /**
      * <p>Broadcast Action: The user has switched on advanced settings in the settings app:</p>
      * <ul>
      *   <li><em>state</em> - A boolean value indicating whether the settings is on or off.</li>
@@ -2853,26 +2840,6 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_USERID =
             "android.intent.extra.user_id";
-
-    /**
-     * @hide (to be un-hidden)
-     * An integer indicating whether the volume is to be increased (positive value) or decreased
-     * (negative value). For bundled changes, the absolute value indicates the number of changes
-     * in the same direction, e.g. +3 corresponds to three "volume up" changes.
-     * @see #ACTION_VOLUME_UPDATE
-     */
-    public static final String EXTRA_VOLUME_UPDATE_DIRECTION =
-            "android.intent.extra.VOLUME_UPDATE_DIRECTION";
-
-    /**
-     * @hide (to be un-hidden)
-     * An integer indicating the new volume value, always between 0 and the value set for
-     * {@link RemoteControlClient#PLAYBACKINFO_VOLUME_MAX} with
-     * {@link RemoteControlClient#setPlaybackInformation(int, int)}
-     * @see #ACTION_VOLUME_UPDATE
-     */
-    public static final String EXTRA_VOLUME_UPDATE_VALUE =
-            "android.intent.extra.VOLUME_UPDATE_VALUE";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
