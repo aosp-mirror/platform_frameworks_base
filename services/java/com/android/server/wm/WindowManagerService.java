@@ -9537,12 +9537,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         }
-        pw.println();
-        if (mOpeningApps.size() > 0) {
-            pw.print("  mOpeningApps="); pw.println(mOpeningApps);
-        }
-        if (mClosingApps.size() > 0) {
-            pw.print("  mClosingApps="); pw.println(mClosingApps);
+        if (mOpeningApps.size() > 0 || mClosingApps.size() > 0) {
+            pw.println();
+            if (mOpeningApps.size() > 0) {
+                pw.print("  mOpeningApps="); pw.println(mOpeningApps);
+            }
+            if (mClosingApps.size() > 0) {
+                pw.print("  mClosingApps="); pw.println(mClosingApps);
+            }
         }
     }
 
@@ -9756,7 +9758,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(" mTransitionWindowAnimationScale="); pw.print(mTransitionAnimationScale);
                     pw.print(" mAnimatorDurationScale="); pw.println(mAnimatorDurationScale);
             pw.print("  mTraversalScheduled="); pw.print(mTraversalScheduled);
-                    pw.print("  mNextAppTransition=0x");
+                    pw.print(" mNextAppTransition=0x");
                     pw.print(Integer.toHexString(mNextAppTransition));
                     pw.print(" mAppTransitionReady="); pw.println(mAppTransitionReady);
             pw.print("  mAppTransitionRunning="); pw.print(mAppTransitionRunning);
@@ -9798,7 +9800,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         pw.println(mNextAppTransitionCallback);
             }
             pw.print("  mStartingIconInTransition="); pw.print(mStartingIconInTransition);
-                    pw.print(", mSkipAppTransitionAnimation="); pw.println(mSkipAppTransitionAnimation);
+                    pw.print(" mSkipAppTransitionAnimation="); pw.println(mSkipAppTransitionAnimation);
         }
     }
 
@@ -9966,6 +9968,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized(mWindowMap) {
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpLastANRLocked(pw);
+            pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
             }
@@ -9985,11 +9993,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("-------------------------------------------------------------------------------");
             }
             dumpWindowsLocked(pw, dumpAll, null);
-            pw.println();
-            if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
-            }
-            dumpLastANRLocked(pw);
         }
     }
 
