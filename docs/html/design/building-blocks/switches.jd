@@ -8,9 +8,7 @@ buttons, and on/off switches.</p>
 <p>Checkboxes allow the user to select multiple options from a set. Avoid using a single checkbox to
 turn an option off or on. Instead, use an on/off switch.</p>
 
-<div style="text-align: center">
   <img src="{@docRoot}design/media/switches_checkboxes.png">
-</div>
 
 <h2 id="radio-buttons">Radio Buttons</h2>
 
@@ -18,14 +16,10 @@ turn an option off or on. Instead, use an on/off switch.</p>
 selection if you think that the user needs to see all available options side-by-side. Otherwise,
 consider a spinner, which uses less space.</p>
 
-<div style="text-align: center">
   <img src="{@docRoot}design/media/switches_radios.png">
-</div>
 
 <h2 id="switches">On/off Switches</h2>
 
 <p>On/off switches toggle the state of a single settings option.</p>
 
-<div style="text-align: center">
   <img src="{@docRoot}design/media/switches_switches.png">
-</div>
