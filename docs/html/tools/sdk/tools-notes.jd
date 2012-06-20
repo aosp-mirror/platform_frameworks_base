@@ -44,11 +44,10 @@ function toggleDiv(link) {
 </script>
 <style>
 .toggleable {
-padding: .25em 1em;
+padding: 5px 0 0;
 }
 .toggleme {
-  padding: 1em 1em 0 2em;
-  line-height:1em;
+  padding: 10px 0 0 20px;
 }
 .toggleable a {
   text-decoration:none;
@@ -60,7 +59,7 @@ padding: .25em 1em;
   display:none;
 }
 #jd-content .toggle-img {
-  margin:0;
+  margin:0 5px 3px 0;
 }
 </style>
 
