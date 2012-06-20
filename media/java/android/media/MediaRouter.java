@@ -589,8 +589,45 @@ public class MediaRouter {
         RouteGroup mGroup;
         final RouteCategory mCategory;
         Drawable mIcon;
+        // playback information
+        int mPlaybackType = PLAYBACK_TYPE_LOCAL;
+        int mVolumeMax = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME;
+        int mVolume = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME;
+        int mVolumeHandling = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME_HANDLING;
+        int mPlaybackStream = AudioManager.STREAM_MUSIC;
+        VolumeCallbackInfo mVcb;
 
         private Object mTag;
+
+        /**
+         * @hide (to be un-hidden)
+         * The default playback type, "local", indicating the presentation of the media is happening
+         * on the same device (e.g. a phone, a tablet) as where it is controlled from.
+         * @see #setPlaybackType(int)
+         */
+        public final static int PLAYBACK_TYPE_LOCAL = 0;
+        /**
+         * @hide (to be un-hidden)
+         * A playback type indicating the presentation of the media is happening on
+         * a different device (i.e. the remote device) than where it is controlled from.
+         * @see #setPlaybackType(int)
+         */
+        public final static int PLAYBACK_TYPE_REMOTE = 1;
+        /**
+         * @hide (to be un-hidden)
+         * Playback information indicating the playback volume is fixed, i.e. it cannot be
+         * controlled from this object. An example of fixed playback volume is a remote player,
+         * playing over HDMI where the user prefers to control the volume on the HDMI sink, rather
+         * than attenuate at the source.
+         * @see #setVolumeHandling(int)
+         */
+        public final static int PLAYBACK_VOLUME_FIXED = 0;
+        /**
+         * @hide (to be un-hidden)
+         * Playback information indicating the playback volume is variable and can be controlled
+         * from this object.
+         */
+        public final static int PLAYBACK_VOLUME_VARIABLE = 1;
 
         RouteInfo(RouteCategory category) {
             mCategory = category;
@@ -685,6 +722,71 @@ public class MediaRouter {
             return mTag;
         }
 
+        /**
+         * @hide (to be un-hidden)
+         * @return the type of playback associated with this route
+         * @see UserRouteInfo#setPlaybackType(int)
+         */
+        public int getPlaybackType() {
+            return mPlaybackType;
+        }
+
+        /**
+         * @hide (to be un-hidden)
+         * @return the stream over which the playback associated with this route is performed
+         * @see UserRouteInfo#setPlaybackStream(int)
+         */
+        public int getPlaybackStream() {
+            return mPlaybackStream;
+        }
+
+        /**
+         * @hide (to be un-hidden)
+         * @return the volume at which the playback associated with this route is performed
+         * @see UserRouteInfo#setVolume(int)
+         */
+        public int getVolume() {
+            if (mPlaybackType == PLAYBACK_TYPE_LOCAL) {
+                int vol = 0;
+                try {
+                    vol = sStatic.mAudioService.getStreamVolume(mPlaybackStream);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error getting local stream volume", e);
+                }
+                return vol;
+            } else {
+                return mVolume;
+            }
+        }
+
+        /**
+         * @hide (to be un-hidden)
+         * @return the maximum volume at which the playback associated with this route is performed
+         * @see UserRouteInfo#setVolumeMax(int)
+         */
+        public int getVolumeMax() {
+            if (mPlaybackType == PLAYBACK_TYPE_LOCAL) {
+                int volMax = 0;
+                try {
+                    volMax = sStatic.mAudioService.getStreamMaxVolume(mPlaybackStream);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error getting local stream volume", e);
+                }
+                return volMax;
+            } else {
+                return mVolumeMax;
+            }
+        }
+
+        /**
+         * @hide (to be un-hidden)
+         * @return how volume is handling on the route
+         * @see UserRouteInfo#setVolumeHandling(int)
+         */
+        public int getVolumeHandling() {
+            return mVolumeHandling;
+        }
+
         void setStatusInt(CharSequence status) {
             if (!status.equals(mStatus)) {
                 mStatus = status;
@@ -694,6 +796,24 @@ public class MediaRouter {
                 routeUpdated();
             }
         }
+
+        final IRemoteVolumeObserver.Stub mRemoteVolObserver = new IRemoteVolumeObserver.Stub() {
+            public void dispatchRemoteVolumeUpdate(final int direction, final int value) {
+                sStatic.mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                      //Log.d(TAG, "dispatchRemoteVolumeUpdate dir=" + direction + " val=" + value);
+                        if (mVcb != null) {
+                            if (direction != 0) {
+                                mVcb.vcb.onVolumeUpdateRequest(mVcb.route, direction);
+                            } else {
+                                mVcb.vcb.onVolumeSetRequest(mVcb.route, value);
+                            }
+                        }
+                    }
+                });
+            }
+        };
 
         void routeUpdated() {
             updateRoute(this);
@@ -757,10 +877,14 @@ public class MediaRouter {
          * RemoteControlClient will be used to reflect and update information
          * such as route volume info in related UIs.</p>
          *
+         * <p>The RemoteControlClient must have been previously registered with
+         * {@link AudioManager#registerRemoteControlClient(RemoteControlClient)}.</p>
+         *
          * @param rcc RemoteControlClient associated with this route
          */
         public void setRemoteControlClient(RemoteControlClient rcc) {
             mRcc = rcc;
+            updatePlaybackInfoOnRcc();
         }
 
         /**
@@ -791,6 +915,111 @@ public class MediaRouter {
          */
         public void setIconResource(int resId) {
             setIconDrawable(sStatic.mResources.getDrawable(resId));
+        }
+
+        /**
+         * @hide (to be un-hidden)
+         * Set a callback to be notified of volume update requests
+         * @param vcb
+         */
+        public void setVolumeCallback(VolumeCallback vcb) {
+            mVcb = new VolumeCallbackInfo(vcb, this);
+        }
+
+        /**
+         * @hide (to be un-hidden)
+         * Defines whether playback associated with this route is "local"
+         *    ({@link RouteInfo#PLAYBACK_TYPE_LOCAL}) or "remote"
+         *    ({@link RouteInfo#PLAYBACK_TYPE_REMOTE}).
+         * @param type
+         */
+        public void setPlaybackType(int type) {
+            if (mPlaybackType != type) {
+                mPlaybackType = type;
+                setPlaybackInfoOnRcc(RemoteControlClient.PLAYBACKINFO_PLAYBACK_TYPE, type);
+            }
+        }
+
+        /**
+         * @hide (to be un-hidden)
+         * Defines whether volume for the playback associated with this route is fixed
+         * ({@link RouteInfo#PLAYBACK_VOLUME_FIXED}) or can modified
+         * ({@link RouteInfo#PLAYBACK_VOLUME_VARIABLE}).
+         * @param volumeHandling
+         */
+        public void setVolumeHandling(int volumeHandling) {
+            if (mVolumeHandling != volumeHandling) {
+                mVolumeHandling = volumeHandling;
+                setPlaybackInfoOnRcc(
+                        RemoteControlClient.PLAYBACKINFO_VOLUME_HANDLING, volumeHandling);
+            }
+        }
+
+        /**
+         * @hide (to be un-hidden)
+         * Defines at what volume the playback associated with this route is performed (for user
+         * feedback purposes). This information is only used when the playback is not local.
+         * @param volume
+         */
+        public void setVolume(int volume) {
+            if (mVolume != volume) {
+                mVolume = volume;
+                setPlaybackInfoOnRcc(RemoteControlClient.PLAYBACKINFO_VOLUME, volume);
+            }
+        }
+
+        /**
+         * @hide (to be un-hidden)
+         * Defines the maximum volume at which the playback associated with this route is performed
+         * (for user feedback purposes). This information is only used when the playback is not
+         * local.
+         * @param volumeMax
+         */
+        public void setVolumeMax(int volumeMax) {
+            if (mVolumeMax != volumeMax) {
+                mVolumeMax = volumeMax;
+                setPlaybackInfoOnRcc(RemoteControlClient.PLAYBACKINFO_VOLUME_MAX, volumeMax);
+            }
+        }
+
+        /**
+         * @hide (to be un-hidden)
+         * Defines over what stream type the media is presented.
+         * @param stream
+         */
+        public void setPlaybackStream(int stream) {
+            if (mPlaybackStream != stream) {
+                mPlaybackStream = stream;
+                setPlaybackInfoOnRcc(RemoteControlClient.PLAYBACKINFO_USES_STREAM, stream);
+            }
+        }
+
+        private void updatePlaybackInfoOnRcc() {
+            if ((mRcc != null) && (mRcc.getRcseId() != RemoteControlClient.RCSE_ID_UNREGISTERED)) {
+                mRcc.setPlaybackInformation(
+                        RemoteControlClient.PLAYBACKINFO_VOLUME_MAX, mVolumeMax);
+                mRcc.setPlaybackInformation(
+                        RemoteControlClient.PLAYBACKINFO_VOLUME, mVolume);
+                mRcc.setPlaybackInformation(
+                        RemoteControlClient.PLAYBACKINFO_VOLUME_HANDLING, mVolumeHandling);
+                mRcc.setPlaybackInformation(
+                        RemoteControlClient.PLAYBACKINFO_USES_STREAM, mPlaybackStream);
+                mRcc.setPlaybackInformation(
+                        RemoteControlClient.PLAYBACKINFO_PLAYBACK_TYPE, mPlaybackType);
+                // let AudioService know whom to call when remote volume needs to be updated
+                try {
+                    sStatic.mAudioService.registerRemoteVolumeObserverForRcc(
+                            mRcc.getRcseId() /* rccId */, mRemoteVolObserver /* rvo */);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error registering remote volume observer", e);
+                }
+            }
+        }
+
+        private void setPlaybackInfoOnRcc(int what, int value) {
+            if (mRcc != null) {
+                mRcc.setPlaybackInformation(what, value);
+            }
         }
     }
 
@@ -1206,4 +1435,44 @@ public class MediaRouter {
         }
 
     }
+
+    static class VolumeCallbackInfo {
+        public final VolumeCallback vcb;
+        public final RouteInfo route;
+
+        public VolumeCallbackInfo(VolumeCallback vcb, RouteInfo route) {
+            this.vcb = vcb;
+            this.route = route;
+        }
+    }
+
+    /**
+     * @hide (to be un-hidden)
+     * Interface for receiving events about volume changes.
+     * All methods of this interface will be called from the application's main thread.
+     *
+     * <p>A VolumeCallback will only receive events relevant to routes that the callback
+     * was registered for.</p>
+     *
+     * @see UserRouteInfo#setVolumeCallback(VolumeCallback)
+     */
+    public static abstract class VolumeCallback {
+        /**
+         * Called when the volume for the route should be increased or decreased.
+         * @param info the route affected by this event
+         * @param direction an integer indicating whether the volume is to be increased
+         *     (positive value) or decreased (negative value).
+         *     For bundled changes, the absolute value indicates the number of changes
+         *     in the same direction, e.g. +3 corresponds to three "volume up" changes.
+         */
+        public abstract void onVolumeUpdateRequest(RouteInfo info, int direction);
+        /**
+         * Called when the volume for the route should be set to the given value
+         * @param info the route affected by this event
+         * @param volume an integer indicating the new volume value that should be used, always
+         *     between 0 and the value set by {@link UserRouteInfo#setVolumeMax(int)}.
+         */
+        public abstract void onVolumeSetRequest(RouteInfo info, int volume);
+    }
+
 }

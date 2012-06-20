@@ -134,13 +134,13 @@ public class RemoteControlClient
     public final static int PLAYSTATE_NONE               = 0;
 
     /**
-     * @hide (to be un-hidden)
+     * @hide
      * The default playback type, "local", indicating the presentation of the media is happening on
      * the same device (e.g. a phone, a tablet) as where it is controlled from.
      */
     public final static int PLAYBACK_TYPE_LOCAL = 0;
     /**
-     * @hide (to be un-hidden)
+     * @hide
      * A playback type indicating the presentation of the media is happening on
      * a different device (i.e. the remote device) than where it is controlled from.
      */
@@ -148,7 +148,7 @@ public class RemoteControlClient
     private final static int PLAYBACK_TYPE_MIN = PLAYBACK_TYPE_LOCAL;
     private final static int PLAYBACK_TYPE_MAX = PLAYBACK_TYPE_REMOTE;
     /**
-     * @hide (to be un-hidden)
+     * @hide
      * Playback information indicating the playback volume is fixed, i.e. it cannot be controlled
      * from this object. An example of fixed playback volume is a remote player, playing over HDMI
      * where the user prefer to control the volume on the HDMI sink, rather than attenuate at the
@@ -157,7 +157,7 @@ public class RemoteControlClient
      */
     public final static int PLAYBACK_VOLUME_FIXED = 0;
     /**
-     * @hide (to be un-hidden)
+     * @hide
      * Playback information indicating the playback volume is variable and can be controlled from
      * this object.
      * @see #PLAYBACKINFO_VOLUME_HANDLING.
@@ -173,34 +173,34 @@ public class RemoteControlClient
     //==========================================
     // Public keys for playback information
     /**
-     * @hide (to be un-hidden)
+     * @hide
      * Playback information that defines the type of playback associated with this
      * RemoteControlClient. See {@link #PLAYBACK_TYPE_LOCAL} and {@link #PLAYBACK_TYPE_REMOTE}.
      */
     public final static int PLAYBACKINFO_PLAYBACK_TYPE = 1;
     /**
-     * @hide (to be un-hidden)
+     * @hide
      * Playback information that defines at what volume the playback associated with this
      * RemoteControlClient is performed. This information is only used when the playback type is not
      * local (see {@link #PLAYBACKINFO_PLAYBACK_TYPE}).
      */
     public final static int PLAYBACKINFO_VOLUME = 2;
     /**
-     * @hide (to be un-hidden)
+     * @hide
      * Playback information that defines the maximum volume volume value that is supported
      * by the playback associated with this RemoteControlClient. This information is only used
      * when the playback type is not local (see {@link #PLAYBACKINFO_PLAYBACK_TYPE}).
      */
     public final static int PLAYBACKINFO_VOLUME_MAX = 3;
     /**
-     * @hide (to be un-hidden)
+     * @hide
      * Playback information that defines how volume is handled for the presentation of the media.
      * @see #PLAYBACK_VOLUME_FIXED
      * @see #PLAYBACK_VOLUME_VARIABLE
      */
     public final static int PLAYBACKINFO_VOLUME_HANDLING = 4;
     /**
-     * @hide (to be un-hidden)
+     * @hide
      * Playback information that defines over what stream type the media is presented.
      */
     public final static int PLAYBACKINFO_USES_STREAM = 5;
@@ -642,7 +642,7 @@ public class RemoteControlClient
     private int mPlaybackStream = AudioManager.STREAM_MUSIC;
 
     /**
-     * @hide  (to be un-hidden)
+     * @hide
      * Set information describing information related to the playback of media so the system
      * can implement additional behavior to handle non-local playback usecases.
      * @param what a key to specify the type of information to set. Valid keys are
@@ -713,7 +713,7 @@ public class RemoteControlClient
     }
 
     /**
-     * @hide  (to be un-hidden)
+     * @hide
      * Return playback information represented as an integer value.
      * @param what a key to specify the type of information to retrieve. Valid keys are
      *        {@link #PLAYBACKINFO_PLAYBACK_TYPE},
@@ -897,6 +897,13 @@ public class RemoteControlClient
      */
     public void setRcseId(int id) {
         mRcseId = id;
+    }
+
+    /**
+     * @hide
+     */
+    public int getRcseId() {
+        return mRcseId;
     }
 
     private EventHandler mEventHandler;
