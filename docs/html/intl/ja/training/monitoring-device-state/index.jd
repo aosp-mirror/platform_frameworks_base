@@ -13,7 +13,7 @@ next.link=battery-monitoring.html
 <h2>依存関係と前提条件</h2> 
 <ul>
   <li>Android 2.0（API レベル 5）以上</li>
-  <li>「<a href="{@docRoot}guide/topics/intents/intents-filters.html">インテントとインテント フィルタ</a>」を読み終えていること</li>
+  <li>「<a href="{@docRoot}guide/components/intents-filters.html">インテントとインテント フィルタ</a>」を読み終えていること</li>
 </ul>
 
 <h2>関連項目</h2>

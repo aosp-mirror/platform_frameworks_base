@@ -23,7 +23,7 @@ next.link=connectivity-monitoring.html
 
 <h2>関連項目</h2>
 <ul>
-  <li><a href="{@docRoot}guide/topics/intents/intents-filters.html">インテントとインテント フィルタ</a>
+  <li><a href="{@docRoot}guide/components/intents-filters.html">インテントとインテント フィルタ</a>
 </ul>
 
 </div> 

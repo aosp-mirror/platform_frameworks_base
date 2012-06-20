@@ -13,7 +13,7 @@ next.link=battery-monitoring.html
 <h2>요구사항과 선행조건</h2> 
 <ul>
   <li>Android 2.0(API 수준 5) 또는 이상</li>
-  <li> <a href="{@docRoot}guide/topics/intents/intents-filters.html">인텐트 및 인텐트 필터</a> 사용 경험</li>
+  <li> <a href="{@docRoot}guide/components/intents-filters.html">인텐트 및 인텐트 필터</a> 사용 경험</li>
 </ul>
 
 <h2>참고자료</h2>

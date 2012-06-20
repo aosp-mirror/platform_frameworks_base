@@ -750,7 +750,7 @@ itself.
 
     <p>
       For more about intents, see <a
-href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a>.
+href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>.
     </p>
 
 
@@ -947,7 +947,7 @@ href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Fi
         Home screen), or from a shortcut icon on the Home screen, or
         from the task switcher.  (The mechanism for this is for the
         activity to have an 
-        <a href={@docRoot}guide/topics/intents/intents-filters.html>intent filter</a> with action
+        <a href={@docRoot}guide/components/intents-filters.html>intent filter</a> with action
 MAIN and
         category LAUNCHER.)
       </li>

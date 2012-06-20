@@ -262,7 +262,7 @@ android.content.ContentProvider#query query()} on a {@link android.content.Conte
 </ul>
 
 <p>For more information about using intents, see the <a
-href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and
+href="{@docRoot}guide/components/intents-filters.html">Intents and
 Intent Filters</a> document. More information about activating specific components is also provided
 in the following documents: <a
 href="{@docRoot}guide/components/activities.html">Activities</a>, <a
@@ -380,7 +380,7 @@ activity and launches it when you invoke the intent with {@link android.app.Acti
 startActivity()}.</p>
 
 <p>For more about creating intent filters, see the <a
-href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a> document.
+href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a> document.
 </p>
 
 

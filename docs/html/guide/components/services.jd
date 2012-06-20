@@ -252,7 +252,7 @@ attribute and set it to {@code "false"}. This is effective even if your service 
 filters.</p>
 
 <p>For more information about creating intent filters for your service, see the <a
-href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a>
+href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
 document.</p>
 
 

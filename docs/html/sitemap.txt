@@ -58,7 +58,7 @@ http://developer.android.com/guide/topics/resources/menu-resource.html
 http://developer.android.com/guide/topics/resources/string-resource.html
 http://developer.android.com/guide/topics/resources/style-resource.html
 http://developer.android.com/guide/topics/resources/more-resources.html
-http://developer.android.com/guide/topics/intents/intents-filters.html
+http://developer.android.com/guide/components/intents-filters.html
 http://developer.android.com/guide/topics/data/data-storage.html
 http://developer.android.com/guide/topics/data/backup.html
 http://developer.android.com/guide/topics/providers/content-providers.html

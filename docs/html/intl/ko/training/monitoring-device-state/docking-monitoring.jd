@@ -23,7 +23,7 @@ next.link=connectivity-monitoring.html
 
 <h2>참고자료</h2>
 <ul>
-  <li><a href="{@docRoot}guide/topics/intents/intents-filters.html">인텐트 및 인텐트 필터</a>
+  <li><a href="{@docRoot}guide/components/intents-filters.html">인텐트 및 인텐트 필터</a>
 </ul>
 
 </div> 

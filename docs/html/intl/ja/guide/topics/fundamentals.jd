@@ -185,7 +185,7 @@ android.content.BroadcastReceiver#onReceive onReceive()}</code> メソッドが�
 </ul>
 
 <p>
-インテント メッセージについて詳しくは、<a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a> をご覧ください。
+インテント メッセージについて詳しくは、<a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a> をご覧ください。
 </p>
 
 
@@ -293,7 +293,7 @@ Intent オブジェクトでは、対象とするコンポーネントを明示�
 </p>
 
 <p>
-インテント フィルタについて詳しくは、<a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a> をご覧ください。
+インテント フィルタについて詳しくは、<a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a> をご覧ください。
 </p>
 
 

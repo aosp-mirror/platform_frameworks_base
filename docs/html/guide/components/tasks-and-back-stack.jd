@@ -591,6 +591,6 @@ href="#Clearing">Clearing the stack</a>).</p>
 <p>For more information about how to use intents to
 activate other application components and publish the intents to which your components
 respond, continue with the <b><a
-href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent
+href="{@docRoot}guide/components/intents-filters.html">Intents and Intent
 Filters</a></b> document.</p>
 -->

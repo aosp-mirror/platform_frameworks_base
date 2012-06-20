@@ -21,7 +21,7 @@ next.link=docking-monitoring.html
 
 <h2>También puedes consultar:</h2>
 <ul>
-  <li><a href="{@docRoot}guide/topics/intents/intents-filters.html">Intentos y filtros de intentos</a>
+  <li><a href="{@docRoot}guide/components/intents-filters.html">Intentos y filtros de intentos</a>
 </ul>
 
 </div> 

@@ -62,7 +62,7 @@
             </a></li>
         </ul>
       </li>
-      <li><a href="<?cs var:toroot ?>guide/components/intents/intents.html">
+      <li><a href="<?cs var:toroot ?>guide/components/intents-filters.html">
           <span class="en">Intents and Intent Filters</span>
         </a></li>
       <li><a href="<?cs var:toroot ?>guide/components/processes-and-threads.html">

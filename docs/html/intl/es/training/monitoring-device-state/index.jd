@@ -13,7 +13,7 @@ next.link=battery-monitoring.html
 <h2>Dependencias y requisitos previos</h2> 
 <ul>
   <li>Android 2.0 (nivel 5 del API) o superior</li>
-  <li>Experiencia con <a href="{@docRoot}guide/topics/intents/intents-filters.html">Intentos y filtros de intentos</a></li>
+  <li>Experiencia con <a href="{@docRoot}guide/components/intents-filters.html">Intentos y filtros de intentos</a></li>
 </ul>
 
 <h2>También puedes consultar:</h2>

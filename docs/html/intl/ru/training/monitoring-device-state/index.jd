@@ -13,7 +13,7 @@ next.link=battery-monitoring.html
 <h2>Требования</h2> 
 <ul>
   <li>Android 2.0 (API уровня&nbsp;5) или более поздней версии</li>
-  <li>Опыт работы с <a href="{@docRoot}guide/topics/intents/intents-filters.html">намерениями и фильтрами намерений</a></li>
+  <li>Опыт работы с <a href="{@docRoot}guide/components/intents-filters.html">намерениями и фильтрами намерений</a></li>
 </ul>
 
 <h2>Дополнительные материалы</h2>

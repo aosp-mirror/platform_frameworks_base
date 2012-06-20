@@ -24,7 +24,7 @@ next.link=cameradirect.html
     <h2>You should also read</h2>
       <ul>
         <li><a href="{@docRoot}guide/topics/media/camera.html">Camera</a></li>
-        <li><a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent 
+        <li><a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent 
       Filters</a></li>
       </ul>
 

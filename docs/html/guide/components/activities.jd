@@ -223,7 +223,7 @@ href="{@docRoot}guide/topics/manifest/data-element.html">{@code
 respond.</p>
 
 <p>For more information about how your activities can respond to intents, see the <a
-href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a>
+href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
 document.</p>
 
 
@@ -328,7 +328,7 @@ the <a
 href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a> document.</p>
 
 <p>For more information about using intents, see the <a
-href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent
+href="{@docRoot}guide/components/intents-filters.html">Intents and Intent
 Filters</a> document.</p>
 
 

@@ -21,7 +21,7 @@ next.link=docking-monitoring.html
 
 <h2>您还应参阅</h2>
 <ul>
-  <li><a href="{@docRoot}guide/topics/intents/intents-filters.html">intent 和 intent 过滤器</a>
+  <li><a href="{@docRoot}guide/components/intents-filters.html">intent 和 intent 过滤器</a>
 </ul>
 
 </div> 
