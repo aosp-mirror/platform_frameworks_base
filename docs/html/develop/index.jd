@@ -5,9 +5,20 @@ carousel=1
 tabbedList=1
 @jd:body
 
+<style>
+#noplayer-message {
+position:absolute;top:50%;left:0;width:100%;z-index:-1;text-align:center;display:none;
+}
+#player-frame object {z-index:1;}
+</style>
 
 <div id="player-wrapper">
   <div id="player-frame">
+    <div id="noplayer-message">
+      <!-- busted flash player message -->
+      Your video is supposed to appear here.<br/>
+      Make sure you have the <a href="http://get.adobe.com/flashplayer/" target="_blank">Flash&reg; Player</a>.
+    </div>
     <div id="player"><!-- Youtube embeds here... actually replaces this div --></div>
     <a class="close" onclick="$('#player-wrapper').hide()">close video</a>
   </div>
@@ -190,6 +201,7 @@ function loadVideo(id, title, autoplay) {
       (autoplay?1:0), 'player', '525', '330', '9.0.0', false, false, {allowfullscreen: 'true'});
   $("#videoPlayerTitle").html("<h2>" + unescape(title) + "</h2>");
   $("#player-wrapper").show();
+  setTimeout(function(){$('#noplayer-message').show()}, 2000);
 }
 
 /* Draw all videos from a playlist into a 'videoPreviews' list
