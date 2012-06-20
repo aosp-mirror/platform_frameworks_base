@@ -50,7 +50,7 @@ application can create View and ViewGroup objects (and manipulate their properti
 <div class="sidebox-wrapper">
 <div class="sidebox">
   <ul>
-  <li>The <a href="{@docRoot}sdk/eclipse-adt.html">ADT
+  <li>The <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT
   Plugin for Eclipse</a> offers a layout preview of your XML &mdash; 
   with the XML file opened, select the <strong>Layout</strong> tab.</li>
   <li>You should also try the 

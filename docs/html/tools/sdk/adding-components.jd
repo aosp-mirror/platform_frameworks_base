@@ -38,7 +38,7 @@ what packages to install.</p>
 
 <p class="note"><strong>Note:</strong> If you develop in Eclipse, you might also need
 to update your ADT plugin when you update your development tools. See the revisions listed in the
-<a href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin for Eclipse</a> document.</p>
+<a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin for Eclipse</a> document.</p>
 
 <img src="{@docRoot}images/sdk_manager_packages.png" alt="" />
 <p class="img-caption"><strong>Figure 1.</strong> The Android SDK Manager's

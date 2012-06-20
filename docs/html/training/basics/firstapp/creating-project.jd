@@ -42,7 +42,7 @@ SDK tools from a command line.</p>
 
 <p class="note"><strong>Note:</strong> You should already have the Android SDK installed, and if
 you're using Eclipse, you should have installed the <a
-href="{@docRoot}sdk/eclipse-adt.html">ADT plugin</a> as well. If you have not installed
+href="{@docRoot}tools/sdk/eclipse-adt.html">ADT plugin</a> as well. If you have not installed
 these, see <a href="{@docRoot}sdk/installing/index.html">Installing the Android SDK</a> and return here
 when you've completed the installation.</p>
 
@@ -59,7 +59,7 @@ when you've completed the installation.</p>
 The resulting dialog should have a folder labeled <em>Android</em>.  (If you don’t see the
 <em>Android</em> folder,
 then you have not installed the ADT plugin&mdash;see <a
-href="{@docRoot}sdk/eclipse-adt.html#installing">Installing the ADT Plugin</a>).</li>
+href="{@docRoot}tools/sdk/eclipse-adt.html#installing">Installing the ADT Plugin</a>).</li>
   <li>Open the <em>Android</em> folder, select <em>Android Project</em> and click
 <strong>Next</strong>.</li>
   <li>Enter a project name (such as "MyFirstApp") and click <strong>Next</strong>.</li>

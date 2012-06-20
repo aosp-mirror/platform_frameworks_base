@@ -81,7 +81,7 @@ download and install this update.</p>
         <li>Android SDK Platform-tools revision 9 or later.</li>
         <li>If you are developing in Eclipse with ADT, note that the SDK Tools r19 is designed for
         use with ADT 18.0.0 and later. If you haven't already, we highly recommend updating your
-        <a href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin</a> to 18.0.0.</li>
+        <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 18.0.0.</li>
         <li>If you are developing outside Eclipse, you must have
           <a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later.</li>
     </ul>
@@ -116,7 +116,7 @@ acceleration.</li>
         <li>Android SDK Platform-tools revision 9 or later.</li>
         <li>If you are developing in Eclipse with ADT, note that the SDK Tools r18 is designed for
         use with ADT 18.0.0 and later. If you haven't already, we highly recommend updating your
-        <a href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin</a> to 18.0.0.</li>
+        <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 18.0.0.</li>
         <li>If you are developing outside Eclipse, you must have
           <a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later.</li>
     </ul>
@@ -158,7 +158,7 @@ in some cases.</li>
         <li>Android SDK Platform-tools revision 9 or later.</li>
         <li>If you are developing in Eclipse with ADT, note that the SDK Tools r17 is designed for
         use with ADT 17.0.0 and later. If you haven't already, we highly recommend updating your
-        <a href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin</a> to 17.0.0.</li>
+        <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 17.0.0.</li>
         <li>If you are developing outside Eclipse, you must have
           <a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later.</li>
     </ul>
@@ -262,7 +262,7 @@ ignore attribute. (<a
     <li>Android SDK Platform-tools revision 9 or later.</li>
     <li>If you are developing in Eclipse with ADT, note that the SDK Tools r16 is designed for use
     with ADT 16.0.0 and later. If you haven't already, we highly recommend updating your
-    <a href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin</a> to 16.0.0.</li>
+    <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 16.0.0.</li>
     <li>If you are developing outside Eclipse, you must have <a href="http://ant.apache.org/">Apache
     Ant</a> 1.8 or later.</li>
 </ul>
@@ -310,7 +310,7 @@ ignore attribute. (<a
   <ul><li>Android SDK Platform-tools revision 9 or later.</li>
   <li>If you are developing in Eclipse with ADT, note that the SDK Tools r15 is designed for use
   with ADT 15.0.0 and later. If you haven't already, we highly recommend updating your <a
-  href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin</a> to 15.0.0.</li>
+  href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 15.0.0.</li>
   <li>If you are developing outside Eclipse, you must have <a href="http://ant.apache.org/">Apache
   Ant</a> 1.8 or later.</li>
 </ul>
@@ -358,7 +358,7 @@ ignore attribute. (<a
   <ul><li>Android SDK Platform-tools revision 8 or later.</li>
   <li>If you are developing in Eclipse with ADT, note that the SDK Tools r14 is designed for use
   with ADT 14.0.0 and later. If you haven't already, we highly recommend updating your <a
-  href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin</a> to 14.0.0.</li>
+  href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 14.0.0.</li>
   <li>If you are developing outside Eclipse, you must have <a href="http://ant.apache.org/">Apache
   Ant</a> 1.8 or later.</li>
 </ul>
@@ -407,7 +407,7 @@ SDK Tools, Revision 13</a> <em>(September 2011)</em>
 <dd>
 <p>If you are developing in Eclipse with ADT, note that the SDK Tools r13 is designed for use with
 ADT 12.0.0 and later. If you haven't already, we highly recommend updating your <a
-href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin</a> to 12.0.0.</p>
+href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 12.0.0.</p>
 
 <p>If you are developing outside Eclipse, you must have <a href="http://ant.apache.org/">Apache
 Ant</a> 1.8 or later.</p>
@@ -436,7 +436,7 @@ SDK Tools, Revision 12</a> <em>(July 2011)</em>
 <dd>
 <p>If you are developing in Eclipse with ADT, note that the SDK Tools r12 is designed for use with
 ADT 12.0.0 and later. If you haven't already, we highly recommend updating your <a
-href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin</a> to 12.0.0.</p>
+href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 12.0.0.</p>
 
 <p>If you are developing outside Eclipse, you must have <a href="http://ant.apache.org/">Apache
 Ant</a> 1.8 or later.</p>
@@ -462,7 +462,7 @@ SDK Tools, Revision 11</a> <em>(May 2011)</em>
 <dd>
 <p>If you are developing in Eclipse with ADT, note that the SDK Tools r11 is designed for use with
 ADT 10.0.1 and later. If you haven't already, we highly recommend updating your <a
-href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin</a> to 10.0.1.</p>
+href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 10.0.1.</p>
 
 <p>If you are developing outside Eclipse, you must have <a href="http://ant.apache.org/">Apache
 Ant</a> 1.8 or later.</p>
