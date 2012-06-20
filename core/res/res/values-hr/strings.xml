@@ -942,8 +942,8 @@
     <string name="no" msgid="5141531044935541497">"Odustani"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Pažnja"</string>
     <string name="loading" msgid="7933681260296021180">"Učitavanje…"</string>
-    <string name="capital_on" msgid="1544682755514494298">"Uključeno"</string>
-    <string name="capital_off" msgid="6815870386972805832">"Isključeno"</string>
+    <string name="capital_on" msgid="1544682755514494298">"Uklj."</string>
+    <string name="capital_off" msgid="6815870386972805832">"Isklj."</string>
     <string name="whichApplication" msgid="4533185947064773386">"Radnju dovrši pomoću stavke"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Koristi se kao zadana postavka za ovu lokaciju."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Izbrisati zadano u Postavkama sustava &gt; Aplikacije &gt; Preuzimanja."</string>
