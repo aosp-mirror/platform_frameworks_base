@@ -89,6 +89,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:gravity="center"
+            android:focusable="true"
 
             android:targetDrawables="@array/lockscreen_targets_with_camera"
             android:targetDescriptions="@array/lockscreen_target_descriptions_with_camera"
