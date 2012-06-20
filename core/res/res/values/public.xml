@@ -3662,7 +3662,7 @@
 <!-- ===============================================================
      Resources added in version 17 of the platform (Jelly Bean MRx?)
      =============================================================== -->
-  <public type="attr" name="supportsRtl" id="0x010103ae" />
+  <public type="attr" name="supportsRtl" />
   <public type="attr" name="textDirection"/>
   <public type="attr" name="textAlignment"/>
   <public type="attr" name="layoutDirection" />
