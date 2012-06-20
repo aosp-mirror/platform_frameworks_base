@@ -470,7 +470,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
         if (pair == null) {
             pair = sDynamicIds.resolveId(value);
             if (pair == null) {
-                System.out.println(String.format("Missing id: %1$08X (%1$d)", value));
+                //System.out.println(String.format("Missing id: %1$08X (%1$d)", value));
             }
         }
         return pair;
