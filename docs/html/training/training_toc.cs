@@ -175,6 +175,46 @@
       </li>
       
       <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>training/efficient-downloads/index.html">
+            <span class="en">Transferring Data Without Draining the Battery</span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/efficient-downloads/efficient-network-access.html">
+            <span class="en">Optimizing Downloads for Efficient Network Access</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/efficient-downloads/regular_updates.html">
+            <span class="en">Minimizing the Effect of Regular Updates</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/efficient-downloads/redundant_redundant.html">
+            <span class="en">Redundant Downloads are Redundant</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/efficient-downloads/connectivity_patterns.html">
+            <span class="en">Modifying Patterns Based on the Connectivity Type</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>training/cloudsync/index.html">
+            <span class="en">Syncing to the Cloud</span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/cloudsync/aesync.html">
+            <span class="en">Syncing with App Engine</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/cloudsync/backupapi.html">
+            <span class="en">Using the Backup API</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+      
+      <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>training/multiscreen/index.html">
             <span class="en">Designing for Multiple Screens</span>
             <span class="es">Cómo diseñar aplicaciones para varias pantallas</span>
@@ -302,46 +342,6 @@
             <span class="ko">Manipulating Broadcast Receivers On Demand</span>
             <span class="ru">Manipulating Broadcast Receivers On Demand</span>
             <span class="zh-CN">根据需要操作广播接收器</span>
-          </a>
-          </li>
-        </ul>
-      </li>
-      
-      <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>training/efficient-downloads/index.html">
-            <span class="en">Transferring Data Without Draining the Battery</span>
-          </a></div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/efficient-downloads/efficient-network-access.html">
-            <span class="en">Optimizing Downloads for Efficient Network Access</span>
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/efficient-downloads/regular_updates.html">
-            <span class="en">Minimizing the Effect of Regular Updates</span>
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/efficient-downloads/redundant_redundant.html">
-            <span class="en">Redundant Downloads are Redundant</span>
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/efficient-downloads/connectivity_patterns.html">
-            <span class="en">Modifying Patterns Based on the Connectivity Type</span>
-          </a>
-          </li>
-        </ul>
-      </li>
-
-      <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>training/cloudsync/index.html">
-            <span class="en">Syncing to the Cloud</span>
-          </a></div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/cloudsync/aesync.html">
-            <span class="en">Syncing with App Engine</span>
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/cloudsync/backupapi.html">
-            <span class="en">Using the Backup API</span>
           </a>
           </li>
         </ul>
