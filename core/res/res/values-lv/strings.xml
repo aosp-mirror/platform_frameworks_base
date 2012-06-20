@@ -934,7 +934,7 @@
     <string name="deleteText" msgid="7070985395199629156">"dzēst"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Ievades metode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksta darbības"</string>
-    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Brīvās krātuves apjoms samazinās"</string>
+    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Paliek maz brīvas vietas"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Dažas sistēmas funkcijas var nedarboties."</string>
     <string name="ok" msgid="5970060430562524910">"Labi"</string>
     <string name="cancel" msgid="6442560571259935130">"Atcelt"</string>

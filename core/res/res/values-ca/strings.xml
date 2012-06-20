@@ -942,8 +942,8 @@
     <string name="no" msgid="5141531044935541497">"Cancel·la"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Atenció"</string>
     <string name="loading" msgid="7933681260296021180">"S\'està carregant…"</string>
-    <string name="capital_on" msgid="1544682755514494298">"ACTIVAT"</string>
-    <string name="capital_off" msgid="6815870386972805832">"DESACTIVAT"</string>
+    <string name="capital_on" msgid="1544682755514494298">"Activa"</string>
+    <string name="capital_off" msgid="6815870386972805832">"Desactiva"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Completa l\'acció mitjançant"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utilitza-ho de manera predeterminada per a aquesta acció."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Esborra els paràmetres predeterminats a Configuració del sistema &gt; Aplicacions &gt; Baixades."</string>
