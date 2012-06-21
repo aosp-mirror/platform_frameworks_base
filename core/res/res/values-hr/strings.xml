@@ -144,7 +144,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Zvono uključeno"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Isključivanje..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Vaš tabletni uređaj će se isključiti."</string>
-    <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Vaš će se telefon ipak isključiti"</string>
+    <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Vaš će se telefon isključiti."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Želite li isključiti uređaj?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Ponovno pokretanje u sigurnom načinu rada"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"Želite li ponovo pokrenuti uređaj u sigurnom načinu rada? To će onemogućiti sve aplikacije treće strane koje ste instalirali. Bit će vraćene kada ponovo pokrenete uređaj."</string>
