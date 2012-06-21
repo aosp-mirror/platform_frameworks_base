@@ -862,4 +862,7 @@
          [bootmode]:[original USB mode]:[USB mode used]-->
     <integer-array translatable="false" name="config_oemUsbModeOverride">
     </integer-array>
+
+    <!-- Set to true to add links to Cell Broadcast app from Settings and MMS app. -->
+    <bool name="config_cellBroadcastAppLinks">false</bool>
 </resources>
