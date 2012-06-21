@@ -38,7 +38,6 @@ public class WindowAnimator {
     ArrayList<WindowStateAnimator> mWinAnimators = new ArrayList<WindowStateAnimator>();
 
     boolean mAnimating;
-    boolean mTokenMayBeDrawn;
     boolean mForceHiding;
     WindowState mWindowAnimationBackground;
     int mWindowAnimationBackgroundColor;
@@ -57,7 +56,7 @@ public class WindowAnimator {
 
     /** Skip repeated AppWindowTokens initialization. Note that AppWindowsToken's version of this
      * is a long initialized to Long.MIN_VALUE so that it doesn't match this value on startup. */
-    private int mTransactionSequence;
+    private int mAnimTransactionSequence;
 
     /** The one and only screen rotation if one is happening */
     ScreenRotationAnimation mScreenRotationAnimation = null;
@@ -194,7 +193,7 @@ public class WindowAnimator {
     }
 
     private void updateWindowsAndWallpaperLocked() {
-        ++mTransactionSequence;
+        ++mAnimTransactionSequence;
 
         ArrayList<WindowStateAnimator> unForceHiding = null;
         boolean wallpaperInUnForceHiding = false;
@@ -332,59 +331,22 @@ public class WindowAnimator {
             }
 
             final AppWindowToken atoken = win.mAppToken;
-            if (atoken != null && (!atoken.allDrawn || atoken.mAppAnimator.freezingScreen)) {
-                if (atoken.lastTransactionSequence != mTransactionSequence) {
-                    atoken.lastTransactionSequence = mTransactionSequence;
-                    atoken.numInterestingWindows = atoken.numDrawnWindows = 0;
-                    atoken.startingDisplayed = false;
-                }
-                if ((win.isOnScreen() || winAnimator.mAttrType
-                        == WindowManager.LayoutParams.TYPE_BASE_APPLICATION)
-                        && !win.mExiting && !win.mDestroying) {
-                    if (WindowManagerService.DEBUG_VISIBILITY ||
-                            WindowManagerService.DEBUG_ORIENTATION) {
-                        Slog.v(TAG, "Eval win " + win + ": isDrawn=" + win.isDrawnLw()
-                                + ", isAnimating=" + winAnimator.isAnimating());
-                        if (!win.isDrawnLw()) {
-                            Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurface
-                                    + " pv=" + win.mPolicyVisibility
-                                    + " mDrawState=" + winAnimator.mDrawState
-                                    + " ah=" + win.mAttachedHidden
-                                    + " th=" + atoken.hiddenRequested
-                                    + " a=" + winAnimator.mAnimating);
+            if (winAnimator.mDrawState == WindowStateAnimator.READY_TO_SHOW) {
+                if (atoken == null || atoken.allDrawn) {
+                    if (winAnimator.performShowLocked()) {
+                        mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
+                        if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
+                            mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 5",
+                                mPendingLayoutChanges);
                         }
-                    }
-                    if (win != atoken.startingWindow) {
-                        if (!atoken.mAppAnimator.freezingScreen || !win.mAppFreezing) {
-                            atoken.numInterestingWindows++;
-                            if (win.isDrawnLw()) {
-                                atoken.numDrawnWindows++;
-                                if (WindowManagerService.DEBUG_VISIBILITY ||
-                                        WindowManagerService.DEBUG_ORIENTATION) Slog.v(TAG,
-                                        "tokenMayBeDrawn: " + atoken
-                                        + " freezingScreen=" + atoken.mAppAnimator.freezingScreen
-                                        + " mAppFreezing=" + win.mAppFreezing);
-                                mTokenMayBeDrawn = true;
-                            }
-                        }
-                    } else if (win.isDrawnLw()) {
-                        atoken.startingDisplayed = true;
-                    }
-                }
-            } else if (winAnimator.mDrawState == WindowStateAnimator.READY_TO_SHOW) {
-                if (winAnimator.performShowLocked()) {
-                    mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
-                    if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                        mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 5",
-                            mPendingLayoutChanges);
                     }
                 }
             }
             final AppWindowAnimator appAnimator =
                     atoken == null ? null : atoken.mAppAnimator;
             if (appAnimator != null && appAnimator.thumbnail != null) {
-                if (appAnimator.thumbnailTransactionSeq != mTransactionSequence) {
-                    appAnimator.thumbnailTransactionSeq = mTransactionSequence;
+                if (appAnimator.thumbnailTransactionSeq != mAnimTransactionSequence) {
+                    appAnimator.thumbnailTransactionSeq = mAnimTransactionSequence;
                     appAnimator.thumbnailLayer = 0;
                 }
                 if (appAnimator.thumbnailLayer < winAnimator.mAnimLayer) {
@@ -414,39 +376,32 @@ public class WindowAnimator {
         final int NT = appTokens.size();
         for (int i=0; i<NT; i++) {
             AppWindowToken wtoken = appTokens.get(i);
-            if (wtoken.mAppAnimator.freezingScreen) {
-                int numInteresting = wtoken.numInterestingWindows;
-                if (numInteresting > 0 && wtoken.numDrawnWindows >= numInteresting) {
-                    if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
-                            "allDrawn: " + wtoken
-                            + " interesting=" + numInteresting
-                            + " drawn=" + wtoken.numDrawnWindows);
-                    wtoken.mAppAnimator.showAllWindowsLocked();
-                    mService.unsetAppFreezingScreenLocked(wtoken, false, true);
-                    if (WindowManagerService.DEBUG_ORIENTATION) Slog.i(TAG,
-                            "Setting mOrientationChangeComplete=true because wtoken "
-                            + wtoken + " numInteresting=" + numInteresting
-                            + " numDrawn=" + wtoken.numDrawnWindows);
-                    // This will set mOrientationChangeComplete and cause a pass through layout.
-                    mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-                }
-            } else if (!wtoken.allDrawn) {
-                int numInteresting = wtoken.numInterestingWindows;
-                if (numInteresting > 0 && wtoken.numDrawnWindows >= numInteresting) {
-                    if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
-                            "allDrawn: " + wtoken
-                            + " interesting=" + numInteresting
-                            + " drawn=" + wtoken.numDrawnWindows);
-                    wtoken.allDrawn = true;
-                    mPendingLayoutChanges |= PhoneWindowManager.FINISH_LAYOUT_REDO_ANIM;
-                    if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                        mService.debugLayoutRepeats("testTokenMayBeDrawnLocked",
-                            mPendingLayoutChanges);
-                    }
+            final boolean allDrawn = wtoken.allDrawn;
+            if (allDrawn != wtoken.mAppAnimator.allDrawn) {
+                wtoken.mAppAnimator.allDrawn = allDrawn;
+                if (allDrawn) {
+                    // The token has now changed state to having all
+                    // windows shown...  what to do, what to do?
+                    if (wtoken.mAppAnimator.freezingScreen) {
+                        wtoken.mAppAnimator.showAllWindowsLocked();
+                        mService.unsetAppFreezingScreenLocked(wtoken, false, true);
+                        if (WindowManagerService.DEBUG_ORIENTATION) Slog.i(TAG,
+                                "Setting mOrientationChangeComplete=true because wtoken "
+                                + wtoken + " numInteresting=" + wtoken.numInterestingWindows
+                                + " numDrawn=" + wtoken.numDrawnWindows);
+                        // This will set mOrientationChangeComplete and cause a pass through layout.
+                        mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+                    } else {
+                        mPendingLayoutChanges |= PhoneWindowManager.FINISH_LAYOUT_REDO_ANIM;
+                        if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
+                            mService.debugLayoutRepeats("testTokenMayBeDrawnLocked",
+                                mPendingLayoutChanges);
+                        }
 
-                    // We can now show all of the drawn windows!
-                    if (!mService.mOpeningApps.contains(wtoken)) {
-                        mAnimating |= wtoken.mAppAnimator.showAllWindowsLocked();
+                        // We can now show all of the drawn windows!
+                        if (!mService.mOpeningApps.contains(wtoken)) {
+                            mAnimating |= wtoken.mAppAnimator.showAllWindowsLocked();
+                        }
                     }
                 }
             }
@@ -454,7 +409,6 @@ public class WindowAnimator {
     }
 
     private void performAnimationsLocked() {
-        mTokenMayBeDrawn = false;
         mForceHiding = false;
         mDetachedWallpaper = null;
         mWindowAnimationBackground = null;
@@ -465,9 +419,7 @@ public class WindowAnimator {
             mPendingActions |= WALLPAPER_ACTION_PENDING;
         }
 
-        if (mTokenMayBeDrawn) {
-            testTokenMayBeDrawnLocked();
-        }
+        testTokenMayBeDrawnLocked();
     }
 
     synchronized void animate() {
@@ -584,18 +536,23 @@ public class WindowAnimator {
     }
 
     public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
-        if (mWindowDetachedWallpaper != null) {
-            pw.print("  mWindowDetachedWallpaper="); pw.println(mWindowDetachedWallpaper);
-        }
-        if (mWindowAnimationBackgroundSurface != null) {
-            pw.println("  mWindowAnimationBackgroundSurface:");
-            mWindowAnimationBackgroundSurface.printTo("    ", pw);
-        }
-        if (mDimAnimator != null) {
-            pw.println("  mDimAnimator:");
-            mDimAnimator.printTo("    ", pw);
-        } else {
-            pw.println( "  no DimAnimator ");
+        if (dumpAll) {
+            if (mWindowDetachedWallpaper != null) {
+                pw.print(prefix); pw.print("mWindowDetachedWallpaper=");
+                        pw.println(mWindowDetachedWallpaper);
+            }
+            pw.print(prefix); pw.print("mAnimTransactionSequence=");
+                    pw.println(mAnimTransactionSequence);
+            if (mWindowAnimationBackgroundSurface != null) {
+                pw.print(prefix); pw.print("mWindowAnimationBackgroundSurface:");
+                        mWindowAnimationBackgroundSurface.printTo(prefix + "  ", pw);
+            }
+            if (mDimAnimator != null) {
+                pw.print(prefix); pw.print("mDimAnimator:");
+                mDimAnimator.printTo(prefix + "  ", pw);
+            } else {
+                pw.print(prefix); pw.print("no DimAnimator ");
+            }
         }
     }
 

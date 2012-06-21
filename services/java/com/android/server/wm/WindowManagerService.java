@@ -96,6 +96,7 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.FloatMath;
 import android.util.Log;
+import android.util.LogPrinter;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseIntArray;
@@ -642,6 +643,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
     LayoutFields mInnerFields = new LayoutFields();
 
+    /** Skip repeated AppWindowTokens initialization. Note that AppWindowsToken's version of this
+     * is a long initialized to Long.MIN_VALUE so that it doesn't match this value on startup. */
+    private int mTransactionSequence;
+
     /** Only do a maximum of 6 repeated layouts. After that quit */
     private int mLayoutRepeatCount;
 
@@ -794,6 +799,8 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void run() {
             Looper.prepare();
+            //Looper.myLooper().setMessageLogging(new LogPrinter(
+            //        android.util.Log.DEBUG, TAG, android.util.Log.LOG_ID_SYSTEM));
             WindowManagerService s = new WindowManagerService(mContext, mPM,
                     mHaveInputMethods, mAllowBootMessages);
             android.os.Process.setThreadPriority(
@@ -3573,7 +3580,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void setAppGroupId(IBinder token, int groupId) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "setAppStartingIcon()")) {
+                "setAppGroupId()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -3996,7 +4003,7 @@ public class WindowManagerService extends IWindowManager.Stub
             CharSequence nonLocalizedLabel, int labelRes, int icon,
             int windowFlags, IBinder transferFrom, boolean createIfNeeded) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "setAppStartingIcon()")) {
+                "setAppStartingWindow()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -4052,12 +4059,13 @@ public class WindowManagerService extends IWindowManager.Stub
                         startingWindow.mToken = wtoken;
                         startingWindow.mRootToken = wtoken;
                         startingWindow.mAppToken = wtoken;
-                        if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
-                                "Removing starting window: " + startingWindow);
+                        if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE || DEBUG_STARTING_WINDOW) {
+                            Slog.v(TAG, "Removing starting window: " + startingWindow);
+                        }
                         mWindows.remove(startingWindow);
                         mWindowsChanged = true;
-                        if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Removing starting " + startingWindow
-                                + " from " + ttoken);
+                        if (DEBUG_ADD_REMOVE) Slog.v(TAG,
+                                "Removing starting " + startingWindow + " from " + ttoken);
                         ttoken.windows.remove(startingWindow);
                         ttoken.allAppWindows.remove(startingWindow);
                         addWindowToListInOrderLocked(startingWindow, true);
@@ -4144,6 +4152,8 @@ public class WindowManagerService extends IWindowManager.Stub
             // show a starting window -- the current effect (a full-screen
             // opaque starting window that fades away to the real contents
             // when it is ready) does not work for this.
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Checking theme of starting window: 0x"
+                    + Integer.toHexString(theme));
             if (theme != 0) {
                 AttributeCache.Entry ent = AttributeCache.instance().get(pkg, theme,
                         com.android.internal.R.styleable.Window);
@@ -4152,6 +4162,15 @@ public class WindowManagerService extends IWindowManager.Stub
                     // pretend like we didn't see that.
                     return;
                 }
+                if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Translucent="
+                        + ent.array.getBoolean(
+                                com.android.internal.R.styleable.Window_windowIsTranslucent, false)
+                        + " Floating="
+                        + ent.array.getBoolean(
+                                com.android.internal.R.styleable.Window_windowIsFloating, false)
+                        + " ShowWallpaper="
+                        + ent.array.getBoolean(
+                                com.android.internal.R.styleable.Window_windowShowWallpaper, false));
                 if (ent.array.getBoolean(
                         com.android.internal.R.styleable.Window_windowIsTranslucent, false)) {
                     return;
@@ -4175,6 +4194,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Creating StartingData");
             mStartingIconInTransition = true;
             wtoken.startingData = new StartingData(pkg, theme, compatInfo, nonLocalizedLabel,
                     labelRes, icon, windowFlags);
@@ -4182,6 +4202,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // Note: we really want to do sendMessageAtFrontOfQueue() because we
             // want to process the message ASAP, before any other queued
             // messages.
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Enqueueing ADD_STARTING");
             mH.sendMessageAtFrontOfQueue(m);
         }
     }
@@ -8444,6 +8465,26 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    private void updateAllDrawnLocked() {
+        // See if any windows have been drawn, so they (and others
+        // associated with them) can now be shown.
+        final ArrayList<AppWindowToken> appTokens = mAnimatingAppTokens;
+        final int NT = appTokens.size();
+        for (int i=0; i<NT; i++) {
+            AppWindowToken wtoken = appTokens.get(i);
+            if (!wtoken.allDrawn) {
+                int numInteresting = wtoken.numInterestingWindows;
+                if (numInteresting > 0 && wtoken.numDrawnWindows >= numInteresting) {
+                    if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
+                            "allDrawn: " + wtoken
+                            + " interesting=" + numInteresting
+                            + " drawn=" + wtoken.numDrawnWindows);
+                    wtoken.allDrawn = true;
+                }
+            }
+        }
+    }
+
     // "Something has changed!  Let's make it correct now."
     private final void performLayoutAndPlaceSurfacesLockedInner(
             boolean recoveringMemory) {
@@ -8483,6 +8524,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mInnerFields.mHoldScreen = null;
         mInnerFields.mScreenBrightness = -1;
         mInnerFields.mButtonBrightness = -1;
+        mTransactionSequence++;
 
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                 ">>> OPEN TRANSACTION performLayoutAndPlaceSurfaces");
@@ -8560,6 +8602,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mInnerFields.mSyswin = false;
 
             boolean focusDisplayed = false;
+            boolean updateAllDrawn = false;
             final int N = mWindows.size();
             for (i=N-1; i>=0; i--) {
                 WindowState w = mWindows.get(i);
@@ -8616,6 +8659,53 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
 
                     winAnimator.setSurfaceBoundaries(recoveringMemory);
+
+                    final AppWindowToken atoken = w.mAppToken;
+                    if (DEBUG_STARTING_WINDOW && atoken != null && w == atoken.startingWindow) {
+                        Slog.d(TAG, "updateWindows: starting " + w + " isOnScreen="
+                            + w.isOnScreen() + " allDrawn=" + atoken.allDrawn
+                            + " freezingScreen=" + atoken.mAppAnimator.freezingScreen);
+                    }
+                    if (atoken != null && (!atoken.allDrawn || atoken.mAppAnimator.freezingScreen)) {
+                        if (atoken.lastTransactionSequence != mTransactionSequence) {
+                            atoken.lastTransactionSequence = mTransactionSequence;
+                            atoken.numInterestingWindows = atoken.numDrawnWindows = 0;
+                            atoken.startingDisplayed = false;
+                        }
+                        if ((w.isOnScreen() || winAnimator.mAttrType
+                                == WindowManager.LayoutParams.TYPE_BASE_APPLICATION)
+                                && !w.mExiting && !w.mDestroying) {
+                            if (WindowManagerService.DEBUG_VISIBILITY ||
+                                    WindowManagerService.DEBUG_ORIENTATION) {
+                                Slog.v(TAG, "Eval win " + w + ": isDrawn=" + w.isDrawnLw()
+                                        + ", isAnimating=" + winAnimator.isAnimating());
+                                if (!w.isDrawnLw()) {
+                                    Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurface
+                                            + " pv=" + w.mPolicyVisibility
+                                            + " mDrawState=" + winAnimator.mDrawState
+                                            + " ah=" + w.mAttachedHidden
+                                            + " th=" + atoken.hiddenRequested
+                                            + " a=" + winAnimator.mAnimating);
+                                }
+                            }
+                            if (w != atoken.startingWindow) {
+                                if (!atoken.mAppAnimator.freezingScreen || !w.mAppFreezing) {
+                                    atoken.numInterestingWindows++;
+                                    if (w.isDrawnLw()) {
+                                        atoken.numDrawnWindows++;
+                                        if (WindowManagerService.DEBUG_VISIBILITY ||
+                                                WindowManagerService.DEBUG_ORIENTATION) Slog.v(TAG,
+                                                "tokenMayBeDrawn: " + atoken
+                                                + " freezingScreen=" + atoken.mAppAnimator.freezingScreen
+                                                + " mAppFreezing=" + w.mAppFreezing);
+                                        updateAllDrawn = true;
+                                    }
+                                }
+                            } else if (w.isDrawnLw()) {
+                                atoken.startingDisplayed = true;
+                            }
+                        }
+                    }
                 }
 
                 if (someoneLosingFocus && w == mCurrentFocus && w.isDisplayedLw()) {
@@ -8623,6 +8713,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 updateResizingWindows(w);
+            }
+
+            if (updateAllDrawn) {
+                updateAllDrawnLocked();
             }
 
             if (focusDisplayed) {
@@ -9753,7 +9847,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             pw.print("  mSystemBooted="); pw.print(mSystemBooted);
                     pw.print(" mDisplayEnabled="); pw.println(mDisplayEnabled);
-            pw.print("  mLayoutNeeded="); pw.println(mLayoutNeeded);
+            pw.print("  mLayoutNeeded="); pw.print(mLayoutNeeded);
+                    pw.print("mTransactionSequence="); pw.println(mTransactionSequence);
             pw.print("  mDisplayFrozen="); pw.print(mDisplayFrozen);
                     pw.print(" mWindowsFreezingScreen="); pw.print(mWindowsFreezingScreen);
                     pw.print(" mAppsFreezingScreen="); pw.print(mAppsFreezingScreen);
@@ -9814,6 +9909,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             pw.print("  mStartingIconInTransition="); pw.print(mStartingIconInTransition);
                     pw.print(" mSkipAppTransitionAnimation="); pw.println(mSkipAppTransitionAnimation);
+            pw.println("  Window Animator:");
+            mAnimator.dump(pw, "    ", dumpAll);
         }
     }
 

@@ -241,12 +241,18 @@ class AppWindowToken extends WindowToken {
             pw.print(prefix); pw.print("paused="); pw.println(paused);
         }
         if (numInterestingWindows != 0 || numDrawnWindows != 0
-                || inPendingTransaction || allDrawn) {
+                || allDrawn || mAppAnimator.allDrawn) {
             pw.print(prefix); pw.print("numInterestingWindows=");
                     pw.print(numInterestingWindows);
                     pw.print(" numDrawnWindows="); pw.print(numDrawnWindows);
                     pw.print(" inPendingTransaction="); pw.print(inPendingTransaction);
-                    pw.print(" allDrawn="); pw.println(allDrawn);
+                    pw.print(" allDrawn="); pw.print(allDrawn);
+                    pw.print(" (animator="); pw.print(mAppAnimator.allDrawn);
+                    pw.println(")");
+        }
+        if (inPendingTransaction) {
+            pw.print(prefix); pw.print("inPendingTransaction=");
+                    pw.println(inPendingTransaction);
         }
         if (startingData != null || removed || firstWindowDrawn) {
             pw.print(prefix); pw.print("startingData="); pw.print(startingData);
