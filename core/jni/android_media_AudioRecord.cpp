@@ -234,7 +234,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         recorderCallback,// callback_t
         lpCallbackData,// void* user
         0,             // notificationFrames,
-        true,          // threadCanCallJava)
+        true,          // threadCanCallJava
         sessionId);
 
     if (lpRecorder->initCheck() != NO_ERROR) {
