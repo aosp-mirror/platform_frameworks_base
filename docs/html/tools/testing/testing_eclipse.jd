@@ -305,7 +305,7 @@ from Eclipse</a>.
             <li>
                 In the Emulator Launch Parameters pane, set the Android emulator flags you want to
                 use. These are documented in the topic
-                <a href="{@docRoot}tools/emulator.html#startup-options">
+                <a href="{@docRoot}tools/help/emulator.html#startup-options">
                 Android Emulator</a>.
             </li>
         </ul>

@@ -76,7 +76,7 @@ page.title=Managing Projects
     <dt><code>jni</code></dt>
 
     <dd>Contains native code sources developed using the Android NDK. For more information, see the
-    <a href="{@docRoot}sdk/ndk/index.html">Android NDK documentation</a>.</dd>
+    <a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK documentation</a>.</dd>
 
     <dt><code>gen/</code></dt>
 

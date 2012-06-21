@@ -429,7 +429,7 @@ Menu &gt; Settings &gt; Locale &amp; text &gt; Select locale). </p>
 <h3 id="emulator">Testing on an Emulator</h3>
 
 <p>For details about using the emulator, see See <a
-href="{@docRoot}tools/emulator.html">Android Emulator</a>.</p>
+href="{@docRoot}tools/help/emulator.html">Android Emulator</a>.</p>
 <h4>Creating and using a custom locale</h4>
 
 <p>A &quot;custom&quot; locale is a language/region combination that the Android

@@ -65,7 +65,7 @@ parent.link=index.html
 
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}tools/emulator.html">Android Emulator</a></li>
+    <li><a href="{@docRoot}tools/help/emulator.html">Android Emulator</a></li>
     <li><a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD Manager</a></li>
   </ol>
 </div>
@@ -182,7 +182,7 @@ like this: </p>
 
 <p>This initializes the emulator, loads an AVD configuration and displays the emulator
 window. For more information about command line options for the emulator, see the
-<a href="{@docRoot}tools/emulator.html">Android Emulator</a> tool reference.</p>
+<a href="{@docRoot}tools/help/emulator.html">Android Emulator</a> tool reference.</p>
 
 <p class="note"><strong>Note:</strong> You can run multiple
 instances of the emulator concurrently, each with its own AVD configuration and
@@ -200,7 +200,7 @@ on the Emulator</a> for information about how to install your application.</p>
 <p>To stop an emulator instance, just close the emulator's window.</p>
 
 <p>For a reference of the emulator's startup commands and keyboard mapping, see
-the <a href="{@docRoot}tools/emulator.html">Android Emulator</a> tool
+the <a href="{@docRoot}tools/help/emulator.html">Android Emulator</a> tool
 reference.</p>
 
 

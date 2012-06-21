@@ -4,7 +4,7 @@ parent.link=index.html
 @jd:body
 
 <p>The Monkey is a program that runs on your 
-<a href="{@docRoot}tools/emulator.html">emulator</a> or device and generates pseudo-random
+<a href="{@docRoot}tools/help/emulator.html">emulator</a> or device and generates pseudo-random
 streams of user events such as clicks, touches, or gestures, as well as a number of system-level 
 events.  You can use the Monkey to stress-test applications that you are developing, in a random 
 yet repeatable manner.</p>

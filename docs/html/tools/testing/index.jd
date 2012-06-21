@@ -25,7 +25,7 @@ declaring what you’re not allowed to do on that thread, and what the penalty i
 policy. Implementation-wise, this policy is simply a thread-local integer bitmask.</p>
     </a>
     
-    <a href="android-developers.blogspot.com/2010/10/traceview-war-story.html">
+    <a href="http://android-developers.blogspot.com/2010/10/traceview-war-story.html">
       <h4>Traceview War Story</h4>
       <p>I recently took my first serious look at Traceview, and it occurred to me, first, that
 there are probably a few other Android developers who haven’t used it and, second, that this is an

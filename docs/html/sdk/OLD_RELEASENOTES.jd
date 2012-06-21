@@ -387,13 +387,13 @@ specify which port the emulator should bind to for the console. &lt;port&gt; mus
 <ul>
 <li>Now provides support for emulating inbound SMS messages. The ADT plugin and DDMS provide integrated access to 
 this capability. For more information about how to emulate inbound SMS from the console, 
-see <a href="{@docRoot}tools/emulator.html#sms">SMS Emulation</a>. </li>
+see <a href="{@docRoot}tools/help/emulator.html#sms">SMS Emulation</a>. </li>
 </ul>
 
 <h4>Emulator</h4>
 <ul><li>The default emulator skin has been changed to HVGA-P from QVGA-L. For information 
 about emulator skins and how to load a specific skin when starting the emulator, see 
-<a href="{@docRoot}tools/emulator.html#skins">Using Emulator Skins</a>.</li>
+<a href="{@docRoot}tools/help/emulator.html#skins">Using Emulator Skins</a>.</li>
 </ul>
 
 <h3>Resolved Issues</h3>

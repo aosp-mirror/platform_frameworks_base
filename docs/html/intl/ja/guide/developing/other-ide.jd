@@ -20,7 +20,7 @@ page.title=その他の統合開発環境
   <h2>関連項目</h2>
   <ol>
     <li><a href="{@docRoot}tools/othertools.html#android">android ツール</a></li>
-    <li><a href="{@docRoot}tools/emulator.html">Android Emulator</a></li>
+    <li><a href="{@docRoot}tools/help/emulator.html">Android Emulator</a></li>
     <li><a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a></li>
   </ol>
 </div>
@@ -38,7 +38,7 @@ page.title=その他の統合開発環境
 <dl>
   <dt><a href="{@docRoot}tools/othertools.html#android">android</a></dt>
     <dd>Android プロジェクトの作成/更新、AVD の作成/移動/削除のために使用します。</dd>
-  <dt><a href="{@docRoot}tools/emulator.html">Android Emulator</a></dt>
+  <dt><a href="{@docRoot}tools/help/emulator.html">Android Emulator</a></dt>
     <dd>Android のエミュレーション プラットフォームで Android アプリケーションを実行するために使用します。</dd>
   <dt><a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a></dt>
     <dd>エミュレータまたは接続先の端末とのインターフェースとして使用します（アプリケーションのインストール、端末のシェル、コマンドの実行などに使用）。
@@ -254,7 +254,7 @@ id:2
 <p>上記で使用したツールについて詳しくは、次のドキュメントをご覧ください:</p>
 <ul>
   <li><a href="{@docRoot}tools/othertools.html#android">android ツール</a></li>
-  <li><a href="{@docRoot}tools/emulator.html">Android Emulator</a></li>
+  <li><a href="{@docRoot}tools/help/emulator.html">Android Emulator</a></li>
   <li><a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a> (ADB)</li>
 </ul>
 

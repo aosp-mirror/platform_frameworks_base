@@ -69,7 +69,7 @@ OpenGL ES 2.0 API specification.</p>
 
 <p>Android supports OpenGL both through its framework API and the Native Development
 Kit (NDK). This topic focuses on the Android framework interfaces. For more information about the
-NDK, see the <a href="{@docRoot}sdk/ndk/index.html">Android NDK</a>.
+NDK, see the <a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK</a>.
 
 <p>There are two foundational classes in the Android framework that let you create and manipulate
 graphics with the OpenGL ES API: {@link android.opengl.GLSurfaceView} and {@link

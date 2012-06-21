@@ -1059,7 +1059,7 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
   <p>Before you get started make sure that you have downloaded the latest <a href=
   "{@docRoot}sdk/index.html">Android SDK</a> and upgraded your applications and environment as
   needed. The NDK is compatible with older platform versions but not older versions of the SDK tools.
-  Also, take a moment to review the <a href="{@docRoot}sdk/ndk/overview.html#reqs">System and
+  Also, take a moment to review the <a href="{@docRoot}tools/sdk/ndk/overview.html#reqs">System and
 Software Requirements</a>
   for the NDK, if you haven't already.</p>
 
@@ -1119,7 +1119,7 @@ Software Requirements</a>
 
   <p>The NDK includes sample Android applications that illustrate how to use native code in your
   Android applications. For more information, see <a href=
-  "{@docRoot}sdk/ndk/overview.html#samples">Sample Applications</a>.</p>
+  "{@docRoot}tools/sdk/ndk/overview.html#samples">Sample Applications</a>.</p>
 
   <h2 id="forum">Discussion Forum and Mailing List</h2>
 

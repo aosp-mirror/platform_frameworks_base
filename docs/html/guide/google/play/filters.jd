@@ -400,7 +400,7 @@ country (as determined by SIM carrier) in which paid apps are available.</p></td
   <td valign="top">Native Platform</td> <td valign="top"><p>An application that includes native
     libraries that target a specific platform (ARM EABI v7 or x86, for example) are
     visible only on devices that support that platform. For details about the NDK and using
-    native libraries, see <a href="{@docRoot}sdk/ndk/index.html#overview">What is the
+    native libraries, see <a href="{@docRoot}tools/sdk/ndk/index.html#overview">What is the
       Android NDK?</a></p> </tr> <tr>
         <td valign="top">Copy-Protected Applications</td> <td valign="top"><p>To
           copy protect an application, set copy protection to "On" when you configure publishing

@@ -67,7 +67,7 @@ games, using the NDK is beneficial (It is important to note though that you can 
 performance using the framework APIs. For example, the Google Body app is developed entirely
 using the framework APIs). OpenGL with the NDK is also useful if you have a lot of native
 code that you want to port over to Android. For more information about using the NDK, read the
-docs in the <code>docs/</code> directory of the <a href="{@docRoot}sdk/ndk/index.html">NDK
+docs in the <code>docs/</code> directory of the <a href="{@docRoot}tools/sdk/ndk/index.html">NDK
 download.</a></dd>
 </dl>
 

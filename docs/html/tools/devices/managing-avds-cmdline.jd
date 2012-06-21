@@ -171,7 +171,7 @@ WVGA screen.</p>
 
 <p>As an alternative to adjusting the emulator skin configuration, you can use
 the emulator skin's default density and add the <code>-dpi-device</code> option
-to the <a href="{@docRoot}tools/emulator.html">emulator</a> command line when
+to the <a href="{@docRoot}tools/help/emulator.html">emulator</a> command line when
 starting the AVD. For example:</p>
 
 <pre>emulator -avd WVGA800 -scale 96dpi -dpi-device 160</pre>

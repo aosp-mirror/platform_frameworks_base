@@ -572,7 +572,7 @@ events and surfaces.</li>
 </ul>
 
 <p>For full information on working with native code or to download the NDK,
-see the <a href="{@docRoot}sdk/ndk/index.html">Android NDK</a> page.</p>
+see the <a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK</a> page.</p>
 
 
 <h3 id="dalvik">Dalvik Runtime</h3>

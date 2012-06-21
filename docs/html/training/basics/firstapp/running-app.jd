@@ -85,7 +85,7 @@ the app.</p>
 <ol>
   <li>Plug in your Android-powered device to your machine with a USB cable.
 If you’re developing on Windows, you might need to install the appropriate USB driver for your
-device. For help installing drivers, see the <a href="{@docRoot}sdk/oem-usb.html">OEM USB
+device. For help installing drivers, see the <a href="{@docRoot}tools/extras/oem-usb.html">OEM USB
 Drivers</a> document.</li>
   <li>Ensure that <strong>USB debugging</strong> is enabled in the device Settings (open Settings
 and navitage to <strong>Applications > Development</strong> on most devices, or select

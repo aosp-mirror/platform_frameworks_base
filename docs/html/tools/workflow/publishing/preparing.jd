@@ -202,7 +202,7 @@ tasks:</p>
 <ul>
   <li>Review the contents of your <code>jni/</code>, <code>lib/</code>, and <code>src/</code>
   directories.  The <code>jni/</code> directory should contain only source files associated with the
-  <a href="{@docRoot}sdk/ndk/index.html">Android NDK</a>, such as
+  <a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK</a>, such as
   <code>.c</code>, <code>.cpp</code>, <code>.h</code>, and <code>.mk</code> files. The
   <code>lib/</code> directory should contain only third-party library files or private library
   files, including prebuilt shared and static libraries (for example, <code>.so</code> files). The

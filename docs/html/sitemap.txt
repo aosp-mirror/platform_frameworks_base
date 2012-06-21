@@ -26,7 +26,7 @@ http://developer.android.com/sdk/win-usb.html
 http://developer.android.com/sdk/eclipse-adt.html
 http://developer.android.com/sdk/ndk/index.html
 http://developer.android.com/sdk/ndk/overview.html
-http://developer.android.com/sdk/oem-usb.html
+http://developer.android.com/tools/extras/oem-usb.html
 http://developer.android.com/sdk/requirements.html
 http://developer.android.com/sdk/older_releases.html
 http://developer.android.com/guide/basics/what-is-android.html
@@ -134,7 +134,7 @@ http://developer.android.com/tools/avd.html
 http://developer.android.com/tools/bmgr.html
 http://developer.android.com/tools/ddms.html
 http://developer.android.com/tools/draw9patch.html
-http://developer.android.com/tools/emulator.html
+http://developer.android.com/tools/help/emulator.html
 http://developer.android.com/tools/hierarchy-viewer.html
 http://developer.android.com/tools/layoutopt.html
 http://developer.android.com/tools/monkey.html
