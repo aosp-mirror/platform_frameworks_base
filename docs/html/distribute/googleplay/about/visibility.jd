@@ -34,7 +34,8 @@ user's devices instantly, over the air. No cable or sync is ever needed.</p>
 <img src="{@docRoot}images/gp-growth-downloads.png" style="width:600px;margin-bottom:0em;">
 </div>
 <p class="image-caption" style="padding:.5em"><span
-style="font-weight:500;">Growth in app consumption</span>: Users downloaded more than 3.7 billion apps in Q1 2012 alone.</p>
+style="font-weight:500;">Growth in app consumption</span>: Users downloaded more
+than 3.7 billion apps in Q1 2012 alone.</p>
 </div>
 
 <div>
@@ -224,7 +225,7 @@ everything about your app. When they see your app listed in search results, top
 charts, category listings, and collections, one tap takes them directly to your 
 product details page.</p>
 
-<div style="float:right;margin-right:18px;">
+<div style="float:right;margin-left:10px;">
 <img src="{@docRoot}images/gp-details-pages-magicpiano.png" style="width:500px">
 </div>
 

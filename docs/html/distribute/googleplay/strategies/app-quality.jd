@@ -85,7 +85,7 @@ As you are designing or evaluating your app's UI, make sure to read and become f
 </div></div>
 
 <p>
-Another way to incrementally improve usability, based on real-world data, is to implement <a href="http://code.google.com/mobile/analytics/docs/">Analytics</a> throughout your app to log usage of particular sections. Consider demoting infrequently used sections to the <a href="{@docRoot}guide/components/ui/menus.html#options-menu">options menu</a>, or removing them altogether. For often-used sections and UI elements, make sure they're immediately obvious and easily accessible in your app's UI so that users can get to them quickly.</p>
+Another way to incrementally improve usability, based on real-world data, is to implement <a href="http://code.google.com/mobile/analytics/docs/">Analytics</a> throughout your app to log usage of particular sections. Consider demoting infrequently used sections to the overflow menu in the <a href="{@docRoot}design/patterns/actionbar.html">Action bar</a>, or removing them altogether. For often-used sections and UI elements, make sure they're immediately obvious and easily accessible in your app's UI so that users can get to them quickly.</p>
 <p>
 Lastly, usability is an extensive and well-documented subject, with close ties to interface design, cognitive science, and other disciplines.</p>
 
