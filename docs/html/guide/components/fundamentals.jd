@@ -283,7 +283,7 @@ such as:</p>
 <ul>
   <li>Identify any user permissions the application requires, such as Internet access or
 read-access to the user's contacts.</li>
-  <li>Declare the minimum <a href="{@docRoot}guide/appendix/api-levels.html">API Level</a>
+  <li>Declare the minimum <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Level</a>
 required by the application, based on which APIs the application uses.</li>
   <li>Declare hardware and software features used or required by the application, such as a camera,
 bluetooth services, or a multitouch screen.</li>
@@ -396,7 +396,7 @@ them, but external services such as Google Play do read them in order to provide
 for users when they search for applications from their device.</p>
 
 <p>For example, if your application requires a camera and uses APIs introduced in Android 2.1 (<a
-href="{@docRoot}guide/appendix/api-levels.html">API Level</a> 7), you should declare these as
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Level</a> 7), you should declare these as
 requirements in your manifest file. That way, devices that do <em>not</em> have a camera and have an
 Android version <em>lower</em> than 2.1 cannot install your application from Google Play.</p>
 
@@ -450,7 +450,7 @@ element.</dd>
 such as Android 1.6 or Android 2.3. Each successive version often includes additional APIs not
 available in the previous version. In order to indicate which set of APIs are available, each
 platform version specifies an <a
-href="{@docRoot}guide/appendix/api-levels.html">API Level</a> (for example, Android 1.0 is API Level
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Level</a> (for example, Android 1.0 is API Level
 1 and Android 2.3 is API Level 9). If you use any APIs that were added to the platform after
 version 1.0, you should declare the minimum API Level in which those APIs were introduced using the
 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a>

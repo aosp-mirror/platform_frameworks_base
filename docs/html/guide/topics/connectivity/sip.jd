@@ -140,7 +140,7 @@ manifest:</p>
 <ul>
   <li><code>&lt;uses-sdk android:minSdkVersion=&quot;9&quot; /&gt;</code>. This 
  indicates that your application requires   Android 2.3 or higher. For more
-information, see <a href="{@docRoot}guide/appendix/api-levels.html">API
+information, see <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API
 Levels</a> and the documentation for the <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a
 > element.</li>

@@ -71,7 +71,7 @@ application, you need to set the proper value, "{@sdkPlatformApiLevel}", in the
 element in your application's manifest. </p>
 
 <p>For more information about how to use API Level, see the <a
-href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Levels</a> document. </p>
 
 
 <h2 id="api">Framework API Changes</h2>

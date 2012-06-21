@@ -49,7 +49,7 @@ support all desired devices with a single APK</li>
   <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
   <li><a href="{@docRoot}sdk/compatibility-library.html">Compatibility
 Package</a></li>
-  <li><a href="{@docRoot}guide/appendix/api-levels.html">Android API Levels</a></li>
+  <li><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Android API Levels</a></li>
 </ol>
 
 </div>

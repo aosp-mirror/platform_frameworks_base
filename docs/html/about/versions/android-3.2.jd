@@ -560,7 +560,7 @@ also need to add an <code>android:minSdkVersion="{@sdkPlatformApiLevel}"</code>
 attribute to the <code>&lt;uses-sdk&gt;</code> element in the application's
 manifest.</p>
 
-<p>For more information, read <a href="{@docRoot}guide/appendix/api-levels.html">What is API
+<p>For more information, read <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">What is API
 Level?</a></p>
 
 

@@ -171,4 +171,4 @@ maximum API Level. </p>
 <p>For more information, see the <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
 manifest element documentation and the <a
-href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document.</p>
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Levels</a> document.</p>

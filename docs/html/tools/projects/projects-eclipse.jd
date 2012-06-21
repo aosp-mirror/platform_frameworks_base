@@ -91,7 +91,7 @@ parent.link=index.html
             the <code>minSdkVersion</code> attribute in the <a href=
             "{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a> of your
             Android Manifest file. If you're unsure of the appropriate <a href=
-            "{@docRoot}guide/appendix/api-levels.html">API Level</a> to use, copy the API Level
+            "{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Level</a> to use, copy the API Level
             listed for the Build Target you selected in the Target tab.</li>
           </ul>
         </li>

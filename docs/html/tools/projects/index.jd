@@ -333,7 +333,7 @@ be added in a future
   <p>A library is compiled as part of the dependent application project, so the API used in the
   library project must be compatible with the version of the Android library used to compile the
   application project. In general, the library project should use an <a href=
-  "{@docRoot}guide/appendix/api-levels.html">API level</a> that is the same as &mdash; or lower
+  "{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API level</a> that is the same as &mdash; or lower
   than &mdash; that used by the application. If the library project uses an API level that is
   higher than that of the application, the application project will not compile. It is
   perfectly acceptable to have a library that uses the Android 1.5 API (API level 3) and that is
