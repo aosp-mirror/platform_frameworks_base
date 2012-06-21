@@ -44,7 +44,7 @@ use the Android SDK Manager to download the platform into your SDK.</p>
 
 <p>The sections below provide a technical overview of new APIs in Android 4.0.</p>
 
-<div class="toggle-content closed" style="padding-left:1em;">
+<div class="toggle-content closed">
 
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png"
@@ -1811,21 +1811,6 @@ notes for other new APIs.</li>
 
 
 
-<h3 id="api-level">API Level</h3>
-
-<p>The Android {@sdkPlatformVersion} API is assigned an integer
-identifier&mdash;<strong>{@sdkPlatformApiLevel}</strong>&mdash;that is stored in the system itself.
-This identifier, called the "API level", allows the system to correctly determine whether an
-application is compatible with the system, prior to installing the application. </p>
-
-<p>To use APIs introduced in Android {@sdkPlatformVersion} in your application, you need compile the
-application against an Android platform that supports API level {@sdkPlatformApiLevel} or
-higher. Depending on your needs, you might also need to add an
-<code>android:minSdkVersion="{@sdkPlatformApiLevel}"</code> attribute to the
-<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a>
-element.</p>
-
-<p>For more information, see the <a href="{@docRoot}
 <h3 id="api-level">API Level</h3>
 
 <p>The Android {@sdkPlatformVersion} API is assigned an integer

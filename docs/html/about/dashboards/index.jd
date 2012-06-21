@@ -6,7 +6,7 @@ header.hide=1
 
 <h2 id="Platform">Platform Versions</h2>
 
-<p>This section provides data about the relative number of active devices
+<p>This page provides data about the relative number of active devices
 running a given version of the Android platform. This can help you
 understand the landscape of device distribution and decide how to prioritize
 the development of your application features for the devices currently in

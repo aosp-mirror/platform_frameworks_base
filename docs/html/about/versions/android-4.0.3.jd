@@ -40,7 +40,7 @@ use the Android SDK Manager to download the platform into your SDK.</p>
 
 <p>The sections below provide a technical overview of new APIs in Android 4.0.3.</p>
 
-<div class="toggle-content closed" style="padding-left:1em;">
+<div class="toggle-content closed">
 
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png"

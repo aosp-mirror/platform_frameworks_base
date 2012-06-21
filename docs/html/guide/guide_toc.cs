@@ -458,10 +458,12 @@
                 <a href="<?cs var:toroot?>guide/topics/admin/device-admin.html">
                 <span class="en">Device Policies</span></a>
               </li>
+            <!--
               <li>
                 <a href="<?cs var:toroot?>guide/topics/admin/keychain.html">
                 <span class="en">Certificate Store</span></a>
               </li>
+            -->
            </ul>
   </li><!-- end of administration -->
   

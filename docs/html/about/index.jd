@@ -4,14 +4,14 @@ header.hide=0
 
 @jd:body
 
-<div style="position:absolute;width:440px;">
+<div style="position:absolute;width:400px;">
 <p>Android powers hundreds of millions of mobile devices in more than 130
 countries around the world. It's the largest installed base of any mobile platform
 and growing fast&mdash;every day another 900,000 users power up their
 Android devices for the first time and start looking for apps, games,
 and other digital content. </p>
 
-<div style="width:360px">
+<div style="width:330px">
 <p>Android gives you a world-class platform for creating apps and games for
 Android users everywhere, as well as an open marketplace for distributing
 to them instantly.</p>
@@ -19,7 +19,10 @@ to them instantly.</p>
 </div>
 
 <img src="{@docRoot}images/about/growth-chart.png" alt="" height="400" width="681"
-style="margin:20px 0 30px;" />
+style="margin:20px 0 10px 30px;" />
+<div style="position:relative;left: 450px;width: 250px;top: -20px;color: #777;">
+  <em>Android growth in device activations</em></div>
+
 
 <h3>Global partnerships and large installed base</h3>
 
@@ -114,7 +117,7 @@ the best apps promotional slots in curated collections.
 <p>Preinstalled on hundreds of millions of Android devices around the world,
 Google Play can be a growth engine for your business.</p>
 
-<p><a class="landing-page-link" href="{@docRoot}about/start.html">Get Started</a></p>
+<p><a class="landing-page-link" href="{@docRoot}about/start.html">GET STARTED</a></p>
 
 <div style="background: #F0F0F0;
             border-top: 1px solid #DDD;

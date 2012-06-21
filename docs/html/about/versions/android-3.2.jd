@@ -20,21 +20,11 @@ href="{@docRoot}sdk/api_diff/13/changes.html">API
 Differences Report &raquo;</a> </li>
 </ol>
 
-<h2>See Also</h2>
-<ol>
-  <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting
-  Multiple Screens</a></li>
-  <li><a href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing
-Apps for Android 3.x</a></li>
-</ol>
-
 </div>
 </div>
 
 
 <p><em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
-
-<p>Welcome to Android 3.2!</p>
 
 <p>Android 3.2 is an incremental platform release that adds new
 capabilities for users and developers. The sections below provide an overview
