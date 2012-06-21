@@ -25,6 +25,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRouter;
+import android.media.MediaRouter.RouteGroup;
 import android.media.MediaRouter.RouteInfo;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -157,8 +158,13 @@ public class MediaRouteButton extends View {
         final int N = mRouter.getRouteCount();
         int count = 0;
         for (int i = 0; i < N; i++) {
-            if ((mRouter.getRouteAt(i).getSupportedTypes() & mRouteTypes) != 0) {
-                count++;
+            final RouteInfo route = mRouter.getRouteAt(i);
+            if ((route.getSupportedTypes() & mRouteTypes) != 0) {
+                if (route instanceof RouteGroup) {
+                    count += ((RouteGroup) route).getRouteCount();
+                } else {
+                    count++;
+                }
             }
         }
 
