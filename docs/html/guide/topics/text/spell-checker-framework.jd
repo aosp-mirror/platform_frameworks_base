@@ -108,20 +108,23 @@ parent.link=../browser.html?tag=article
                 the current locale and so forth.
             </dd>
             <dt>
-     {@link android.service.textservice.SpellCheckerService.Session#onGetSuggestions(TextInfo, int)
-     onGetSuggestions()}
+     {@link android.service.textservice.SpellCheckerService.Session#onGetSentenceSuggestionsMultiple(TextInfo[], int)
+     onGetSentenceSuggestionsMultiple()}
             </dt>
             <dd>
-                Does the actual spell checking. This method returns an object containing
-                suggestions for the text passed to it.
+                Does the actual spell checking. This method returns an array of
+                {@link android.view.textservice.SentenceSuggestionsInfo} containing
+                suggestions for the sentences passed to it.
             </dd>
         </dl>
         <p>
             Optionally, you can implement
             {@link android.service.textservice.SpellCheckerService.Session#onCancel()}, which
-            handles requests to cancel spell checking, or
-{@link android.service.textservice.SpellCheckerService.Session#onGetSuggestionsMultiple(TextInfo[], int, boolean)
-onGetSuggestionsMultiple()}, which handles batches of suggestion requests, or both.
+            handles requests to cancel spell checking,
+            {@link android.service.textservice.SpellCheckerService.Session#onGetSuggestions(TextInfo, int)
+            onGetSuggestions()}, which handles a word suggestion request, or
+            {@link android.service.textservice.SpellCheckerService.Session#onGetSuggestionsMultiple(TextInfo[], int, boolean)
+            onGetSuggestionsMultiple()}, which handles batches of word suggestion requests.
         </p>
         <p>
             See the
@@ -208,7 +211,7 @@ onGetSuggestionsMultiple()}, which handles batches of suggestion requests, or bo
 <h2 id="SpellCheckClient">Accessing the Spell Checker Service from a Client</h2>
 <p>
     Applications that use {@link android.widget.TextView} views automatically benefit from spell
-    checking,  because {@link android.widget.TextView} automatically uses a spelling checker. The
+    checking, because {@link android.widget.TextView} automatically uses a spelling checker. The
     following screenshots show this:
 </p>
 <img src="{@docRoot}resources/articles/images/textview_spellcheck_screenshot_1.png" alt=""
@@ -224,7 +227,7 @@ onGetSuggestionsMultiple()}, which handles batches of suggestion requests, or bo
     The following diagram shows the flow of control for interacting with a spelling checker service:
 </p>
 <img src="{@docRoot}resources/articles/images/spellcheck_client_flow.png" alt=""
-    height="394" id="figure3" />
+    height="393" id="figure3" />
 <p class="img-caption">
   <strong>Figure 3.</strong> Interacting with a spelling checker service.
 </p>
