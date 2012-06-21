@@ -3608,6 +3608,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 });
             }
         } else {
+            if (mKeyguardMediator != null) {
+                // Must set mScreenOn = true.
+                mKeyguardMediator.onScreenTurnedOn(null);
+            }
             synchronized (mLock) {
                 mScreenOnFully = true;
             }
