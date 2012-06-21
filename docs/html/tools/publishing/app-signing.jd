@@ -36,7 +36,7 @@ page.title=Signing Your Applications
 <h2>See also</h2>
 
 <ol>
-<li><a href="{@docRoot}guide/publishing/versioning.html">Versioning Your Applications</a></li>
+<li><a href="{@docRoot}tools/publishing/versioning.html">Versioning Your Applications</a></li>
 <li><a href="{@docRoot}guide/publishing/preparing.html">Preparing to Publish</a></li>
 </ol>
 

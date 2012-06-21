@@ -96,7 +96,7 @@ href="{@docRoot}guide/publishing/publishing.html#market">Android マーケット
 
 <p>これまでにリリースしたバージョンがある場合、最新のアプリケーションのバージョン番号を旧バージョンから増加させる必要があります。アプリケーションのマニフェスト ファイルの <code>&lt;manifest&gt;</code> 要素の <code>android:versionCode</code> と <code>android:versionName</code> 属性の両方を適切な値を使用して増加する必要があります。 </p>
 
-<p>アプリケーションのバージョン情報を定義する方法は、<a href="{@docRoot}guide/publishing/versioning.html">Versioning Your Applications</a>をご覧ください。</p>
+<p>アプリケーションのバージョン情報を定義する方法は、<a href="{@docRoot}tools/publishing/versioning.html">Versioning Your Applications</a>をご覧ください。</p>
 
 <h3 id="cryptokey">6. 適切な暗号化キーを取得する</h3>
 

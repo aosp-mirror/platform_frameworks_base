@@ -44,7 +44,7 @@ parent.link=index.html
     The monkeyrunner tool is not related to the
     <a href="{@docRoot}tools/monkey.html">UI/Application Exerciser Monkey</a>,
     also known as the <code>monkey</code> tool. The <code>monkey</code> tool runs in an
-    <code><a href="{@docRoot}tools/adb.html">adb</a></code> shell directly on the
+    <code><a href="{@docRoot}tools/help/adb.html">adb</a></code> shell directly on the
     device or emulator and generates pseudo-random streams of user and system events. In comparison,
     the monkeyrunner tool controls devices and emulators from a workstation by sending specific
     commands and events from an API.
@@ -76,7 +76,7 @@ parent.link=index.html
         <code><a href="http://docs.python.org/library/os.html">os</a></code> and
         <code><a href="http://docs.python.org/library/subprocess.html">subprocess</a></code>
         modules to call Android tools such as
-        <a href="{@docRoot}tools/adb.html">Android Debug Bridge</a>.
+        <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a>.
         <p>
             You can also add your own classes to the monkeyrunner API. This is described
             in more detail in the section

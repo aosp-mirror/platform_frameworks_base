@@ -501,7 +501,7 @@ parent.link=index.html
     To run {@link android.test.InstrumentationTestRunner}, you use internal system classes called by
     Android tools. When you run a test in Eclipse with ADT, the classes are called automatically.
     When you run a test from the command line, you run these classes with
-    <a href="{@docRoot}tools/adb.html">Android Debug Bridge (adb)</a>.
+    <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge (adb)</a>.
 </p>
 <p>
     The system classes load and start the test package, kill any processes that
@@ -555,7 +555,7 @@ parent.link=index.html
 The <a href="{@docRoot}tools/monkey.html">UI/Application Exerciser Monkey</a>,
             usually called "monkey", is a command-line tool that sends pseudo-random streams of
             keystrokes, touches, and gestures to a device. You run it with the
-            <a href="{@docRoot}tools/adb.html">Android Debug Bridge</a> (adb) tool.
+            <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a> (adb) tool.
             You use it to stress-test your application and report back errors that are encountered.
             You can repeat a stream of events by running the tool each time with the same random
             number seed.

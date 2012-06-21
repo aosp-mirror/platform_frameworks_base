@@ -127,7 +127,7 @@ http://developer.android.com/guide/developing/testing/testing_eclipse.html
 http://developer.android.com/guide/developing/testing/testing_otheride.html
 http://developer.android.com/tools/index.html
 http://developer.android.com/tools/aapt.html
-http://developer.android.com/tools/adb.html
+http://developer.android.com/tools/help/adb.html
 http://developer.android.com/tools/othertools.html
 http://developer.android.com/tools/aidl.html
 http://developer.android.com/tools/avd.html
@@ -146,7 +146,7 @@ http://developer.android.com/tools/proguard.html
 http://developer.android.com/tools/traceview.html
 http://developer.android.com/tools/zipalign.html
 http://developer.android.com/guide/publishing/app-signing.html
-http://developer.android.com/guide/publishing/versioning.html
+http://developer.android.com/tools/publishing/versioning.html
 http://developer.android.com/guide/publishing/preparing.html
 http://developer.android.com/guide/publishing/publishing.html
 http://developer.android.com/guide/practices/compatibility.html

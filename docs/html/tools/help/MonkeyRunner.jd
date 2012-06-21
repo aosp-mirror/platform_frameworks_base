@@ -428,7 +428,7 @@ parent.link=index.html
             <td>
                 A regular expression that specifies the serial number of the device or emulator. See
                 the topic
-                <a href="{@docRoot}tools/adb.html">Android Debug Bridge</a>
+                <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a>
                 for a description of device and emulator serial numbers.
             </td>
         </tr>

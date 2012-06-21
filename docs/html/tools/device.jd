@@ -114,7 +114,7 @@ presented with a <b>Device Chooser</b> dialog that lists the available
 emulator(s) and connected device(s). Select the device upon which you want to
 install and run the application.</p>
 
-<p>If using the <a href="{@docRoot}tools/adb.html">Android
+<p>If using the <a href="{@docRoot}tools/help/adb.html">Android
 Debug Bridge</a> (adb), you can issue commands with the <code>-d</code> flag to
 target your connected device.</p>
 

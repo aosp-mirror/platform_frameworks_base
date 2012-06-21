@@ -31,7 +31,7 @@ parent.link=index.html
 on Android devices supporting API Level 8 or greater.  It provides commands to induce backup
 and restore operations so that you don't need to repeatedly wipe data or take similar
 intrusive steps in order to test your application's backup agent.  These commands are
-accessed via the <a href="{@docRoot}tools/adb.html">adb</a> shell.
+accessed via the <a href="{@docRoot}tools/help/adb.html">adb</a> shell.
 
 <p>For information about adding support for backup in your application, read <a
 href="{@docRoot}guide/topics/data/backup.html">Data Backup</a>, which includes a guide to testing

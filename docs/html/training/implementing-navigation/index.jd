@@ -15,7 +15,7 @@ next.link=lateral.html
 <ul>
   <li>API level 14</li>
   <li>Understanding of fragments and Android layouts</li>
-  <li><a href="{@docRoot}sdk/compatibility-library.html">The Android Support Package</a></li>
+  <li><a href="{@docRoot}tools/extras/support-library.html">The Android Support Package</a></li>
   <li><a href="{@docRoot}training/design-navigation/index.html">Designing Effective Navigation</a></li>
 </ul>
 

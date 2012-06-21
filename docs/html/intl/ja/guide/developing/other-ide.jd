@@ -21,7 +21,7 @@ page.title=その他の統合開発環境
   <ol>
     <li><a href="{@docRoot}tools/othertools.html#android">android ツール</a></li>
     <li><a href="{@docRoot}tools/emulator.html">Android Emulator</a></li>
-    <li><a href="{@docRoot}tools/adb.html">Android Debug Bridge</a></li>
+    <li><a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a></li>
   </ol>
 </div>
 </div>
@@ -40,7 +40,7 @@ page.title=その他の統合開発環境
     <dd>Android プロジェクトの作成/更新、AVD の作成/移動/削除のために使用します。</dd>
   <dt><a href="{@docRoot}tools/emulator.html">Android Emulator</a></dt>
     <dd>Android のエミュレーション プラットフォームで Android アプリケーションを実行するために使用します。</dd>
-  <dt><a href="{@docRoot}tools/adb.html">Android Debug Bridge</a></dt>
+  <dt><a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a></dt>
     <dd>エミュレータまたは接続先の端末とのインターフェースとして使用します（アプリケーションのインストール、端末のシェル、コマンドの実行などに使用）。
     </dd>
 </dl>
@@ -109,7 +109,7 @@ android create project \
   <li><code>tests/</code> - テスト用に、上記のすべての複製が含まれます。</li>
 </ul>
 
-<p>プロジェクトを作成すると、開発を始める準備ができます。開発のために、プロジェクト フォルダをどこにでも移動できますが、アプリケーションをエミュレータに送信するために(方法については後述します)、SDK の <code>tools/</code> ディレクトリにある <a href="{@docRoot}tools/adb.html">Android Debug Bridge</a>（adb）を使用する必要があります。そのためにプロジェクト ソリューションと <code>tools/</code> フォルダ間でアクセスする必要があります。</p>
+<p>プロジェクトを作成すると、開発を始める準備ができます。開発のために、プロジェクト フォルダをどこにでも移動できますが、アプリケーションをエミュレータに送信するために(方法については後述します)、SDK の <code>tools/</code> ディレクトリにある <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a>（adb）を使用する必要があります。そのためにプロジェクト ソリューションと <code>tools/</code> フォルダ間でアクセスする必要があります。</p>
 
 <p class="warning"><strong>注:</strong> SDK ディレクトリは移動させないでください。移動するとビルド スクリプトが機能しなくなります（ビルド スクリプトをもう一度機能させるには、手動でスクリプトを更新して、SDK の新しいロケーションを反映させる必要があります）。</p>
 
@@ -255,7 +255,7 @@ id:2
 <ul>
   <li><a href="{@docRoot}tools/othertools.html#android">android ツール</a></li>
   <li><a href="{@docRoot}tools/emulator.html">Android Emulator</a></li>
-  <li><a href="{@docRoot}tools/adb.html">Android Debug Bridge</a> (ADB)</li>
+  <li><a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a> (ADB)</li>
 </ul>
 
 

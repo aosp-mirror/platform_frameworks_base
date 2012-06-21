@@ -69,7 +69,7 @@ matches the API Level of the Android platform that you plan to use.</dd>
   <dd>Recommended. The APIs available in this static library allow you to use a variety of new
 framework features (including some not available in even the latest version) on devices running
 a platform version as old as Android 1.6. For more information, read <a
-href="{@docRoot}tools/sdk/support-package.html">Support Library</a>.</dd>
+href="{@docRoot}tools/extras/support-library.html">Support Library</a>.</dd>
 </dl>
 
 

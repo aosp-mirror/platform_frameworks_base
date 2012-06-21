@@ -1189,7 +1189,7 @@ lifecycle</a>.
 </p>
 <ul>
   <li>
-   <a href="{@docRoot}tools/adb.html">adb</a> - Installs and uninstalls applications and test applications to a device or the emulator. You
+   <a href="{@docRoot}tools/help/adb.html">adb</a> - Installs and uninstalls applications and test applications to a device or the emulator. You
    also use this tool to run the test application from the command line.
   </li>
   <li>

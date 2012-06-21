@@ -912,7 +912,7 @@ newdevice = MonkeyRunner.waitForConnection()
           <th>cmd</th>
           <td>
             The command to execute in the <code>adb</code> shell. The form of these commands is
-            described in the topic <a href="{@docRoot}tools/adb.html">Android
+            described in the topic <a href="{@docRoot}tools/help/adb.html">Android
             Debug Bridge</a>.
           </td>
         </tr>

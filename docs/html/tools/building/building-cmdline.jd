@@ -286,7 +286,7 @@ adb -d install <em>path/to/your/app</em>.apk
 
     <li><a href="{@docRoot}tools/devices/emulator.html">Android Emulator</a></li>
 
-    <li><a href="{@docRoot}tools/adb.html">Android Debug Bridge</a> (ADB)</li>
+    <li><a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a> (ADB)</li>
   </ul>
 
   <h2 id="Signing">Application Signing</h2>

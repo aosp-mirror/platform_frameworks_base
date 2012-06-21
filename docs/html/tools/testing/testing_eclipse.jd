@@ -363,7 +363,7 @@ from Eclipse</a>.
     In the following description of these messages, <code><em>devicename</em></code> is the name of
     the device or emulator you are using to run the test, and <code><em>port</em></code> is the
     port number for the device. The name and port number are in the format used by the
-    <code><a href="{@docRoot}tools/adb.html#devicestatus">adb devices</a></code>
+    <code><a href="{@docRoot}tools/help/adb.html#devicestatus">adb devices</a></code>
     command. Also, <code><em>testfile</em></code> is the <code>.apk</code> filename of the test
     package you are running, and <em>appfile</em> is the filename of the application under test.
 </p>

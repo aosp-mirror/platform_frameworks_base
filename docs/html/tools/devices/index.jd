@@ -49,7 +49,7 @@ options, from the <strong>&lt;sdk>/tools/</strong> directory.</p>
     <code>minSdkVersion</code></a> attribute of the application's manifest file. For more
     information about the relationship between system API Level and application
     <code>minSdkVersion</code>, see <a href=
-    "{@docRoot}guide/publishing/versioning.html">Specifying Minimum System API Version</a>.</li>
+    "{@docRoot}tools/publishing/versioning.html">Specifying Minimum System API Version</a>.</li>
 
     <li>You should create at least one AVD that uses a target whose API Level is greater than that required
     by your application, because it allows you to test the

@@ -25,7 +25,7 @@ page.title=Debugging
   comprise a typical Android debugging environment are:</p>
 
   <dl>
-    <dt><a href="{@docRoot}tools/adb.html"><strong>adb</strong></a></dt>
+    <dt><a href="{@docRoot}tools/help/adb.html"><strong>adb</strong></a></dt>
 
     <dd><code>adb</code> acts as a middleman between a device and your development system. It provides various
     device management capabilities, including moving and syncing files to the emulator, running a
@@ -132,7 +132,7 @@ Debugging with the Dev Tools App</a>.
 
 <dt><strong>Get application and system state information from the emulator</strong></dt>
 <dd>You can access dumpstate information from the <code>adb shell</code> commands. See
-<a href="{@docRoot}tools/adb.html#dumpsys">dumpsys and
+<a href="{@docRoot}tools/help/adb.html#dumpsys">dumpsys and
 dumpstate</a> on the adb topic page.</dd>
 
 

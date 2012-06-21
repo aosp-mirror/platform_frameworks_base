@@ -42,7 +42,7 @@ development steps encompass four development phases, which include:</p>
     can install and run on the emulator or an Android-powered device. If you are using Eclipse,
     builds are generated each time you project is saved. If you're using another IDE,
     you can build your project using Ant and install it on a device using
-    <a href="{@docRoot}tools/adb.html">adb</a>. For more information, see
+    <a href="{@docRoot}tools/help/adb.html">adb</a>. For more information, see
     <a href="{@docRoot}tools/building/index.html">Build and run your application</a>.</p>
     <p>Next, you debug your application using a JDWP-compliant debugger along with the debugging
     and logging tools that are provided with the Android SDK. Eclipse already comes packaged with
@@ -74,7 +74,7 @@ development steps encompass four development phases, which include:</p>
 
     <dd>Run your Android applications on an emulated Android platform.</dd>
 
-    <dt><a href="{@docRoot}tools/adb.html">Android Debug Bridge</a></dt>
+    <dt><a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a></dt>
 
     <dd>Interface with your emulator or connected device (install apps, shell the device, issue
     commands, etc.).</dd>

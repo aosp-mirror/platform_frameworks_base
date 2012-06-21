@@ -42,7 +42,7 @@ page.title=Glossary
         SDK. It provides tools to browse the device, copy tools on the device, and
         forward ports for debugging. If you are developing in Eclipse using the
 		ADT Plugin, adb is integrated into your development environment. See 
-		<a href="{@docRoot}tools/adb.html">Android Debug Bridge</a>
+		<a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a>
 		for more information. </dd>
 
     <dt id="application">Application</dt>
