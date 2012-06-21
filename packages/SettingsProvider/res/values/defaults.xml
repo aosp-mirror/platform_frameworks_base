@@ -120,7 +120,7 @@
 
     <!-- Default for Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION_URL -->
     <string name="def_accessibility_screen_reader_url" translatable="false">
-        https://ssl.gstatic.com/accessibility/javascript/android/AndroidScriptChooser.user.js
+        https://ssl.gstatic.com/accessibility/javascript/android/AndroidVox_v1.js
     </string>
 
     <!-- Default for Settings.Secure.TOUCH_EXPLORATION_ENABLED -->
