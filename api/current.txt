@@ -11538,6 +11538,7 @@ package android.media {
     method public abstract void onRouteSelected(android.media.MediaRouter, int, android.media.MediaRouter.RouteInfo);
     method public abstract void onRouteUngrouped(android.media.MediaRouter, android.media.MediaRouter.RouteInfo, android.media.MediaRouter.RouteGroup);
     method public abstract void onRouteUnselected(android.media.MediaRouter, int, android.media.MediaRouter.RouteInfo);
+    method public abstract void onRouteVolumeChanged(android.media.MediaRouter, android.media.MediaRouter.RouteInfo);
   }
 
   public static class MediaRouter.RouteCategory {
@@ -11573,6 +11574,8 @@ package android.media {
     method public int getVolume();
     method public int getVolumeHandling();
     method public int getVolumeMax();
+    method public void requestSetVolume(int);
+    method public void requestUpdateVolume(int);
     method public void setTag(java.lang.Object);
     field public static final int PLAYBACK_TYPE_LOCAL = 0; // 0x0
     field public static final int PLAYBACK_TYPE_REMOTE = 1; // 0x1
@@ -11589,6 +11592,7 @@ package android.media {
     method public void onRouteSelected(android.media.MediaRouter, int, android.media.MediaRouter.RouteInfo);
     method public void onRouteUngrouped(android.media.MediaRouter, android.media.MediaRouter.RouteInfo, android.media.MediaRouter.RouteGroup);
     method public void onRouteUnselected(android.media.MediaRouter, int, android.media.MediaRouter.RouteInfo);
+    method public void onRouteVolumeChanged(android.media.MediaRouter, android.media.MediaRouter.RouteInfo);
   }
 
   public static class MediaRouter.UserRouteInfo extends android.media.MediaRouter.RouteInfo {

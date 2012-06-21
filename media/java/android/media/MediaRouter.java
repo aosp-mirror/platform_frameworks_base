@@ -16,7 +16,10 @@
 
 package android.media;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -87,11 +90,14 @@ public class MediaRouter {
         }
 
         // Called after sStatic is initialized
-        void startMonitoringRoutes() {
+        void startMonitoringRoutes(Context appContext) {
             mDefaultAudio = new RouteInfo(mSystemCategory);
             mDefaultAudio.mNameResId = com.android.internal.R.string.default_audio_route_name;
             mDefaultAudio.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO;
             addRoute(mDefaultAudio);
+
+            appContext.registerReceiver(new VolumeChangeReceiver(),
+                    new IntentFilter(AudioManager.VOLUME_CHANGED_ACTION));
 
             AudioRoutesInfo newRoutes = null;
             try {
@@ -190,8 +196,9 @@ public class MediaRouter {
     public MediaRouter(Context context) {
         synchronized (Static.class) {
             if (sStatic == null) {
-                sStatic = new Static(context.getApplicationContext());
-                sStatic.startMonitoringRoutes();
+                final Context appContext = context.getApplicationContext();
+                sStatic = new Static(appContext);
+                sStatic.startMonitoringRoutes(appContext);
             }
         }
     }
@@ -578,6 +585,33 @@ public class MediaRouter {
         }
     }
 
+    static void dispatchRouteVolumeChanged(RouteInfo info) {
+        for (CallbackInfo cbi : sStatic.mCallbacks) {
+            if ((cbi.type & info.mSupportedTypes) != 0) {
+                cbi.cb.onRouteVolumeChanged(cbi.router, info);
+            }
+        }
+    }
+
+    static void systemVolumeChanged(int newValue) {
+        final RouteInfo selectedRoute = sStatic.mSelectedRoute;
+        if (selectedRoute == null) return;
+
+        if (selectedRoute == sStatic.mBluetoothA2dpRoute ||
+                selectedRoute == sStatic.mDefaultAudio) {
+            dispatchRouteVolumeChanged(selectedRoute);
+        } else if (sStatic.mBluetoothA2dpRoute != null) {
+            try {
+                dispatchRouteVolumeChanged(sStatic.mAudioService.isBluetoothA2dpOn() ?
+                        sStatic.mBluetoothA2dpRoute : sStatic.mDefaultAudio);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error checking Bluetooth A2DP state to report volume change", e);
+            }
+        } else {
+            dispatchRouteVolumeChanged(sStatic.mDefaultAudio);
+        }
+    }
+
     /**
      * Information about a media route.
      */
@@ -735,6 +769,9 @@ public class MediaRouter {
         }
 
         /**
+         * Return the current volume for this route. Depending on the route, this may only
+         * be valid if the route is currently selected.
+         *
          * @return the volume at which the playback associated with this route is performed
          * @see UserRouteInfo#setVolume(int)
          */
@@ -749,6 +786,44 @@ public class MediaRouter {
                 return vol;
             } else {
                 return mVolume;
+            }
+        }
+
+        /**
+         * Request a volume change for this route.
+         * @param volume value between 0 and getVolumeMax
+         */
+        public void requestSetVolume(int volume) {
+            if (mPlaybackType == PLAYBACK_TYPE_LOCAL) {
+                try {
+                    sStatic.mAudioService.setStreamVolume(mPlaybackStream, volume, 0);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error setting local stream volume", e);
+                }
+            } else {
+                Log.e(TAG, getClass().getSimpleName() + ".requestSetVolume(): " +
+                        "Non-local volume playback on system route? " +
+                        "Could not request volume change.");
+            }
+        }
+
+        /**
+         * Request an incremental volume update for this route.
+         * @param direction Delta to apply to the current volume
+         */
+        public void requestUpdateVolume(int direction) {
+            if (mPlaybackType == PLAYBACK_TYPE_LOCAL) {
+                try {
+                    final int volume =
+                            Math.max(0, Math.min(getVolume() + direction, getVolumeMax()));
+                    sStatic.mAudioService.setStreamVolume(mPlaybackStream, volume, 0);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error setting local stream volume", e);
+                }
+            } else {
+                Log.e(TAG, getClass().getSimpleName() + ".requestChangeVolume(): " +
+                        "Non-local volume playback on system route? " +
+                        "Could not request volume change.");
             }
         }
 
@@ -821,6 +896,8 @@ public class MediaRouter {
 
     /**
      * Information about a route that the application may define and modify.
+     * A user route defaults to {@link RouteInfo#PLAYBACK_TYPE_REMOTE} and
+     * {@link RouteInfo#PLAYBACK_VOLUME_FIXED}.
      *
      * @see MediaRouter.RouteInfo
      */
@@ -830,6 +907,8 @@ public class MediaRouter {
         UserRouteInfo(RouteCategory category) {
             super(category);
             mSupportedTypes = ROUTE_TYPE_USER;
+            mPlaybackType = PLAYBACK_TYPE_REMOTE;
+            mVolumeHandling = PLAYBACK_VOLUME_FIXED;
         }
 
         /**
@@ -949,9 +1028,33 @@ public class MediaRouter {
          * @param volume
          */
         public void setVolume(int volume) {
+            volume = Math.max(0, Math.min(volume, getVolumeMax()));
             if (mVolume != volume) {
                 mVolume = volume;
                 setPlaybackInfoOnRcc(RemoteControlClient.PLAYBACKINFO_VOLUME, volume);
+                dispatchRouteVolumeChanged(this);
+            }
+        }
+
+        @Override
+        public void requestSetVolume(int volume) {
+            if (mVolumeHandling == PLAYBACK_VOLUME_VARIABLE) {
+                if (mVcb == null) {
+                    Log.e(TAG, "Cannot requestSetVolume on user route - no volume callback set");
+                    return;
+                }
+                mVcb.vcb.onVolumeSetRequest(this, volume);
+            }
+        }
+
+        @Override
+        public void requestUpdateVolume(int direction) {
+            if (mVolumeHandling == PLAYBACK_VOLUME_VARIABLE) {
+                if (mVcb == null) {
+                    Log.e(TAG, "Cannot requestChangeVolume on user route - no volumec callback set");
+                    return;
+                }
+                mVcb.vcb.onVolumeUpdateRequest(this, direction);
             }
         }
 
@@ -1018,6 +1121,7 @@ public class MediaRouter {
         RouteGroup(RouteCategory category) {
             super(category);
             mGroup = this;
+            mVolumeHandling = PLAYBACK_VOLUME_FIXED;
         }
 
         CharSequence getName(Resources res) {
@@ -1138,6 +1242,45 @@ public class MediaRouter {
             setIconDrawable(sStatic.mResources.getDrawable(resId));
         }
 
+        @Override
+        public void requestSetVolume(int volume) {
+            final int maxVol = getVolumeMax();
+            if (maxVol == 0) {
+                return;
+            }
+
+            final float scaledVolume = (float) volume / maxVol;
+            final int routeCount = getRouteCount();
+            for (int i = 0; i < routeCount; i++) {
+                final RouteInfo route = getRouteAt(i);
+                final int routeVol = (int) (scaledVolume * route.getVolumeMax());
+                route.requestSetVolume(routeVol);
+            }
+            if (volume != mVolume) {
+                mVolume = volume;
+                dispatchRouteVolumeChanged(this);
+            }
+        }
+
+        @Override
+        public void requestUpdateVolume(int direction) {
+            final int maxVol = getVolumeMax();
+            if (maxVol == 0) {
+                return;
+            }
+
+            final int routeCount = getRouteCount();
+            for (int i = 0; i < routeCount; i++) {
+                final RouteInfo route = getRouteAt(i);
+                route.requestUpdateVolume(direction);
+            }
+            final int volume = Math.max(0, Math.min(mVolume + direction, maxVol));
+            if (volume != mVolume) {
+                mVolume = volume;
+                dispatchRouteVolumeChanged(this);
+            }
+        }
+
         void memberNameChanged(RouteInfo info, CharSequence name) {
             mUpdateName = true;
             routeUpdated();
@@ -1157,10 +1300,23 @@ public class MediaRouter {
                 return;
             }
 
+            int maxVolume = 0;
+            boolean isLocal = true;
+            boolean isFixedVolume = true;
             for (int i = 0; i < count; i++) {
-                types |= mRoutes.get(i).mSupportedTypes;
+                final RouteInfo route = mRoutes.get(i);
+                types |= route.mSupportedTypes;
+                final int routeMaxVolume = route.getVolumeMax();
+                if (routeMaxVolume > maxVolume) {
+                    maxVolume = routeMaxVolume;
+                }
+                isLocal &= route.getPlaybackType() == PLAYBACK_TYPE_LOCAL;
+                isFixedVolume &= route.getVolumeHandling() == PLAYBACK_VOLUME_FIXED;
             }
+            mPlaybackType = isLocal ? PLAYBACK_TYPE_LOCAL : PLAYBACK_TYPE_REMOTE;
+            mVolumeHandling = isFixedVolume ? PLAYBACK_VOLUME_FIXED : PLAYBACK_VOLUME_VARIABLE;
             mSupportedTypes = types;
+            mVolumeMax = maxVolume;
             mIcon = count == 1 ? mRoutes.get(0).getIconDrawable() : null;
             super.routeUpdated();
         }
@@ -1381,6 +1537,14 @@ public class MediaRouter {
          * @param group The group the route was removed from
          */
         public abstract void onRouteUngrouped(MediaRouter router, RouteInfo info, RouteGroup group);
+
+        /**
+         * Called when a route's volume changes.
+         *
+         * @param router the MediaRouter reporting the event
+         * @param info The route with altered volume
+         */
+        public abstract void onRouteVolumeChanged(MediaRouter router, RouteInfo info);
     }
 
     /**
@@ -1419,6 +1583,9 @@ public class MediaRouter {
         public void onRouteUngrouped(MediaRouter router, RouteInfo info, RouteGroup group) {
         }
 
+        @Override
+        public void onRouteVolumeChanged(MediaRouter router, RouteInfo info) {
+        }
     }
 
     static class VolumeCallbackInfo {
@@ -1459,4 +1626,25 @@ public class MediaRouter {
         public abstract void onVolumeSetRequest(RouteInfo info, int volume);
     }
 
+    static class VolumeChangeReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(AudioManager.VOLUME_CHANGED_ACTION)) {
+                final int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
+                        -1);
+                if (streamType != AudioManager.STREAM_MUSIC) {
+                    return;
+                }
+
+                final int newVolume = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, 0);
+                final int oldVolume = intent.getIntExtra(
+                        AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE, 0);
+                if (newVolume != oldVolume) {
+                    systemVolumeChanged(newVolume);
+                }
+            }
+        }
+
+    }
 }
