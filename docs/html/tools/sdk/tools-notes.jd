@@ -12,8 +12,7 @@ latest revision of the SDK Tools in the <code>&lt;sdk&gt;/tools</code> directory
 of the SDK Tools, use the <em>Android SDK Manager</em> to get the
 update, rather than downloading a new SDK starter package. For more information
 about how to update, see <a
-href="{@docRoot}sdk/adding-components.html#UpdatingComponents">Updating SDK
-Components</a>.</p>
+href="{@docRoot}sdk/exploring.html#UpdatingComponents">Exploring the SDK</a>.</p>
 
 
 <h2 id="notes">Revisions</h2>
@@ -71,7 +70,7 @@ padding: 5px 0 0;
 
   <div class="toggleme">
     <p class="note"><strong>Note:</strong> This update of SDK Tools is only available through
-the <a href="{@docRoot}sdk/adding-components.html">Android SDK Manager</a>. Use this tool to
+the <a href="{@docRoot}sdk/exploring.html">Android SDK Manager</a>. Use this tool to
 download and install this update.</p>
 
     <dl>
@@ -586,8 +585,8 @@ Ant</a> 1.8 or later.</p>
 (Android 2.1, Android 2.2, and so on) use the same (latest) version of build
 tools such as <code>adb</code>, <code>aapt</code>, <code>aidl</code>, and
 <code>dx</code>. To download the Platform-tools component, use the Android SDK
-Manager, as described in <a href="adding-components.html">Adding SDK
-Components</a></p>
+Manager, as described in <a href="{@docRoot}sdk/exploring.html">Exploring the
+SDK</a></p>
 
 <dt>Upgrading from SDK Tools r7:</dt>
 <dd>

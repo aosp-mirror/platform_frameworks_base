@@ -31,7 +31,7 @@ differences report &raquo;</a> </li>
 
   <h2>See Also</h2>
   <ol>
-    <li><a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a></li>
+    <li><a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a></li>
   </ol>
 
 </div>
@@ -56,8 +56,8 @@ includes no external libraries. </p>
 <p>To get started developing or testing against the Android
 {@sdkPlatformVersion} platform, use the Android SDK and AVD Manager tool to
 download the platform into your Android 1.6 or later SDK. For more information,
-see <a href="{@docRoot}sdk/adding-components.html">Adding SDK
-Components</a>.</p>
+see <a href="{@docRoot}sdk/exploring.html">Exploring the
+SDK</a>.</p>
 
 
 <h2 id="features">Platform Highlights</h2>

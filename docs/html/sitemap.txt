@@ -10,7 +10,7 @@ http://developer.android.com/license.html
 http://developer.android.com/sdk/installing/index.html
 http://developer.android.com/about/versions/android-3.0-highlights.html
 http://developer.android.com/sdk/preview/index.html
-http://developer.android.com/sdk/adding-components.html
+http://developer.android.com/sdk/exploring.html
 http://developer.android.com/about/versions/android-2.3.html
 http://developer.android.com/about/versions/android-2.3-highlights.html
 http://developer.android.com/sdk/api_diff/9/changes.html

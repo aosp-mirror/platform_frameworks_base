@@ -66,7 +66,7 @@ function toggleDiv(link) {
 <h2>See also</h2>
   <ol>
     <li><a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin for Eclipse</a></li>
-    <li><a href="{@docRoot}sdk/adding-components.html">Adding SDK Packages</a></li>
+    <li><a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a></li>
   </ol>
 
 </div>
@@ -83,7 +83,7 @@ this page.</p>
 
 <p>If you already have an Android SDK, use the Android SDK Manager tool to install
 updated tools and new Android platforms into your existing environment. For information about how to
-do that, see <a href="{@docRoot}sdk/adding-components.html">Adding SDK Packages</a>.</p>
+do that, see <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.</p>
 
 
 <h2 id="Preparing">Step 1. Preparing Your Development Computer</h2>
@@ -349,7 +349,7 @@ developing Android apps. The next section describes the contents of the Android 
 you with the packages you've just installed.</p>
 
 <p>For more information about using the Android SDK Manager, see the <a
-href="{@docRoot}sdk/adding-components.html">Adding SDK Packages</a> document. </p>
+href="{@docRoot}sdk/exploring.html">Exploring the SDK</a> document. </p>
 
 
 <h2 id="sdkContents">Step 5. Exploring the SDK (Optional)</h2>

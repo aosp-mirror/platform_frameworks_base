@@ -15,7 +15,7 @@ development and testing.</p>
 <p>If you already have an Android SDK for platform version 1.6 or newer, then
 you do not need to install a new SDK&mdash;especially not one from this page.
 You should install older platforms as components of your existing SDK.
-See <a href="adding-components.html">Adding SDK Components</a>.</p>
+See <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.</p>
 </div>
 
 
