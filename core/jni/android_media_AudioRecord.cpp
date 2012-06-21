@@ -18,22 +18,12 @@
 
 #define LOG_TAG "AudioRecord-JNI"
 
-#include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <math.h>
-
 #include <jni.h>
 #include <JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 
 #include <utils/Log.h>
-#include <utils/SortedVector.h>
-#include <utils/threads.h>
 #include <media/AudioRecord.h>
-#include <media/mediarecorder.h>
-
-#include <cutils/bitops.h>
 
 #include <system/audio.h>
 
