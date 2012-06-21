@@ -1897,7 +1897,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Equivalent to calling {@link View#setPadding(int, int, int, int)}.
+     * Equivalent to calling {@link android.view.View#setPadding(int, int, int, int)}.
      *
      * @param viewId The id of the view to change
      * @param left the left padding in pixels
