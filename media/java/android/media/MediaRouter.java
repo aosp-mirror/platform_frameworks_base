@@ -1033,6 +1033,9 @@ public class MediaRouter {
                 mVolume = volume;
                 setPlaybackInfoOnRcc(RemoteControlClient.PLAYBACKINFO_VOLUME, volume);
                 dispatchRouteVolumeChanged(this);
+                if (mGroup != null) {
+                    mGroup.memberVolumeChanged(this);
+                }
             }
         }
 
@@ -1148,6 +1151,7 @@ public class MediaRouter {
             mRoutes.add(route);
             route.mGroup = this;
             mUpdateName = true;
+            updateVolume();
             dispatchRouteGrouped(route, this, at);
             routeUpdated();
         }
@@ -1171,6 +1175,7 @@ public class MediaRouter {
             mRoutes.add(insertAt, route);
             route.mGroup = this;
             mUpdateName = true;
+            updateVolume();
             dispatchRouteGrouped(route, this, insertAt);
             routeUpdated();
         }
@@ -1188,6 +1193,7 @@ public class MediaRouter {
             mRoutes.remove(route);
             route.mGroup = null;
             mUpdateName = true;
+            updateVolume();
             dispatchRouteUngrouped(route, this);
             routeUpdated();
         }
@@ -1201,6 +1207,7 @@ public class MediaRouter {
             RouteInfo route = mRoutes.remove(index);
             route.mGroup = null;
             mUpdateName = true;
+            updateVolume();
             dispatchRouteUngrouped(route, this);
             routeUpdated();
         }
@@ -1270,11 +1277,15 @@ public class MediaRouter {
             }
 
             final int routeCount = getRouteCount();
+            int volume = 0;
             for (int i = 0; i < routeCount; i++) {
                 final RouteInfo route = getRouteAt(i);
                 route.requestUpdateVolume(direction);
+                final int routeVol = route.getVolume();
+                if (routeVol > volume) {
+                    volume = routeVol;
+                }
             }
-            final int volume = Math.max(0, Math.min(mVolume + direction, maxVol));
             if (volume != mVolume) {
                 mVolume = volume;
                 dispatchRouteVolumeChanged(this);
@@ -1288,6 +1299,26 @@ public class MediaRouter {
 
         void memberStatusChanged(RouteInfo info, CharSequence status) {
             setStatusInt(status);
+        }
+
+        void memberVolumeChanged(RouteInfo info) {
+            updateVolume();
+        }
+
+        void updateVolume() {
+            // A group always represents the highest component volume value.
+            final int routeCount = getRouteCount();
+            int volume = 0;
+            for (int i = 0; i < routeCount; i++) {
+                final int routeVol = getRouteAt(i).getVolume();
+                if (routeVol > volume) {
+                    volume = routeVol;
+                }
+            }
+            if (volume != mVolume) {
+                mVolume = volume;
+                dispatchRouteVolumeChanged(this);
+            }
         }
 
         @Override
