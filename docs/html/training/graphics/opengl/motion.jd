@@ -1,0 +1,92 @@
+page.title=Adding Motion
+parent.title=Displaying Graphics with OpenGL ES
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Applying Projection and Camera Views
+previous.link=projection.html
+next.title=Responding to Touch Events
+next.link=touch.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#rotate-gl1">Rotate a Shape</a></li>
+  <li><a href="#cont-render">Enable Continuous Rendering</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL</a></li>
+</ul>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/OpenGLES.zip"
+class="button">Download the sample</a>
+ <p class="filename">OpenGLES.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>Drawing objects on screen is a pretty basic feature of OpenGL, but you can do this with other
+Android graphics framwork classes, including {@link android.graphics.Canvas} and
+{@link android.graphics.drawable.Drawable} objects. OpenGL ES provides additional capabilities for
+moving and transforming drawn objects in three dimensions or in other unique ways to create
+compelling user experiences.</p>
+
+<p>In this lesson, you take another step forward into using OpenGL ES by learning how to add motion
+to a shape with rotation.</p>
+
+
+<h2 id="rotate">Rotate a Shape</h2>
+
+<p>Rotating a drawing object with OpenGL ES 2.0 is relatively simple. You create another
+transformation matrix (a rotation matrix) and then combine it with your projection and
+camera view tranformation matrices:</p>
+
+<pre>
+private float[] mRotationMatrix = new float[16];
+public void onDrawFrame(GL10 gl) {
+    ...
+    // Create a rotation transformation for the triangle
+    long time = SystemClock.uptimeMillis() % 4000L;
+    float angle = 0.090f * ((int) time);
+    Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, -1.0f);
+
+    // Combine the rotation matrix with the projection and camera view
+    Matrix.multiplyMM(mMVPMatrix, 0, mRotationMatrix, 0, mMVPMatrix, 0);
+
+    // Draw triangle
+    mTriangle.draw(mMVPMatrix);
+}
+</pre>
+
+<p>If your triangle does not rotate after making these changes, make sure you have commented out the
+{@link android.opengl.GLSurfaceView#RENDERMODE_WHEN_DIRTY GLSurfaceView.RENDERMODE_WHEN_DIRTY} 
+setting, as described in the next section.</p>
+
+
+<h2 id="cont-render">Enable Continuous Rendering</h2>
+
+<p>If you have diligently followed along with the example code in this class to this point, make
+sure you comment out the line that sets the render mode only draw when dirty, otherwise OpenGL
+rotates the shape only one increment and then waits for a call to {@link
+android.opengl.GLSurfaceView#requestRender requestRender()} from the {@link
+android.opengl.GLSurfaceView} container:</p>
+
+<pre>
+public MyGLSurfaceView(Context context) {
+    ...
+    // Render the view only when there is a change in the drawing data
+    //setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY); // comment out for auto-rotation
+}
+</pre>
+
+<p>Unless you have objects changing without any user interaction, it’s usually a good idea have this
+flag turned on. Be ready to uncomment this code, because the next lesson makes this call applicable
+once again.</p>

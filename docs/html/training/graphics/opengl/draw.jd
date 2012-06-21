@@ -1,0 +1,195 @@
+page.title=Drawing Shapes
+parent.title=Displaying Graphics with OpenGL ES
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Defining Shapes
+previous.link=environment.html
+next.title=Applying Projection and Camera Views
+next.link=projection.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#initialize">Initialize Shapes</a></li>
+  <li><a href="#draw">Draw a Shape</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL</a></li>
+</ul>
+
+<div class="download-box">
+ <a href="{@docRoot}shareables/training/OpenGLES.zip"
+class="button">Download the sample</a>
+ <p class="filename">OpenGLES.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>After you define shapes to be drawn with OpenGL, you probably want to draw them. Drawing shapes
+with the OpenGL ES 2.0 takes a bit more code than you might imagine, because the API provides a
+great deal of control over the graphics rendering pipeline.</p>
+
+<p>This lesson explains how to draw the shapes you defined in the previous lesson using the OpenGL
+ES 2.0 API.</p>
+
+
+<h2 id="initialize">Initialize Shapes</h2>
+
+<p>Before you do any drawing, you must initialize and load the shapes you plan to draw. Unless the
+structure (the original coordinates) of the shapes you use in your program change during the course
+of execution, you should initialize them in the {@link
+android.opengl.GLSurfaceView.Renderer#onSurfaceCreated onSurfaceCreated()} method of your renderer
+for memory and processing efficiency.</p>
+
+<pre>
+public void onSurfaceCreated(GL10 unused, EGLConfig config) {
+    ...
+
+    // initialize a triangle
+    mTriangle = new Triangle();
+    // initialize a square
+    mSquare = new Square();
+}
+</pre>
+
+
+<h2 id="draw">Draw a Shape</h2>
+
+<p>Drawing a defined shape using OpenGL ES 2.0 requires a significant amount of code, because you
+must provide a lot of details to the graphics rendering pipeline. Specifically, you must define the
+following:</p>
+
+<ul>
+  <li><em>Vertex Shader</em> - OpenGL ES graphics code for rendering the vertices of a shape.</li>
+  <li><em>Fragment Shader</em> - OpenGL ES code for rendering the face of a shape with colors or
+textures.</li>
+  <li><em>Program</em> - An OpenGL ES object that contains the shaders you want to use for drawing
+one or more shapes.</li>
+</ul>
+
+<p>You need at least one vertex shader to draw a shape and one fragment shader to color that shape.
+These shaders must be complied and then added to an OpenGL ES program, which is then used to draw
+the shape. Here is an example of how to define basic shaders you can use to draw a shape:</p>
+
+<pre>
+private final String vertexShaderCode =
+    "attribute vec4 vPosition;" +
+    "void main() {" +
+    "  gl_Position = vPosition;" +
+    "}";
+
+private final String fragmentShaderCode =
+    "precision mediump float;" +
+    "uniform vec4 vColor;" +
+    "void main() {" +
+    "  gl_FragColor = vColor;" +
+    "}";
+</pre>
+
+<p>Shaders contain OpenGL Shading Language (GLSL) code that must be compiled prior to using it in
+the OpenGL ES environment. To compile this code, create a utility method in your renderer class:</p>
+
+<pre>
+public static int loadShader(int type, String shaderCode){
+
+    // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
+    // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
+    int shader = GLES20.glCreateShader(type);
+
+    // add the source code to the shader and compile it
+    GLES20.glShaderSource(shader, shaderCode);
+    GLES20.glCompileShader(shader);
+
+    return shader;
+}
+</pre>
+
+<p>In order to draw your shape, you must compile the shader code, add them to a OpenGL ES program
+object and then link the program. Do this in your drawn object’s constructor, so it is only done
+once.</p>
+
+<p class="note"><strong>Note:</strong> Compiling OpenGL ES shaders and linking programs is expensive
+in terms of CPU cycles and processing time, so you should avoid doing this more than once. If you do
+not know the content of your shaders at runtime, you should build your code such that they only
+get created once and then cached for later use.</p>
+
+<pre>
+public Triangle() {
+    ...
+
+    int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
+    int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
+
+    mProgram = GLES20.glCreateProgram();             // create empty OpenGL ES Program
+    GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
+    GLES20.glAttachShader(mProgram, fragmentShader); // add the fragment shader to program
+    GLES20.glLinkProgram(mProgram);                  // creates OpenGL ES program executables
+}
+</pre>
+
+<p>At this point, you are ready to add the actual calls that draw your shape. Drawing shapes with
+OpenGL ES requires that you specify several parameters to tell the rendering pipeline what you want
+to draw and how to draw it. Since drawing options can vary by shape, it's a good idea to have your
+shape classes contain their own drawing logic.</p>
+
+<p>Create a {@code draw()} method for drawing the shape. This code sets the position and
+color values to the shape’s vertex shader and fragment shader, and then executes the drawing
+function.</p>
+
+<pre>
+public void draw() {
+    // Add program to OpenGL ES environment
+    GLES20.glUseProgram(mProgram);
+
+    // get handle to vertex shader's vPosition member
+    mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
+
+    // Enable a handle to the triangle vertices
+    GLES20.glEnableVertexAttribArray(mPositionHandle);
+
+    // Prepare the triangle coordinate data
+    GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
+                                 GLES20.GL_FLOAT, false,
+                                 vertexStride, vertexBuffer);
+
+    // get handle to fragment shader's vColor member
+    mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
+
+    // Set color for drawing the triangle
+    GLES20.glUniform4fv(mColorHandle, 1, color, 0);
+
+    // Draw the triangle
+    GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
+
+    // Disable vertex array
+    GLES20.glDisableVertexAttribArray(mPositionHandle);
+}
+</pre>
+
+<p>Once you have all this code in place, drawing this object just requires a call to the
+{@code draw()} method from within your renderer’s {@link
+android.opengl.GLSurfaceView.Renderer#onDrawFrame onDrawFrame()} method. When you run the
+application, it should look something like this:</p>
+
+<img src="{@docRoot}images/opengl/ogl-triangle.png">
+<p class="img-caption">
+<strong>Figure 1.</strong> Triangle drawn without a projection or camera view.</p>
+
+<p>There are a few problems with this code example. First of all, it is not going to impress your
+friends. Secondly, the triangle is a bit squashed and changes shape when you change the screen
+orientation of the device. The reason the shape is skewed is due to the fact that the object’s
+vertices have not been corrected for the proportions of the screen area where the {@link
+android.opengl.GLSurfaceView} is displayed. You can fix that problem using a projection and camera
+view in the next lesson.</p>
+
+<p>Lastly, the triangle is stationary, which is a bit boring. In the <a href="motion.html">Adding
+Motion</a> lesson, you make this shape rotate and make more interesting use of the OpenGL ES
+graphics pipeline.</p>
