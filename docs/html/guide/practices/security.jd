@@ -20,8 +20,7 @@ page.title=﻿Designing for Security
 <ol>
 <li><a href="http://source.android.com/tech/security/index.html">Android
 Security Overview</a></li>
-<li><a href="{@docRoot}guide/topics/security/security.html">Android Security
-And Permissions</a></li>
+<li><a href="{@docRoot}guide/topics/security/permissions.html">Permissions</a></li>
 </ol>
 </div></div>
 <p>Android was designed so that most developers will be able to build

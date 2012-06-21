@@ -69,6 +69,10 @@
           <span class="en">Processes and Threads</span>
         </a>
       </li>
+      <li><a href="<?cs var:toroot ?>guide/topics/security/permissions.html">
+          <span class="en">Permissions</span>
+        </a>
+      </li>
       <li><a href="<?cs var:toroot ?>guide/topics/appwidgets/index.html">
             <span class="en">App Widgets</span>
           </a></li>
