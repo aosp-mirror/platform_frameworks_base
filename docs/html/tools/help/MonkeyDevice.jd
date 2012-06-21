@@ -16,7 +16,7 @@ parent.link=index.html
 <p>
     You normally do not have to create an instance of <code>MonkeyDevice</code>. Instead, you
     use
-<code><a href="{@docRoot}tools/MonkeyRunner.html#waitForConnection">
+<code><a href="{@docRoot}tools/help/MonkeyRunner.html#waitForConnection">
 MonkeyRunner.waitForConnection()</a></code> to create a new object from a connection to a device or
 emulator. For example, instead of
 using:</p>
@@ -299,7 +299,7 @@ newdevice = MonkeyRunner.waitForConnection()
         <td class="jd-typecol">
             <nobr>
                 <code>
-                <a href="{@docRoot}tools/MonkeyImage.html">
+                <a href="{@docRoot}tools/help/MonkeyImage.html">
                         MonkeyImage
                     </a>
                 </code>
@@ -314,7 +314,7 @@ newdevice = MonkeyRunner.waitForConnection()
             <div class="jd-descrdiv">
                 Captures the entire screen buffer of this device, yielding a
                 <code>
-                <a href="{@docRoot}tools/MonkeyImage.html">
+                <a href="{@docRoot}tools/help/MonkeyImage.html">
                         MonkeyImage
                 </a>
                 </code> object containing a screen capture of the current display.
@@ -1033,7 +1033,7 @@ newdevice = MonkeyRunner.waitForConnection()
     <h4 class="jd-details-title">
       <span class="normal">
         <code>
-            <a href="{@docRoot}tools/MonkeyImage.html">
+            <a href="{@docRoot}tools/help/MonkeyImage.html">
                 MonkeyImage
             </a>
         </code>
@@ -1054,7 +1054,7 @@ newdevice = MonkeyRunner.waitForConnection()
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist">
         <li>
-            A <a href="{@docRoot}tools/MonkeyImage.html">
+            A <a href="{@docRoot}tools/help/MonkeyImage.html">
             MonkeyImage</a> object containing the image of the current display.
         </li>
       </ul>

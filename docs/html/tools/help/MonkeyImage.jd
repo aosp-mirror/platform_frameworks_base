@@ -14,7 +14,7 @@ parent.link=index.html
 </p>
 <p>
     You do not need to create new instances of <code>MonkeyImage</code>. Instead, use
-<code><a href="{@docRoot}tools/MonkeyDevice.html#takeSnapshot">
+<code><a href="{@docRoot}tools/help/MonkeyDevice.html#takeSnapshot">
 MonkeyDevice.takeSnapshot()</a></code> to create a new instance from a screenshot. For example, use:
 </p>
 <pre>
@@ -88,7 +88,7 @@ newimage = MonkeyDevice.takeSnapshot()
         <td class="jd-typecol">
             <nobr>
                 <code>
-                    <a href="{@docRoot}tools/MonkeyImage.html">MonkeyImage</a>
+                    <a href="{@docRoot}tools/help/MonkeyImage.html">MonkeyImage</a>
                 </code>
             </nobr>
         </td>
@@ -116,7 +116,7 @@ newimage = MonkeyDevice.takeSnapshot()
                 <span class="sympad">
                     <a href="#sameAs">sameAs</a>
                 </span>
-         (<code><a href="{@docRoot}tools/MonkeyImage.html">MonkeyImage</a></code>
+         (<code><a href="{@docRoot}tools/help/MonkeyImage.html">MonkeyImage</a></code>
             other,
             <em>float</em> percent)
             </nobr>
@@ -291,7 +291,7 @@ newimage = MonkeyDevice.takeSnapshot()
     <h4 class="jd-details-title">
       <span class="normal">
           <code>
-              <a href="{@docRoot}tools/MonkeyImage.html">MonkeyImage</a>
+              <a href="{@docRoot}tools/help/MonkeyImage.html">MonkeyImage</a>
           </code>
       </span>
       <span class="sympad">getSubImage</span>
@@ -344,7 +344,7 @@ newimage = MonkeyDevice.takeSnapshot()
       <span class="normal">
       (
        <code>
-           <a href="{@docRoot}tools/MonkeyImage.html">MonkeyImage</a>
+           <a href="{@docRoot}tools/help/MonkeyImage.html">MonkeyImage</a>
        </code> otherImage,
        <em>float</em> percent
       )

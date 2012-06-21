@@ -238,7 +238,7 @@ size qualifiers</a>.</p>
 <h4>New manifest attributes for screen-size compatibility</h4>
 
 <p>The framework offers a new set of <a
-href="{@docRoot}"><code>&lt;supports-screens&gt;</code></a> manifest attributes that let
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a> manifest attributes that let
 you manage your app's support for different screen sizess.
 Specifically, you can specify the largest and smallest screens on which your app
 is designed to run, as well as the largest screen on which it is designed run

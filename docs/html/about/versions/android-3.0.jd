@@ -189,11 +189,9 @@ before attempting to paste it.</p>
 object) at a time, but one {@link android.content.ClipData} can contain multiple {@link
 android.content.ClipData.Item}s.</p>
 
-<p>For more information, read the <a href="{@docRoot}guide/topics/clipboard/copy-paste.html">Copy
-and Paste</a> documentation. You can also see a simple implementation of copy and paste in the <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/content/ClipboardSample.html">API Demos</a>
-and a more complete implementation in the <a
-href="{@docRoot}resources/samples/NotePad/index.html">Note Pad</a> application.</p>
+<p>For more information, read the <a href="{@docRoot}guide/topics/text/copy-paste.html">Copy
+and Paste</a> documentation. You can also see a simple implementation of copy and paste in the API Demos
+sample and a more complete implementation in the Note Pad sample.</p>
 
 
 

@@ -1725,7 +1725,7 @@ main thread. See the
 <a href="{@docRoot}guide/components/loaders.html">Loaders</a> developer guide.</li>
       <li>System clipboard: Applications can copy and paste data (beyond mere text) to and from
 the system-wide clipboard. Clipped data can be plain text, a URI, or an intent. See the
-<a href="{@docRoot}guide/topics/clipboard/copy-paste.html">Copy and Paste</a> developer guide.</li>
+<a href="{@docRoot}guide/topics/text/copy-paste.html">Copy and Paste</a> developer guide.</li>
       <li>Drag and drop: A set of APIs built into the view framework that facilitates drag and drop
 operations. See the
 <a href="{@docRoot}guide/topics/ui/drag-drop.html">Drag and Drop</a> developer guide.</li>

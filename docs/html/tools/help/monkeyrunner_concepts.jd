@@ -94,11 +94,11 @@ parent.link=index.html
 <h2 id="SampleProgram">A Simple monkeyrunner Program</h2>
 <p>
     Here is a simple monkeyrunner program that connects to a device, creating a
-    <code><a href="{@docRoot}tools/MonkeyDevice.html">MonkeyDevice</a></code>
+    <code><a href="{@docRoot}tools/help/MonkeyDevice.html">MonkeyDevice</a></code>
     object. Using the <code>MonkeyDevice</code> object, the program installs an Android application
     package, runs one of its activities, and sends key events to the activity.
     The program then takes a screenshot of the result, creating a
-    <code><a href="{@docRoot}tools/MonkeyImage.html">MonkeyImage</a></code> object.
+    <code><a href="{@docRoot}tools/help/MonkeyImage.html">MonkeyImage</a></code> object.
     From this object, the program writes out a <code>.png</code> file containing the screenshot.
 </p>
 <pre>
@@ -141,19 +141,19 @@ result.writeToFile('myproject/shot1.png','png')
 </p>
 <ul>
     <li>
-        <code><a href="{@docRoot}tools/MonkeyRunner.html">MonkeyRunner</a></code>:
+        <code><a href="{@docRoot}tools/help/MonkeyRunner.html">MonkeyRunner</a></code>:
         A class of utility methods for monkeyrunner programs. This class provides a method for
         connecting monkeyrunner to a device or emulator. It also provides methods for
         creating UIs for a monkeyrunner program and for displaying the built-in help.
     </li>
     <li>
-        <code><a href="{@docRoot}tools/MonkeyDevice.html">MonkeyDevice</a></code>:
+        <code><a href="{@docRoot}tools/help/MonkeyDevice.html">MonkeyDevice</a></code>:
         Represents a device or emulator. This class provides methods for installing and
         uninstalling packages, starting an Activity, and sending keyboard or touch events to an
         application. You also use this class to run test packages.
     </li>
     <li>
-        <code><a href="{@docRoot}tools/MonkeyImage.html">MonkeyImage</a></code>:
+        <code><a href="{@docRoot}tools/help/MonkeyImage.html">MonkeyImage</a></code>:
         Represents a screen capture image. This class provides methods for capturing screens,
         converting bitmap images to various formats, comparing two MonkeyImage objects, and
         writing an image to a file.
