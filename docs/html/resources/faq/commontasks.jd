@@ -1,0 +1,827 @@
+page.title=Common Tasks and How to Do Them in Android
+parent.title=FAQs, Tips, and How-to
+parent.link=index.html
+@jd:body
+
+<ul>
+    <li><a href="#neweclipseandroidproject">Creating an Android Application using
+    the Eclipse plugin</a></li>
+    <li><a href="#newandroidprojectnoeclipse">Creating an Android Application without
+    the Eclipse plugin</a></li>
+    <li><a href="#addexternallibrary">Adding an External Library (.jar) using Eclipse</a></li>
+    <li><a href="#implementcallbacks">Implementing Activity callbacks</a> (Android
+        calls your activity at various key moments in its life cycle. You must know
+        how to handle each of these to draw your screen, initialize class members,
+        and acquire data.)</li>
+    <li><a href="#opennewscreen">Opening a new screen</a></li>
+    <li><a href="#listening">Listening for button clicks </a></li>
+    <li><a href="#configurewindowproperties">Configuring general window properties </a></li>
+    <li><a href="#localhostalias">Referring to localhost from the emulated environment</a></li>
+    <li><a href="#appstate">Storing and retrieving state</a></li>
+    <li><a href="{@docRoot}guide/topics/data/data-storage.html#preferences">Storing and retrieving preferences</a></li>
+    <li><a href="#storingandretrieving">Storing and retrieving larger or more complex
+            persistent data</a> (files and data) </li>
+    <li><a href="#playback">Playing audio, video, still, or other media files</a></li>
+    <li><a href="#broadcastreceivers">Listening for and broadcasting global messages
+        and setting alarms</a></li>
+    <li><a href="#alerts">Displaying alerts </a></li>
+    <li><a href="#progressbar">Displaying a progress bar</a> </li>
+    <li><a href="#addmenuitems">Adding items to the screen menu</a> </li>
+    <li><a href="#webpage">Display a web page</a> </li>
+    <li><a href="#binding">Binding to data</a></li>
+    <li><a href="#handle">Getting a Handle to a Screen Element</a></li>
+    <li><a href="#captureimages">Capture images from the phone camera </a></li>
+    <li><a href="#threading">Handling expensive operations in the UI thread</a></li>
+    <li><a href="#selectingtext">Selecting, highlighting, or styling portions of
+            text</a></li>
+    <li><a href="#querymap">Utilizing attributes in a Map query</a></li>
+    <li><a href="#filelist">List of files for an Android application</a></li>
+    <li><a href="#logging">Print messages to a log file</a></li>
+</ul>
+<p>The ApiDemos sample application includes many, many examples of common
+tasks and UI features. See the code inside
+<code>&lt;sdk&gt;samples/ApiDemos</code> and the other sample applications
+under the <code>samples/</code> folder in the SDK.</p>
+
+
+<h2 id="neweclipseandroidproject">Creating an Android Application using the Eclipse Plugin</h2>
+
+<p>Using the Android Eclipse plugin is the fastest and easiest way
+to start creating a new Android application. The plugin automatically generates
+the correct project structure for your application, and keeps the resources
+compiled for you automatically.</p>
+
+<p>It is still a good idea to know what is going on though. Take a look at <a
+href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a> 
+to understand the basics of how an Android application works.</p> 
+
+<p>You should also take a look at the ApiDemos application and the other sample
+applications included in the SDK, in the <code>&lt;sdk&gt;/samples/</code>
+folder in the SDK.</p>
+
+<p>Finally, a great way to started with Android development in Eclipse is to
+follow both the <a href="{@docRoot}resources/tutorials/hello-world.html">Hello,
+World</a> and <a
+href="{@docRoot}resources/tutorials/notepad/index.html">Notepad</a> code
+tutorials. In particular, the start of the Hello Android tutorial is an
+excellent introduction to creating a new Android application in Eclipse.</p>
+
+<h2 id="newandroidprojectnoeclipse">Creating an Android Application without the Eclipse Plugin</h2>
+
+<p>This topic describes the manual steps in creating an Android application.
+Before reading this, you should read <a
+href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a> 
+to understand the basics of how an Android application works. You might also 
+want to look at the sample code included with the Android SDK, in the 
+<code>&lt;sdk&gt;/samples/</code> directory. </p>
+
+<p>Here is a list of the basic steps in building an application.</p>
+<ol>
+    <li><strong>Create your required resource files</strong> &nbsp;&nbsp;This includes
+        the AndroidManifest.xml global description file, string files that your application
+        needs, and layout files describing your user interface. A full list of optional
+        and required files and syntax details for each is given in <a href="#filelist">File
+        List for an Android Application</a>. </li>
+    <li><strong>Design your user interface</strong> &nbsp;&nbsp;See <a
+    href="{@docRoot}guide/topics/ui/index.html">User Interface</a> for
+    details on elements of the Android screen. </li>
+    <li><strong>Implement your Activity </strong>(this page)<strong>&nbsp;&nbsp; </strong> You
+        will create one class/file for each screen in your application. Screens will
+        inherit from an {@link android.app android.app} class, typically {@link android.app.Activity
+        android.app.Activity} for basic screens, {@link android.app.ListActivity
+        android.app.ListActivity} for list screens, or {@link android.app.Dialog
+        android.app.Dialog} for dialog boxes. You will implement the required callbacks
+        that let you draw your screen, query data, and commit changes, and also perform
+        any required tasks such as opening additional screens or reading data from
+        the device. Common tasks, such as opening a new screen or reading data from
+        the device, are described below.
+        The list of files you'll need for your application are described in <a href="#filelist">List
+        of Files for an Android Application</a>. </li>
+    <li><strong><a href="{@docRoot}guide/developing/building/building-cmdline.html">Build and install your
+                package</a>.</strong> The Android SDK has some nice tools for generating
+                projects and debugging code. </li>
+</ol>
+
+<h2 id="addexternallibrary">Adding an External Library (.jar) using Eclipse</h2>
+<p>
+You can use a third party JAR in your application by adding it to your Eclipse project as follows:
+</p>
+<ol>
+<li>
+In the <strong>Package Explorer</strong> panel, right-click on your project and select <strong>Properties</strong>.
+<li>
+Select <strong>Java Build Path</strong>, then the tab <strong>Libraries</strong>.
+<li>
+Press the <strong>Add External JARs...</strong> button and select the JAR file.
+</ol>
+<p>
+Alternatively, if you want to include third party JARs with your package, create a new directory for them within your project and select <strong>Add Library...</strong> instead.</p>
+<p>
+It is not necessary to put external JARs in the assets folder.
+</p>
+
+<a name="implementcallbacks" id="implementcallbacks"></a>
+<h2>Implementing Activity Callbacks</h2>
+<p>Android calls a number of callbacks to let you draw your screen, store data before
+    pausing, and refresh data after closing. You must implement at least some of
+    these methods. Read the <a
+href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">Activities</a>
+    document to learn when and in what order these methods 
+    are called. Here are some of the standard types of screen classes that Android provides:</p>
+<ul>
+    <li>{@link android.app.Activity android.app.Activity} - This is a standard screen,
+        with no specialization.</li>
+    <li>{@link android.app.ListActivity android.app.ListActivity} - This is a screen
+        that is used to display a list of something. It hosts a ListView object,
+        and exposes methods to let you identify the selected item, receive callbacks
+        when the selected item changes, and perform other list-related actions. </li>
+    <li>{@link android.app.Dialog android.app.Dialog} - This is a small, popup dialog-style
+        window that isn't intended to remain in the history stack. (It is not resizeable
+        or moveable by the user.)</li>
+</ul>
+
+<a name="opennewscreen" id="opennewscreen"></a><h2>Opening a New Screen</h2>
+<p>Your Activity will often need to open another Activity screen as it progresses.
+    This new screen can be part of the same application or part of another application,
+    the new screen can be floating or full screen, it can return a result, and you
+    can decide whether to close this screen and remove it from the history stack
+    when you are done with it, or to keep the screen open in history. These next
+    sections describe all these options. </p>
+<h3>Floating or full?<a name="floatingorfull" id="floatingorfull"></a></h3>
+<p>When you open a new screen you can decide whether to make it transparent or floating,
+    or full-screen. The choice of new screen affects the event sequence of events
+    in the old screen (if the new screen obscures the old screen, a different
+    series of events is called in the old screen). See the <a
+    href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">Activities</a> document for
+details. </p> 
+<p>Transparent or floating windows are implemented in three
+    standard ways: </p>
+<ul>
+    <li>Create an {@link android.app.Dialog app.Dialog} class </li>
+    <li>Create an {@link android.app.AlertDialog app.AlertDialog} class </li>
+    <li>Set the {@link android.R.style#Theme_Dialog} <em>theme</em> attribute to <code>&#64;android:style/Theme.Dialog</code>
+        in your AndroidManifest.xml file. For example:    
+    <pre>&lt;activity class=&quot;AddRssItem&quot; android:label=&quot;Add an item&quot; android:theme=&quot;&#064;android:style/Theme.Dialog&quot;/&gt;</pre></li>
+</ul>
+
+<p>Calling startActivity() or startActivityForResult() will open a new screen in whatever
+    way it defines itself (if it uses a floating theme it will be floating,
+    otherwise it will be full screen). </p>
+<h3>Opening a Screen </h3>
+<p>When you want to open a new screen, you can either explicitly specify the activity
+    class to open, or you can let the operating system decide which screen to open,
+    based upon the data and various parameters you pass in. A screen is opened by
+    calling {@link android.app.Activity#startActivity(android.content.Intent) startActivity}
+    and passing in an {@link android.content.Intent Intent} object, which specifies
+    the criteria for the handling screen. To specify a specific screen, call Intent.setClass
+    or setClassName with the exact activity class to open. Otherwise, set a variety
+    of values and data, and let Android decide which screen is appropriate to open.
+    Android will find one or zero Activities that match the specified requirements;
+    it will never open multiple activities for a single request. More information
+    on Intents and how Android resolves them to a specific class is given in the
+    {@link android.content.Intent Intent} topic. </p>
+<a name="intentexamples" id="intentexamples"></a><h3>Some Intent examples </h3>
+<p>The following snippet loads the com.android.samples.Animation1 class, and
+    passes it some arbitrary data.:</p>
+<pre>Intent myIntent = new Intent();
+myIntent.setClassName(&quot;com.android.samples&quot;, &quot;com.android.samples.Animation1&quot;);
+myIntent.putExtra(&quot;com.android.samples.SpecialValue&quot;, &quot;Hello, Joe!&quot;); // key/value pair, where key needs current package prefix.
+startActivity(myIntent);    </pre>
+<p>The next snippet requests that a Web page be opened by specifying the VIEW action,
+    and a URI data string starting with &quot;http://&quot; schema:</p>
+<pre>Intent myIntent = new Intent(Intent.VIEW_ACTION, Uri.parse(&quot;http://www.google.com&quot;));</pre>
+<p>Here is the intent filter from the AndroidManifest.xml file for com.android.browser:</p>
+<pre>&lt;intent-filter&gt;
+    &lt;action android:name=&quot;android.intent.action.VIEW&quot; /&gt;
+    &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
+    &lt;scheme android:name=&quot;http&quot; /&gt;
+    &lt;scheme android:name=&quot;https&quot; /&gt;
+    &lt;scheme android:name=&quot;file&quot; /&gt;
+&lt;/intent-filter&gt; </pre>
+<p>Android defines a number of standard values, for instance the action constants
+    defined by {@link android.content.Intent}. You can define custom values, but
+    both the caller and handler must use them. See the &lt;intent-filter&gt;
+    tag description in <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">The AndroidManifest.xml
+    File</a> for more information on the manifest syntax for the handling
+    application. </p>
+<a name="returningaresult" id="returningaresult"></a><h3>Returning a Result from a Screen</h3>
+<p>A window can return a result after it closes. This result will be passed back
+    into the calling Activity's {@link android.app.Activity#onActivityResult(int,int,android.content.Intent)
+    onActivityResult()} method, which can supply an Intent containing arbitrary data, along with
+    the request code passed to startActivityForResult(). Note that you must call the {@link
+    android.app.Activity#startActivityForResult(android.content.Intent,int) startActivityForResult()}
+    method that accepts a request code parameter to get this callback. The following
+    code demonstrates opening a new screen and retrieving a result. </p>
+<pre>// Open the new screen.
+public void onClick(View v){
+    // Start the activity whose result we want to retrieve.  The
+    // result will come back with request code GET_CODE.
+    Intent intent = new Intent(this, com.example.app.ChooseYourBoxer.class);
+    startActivityForResult(intent, CHOOSE_FIGHTER);
+}
+
+// Listen for results.
+protected void onActivityResult(int requestCode, int resultCode, Intent data){
+    // See which child activity is calling us back.
+    switch (requestCode) {
+        case CHOOSE_FIGHTER:
+            // This is the standard resultCode that is sent back if the
+            // activity crashed or didn't doesn't supply an explicit result.
+            if (resultCode == RESULT_CANCELED){
+                myMessageboxFunction("Fight cancelled");
+            } 
+            else {
+                myFightFunction(data);
+            }
+        default:
+            break;
+    }
+}
+
+// Class SentResult
+// Temporary screen to let the user choose something.
+    private OnClickListener mLincolnListener = new OnClickListener(){
+        public void onClick(View v) {
+            Bundle stats = new Bundle();
+            stats.putString("height","6\'4\""); 
+            stats.putString("weight", "190 lbs");
+            stats.putString("reach", "74\"");
+            setResult(RESULT_OK, "Lincoln", stats);
+            finish();
+        }
+    };
+
+    private OnClickListener mWashingtonListener = new OnClickListener() {
+        public void onClick(View v){
+            Bundle stats = new Bundle();
+            stats.putString("height","6\'2\""); 
+            stats.putString("weight", "190 lbs");
+            stats.putString("reach", "73\"");
+            setResult(RESULT_OK, "Washington", stats);
+            finish();
+        }
+    };
+	</pre>
+<h3>Lifetime of the new screen </h3>
+<p>An activity can remove itself from the history stack by calling {@link android.app.Activity#finish()
+    Activity.finish()} on itself, or the activity that opened the screen can call
+    {@link android.app.Activity#finishActivity(int) Activity.finishActivity()}
+    on any screens that it opens to close them. </p>
+<a name="listening" id="listening"></a><h2>Listening for Button Clicks</h2>
+<p>Button click and other UI event capturing are covered in <a
+href="{@docRoot}guide/topics/ui/ui-events.html">Input Events</a>.</p>
+<a name="configurewindowproperties" id="configurewindowproperties"></a><h2>Configuring General Window Properties</h2>
+<p>You can set a number of general window properties, such as whether to display
+    a title, whether the window is floating, and whether it displays an icon, by
+    calling methods on the {@link android.view.Window Window} member
+    of the underlying View object for the window. Examples include calling {@link
+    android.app.Activity#getWindow() getWindow().requestFeature()} (or the convenience
+    method {@link android.app.Activity#requestWindowFeature(int) requestWindowFeature(<em>some_feature</em>)})
+    to hide the title. Here is an example of hiding the title bar:</p>
+<pre>//Hide the title bar
+requestWindowFeature(Window.FEATURE_NO_TITLE);
+</pre>
+<p>A better way to achieve the same end is to specify a theme in your Android
+Manifest file:</p>
+<pre>&lt;application android:icon="@drawable/icon" android:theme="@android:style/Theme.NoTitleBar"&gt;
+</pre>
+<p>This is preferable because it tells the system not to show a title bar while
+your application is starting up. With the explicit method call, your application
+will have a title bar visible to the user until <code>onCreate</code> runs.</p>
+<p>(Note that this can be applied to either the <code>&lt;application&gt;</code>
+tag or to individual <code>&lt;activity&gt;</code> tags.)</p>
+<p class="caution"><strong>Caution:</strong> This theme will also hide the Action Bar on Android
+3.0 and higher. If you want to keep the Action Bar, but hide the title bar, see how you can <a
+href="{@docRoot}guide/topics/ui/themes.html#SelectATheme">select a theme based on platform
+version</a>.</p>
+<a name="localhostalias" id="localhostalias"></a><h2>Referring to localhost from the emulated
+environment</h2>
+<p>
+If you need to refer to your host computer's <em>localhost</em>, such as when you 
+want the emulator client to contact a server running on the same host, use the alias 
+<code>10.0.2.2</code> to refer to the host computer's loopback interface. 
+From the emulator's perspective, localhost (<code>127.0.0.1</code>) refers to its own 
+loopback interface.
+</p>
+<a name="appstate" id="appstate"></a><h2>Storing and Retrieving State</h2>
+<p>If your application is dumped from memory because of space concerns, it will lose
+    all user interface state information such as checkbox state and text box values
+    as well as class member values. Android calls {@link android.app.Activity#onSaveInstanceState(android.os.Bundle)
+    Activity.onSaveInstanceState} before it pauses the application. This method hands in a {@link
+    android.os.Bundle Bundle} that can be used to store name/value pairs that will
+    persist and be handed back to the application even if it is dropped from memory.
+    Android will pass this Bundle back to you when it calls {@link android.app.Activity#onCreate(android.os.Bundle)
+    onCreate()}. This Bundle only exists while the application is still in the history
+    stack (whether or not it has been removed from memory) and will be lost when
+    the application is finalized. See the topics for {@link android.app.Activity#onSaveInstanceState} and
+    {@link android.app.Activity#onCreate} for
+    examples of storing and retrieving state.</p>
+<p>Read more about the lifecycle of an activity in <a
+href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a> document.</p>
+<h3>Storing and Retrieving Larger or More Complex Persistent Data<a name="storingandretrieving" id="storingandretrieving"></a></h3>
+<p>Your application can store files or complex collection objects, and reserve them
+    for private use by itself or other activities in the application, or it can expose
+    its data to all other applications on the device. See <a href="{@docRoot}guide/topics/data/data-storage.html">Storing,
+    Retrieving, and Exposing Data</a> to learn how to store and retrieve private data,
+    how to store and retrieve common data from the device, and how to expose your
+    private data to other applications.</p>
+<a name="playback" id="playback"></a><h2>Playing Media Files</h2>
+<p>Please see the document <a href="{@docRoot}guide/topics/media/index.html">Audio and Video</a> for more details.</p>
+<a name="broadcastreceivers" id="broadcastreceivers"></a><h2>Listening For and Broadcasting Global Messages, and Setting Alarms</h2>
+<p>You can create a listening class that can be notified or even instantiated whenever
+    a specific type of system message is sent. 
+</p>
+<p>The listening classes, called broadcast receivers, extend {@link android.content.BroadcastReceiver
+    BroadcastReceiver}. If you want Android to instantiate the object whenever an appropriate
+    intent notification is sent, define the receiver with a <code>&lt;receiver&gt;</code> element
+    in the AndroidManifext.xml file. If the caller is expected to instantiate the
+    object in preparation to receive a message, this is not required. The receiver
+    will get a call to their {@link android.content.BroadcastReceiver#onReceive(android.content.Context,android.content.Intent)
+    BroadcastReceiver.onReceive()} method. A receiver can define an <code>&lt;intent-filter&gt;</code> tag
+    that describes the types of messages it will receive. Just as Android's IntentResolver
+    will look for appropriate Activity matches for a startActivity() call, it will
+    look for any matching Receivers (but it will send the message to all matching
+    receivers, not to the &quot;best&quot; match). </p>
+<p>To send a notification, the caller creates an {@link android.content.Intent Intent}
+    object and calls {@link android.app.Activity#sendBroadcast(android.content.Intent)
+    Context.sendBroadcast()} with that Intent. Multiple recipients can receive
+    the same message. You can broadcast an Intent message to an intent receiver in
+    any application, not only your own. If the receiving class is not registered
+    using <code>&lt;receiver&gt;</code> in its manifest, you can dynamically instantiate
+    and register a receiver by calling {@link android.content.Context#registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)
+    Context.registerReceiver()}. </p>
+<p>Receivers can include intent filters to specify what kinds of intents they are
+    listening for. Alternatively, if you expect a single known caller to contact
+    a single known receiver, the receiver does not specify an intent filter, and
+    the caller specifies the receiver's class name in the Intent by calling {@link
+    android.content.Intent#setClassName(java.lang.String, java.lang.String) Intent.setClassName()}
+    with the recipient's class name. The recipient receives a {@link android.content.Context
+    Context} object that refers to its own package, not to the package of the sender.</p>
+<p><em><strong>Note:</strong></em>&nbsp;&nbsp;&nbsp;If a receiver or broadcaster
+    enforces permissions, your application might need to request permission
+    to send or receive messages from that object. You can request permission by using
+    the &lt;uses-permission&gt; tag in the manifest. </p>
+<p>Here is a code snippet of a sender and receiver. This example does not demonstrate
+    registering receivers dynamically. For a full code example, see the AlarmService
+    class in the ApiDemos project.</p>
+<h3>Sending the message</h3>
+<pre>// We are sending this to a specific recipient, so we will
+// only specify the recipient class name. 
+Intent intent = new Intent(this, AlarmReceiver.class);
+intent.putExtra(&quot;message&quot;,&quot;Wake up.&quot;);
+sendBroadcast(intent);
+</pre>
+<h3>Receiving the message</h3>
+<p><strong>Receiver AndroidManifest.xml </strong>(because there is no intent filter
+    child, this class will only receive a broadcast when the receiver class is specified
+    by name, as is done in this example):</p>
+<pre>
+&lt;receiver class=".AlarmReceiver" /&gt;</pre>
+<p><strong>Receiver Java code: </strong></p>
+<pre>
+public class AlarmReceiver extends BroadcastReceiver{
+    // Display an alert that we've received a message.    
+    &#064;Override 
+    public void onReceive(Context context, Intent intent){
+	    // Send a text notification to the screen.
+        NotificationManager nm = (NotificationManager)
+        context.getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.notifyWithText(R.id.alarm,
+                          &quot;Alarm!!!&quot;,
+                          NotificationManager.LENGTH_SHORT,
+                          null);
+   }
+}   </pre>
+<h3>Other system messages</h3>
+<p>You can listen for other system messages sent by Android as well, such as USB
+    connection/removal messages, SMS arrival messages, and timezone changes. See
+    {@link android.content.Intent} for a list of broadcast messages to listen for.
+    Messages are marked &quot;Broadcast Action&quot; in the documentation. </p>
+<h3>Listening for phone events<a name="phoneevents" id="phoneevents"></a></h3>
+<p>The {@link android.telephony android.telephony} package overview page describes how to
+    register to listen for phone events. </p>
+<a name="alarms" id="alarms"></a><h3>Setting Alarms </h3>
+<p>Android provides an {@link android.app.AlarmManager AlarmManager} service that
+    will let you specify an Intent to send at a designated time. This intent is typically
+    used to start an application at a preset time. (Note: If you want to send
+    a notification to a sleeping or running application, use {@link android.os.Handler
+    Handler} instead.)</p>
+<a name="alerts" id="alerts"></a><h2>Displaying Alerts</h2>
+<p>There are two major kinds of alerts that you may display to the user:
+(1) Normal alerts are displayed in response to a user action, such as
+trying to perform an action that is not allowed.  (2) Out-of-band alerts,
+called notifications, are
+displayed as a result of something happening in the background, such as the
+user receiving new e-mail.</p>
+
+<a name="dialogsandalerts" id="dialogsandalerts"></a><h3>Normal Alerts</h3>
+
+<p>Android provides a number of ways for you to show popup notifications to your
+    user as they interact with your application. </p>
+<table width="100%" border="1">
+    <tr>
+        <th scope="col">Class</th>
+        <th scope="col">Description</th>
+    </tr>
+    <tr>
+        <td>{@link android.app.Dialog app.Dialog}</td>
+        <td>A generic floating dialog box with a layout that you design. </td>
+    </tr>
+    <tr>
+        <td><p>{@link android.app.AlertDialog app.AlertDialog}</p></td>
+        <td>A popup alert dialog with two buttons (typically OK and Cancel) that
+            take callback handlers. See the section after this table for more details. </td>
+    </tr>
+    <tr>
+        <td>{@link android.app.ProgressDialog ProgressDialog} </td>
+        <td>A dialog box used to indicate progress of an operation with a known progress
+            value or an indeterminate length (setProgress(bool)). See <strong>Views</strong> &gt; <strong>Progress Bar</strong> in
+            ApiDemos for examples. </td>
+    </tr>
+    <tr>
+        <td>Activity</td>
+        <td>By setting the theme of an activity to
+            {@link android.R.style#Theme_Dialog 
+            android:theme=&quot;&#064;android:style/Theme.Dialog&quot;}, 
+            your activity will take on
+            the appearance of a normal dialog, floating on top of whatever was
+            underneath it.  You usually set the theme through the
+            {@link android.R.attr#theme android:theme} attribute in your AndroidManifest.xml.
+            The advantage of this
+            over Dialog and AlertDialog is that Application has a much better managed
+            life cycle than dialogs: if a dialog goes to the background and is killed,
+            you cannot recapture state, whereas Application exposes a {@link android.os.Bundle
+            Bundle} of saved values in <code>onCreate()</code> to help you maintain state.</td>
+    </tr>
+</table>
+<h3>AlertDialog</h3>
+<p>This is a basic warning dialog box that lets you configure a message, button text,
+    and callback. You can create one by calling using the {@link 
+    android.app.AlertDialog.Builder} class, as shown here. </p>
+<pre>private Handler mHandler = new Handler() {
+    public void handleMessage(Message msg) {
+        switch (msg.what) {
+            case ACCEPT_CALL:
+            answer(msg.obj);
+            break;
+    
+            case BOUNCE_TO_VOICEMAIL:
+            voicemail(msg.obj);
+            break;
+    
+        }
+    }
+};
+
+
+private void IncomingMotherInlawCall(Connection c) {
+    String Text;
+    
+    // &quot;Answer&quot; callback.
+    Message acceptMsg = Message.obtain();
+    acceptMsg.target = mHandler;
+    acceptMsg.what = ACCEPT_CALL;
+    acceptMsg.obj = c.getCall();
+    
+    // &quot;Cancel&quot; callback.
+    final Message rejectMsg = Message.obtain();
+    rejectMsg.target = mHandler;
+    rejectMsg.what = BOUNCE_TO_VOICEMAIL;
+    rejectMsg.obj = c.getCall();
+
+    new AlertDialog.Builder(this)
+      .setMessage("Phyllis is calling")
+      .setPositiveButton("Answer", acceptMsg)
+      .setOnCanceListener(new OnCancelListener() {
+        public void onCancel(DialogInterface dialog) {
+          rejectMsg.sendToTarget();
+        }});
+      .show();
+}    </pre>
+
+<h3>Notifications</h3>
+
+<p>Out-of-band alerts should always be displayed using the
+{@link android.app.NotificationManager}, which allows you to tell the user
+about something they may be interested in without disrupting what they are
+currently doing.  A notification can be anything from a brief pop-up box
+informing the user of the new information, through displaying a persistent
+icon in the status bar, to vibrating, playing sounds, or flashing lights to
+get the user's attention.  In all cases, the user must explicitly shift their
+focus to the notification before they can interact with it.</p>
+
+<p>The following code demonstrates using NotificationManager to display a basic text
+    popup when a new SMS message arrives in a listening service, and provides the
+    current message count. You can see several more examples in the ApiDemos application,
+    under app/ (named <em>notification</em>*.java).</p>
+<pre>static void setNewMessageIndicator(Context context, int messageCount){
+   // Get the static global NotificationManager object.
+   NotificationManager nm = NotificationManager.getDefault();</p>
+
+   // If we're being called because a new message has been received, 
+   // then display an icon and a count. Otherwise, delete the persistent
+   // message.
+   if (messageCount &gt; 0) {
+      nm.notifyWithText(myApp.NOTIFICATION_GUID,      // ID for this notification.
+                messageCount + &quot; new message&quot; + messageCount &gt; 1 ? &quot;s&quot;:&quot;&quot;, // Text to display.
+                NotificationManager.LENGTH_SHORT); // Show it for a short time only.
+   }
+}</pre>
+<p>To display a notification in the status bar and have it launch an intent when
+    the user selects it (such as the new text message notification does), call {@link
+    android.app.NotificationManager#notify(int, android.app.Notification) NotificationManager.notify()},
+    and pass in vibration patterns, status bar icons, or Intents to associate with
+    the notification. </p>
+<a name="progressbar" id="progressbar"></a><h2>Displaying a Progress Bar</h2>
+<p>An activity can display a progress bar to notify the user that something is happening.
+    To display a progress bar in a screen, call {@link android.app.Activity#requestWindowFeature(int)
+    Activity.requestWindowFeature(Window.FEATURE_PROGRESS)}. To set the value
+    of the progress bar, call {@link android.view.Window#setFeatureInt(int,int)
+    Activity.getWindow().setFeatureInt(Window.FEATURE_PROGRESS, <em>level</em>)}.
+    Progress bar values are from 0 to 9,999, or set the value to 10,000 to make the
+    progress bar invisible. </p>
+<p>You can also use the {@link android.app.ProgressDialog ProgressDialog} class,
+    which enables a  dialog box with an embedded progress bar to send a &quot;I'm working
+    on it&quot; notification to the user. </p>
+<a name="addmenuitems" id="addmenuitems"></a><h2>Adding Items to the Screen Menu</h2>
+<p>See <a href="{@docRoot}guide/topics/ui/menus.html">Menus</a>.</p>
+
+<a name="webpage" id="webpage"></a><h2>Display a Web Page</h2>
+<p>Use the {@link android.webkit.WebView webkit.WebView} object. </p>
+<a name="binding" id="binding"></a><h2>Binding to Data</h2>
+<p>You can bind a ListView to a set of underlying data by using a shim class called
+    {@link android.widget.ListAdapter ListAdapter} (or a subclass). ListAdapter subclasses
+    bind to a variety of data sources, and expose a common set of methods such as
+    getItem() and getView(), and uses them to pick View items to display in its list.
+    You can extend ListAdapter and override getView() to create your own custom list
+    items. There are essentially only two steps you need to perform to bind to data: </p>
+<ol>
+    <li>Create a ListAdapter object and specify its data source</li>
+    <li>Give the ListAdapter to your ListView object.</li>
+</ol>
+<p>That's it!</p>
+<p>Here's an example of binding a ListActivity screen to the results from a cursor
+    query. (Note that the setListAdapter() method shown is a convenience method that
+    gets the page's ListView object and calls setAdapter() on it.)</p>
+<pre>// Run a query and get a Cursor pointing to the results.
+Cursor c = People.query(this.getContentResolver(), null);
+startManagingCursor(c);
+
+// Create the ListAdapter. A SimpleCursorAdapter lets you specify two interesting things:
+// an XML template for your list item, and
+// The column to map to a specific item, by ID, in your template.
+ListAdapter adapter = new SimpleCursorAdapter(this,  
+                android.R.layout.simple_list_item_1,  // Use a template that displays a text view
+                c,                                    // Give the cursor to the list adapter
+                new String[] {People.NAME} ,          // Map the NAME column in the people database to...
+                new String[] {"text1"});              // The "text1" view defined in the XML template
+setListAdapter(adapter);</pre>
+<p>See view/List4 in the ApiDemos project for an example of extending ListAdapter
+    for a new data type. </p>
+
+<a name="handle"></a>
+
+<h2>Getting a Handle to a Screen Element</h2>
+<p>You can get a handle to a screen element by calling {@link
+android.app.Activity#findViewById(int) Activity.findViewById}. You can then use
+the handle to set or retrieve any values exposed by the object. </p>
+<a name="captureimages" id="captureimages"></a><h2>Capture Images from the Phone Camera</h2>
+<p>You can hook into the device's camera onto your own Canvas object by using the
+    {@link android.hardware.Camera Camera} class. See that class's documentation,
+    and the ApiDemos project's Camera Preview application (Graphics/Camera Preview)
+    for example code. </p>
+
+
+<a name="threading" id="threading"></a><h2>Handling Expensive Operations in the UI Thread</h2>
+<p>Avoid performing long-running operations (such as network I/O) directly in the UI thread &mdash; 
+the main thread of an application where the UI is run &mdash; or your application may be blocked 
+and become unresponsive. Here is a brief summary of the recommended approach for handling expensive operations:</p>
+<ol>
+<li>Create a Handler object in your UI thread</li>
+<li>Spawn off worker threads to perform any required expensive operations</li>
+<li>Post results from a worker thread back to the UI thread's handler either through a Runnable or a {@link android.os.Message}</li>
+<li>Update the views on the UI thread as needed</li>
+</ol>
+
+<p>The following outline illustrates a typical implementation:</p>
+
+<pre>
+public class MyActivity extends Activity {
+
+    [ . . . ]
+    // Need handler for callbacks to the UI thread
+    final Handler mHandler = new Handler();
+
+    // Create runnable for posting
+    final Runnable mUpdateResults = new Runnable() {
+        public void run() {
+            updateResultsInUi();
+        }
+    };
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        [ . . . ]
+    }
+
+    protected void startLongRunningOperation() {
+
+        // Fire off a thread to do some work that we shouldn't do directly in the UI thread
+        Thread t = new Thread() {
+            public void run() {
+                mResults = doSomethingExpensive();
+                mHandler.post(mUpdateResults);
+            }
+        };
+        t.start();
+    }
+
+    private void updateResultsInUi() {
+
+        // Back in the UI thread -- update our UI elements based on the data in mResults
+        [ . . . ]
+    }
+}
+</pre>
+
+<p>For further discussions on this topic, see 
+<a href="{@docRoot}guide/practices/design/responsiveness.html">Designing for Responsiveness</a> 
+and the {@link android.os.Handler} documentation.</p>
+
+<a name="selectingtext" id="selectingtext"></a><h2>Selecting, Highlighting, or Styling Portions of Text</h2>
+<p>You can highlight or style the formatting of strings or substrings of text in
+    a TextView object. There are two ways to do this:</p>
+<ul>
+    <li>If you use a <a href="{@docRoot}guide/topics/resources/available-resources.html#stringresources">string resource</a>,
+        you can add some simple styling, such as bold or italic using HTML notation.
+        The currently supported tags are: <code>B</code> (bold),
+        <code>I</code> (italic), <code>U</code> (underline),
+        <code>TT</code> (monospace), <code>BIG</code>, <code>SMALL</code>,
+        <code>SUP</code> (superscript), <code>SUB</code> (subscript),
+        and <code>STRIKE</code> (strikethrough).
+        So, for example, in res/values/strings.xml you could declare this:<br />
+        <code>&lt;resource&gt;<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&lt;string&nbsp;id=&quot;@+id/styled_welcome_message&quot;&gt;We
+        are &lt;b&gt;&lt;i&gt;so&lt;/i&gt;&lt;/b&gt; glad to see you.&lt;/string&gt;<br />
+        &lt;/resources&gt;</code></li>
+    <li>To style text on the fly, or to add highlighting or more complex styling,
+        you must use the Spannable object as described next. </li>
+</ul>
+<p>To style text on the fly, you must make sure the TextView is using {@link android.text.Spannable}
+    storage for the text (this will always be true if the TextView is an EditText),
+    retrieve its text with {@link android.widget.TextView#getText}, and call {@link
+    android.text.Spannable#setSpan}, passing in a new style class from the {@link
+    android.text.style} package and the selection range. </p>
+<p>The following code snippet demonstrates creating a string with a highlighted section,
+    italic section, and bold section, and adding it to an EditText object. </p>
+<pre>// Get our EditText object.
+EditText vw = (EditText)findViewById(R.id.text);
+
+// Set the EditText's text.
+vw.setText("Italic, highlighted, bold.");
+
+// If this were just a TextView, we could do:
+// vw.setText("Italic, highlighted, bold.", TextView.BufferType.SPANNABLE);
+// to force it to use Spannable storage so styles can be attached.
+// Or we could specify that in the XML.
+
+// Get the EditText's internal text storage
+Spannable str = vw.getText();
+
+// Create our span sections, and assign a format to each.
+str.setSpan(new StyleSpan(android.graphics.Typeface.ITALIC), 0, 7, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+str.setSpan(new BackgroundColorSpan(0xFFFFFF00), 8, 19, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 21, str.length() - 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+</pre>
+
+<a name="querymap" id="querymap"></a><h2>Utilizing attributes in a Map query</h2>
+<p>
+When using a search intent to ask the Maps activity to search for something, the Maps activity responds to the following attributes in the optional context bundle:
+</p>
+<pre>
+               float "centerLatitude" default 0.0f
+               float "centerLongitude" default 0.0f
+               float "latitudeSpan" default 0.0f
+               float "longitudeSpan" default 0.0f
+               int "zoomLevel" default 10
+</pre>
+<p>
+This context information is used to center the search result in a particular area, and is equivalent to adjusting the Map activity to the described location and zoom level before issuing the query.
+</p>
+<p>
+If the latitudeSpan, longitudeSpan, and zoomLevel attributes are not consistent, then it is undefined which one takes precedence.
+</p>
+
+<a name="filelist" id="filelist"></a><h2>List of Files for an Android Application</h2>
+<p>The following list describes the structure and files of an Android application.
+    Many of these files can be built for you (or stubbed out) by the android tool
+    shipped in the tools/ menu of the SDK. </p>
+<table width="100%" border="0">
+    <tr>
+        <td width="28%" valign="top">MyApp/<br /></td>
+        <td width="72%" valign="top">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;AndroidManifest.xml</td>
+        <td valign="top">(<em>required</em>) Advertises the screens that this application provides,
+            where they can be launched (from the main program menu or elsewhere),
+            any content providers it implements and what kind of data they handle,
+            where the implementation classes are, and other application-wide
+            information. Syntax details for this file are described in <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">The AndroidManifest.xml File</a>.</td>
+    </tr>
+    <tr>
+        <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;src/<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<em>myPackagePath</em>/.../<em>MyClass</em>.java</td>
+        <td valign="top">(<em>required</em>) This folder holds all the source code files for your
+            application, inside the appropriate package subfolders. </td>
+    </tr>
+    <tr>
+        <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;res/</td>
+        <td valign="top">(<em>required</em>) This folder holds all the <em>resources</em> for
+            your application. Resources are external data files or description files
+            that are compiled into your code at build time. Files in different folders
+            are compiled differently, so you must put the proper resource into the
+            proper folder. (See <a href="{@docRoot}guide/topics/resources/resources-i18n.html">Resources</a> for details.)</td>
+    </tr>
+    <tr>
+        <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;anim/<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>animation1</em>.xml<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>...</em></td>
+        <td valign="top">(<em>optional</em>) Holds any animation XML description files that the
+            application uses. The format of these files is described in <a href="{@docRoot}guide/topics/resources/resources-i18n.html">Resources</a>. </td>
+    </tr>
+    <tr>
+        <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;drawable/<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>some_picture</em>.png<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>some_stretchable</em>.9.png<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>some_background</em>.xml<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...</td>
+        <td valign="top">(<em>optional</em>) Zero or more files that will be compiled to {@link
+            android.graphics.drawable android.graphics.drawable} resources. Files
+            can be image files (png, gif, or other) or XML files describing other
+            graphics such as bitmaps, stretchable bitmaps, or gradients. Supported
+            bitmap file formats are PNG (preferred), JPG, and GIF (discouraged),
+            as well as the custom 9-patch stretchable bitmap format. These formats
+            are described in <a href="{@docRoot}guide/topics/resources/resources-i18n.html">Resources</a>. </td>
+    </tr>
+    <tr>
+        <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;layout/<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>screen_1_layout</em>.xml<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...<br /></td>
+        <td valign="top">(<em>optional</em>) Holds all the XML files describing screens or parts
+            of screens. Although you could create a screen in Java, defining them
+            in XML files is typically easier. A layout file is similar in concept
+            to an HTML file that describes the screen layout and components. See <a href="{@docRoot}guide/topics/ui/index.html">User Interface</a> for more information about designing screens, and <a href="{@docRoot}guide/topics/resources/available-resources.html#layoutresources">Available Resource Types</a> for the syntax of these files.</td>
+    </tr>
+    <tr>
+        <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;values/<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arrays<br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;          &nbsp;classes.xml<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;colors.xml<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dimens.xml<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            strings.xml<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;styles.xml<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;values.xml<br /></td>
+        <td valign="top"><p>(<em>optional</em>) XML files describing additional resources
+                such as strings, colors, and styles. The naming, quantity, and number
+                of these files are not enforced--any XML file is compiled, but these
+                are the standard names given to these files. However, the syntax
+                of these files is prescribed by Android, and described in <a href="{@docRoot}guide/topics/resources/resources-i18n.html">Resources</a>. </p>
+        </td>
+    </tr>
+    <tr>
+        <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;xml/</td>
+        <td valign="top">(<em>optional</em>) XML files that can be read at run time on the device. </td>
+    </tr>
+    <tr>
+        <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;raw/</td>
+        <td valign="top">(<em>optional</em>) Any files to be copied directly to the device. </td>
+    </tr>
+</table>
+
+
+<a name="logging" ></a>
+<h2>Print Messages to a Log File</h2>
+
+<p>To write log messages from your application:</p>
+<ol><li>Import <code>android.util.Log</code>.</li>
+    <li>Use <code>Log.v()</code>, <code>Log.d()</code>, <code>Log.i()</code>,
+    <code>Log.w()</code>, or <code>Log.e()</code> to log messages.
+    (See the {@link android.util.Log} class.)<br/> E.g., 
+    <code>Log.e(this.toString(), "error: " + err.toString())</code></li>
+    <li>Launch <a href="{@docRoot}guide/developing/tools/ddms.html">DDMS</a> from a terminal
+    by executing <code>ddms</code> in your Android SDK <code>/tools</code> path.</li>
+    <li>Run your application in the Android emulator.</li>
+    <li>From the DDMS application, select the emulator 
+    (e.g., "emulator-5554") and click <b>Device > Run logcat...</b>
+    to view all the log data.</li>
+</ol>
+<p class="note"><strong>Note:</strong> If you are running Eclipse and 
+encounter a warning about the VM debug port when opening DDMS, you can ignore it
+if you're only interested in logs. However, if you want to further inspect and
+control your processes from DDMS, then you should close Eclipse before launching DDMS so that 
+it may use the VM debugging port.</p>
+
+

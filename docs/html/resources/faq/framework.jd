@@ -1,0 +1,186 @@
+page.title=Android Application Framework FAQ
+parent.title=FAQs, Tips, and How-to
+parent.link=index.html
+@jd:body
+
+<ul>
+  <li><a href="#1">Do all the Activities and Services of an
+  application run in a single process?</a></li>
+  <li><a href="#2">Do all Activities run in the main thread of
+  an application process?</a></li>
+  <li><a href="#3">How do I pass complicated data structures
+  from one Activity/Service to another?</a></li>
+  <li><a href="#4">How can I check if an Activity is already
+  running before starting it?</a></li>
+  <li><a href="#5">If an Activity starts a remote service, is
+  there any way for the Service to pass a message back to the Activity?</a></li>
+  <li><a href="#6">How to avoid getting the Application not
+  responding dialog?</a></li>
+  <li><a href="#7">How does an application know if a package is
+  added or removed?</a></li>
+</ul>
+
+
+<a name="1" id="1"></a>
+
+<h2>Do all the Activities and Services of an application run in a
+single process?</h2>
+
+<p>All Activities and Services in an application run in a single process by
+default. If needed, you can declare an <code>android:process</code> attribute
+in your manifest file, to explicitly place a component (Activity/Service) in
+another process.</p>
+
+
+
+<a name="2" id="2"></a>
+
+<h2>Do all Activities run in the main thread of an application
+process?</h2>
+
+<p>By default, all of the application code in a single process runs
+in the main UI thread. This is the same thread
+that also handles UI events. The only exception is the code that handles
+IPC calls coming in from other processes. The system maintains a
+separate pool of transaction threads in each process to dispatch all
+incoming IPC calls. The developer should create separate threads for any
+long-running code, to avoid blocking the main UI thread.</p>
+
+
+
+<a name="3" id="3"></a>
+
+<h2>How do I pass data between Activities/Services within a single
+application?</h2>
+
+<p>It depends on the type of data that you want to share:</p>
+
+<h3>Primitive Data Types</h3>
+
+<p>To share primitive data between Activities/Services in an
+application, use Intent.putExtras(). For passing primitive data that
+needs to persist use the 
+<a href="{@docRoot}guide/topics/data/data-storage.html#preferences">
+Preferences</a> storage mechanism.</p>
+
+<h3>Non-Persistent Objects</h3>
+
+<p>For sharing complex non-persistent user-defined objects for short
+duration, the following approaches are recommended:
+</p>
+  <h4>Singleton class</h4>
+  <p>You can take advantage of the fact that your application
+components run in the same process through the use of a singleton.
+This is a class that is designed to have only one instance.  It
+has a static method with a name such as <code>getInstance()</code>
+that returns the instance; the first time this method is called,
+it creates the global instance.  Because all callers get the same
+instance, they can use this as a point of interaction.  For
+example activity A may retrieve the instance and call setValue(3);
+later activity B may retrieve the instance and call getValue() to
+retrieve the last set value.</p>
+
+  <h4>A public static field/method</h4>
+  <p>An alternate way to make data accessible across Activities/Services is to use <em>public static</em>
+fields and/or methods. You can access these static fields from any other
+class in your application. To share an object, the activity which creates your object sets a
+static field to point to this object and any other activity that wants to use
+this object just accesses this static field.</p>
+
+  <h4>A HashMap of WeakReferences to Objects</h4>
+  <p>You can also use a HashMap of WeakReferences to Objects with Long
+keys. When an activity wants to pass an object to another activity, it
+simply puts the object in the map and sends the key (which is a unique
+Long based on a counter or time stamp) to the recipient activity via
+intent extras. The recipient activity retrieves the object using this
+key.</p>
+
+<h3>Persistent Objects</h3>
+
+<p>Even while an application appears to continue running, the system
+may choose to kill its process and restart it later. If you have data
+that you need to persist from one activity invocation to the next, you
+need to represent that data as state that gets saved by an activity when
+it is informed that it might go away.</p>
+
+<p>For sharing complex persistent user-defined objects, the
+following approaches are recommended:
+<ul>
+  <li>Application Preferences</li>
+  <li>Files</li>
+  <li>contentProviders</li>
+  <li>SQLite DB</li>
+</ul>
+</p>
+
+<p>If the shared data needs to be retained across points where the application
+process can be killed, then place that data in persistent storage like
+Application Preferences, SQLite DB, Files or ContentProviders. Please refer to
+the <a href="{@docRoot}guide/topics/data/data-storage.html">Data Storage</a>
+for further details on how to use these components.</p>
+
+
+
+
+<a name="4" id="4"></a>
+
+<h2>How can I check if an Activity is already running before starting
+it?</h2>
+
+<p>The general mechanism to start a new activity if its not running&mdash;
+or to bring the activity stack to the front if is already running in the
+background&mdash; is the to use the NEW_TASK_LAUNCH flag in the startActivity()
+call.</p>
+
+
+
+<a name="5" id="5"></a>
+
+<h2>If an Activity starts a remote service, is there any way for the
+Service to pass a message back to the Activity?</h2>
+
+<p>See the {@link android.app.Service} documentation's for examples of
+how clients can interact with a service.  You can take advantage of the
+fact that your components run in the same process to greatly simplify
+service interaction from the generic remote case, as shown by the "Local
+Service Sample".  In some cases techniques like singletons may also make sense.
+
+
+<a name="6" id="6"></a>
+
+<h2>How to avoid getting the Application not responding dialog?</h2>
+
+<p>Please read the <a href="{@docRoot}guide/practices/design/responsiveness.html">Designing for Responsiveness</a> 
+document.</p>
+
+
+
+
+<a name="7" id="7"></a>
+
+<h2>How does an application know if a package is added or removed?
+</h2>
+
+<p>Whenever a package is added, an intent with PACKAGE_ADDED action
+is broadcast by the system. Similarly when a package is removed, an
+intent with PACKAGE_REMOVED action is broadcast. To receive these
+intents, you should write something like this:
+<pre>
+       &lt;receiver android:name ="com.android.samples.app.PackageReceiver"&gt;
+            &lt;intent-filter&gt;
+             &lt;action android:name="android.intent.action.PACKAGE_ADDED"/&gt;
+              &lt;action android:name="android.intent.action.PACKAGE_REMOVED"/&gt;            
+            
+              &lt;data android:scheme="package" /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/receiver&gt;
+  </pre>
+  <br>
+Here PackageReceiver is a BroadcastReceiver class.Its onReceive()
+method is invoked, every time an application package is installed or
+removed.
+
+</p>
+
+
+

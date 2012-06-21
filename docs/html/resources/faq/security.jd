@@ -1,0 +1,152 @@
+page.title=Android Security FAQ
+parent.title=FAQs, Tips, and How-to
+parent.link=index.html
+@jd:body
+
+<ul>
+    <li><a href="#secure">Is Android Secure?</a></li>
+    <li><a href="#issue">I think I found a security flaw. How do I report
+    it?</a></li>
+    <li><a href="#informed">How can I stay informed about Android security?</a></li>
+    <li><a href="#use">How do I securely use my Android phone?</a></li>
+    <li><a href="#malware">I think I found malicious software being distributed
+    for Android. How can I help?</a></li>
+    <li><a href="#fixes">How will Android-powered devices receive security fixes?</a>
+    </li>
+    <li><a href="#directfix">Can I get a fix directly from the Android Platform
+    Project?</a></li>
+</ul>
+
+
+<a name="secure" id="secure"></a><h2>Is Android secure?</h2>
+
+<p>The security and privacy of our users' data is of primary importance to the
+Android Open Source Project. We are dedicated to building and maintaining one
+of the most secure mobile platforms available while still fulfilling our goal
+of opening the mobile device space to innovation and competition.</p>
+
+<p> A comprehensive overview  of the <a
+href="http://source.android.com/tech/security/index.html">Android
+security model and Android security processes</a> is provided in the Android
+Open Source Project Website.</p>
+
+<p>Application developers play an important part in the security of Android.
+The Android Platform provides developers with a rich <a
+href="http://code.google.com/android/devel/security.html">security model</a>
+that to request the capabilities, or access, needed by their
+application and to define new capabilities that other applications can request.
+The Android user can choose to grant or deny an application's request for
+certain capabilities on the handset.</p>
+
+<p>We have made great efforts to secure the Android platform, but it is
+inevitable that security bugs will be found in any system of this complexity.
+Therefore, the Android team works hard to find new bugs internally and responds
+quickly and professionally to vulnerability reports from external researchers.
+</p>
+
+
+<a name="issue" id="issue"></a><h2>I think I found a security flaw. How do I
+report it?</h2>
+
+<p>You can reach the Android security team at <a
+href="mailto:security@android.com">security@android.com</a>. If you like, you
+can protect your message using our <a
+href="http://code.google.com/android/security_at_android_dot_com.txt">PGP
+key</a>.</p>
+
+<p>We appreciate researchers practicing responsible disclosure by emailing us
+with a detailed summary of the issue and keeping the issue confidential while
+users are at risk. In return, we will make sure to keep the researcher informed
+of our progress in issuing a fix and will properly credit the reporter(s) when
+we provide the patch. We will always move swiftly to mitigate or fix an
+externally-reported flaw and provide updates to users. </p>
+
+
+<a name="informed" id="informed"></a><h2>How can I stay informed about Android security?</h2>
+
+<p>For general discussion of Android platform security, or how to use
+security features in your Android application, please subscribe to <a
+href="http://groups.google.com/group/android-security-discuss">android-security-discuss</a>.
+</p>
+
+
+<a name="use" id="use"></a><h2>How do I securely use my Android phone?</h2>
+
+<p>Android was designed so that you can safely use your phone without making
+any changes to the device or installing any special software.  Android applications
+run in an Application Sandbox that limits access to sensitive information or data
+with the users permission.</p>
+
+<p>To fully benefit from the security protections in Android, it is important that
+users only download and install software from known sources.</p>
+
+<p>As an open platform, Android allows users to visit any website and load
+software from any developer onto a device. As with a home PC, the user must be
+aware of who is providing the software they are downloading and must decide
+whether they want to grant the application the capabilities it requests.
+This decision can be informed by the user's judgment of the software
+developer's trustworthiness, and where the software came from.</p>
+
+
+<a name="malware" id="malware"></a><h2>I think I found malicious software being
+distributed for Android. How can I help?</h2>
+
+<p>Like any other platform, it will be possible for unethical developers
+to create malicious software, known as <a
+href="http://en.wikipedia.org/wiki/Malware">malware</a>, for Android. If you
+think somebody is trying to spread malware, please let us know at <a
+href="mailto:security@android.com">security@android.com</a>. Please include as
+much detail about the application as possible, with the location it is
+being distributed from and why you suspect it of being malicious software.</p>
+
+<p>The term <i>malicious software</i> is subjective, and we cannot make an
+exhaustive definition.  Some examples of what the Android Security Team believes
+to be malicious software is any application that:
+<ul>
+    <li>uses a bug or security vulnerability to gain permissions that have not
+    been granted by the user</li>
+    <li>shows the user unsolicited messages (especially messages urging the
+    user to buy something);</li>
+    <li>resists (or attempts to resist) the user's effort to uninstall it;</li>
+    <li>attempts to automatically spread itself to other devices;</li>
+    <li>hides its files and/or processes;</li>
+    <li>discloses the user's private information to a third party, without the
+    user's knowledge and consent;</li>
+    <li>destroys the user's data (or the device itself) without the user's
+    knowledge and consent;</li>
+    <li>impersonates the user (such as by sending email or buying things from a
+    web store) without the user's knowledge and consent; or</li>
+    <li>otherwise degrades the user's experience with the device.</li>
+</ul>
+</p>
+
+
+<a name="fixes" id="fixes"></a><h2>How do Android-powered devices receive security
+fixes?</h2>
+
+<p>The manufacturer of each device is responsible for distributing software
+upgrades for it, including security fixes. Many devices will update themselves
+automatically with software downloaded "over the air", while some devices
+require the user to upgrade them manually.</p>
+
+<p>Google provides software updates for a number of Android devices, including
+the <a href="http://www.google.com/nexus">Nexus</a>
+series of devices, using an "over the air" (OTA) update. These updates may include
+security fixes as well as new features.</p>
+
+<a name="directfix" id="directfix"></a><h2>Can I get a fix directly from the
+Android Platform Project?</h2>
+
+<p>Android is a mobile platform that is released as open source and
+available for free use by anybody. This means that there are many
+Android-based products available to consumers, and most of them are created
+without the knowledge or participation of the Android Open Source Project. Like
+the maintainers of other open source projects, we cannot build and release
+patches for the entire ecosystem of products using Android. Instead, we will
+work diligently to find and fix flaws as quickly as possible and to distribute
+those fixes to the manufacturers of the products through the open source project.</p>
+
+<p>If you are making an Android-powered device and would like to know how you can
+properly support your customers by keeping abreast of software updates, please
+contact us at <a
+href="mailto:info@openhandsetalliance.com">info@openhandsetalliance.com</a>.</p>

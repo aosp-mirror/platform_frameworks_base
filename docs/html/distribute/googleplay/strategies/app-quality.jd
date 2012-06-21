@@ -105,11 +105,11 @@ Again, listen to your users by collecting and responding to feature requests. Be
 
 <h2 id="integrate">Integrate with the System and Third-Party apps</h2>
 <p>
-A great way to deliver a delightful user experience is to integrate tightly with the operating system. Features like <a href="{@docRoot}guide/topics/appwidgets/index.html">Home screen widgets</a>, <a href={@docRoot}design/patterns/notifications.html">rich notifications</a>, <a href="{@docRoot}guide/components/ui/search/index.html">global search integration</a>, and {@link android.widget.QuickContactBadge Quick Contacts} are fairly low-hanging fruit in this regard. </p>
+A great way to deliver a delightful user experience is to integrate tightly with the operating system. Features like <a href="{@docRoot}guide/topics/appwidgets/index.html">Home screen widgets</a>, <a href={@docRoot}design/patterns/notifications.html">rich notifications</a>, <a href="{@docRoot}guide/topics/search/index.html">global search integration</a>, and {@link android.widget.QuickContactBadge Quick Contacts} are fairly low-hanging fruit in this regard. </p>
 
 <p>For some app categories, basic features like home screen widgets are par for the course. Not including them is a sure-fire way to tarnish an otherwise positive user experience. Some apps can achieve even tighter OS integration with Android's contacts, accounts, and sync APIs. </p>
 <p>
-Third-party integrations can provide even more user delight and give the user a feeling of device cohesiveness. It's also a really nice way of adding functionality to your app without writing any extra code (by leveraging other apps' functionalities). For example, if you're creating a camera app, you can allow users to edit their photos in <a href=" http://mobile.photoshop.com/android/">Photoshop Express</a> before saving them to their collection, if they have that third-party application installed. More information on this subject is available in the <a href="{@docRoot}resources/articles/can-i-use-this-intent.html">Can I Use this Intent?</a> article.</p>
+Third-party integrations can provide even more user delight and give the user a feeling of device cohesiveness. It's also a really nice way of adding functionality to your app without writing any extra code (by leveraging other apps' functionalities). For example, if you're creating a camera app, you can allow users to edit their photos in <a href=" http://mobile.photoshop.com/android/">Photoshop Express</a> before saving them to their collection, if they have that third-party application installed. More information on this subject is available in the class, <a href="{@docRoot}training/basics/intents/index.html">Interacting with Other Apps</a>.</p>
 
 <h2 id="details">Pay Attention to Details</h2>
 <p>

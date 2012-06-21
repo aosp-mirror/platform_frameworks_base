@@ -580,7 +580,7 @@ the tools/ directory of the SDK and create a disk image like this: </p>
 <pre>mksdcard 1024M sdcard1.iso</pre>
 
 <p>For more information, see <a
-href="{@docRoot}tools/mksdcard.html"><code>mksdcard</code></a>.</p>
+href="{@docRoot}tools/help/mksdcard.html"><code>mksdcard</code></a>.</p>
 
 
 <h3 id="sdcard-files">Copying files to an SD card image</h3>

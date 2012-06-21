@@ -22,7 +22,7 @@ page.title=Preparing for Release
     <ol>
       <li><a href="{@docRoot}tools/publishing/publishing_overview.html">Publishing Overview</a></li>
       <li><a href="{@docRoot}tools/publishing/app-signing.html">Signing Your Applications</a></li>
-      <li><a href="{@docRoot}tools/publishing/publishing.html">Publishing on Google Play</a></li>
+      <li><a href="{@docRoot}distribute/googleplay/publish/preparing.html">Publishing Checklist for Google Play</a></li>
     </ol>
   </div>
 </div>
@@ -44,8 +44,8 @@ application marketplace such as Google Play.</p>
 <p>This document summarizes the main tasks you need to perform to prepare your application for
 release. The tasks that are described in this document apply to all Android applications regardless
 how they are released or distributed to users. If you are releasing your application through Google
-Play, you should also read <a href="{@docRoot}tools/publishing/publishing.html">Publishing on
-Google Play</a> to be sure your release-ready application satisfies all Google Play
+Play, you should also read <a href="{@docRoot}distribute/googleplay/publish/preparing.html">Publishing
+Checklist for Google Play</a> to be sure your release-ready application satisfies all Google Play
 requirements.</p>
 
 <p class="note"><strong>Note:</strong> As a best practice, your application should meet all of your
@@ -246,7 +246,7 @@ application on Google Play. For example, the <code>android:minSdkVersion</code> 
 <code>android:targetSdkVersion</code> attributes, which are located in the <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"> &lt;uses-sdk&gt;</a> element. For more
 information about these and other Google Play settings, see <a
-href="{@docRoot}/guide//appendix/market-filters.html">Filters on Google Play</a>.</p>
+href="{@docRoot}guide/google/play/filters.html">Filters on Google Play</a>.</p>
 
 <h4>Address compatibility issues</h4>
 
@@ -353,6 +353,7 @@ done testing and you are satisfied that the release version of your application
 behaves correctly, you can release your application to users. For more information, see
 <a href="{@docRoot}tools/publishing/publishing_overview.html#publishing-release">Releasing Your
 Application to Users</a>. If you are publishing your application on Google Play, see
-<a href="{@docRoot}tools/publishing/publishing.html">Publishing on Google Play</a>.</p>
+<a href="{@docRoot}distribute/googleplay/publish/preparing.html">Publishing Checklist
+for Google Play</a>.</p>
 
 

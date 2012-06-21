@@ -1,0 +1,19 @@
+page.title=Android Open Source Licensing FAQ
+parent.title=FAQs, Tips, and How-to
+parent.link=index.html
+@jd:body
+
+<ul>
+    <li><a href="#mirror">Where can I find the open source components of Android?</a></li>
+    <li><a href="#timeline">When will we see more code released under open source licenses?</a></li>
+    <li><a href="#apache2">Why are you releasing the code under the Apache License instead of GPLv2?</a></li>
+</ul>
+
+<a name="mirror" id="mirror"></a><h2>Where can I find the open source components of Android?</h2>
+<p>The source code for the full Android stack is available from the <a href="http://source.android.com">Android Open Source Project </a> site. 
+
+<p>Other mirrored GPL and LGPL'd components are available at <a href="http://code.google.com/p/android/downloads/list"><code>http://code.google.com/p/android/downloads/list</code></a>.</p>
+<p>Notices for other licenses can be found within the SDK.</p>
+
+<a name="apache2" id="apache2"></a><h2>Why are you releasing the code under the Apache License instead of GPLv2?</h2>
+<p>One of the best explanations for the reasoning behind releasing code under Apache2 can be found in a <a href="http://arstechnica.com/news.ars/post/20071106-why-google-chose-the-apache-software-license-over-gplv2.html">ArsTechnica article</a> by Ryan Paul.</p>

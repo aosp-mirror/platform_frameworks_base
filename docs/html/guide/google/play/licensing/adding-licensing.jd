@@ -650,8 +650,7 @@ new license check if the <code>reason</code> supplied is {@code Policy.RETRY}. <
 deep-links the user to the application's details page on Google Play, from which the
 use can purchase the application. For more information on how to set up such
 links, see <a
-href="{@docRoot}tools/publishing/publishing.html#marketintent">Linking to your apps
-on Google Play</a>. </li>
+href="{@docRoot}distribute/googleplay/promote/linking.html">Linking to Your Products</a>. </li>
 <li>Display a Toast notification that indicates that the features of the
 application are limited because it is not licensed. </li>
 </ul>
@@ -1001,7 +1000,7 @@ Play Licensing. </p>
 publish the application on Google Play. Follow the normal steps to <a
 href="{@docRoot}tools/publishing/preparing.html">prepare</a>, <a
 href="{@docRoot}tools/publishing/app-signing.html">sign</a>, and then <a
-href="{@docRoot}tools/publishing/publishing.html">publish the application</a>.
+href="{@docRoot}distribute/googleplay/publish/preparing.html">publish the application</a>.
 </p>
 
 <h3>Removing Copy Protection</h3>

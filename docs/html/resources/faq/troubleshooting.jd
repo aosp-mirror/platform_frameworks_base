@@ -1,0 +1,337 @@
+page.title=Troubleshooting
+parent.title=FAQs, Tips, and How-to
+parent.link=index.html
+@jd:body
+
+
+<p>Here are some tips and tricks for common Android errors. Don't forget to use the
+    ddms logcat capability to get a deeper view when errors occur. 
+    See the <a href="{@docRoot}guide/developing/debugging/index.html">Debugging</a> documentation for more information.</p>
+<ul>
+    <li><a href="#installeclipsecomponents">ADT Installation Error: "requires plug-in org.eclipse.wst.sse.ui".</a></li>
+    <li><a href="#nodevice">ADB reports &quot;no device&quot; when an emulator is running</a></li>
+    <li><a href="#noapp">My new application/activity isn't showing up in the device application
+        list </a></li>
+    <li><a href="#noupdate">I updated my app, but the updates don't seem to be showing up on
+    the device</a></li>
+    <li><a href="#layout_wilih">I'm getting a &quot;Binary XML file line #2: You must supply a layout_wilih
+    attribute&quot; error when I start an application</a></li>
+    <li><a href="#permission">My request to (<em>make a call, catch an incoming SMS, receive
+        a notification, send an intent to an Android application</em>) is being
+        ignored</a></li>
+    <li><a href="#build">Help! My project won't build in Eclipse</a></li>
+    <li><a href="#eclipse">Eclipse isn't talking to the emulator</a></li>
+    <li><a href="#majorminor">When I go to preferences in Eclipse and select "Android", I get the following error message: Unsupported major.minor version 49.0.</a></li>
+    <li><a href="#apidemosreinstall">I can't install ApiDemos apps in my IDE because of a signing error</a></li>
+    <li><a href="#gesturebuilderinstall">I can't install the GestureBuilder sample
+app in the emulator</a></li>
+    <li><a href="#signingcalendar">I can't compile my app because the build tools generated an expired debug certificate</a></li>
+    <li><a href="#manifestfiles">Unable to view manifest files from within Eclipse</a></li>
+</ul>
+
+<a name="installeclipsecomponents" id="installeclipsecomponents"></a><h2>ADT Installation Error: "requires plug-in org.eclipse.wst.sse.ui".</h2>
+<p>
+The "Android Editors" feature of the ADT Plugin requires specific Eclipse components, such as WST. If you
+encounter this error message during ADT installation, you need to install the
+required Eclipse components and then try the ADT installation again. Follow the steps below to install the required components for the 
+Android Editors feature, based on the version of Eclipse that you are using.</p>
+
+<table style="font-size:100%">
+<tr><th>Eclipse 3.3 (Europa)</th><th>Eclipse 3.4 (Ganymede)</th></tr>
+<tr>
+<td width="50%">
+<ol>
+<li>From the dialog where you select the <strong>Update sites to visit</strong>, select the checkboxes for both the
+ADT site, and the Callisto/Europa/Ganymede Discovery Site (you may want to
+check <strong>Automatically select mirrors</strong> at the bottom).</li>
+<li>Click <strong>Finish</strong>.</li>
+<li>In the <strong>Next</strong> dialog, select the Android Plugins.</li>
+<li>Now, expand the tree item of the discovery site. It seems that if you
+don't do it, it doesn't load the content of the discovery site.</li>
+<li>On the right, click <strong>Select required</strong>. This will select all the components
+that are required to install the Android plugin (wst, emf, etc...).</li>
+<li>Click <strong>Next</strong>, accept the agreement, click <strong>Install All</strong>, and restart Eclipse.</li>
+</ol>
+</td>
+<td>
+<ol>
+    <li>Select <strong>Help</strong> &gt; <strong>Software Updates...</strong></li>
+    <li>Select the <strong>Installed Software</strong> tab.</li>
+    <li>Click <strong>Update...</strong></li>
+    <li>If an update for ADT is available, select it and click <strong>Finish</strong>.</li>
+</ol>
+</td>
+</tr>
+</table>
+
+
+</p>
+<a name="nodevice"></a><h2>ADB reports &quot;no device&quot; when an emulator is running</h2>
+    <p>Try restarting adb by stopping it (<code>adb
+        kill-server</code>) then any other adb command to restart it.</p>
+
+<a name="noapp"></a><h2>My new application/activity isn't showing up in the
+        applications list </h2>
+<ul>
+    <li>You often must restart your device or emulator before a new activity shows
+        up in the applications list. This is particularly true when it is a completely
+        new application with a new AndroidManifest.xml file.</li>
+    <li>If this is for a new activity in an existing AndroidManifest.xml file, did
+        you include an <code>&lt;activity&gt;</code> tag for your app (or a <code>&lt;service&gt;</code>        tag
+        for a service, or a <code>&lt;receiver&gt;</code> tag for a receiver, etc.)? </li>
+    <li>Make sure that your AndroidManifest.xml file is valid. Errors in attribute
+        values, such as the <em>value </em> attribute in <code>&lt;action <em>value</em>=&quot;<em>&lt;something&gt;</em>&quot;&gt;</code>
+        will often not be caught by compilers, but will prevent your application
+        from being displayed because the intent filter will not be matched. Extra
+        spaces or other characters can often sneak into these strings.</li>
+    <li>Did you send your .apk file to the device (<a href="{@docRoot}guide/developing/tools/adb.html#move">adb install</a>)?</li>
+    <li>Run logcat on your device (<code>adb logcat</code>)
+        and then install your .apk file. Check the logcat output to see whether the
+        application is being installed and recognized properly. Here's sample output
+        from a successful installation:
+<pre>I/FileObserver( 414): *** onEvent wfd: 3 mask: 8 path: MyRSSReader.apk
+D/PackageManager( 414): Scanning package: /data/app/MyRSSReader.apk
+D/PackageManager( 414): Adding package com.example.codelab.rssexample
+D/PackageManager( 414): Registered content provider: my_rss_item, className = com.example.codelab.rssexample.RssContentProvider, isSyncable = false
+D/PackageManager( 414): Providers: com.example.codelab.rssexample.RssContentProvider
+D/PackageManager( 414): Activities: com.example.codelab.rssexample.MyRssReader com.example.codelab.rssexample.MyRssReader2 </pre>
+    </li>
+	<li>If logcat shows that the package manager is having problems loading the manifest
+	    file, force your manifest to be recompiled by adding a space in the file and
+	    compiling it.</li>
+</ul>
+<a name="noupdate"></a><h2>I updated my app, but the updates don't seem to be showing up on the device</h2>
+    <p>Did you remember to send your .apk file to the device (<a href="{@docRoot}guide/developing/tools/adb.html#move">adb
+        install</a>)?</p>
+
+<a name="layout_wilih"></a><h2>I'm getting a &quot;Binary XML file line #2: You must supply a layout_wilih
+    attribute&quot; error
+    when I start an application (but I declare a layout_wilih attribute <em>right
+        there!!!</em>)</h2>
+<ul>
+    <li>Make sure that the SDK you are building with is the same version as the Android
+        OS that you are running on. </li>
+    <li>Make sure that you're calling setContentView() early in your onCreate() method.
+        Calling other methods, such as setListAdapter() before calling setContentView()
+        can sometimes create odd errors when Android tries to access screen elements
+        that haven't been set before.</li>
+</ul>
+<a name="permission"></a><h2>My request to (<em>make a call, catch an incoming SMS,
+receive a notification, send an intent to an Android application</em>) is being
+ignored</h2>
+    <p>You might not have permission (or might not have requested permission) to
+        call this activity or receive this intent. Many standard Android activities,
+        such as making a call, have a permission assigned to it to prevent arbitrary
+        applications from sending or receiving requests. See <a
+        href="{@docRoot}guide/topics/security/security.html">Security and
+        Permissions</a> for more information on permissions, and 
+		{@link android.Manifest.permission Manifest.permission} for a list of
+        standard permissions supported by the Android platform.
+</p>
+<a name="build"></a><h2>Help! My project won't build in Eclipse</h2>
+<p>If your project doesn't build, you may notice symptoms such as new
+resources added in the <code>res/</code> sub-folders not showing up in the R class,
+the emulator not being started, not being able to run the application, or even seeming to run an old version of the application.</p>
+<p>To troubleshoot these types of problems, first try:</p>
+<ol>
+  <li>Switch to the DDMS view in Eclipse (if you don't already have it open):
+    <ol type="a">
+      <li>From the menu select <code>Window &gt; Open Perspective &gt; Other</code></li>      
+      <li>Select DDMS from the list and hit OK</li>
+    </ol>
+  </li>
+  <li>In the Devices panel (top right panel by default), click on the down triangle
+  to bring up the panel menu</li>
+  <li>Select <code>Reset ADB</code> from the menu, and then try running the
+  application again</li>
+</ol>
+<p>If the above still doesn't work, you can try these steps:</p>
+<ol>
+  <li>
+    Check the console and problems tabs at the bottom of the Eclipse UI
+  </li>
+  <li>
+    If there are problems listed in either place, they should give you a clue
+    what is wrong
+  </li>
+  <li>
+    If you aren't sure if the problems are fresh or stale, clear the console
+    with a right click &gt; Clear, then clean the project
+  </li>
+  <li>
+    To clean the project (a good idea with any kind of build error), select
+    Project &gt; Clean from the eclipse main menu, then select the project you
+    are working on (or clean all)
+  </li>
+</ol>
+<a name="eclipse"></a><h2>Eclipse isn't talking to the emulator</h2>
+<p>When communication doesn't seem to be happening between Eclipse and the emulator, symptoms can include: nothing happening when you press run, the emulator hanging waiting
+for a debugger to connect, or errors that Eclipse reports about not being able
+to find the emulator or shell. By far the most common symptom is that when you press run, the emulator starts (or
+is already running), but the application doesn't start.</p>
+<p>
+You may find any of these steps will fix the problem and with practice you
+probably can figure out which one you need to do for your particular issue, but
+to start with, the safest option is to run through all of them in order:</p>
+<ol>
+  <li>
+    Quit the emulator if it is running
+  </li>
+  <li>
+    Check that any emulator processes are killed (sometimes they    can hang, use ps on unix or mac, or task manager in the process view on
+    windows).
+  </li>
+  <li>
+    Quit Eclipse
+  </li>
+  <li>
+    From the command line, type: 
+<pre>adb kill-server </pre>
+  </li>
+  <li>
+    Start Eclipse and try again
+  </li>
+</ol>
+
+<a name="majorminor"></a><h2>When I go to preferences in Eclipse and select "Android", I get the following error message: Unsupported major.minor version 49.0.</h2>
+<p>This error is displayed if you are using an older version of the JDK. Please make sure you are using JDK version 5 or 6.</p>
+
+<h2 id="apidemosreinstall">I can't install ApiDemos apps in my IDE because of a signing error</a></h2>
+
+<p>The Android system requires that all applications be signed, as described in 
+	<a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a>. The ApiDemos 
+applications included with the SDK are preinstalled on the emulator and for that reason have been 
+compiled and signed with a private key.</p>
+
+If you want to modify or run one of the ApiDemos apps from Eclipse/ADT or other IDE, you can do so 
+so only after you uninstall the <em>preinstalled</em> version of the app from the emulator. If 
+you try to run an ApiDemos apps from your IDE without removing the preinstalled version first, 
+you will get errors similar to: </p>
+
+<pre>[2008-08-13 15:14:15 - ApiDemos] Re-installation failed due to different application signatures.
+[2008-08-13 15:14:15 - ApiDemos] You must perform a full uninstall of the application. WARNING: ...This will remove the application data!
+[2008-08-13 15:14:15 - ApiDemos] Please execute 'adb uninstall com.android.samples' in a shell.</pre>
+
+<p>The error occurs because, in this case, you are attempting to install another copy of ApiDemos 
+onto the emulator, a copy that is signed with a different certificate (the Android IDE tools will 
+have signed the app with a debug certificate, where the existing version was already signed with 
+a private certificate). The system does not allow this type of reinstallation.  </p>
+
+<p>To resolve the issue, you need to fully uninstall the preinstalled and then reinstall it using 
+the adb tool. Here's how to do that:</p>
+
+<ol>
+  <li>In a terminal, change to the tools directory of the SDK.</li>
+  <li>If no emulator instance is running, start an emulator using using the command <code>emulator</code>.</li>
+  <li>Uninstall the preinstalled app using the command <code>adb uninstall com.example.android.apis</code>.</li>
+  <li>Reinstall the app using the command <code>adb install &lt;path to the ApiDemos.apk&gt;</code>. If you are 
+  working in Eclipse/ADT, you can just compile and run the app in the normal way. </li>
+</ol>
+
+<p>Note that if multiple emulator instances are running, you need to direct your uninstall/install 
+commands to the emulator instance that you are targeting. To do that you can add the 
+<code>-s &lt;serialNumber&gt;</code> to the command, for example: </p>
+
+<pre>adb -s emulator-5556 install</pre>
+
+<p>For more information about adb, see the <a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> 
+documentation.</p>
+
+<h2 id="gesturebuilderinstall">I can't install the GestureBuilder sample 
+app in the emulator</a></h2>
+
+<p>This is similar to the ApiDemos problem described above, except that
+you cannot fix it by uninstalling GestureBuilder from the emulator. The 
+GestureBuilder app cannot be uninstalled because it is currently installed 
+within the system files themselves.</p>
+
+<p><strong>Symptoms</strong></p>
+
+<ul><li><p>You cannot run GestureBuilder in the emulator:</p>
+
+<pre>[2009-12-10 14:57:19 - GestureBuilderActivity]Re-installation failed due to different application signatures.
+[2009-12-10 14:57:19 - GestureBuilderActivity]You must perform a full uninstall of the application. WARNING: This will remove the application data!
+[2009-12-10 14:57:19 - GestureBuilderActivity]Please execute 'adb uninstall com.android.gesture.builder' in a shell.</pre>
+</li>
+
+<li><p>Running <code>adb uninstall com.android.gesture.builder</code> fails:</p>
+<pre>$ adb uninstall com.android.gesture.builder
+	Failure</pre>
+</li></ul>
+
+<p>For now, the work-around is to change the sample's package name
+so that the system can install it as a new app rather than as a 
+replacement for the existing GestureBuilder app. To change the 
+package name, open the manifest file and modify the package attribute 
+of the manifest element. Next, update imports and other references to 
+the package name, rebuild the app, and run it in an AVD.</p>
+
+<p>For example, here's how you could do this in Eclipse:</p>
+
+<ol>
+  <li>Right-click on the package name
+(<code>src/com.android.gesture.builder</code>).</li>
+  <li>Select <strong>Refactor &gt; Rename</strong> and change the name, for example to
+<code>com.android.gestureNEW.builder</code>. </li>
+  <li>Open the manifest file. Inside the <code>&lt;manifest&gt;</code>
+tag, change the package name to
+<code>com.android.gestureNEW.builder</code>.</li>
+  <li>Open each of the two Activity files and do Ctrl-Shift-O to add
+missing import packages, then save each file.</li>
+<li>Run the GestureBuilder application on the emulator.</li>
+</ol>
+
+<p>If you get an error message such as "Could not load /sdcard/gestures. 
+Make sure you have a mounted SD card," be sure that your target AVD has an 
+SD card. To create an AVD that has an SD card, specify one when creating
+an AVD with the AVD manager. See 
+<a href="{@docRoot}guide/developing/devices/managing-avds.html#createavd">
+Creating and Managing AVDs with AVD Manager</a> for more information.</p>
+
+<h2 id="signingcalendar">I can't compile my app because the build tools generated an expired debug certificate</h2>
+
+<p>If your development machine uses a locale that has a non-Gregorian calendar, you may encounter problems when first trying to compile and run your application. Specifically, you may find that the Android build tools won't compile your application because the debug key is expired. </p>
+
+<p>The problem occurs because the Keytool utility &mdash; included in the JDK and used by the Android build tools &mdash; fails to properly handle non-Gregorian locales and may create validity dates that are in the past. That is, it may generate a debug key that is already expired, which results in the compile error.</p>
+
+<p>If you encounter this problem, follow these steps to work around it: </p>
+
+<ol>
+<li>First, delete the debug keystore/key already generated by the Android build tools. Specifically, delete the <code>debug.keystore</code> file. On Linux/Mac OSX, the file is stored in <code>~/.android</code>. On Windows XP, the file is stored in <code>
+C:\Documents and Settings\&lt;user&gt;\.android</code>. On Windows Vista, the file is stored in <code>
+C:\Users\&lt;user&gt;\.android</code></li>
+<li>Next, you can either
+<ul>
+<li>Temporarily change your development machine's locale (date and time) to one that uses a Gregorian calendar, for example, United States. Once the locale is changed, use the Android build tools to compile and install your app. The build tools will regenerate a new keystore and debug key with valid dates. Once the new debug key is generated, you can reset your development machine to the original locale. </li>
+<li>Alternatively, if you do not want to change your machine's locale settings, you can generate the keystore/key on any machine using the Gregorian calendar, then copy the <code>debug.keystore</code> file from that computer to the proper location on your development machine. </li>
+</ul>
+</li>
+</ol>
+
+<p>This problem has been verified on Windows and may apply to other platforms. </p>
+
+<p>For general information about signing Android applications, see 
+<a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a>. </p>
+
+<h2 id="manifestfiles">Unable to view manifest files from within
+Eclipse</a></h2>
+
+<p>When you try to open an application's manifest file from within
+Eclipse, you might get an error such as this one:</p>
+<pre>An error has occurred. See error log for more details.
+org.eclipse.wst.sse.ui.StructuredTextEditor.isBlockSelectionModeEnabled()Z</pre>
+
+<p>Try reverting to the 3.0 version of the Eclipse XML Editors and
+Tools. If this does not work, remove the 3.1 version of the tool. To do
+this in Eclipse 3.4:</p>
+
+<ol>
+	<li>Select <strong>Help > Software Updates...</strong></li>
+	<li>Select the <strong>Installed Software</strong> tab.</li>
+	<li>Select <strong>Eclipse XML Editors and Tools</strong>.</li>
+	<li>Click <strong>Uninstall</strong>.</li>
+	<li>Click <strong>Finish</strong>.</li>
+</ol>
+
+<p>When you restart Eclipse, you should be able to view the manifest
+files. </p>

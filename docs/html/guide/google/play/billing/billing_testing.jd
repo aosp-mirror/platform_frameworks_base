@@ -288,6 +288,6 @@ do a factory reset, making sure you log on with your primary account first.</p>
 publish your application on Google Play. You can follow the normal steps for <a
 href="{@docRoot}tools/publishing/preparing.html">preparing</a>, <a
 href="{@docRoot}tools/publishing/app-signing.html">signing</a>, and <a
-href="{@docRoot}tools/publishing/publishing.html">publishing your application</a>.
+href="{@docRoot}distribute/googleplay/publish/preparing.html">publishing on Google Play</a>.
 </p>
 

@@ -177,8 +177,6 @@ garbage collected even after the thread terminates.
 
 </dl>
 
-<p>See the <a href="{@docRoot}resources/faq/troubleshooting.html">Troubleshooting</a> document
-for answers to some common developing and debugging issues.</p>
 
 
 

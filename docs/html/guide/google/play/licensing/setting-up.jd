@@ -46,7 +46,7 @@ href="http://play.google.com/apps/publish">http://play.google.com/apps/publish</
 </p>
 
 <p>For more information, see <a
-href="{@docRoot}tools/publishing/publishing.html">Publishing on Google Play</a>.</p>
+href="{@docRoot}distribute/googleplay/publish/register.html">Get Started with Publishing</a>.</p>
 
 <p>If you already have a publisher account on Google Play, use your existing
 account to set up licensing.</p>

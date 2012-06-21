@@ -188,7 +188,7 @@ run properly on the Android platform versions and device screen sizes that you
 want to target. 
 
 <p>From an app-compatibility perspective, Android platform versions are defined
-by <a href="{@docRoot}about/framework/api-levels.html">API Level</a>. You should
+by <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API level</a>. You should
 confirm the minimum version that your app is compatible with (<a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;minSdkVersion&gt;</code></a>),
 as that will affect its distribution to Android
@@ -391,7 +391,7 @@ APK file that you can upload to the Developer Console for distribution to
 users. </p>
 
 <p>For complete details on how to create a release-ready version of your app,
-read <a href="{@docRoot}tools/workflow/preparing.html">Preparing for
+read <a href="{@docRoot}tools/publishing/preparing.html">Preparing for
 Release</a>.</p>
 
 <p>Once you have the release-ready APK in hand, you can upload it to 
@@ -402,7 +402,7 @@ recent version before publishing. </p>
 <tr>
 <td><p>Related resources:</p>
 <ul style="margin-top:-.5em;">
-<li><strong><a href="{@docRoot}tools/workflow/preparing.html">Preparing for Release</a></strong> &mdash; Essential information for preparing and packaging your app properly for distribution.</li>
+<li><strong><a href="{@docRoot}tools/publishing/preparing.html">Preparing for Release</a></strong> &mdash; Essential information for preparing and packaging your app properly for distribution.</li>
 </ul>
 </td>
 </tr>
