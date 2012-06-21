@@ -129,6 +129,7 @@ final class ActivityRecord {
     private boolean inHistory;  // are we in the history stack?
 
     void dump(PrintWriter pw, String prefix) {
+        final long now = SystemClock.uptimeMillis();
         pw.print(prefix); pw.print("packageName="); pw.print(packageName);
                 pw.print(" processName="); pw.println(processName);
         pw.print(prefix); pw.print("launchedFromUid="); pw.print(launchedFromUid);
@@ -161,8 +162,30 @@ final class ActivityRecord {
         if (results != null) {
             pw.print(prefix); pw.print("results="); pw.println(results);
         }
-        if (pendingResults != null) {
-            pw.print(prefix); pw.print("pendingResults="); pw.println(pendingResults);
+        if (pendingResults != null && pendingResults.size() > 0) {
+            pw.print(prefix); pw.println("Pending Results:");
+            for (WeakReference<PendingIntentRecord> wpir : pendingResults) {
+                PendingIntentRecord pir = wpir != null ? wpir.get() : null;
+                pw.print(prefix); pw.print("  - ");
+                if (pir == null) {
+                    pw.println("null");
+                } else {
+                    pw.println(pir);
+                    pir.dump(pw, prefix + "    ");
+                }
+            }
+        }
+        if (newIntents != null && newIntents.size() > 0) {
+            pw.print(prefix); pw.println("Pending New Intents:");
+            for (int i=0; i<newIntents.size(); i++) {
+                Intent intent = (Intent)newIntents.get(i);
+                pw.print(prefix); pw.print("  - ");
+                if (intent == null) {
+                    pw.println("null");
+                } else {
+                    pw.println(intent.toShortString(false, true, false, true));
+                }
+            }
         }
         if (pendingOptions != null) {
             pw.print(prefix); pw.print("pendingOptions="); pw.println(pendingOptions);
@@ -199,14 +222,20 @@ final class ActivityRecord {
         pw.print(prefix); pw.print("thumbHolder="); pw.println(thumbHolder);
         if (launchTime != 0 || startTime != 0) {
             pw.print(prefix); pw.print("launchTime=");
-                    TimeUtils.formatDuration(launchTime, pw); pw.print(" startTime=");
-                    TimeUtils.formatDuration(startTime, pw); pw.println("");
+                    if (launchTime == 0) pw.print("0");
+                    else TimeUtils.formatDuration(launchTime, now, pw);
+                    pw.print(" startTime=");
+                    if (startTime == 0) pw.print("0");
+                    else TimeUtils.formatDuration(startTime, now, pw);
+                    pw.println();
         }
         if (lastVisibleTime != 0 || waitingVisible || nowVisible) {
             pw.print(prefix); pw.print("waitingVisible="); pw.print(waitingVisible);
                     pw.print(" nowVisible="); pw.print(nowVisible);
                     pw.print(" lastVisibleTime=");
-                    TimeUtils.formatDuration(lastVisibleTime, pw); pw.println("");
+                    if (lastVisibleTime == 0) pw.print("0");
+                    else TimeUtils.formatDuration(lastVisibleTime, now, pw);
+                    pw.println();
         }
         if (configDestroy || configChangeFlags != 0) {
             pw.print(prefix); pw.print("configDestroy="); pw.print(configDestroy);
@@ -525,7 +554,13 @@ final class ActivityRecord {
      */
     final void deliverNewIntentLocked(int callingUid, Intent intent) {
         boolean sent = false;
-        if (state == ActivityState.RESUMED
+        // We want to immediately deliver the intent to the activity if
+        // it is currently the top resumed activity...  however, if the
+        // device is sleeping, then all activities are stopped, so in that
+        // case we will deliver it if this is the current top activity on its
+        // stack.
+        if ((state == ActivityState.RESUMED || (service.mSleeping
+                        && stack.topRunningActivityLocked(null) == this))
                 && app != null && app.thread != null) {
             try {
                 ArrayList<Intent> ar = new ArrayList<Intent>();
