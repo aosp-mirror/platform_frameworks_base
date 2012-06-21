@@ -15,9 +15,9 @@ of users at Google's scale. </p>
 
 <p>Google Play is the premier store for distributing Android apps. It’s
 preinstalled on more than 300 million devices worldwide, a number growing by
-almost a million every day. Over the past year, Android users have downloaded
-more than <strong style="text-wrap:none;">13 billion apps</strong> from Google
-Play.</p>
+almost a million every day. Android users have downloaded
+more than <strong style="text-wrap:none;">15 billion apps</strong> from Google
+Play, growing at a rate of more than 1 billion per month.</p>
 
 <p>When you publish on Google Play, you put your apps in front of Android's huge
 base of active customers, in more than 130 countries and territories across the
@@ -34,8 +34,8 @@ user's devices instantly, over the air. No cable or sync is ever needed.</p>
 <img src="{@docRoot}images/gp-growth-downloads.png" style="width:600px;margin-bottom:0em;">
 </div>
 <p class="image-caption" style="padding:.5em"><span
-style="font-weight:500;">Growth in app consumption</span>: Users downloaded more
-than 3.7 billion apps in Q1 2012 alone.</p>
+style="font-weight:500;">Growth in app consumption</span>: Users download more than
+1 billion apps from Google Play each month.</p>
 </div>
 
 <div>
@@ -123,7 +123,7 @@ they’ll climb one or more of the top charts and gain even more exposure.</p>
 <td style="width:100px">Top Free</td><td>Free apps and games</td></tr>
 <td style="width:140px">Top Paid</td><td>Priced apps and games</td></tr>
 <td>Top New Free</td><td>Less than 30 days old</td></tr>
-<td>Top New Pai</td><td>Less than 30 days old</td></tr>
+<td>Top New Paid</td><td>Less than 30 days old</td></tr>
 <td>Top Grossing</td><td>Gross proceeds, free or priced</td></tr>
 <td>Best Selling</td><td>Popular priced games</td></tr>
 <td>Trending</td><td>New arrivals growing quickly in installs</td>
@@ -204,7 +204,7 @@ displayed wherever the app name is seen in Google Play.</p>
 src="{@docRoot}images/topdev_ann.png"> TOP DEVELOPER</h4>
 
 <p>Top Developer is a badge recognizing established, respected developers for
-their commitment to launching high-quality, trustworthy, and innovative apps on
+their commitment to launching high-quality and innovative apps on
 Android. The Google Play editorial staff selects developers awards a Top
 Developer badge from time to time, based on the cumulative work of the
 developer.</p>

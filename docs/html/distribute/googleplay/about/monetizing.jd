@@ -76,7 +76,7 @@ location, carrier network, and other factors.</p>
 <h2 id="billing-models" style="margin-top:1.5em;">Choice of billing models</h2>
 
 <p>Google Play gives you a choice of billing models to let you monetize your
-products in the way that you want. </p>
+products. </p>
 
 <p>You can offer apps to all users for free, or
 you can set an initial price for the app, paid before download. You can also
@@ -95,7 +95,7 @@ targeted advertising.</p>
 </div>
 </div>
 
-<p>You can combine these billing models in different ways, based on business
+<p>You can combine these billing models in different ways, based on your business
 needs or market conditions. </p>
 
 <p>For example, you can use a freemium or ad-supported model by distributing
@@ -111,21 +111,16 @@ free apps must remain free (to download) for the life of the app.</p>
 </div>
 
 <p>Google Play gives you complete control over how you price your products. You
-can set prices individually in more than 130 currencies used by millions of
+can set prices in more than 130 countries, for millions of
 users around the world. When users browse your app’s product page or initiate a
 purchase, Google Play shows them the price they will be charged <em>in
 their local currency</em>.</p>
 
-<p>The prices you set in Google Play are final, meaning that Google Play shows and
-charges the user the exact price that you’ve set, inclusive of applicable taxes
-(in most countries). This puts you in control of your prices and eliminates the
-uncertainties of conversions and estimates for users. </p>
-
-<p>You can set and adjust your prices at any time, in any currency, without
-having to publish an update to your app. Your prices in different currencies are
-independent, so you can adjust one price without affecting any of the others.
-This gives you the ability to run short-term promotions and discounts in
-specific countries and more easily manage shifts in exchange rates.</p>
+<p>You can set and adjust your prices at any time, in any available currency. 
+Your prices in available currencies are independent, so you can adjust one
+price without affecting others. This gives you the ability to run
+short-term promotions and discounts in specific countries and more easily
+manage shifts in exchange rates.</p>
 
 <p>You can set and manage prices for your apps and in-app products from the
 Google Play Android Developer Console.</p>
@@ -139,9 +134,6 @@ href="{@docRoot}distribute/googleplay/publish/register.html">Get Started with
 Publishing</a> for details). Once you’ve set up your account and published your
 apps, Google Play makes monthly payouts of sales proceeds to your merchant
 account, in your local currency.</p>
-
-<p>At payout, Google Play calculates the taxes for each transaction based on
-rates that you control from the Google Checkout merchant account.</p>
 
 <h2 id="reporting">Detailed financial reporting</h2>
 
