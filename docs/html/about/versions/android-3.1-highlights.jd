@@ -294,7 +294,7 @@ many new ways to engage users and build powerful interaction experiences with
 connected hardware.</p>
 
 <p>To learn more about how to develop applications that interact with
-accessories, see the <a href="{@docRoot}guide/topics/usb/accessory.html">USB
+accessories, see the <a href="{@docRoot}guide/topics/connectivity/usb/accessory.html">USB
 Accessory</a> documentation.</p>
 
 <h3 id="host">USB host API</h3>
@@ -306,7 +306,7 @@ connected devices such as audio devices. input devices, communications devices,
 hubs, cameras, and more.</p>
 
 <p>To learn more about how to develop applications that interact with
-USB devices, see the <a href="{@docRoot}guide/topics/usb/host.html">USB
+USB devices, see the <a href="{@docRoot}guide/topics/connectivity/usb/host.html">USB
 Host</a> documentation.</p>
 
 <h3 id="inputdevices">Input from mice, joysticks, and gamepads</h3>

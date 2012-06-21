@@ -128,12 +128,12 @@ tag technologies are as follows:</p>
 <ol>
   <li>Filter for an {@link android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED} intent specifying the
 tag technologies that you want to handle. See <a
-href="{@docRoot}guide/topics/nfc/nfc.html#tech-disc">Filtering for NFC
+href="{@docRoot}guide/topics/connectivity/nfc/nfc.html#tech-disc">Filtering for NFC
 intents</a> for more information. In general, the tag dispatch system tries to start a {@link
 android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED} intent when an NDEF message
 cannot be mapped to a MIME type or URI, or if the tag scanned did not contain NDEF data. For
 more information on how this is determined, see <a
-href="{@docRoot}guide/topics/nfc/nfc.html#tag-dispatch">The Tag Dispatch System</a>.</li>
+href="{@docRoot}guide/topics/connectivity/nfc/nfc.html#tag-dispatch">The Tag Dispatch System</a>.</li>
   <li>When your application receives the intent, obtain the {@link android.nfc.Tag} object from
 the intent:
 <pre>Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);</pre></li>

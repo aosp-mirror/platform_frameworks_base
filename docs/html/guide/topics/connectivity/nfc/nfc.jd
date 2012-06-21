@@ -39,7 +39,7 @@ page.title=NFC Basics
 <p>This document describes the basic NFC tasks you perform in Android. It explains how to send and
 receive NFC data in the form of NDEF messages and describes the Android framework APIs that support
 these features. For more advanced topics, including a discussion of working with non-NDEF data,
-see <a href="{@docRoot}guide/topics/nfc/advanced-nfc.html">Advanced NFC</a>.</p>
+see <a href="{@docRoot}guide/topics/connectivity/nfc/advanced-nfc.html">Advanced NFC</a>.</p>
 
 
 <p>There are two major uses cases when working with NDEF data and Android:</p>
@@ -105,7 +105,7 @@ or more records ({@link android.nfc.NdefRecord}). Each NDEF record must be well-
 the specification of the type of record that you want to create. Android
 also supports other types of tags that do not contain NDEF data, which you can work with by using
 the classes in the {@link android.nfc.tech} package. To learn more
-about these technologies, see the <a href="{@docRoot}guide/topics/nfc/advanced-nfc.html">Advanced
+about these technologies, see the <a href="{@docRoot}guide/topics/connectivity/nfc/advanced-nfc.html">Advanced
 NFC</a> topic. Working with these other types of tags involves
 writing your own protocol stack to communicate with the tags, so we recommend using NDEF when
 possible for ease of development and maximum support for Android-powered devices.
@@ -454,7 +454,7 @@ within a <code>tech-list</code> set. Your activity is
 
 <p>For more information about working with tag technologies and the {@link
 android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED} intent, see <a
-href="{@docRoot}guide/topics/nfc/advanced-nfc.html#tag-tech">Working with Supported Tag
+href="{@docRoot}guide/topics/connectivity/nfc/advanced-nfc.html#tag-tech">Working with Supported Tag
 Technologies</a> in the Advanced NFC document.</p>
 <h3 id="tag-disc">ACTION_TAG_DISCOVERED</h3>
 <p>To filter for {@link android.nfc.NfcAdapter#ACTION_TAG_DISCOVERED} use the following intent
@@ -685,7 +685,7 @@ application based on the AAR.</li>
 </p>
 
 <p class="note"><strong>Note:</strong> You can override AARs and the intent dispatch system with the <a
-href="{@docRoot}guide/topics/nfc/advanced-nfc.html#foreground-dispatch">foreground dispatch
+href="{@docRoot}guide/topics/connectivity/nfc/advanced-nfc.html#foreground-dispatch">foreground dispatch
 system</a>, which allows a foreground activity to have priority when an NFC tag is discovered.
 With this method, the activity must be in the foreground to
 override AARs and the intent dispatch system.</p>
@@ -766,7 +766,7 @@ API level 14 (Android 4.0) and later.</li>
 
   <p class="note"><strong>Note:</strong> If your activity enables Android Beam and is
 in the foreground, the standard intent dispatch system is disabled. However, if your activity also
-enables <a href="{@docRoot}guide/topics/nfc/advanced-nfc.html#foreground-dispatch">foreground
+enables <a href="{@docRoot}guide/topics/connectivity/nfc/advanced-nfc.html#foreground-dispatch">foreground
 dispatching</a>, then it can still scan tags that match the intent filters set in the foreground
 dispatching.</p>
 

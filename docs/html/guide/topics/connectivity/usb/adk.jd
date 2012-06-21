@@ -63,7 +63,7 @@ page.title=Android Open Accessory Development Kit
 
       <ol>
         <li><a href="http://www.youtube.com/watch?v=s7szcpXf2rE">Google I/O Session Video</a></li>
-        <li><a href="{@docRoot}guide/topics/usb/accessory.html">USB Accessory Dev Guide</a></li>
+        <li><a href="{@docRoot}guide/topics/connectivity/usb/accessory.html">USB Accessory Dev Guide</a></li>
       </ol>
 
       <h2>Where to buy</h2>
@@ -121,7 +121,7 @@ page.title=Android Open Accessory Development Kit
   hardware and not all devices will support accessory mode. Devices that support accessory mode can
   be filtered using a <code>&lt;uses-feature&gt;</code> element in your corresponding application's
   Android manifest. For more information, see the <a href=
-  "{@docRoot}guide/topics/usb/accessory.html#manifest">USB Accessory</a> Developer Guide.</p>
+  "{@docRoot}guide/topics/connectivity/usb/accessory.html#manifest">USB Accessory</a> Developer Guide.</p>
 
   <p>The following list of distributers are currently producing Android Open Accessory compatible
   development boards:</p>
@@ -369,7 +369,7 @@ page.title=Android Open Accessory Development Kit
     2.3.4 devices that support accessory mode. This library is also forward compatible with Android
     3.1 or newer devices that support accessory mode. If you only care about Android 3.1 or newer
     devices, all you need is API Level 12. For more information on deciding which API level to use,
-    see the <a href="{@docRoot}guide/topics/usb/accessory.html#choosing">USB Accessory</a>
+    see the <a href="{@docRoot}guide/topics/connectivity/usb/accessory.html#choosing">USB Accessory</a>
     documentation.</li>
 
     <li>Click <strong>File &gt; New &gt; Project...</strong>, then select <strong>Android &gt;

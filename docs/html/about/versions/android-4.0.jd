@@ -578,7 +578,7 @@ action to start an activity, with either a URL or a MIME type set according to t
 android.nfc.NdefRecord} in the {@link android.nfc.NdefMessage}. For the activity you want to
 respond, you can declare intent filters for the URLs or MIME types your app cares about. For more
 information about Tag Dispatch see the <a
-href="{@docRoot}guide/topics/nfc/index.html#dispatch">NFC</a> developer guide.</p>
+href="{@docRoot}guide/topics/connectivity/nfc/index.html#dispatch">NFC</a> developer guide.</p>
 
 <p>If you want your {@link android.nfc.NdefMessage} to carry a URI, you can now use the convenience
 method {@link android.nfc.NdefRecord#createUri createUri} to construct a new {@link
@@ -606,7 +606,7 @@ application installed, the system launches it; if it’s not installed, Google P
 the user to your application in order to install it.</p>
 
 <p>You can read more about Android Beam and other NFC features in the <a
-href="{@docRoot}guide/topics/nfc/nfc.html">NFC Basics</a> developer guide. For some example code
+href="{@docRoot}guide/topics/connectivity/nfc/nfc.html">NFC Basics</a> developer guide. For some example code
 using Android Beam, see the <a
 href="{@docRoot}resources/samples/AndroidBeamDemo/src/com/example/android/beam/Beam.html">Android
 Beam Demo</a>.</p>
@@ -1764,7 +1764,7 @@ notes for more information.</li>
       <li>USB APIs: Powerful new APIs for integrating connected peripherals with
 Android applications. The APIs are based on a USB stack and services that are
 built into the platform, including support for both USB host and device interactions. See the <a
-href="{@docRoot}guide/topics/usb/index.html">USB Host and Accessory</a> developer guide.</li>
+href="{@docRoot}guide/topics/connectivity/usb/index.html">USB Host and Accessory</a> developer guide.</li>
       <li>MTP/PTP APIs: Applications can interact directly with connected cameras and other PTP
 devices to receive notifications when devices are attached and removed, manage files and storage on
 those devices, and transfer files and metadata to and from them. The MTP API implements the PTP

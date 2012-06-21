@@ -95,7 +95,7 @@ http://developer.android.com/guide/topics/media/index.html
 http://developer.android.com/guide/topics/location/index.html
 http://developer.android.com/guide/topics/location/obtaining-user-location.html
 http://developer.android.com/guide/topics/appwidgets/index.html
-http://developer.android.com/guide/topics/wireless/bluetooth.html
+http://developer.android.com/guide/topics/connectivity/bluetooth.html
 http://developer.android.com/guide/topics/search/index.html
 http://developer.android.com/guide/topics/search/search-dialog.html
 http://developer.android.com/guide/topics/search/adding-recent-query-suggestions.html

@@ -374,7 +374,7 @@ New transformations are made possible with a set of object properties that defin
 position, orientation, transparency and more.</p>
 
 <p>For more information, read the <a
-href="{@docRoot}guide/topics/graphics/animation.html">Property Animation</a> document.</p>
+href="{@docRoot}guide/topics/graphics/prop-animation.html">Property Animation</a> document.</p>
 
 
 <h3>Enable hardware acceleration</h3>

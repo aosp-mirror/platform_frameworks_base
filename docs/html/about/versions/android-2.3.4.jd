@@ -120,7 +120,7 @@ accessories support, for runtime testing against connected devices</li>
 
 <p>For a full discussion of how to develop applications that interact with USB
 accessories, please see the related <a
-href="{@docRoot}guide/topics/usb/index.html">developer documentation</a>.</p>
+href="{@docRoot}guide/topics/connectivity/usb/index.html">developer documentation</a>.</p>
 
 <p>Additionally, developers can request filtering on Google Play, such that
 their applications are not available to users whose devices do not provide the

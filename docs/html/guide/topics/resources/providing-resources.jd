@@ -89,7 +89,7 @@ supported inside project {@code res/} directory.</p>
 
   <tr>
     <td><code>animator/</code></td>
-    <td>XML files that define <a href="{@docRoot}guide/topics/graphics/animation.html">property
+    <td>XML files that define <a href="{@docRoot}guide/topics/graphics/prop-animation.html">property
 animations</a>.</td>
   </tr>
 

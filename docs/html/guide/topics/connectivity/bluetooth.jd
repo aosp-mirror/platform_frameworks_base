@@ -940,7 +940,7 @@ HDP, see <a href="#HDP">Health Device Profile</a>.</li>
 <ol> 
 
   <li>Get the default adapter, as described in
-    <a href="{@docRoot}guide/topics/wireless/bluetooth.html#SettingUp">Setting Up
+    <a href="{@docRoot}guide/topics/connectivity/bluetooth.html#SettingUp">Setting Up
       Bluetooth</a>.</li> 
 
   <li>Use {@link

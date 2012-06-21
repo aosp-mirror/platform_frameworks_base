@@ -15,13 +15,13 @@ page.title=Near Field Communication
   called NDEF (NFC Data Exchange Format).</p>
 
   <dl>
-    <dt><strong><a href="{@docRoot}guide/topics/nfc/nfc.html">NFC Basics</a></strong></dt>
+    <dt><strong><a href="{@docRoot}guide/topics/connectivity/nfc/nfc.html">NFC Basics</a></strong></dt>
     <dd>This document describes how Android handles discovered NFC tags and how it notifies
 applications of data that is relevant to the application. It also goes over how to work with the
 NDEF data in your applications and gives an overview of the framework APIs that support the basic
 NFC feature set of Android.</dd>
 
-    <dt><strong><a href="{@docRoot}guide/topics/nfc/advanced-nfc.html">Advanced
+    <dt><strong><a href="{@docRoot}guide/topics/connectivity/nfc/advanced-nfc.html">Advanced
     NFC</a></strong></dt>
     <dd>This document goes over the APIs that enable use of the various tag technologies that
     Android supports. When you are not working with NDEF data, or when you are working with NDEF

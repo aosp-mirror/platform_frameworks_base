@@ -136,7 +136,7 @@ accessories (connection of USB hosts), declare this element:
 
 <p>For complete information about how to develop applications that interact with
 USB accessories, please see the
-<a href="{@docRoot}guide/topics/usb/index.html">developer documentation</a>.</p>
+<a href="{@docRoot}guide/topics/connectivity/usb/index.html">developer documentation</a>.</p>
 
 <p class="note">To look at sample applications that use the USB host API, see <a
 href="{@docRoot}resources/samples/USB/AdbTest/index.html">ADB Test</a> and <a

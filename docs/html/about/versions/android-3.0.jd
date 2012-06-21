@@ -387,7 +387,7 @@ such as a {@link android.animation.ValueAnimator} or {@link android.animation.Ob
 discussed above.</p>
 
 <p>For more information, see the <a
-href="{@docRoot}guide/topics/graphics/animation.html">Property Animation</a> documentation. You can
+href="{@docRoot}guide/topics/graphics/prop-animation.html">Property Animation</a> documentation. You can
 also see several samples using the animation APIs in the <a
 href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animation/index.html">API
 Demos</a> application.</p>
