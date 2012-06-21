@@ -3759,6 +3759,7 @@ package android.app {
   public static class Notification.BigPictureStyle extends android.app.Notification.Style {
     ctor public Notification.BigPictureStyle();
     ctor public Notification.BigPictureStyle(android.app.Notification.Builder);
+    method public android.app.Notification.BigPictureStyle bigLargeIcon(android.graphics.Bitmap);
     method public android.app.Notification.BigPictureStyle bigPicture(android.graphics.Bitmap);
     method public android.app.Notification build();
     method public android.app.Notification.BigPictureStyle setBigContentTitle(java.lang.CharSequence);
@@ -28156,8 +28157,11 @@ package android.widget {
     method public void setString(int, java.lang.String, java.lang.String);
     method public void setTextColor(int, int);
     method public void setTextViewCompoundDrawables(int, int, int, int, int);
+    method public void setTextViewCompoundDrawablesRelative(int, int, int, int, int);
     method public void setTextViewText(int, java.lang.CharSequence);
+    method public void setTextViewTextSize(int, int, float);
     method public void setUri(int, java.lang.String, android.net.Uri);
+    method public void setViewPadding(int, int, int, int, int);
     method public void setViewVisibility(int, int);
     method public void showNext(int);
     method public void showPrevious(int);

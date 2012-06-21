@@ -1733,7 +1733,6 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @hide
          * Override the large icon when the big notification is shown.
          */
         public BigPictureStyle bigLargeIcon(Bitmap b) {
