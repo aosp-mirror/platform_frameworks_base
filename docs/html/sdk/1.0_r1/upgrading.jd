@@ -1,0 +1,154 @@
+page.title=Upgrading the SDK
+sdk.version=1.0_r1
+@jd:body
+
+<p>For the current SDK release, see the links under <strong>Current SDK Release</strong> in the side navigation.</p>
+
+<p>This guide will help you migrate your development environment and applications
+to <strong>version 1.0, release 1</strong>, of the Android SDK. Use this guide if you've been developing applications
+on a different version of the Android SDK.</p>
+
+<p>To ensure that your applications are compliant with the Android 1.0 system available 
+on mobile devices, you need to install the new SDK and port your existing Android 
+applications to the updated API. The sections below guide you through the process.</p>
+
+<h2 id="install-new">Install the new SDK</h2>
+
+<p>After unpacking the SDK, you should:</p>
+
+<ul>
+  <li>Wipe your emulator data. <p>Some data formats have changed since the last
+  SDK release, so any previously saved data in your emulator must be removed. Open a console/terminal
+  and navigate to the <code>/tools</code> directory of your SDK. Launch the 
+  emulator with the <code>-wipe-data</code> option. </p>
+  <p>Windows: <code>emulator -wipe-data</code><br/>
+   Mac/Linux: <code>./emulator -wipe-data</code></p>
+  </li>
+  <li>Update your PATH variable (Mac/Linux; optional). <p>If you had previously setup your 
+  PATH variable to point to the SDK tools directory, then you'll need to update it to 
+  point to the new SDK. E.g., for a <code>.bashrc</code> or <code>.bash_profile</code> file:
+  <code>export PATH=$PATH:<em>&lt;your_new_sdk_dir></em>/tools</code></p>
+  </li>
+</ul>
+
+<h2 id="update-plugin">Update your ADT Eclipse Plugin</h2>
+
+<p>If you develop on Eclipse and are using the ADT plugin, follow these steps to install the
+plugin that's required for this version of the SDK.</p>
+
+<table style="font-size:100%">
+<tr><th>Eclipse 3.3 (Europa)</th><th>Eclipse 3.4 (Ganymede)</th></tr>
+<tr>
+<td width="45%">
+<ol>
+    <li><a href="http://dl-ssl.google.com/android/ADT-0.8.0.zip">Download the ADT v0.8.0 zip 
+      file</a> (do not unpack it).</li>
+    <li>Start Eclipse, then select <strong>Help</strong> &gt; <strong>Software Updates</strong> &gt; <strong>Find
+            and Install...</strong>. </li>
+    <li>In the dialog that appears, select <strong>Search for new features to install</strong> and click 
+      <strong>Next</strong>. </li>
+    <li>Click <strong>New Archive Site...</strong></li>
+    <li>Browse and select the downloaded the zip file.</li>
+    <li>You should now see the new site added to the search list (and checked).
+        Click <strong>Finish</strong>. </li>
+    <li>In the subsequent Search Results dialog box, select the checkbox for
+    <strong>Android Plugin</strong> &gt; <strong>Developer Tools</strong>.
+    This will check both features:  "Android Developer Tools", and "Android
+    Editors". The Android Editors feature is optional, but recommended.  If
+    you choose to install it, you need the WST plugin mentioned earlier in this
+    page. Click <strong>Next</strong>. </li>
+    <li>Read the license agreement and then select <strong>Accept terms of the license agreement</strong>. 
+     Click <strong>Next</strong>. </li>
+    <li>Click <strong>Finish</strong>. </li>
+    <li>The ADT plugin is not signed; you can accept the installation anyway
+        by clicking <strong>Install All</strong>. </li>
+    <li>Restart Eclipse. </li>
+</ol>
+
+</td>
+<td>
+
+<ol>
+    <li><a href="http://dl-ssl.google.com/android/ADT-0.8.0.zip">Download the ADT v0.8.0 zip 
+      file</a> (do not unpack it).</li>
+    <li>Start Eclipse, then select <strong>Help</strong> &gt; <strong>Software Updates...</strong>.</li>
+    <li>In the dialog that appears, click the <strong>Available Software</strong> tab.</li>
+    <li>Click <strong>Add Site...</strong>, then <strong>Archive...</strong>.</li>
+    <li>Browse and select the downloaded the zip file.</li>
+    <li>Back in the Available Software view, you should see the plugin. Select the checkbox next to 
+      <em>Developer Tools</em>  and click <strong>Install...</strong></li>
+    <li>On the subsequent Install window, "Android Developer Tools", and "Android Editors" should both be checked. 
+    The Android Editors feature is optional, but recommended.  If
+    you choose to install it, you need the WST plugin mentioned earlier in this
+    page. Click <strong>Next</strong>.</li>
+    <li>Accept the license agreement and click <strong>Finish</strong>.</li>
+    <li>Restart Eclipse. </li>
+</ol>
+
+</td>
+</tr>
+</table>
+
+<p>After restart, update your Eclipse preferences to point to the SDK directory:</p>
+    <ol>
+      <li>Select <strong>Window</strong> > <strong>Preferences...</strong> to open the Preferences panel. (Mac OSX: <strong>Eclipse</strong> > <strong>Preferences</strong>)</li>
+      <li>Select <strong>Android</strong> from the left panel.</li>
+      <li>For the SDK Location in the main panel, click <strong>Browse...</strong> and locate the SDK directory.</li>
+      <li>Click <strong>Apply</strong>, then <strong>OK</strong>.</li>
+    </ol>
+
+<h2 id="sign">Set Up Application Signing</h2>
+
+<p>All applications must now be signed before you can install them on the emulator. Both 
+the ADT plugin and the Ant-based build tools support this requirement by signing compiled 
+.apk files with a debug key. To do so, the build tools use the Keytool utility included 
+in the JDK to to create a keystore and a key with a known alias and password. For more 
+information, see "Signing and Publishing Your App" in the documentation included with the SDK.
+
+<p>To support signing, you should first make sure that Keytool is available to the SDK build 
+tools. In most cases, you can tell the SDK build tools how to find Keytool by making sure that 
+your JAVA_HOME environment variable is set and that it references a suitable JDK. Alternatively, 
+you can add the JDK version of Keytool to your PATH variable.</p>
+
+<p>If you are developing on a version of Linux that originally came with Gnu Compiler for Java, 
+make sure that the system is using the JDK version of Keytool, rather than the gcj version. 
+If keytool is already in your PATH, it might be pointing to a symlink at /usr/bin/keytool. 
+In this case, check the symlink target to make sure that it points to the keytool in the JDK.</p>
+
+<p>If you use Ant to build your .apk files (rather than ADT for Eclipse), you must regenerate 
+your build.xml file. To do that, follow these steps:</p>
+<ol>
+  <li>In your Android application project directory, locate and delete the current build.xml file.</li>
+  <li>Run activitycreator, directing output to the folder containing your application project.
+
+<pre>- exec activitycreator --out &lt;project folder&gt; your.activity.YourActivity</pre>
+
+  </li>
+</ol>
+
+<p>Run in this way, activitycreator will not erase or create new Java files (or manifest files), 
+provided the activity and package already exists. It is important that the package and the activity 
+are real. The tool creates a new build.xml file, as well as a new directory called "libs" in which 
+to place 3rd jar files, which are now automatically handled by the Ant script.</p>
+
+<h2 id="migrate">Migrate your applications</h2>
+
+<p>If (and only if) you have written apps in an SDK released previous to
+the Android 1.0 SDK, you will need to migrate your applications. After
+updating your SDK, you may encounter breakages in your code, due to
+framework and API changes. You'll need to update your code to match
+changes in the Android APIs.</p>
+
+<p>One way to start is to open your project in Eclipse and see where the ADT
+identifies errors in your application. You can also look up
+specific changes in the Android APIs in the <em>Overview of Changes</em> and <em>
+API Diffs Report</em>, both available in the documentation included with the
+Android 1.0 SDK package.</p>
+
+<p>If you have additional trouble updating your code, visit the 
+<a href="http://groups.google.com/group/android-developers">Android Developers Group</a>
+to seek help from other Android developers.</p>
+
+<p>If you have modified one of the ApiDemos applications and would like to migrate it 
+to the new SDK, note that you will need to uninstall the version of ApiDemos that comes 
+preinstalled in the emulator.</p>

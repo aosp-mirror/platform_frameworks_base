@@ -1,0 +1,385 @@
+page.title=Upgrading the SDK
+sdk.version=1.6
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Upgrading the SDK</h2>
+  <ul>
+    <li>If you are developing on the Android 1.5 SDK, migrating your
+applications is straightforward and typically requires no modifications.</li>
+    <li>For Eclipse users, a new version of ADT is available. To use the Android
+1.6 SDK, please upgrade to ADT 0.9.3 (or later).</li>
+    <li>For Windows users, the SDK includes a new USB driver that you can
+install, if you are developing on a device. </li>
+    <li>A new Android SDK and AVD Manager tool is available. To access 
+it, run the <code>android</code> tool without options. </li>
+  </ul>
+
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#Install">Install the SDK</a></li>
+    <li><a href="#UpdateAdt">Update Your Eclipse ADT Plugin</a></li>
+    <li><a href="#RunYourApps">Run Your Applications</a></li>
+    <li><a href="#MigrateYourApps">Migrate Your Applications</a></li>
+  </ol>
+  
+  <h2>Migrating information</h2>
+  <ol>
+    <li><a href="{@docRoot}sdk/api_diff/4/changes.html">Android 1.6 API 
+Differences</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>This document describes how to move your development environment and existing
+Android applications from an Android 1.5 SDK to the Android 1.6 SDK. If you are
+migrating applications from an SDK older than 1.5, please also read the
+upgrading document available in the Android 1.5 SDK package.</p>
+
+<p>There are several compelling reasons to upgrade, such as new SDK tools that
+make developing more efficient and new APIs that allow you to expand the
+feature-set of your applications. However, even if you or your applications
+don't require these enhancements, it's important that you upgrade to ensure that
+your applications run properly on the upcoming Android platform.</p>
+
+<p>The Android 1.6 platform will soon be deployable to devices around the world.
+If you have already released Android applications to the public, you should test
+the forward-compatibility of your applications on the latest version of the
+platform as soon as possible. It's unlikely that you'll encounter problems in
+your applications, but in the interest of maintaining the best user experience,
+you should take no risks. So, please install the new Android SDK and test your
+applications on the new platform.</p>
+
+<!-- NOT AVAILABLE FOR PREVIEW RELEASES -->
+<p>For more information on new SDK features and system changes, 
+see the <a href="{@docRoot}sdk/android-1.6.html">Android 1.6 Version Notes</a>.</p>
+<!-- -->
+
+<h2 id="Install">Install the SDK</h2>
+
+<p>If you haven't yet downloaded the SDK, <a href="index.html">download it from 
+here</a> and unpack it into a safe location.</p>
+
+<p>If you had previously setup your <code>PATH</code> variable to point to the SDK 
+tools directory, then you need to update it to point to the new SDK. For example, for
+a <code>.bashrc</code> or <code>.bash_profile</code> file:</p>
+<pre>export PATH=$PATH:<em>&lt;your_sdk_dir></em>/tools</pre>
+
+
+<h2 id="UpdateAdt">Update Your Eclipse ADT Plugin</h2>
+
+<p>If you don't use the Eclipse IDE for development,
+skip to <a href="#RunYourApps">Run Your Applications</a>.</p>
+
+<p>A new version of the ADT Plugin, ADT 0.9.3, is available in conjunction with
+this SDK release. To use the SDK, you must upgrade your ADT Plugin to version
+0.9.3. With ADT 0.9.3, you can still compile your existing applications against 
+multiple platform versions, such as Android 1.5, Android 1.1, and so on. However, 
+ADT 0.9.3 is not compatible with previous versions of the SDK and its tools, so 
+make sure that you upgrade both your SDK <em>and</em> the ADT Plugin.</p>
+
+The upgrade steps for ADT are described below. For information about new features in ADT, see the <a
+href="{@docRoot}sdk/RELEASENOTES.html">Release Notes</a> document. </p>
+
+<p>If you're currently using a version of ADT <em>older</em> than version 0.9,
+then you must uninstall ADT before you proceed (read how to <a
+href="{@docRoot}sdk/1.5_r3/upgrading.html#uninstallAdt">Uninstall your previous
+ADT plugin</a>). If you currently have version 0.9 or 0.9.1, then you don't need
+to uninstall and can continue with the procedure below.</p>
+
+<table style="font-size:100%">
+<tr><th>Eclipse 3.4 (Ganymede)</th><th>Eclipse 3.5 (Galileo)</th></tr>
+<tr>
+<td width="50%">
+<!-- 3.4 steps -->
+<ol>
+    <li>Select <strong>Help</strong> &gt; <strong>Software Updates</strong>.</li>
+    <li>Select the <strong>Available Software</strong> tab.</li>
+    <li>Select the checkboxes next to Android DDMS and Android Developer Tools, 
+      then click  <strong>Update</strong>.</li>
+    <li>In the resulting Available Updates dialog, ensure that both Android DDMS 
+      and Android Development Tools are selected, then click 
+      <strong>Next</strong>.</li>
+    <li>Read and accept the license agreement and then click <strong>Finish</strong>.
+      This will download and install the latest version of Android DDMS and 
+      Android Development Tools.</li>
+    <li>Restart Eclipse.</li>
+</ol>
+</td>
+<td>
+<!-- 3.5 steps -->
+<ol>
+    <li>Select <strong>Help</strong> &gt; <strong>Check for Updates</strong>. </li>
+    <li>In the resulting Available Updates dialog, locate the Android DDMS and 
+        Android Development Tools features in the list and ensure that the checkboxes
+        next to them are selected. Click <strong>Next</strong>. 
+        <p>If the Available Updates dialog does not list Android DDMS and Android 
+           Development tools, make sure that you have set up a remote update site 
+           for them, as described in 
+           <a href="installing.html#InstallingADT">Installing the ADT Plugin</a>. 
+        </p></li>
+    <li>In the Update Details dialog, click <strong>Next</strong>.</li>
+    <li>Read and accept the license agreement and then click <strong>Finish</strong>.
+      This will download and install the latest version of Android DDMS and 
+      Android Development Tools.</li>
+    <li>Restart Eclipse.</li>
+</ol>
+</td>
+</tr>
+</table>
+
+<p>If you encounter problems with this update procedure, try performing a fresh
+installation. Fully remove your existing ADT Plugin as described in <a
+href="{@docRoot}sdk/1.5_r3/upgrading.html#uninstallAdt">Uninstall your previous
+ADT plugin</a> and then follow the guide to <a
+href="installing.html#InstallingADT">Installing the ADT Plugin for
+Eclipse</a>.</p>
+
+<h3 id="updateEclipsePrefs">Update your Eclipse SDK Preferences</h3>
+
+<p>The last step is to update your Eclipse preferences to point to the new 
+SDK directory:</p>
+<ol>
+  <li>Select <strong>Window</strong> > <strong>Preferences</strong> to open 
+      the Preferences panel (Mac: <strong>Eclipse</strong> > <strong>Preferences
+      </strong>).</li>
+  <li>Select <strong>Android</strong> from the left panel.</li>
+  <li>For the SDK Location, click <strong>Browse</strong> 
+  and locate your SDK directory.</li>
+  <li>Click <strong>Apply</strong>, then <strong>OK</strong>.</li>
+</ol>
+
+
+<h2 id="RunYourApps">Run Your Applications to Test Forward Compatibility</h2>
+
+<p>Now that you have installed the Android 1.6 SDK, we encourage you run each of
+your existing applications on the Android 1.6 system image that is included in
+the SDK, to ensure that it functions properly on the new platform.
+Testing forward-compatibility in this way is especially important for
+applications that you may have already published and that may be installed on
+devices that will upgrade to the new platform. </p>
+
+<p>In most cases, your applications will function properly when run on the new
+version of the platform. However, it is possible that you will encounter
+unexpected behavior, because of changes in the API or underlying platform. If
+you do find problems, you can use the SDK tools to compile and publish an update
+to the applications, which users can then download. 
+
+<p>To test forward-compatibility, simply run your application, as-is, on an
+instance of the Android Emulator that uses an AVD targeted to the "Android 1.6"
+system image. Here are the steps: </p>
+
+<ol>
+  <li>Make no changes to your application code.</li>
+  <li>Create a new AVD that runs the new "Android 1.6" platform. </li>
+  <li>Launch your application in an emulator running the new AVD.</li>
+  <li>Perform normal testing on your application to ensure everything works as 
+      expected.</li>
+</ol>
+
+<p>Note that, for the purposes of forward-compatibility testing, you should not
+change how your application is compiled. That is, you should continue to compile
+the application against the same version of the Android library as before. The
+only change needed is to the AVD, which controls the version of the Android
+system image (run-time environment) on which the application is run. 
+
+<p>For more information on creating an AVD and launching your application, see
+<a href="{@docRoot}guide/developing/eclipse-adt.html#Running">Running Your
+Applications (Eclipse)</a> or <a
+href="{@docRoot}guide/developing/other-ide.html#Running">Running
+Your Applications (other IDEs)</a>, depending on your development
+environment.</p>
+
+<h3 id="FutureProofYourApps">Android 1.6 Forward-Compatibility Tips</h3>
+
+<p>The new version of the Android platform includes several new APIs, but
+very few actual changes to existing APIs. This means that, in most
+cases, your applications written with earlier versions of the Android library
+should run properly on the Android 1.6 platform. </p>
+
+<p>However, here are some areas to pay attention to as you test forward-compatibility:</p>
+
+<ul>
+  <li><strong>Make sure your application doesn't use internal APIs</strong>. Your
+application should not use any APIs that are not officially supported and are
+not published in the Android reference documentation. Unofficial APIs can change
+at any time without notice and &mdash; if your application happens to be using
+them &mdash; such a change could cause the application to break.</li>
+
+ <li><strong>Watch for assumptions about available hardware</strong>. Remember
+that not all compatible devices offer the same hardware capabilities &mdash;
+screens, keyboards, and physical keys, and so on. As you test your application,
+watch for areas where your application depends on the presence of specific
+hardware capabilities. If you find dependencies, you can design around them by
+building in alternate support or graceful degradation, or you can specify them 
+as hardware requirements in a 
+<a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html"><code>&lt;uses-configuration&gt;</code>.</a>
+element in the application's manifest file. Also see the <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>
+manifest element, which lets your application declare a requirement for 
+specific features, such as an OpenGL ES version or a camera that has 
+autofocus capability.
+</li>
+
+ <li><strong>Watch for assumptions about available features</strong>. Not all 
+compatible devices offer equal support for embedded features. same hardware capabilities &mdash;
+screens, keyboards, and physical keys, and so on. As you test your application,
+watch for areas where your application depends on the presence of specific
+hardware capabilities. If you find dependencies, you can design around them by
+building in alternate support or graceful degradation, or you can specify them 
+as hardware requirements in a 
+<a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html"><code>&lt;uses-configuration&gt;</code>.</a>
+element in the application's manifest file. </li>
+
+  <p>When testing forward-compatibility, try running your application in various
+AVDs that emulate different hardware configurations. For example, you can create
+an AVD that does not offer a physical keyboard or one that uses a dpad instead
+of a trackball. Running your application in different emulated hardware
+configurations will give you an idea of where its dependencies are and help you
+identify problems. </p>
+ </li>
+
+  <li><strong>Watch for assumptions about screen resolution and
+density</strong>. A device's screen resolution and density is likely to affect
+the way that your application's UI is rendered, especially if your app specifies
+dimensions or positions using pixels or absolute layouts. To ensure consistent
+UI across screens, your app should specify the dimensions and positions of
+layouts and drawables in relative units that can be scaled by the system as
+appropriate, according to the density of the device's screen. Alternatively, you
+can create custom sets of layout/drawable resources for specific screens, which
+the system can then load as appropriate, based on the current device screen.</p>
+
+  <p>When testing forward-compatibility, try running your application in various
+AVDs that emulate different screen resolutions and densities. Also note that,
+starting with Android 1.6, the platform provides a Compatibility Mode that
+automatically scales the UI of applications if they do not explicitly indicate
+support for the current screen in the 
+<a href="{@docRoot}guide/topics/manifest/supports-screen-element.html"><code>&lt;supports-screen&gt;</code></a>
+element in their manifest files. As part of testing, you should evaluate how
+your application is displayed in Compatibility Mode on different screens. </p>
+  </li>
+
+  <li><strong>Avoid performing layout orientation changes based on the
+acceletometer (or via other sensors)</strong>. Some Android-powered devices will
+automatically rotate the orientation (and all devices have the option to turn on
+auto-rotation), so if your application also attempts to rotate the orientation,
+it can result in strange behavior. In addition, if your application uses the
+accelerometer to detect shaking and you do not want to rotate the orientation,
+then you should lock the current orientation with <a
+href="{@docRoot}guide/topics/manifest/activity-element.html#screen">android:screenOrientation</a>.
+ </li>
+
+</ul>
+
+<h2 id="MigrateYourApps">Migrate Your Applications</h2>
+
+<p>If you want to use any of the new Android 1.6 APIs in your existing
+applications, you must first migrate the applications to the new Android
+platform version. Generally, migrating an application includes: </p>
+
+<ul>
+<li>Referencing the proper API Level in the application's manifest file, 
+and</li>
+<li>Resetting its project properties so that it is compiled against the Android 
+1.6 build target.</li>
+</ul>
+
+<p>Additionally, to run your application in the emulator, you need to
+create an AVD that uses the Android 1.6 system image. </p>
+
+<p class="note"><strong>Note:</strong> You only need migrate your application as
+described in this section if the application will actually use APIs
+<em>introduced</em> in the Android 1.6 platform (which are not available on
+devices running older versions of the Android platform). If your application
+does not use any new APIs, you can compile and run it without modification and
+not migration is necessary.</p>
+
+<h3>Reference the Proper API Level</h3>
+
+<p>If your application is using APIs introduced in Android 1.6, you must
+reference that dependency in the application's manifest file so that it can be
+deployed to devices running the Android 1.6 platform. </p>
+
+<p>Open the manifest file and locate the <code>minSdkVersion</code> attribute 
+in the <code>&lt;uses-sdk&gt;</code> manifest element. Set the value of 
+<code>minSdkVersion</code> to <code>"4"</code> (the API Level
+identifier corresponding to Android 1.6). Here's an example:</p>
+
+<pre>
+&lt;manifest>
+  ...
+  &lt;uses-sdk android:minSdkVersion="4" />
+  ...
+&lt;/manifest>
+</pre>
+
+<h3>Compile Against the Proper Build Target</h3>
+
+<p>Once you've changed the <code>minSdkVersion</code> value in your
+application's manifest, you need to set the application's project properties so
+that the application will be compiled against the Android 1.6 library. To do so,
+follow the steps below for your respective development environment.  </p>
+
+<h4 id="EclipseUsers">Eclipse Users</h4>
+
+<ol>
+  <li>Right-click on the individual project (in the Package Explorer)
+  and select <strong>Properties</strong>.</li>
+  <li>In the properties, open the Android panel and select a new Project Build Target.
+  Select "Android 1.6" to target the new platform (or "Google APIs" with the "4" 
+  API Level, if your application uses the Google Maps APIs).</li>
+  <li>Click <strong>Apply</strong>, then <strong>OK</strong>.</li>
+</ol>
+	
+<h4 id="AntUsers">Ant Users</h4>
+	
+<p>Use the <code>android</code> tool (located in
+<code><em>your_sdk</em>/tools/</code>) to create a new <code>build.xml</code>
+that references the new platform target. To see a list of available targets,
+execute:</p>
+
+<pre>android list targets</pre>
+
+<p>Select the target <code>id</code> that corresponds to the "Android 1.6" platform
+and pass it with the <code>--target</code> parameter when updating your project.
+For example:</p>
+
+<pre>android update project --path /path/to/my-project --target 2</pre>
+
+<p>If your application uses the Google Maps APIs (i.e., MapView), be certain to 
+select a Google APIs target.</p>
+
+<h3>Create an AVD that Uses the Android 1.6 Platform</h3>
+
+<p>Finally, you need to set up a new AVD that uses the Android 1.6 platform, so that 
+you can run your application in the emulator. 
+
+<p>To set up the new AVD, use the <code>android</code> tool, available in the
+<code>tools/</code> directory of the SDK. You can run the AVD manager by simply
+changing to the <code>tools/</code> directory and entering <code>android</code>
+at the command line. Click "New" to create the AVD and set its properties.</p>
+
+<p>When creating the AVD, make sure to select a target of "Android 1.6 - API
+Level 4". If your application uses the Google Maps APIs (MapView), select the
+target "Google APIs (Google Inc.) - API Level 4". </p>
+
+<p>For more information about running your application in an AVD, see <a
+href="{@docRoot}guide/developing/eclipse-adt.html#Running">Running Your
+Application (Eclipse)</a> or <a
+href="{@docRoot}guide/developing/other-ide.html#Running">Running Your
+Application (other IDEs)</a>. </p>
+
+<p>For general information about AVDs, see the <a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual
+Devices</a> document. </p>
+
+
+
+<div class="special">
+<p>If you have trouble migrating to the new version of the SDK, visit the 
+<a href="http://groups.google.com/group/android-developers">Android Developers Group</a>
+to seek help from other Android developers.</p>
+</div>
+

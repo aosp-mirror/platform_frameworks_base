@@ -1,0 +1,8 @@
+@jd:body
+
+<script type="text/javascript">
+  document.location=toRoot+"sdk/installing.html"
+</script>
+
+<p>You should have already been redirected by your browser. Please go to
+<a href="{@docRoot}sdk/installing.html">Installing the Android SDK</a>.</p>
