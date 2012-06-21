@@ -40,7 +40,7 @@ Another way to better listen to your users is by having a public beta or trusted
 <p>
 The effect of overall app stability of ratings and user satisfaction is very well-known and there are many tools and techniques for testing and profiling your app on different devices and user scenarios.</p>
 <p>
-One noteworthy and yet relatively underused tool for catching stability issues such as crashes is the <a href="{@docRoot}tools/monkey.html">UI/Application Exerciser Monkey</a> (Monkey). Monkey will send random UI events to your app's activitie, allowing you to trigger user flows that can uncover stability problems.</p>
+One noteworthy and yet relatively underused tool for catching stability issues such as crashes is the <a href="{@docRoot}tools/help/monkey.html">UI/Application Exerciser Monkey</a> (Monkey). Monkey will send random UI events to your app's activitie, allowing you to trigger user flows that can uncover stability problems.</p>
 <p>
 Also, with the Google error-reporting features built into most Android devices, users now have a way to report application crashes to developers. The error reports show up in aggregate in the Google Play Developer Console. Make sure to read these reports often and act on them appropriately.</p>
 <p>

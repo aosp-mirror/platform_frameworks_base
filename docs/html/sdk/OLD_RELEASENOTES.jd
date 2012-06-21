@@ -175,7 +175,7 @@ specify which port the emulator should bind to for the console. &lt;port&gt; mus
 <ul>
 	<li><a href="{@docRoot}tools/help/hierarchy-viewer.html">HierarchyViewer</a> is a visual tool for inspecting and debugging your user interfaces and layout. </li>
 	<li><a href="{@docRoot}tools/help/draw9patch.html">Draw 9-patch</a> allows you to easily create a NinePatch graphic using a WYSIWYG editor. </li>
-	<li>The <a href="{@docRoot}tools/monkey.html">UI/Application Exerciser Monkey</a> generates pseudo-random system and user events, for testing your application. </li>
+	<li>The <a href="{@docRoot}tools/help/monkey.html">UI/Application Exerciser Monkey</a> generates pseudo-random system and user events, for testing your application. </li>
 </ul>
 <p>
 	<b>Application Signing</b>

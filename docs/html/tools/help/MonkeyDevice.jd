@@ -7,7 +7,7 @@ parent.link=index.html
 </style>
 <p>
     A monkeyrunner class that represents a device or emulator accessible by the workstation running
-<code><a href="{@docRoot}tools/monkeyrunner_concepts.html">monkeyrunner</a></code>.
+<code><a href="{@docRoot}tools/help/monkeyrunner_concepts.html">monkeyrunner</a></code>.
 </p>
 <p>
     This class is used to control an Android device or emulator. The methods send UI events,

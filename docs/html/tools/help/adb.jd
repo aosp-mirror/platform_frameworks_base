@@ -409,7 +409,7 @@ application and send 500 pseudo-random events to it.</p>
 <pre>$ adb shell monkey -v -p your.package.name 500</pre>
 
 <p>For more information about command options for Monkey, see the complete 
-<a href="{@docRoot}tools/monkey.html" title="monkey">UI/Application Exerciser Monkey</a> documentation page.</p>
+<a href="{@docRoot}tools/help/monkey.html" title="monkey">UI/Application Exerciser Monkey</a> documentation page.</p>
 
 
 <a name="othershellcommands"></a>

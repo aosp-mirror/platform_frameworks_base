@@ -76,11 +76,11 @@ parent.link=index.html
           Testing from Other IDEs</a>
         </li>
         <li>
-          <a href="{@docRoot}tools/monkeyrunner_concepts.html">
+          <a href="{@docRoot}tools/help/monkeyrunner_concepts.html">
           monkeyrunner</a>
         </li>
         <li>
-     <a href="{@docRoot}tools/monkey.html">UI/Application Exerciser Monkey</a>
+     <a href="{@docRoot}tools/help/monkey.html">UI/Application Exerciser Monkey</a>
         </li>
       </ol>
   </div>
@@ -117,9 +117,9 @@ parent.link=index.html
     </li>
     <li>
         The SDK also provides
-  <a href="{@docRoot}tools/monkeyrunner_concepts.html">monkeyrunner</a>, an API
+  <a href="{@docRoot}tools/help/monkeyrunner_concepts.html">monkeyrunner</a>, an API
         testing devices with Python programs, and <a
-        href="{@docRoot}tools/monkey.html">UI/Application Exerciser Monkey</a>,
+        href="{@docRoot}tools/help/monkey.html">UI/Application Exerciser Monkey</a>,
         a command-line tool for stress-testing UIs by sending pseudo-random events to a device.
     </li>
 </ul>
@@ -552,7 +552,7 @@ parent.link=index.html
 </p>
     <ul>
         <li>
-The <a href="{@docRoot}tools/monkey.html">UI/Application Exerciser Monkey</a>,
+The <a href="{@docRoot}tools/help/monkey.html">UI/Application Exerciser Monkey</a>,
             usually called "monkey", is a command-line tool that sends pseudo-random streams of
             keystrokes, touches, and gestures to a device. You run it with the
             <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a> (adb) tool.
@@ -561,7 +561,7 @@ The <a href="{@docRoot}tools/monkey.html">UI/Application Exerciser Monkey</a>,
             number seed.
         </li>
         <li>
-    The <a href="{@docRoot}tools/monkeyrunner_concepts.html">monkeyrunner</a> tool
+    The <a href="{@docRoot}tools/help/monkeyrunner_concepts.html">monkeyrunner</a> tool
             is an API and execution environment for test programs written in Python. The API
             includes functions for connecting to a device, installing and uninstalling packages,
             taking screenshots, comparing two images, and running a test package against an
