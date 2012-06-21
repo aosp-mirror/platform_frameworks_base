@@ -239,7 +239,7 @@ private:
             Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
             Vector<jchar>* const outGlyphs);
 
-    SkTypeface* getCachedTypeface(SkTypeface** typeface, FallbackScripts fallbackEnum);
+    SkTypeface* getCachedTypeface(SkTypeface** typeface, HB_Script script, SkTypeface::Style style);
     HB_Face getCachedHBFace(SkTypeface* typeface);
 
     void ensureShaperItemGlyphArrays(size_t size);
