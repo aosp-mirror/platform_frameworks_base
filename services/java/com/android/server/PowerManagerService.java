@@ -1746,7 +1746,7 @@ public class PowerManagerService extends IPowerManager.Stub
             Slog.i(TAG, "Set screen state: " + on, e);
         }
         if (on) {
-            if ((mPowerState & SCREEN_ON_BIT) == 0 || mSkippedScreenOn) {
+            if (mInitialized && ((mPowerState & SCREEN_ON_BIT) == 0 || mSkippedScreenOn)) {
                 // If we are turning the screen state on, but the screen
                 // light is currently off, then make sure that we set the
                 // light at this point to 0.  This is the case where we are
@@ -1754,6 +1754,8 @@ public class PowerManagerService extends IPowerManager.Stub
                 // before showing it to the user.  We want the light off
                 // until it is ready to be shown to the user, not it using
                 // whatever the last value it had.
+                // Skip this if the screen is being turned on for the first time
+                // after boot (mInitialized is false).
                 if (DEBUG_SCREEN_ON) {
                     Slog.i(TAG, "Forcing brightness 0: mPowerState=0x"
                             + Integer.toHexString(mPowerState)
@@ -2325,6 +2327,13 @@ public class PowerManagerService extends IPowerManager.Stub
                     // current animation is unrelated to new animation, jump to final values
                     cancelAnimation();
                 }
+                if (mInitialAnimation) {
+                    // jump to final value in one step the first time the brightness is set
+                    animationDuration = 0;
+                    if (target > 0) {
+                        mInitialAnimation = false;
+                    }
+                }
                 startValue = currentValue;
                 endValue = target;
                 startSensorValue = mHighestLightSensorValue;
@@ -2332,7 +2341,6 @@ public class PowerManagerService extends IPowerManager.Stub
                 currentMask = mask;
                 duration = (int) (mWindowScaleAnimation * animationDuration);
                 startTimeMillis = SystemClock.elapsedRealtime();
-                mInitialAnimation = mInitialAnimation && target > 0;
 
                 if (mDebugLightAnimation) {
                     Slog.v(TAG, "animateTo(target=" + target
