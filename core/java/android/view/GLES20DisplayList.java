@@ -43,6 +43,10 @@ class GLES20DisplayList extends DisplayList {
         mName = name;
     }
 
+    boolean hasNativeDisplayList() {
+        return mValid && mFinalizer != null;
+    }
+
     int getNativeDisplayList() {
         if (!mValid || mFinalizer == null) {
             throw new IllegalStateException("The display list is not valid.");
@@ -110,229 +114,179 @@ class GLES20DisplayList extends DisplayList {
 
     @Override
     public void setCaching(boolean caching) {
-        try {
-            nSetCaching(getNativeDisplayList(), caching);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetCaching(mFinalizer.mNativeDisplayList, caching);
         }
     }
 
     @Override
     public void setClipChildren(boolean clipChildren) {
-        try {
-            nSetClipChildren(getNativeDisplayList(), clipChildren);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetClipChildren(mFinalizer.mNativeDisplayList, clipChildren);
         }
     }
 
     @Override
     public void setStaticMatrix(Matrix matrix) {
-        try {
-            nSetStaticMatrix(getNativeDisplayList(), matrix.native_instance);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetStaticMatrix(mFinalizer.mNativeDisplayList, matrix.native_instance);
         }
     }
 
     @Override
     public void setAnimationMatrix(Matrix matrix) {
-        try {
-            nSetAnimationMatrix(getNativeDisplayList(),
+        if (hasNativeDisplayList()) {
+            nSetAnimationMatrix(mFinalizer.mNativeDisplayList,
                     (matrix != null) ? matrix.native_instance : 0);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
         }
     }
 
     @Override
     public void setAlpha(float alpha) {
-        try {
-            nSetAlpha(getNativeDisplayList(), alpha);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetAlpha(mFinalizer.mNativeDisplayList, alpha);
         }
     }
 
     @Override
     public void setHasOverlappingRendering(boolean hasOverlappingRendering) {
-        try {
-            nSetHasOverlappingRendering(getNativeDisplayList(), hasOverlappingRendering);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetHasOverlappingRendering(mFinalizer.mNativeDisplayList, hasOverlappingRendering);
         }
     }
 
     @Override
     public void setTranslationX(float translationX) {
-        try {
-            nSetTranslationX(getNativeDisplayList(), translationX);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetTranslationX(mFinalizer.mNativeDisplayList, translationX);
         }
     }
 
     @Override
     public void setTranslationY(float translationY) {
-        try {
-            nSetTranslationY(getNativeDisplayList(), translationY);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetTranslationY(mFinalizer.mNativeDisplayList, translationY);
         }
     }
 
     @Override
     public void setRotation(float rotation) {
-        try {
-            nSetRotation(getNativeDisplayList(), rotation);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetRotation(mFinalizer.mNativeDisplayList, rotation);
         }
     }
 
     @Override
     public void setRotationX(float rotationX) {
-        try {
-            nSetRotationX(getNativeDisplayList(), rotationX);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetRotationX(mFinalizer.mNativeDisplayList, rotationX);
         }
     }
 
     @Override
     public void setRotationY(float rotationY) {
-        try {
-            nSetRotationY(getNativeDisplayList(), rotationY);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetRotationY(mFinalizer.mNativeDisplayList, rotationY);
         }
     }
 
     @Override
     public void setScaleX(float scaleX) {
-        try {
-            nSetScaleX(getNativeDisplayList(), scaleX);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetScaleX(mFinalizer.mNativeDisplayList, scaleX);
         }
     }
 
     @Override
     public void setScaleY(float scaleY) {
-        try {
-            nSetScaleY(getNativeDisplayList(), scaleY);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetScaleY(mFinalizer.mNativeDisplayList, scaleY);
         }
     }
 
     @Override
     public void setTransformationInfo(float alpha, float translationX, float translationY,
             float rotation, float rotationX, float rotationY, float scaleX, float scaleY) {
-        try {
-            nSetTransformationInfo(getNativeDisplayList(), alpha, translationX, translationY,
+        if (hasNativeDisplayList()) {
+            nSetTransformationInfo(mFinalizer.mNativeDisplayList, alpha, translationX, translationY,
                     rotation, rotationX, rotationY, scaleX, scaleY);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
         }
     }
 
     @Override
     public void setPivotX(float pivotX) {
-        try {
-            nSetPivotX(getNativeDisplayList(), pivotX);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetPivotX(mFinalizer.mNativeDisplayList, pivotX);
         }
     }
 
     @Override
     public void setPivotY(float pivotY) {
-        try {
-            nSetPivotY(getNativeDisplayList(), pivotY);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetPivotY(mFinalizer.mNativeDisplayList, pivotY);
         }
     }
 
     @Override
     public void setCameraDistance(float distance) {
-        try {
-            nSetCameraDistance(getNativeDisplayList(), distance);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetCameraDistance(mFinalizer.mNativeDisplayList, distance);
         }
     }
 
     @Override
     public void setLeft(int left) {
-        try {
-            nSetLeft(getNativeDisplayList(), left);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetLeft(mFinalizer.mNativeDisplayList, left);
         }
     }
 
     @Override
     public void setTop(int top) {
-        try {
-            nSetTop(getNativeDisplayList(), top);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetTop(mFinalizer.mNativeDisplayList, top);
         }
     }
 
     @Override
     public void setRight(int right) {
-        try {
-            nSetRight(getNativeDisplayList(), right);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetRight(mFinalizer.mNativeDisplayList, right);
         }
     }
 
     @Override
     public void setBottom(int bottom) {
-        try {
-            nSetBottom(getNativeDisplayList(), bottom);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetBottom(mFinalizer.mNativeDisplayList, bottom);
         }
     }
 
     @Override
     public void setLeftTop(int left, int top) {
-        try {
-            nSetLeftTop(getNativeDisplayList(), left, top);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetLeftTop(mFinalizer.mNativeDisplayList, left, top);
         }
     }
 
     @Override
     public void setLeftTopRightBottom(int left, int top, int right, int bottom) {
-        try {
-            nSetLeftTopRightBottom(getNativeDisplayList(), left, top, right, bottom);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nSetLeftTopRightBottom(mFinalizer.mNativeDisplayList, left, top, right, bottom);
         }
     }
 
     @Override
     public void offsetLeftRight(int offset) {
-        try {
-            nOffsetLeftRight(getNativeDisplayList(), offset);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nOffsetLeftRight(mFinalizer.mNativeDisplayList, offset);
         }
     }
 
     @Override
     public void offsetTopBottom(int offset) {
-        try {
-            nOffsetTopBottom(getNativeDisplayList(), offset);
-        } catch (IllegalStateException e) {
-            // invalid DisplayList okay: we'll set current values the next time we render to it
+        if (hasNativeDisplayList()) {
+            nOffsetTopBottom(mFinalizer.mNativeDisplayList, offset);
         }
     }
 
