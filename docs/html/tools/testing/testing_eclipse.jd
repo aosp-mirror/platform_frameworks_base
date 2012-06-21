@@ -223,7 +223,7 @@ from Eclipse</a>.
 </p>
 <p>
     The Resources tab contains an
-    <a href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity Testing</a>
+    <a href="{@docRoot}tools/testing/activity_test.html">Activity Testing</a>
     tutorial with more information about creating test classes and methods.
 </p>
 <h2 id="RunTestEclipse">Running Tests</h2>
@@ -351,7 +351,7 @@ from Eclipse</a>.
             sample test package, which tests the
             <a href="{@docRoot}resources/samples/Spinner/index.html">Spinner</a>
             sample application. This test package is also featured in the
-            <a href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity Testing</a>
+            <a href="{@docRoot}tools/testing/activity_test.html">Activity Testing</a>
             tutorial.
         </p>
     </div>

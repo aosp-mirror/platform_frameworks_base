@@ -353,5 +353,5 @@ displayed on devices running Android 4.0.3 or higher.</p>
   </ul>
   
   For more information about providing mock location data, see 
-  <a href="{@docRoot}guide/topics/location/obtaining-user-location.html#MockData">Obtaining User Location</a>.
+  <a href="{@docRoot}guide/topics/location/strategies.html#MockData">Location Strategies</a>.
   

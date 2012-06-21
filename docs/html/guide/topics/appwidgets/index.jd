@@ -516,7 +516,7 @@ consider starting a {@link android.app.Service} in the
 {@link android.appwidget.AppWidgetProvider#onUpdate(Context,AppWidgetManager,int[]) onUpdate()} 
 method. From within the Service, you can perform your own updates
 to the App Widget without worrying about the AppWidgetProvider closing down due
-to an <a href="{@docRoot}guide/practices/design/responsiveness.html">Application
+to an <a href="{@docRoot}guide/practices/responsiveness.html">Application
 Not Responding</a> (ANR) error. See the <a
 href="http://code.google.com/p/wiktionary-android/source/browse/trunk/Wiktionary/src/com/example/android/wiktionary/WordWidget.java">Wiktionary sample's AppWidgetProvider</a> for an example of an App Widget running a {@link
 android.app.Service}.</p>

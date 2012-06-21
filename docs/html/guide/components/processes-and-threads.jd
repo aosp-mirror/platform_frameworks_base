@@ -221,7 +221,7 @@ database queries will block the whole UI. When the thread is blocked, no events 
 including drawing events. From the user's perspective, the
 application appears to hang. Even worse, if the UI thread is blocked for more than a few seconds
 (about 5 seconds currently) the user is presented with the infamous "<a
-href="http://developer.android.com/guide/practices/design/responsiveness.html">application not
+href="http://developer.android.com/guide/practices/responsiveness.html">application not
 responding</a>" (ANR) dialog. The user might then decide to quit your application and uninstall it
 if they are unhappy.</p>
 

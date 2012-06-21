@@ -1614,7 +1614,7 @@ seemed to work because it made it possible to write buggy code. In Android 4.0, 
 indirect references in order to detect these bugs.</p>
 
 <p>The ins and outs of JNI local references are described in “Local and Global References" in <a
-href="{@docRoot}guide/practices/design/jni.html">JNI Tips</a>. In Android 4.0, <a
+href="{@docRoot}guide/practices/jni.html">JNI Tips</a>. In Android 4.0, <a
 href="http://android-developers.blogspot.com/2011/07/debugging-android-jni-with-checkjni.html">
 CheckJNI</a> has been enhanced to detect these errors. Watch the <a
 href="http://android-developers.blogspot.com/">Android Developers Blog</a> for an upcoming post

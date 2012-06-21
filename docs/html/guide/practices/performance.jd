@@ -379,7 +379,7 @@ code compiled for the ARM in the Nexus One won't run on the ARM in the G1.</p>
 that you want to port to Android, not for "speeding up" parts of a Java app.</p>
 
 <p>If you do need to use native code, you should read our
-<a href="{@docRoot}guide/practices/design/jni.html">JNI Tips</a>.</p>
+<a href="{@docRoot}guide/practices/jni.html">JNI Tips</a>.</p>
 
 <p>(See also <em>Effective Java</em> item 54.)</p>
 

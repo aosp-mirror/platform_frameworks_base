@@ -93,7 +93,7 @@ http://developer.android.com/guide/topics/graphics/2d-graphics.html
 http://developer.android.com/guide/topics/graphics/opengl.html
 http://developer.android.com/guide/topics/media/index.html
 http://developer.android.com/guide/topics/location/index.html
-http://developer.android.com/guide/topics/location/obtaining-user-location.html
+http://developer.android.com/guide/topics/location/strategies.html
 http://developer.android.com/guide/topics/appwidgets/index.html
 http://developer.android.com/guide/topics/connectivity/bluetooth.html
 http://developer.android.com/guide/topics/search/index.html
@@ -160,9 +160,9 @@ http://developer.android.com/guide/practices/ui_guidelines/icon_design_tab.html
 http://developer.android.com/guide/practices/ui_guidelines/icon_design_dialog.html
 http://developer.android.com/guide/practices/ui_guidelines/icon_design_list.html
 http://developer.android.com/guide/practices/ui_guidelines/widget_design.html
-http://developer.android.com/guide/practices/design/performance.html
-http://developer.android.com/guide/practices/design/responsiveness.html
-http://developer.android.com/guide/practices/design/seamlessness.html
+http://developer.android.com/guide/practices/performance.html
+http://developer.android.com/guide/practices/responsiveness.html
+http://developer.android.com/guide/practices/seamlessness.html
 http://developer.android.com/guide/webapps/index.html
 http://developer.android.com/guide/webapps/targeting.html
 http://developer.android.com/guide/webapps/webview.html
@@ -214,7 +214,7 @@ http://developer.android.com/resources/tutorials/views/index.html
 http://developer.android.com/resources/tutorials/localization/index.html
 http://developer.android.com/resources/tutorials/testing/helloandroid_test.html
 http://developer.android.com/resources/tutorials/notepad/index.html
-http://developer.android.com/resources/tutorials/testing/activity_test.html
+http://developer.android.com/tools/testing/activity_test.html
 http://developer.android.com/resources/samples/get.html
 http://developer.android.com/resources/samples/index.html
 http://developer.android.com/resources/samples/AccelerometerPlay/index.html

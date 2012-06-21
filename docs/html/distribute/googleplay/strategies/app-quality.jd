@@ -58,9 +58,9 @@ You can improve your apps's UI responsiveness by moving long-running operations 
 <h2>More resources</h2>
 <ul>
 <li><a href="{@docRoot}design/index.html">Android Design</a></li>
-<li><a href="{@docRoot}guide/practices/design/performance.html">Designing for Performance</a></li>
-<li><a href="{@docRoot}guide/practices/design/responsiveness.html">Designing for Responsiveness</a>
-<li><a href="{@docRoot}guide/practices/design/seamlessness.html">Designing for seamlessness</a>
+<li><a href="{@docRoot}guide/practices/performance.html">Designing for Performance</a></li>
+<li><a href="{@docRoot}guide/practices/responsiveness.html">Designing for Responsiveness</a>
+<li><a href="{@docRoot}guide/practices/seamlessness.html">Designing for seamlessness</a>
 </li>
 </ul>
 </div></div>
