@@ -562,13 +562,6 @@ public final class WebViewCore {
     }
 
     /**
-     * Notify the webview that this is an installable web app.
-     */
-    protected void setInstallableWebApp() {
-        mCallbackProxy.setInstallableWebApp();
-    }
-
-    /**
      * Notify the webview that we want to display the video layer fullscreen.
      */
     protected void enterFullscreenForVideoLayer(int layerId, String url) {

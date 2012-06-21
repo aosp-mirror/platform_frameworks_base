@@ -377,13 +377,6 @@ public class WebChromeClient {
     }
 
     /**
-     * Tell the client that the page being viewed is web app capable,
-     * i.e. has specified the fullscreen-web-app-capable meta tag.
-     * @hide
-     */
-    public void setInstallableWebApp() { }
-
-    /**
      * Tell the client that the page being viewed has an autofillable
      * form and the user would like to set a profile up.
      * @param msg A Message to send once the user has successfully
