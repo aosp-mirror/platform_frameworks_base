@@ -294,13 +294,6 @@ public class ImageWallpaper extends WallpaperService {
                 updateWallpaperLocked();
             }
 
-            if (mBackground == null) {
-                // If we somehow got to this point after we have last flushed
-                // the wallpaper, well we really need it to draw again.  So
-                // seems like we need to reload it.  Ouch.
-                updateWallpaperLocked();
-            }
-
             SurfaceHolder sh = getSurfaceHolder();
             final Rect frame = sh.getSurfaceFrame();
             final int dw = frame.width();
