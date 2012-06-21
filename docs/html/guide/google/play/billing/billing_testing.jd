@@ -286,8 +286,8 @@ do a factory reset, making sure you log on with your primary account first.</p>
 
 <p>When you are finished testing your in-app billing implementation, you are ready to
 publish your application on Google Play. You can follow the normal steps for <a
-href="{@docRoot}guide/publishing/preparing.html">preparing</a>, <a
-href="{@docRoot}guide/publishing/app-signing.html">signing</a>, and <a
-href="{@docRoot}guide/publishing/publishing.html">publishing your application</a>.
+href="{@docRoot}tools/publishing/preparing.html">preparing</a>, <a
+href="{@docRoot}tools/publishing/app-signing.html">signing</a>, and <a
+href="{@docRoot}tools/publishing/publishing.html">publishing your application</a>.
 </p>
 

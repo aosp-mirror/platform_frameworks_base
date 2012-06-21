@@ -20,9 +20,9 @@ page.title=Preparing for Release
     </ol>
     <h2>See also</h2>
     <ol>
-      <li><a href="{@docRoot}guide/publishing/publishing_overview.html">Publishing Overview</a></li>
-      <li><a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a></li>
-      <li><a href="{@docRoot}guide/publishing/publishing.html">Publishing on Google Play</a></li>
+      <li><a href="{@docRoot}tools/publishing/publishing_overview.html">Publishing Overview</a></li>
+      <li><a href="{@docRoot}tools/publishing/app-signing.html">Signing Your Applications</a></li>
+      <li><a href="{@docRoot}tools/publishing/publishing.html">Publishing on Google Play</a></li>
     </ol>
   </div>
 </div>
@@ -44,7 +44,7 @@ application marketplace such as Google Play.</p>
 <p>This document summarizes the main tasks you need to perform to prepare your application for
 release. The tasks that are described in this document apply to all Android applications regardless
 how they are released or distributed to users. If you are releasing your application through Google
-Play, you should also read <a href="{@docRoot}guide/publishing/publishing.html">Publishing on
+Play, you should also read <a href="{@docRoot}tools/publishing/publishing.html">Publishing on
 Google Play</a> to be sure your release-ready application satisfies all Google Play
 requirements.</p>
 
@@ -98,7 +98,7 @@ and create promotional text while you are gathering materials for release.</p>
 your application. The Android SDK contains several tools to help you test and debug your Android
 applications. For more information, see the <a
 href="{@docRoot}tools/debugging/index.html">Debugging</a> and <a
-href="{@docRoot}guide/developing/testing/index.html">Testing</a> sections in the Dev Guide.</p>
+href="{@docRoot}tools/testing/index.html">Testing</a> sections in the Dev Guide.</p>
 
 <h2 id="publishing-gather">Gathering Materials and Resources</h2>
 
@@ -114,7 +114,7 @@ developer holds the private key). The Android system uses the certificate as a m
 the author of an application and establishing trust relationships between applications. The
 certificate that you use for signing does not need to be signed by a certificate authority; the
 Android system allows you to sign your applications with a self-signed certificate. To learn about
-certificate requirements, see <a href="{@docRoot}guide/publishing/app-signing.html#cert">Obtain a
+certificate requirements, see <a href="{@docRoot}tools/publishing/app-signing.html#cert">Obtain a
 suitable private key</a>.</p>
 
 <p class="caution"><strong>Important:</strong> Your application must be signed with a cryptographic
@@ -305,7 +305,7 @@ the Ant build script from the command line, you can automate the entire build pr
 
 <p>You can use the Eclipse Export Wizard to build a release-ready <code>.apk</code> file that is
 signed with your private key and optimized. To learn how to run the Export Wizard, see
-<a href="{@docRoot}guide/publishing/app-signing.html#ExportWizard">Compile and sign with Eclipse
+<a href="{@docRoot}tools/publishing/app-signing.html#ExportWizard">Compile and sign with Eclipse
 ADT</a>. The Export Wizard compiles your application for release, signs your application with your
 private key, and optimizes your application with the zipalign tool. The Export Wizard should run
 successfully if you have run or debugged your application from Eclipse and you have no errors in
@@ -315,7 +315,7 @@ and Running from Eclipse with ADT</a> for more information.</p>
 <p>The Export Wizard assumes that you have a <a href="#billing-keys">certificate and private key</a>
 suitable for signing your application. If you do not have a suitable certificate and private key,
 the Export Wizard will help you generate one (see
-<a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a> for more
+<a href="{@docRoot}tools/publishing/app-signing.html">Signing Your Applications</a> for more
 information about the signing process and signing guidelines.</p>
 
 <h3>Building with Ant</h3>
@@ -326,7 +326,7 @@ see <a href="{@docRoot}tools/building/building-cmdline.html#ReleaseMode">Buildin
 Release Mode</a>. This build method assumes you have a <a href="#billing-keys">certificate and
 private key</a> suitable for signing your application. If you do not have a suitable certificate and
 private key, the Export Wizard will help you generate one (see
-<a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a> for more
+<a href="{@docRoot}tools/publishing/app-signing.html">Signing Your Applications</a> for more
 information about the signing process and signing guidelines.</p>
 
 <h2 id="publishing-resources">Preparing External Servers and Resources</h2>
@@ -351,8 +351,8 @@ sized correctly and that your application's performance and battery efficiency a
 a summary of common Android situations that you should consider when you are testing. When you are
 done testing and you are satisfied that the release version of your application
 behaves correctly, you can release your application to users. For more information, see
-<a href="{@docRoot}guide/publishing/publishing_overview.html#publishing-release">Releasing Your
+<a href="{@docRoot}tools/publishing/publishing_overview.html#publishing-release">Releasing Your
 Application to Users</a>. If you are publishing your application on Google Play, see
-<a href="{@docRoot}guide/publishing/publishing.html">Publishing on Google Play</a>.</p>
+<a href="{@docRoot}tools/publishing/publishing.html">Publishing on Google Play</a>.</p>
 
 

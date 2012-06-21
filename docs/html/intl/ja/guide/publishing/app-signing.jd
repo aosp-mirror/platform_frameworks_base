@@ -36,7 +36,7 @@ page.title=アプリケーションへの署名
 
 <ol>
 <li><a href="{@docRoot}tools/publishing/versioning.html">アプリケーションのバージョニング</a></li>
-<li><a href="{@docRoot}guide/publishing/preparing.html">公開の準備</a></li>
+<li><a href="{@docRoot}tools/publishing/preparing.html">公開の準備</a></li>
 </ol>
 
 </div>

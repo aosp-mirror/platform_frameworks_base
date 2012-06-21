@@ -50,13 +50,13 @@ development steps encompass four development phases, which include:</p>
     <a href="{@docRoot}tools/debugging/index.html">Debug your application with the
       SDK debugging and logging tools</a>.</p>
     <p>Last, you test your application using various Android SDK testing tools. For more
-    information, see <a href="{@docRoot}guide/developing/testing/index.html">Test your application
+    information, see <a href="{@docRoot}tools/testing/index.html">Test your application
     with the Testing and Instrumentation framework</a>.</p>
   </li>
   <li><strong>Publishing</strong>
     <p>During this phase you configure and build your application for release and distribute your
       application to users. For more information, see
-      <a href="{@docRoot}guide/publishing/publishing_overview.html">Publishing Overview</a>.</p>
+      <a href="{@docRoot}tools/publishing/publishing_overview.html">Publishing Overview</a>.</p>
   </li>
 </ul>
 
@@ -66,7 +66,7 @@ development steps encompass four development phases, which include:</p>
   all of the tools below, because you will have to run them from the command line.</p>
 
   <dl>
-    <dt><a href="{@docRoot}tools/android.html">android</a></dt>
+    <dt><a href="{@docRoot}tools/help/android.html">android</a></dt>
 
     <dd>Create and update Android projects and create, move, and delete AVDs.</dd>
 

@@ -49,11 +49,11 @@ parent.link=index.html
           Testing Fundamentals</a>
         </li>
         <li>
-          <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">
+          <a href="{@docRoot}tools/testing/testing_eclipse.html">
           Testing From Eclipse with ADT</a>
         </li>
         <li>
-          <a href="{@docRoot}guide/developing/testing/testing_otheride.html">
+          <a href="{@docRoot}tools/testing/testing_otheride.html">
           Testing From Other IDEs</a>
         </li>
       </ol>
@@ -94,9 +94,9 @@ parent.link=index.html
     runner {@link android.test.InstrumentationTestRunner}. The section
     <a href="{@docRoot}tools/testing/testing_android.html#InstrumentationTestRunner">
     Running Tests With InstrumentationTestRunner</a> describes the test runner in
-    more detail. The topic <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">
+    more detail. The topic <a href="{@docRoot}tools/testing/testing_eclipse.html">
     Testing From Eclipse with ADT</a> shows you how to run a test package in Eclipse, and the
-    topic <a href="{@docRoot}guide/developing/testing/testing_otheride.html">
+    topic <a href="{@docRoot}tools/testing/testing_otheride.html">
     Testing From Other IDEs</a>
     shows you how to run a test package from the command line.
 </p>
@@ -205,9 +205,9 @@ classes</a>.
 <h2 id="NextSteps">Next Steps</h2>
 <p>
     To learn how to set up and run tests in Eclipse, please refer to 
-<a href="{@docRoot}guide/developing/testing/testing_eclipse.html">Testing from Eclipse with ADT</a>.
+<a href="{@docRoot}tools/testing/testing_eclipse.html">Testing from Eclipse with ADT</a>.
     If you're not working in Eclipse, refer to 
-<a href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing From Other IDEs</a>.
+<a href="{@docRoot}tools/testing/testing_otheride.html">Testing From Other IDEs</a>.
 </p>
 <p>
     If you want a step-by-step introduction to testing activities, try the 

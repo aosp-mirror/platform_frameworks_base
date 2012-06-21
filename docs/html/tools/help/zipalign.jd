@@ -37,7 +37,7 @@ the "extra" field in the zip Local File Header sections.  Existing data
 in the "extra" fields may be altered by this process.</p>
 
 <p>For more information about how to use zipalign when building your 
-application, please read <a href="{@docRoot}guide/publishing/app-signing.html">Signing
+application, please read <a href="{@docRoot}tools/publishing/app-signing.html">Signing
 Your Application</a>.</p>
 
 

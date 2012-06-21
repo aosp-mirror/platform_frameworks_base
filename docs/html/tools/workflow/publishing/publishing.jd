@@ -34,8 +34,8 @@ page.title=Publishing on Google Play
 <h2>See also</h2>
 
 <ol>
-<li><a href="{@docRoot}guide/publishing/publishing_overview.html">Publishing Overview</a></li>
-<li><a href="{@docRoot}guide/publishing/preparing.html">Preparing for Release</a></li>
+<li><a href="{@docRoot}tools/publishing/publishing_overview.html">Publishing Overview</a></li>
+<li><a href="{@docRoot}tools/publishing/preparing.html">Preparing for Release</a></li>
 </ol>
 
 <div id="qv-extra">
@@ -108,12 +108,12 @@ status of your app from Unpublished to Published.</li>
      id="figure1" />
 <p class="img-caption">
   <strong>Figure 1.</strong> To publish apps on Google Play you must first <a
-href="{@docRoot}guide/publishing/preparing.html">prepare your app for release</a> and then perform
+href="{@docRoot}tools/publishing/preparing.html">prepare your app for release</a> and then perform
 three simple tasks.
 </p>
 
 <p class="caution"><strong>Important:</strong> You must <a
-href="{@docRoot}guide/publishing/preparing.html">prepare your application for release</a> before you
+href="{@docRoot}tools/publishing/preparing.html">prepare your application for release</a> before you
 can publish it on Google Play. When you prepare your application for release you configure it for
 release and build it in release mode. Building in release mode signs your application's {@code .apk}
 file with your private release key. You cannot publish an application on Google Play unless it is
@@ -192,7 +192,7 @@ using Google Play filters. Filtering compares device configurations that you dec
 app's manifest file to the configuration defined by a device. For example, if you declare the camera
 filter in your manifest, only those devices that have a camera will see your app on Google
 Play. Filters must be configured in your application's manifest file when you are <a
-href="{@docRoot}guide/publishing/preparing.html">preparing your app for release</a> (that is, before
+href="{@docRoot}tools/publishing/preparing.html">preparing your app for release</a> (that is, before
 you upload your app to Google Play). For more information, see <a
 href="{@docRoot}guide/appendix/market-filters.html">Filters on Google Play</a>.</p>
 
@@ -209,7 +209,7 @@ not possible. To help you publish your application for as many devices as possib
 allows you to publish multiple APKs under the same application listing. Google Play then supplies
 each APK to the appropriate devices based on configuration support you've declared in the manifest
 file of each APK. To use this feature, you need to build your separate {@code .apk} files when you are <a
-href="{@docRoot}guide/publishing/preparing.html">preparing your app for release</a> (that is, before
+href="{@docRoot}tools/publishing/preparing.html">preparing your app for release</a> (that is, before
 you upload your app to Google Play). For more information, see <a
 href="{@docRoot}guide/google/play/publishing/multiple-apks.html">Multiple APK Support</a>.</p>
 

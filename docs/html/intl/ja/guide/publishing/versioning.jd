@@ -24,8 +24,8 @@ page.title=アプリケーションのバージョニング
 <h2>関連項目</h2>
 
 <ol>
-<li><a href="{@docRoot}guide/publishing/preparing.html">公開の準備</a></li>
-<li><a href="{@docRoot}guide/publishing/publishing.html#market">Android マーケットでの公開</a></li>
+<li><a href="{@docRoot}tools/publishing/preparing.html">公開の準備</a></li>
+<li><a href="{@docRoot}tools/publishing/publishing.html#market">Android マーケットでの公開</a></li>
 <li><a href="{@docRoot}guide/topics/manifest/manifest-intro.html">The AndroidManifest.xml File</a></li>
 </ol>
 

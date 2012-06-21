@@ -68,11 +68,11 @@ parent.link=index.html
   <h2>See also</h2>
       <ol>
         <li>
-          <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">
+          <a href="{@docRoot}tools/testing/testing_eclipse.html">
           Testing from Eclipse with ADT</a>
         </li>
         <li>
-          <a href="{@docRoot}guide/developing/testing/testing_otheride.html">
+          <a href="{@docRoot}tools/testing/testing_otheride.html">
           Testing from Other IDEs</a>
         </li>
         <li>
@@ -522,9 +522,9 @@ parent.link=index.html
 </p>
 <p>
     To learn more about running tests, please read the topics
-    <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">
+    <a href="{@docRoot}tools/testing/testing_eclipse.html">
     Testing from Eclipse with ADT</a> or
-    <a href="{@docRoot}guide/developing/testing/testing_otheride.html">
+    <a href="{@docRoot}tools/testing/testing_otheride.html">
     Testing from Other IDEs</a>.
 </p>
 <h2 id="TestResults">Seeing Test Results</h2>
@@ -540,10 +540,10 @@ parent.link=index.html
 <p>
     The test results have a format that is specific to the IDE that you are using. The test
     results format for Eclipse with ADT is described in
-    <a href="{@docRoot}guide/developing/testing/testing_eclipse.html#RunTestEclipse">
+    <a href="{@docRoot}tools/testing/testing_eclipse.html#RunTestEclipse">
     Testing from Eclipse with ADT</a>. The test results format for tests run from the
     command line is described in
-    <a href="{@docRoot}guide/developing/testing/testing_otheride.html#RunTestsCommand">
+    <a href="{@docRoot}tools/testing/testing_otheride.html#RunTestsCommand">
     Testing from Other IDEs</a>.
 </p>
 <h2 id="Monkeys">monkey and monkeyrunner</h2>
@@ -630,9 +630,9 @@ The <a href="{@docRoot}tools/monkey.html">UI/Application Exerciser Monkey</a>,
 <h2 id="NextSteps">Next Steps</h2>
 <p>
     To learn how to set up and run tests in Eclipse, please refer to 
-<a href="{@docRoot}guide/developing/testing/testing_eclipse.html">Testing from Eclipse with ADT</a>.
+<a href="{@docRoot}tools/testing/testing_eclipse.html">Testing from Eclipse with ADT</a>.
     If you're not working in Eclipse, refer to 
-<a href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing from Other IDEs</a>.
+<a href="{@docRoot}tools/testing/testing_otheride.html">Testing from Other IDEs</a>.
 </p>
 <p>
     If you want a step-by-step introduction to Android testing, try the

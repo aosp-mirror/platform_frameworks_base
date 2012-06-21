@@ -715,7 +715,7 @@ URI) of your app's details page. Here’s an example:</p>
 intent.setData(Uri.parse("market://details?id=com.example.app"));
 startActivity(intent);</pre>
 
-<p>For more information, see <a href="{@docRoot}guide/publishing/publishing.html#OpeningDetails">Opening
+<p>For more information, see <a href="{@docRoot}tools/publishing/publishing.html#OpeningDetails">Opening
 the app details page from your Android app</a>
 
 <h3 id="purchase-state-changes">Recurring billing and changes in purchase state</h3>

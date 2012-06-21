@@ -66,11 +66,11 @@ parent.link=index.html
 <h2>See Also</h2>
       <ol>
         <li>
-          <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">
+          <a href="{@docRoot}tools/testing/testing_eclipse.html">
           Testing from Eclipse with ADT</a>
         </li>
         <li>
-          <a href="{@docRoot}guide/developing/testing/testing_otheride.html">
+          <a href="{@docRoot}tools/testing/testing_otheride.html">
           Testing from Other IDEs</a>
         </li>
       </ol>
@@ -216,9 +216,9 @@ parent.link=index.html
 <h2 id="NextSteps">Next Steps</h2>
 <p>
     To learn how to set up and run tests in Eclipse, please refer to 
-<a href="{@docRoot}guide/developing/testing/testing_eclipse.html">Testing from Eclipse with ADT</a>.
+<a href="{@docRoot}tools/testing/testing_eclipse.html">Testing from Eclipse with ADT</a>.
     If you're not working in Eclipse, refer to 
-<a href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing from Other IDEs</a>.
+<a href="{@docRoot}tools/testing/testing_otheride.html">Testing from Other IDEs</a>.
 </p>
 <p>
     If you want a step-by-step introduction to testing activities, try the 

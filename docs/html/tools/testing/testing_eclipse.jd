@@ -52,7 +52,7 @@ from Eclipse</a>.
 <p>
     If you are not developing in Eclipse or you want to learn how to create and run tests from the
     command line, see
-    <a href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing from Other IDEs</a>.
+    <a href="{@docRoot}tools/testing/testing_otheride.html">Testing from Other IDEs</a>.
 </p>
 <h2 id="CreateTestProjectEclipse">Creating a Test Project</h2>
 <p>
@@ -241,7 +241,7 @@ from Eclipse</a>.
                     To run tests created in Eclipse with ADT with command-line tools, you must first
                     install additional files into the test project using the <code>android</code>
                     tool's "create test-project" option. To see how to do this, read
-                   <a href="{@docRoot}guide/developing/testing/testing_otheride.html#CreateProject">
+                   <a href="{@docRoot}tools/testing/testing_otheride.html#CreateProject">
                     Testing in Other IDEs</a>.
                 </p>
         </div>

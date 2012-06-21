@@ -68,7 +68,7 @@ parent.link=index.html
 <p>
     If you are developing in Eclipse with ADT, you can set up and run your tests
     directly in Eclipse. For more information, please read
-    <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">
+    <a href="{@docRoot}tools/testing/testing_eclipse.html">
     Testing from Eclipse with ADT</a>.
 </p>
 <h2 id="CreateTestProjectCommand">Working with Test Projects</h2>

@@ -1193,7 +1193,7 @@ lifecycle</a>.
    also use this tool to run the test application from the command line.
   </li>
   <li>
-    <a href="{@docRoot}tools/android.html">android</a> - Manages projects and test projects. This tool also manages AVDs and Android platforms.
+    <a href="{@docRoot}tools/help/android.html">android</a> - Manages projects and test projects. This tool also manages AVDs and Android platforms.
   </li>
 </ul>
   <p>
