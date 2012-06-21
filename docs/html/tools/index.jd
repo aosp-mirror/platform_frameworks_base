@@ -6,7 +6,8 @@ page.title=Developer Tools
 
 <div style="position:relative;height:0">
 <div style="position:absolute;width:420px"> 
-  <p>Android IDE is a professional-grade development environment for building
+  <p>The Android Developer Tools (ADT) plugin for Eclipse provides
+    a professional-grade development environment for building
   Android apps. It's a full Java IDE with advanced features to help you build, test, debug,
   and package your Android apps. </p>
   <p>Free, open-source, and runs on most major OS platforms.<br>To get started, 
