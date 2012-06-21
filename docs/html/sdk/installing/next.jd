@@ -38,7 +38,8 @@ href="{@docRoot}guide/components/index.html">API Guides</a>.</li>
 
 <h3>Explore the development tools</h3>
 <ul>
-  <li>Learn about developing an app with the Android IDE and other tools from the <a
+  <li>Learn about developing an app with the Android Developer Tools plugin for Eclipse
+    and other tools from the <a
   href="{@docRoot}tools/workflow/index.html">Workflow</a>.</li>
 </ul>
 

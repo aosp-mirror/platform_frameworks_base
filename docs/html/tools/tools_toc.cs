@@ -2,7 +2,7 @@
 
   <li class="nav-section">
     <div class="nav-section-header empty">
-        <a href="<?cs var:toroot ?>tools/index.html"><span class="en">Android IDE</span></a>
+        <a href="<?cs var:toroot ?>tools/index.html"><span class="en">Developer Tools</span></a>
     </div>
   </li>
   

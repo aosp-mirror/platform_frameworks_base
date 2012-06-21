@@ -78,7 +78,8 @@ density, locale,
 and so on.</p>
 
 
-<p>To help you develop efficiently, the <a href="{@docRoot}tools/index.html">Android IDE</a>
+<p>To help you develop efficiently, the <a href="{@docRoot}tools/index.html">Android 
+    Developer Tools</a>
 offers a full Java IDE with advanced features for developing, debugging, and
 packaging Android apps. Using the IDE, you can develop on any available Android
 device or create virtual devices that emulate any hardware configuration.</p>
