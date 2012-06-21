@@ -34,7 +34,12 @@
 <familyset>
     <family>
         <fileset>
-            <file>DroidNaskh-Regular-SystemUI.ttf</file>
+            <file variant="elegant">DroidNaskh-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file variant="compact">DroidNaskh-Regular-SystemUI.ttf</file>
         </fileset>
     </family>
     <family>
