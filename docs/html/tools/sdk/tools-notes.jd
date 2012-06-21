@@ -848,7 +848,7 @@ tool that helps you optimize your layout hierarchies. When run against your
 layout files, the tool analyzes their hierarchies and notifies you of
 inefficiencies and other potential issues. The tool also provides simple
 solutions for the issues it finds. For usage, see <a
-href="/tools/layoutopt.html">layoutopt</a>.</p>
+href="/tools/help/layoutopt.html">layoutopt</a>.</p>
 </dd>
 </dl>
  </div>

@@ -194,7 +194,7 @@ filter in your manifest, only those devices that have a camera will see your app
 Play. Filters must be configured in your application's manifest file when you are <a
 href="{@docRoot}tools/publishing/preparing.html">preparing your app for release</a> (that is, before
 you upload your app to Google Play). For more information, see <a
-href="{@docRoot}guide/appendix/market-filters.html">Filters on Google Play</a>.</p>
+href="{@docRoot}guide/google/play/filters.html">Filters on Google Play</a>.</p>
 
 <p>You can also use the multiple APK feature to distribute different {@code .apk} files under the same
 application listing and the same package name; however, you should use this option only as a last

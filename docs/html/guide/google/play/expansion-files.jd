@@ -301,7 +301,7 @@ href="{@docRoot}guide/google/play/publishing/multiple-apks.html">multiple APKs</
 provide different expansion files for different devices, you still must upload separate APKs
 for each device in order to provide a unique  <a
 href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code versionCode}</a>
-value and declare different <a href="{@docRoot}guide/appendix/market-filters.html">filters</a> for
+value and declare different <a href="{@docRoot}guide/google/play/filters.html">filters</a> for
 each APK.</li>
   <li>You cannot issue an update to your application by changing the expansion files
 alone&mdash;<strong>you must upload a new APK</strong> to update your app. If your changes only

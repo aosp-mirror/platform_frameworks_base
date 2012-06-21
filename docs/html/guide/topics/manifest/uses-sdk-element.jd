@@ -64,7 +64,7 @@ version-compatibility. To do this, Google Play checks the <code>&lt;uses-sdk&gt;
 attributes in each application's manifest to establish its version-compatibility
 range, then shows or hides the application based on a comparison with the API
 Level of the user's Android system version. For more information, see <a
-href="{@docRoot}guide/appendix/market-filters.html">Filters on Google Play</a>.</p>
+href="{@docRoot}guide/google/play/filters.html">Filters on Google Play</a>.</p>
   </div>
 </div>
 

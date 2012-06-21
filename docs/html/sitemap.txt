@@ -5,7 +5,7 @@ http://developer.android.com/guide/index.html
 http://developer.android.com/reference/packages.html
 http://developer.android.com/resources/index.html
 http://developer.android.com/videos/index.html
-http://developer.android.com/resources/dashboard/platform-versions.html
+http://developer.android.com/about/dashboards/index.html
 http://developer.android.com/license.html
 http://developer.android.com/sdk/installing/index.html
 http://developer.android.com/about/versions/android-3.0-highlights.html
@@ -117,7 +117,7 @@ http://developer.android.com/guide/google/play/billing/billing_best_practices.ht
 http://developer.android.com/guide/google/play/billing/billing_testing.html
 http://developer.android.com/guide/google/play/billing/billing_admin.html
 http://developer.android.com/guide/google/play/billing/billing_reference.html
-http://developer.android.com/guide/appendix/market-filters.html
+http://developer.android.com/guide/google/play/filters.html
 http://developer.android.com/guide/developing/eclipse-adt.html
 http://developer.android.com/guide/developing/other-ide.html
 http://developer.android.com/tools/device.html
@@ -136,7 +136,7 @@ http://developer.android.com/tools/ddms.html
 http://developer.android.com/tools/draw9patch.html
 http://developer.android.com/tools/help/emulator.html
 http://developer.android.com/tools/hierarchy-viewer.html
-http://developer.android.com/tools/layoutopt.html
+http://developer.android.com/tools/help/layoutopt.html
 http://developer.android.com/tools/monkey.html
 http://developer.android.com/tools/monkeyrunner_concepts.html
 http://developer.android.com/tools/MonkeyDevice.html

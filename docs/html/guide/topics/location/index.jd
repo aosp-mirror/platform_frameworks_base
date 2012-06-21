@@ -13,8 +13,7 @@ device's location and bearing and register for updates</li>
 
   <h2>Topics</h2>
   <ol>
-    <li><a href="{@docRoot}guide/topics/location/strategies.html">Obtaining User
-Location</a></li>
+    <li><a href="{@docRoot}guide/topics/location/strategies.html">Location Strategies</a></li>
   </ol>
   
   <h2>See Also</h2>
@@ -58,8 +57,7 @@ comes within a given proximity (specified by radius in meters) of a given lat/lo
 </ul>
 
 <p>For more information, read the guide to <a
-href="{@docRoot}guide/topics/location/strategies.html">Obtaining User
-Location</a>.</p>
+href="{@docRoot}guide/topics/location/strategies.html">Location Strategies</a>.</p>
 
 
 <h2 id="maps">Google Maps External Library</h2>

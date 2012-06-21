@@ -46,7 +46,7 @@ parent.link=manifest-intro.html
         <dd>
             Google Play filters applications based on the libraries installed on the
             user's device. For more information about filtering, see the topic
-            <a href="{@docRoot}guide/appendix/market-filters.html">Filters on Google Play</a>.
+            <a href="{@docRoot}guide/google/play/filters.html">Filters on Google Play</a>.
         </dd>
     </dl>
     <p>

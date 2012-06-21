@@ -45,7 +45,7 @@ android.widget.GridView}.</p>
 
 <p>In this lesson you'll learn to use <a
 href="{@docRoot}tools/help/hierarchy-viewer.html">Hierarchy Viewer</a> and <a
-href="{@docRoot}tools/layoutopt.html">Layoutopt</a> to examine and optimize your
+href="{@docRoot}tools/help/layoutopt.html">Layoutopt</a> to examine and optimize your
 layout.</p>
 
 
