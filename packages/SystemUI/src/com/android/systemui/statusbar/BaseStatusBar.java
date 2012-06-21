@@ -561,14 +561,14 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (expandedOneU != null) {
             SizeAdaptiveLayout.LayoutParams params =
                     new SizeAdaptiveLayout.LayoutParams(expandedOneU.getLayoutParams());
-            params.minHeight = rowHeight;
-            params.maxHeight = rowHeight;
+            params.minHeight = minHeight;
+            params.maxHeight = minHeight;
             adaptive.addView(expandedOneU, params);
         }
         if (expandedLarge != null) {
             SizeAdaptiveLayout.LayoutParams params =
                     new SizeAdaptiveLayout.LayoutParams(expandedLarge.getLayoutParams());
-            params.minHeight = rowHeight+1;
+            params.minHeight = minHeight+1;
             params.maxHeight = maxHeight;
             adaptive.addView(expandedLarge, params);
         }

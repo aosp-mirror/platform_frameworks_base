@@ -53,6 +53,7 @@ public class SizeAdaptiveLayout extends ViewGroup {
 
     private static final String TAG = "SizeAdaptiveLayout";
     private static final boolean DEBUG = false;
+    private static final boolean REPORT_BAD_BOUNDS = true;
     private static final long CROSSFADE_TIME = 250;
 
     // TypedArray indices
@@ -175,7 +176,7 @@ public class SizeAdaptiveLayout extends ViewGroup {
             height = Math.min(height, lp.maxHeight);
         }
 
-        if (DEBUG && heightIn != height) {
+        if (REPORT_BAD_BOUNDS && heightIn != height) {
             Log.d(TAG, this + "child view " + child + " " +
                   "measured out of bounds at " + heightIn +"px " +
                   "clamped to " + height + "px");
