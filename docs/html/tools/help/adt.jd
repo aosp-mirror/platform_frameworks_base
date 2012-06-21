@@ -123,9 +123,9 @@ Project site.</p>
     file transfer, device enumeration, and logcat (DDMS). You must access the more advanced
     features of <code>adb</code>, such as shell commands, from the command line.</li>
 
-    <li><a href="{@docRoot}tools/proguard.html">ProGuard</a>: Allows code obfuscation,
+    <li><a href="{@docRoot}tools/help/proguard.html">ProGuard</a>: Allows code obfuscation,
     shrinking, and optimization. ADT integrates ProGuard as part of the build, if you <a href=
-    "{@docRoot}tools/proguard.html#enabling">enable it</a>.</li>
+    "{@docRoot}tools/help/proguard.html#enabling">enable it</a>.</li>
   </ul>
 
 <h2 id="editors">Code Editors</h2>

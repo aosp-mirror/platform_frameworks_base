@@ -65,9 +65,9 @@ You can improve your apps's UI responsiveness by moving long-running operations 
 </ul>
 </div></div>
 <p>
-A great way to improve UI performance is to minimize the complexity of your layouts. If you open up <a href="{@docRoot}tools/hierarchy-viewer.html">hierarchyviewer</a> and see that your layouts are more than 5 levels deep, it may be time to simplify your layout. Consider refactoring those deeply nested LinearLayouts into RelativeLayout. The impact of View objects is cumulative &mdash; each one costs about 1 to 2 KB of memory, so large view hierarchies can be a recipe for disaster, causing frequent VM garbage collection passes which block the main (UI) thread. You can learn more in <a href="http://www.youtube.com/watch?v=wDBM6wVEO70">World of ListView</a>, another session at Google I/O.</p>
+A great way to improve UI performance is to minimize the complexity of your layouts. If you open up <a href="{@docRoot}tools/help/hierarchy-viewer.html">hierarchyviewer</a> and see that your layouts are more than 5 levels deep, it may be time to simplify your layout. Consider refactoring those deeply nested LinearLayouts into RelativeLayout. The impact of View objects is cumulative &mdash; each one costs about 1 to 2 KB of memory, so large view hierarchies can be a recipe for disaster, causing frequent VM garbage collection passes which block the main (UI) thread. You can learn more in <a href="http://www.youtube.com/watch?v=wDBM6wVEO70">World of ListView</a>, another session at Google I/O.</p>
 <p>
-Lastly, pointed out in the blog post <a href="http://android-developers.blogspot.com/2010/10/traceview-war-story.html">Traceview War Story</a>, tools like <a href="{@docRoot}tools/traceview.html">traceview</code> and <a href="{@docRoot}tools/ddms.html">ddms</a> can be your best frends in improving your app by profiling method calls and monitoring VM memory allocations, respectively.</p>
+Lastly, pointed out in the blog post <a href="http://android-developers.blogspot.com/2010/10/traceview-war-story.html">Traceview War Story</a>, tools like <a href="{@docRoot}tools/help/traceview.html">traceview</code> and <a href="{@docRoot}tools/ddms.html">ddms</a> can be your best frends in improving your app by profiling method calls and monitoring VM memory allocations, respectively.</p>
 
 
 <h2 id="usability">Improve Usability</h2>

@@ -619,7 +619,7 @@ build.</li>
 configuration file using the <code>android</code> tool &mdash; the build tools
 then automatically run ProGuard against the project sources during the build.
 For more information, see the <a
-href="{@docRoot}tools/proguard.html">ProGuard</a>
+href="{@docRoot}tools/help/proguard.html">ProGuard</a>
 documentation. </li>
 <li>New overridable Ant javac properties: <code>java.encoding</code>,
 <code>java.source</code>, and <code>java.target</code> (default values are

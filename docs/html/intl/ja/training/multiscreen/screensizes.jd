@@ -263,7 +263,7 @@ all}
 <p class="img-caption"><strong>図 4.</strong> <code>button.png</code></p>
 
 <p>次に、 <ode
-href="{@docRoot}tools/draw9patch.html">SDK の <code>draw9patch</code></a> ユーティリティ（<code>tools/</code> ディレクトリにあります）からナインパッチを実行して、左境界線と上境界線上にピクセル（ドット）を描くことで拡大する領域にマークを付けます。また、右境界線と下境界線上にピクセルを描くことで、コンテンツを入れる領域をマークできます（図 5）。</p>
+href="{@docRoot}tools/help/draw9patch.html">SDK の <code>draw9patch</code></a> ユーティリティ（<code>tools/</code> ディレクトリにあります）からナインパッチを実行して、左境界線と上境界線上にピクセル（ドット）を描くことで拡大する領域にマークを付けます。また、右境界線と下境界線上にピクセルを描くことで、コンテンツを入れる領域をマークできます（図 5）。</p>
 
 <img src="{@docRoot}images/training/button_with_marks.png" />
 <p class="img-caption"><strong>図 5.</strong> <code>button.9.png</code></p>

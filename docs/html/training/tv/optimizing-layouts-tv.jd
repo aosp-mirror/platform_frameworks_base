@@ -157,7 +157,7 @@ UI quality).
 </p>
 
 <p>
-To get the best scaling results for images, provide them as <a href="{@docRoot}tools/draw9patch.html">
+To get the best scaling results for images, provide them as <a href="{@docRoot}tools/help/draw9patch.html">
 9-patch image</a> elements if possible.
 If you provide low quality or small images in your layouts, they will appear pixelated, fuzzy, or grainy. This 
 is not a good experience for the user. Instead, use high-quality images. 

@@ -263,7 +263,7 @@ all}
 <p class="img-caption"><strong>图 4</strong>。<code>button.png</code></p>
 
 <p>然后通过 SDK 的  <ode
-href="{@docRoot}tools/draw9patch.html"><code>draw9patch</code></a> 实用工具（位于 <code>tools/</code> 目录中）运行该图片，您可以在该工具中绘制像素以标出要拉伸的区域以及左侧和顶部的边界。您还可以沿右侧和底部边界绘制像素以标出用于放置内容的区域，具体如图 5 所示。</p>
+href="{@docRoot}tools/help/draw9patch.html"><code>draw9patch</code></a> 实用工具（位于 <code>tools/</code> 目录中）运行该图片，您可以在该工具中绘制像素以标出要拉伸的区域以及左侧和顶部的边界。您还可以沿右侧和底部边界绘制像素以标出用于放置内容的区域，具体如图 5 所示。</p>
 
 <img src="{@docRoot}images/training/button_with_marks.png" />
 <p class="img-caption"><strong>图 5</strong>。<code>button.9.png</code></p>

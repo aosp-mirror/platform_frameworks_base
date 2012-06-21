@@ -295,7 +295,7 @@ traceview /tmp/calc
   <p class="note"><strong>Note:</strong> If you are trying to view the trace logs of an application 
   that is built with ProGuard enabled (release mode build), some method and member names might be obfuscated.
   You can use the Proguard <code>mapping.txt</code> file to figure out the original unobfuscated names. For more information
-  on this file, see the <a href="{@docRoot}tools/proguard.html">Proguard</a> documentation.</p>
+  on this file, see the <a href="{@docRoot}tools/help/proguard.html">Proguard</a> documentation.</p>
 
       <h2 id="dmtracedump">Using dmtracdedump</h2>
 
