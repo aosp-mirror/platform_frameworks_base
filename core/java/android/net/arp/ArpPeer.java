@@ -16,8 +16,12 @@
 
 package android.net.arp;
 
+import android.net.LinkAddress;
+import android.net.LinkProperties;
+import android.net.RouteInfo;
 import android.os.SystemClock;
 import android.util.Log;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Inet6Address;
@@ -35,6 +39,8 @@ import libcore.net.RawSocket;
  * @hide
  */
 public class ArpPeer {
+    private static final boolean DBG = false;
+    private static final String TAG = "ArpPeer";
     private String mInterfaceName;
     private final InetAddress mMyAddr;
     private final byte[] mMyMac = new byte[6];
@@ -46,7 +52,6 @@ public class ArpPeer {
     private static final int ARP_LENGTH = 28;
     private static final int MAC_ADDR_LENGTH = 6;
     private static final int IPV4_LENGTH = 4;
-    private static final String TAG = "ArpPeer";
 
     public ArpPeer(String interfaceName, InetAddress myAddr, String mac,
                    InetAddress peer) throws SocketException {
@@ -121,6 +126,41 @@ public class ArpPeer {
         }
 
         return null;
+    }
+
+    public static boolean doArp(String myMacAddress, LinkProperties linkProperties,
+            int timeoutMillis, int numArpPings, int minArpResponses) {
+        String interfaceName = linkProperties.getInterfaceName();
+        InetAddress inetAddress = null;
+        InetAddress gateway = null;
+        boolean success;
+
+        for (LinkAddress la : linkProperties.getLinkAddresses()) {
+            inetAddress = la.getAddress();
+            break;
+        }
+
+        for (RouteInfo route : linkProperties.getRoutes()) {
+            gateway = route.getGateway();
+            break;
+        }
+
+        try {
+            ArpPeer peer = new ArpPeer(interfaceName, inetAddress, myMacAddress, gateway);
+            int responses = 0;
+            for (int i=0; i < numArpPings; i++) {
+                if(peer.doArp(timeoutMillis) != null) responses++;
+            }
+            if (DBG) Log.d(TAG, "ARP test result: " + responses + "/" + numArpPings);
+            success = (responses >= minArpResponses);
+            peer.close();
+        } catch (SocketException se) {
+            //Consider an Arp socket creation issue as a successful Arp
+            //test to avoid any wifi connectivity issues
+            Log.e(TAG, "ARP test initiation failure: " + se);
+            success = true;
+        }
+        return success;
     }
 
     public void close() {
