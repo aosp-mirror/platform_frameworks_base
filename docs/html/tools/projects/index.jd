@@ -228,7 +228,7 @@ used.</dd>
     project feature that generates each library project into its own JAR file.
     You can download the tools and platforms using the
     <em>Android SDK Manager</em>, as described in
-    <a href="{@docRoot}sdk/adding-components.html">Adding SDK Packages</a>.</p>
+    <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.</p>
 
     <p>If you have source code and resources that are common to multiple Android projects, you
     can move them to a library project so that it is easier to maintain across applications and

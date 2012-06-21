@@ -98,8 +98,8 @@ Google APIs add-on, visit</p>
 href="http://code.google.com/android/add-ons/google-apis">http://code.google.com/android/add-ons/google-apis</a></p>
 
 <p>For your convenience, the Google APIs add-on is also available as a downloadable component from
-the Android SDK Manager (see <a href="{@docRoot}sdk/adding-components.html">Adding SDK
-Components</a>).</p>
+the Android SDK Manager (see <a href="{@docRoot}sdk/exploring.html">Exploring the
+SDK</a>).</p>
 
 <p class="note"><strong>Note:</strong> In order to display Google Maps data in a
 MapView, you must register with the Google Maps service and obtain a Maps API

@@ -1107,7 +1107,7 @@ ADT 0.9.5</a> <em>(December 2009)</em>
 <dd><p>ADT 0.9.5 requires features provided in SDK Tools r4 or higher. If you install
 ADT 0.9.5, which is highly recommended, you should use the Android SDK
 Manager to download the latest SDK Tools into your SDK. For more information,
-see <a href="{@docRoot}sdk/adding-components.html">Adding SDK Packages</a>.</p>
+see <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.</p>
 </dd>
 
 <dt>General notes:</dt>
@@ -1134,7 +1134,7 @@ ADT 0.9.4</a> <em>(October 2009)</em>
 <dd><p>ADT 0.9.4 requires features provided in SDK Tools r3 or higher. If you install
 ADT 0.9.4, which is highly recommended, you should use the Android SDK
 Manager to download the latest SDK Tools into your SDK. For more information,
-see <a href="{@docRoot}sdk/adding-components.html">Adding SDK Packages</a>.</p>
+see <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.</p>
 </dd>
 
 <dt>Project Creation Wizard:</dt>

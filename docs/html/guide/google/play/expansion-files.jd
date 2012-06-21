@@ -447,7 +447,7 @@ receives updates about the download progress.</li>
 download two packages from the SDK Manager and add the appropriate libraries to your
 application.</p>
 
-<p>First, open the <a href="{@docRoot}sdk/adding-components.html">Android SDK Manager</a>, expand
+<p>First, open the <a href="{@docRoot}sdk/exploring.html">Android SDK Manager</a>, expand
 <em>Extras</em> and download:</p>
 <ul>
   <li><em>Google Market Licensing package</em></li>

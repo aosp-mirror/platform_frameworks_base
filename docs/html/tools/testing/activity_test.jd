@@ -158,7 +158,7 @@ parent.link=index.html
             open the Android SDK and AVD Manager and check in the
             <strong>Installed Packages</strong> panel.
             If aren't sure how to download a platform into your SDK,
-            read <a href="{@docRoot}sdk/adding-components.html">Adding SDK Packages</a>.
+            read <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.
         </p>
     </li>
   </ul>
