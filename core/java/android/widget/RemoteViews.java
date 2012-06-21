@@ -1631,7 +1631,6 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * @hide
      * Equivalent to calling {@link TextView#setTextSize(int, float)}
      * 
      * @param viewId The id of the view whose text size should change
@@ -1665,7 +1664,11 @@ public class RemoteViews implements Parcelable, Filter {
      * layout direction), or 0
      * @param top The id of a drawable to place above the text, or 0
      * @param end The id of a drawable to place after the text, or 0
+<<<<<<< HEAD
      * @param bottom The id of a drawable to place below the text, or 0 
+=======
+     * @param bottom The id of a drawable to place below the text, or 0
+>>>>>>> 0a43f67e
      */
     public void setTextViewCompoundDrawablesRelative(int viewId, int start, int top, int end, int bottom) {
         addAction(new TextViewDrawableAction(viewId, true, start, top, end, bottom));
@@ -1901,7 +1904,6 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * @hide
      * Equivalent to calling {@link View#setPadding(int, int, int, int)}.
      *
      * @param viewId The id of the view to change
