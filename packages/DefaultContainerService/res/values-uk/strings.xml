@@ -20,5 +20,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="service_name" msgid="4841491635055379553">"Package Access Helper"</string>
+    <string name="service_name" msgid="4841491635055379553">"Майстер доступу до пакетів"</string>
 </resources>
