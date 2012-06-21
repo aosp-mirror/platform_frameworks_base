@@ -8,7 +8,7 @@ parent.link=../browser.html?tag=article
 <h2>See also</h2>
 <ol>
     <li>
-        <a href="{@docRoot}resources/articles/on-screen-inputs.html">Onscreen Input Methods</a>
+        <a href="http://android-developers.blogspot.com/2009/04/updating-applications-for-on-screen.html">Onscreen Input Methods</a>
     </li>
     <li>
         <a href="{@docRoot}resources/samples/SoftKeyboard/index.html">Soft Keyboard sample</a>
@@ -40,7 +40,7 @@ parent.link=../browser.html?tag=article
 </ul>
 <p>
     If you haven't worked with IMEs before, you should read the introductory article 
-    <a href="{@docRoot}resources/articles/on-screen-inputs.html">Onscreen Input Methods</a> first.
+    <a href="http://android-developers.blogspot.com/2009/04/updating-applications-for-on-screen.html">Onscreen Input Methods</a> first.
     Also, the Soft Keyboard sample app included in the SDK contains sample code that you can modify
     to start building your own IME.
 </p>
