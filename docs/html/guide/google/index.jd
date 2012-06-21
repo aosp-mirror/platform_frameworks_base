@@ -51,8 +51,7 @@ declaring the hardware and software features needed by your app.</p>
 
   <div class="layout-content-col span-4">
 <h4>Multiple APK Support</h4>
-<p>Leverage Google products in your app with
-an easy to use authentication flow for your users.</p>
+<p>Distribute different APKs based on a variety of properties such as platform version, screen size, and GLES texture compression support.</p>
 <a href="{@docRoot}guide/google/play/publishing/multiple-apks.html">Learn more &raquo;</a>
 </div>
 
