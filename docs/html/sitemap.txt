@@ -122,9 +122,9 @@ http://developer.android.com/guide/developing/eclipse-adt.html
 http://developer.android.com/guide/developing/other-ide.html
 http://developer.android.com/tools/device.html
 http://developer.android.com/guide/developing/debug-tasks.html
-http://developer.android.com/guide/developing/testing/index.html
-http://developer.android.com/guide/developing/testing/testing_eclipse.html
-http://developer.android.com/guide/developing/testing/testing_otheride.html
+http://developer.android.com/tools/testing/index.html
+http://developer.android.com/tools/testing/testing_eclipse.html
+http://developer.android.com/tools/testing/testing_otheride.html
 http://developer.android.com/tools/index.html
 http://developer.android.com/tools/aapt.html
 http://developer.android.com/tools/help/adb.html
@@ -145,10 +145,10 @@ http://developer.android.com/tools/MonkeyRunner.html
 http://developer.android.com/tools/proguard.html
 http://developer.android.com/tools/traceview.html
 http://developer.android.com/tools/zipalign.html
-http://developer.android.com/guide/publishing/app-signing.html
+http://developer.android.com/tools/publishing/app-signing.html
 http://developer.android.com/tools/publishing/versioning.html
-http://developer.android.com/guide/publishing/preparing.html
-http://developer.android.com/guide/publishing/publishing.html
+http://developer.android.com/tools/publishing/preparing.html
+http://developer.android.com/tools/publishing/publishing.html
 http://developer.android.com/guide/practices/compatibility.html
 http://developer.android.com/guide/practices/screens_support.html
 http://developer.android.com/guide/practices/ui_guidelines/index.html

@@ -19,7 +19,7 @@ parent.link=index.html
 
       <ol>
         <li><a href=
-        "{@docRoot}guide/developing/testing/testing_eclipse.html#CreateTestProjectEclipse">Testing
+        "{@docRoot}tools/testing/testing_eclipse.html#CreateTestProjectEclipse">Testing
         from Eclipse with ADT</a></li>
       </ol>
     </div>
@@ -39,7 +39,7 @@ parent.link=index.html
 
   <li>Test projects extend JUnit test functionality to include Android specific functionality. For
   more information on creating a test project, see <a href=
-  "{@docRoot}guide/developing/testing/testing_eclipse.html">Testing from Eclipse with ADT</a>.</li>
+  "{@docRoot}tools/testing/testing_eclipse.html">Testing from Eclipse with ADT</a>.</li>
   </ul>
 
   <h2 id="CreatingAProject">Creating an Android Project</h2>

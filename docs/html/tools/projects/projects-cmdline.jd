@@ -29,7 +29,7 @@ file</a></li>
 
       <ol>
         <li><a href=
-        "{@docRoot}guide/developing/testing/testing_otheride.html#CreateTestProjectCommand">Testing
+        "{@docRoot}tools/testing/testing_otheride.html#CreateTestProjectCommand">Testing
         from Other IDEs</a></li>
       </ol>
     </div>
@@ -50,7 +50,7 @@ file</a></li>
 
   <li>Test projects extend JUnit test functionality to include Android specific functionality. For
   more information on creating a test project, see <a href=
-  "{@docRoot}guide/developing/testing/testing_otheride.html">Testing from other IDEs</a>.</li>
+  "{@docRoot}tools/testing/testing_otheride.html">Testing from other IDEs</a>.</li>
   </ul>
 
 

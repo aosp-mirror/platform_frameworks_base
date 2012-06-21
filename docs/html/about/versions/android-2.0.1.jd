@@ -246,7 +246,7 @@ through Settings.</p>
 <h3 id="ant">Ant Support</h3>
 
 <ul>
-<li>Debug- and release-mode application signing. Release-mode signing includes integrated support for <code>zipalign</code> optimization. For more information, see <a href="{@docRoot}guide/publishing/app-signing.html#releasecompile">Signing Your Applications</a>.</li>
+<li>Debug- and release-mode application signing. Release-mode signing includes integrated support for <code>zipalign</code> optimization. For more information, see <a href="{@docRoot}tools/publishing/app-signing.html#releasecompile">Signing Your Applications</a>.</li>
 
 <li>Adds new Ant build system with support for Emma instrumentation projects (code coverage).</li>
 </ul>

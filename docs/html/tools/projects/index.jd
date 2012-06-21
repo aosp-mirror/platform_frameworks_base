@@ -427,7 +427,7 @@ and select <strong>Properties</strong>.</dd>
   </dl>
 
   <p>For more information, see the <a href=
-  "{@docRoot}guide/developing/testing/index.html">Testing</a> section.</p>
+  "{@docRoot}tools/testing/index.html">Testing</a> section.</p>
 
 
   <h2 id="testing">Testing a Library Project</h2>
@@ -436,7 +436,7 @@ and select <strong>Properties</strong>.</dd>
   project:</p>
 
   <ul>
-    <li>You can set up a <a href="{@docRoot}guide/developing/testing/testing_otheride.html">test
+    <li>You can set up a <a href="{@docRoot}tools/testing/testing_otheride.html">test
     project</a> that instruments an application project that depends on the library project. You
     can then add tests to the project for library-specific features.</li>
 

@@ -776,7 +776,7 @@ newdevice = MonkeyRunner.waitForConnection()
                     the single key "stream". The value of "stream" is a <em>string</em> containing
                     the test output, as if <code>InstrumentationTestRunner</code> was run from the
                     command line. The format of this output is described in
-                    <a href="{@docRoot}guide/developing/testing/testing_otheride.html">
+                    <a href="{@docRoot}tools/testing/testing_otheride.html">
                     Testing in Other IDEs</a>.
                 </p>
             </li>

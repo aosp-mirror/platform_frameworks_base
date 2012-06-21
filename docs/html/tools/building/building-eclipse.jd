@@ -34,7 +34,7 @@ parent.link=index.html
    <p>This document shows you how to run your application on an emulator or a real device 
    from Eclipse&mdash;all of which is done using the debug version of your application. 
    For more information about how to sign your application with a private key for release, see <a href=
-  "{@docRoot}guide/publishing/app-signing.html#ExportWizard">Signing Your Applications</a></p>
+  "{@docRoot}tools/publishing/app-signing.html#ExportWizard">Signing Your Applications</a></p>
 
   <h2 id="RunningOnEmulatorEclipse">Running on the emulator</h2>
 

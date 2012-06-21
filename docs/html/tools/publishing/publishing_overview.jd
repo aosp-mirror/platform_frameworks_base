@@ -99,7 +99,7 @@ property.</p>
 <code>.apk</code> file that you can distribute to users.</p>
 
 <p>To learn how to prepare your application for release, see <a
-href="{@docRoot}guide/publishing/preparing.html">Preparing for Release</a> in the Dev Guide. This
+href="{@docRoot}tools/publishing/preparing.html">Preparing for Release</a> in the Dev Guide. This
 topic provides step-by-step instructions for configuring and building a release version of your
 application.</p>
 

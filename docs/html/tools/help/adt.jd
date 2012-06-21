@@ -101,7 +101,7 @@ Project site.</p>
     Allows you to profile your program's execution
     (<strong>Window &gt; Open Perspective &gt; Traceview</strong>). </li>
 
-    <li><a href="{@docRoot}tools/android.html">android</a>: Provides access to
+    <li><a href="{@docRoot}tools/help/android.html">android</a>: Provides access to
     the Android SDK Manager and AVD Manager. Other <code>android</code> features such as creating or
     updating projects (application and library) are integrated throughout the Eclipse IDE. </li>
 

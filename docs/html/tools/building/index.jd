@@ -33,7 +33,7 @@ page.title=Building and Running
   <p>Fortunately, Eclipse or your Ant build script signs the application for you in debug mode
   when you build your application. You can also easily setup Eclipse or your Ant build to sign your
   application in release mode as well. For more information on signing applications, see <a href=
-  "{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a>.</p>
+  "{@docRoot}tools/publishing/app-signing.html">Signing Your Applications</a>.</p>
   
   <p>The following diagram depicts the components involved in building and running an application:</p>
 

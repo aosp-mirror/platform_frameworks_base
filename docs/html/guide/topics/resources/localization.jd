@@ -620,7 +620,7 @@ border="0"></td>
     <td>Upload your .apk file or files to Google Play, selecting the appropriate
 languages as
     you upload. (For more details, see <a
-href="{@docRoot}guide/publishing/publishing.html">Publishing Your
+href="{@docRoot}tools/publishing/publishing.html">Publishing Your
 Applications</a>.)</td>
   </tr>
 </table>
