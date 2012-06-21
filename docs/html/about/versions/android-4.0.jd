@@ -1840,5 +1840,5 @@ higher. Depending on your needs, you might also need to add an
 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a>
 element.</p>
 
-<p>For more information, read <a href="{@docRoot}guide/appendix/api-levels.html">What is API
+<p>For more information, read <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">What is API
 Level?</a></p>

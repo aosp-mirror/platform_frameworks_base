@@ -980,5 +980,5 @@ manifest. If your application is designed to run only on Android 2.3 and higher,
 declaring the attribute prevents the application from being installed on earlier
 versions of the platform.</p>
 
-<p>For more information, read <a href="{@docRoot}guide/appendix/api-levels.html">What is API
+<p>For more information, read <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">What is API
 Level?</a></p>

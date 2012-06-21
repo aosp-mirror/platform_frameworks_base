@@ -54,7 +54,7 @@ but the single most important characteristic of a compatible device is the
 ability to install and correctly run an Android <code>.apk</code> file.</p>
 
 <p>There is exactly one Android API for each <a
-href="{@docRoot}guide/appendix/api-levels.html">API level</a>, and it’s the same
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API level</a>, and it’s the same
 API no matter what kind of device it’s installed on. No parts of the API are
 optional, and you never have to worry about parts of the API missing on some
 devices. Every compatible Android device your app will land on will include

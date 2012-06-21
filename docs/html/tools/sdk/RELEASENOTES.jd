@@ -72,7 +72,7 @@ add-ons) into your environment.</li>
 capability that lets you display only the parts of the API that are actually 
 available to your application, based on the <code>android:minSdkVersion</code>
 value the application declares in its manifest. For more information, see
-<a href="{@docRoot}guide/appendix/api-levels.html">Android API Levels</a></li>
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Android API Levels</a></li>
   </ul>
 
 <p>For details about the Android platforms included in the SDK &mdash; including

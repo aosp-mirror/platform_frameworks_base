@@ -21,7 +21,7 @@ previous.link=screens.html
     
     <h2>You should also read</h2>
     <ul>
-      <li><a href="{@docRoot}guide/appendix/api-levels.html">Android API Levels</a></li>
+      <li><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Android API Levels</a></li>
       <li><a
 href="{@docRoot}sdk/compatibility-library.html">Android Support Library</a></li>
     </ul>

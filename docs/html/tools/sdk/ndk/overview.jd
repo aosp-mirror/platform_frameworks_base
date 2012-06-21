@@ -558,7 +558,7 @@ later)</li>
       </table>
 
       <p>For more information about API Level and its relationship to Android platform versions,
-      see <a href="{@docRoot}guide/appendix/api-levels.html">Android API Levels</a>.</p>
+      see <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Android API Levels</a>.</p>
     </li>
 
     <li>Additionally, an application using the OpenGL ES APIs should declare a

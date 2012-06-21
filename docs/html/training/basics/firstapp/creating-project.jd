@@ -87,7 +87,7 @@ app (an activity represents a single screen in your app). Enter "MyFirstActivity
       <li><em>Minimum SDK</em>: Select <em>4 (Android 1.6)</em>.
         <p>Because this version is lower than the build target selected for the app, a warning
 appears, but that's alright. You simply need to be sure that you don't use any APIs that require an
-<a href="{@docRoot}guide/appendix/api-levels.html">API level</a> greater than the minimum SDK
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API level</a> greater than the minimum SDK
 version without first using some code to verify the device's system version (you'll see this in some
 other classes).</p>
       </li>
