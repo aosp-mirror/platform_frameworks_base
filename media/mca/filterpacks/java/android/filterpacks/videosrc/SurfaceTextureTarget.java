@@ -162,6 +162,10 @@ public class SurfaceTextureTarget extends Filter {
     @Override
     public synchronized void open(FilterContext context) {
         // Set up SurfaceTexture internals
+        if (mSurfaceTexture == null) {
+            Log.e(TAG, "SurfaceTexture is null!!");
+            throw new RuntimeException("Could not register SurfaceTexture: " + mSurfaceTexture);
+        }
         mSurfaceId = context.getGLEnvironment().registerSurfaceTexture(
             mSurfaceTexture, mScreenWidth, mScreenHeight);
         if (mSurfaceId <= 0) {
@@ -170,19 +174,24 @@ public class SurfaceTextureTarget extends Filter {
     }
 
 
+    // Once the surface is unregistered, we still need the surfacetexture reference.
+    // That is because when the the filter graph stops and starts again, the app
+    // may not set the mSurfaceTexture again on the filter. In some cases, the app
+    // may not even know that the graph has re-started. So it is difficult to enforce
+    // that condition on an app using this filter. The only case where we need
+    // to let go of the mSurfaceTexure reference is when the app wants to shut
+    // down the graph on purpose, such as in the disconnect call.
     @Override
     public synchronized void close(FilterContext context) {
         if (mSurfaceId > 0) {
             context.getGLEnvironment().unregisterSurfaceId(mSurfaceId);
             mSurfaceId = -1;
-            // Once the surface is unregistered, remove the surfacetexture reference.
-            // The surfaceId could not have been valid without a valid surfacetexture.
-            mSurfaceTexture = null;
         }
     }
 
     // This should be called from the client side when the surfacetexture is no longer
     // valid. e.g. from onPause() in the application using the filter graph.
+    // In this case, we need to let go of our surfacetexture reference.
     public synchronized void disconnect(FilterContext context) {
         if (mLogVerbose) Log.v(TAG, "disconnect");
         if (mSurfaceTexture == null) {
