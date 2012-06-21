@@ -442,7 +442,9 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             mScreenOn = true;
             mDelayedShowingSequence++;
             if (DEBUG) Log.d(TAG, "onScreenTurnedOn, seq = " + mDelayedShowingSequence);
-            notifyScreenOnLocked(showListener);
+            if (showListener != null) {
+                notifyScreenOnLocked(showListener);
+            }
         }
     }
 
