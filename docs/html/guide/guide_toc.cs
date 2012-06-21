@@ -550,28 +550,10 @@
   
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/google/index.html">
-        <span class="en">Google APIs</span>
+        <span class="en">Google Services</span>
       </a></div>
     <ul>      
-      <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/google/play/licensing/index.html">
-          <span class="en">Application Licensing</span></a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot?>guide/google/play/licensing/overview.html">
-              <span class="en">Licensing Overview</span></a>
-          </li>
-          <li><a href="<?cs var:toroot?>guide/google/play/licensing/setting-up.html">
-              <span class="en">Setting Up for Licensing</span></a>
-          </li>
-          <li><a href="<?cs var:toroot?>guide/google/play/licensing/adding-licensing.html">
-              <span class="en">Adding Licensing to Your App</span></a>
-          </li>
-          <li><a href="<?cs var:toroot?>guide/google/play/licensing/licensing-reference.html">
-              <span class="en">Licensing Reference</span></a>
-          </li>
-        </ul>
-      </li>
+
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot?>guide/google/play/billing/index.html">
             <span class="en">In-app Billing</span></a>
@@ -600,6 +582,25 @@
           </li>
         </ul>
       </li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/google/play/licensing/index.html">
+          <span class="en">Application Licensing</span></a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot?>guide/google/play/licensing/overview.html">
+              <span class="en">Licensing Overview</span></a>
+          </li>
+          <li><a href="<?cs var:toroot?>guide/google/play/licensing/setting-up.html">
+              <span class="en">Setting Up for Licensing</span></a>
+          </li>
+          <li><a href="<?cs var:toroot?>guide/google/play/licensing/adding-licensing.html">
+              <span class="en">Adding Licensing to Your App</span></a>
+          </li>
+          <li><a href="<?cs var:toroot?>guide/google/play/licensing/licensing-reference.html">
+              <span class="en">Licensing Reference</span></a>
+          </li>
+        </ul>
+      </li>       
       <li><a href="<?cs var:toroot ?>guide/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
@@ -609,6 +610,7 @@
       <li><a href="<?cs var:toroot ?>guide/google/play/expansion-files.html">
           <span class="en">APK Expansion Files</span></a>
       </li>
+
     </ul>
   </li><!-- end Google Play -->
   
