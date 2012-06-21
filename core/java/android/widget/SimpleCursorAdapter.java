@@ -78,7 +78,7 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
         super(context, layout, c);
         mTo = to;
         mOriginalFrom = from;
-        findColumns(from);
+        findColumns(c, from);
     }
 
     /**
@@ -104,7 +104,7 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
         super(context, layout, c, flags);
         mTo = to;
         mOriginalFrom = from;
-        findColumns(from);
+        findColumns(c, from);
     }
 
     /**
@@ -316,20 +316,21 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
     }
 
     /**
-     * Create a map from an array of strings to an array of column-id integers in mCursor.
-     * If mCursor is null, the array will be discarded.
-     * 
+     * Create a map from an array of strings to an array of column-id integers in cursor c.
+     * If c is null, the array will be discarded.
+     *
+     * @param c the cursor to find the columns from
      * @param from the Strings naming the columns of interest
      */
-    private void findColumns(String[] from) {
-        if (mCursor != null) {
+    private void findColumns(Cursor c, String[] from) {
+        if (c != null) {
             int i;
             int count = from.length;
             if (mFrom == null || mFrom.length != count) {
                 mFrom = new int[count];
             }
             for (i = 0; i < count; i++) {
-                mFrom[i] = mCursor.getColumnIndexOrThrow(from[i]);
+                mFrom[i] = c.getColumnIndexOrThrow(from[i]);
             }
         } else {
             mFrom = null;
@@ -341,13 +342,8 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
         // super.swapCursor() will notify observers before we have
         // a valid mapping, make sure we have a mapping before this
         // happens
-        if (mFrom == null) {
-            findColumns(mOriginalFrom);
-        }
-        Cursor res = super.swapCursor(c);
-        // rescan columns in case cursor layout is different
-        findColumns(mOriginalFrom);
-        return res;
+        findColumns(c, mOriginalFrom);
+        return super.swapCursor(c);
     }
     
     /**
@@ -367,11 +363,8 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
         // super.changeCursor() will notify observers before we have
         // a valid mapping, make sure we have a mapping before this
         // happens
-        if (mFrom == null) {
-            findColumns(mOriginalFrom);
-        }
+        findColumns(c, mOriginalFrom);
         super.changeCursor(c);
-        findColumns(mOriginalFrom);
     }
 
     /**
