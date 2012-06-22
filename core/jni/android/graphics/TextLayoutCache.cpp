@@ -345,26 +345,10 @@ TextLayoutShaper::TextLayoutShaper() : mShaperItemGlyphArraySize(0) {
 
 void TextLayoutShaper::init() {
     mDefaultTypeface = SkFontHost::CreateTypeface(NULL, NULL, NULL, 0, SkTypeface::kNormal);
-    mArabicTypeface = NULL;
-    mHebrewRegularTypeface = NULL;
-    mHebrewBoldTypeface = NULL;
-    mBengaliTypeface = NULL;
-    mThaiTypeface = NULL;
-    mDevanagariRegularTypeface = NULL;
-    mTamilRegularTypeface = NULL;
-    mTamilBoldTypeface = NULL;
 }
 
 void TextLayoutShaper::unrefTypefaces() {
     SkSafeUnref(mDefaultTypeface);
-    SkSafeUnref(mArabicTypeface);
-    SkSafeUnref(mHebrewRegularTypeface);
-    SkSafeUnref(mHebrewBoldTypeface);
-    SkSafeUnref(mBengaliTypeface);
-    SkSafeUnref(mThaiTypeface);
-    SkSafeUnref(mDevanagariRegularTypeface);
-    SkSafeUnref(mTamilRegularTypeface);
-    SkSafeUnref(mTamilBoldTypeface);
 }
 
 TextLayoutShaper::~TextLayoutShaper() {
@@ -750,113 +734,30 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* chars
  * assumption is that its lifetime is managed elsewhere - in particular, the fallback typefaces
  * for the default font live in a global cache.
  */
-SkTypeface* TextLayoutShaper::typefaceForUnichar(const SkPaint* paint, SkTypeface* typeface,
-        SkUnichar unichar, HB_Script script) {
-    // Set the correct Typeface depending on the script
-    switch (script) {
-    case HB_Script_Arabic:
-        typeface = getCachedTypeface(&mArabicTypeface, HB_Script_Arabic,
-                SkTypeface::kNormal);
-#if DEBUG_GLYPHS
-        ALOGD("Using Arabic Typeface");
-#endif
-        break;
-
-    case HB_Script_Hebrew:
-        if (typeface) {
-            switch (typeface->style()) {
-            case SkTypeface::kBold:
-            case SkTypeface::kBoldItalic:
-                typeface = getCachedTypeface(&mHebrewBoldTypeface, HB_Script_Hebrew,
-                        SkTypeface::kBold);
-#if DEBUG_GLYPHS
-                ALOGD("Using Hebrew Bold/BoldItalic Typeface");
-#endif
-                break;
-
-            case SkTypeface::kNormal:
-            case SkTypeface::kItalic:
-            default:
-                typeface = getCachedTypeface(&mHebrewRegularTypeface, HB_Script_Hebrew,
-                        SkTypeface::kNormal);
-#if DEBUG_GLYPHS
-                ALOGD("Using Hebrew Regular/Italic Typeface");
-#endif
-                break;
-            }
-        } else {
-            typeface = getCachedTypeface(&mHebrewRegularTypeface, HB_Script_Hebrew,
-                    SkTypeface::kNormal);
-#if DEBUG_GLYPHS
-            ALOGD("Using Hebrew Regular Typeface");
-#endif
-        }
-        break;
-
-    case HB_Script_Bengali:
-        typeface = getCachedTypeface(&mBengaliTypeface, HB_Script_Bengali,
-                SkTypeface::kNormal);
-#if DEBUG_GLYPHS
-        ALOGD("Using Bengali Typeface");
-#endif
-        break;
-
-    case HB_Script_Thai:
-        typeface = getCachedTypeface(&mThaiTypeface, HB_Script_Thai,
-                SkTypeface::kNormal);
-#if DEBUG_GLYPHS
-        ALOGD("Using Thai Typeface");
-#endif
-        break;
-
-    case HB_Script_Devanagari:
-       typeface = getCachedTypeface(&mDevanagariRegularTypeface, HB_Script_Devanagari,
-               SkTypeface::kNormal);
-#if DEBUG_GLYPHS
-       ALOGD("Using Devanagari Regular Typeface");
-#endif
-        break;
-
-    case HB_Script_Tamil:
-        if (typeface) {
-            switch (typeface->style()) {
-            case SkTypeface::kBold:
-            case SkTypeface::kBoldItalic:
-                typeface = getCachedTypeface(&mTamilBoldTypeface, HB_Script_Tamil,
-                        SkTypeface::kBold);
-#if DEBUG_GLYPHS
-                ALOGD("Using Tamil Bold Typeface");
-#endif
-                break;
-
-            case SkTypeface::kNormal:
-            case SkTypeface::kItalic:
-            default:
-                typeface = getCachedTypeface(&mTamilRegularTypeface, HB_Script_Tamil,
-                        SkTypeface::kNormal);
-#if DEBUG_GLYPHS
-                ALOGD("Using Tamil Regular Typeface");
-#endif
-                break;
-            }
-        } else {
-            typeface = getCachedTypeface(&mTamilRegularTypeface, HB_Script_Tamil,
-                    SkTypeface::kNormal);
-#if DEBUG_GLYPHS
-            ALOGD("Using Tamil Regular Typeface");
-#endif
-        }
-        break;
-
-    default:
-#if DEBUG_GLYPHS
-        if (typeface) {
-            ALOGD("Using Paint Typeface");
-        }
-#endif
-        break;
+SkTypeface* TextLayoutShaper::typefaceForScript(const SkPaint* paint, SkTypeface* typeface,
+        HB_Script script) {
+    SkTypeface::Style currentStyle = SkTypeface::kNormal;
+    if (typeface) {
+        currentStyle = typeface->style();
     }
+    typeface = SkCreateTypefaceForScript(script, currentStyle);
+#if DEBUG_GLYPHS
+    ALOGD("Using Harfbuzz Script %d, Style %d", script, currentStyle);
+#endif
     return typeface;
+}
+
+bool TextLayoutShaper::isComplexScript(HB_Script script) {
+    switch (script) {
+    case HB_Script_Common:
+    case HB_Script_Greek:
+    case HB_Script_Cyrillic:
+    case HB_Script_Hangul:
+    case HB_Script_Inherited:
+        return false;
+    default:
+        return true;
+    }
 }
 
 size_t TextLayoutShaper::shapeFontRun(const SkPaint* paint, bool isRTL) {
@@ -874,37 +775,35 @@ size_t TextLayoutShaper::shapeFontRun(const SkPaint* paint, bool isRTL) {
     // If we are a "common" script we dont need to shift
     size_t baseGlyphCount = 0;
     SkUnichar firstUnichar = 0;
-    switch (mShaperItem.item.script) {
-    case HB_Script_Arabic:
-    case HB_Script_Hebrew:
-    case HB_Script_Bengali:
-    case HB_Script_Devanagari:
-    case HB_Script_Tamil:
-    case HB_Script_Thai:{
-        const uint16_t* text16 = (const uint16_t*)(mShaperItem.string + mShaperItem.item.pos);
+    if (isComplexScript(mShaperItem.item.script)) {
+        const uint16_t* text16 = (const uint16_t*) (mShaperItem.string + mShaperItem.item.pos);
         const uint16_t* text16End = text16 + mShaperItem.item.length;
         firstUnichar = SkUTF16_NextUnichar(&text16);
         while (firstUnichar == ' ' && text16 < text16End) {
             firstUnichar = SkUTF16_NextUnichar(&text16);
         }
         baseGlyphCount = paint->getBaseGlyphCount(firstUnichar);
-        break;
-    }
-    default:
-        break;
     }
 
-    // We test the baseGlyphCount to see if the typeface supports the requested script
     if (baseGlyphCount != 0) {
-        typeface = typefaceForUnichar(paint, typeface, firstUnichar, mShaperItem.item.script);
+        typeface = typefaceForScript(paint, typeface, mShaperItem.item.script);
+        if (!typeface) {
+            typeface = mDefaultTypeface;
+            SkSafeRef(typeface);
+#if DEBUG_GLYPHS
+            ALOGD("Using Default Typeface");
+#endif
+        }
+    } else {
+        if (!typeface) {
+            typeface = mDefaultTypeface;
+#if DEBUG_GLYPHS
+            ALOGD("Using Default Typeface");
+#endif
+        }
+        SkSafeRef(typeface);
     }
 
-    if (!typeface) {
-        typeface = mDefaultTypeface;
-#if DEBUG_GLYPHS
-        ALOGD("Using Default Typeface");
-#endif
-    }
     mShapingPaint.setTypeface(typeface);
     mShaperItem.face = getCachedHBFace(typeface);
 
@@ -912,6 +811,7 @@ size_t TextLayoutShaper::shapeFontRun(const SkPaint* paint, bool isRTL) {
     ALOGD("Run typeface = %p, uniqueID = %d, hb_face = %p",
             typeface, typeface->uniqueID(), mShaperItem.face);
 #endif
+    SkSafeUnref(typeface);
 
     // Shape
     assert(mShaperItem.item.length > 0); // Harfbuzz will overwrite other memory if length is 0.
@@ -958,25 +858,6 @@ void TextLayoutShaper::deleteShaperItemGlyphArrays() {
     delete[] mShaperItem.advances;
     delete[] mShaperItem.offsets;
     delete[] mShaperItem.log_clusters;
-}
-
-SkTypeface* TextLayoutShaper::getCachedTypeface(SkTypeface** typeface, HB_Script script,
-        SkTypeface::Style style) {
-    if (!*typeface) {
-        *typeface = SkCreateTypefaceForScript(script, style);
-        // CreateFromFile(path) can return NULL if the path is non existing
-        if (!*typeface) {
-#if DEBUG_GLYPHS
-        ALOGD("No font for Harfbuzz script %d, will use default font", script);
-#endif
-            return mDefaultTypeface;
-        }
-        (*typeface)->ref();
-#if DEBUG_GLYPHS
-        ALOGD("Created SkTypeface for Harfbuzz script %d with uniqueID = %d", script, (*typeface)->uniqueID());
-#endif
-    }
-    return *typeface;
 }
 
 HB_Face TextLayoutShaper::getCachedHBFace(SkTypeface* typeface) {
