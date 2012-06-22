@@ -39,7 +39,7 @@ public:
           mUpdate(false), mExtending(false),
           mRequireLocalization(false), mPseudolocalize(false),
           mWantUTF16(false), mValues(false),
-          mCompressionMethod(0), mOutputAPKFile(NULL),
+          mCompressionMethod(0), mJunkPath(false), mOutputAPKFile(NULL),
           mManifestPackageNameOverride(NULL), mInstrumentationPackageNameOverride(NULL),
           mAutoAddOverlay(false), mGenDependencies(false),
           mAssetSourceDir(NULL), 
