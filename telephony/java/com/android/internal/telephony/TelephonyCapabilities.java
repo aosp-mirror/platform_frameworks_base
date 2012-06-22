@@ -177,4 +177,15 @@ public class TelephonyCapabilities {
     public static boolean supportsAdn(int phoneType) {
         return phoneType == Phone.PHONE_TYPE_GSM;
     }
+
+    /**
+     * Returns true if the device can distinguish the phone's dialing state
+     * (Call.State.DIALING/ACTIVE) and connected state (Call.State.CONNECTED).
+     *
+     * Currently this returns true for GSM phones as we cannot know when a CDMA
+     * phone has transitioned from dialing/active to connected.
+     */
+    public static boolean canDistinguishDialingAndConnected(int phoneType) {
+        return phoneType == Phone.PHONE_TYPE_GSM;
+    }
 }
