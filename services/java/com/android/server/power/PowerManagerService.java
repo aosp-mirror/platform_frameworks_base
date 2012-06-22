@@ -20,9 +20,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.server.BatteryService;
 import com.android.server.EventLogTags;
 import com.android.server.LightsService;
-import com.android.server.LightsService.Light;
 import com.android.server.Watchdog;
-import com.android.server.Watchdog.Monitor;
 import com.android.server.am.BatteryStatsService;
 
 import android.app.ActivityManagerNative;
@@ -67,7 +65,6 @@ import static android.view.WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR;
 import static android.provider.Settings.System.DIM_SCREEN;
 import static android.provider.Settings.System.SCREEN_BRIGHTNESS;
 import static android.provider.Settings.System.SCREEN_BRIGHTNESS_MODE;
-import static android.provider.Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ;
 import static android.provider.Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 import static android.provider.Settings.System.STAY_ON_WHILE_PLUGGED_IN;
@@ -89,19 +86,20 @@ public class PowerManagerService extends IPowerManager.Stub
     private static final String TAG = "PowerManagerService";
     static final String PARTIAL_NAME = "PowerManagerService";
 
+    // could be either static or controllable at runtime
+    private static final boolean DEBUG = false;
+    private static final boolean DEBUG_PROXIMITY_SENSOR = (false || DEBUG);
+    private static final boolean DEBUG_LIGHT_SENSOR = (false || DEBUG);
+    private static final boolean DEBUG_LIGHT_ANIMATION = (false || DEBUG);
+    private static final boolean DEBUG_SCREEN_ON = false;
+
     // Wake lock that ensures that the CPU is running.  The screen might not be on.
     private static final int PARTIAL_WAKE_LOCK_ID = 1;
 
     // Wake lock that ensures that the screen is on.
     private static final int FULL_WAKE_LOCK_ID = 2;
 
-    static final boolean DEBUG_SCREEN_ON = false;
-
     private static final boolean LOG_PARTIAL_WL = false;
-
-    // Indicates whether touch-down cycles should be logged as part of the
-    // LOG_POWER_SCREEN_STATE log events
-    private static final boolean LOG_TOUCH_DOWNS = true;
 
     private static final int LOCK_MASK = PowerManager.PARTIAL_WAKE_LOCK
                                         | PowerManager.SCREEN_DIM_WAKE_LOCK
@@ -300,17 +298,6 @@ public class PowerManagerService extends IPowerManager.Stub
     // Must match with the ISurfaceComposer constants in C++.
     private static final int ANIM_SETTING_ON = 0x01;
     private static final int ANIM_SETTING_OFF = 0x10;
-
-    // Used when logging number and duration of touch-down cycles
-    private long mTotalTouchDownTime;
-    private long mLastTouchDown;
-    private int mTouchCycles;
-
-    // could be either static or controllable at runtime
-    private static final boolean mSpew = false;
-    private static final boolean mDebugProximitySensor = (false || mSpew);
-    private static final boolean mDebugLightSensor = (false || mSpew);
-    private static final boolean mDebugLightAnimation = (false || mSpew);
 
     private native void nativeInit();
     private native void nativeSetPowerState(boolean screenOn, boolean screenBright);
@@ -855,7 +842,7 @@ public class PowerManagerService extends IPowerManager.Stub
 
     public void acquireWakeLockLocked(int flags, IBinder lock, int uid, int pid, String tag,
             WorkSource ws) {
-        if (mSpew) {
+        if (DEBUG) {
             Slog.d(TAG, "acquireWakeLock flags=0x" + Integer.toHexString(flags) + " tag=" + tag);
         }
 
@@ -944,7 +931,7 @@ public class PowerManagerService extends IPowerManager.Stub
                         mProximitySensorActive = false;
                     }
 
-                    if (mSpew) {
+                    if (DEBUG) {
                         Slog.d(TAG, "wakeup here mUserState=0x" + Integer.toHexString(mUserState)
                                 + " mWakeLockState=0x"
                                 + Integer.toHexString(mWakeLockState)
@@ -952,7 +939,7 @@ public class PowerManagerService extends IPowerManager.Stub
                                 + Integer.toHexString(oldWakeLockState));
                     }
                 } else {
-                    if (mSpew) {
+                    if (DEBUG) {
                         Slog.d(TAG, "here mUserState=0x" + Integer.toHexString(mUserState)
                                 + " mLocks.gatherState()=0x"
                                 + Integer.toHexString(mLocks.gatherState())
@@ -967,7 +954,9 @@ public class PowerManagerService extends IPowerManager.Stub
             if (newlock) {
                 mPartialCount++;
                 if (mPartialCount == 1) {
-                    if (LOG_PARTIAL_WL) EventLog.writeEvent(EventLogTags.POWER_PARTIAL_WAKE_STATE, 1, tag);
+                    if (LOG_PARTIAL_WL) {
+                        EventLog.writeEvent(EventLogTags.POWER_PARTIAL_WAKE_STATE, 1, tag);
+                    }
                 }
             }
             nativeAcquireWakeLock(PARTIAL_WAKE_LOCK_ID, PARTIAL_NAME);
@@ -1022,7 +1011,7 @@ public class PowerManagerService extends IPowerManager.Stub
             return;
         }
 
-        if (mSpew) {
+        if (DEBUG) {
             Slog.d(TAG, "releaseWakeLock flags=0x"
                     + Integer.toHexString(wl.flags) + " tag=" + wl.tag);
         }
@@ -1034,7 +1023,7 @@ public class PowerManagerService extends IPowerManager.Stub
                     if (mProximitySensorActive &&
                             ((flags & PowerManager.WAIT_FOR_PROXIMITY_NEGATIVE) != 0)) {
                         // wait for proximity sensor to go negative before disabling sensor
-                        if (mDebugProximitySensor) {
+                        if (DEBUG_PROXIMITY_SENSOR) {
                             Slog.d(TAG, "waiting for proximity sensor to go negative");
                         }
                     } else {
@@ -1053,7 +1042,9 @@ public class PowerManagerService extends IPowerManager.Stub
         else if ((wl.flags & LOCK_MASK) == PowerManager.PARTIAL_WAKE_LOCK) {
             mPartialCount--;
             if (mPartialCount == 0) {
-                if (LOG_PARTIAL_WL) EventLog.writeEvent(EventLogTags.POWER_PARTIAL_WAKE_STATE, 0, wl.tag);
+                if (LOG_PARTIAL_WL) {
+                    EventLog.writeEvent(EventLogTags.POWER_PARTIAL_WAKE_STATE, 0, wl.tag);
+                }
                 nativeReleaseWakeLock(PARTIAL_NAME);
             }
         }
@@ -1338,7 +1329,7 @@ public class PowerManagerService extends IPowerManager.Stub
                         nextState = SCREEN_BRIGHT;
                     }
                 }
-                if (mSpew) {
+                if (DEBUG) {
                     Slog.d(TAG, "setTimeoutLocked now=" + now
                             + " timeoutOverride=" + timeoutOverride
                             + " nextState=" + nextState + " when=" + when);
@@ -1368,7 +1359,7 @@ public class PowerManagerService extends IPowerManager.Stub
         public void run()
         {
             synchronized (mLocks) {
-                if (mSpew) {
+                if (DEBUG) {
                     Slog.d(TAG, "user activity timeout timed out nextState=" + this.nextState);
                 }
 
@@ -1523,7 +1514,7 @@ public class PowerManagerService extends IPowerManager.Stub
                         // ignore it
                     }
 
-                    if (mSpew) {
+                    if (DEBUG) {
                         Slog.d(TAG, "mBroadcastWakeLock=" + mBroadcastWakeLock);
                     }
                     if (mContext != null && ActivityManagerNative.isSystemReady()) {
@@ -1590,23 +1581,6 @@ public class PowerManagerService extends IPowerManager.Stub
         }
     };
 
-    void logPointerUpEvent() {
-        if (LOG_TOUCH_DOWNS) {
-            mTotalTouchDownTime += SystemClock.elapsedRealtime() - mLastTouchDown;
-            mLastTouchDown = 0;
-        }
-    }
-
-    void logPointerDownEvent() {
-        if (LOG_TOUCH_DOWNS) {
-            // If we are not already timing a down/up sequence
-            if (mLastTouchDown == 0) {
-                mLastTouchDown = SystemClock.elapsedRealtime();
-                mTouchCycles++;
-            }
-        }
-    }
-
     /**
      * Prevents the screen from turning on even if it *should* turn on due
      * to a subsequent full wake lock being acquired.
@@ -1668,7 +1642,7 @@ public class PowerManagerService extends IPowerManager.Stub
                 // handles the case where the screen is currently off because of
                 // a prior preventScreenOn(true) call.)
                 if (!mProximitySensorActive && (mPowerState & SCREEN_ON_BIT) != 0) {
-                    if (mSpew) {
+                    if (DEBUG) {
                         Slog.d(TAG,
                               "preventScreenOn: turning on after a prior preventScreenOn(true)!");
                     }
@@ -1688,7 +1662,7 @@ public class PowerManagerService extends IPowerManager.Stub
     public void setScreenBrightnessOverride(int brightness) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
 
-        if (mSpew) Slog.d(TAG, "setScreenBrightnessOverride " + brightness);
+        if (DEBUG) Slog.d(TAG, "setScreenBrightnessOverride " + brightness);
         synchronized (mLocks) {
             if (mScreenBrightnessOverride != brightness) {
                 mScreenBrightnessOverride = brightness;
@@ -1702,7 +1676,7 @@ public class PowerManagerService extends IPowerManager.Stub
     public void setButtonBrightnessOverride(int brightness) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
 
-        if (mSpew) Slog.d(TAG, "setButtonBrightnessOverride " + brightness);
+        if (DEBUG) Slog.d(TAG, "setButtonBrightnessOverride " + brightness);
          synchronized (mLocks) {
            if (mButtonBrightnessOverride != brightness) {
                 mButtonBrightnessOverride = brightness;
@@ -1798,7 +1772,7 @@ public class PowerManagerService extends IPowerManager.Stub
         synchronized (mLocks) {
             int err;
 
-            if (mSpew) {
+            if (DEBUG) {
                 Slog.d(TAG, "setPowerState: mPowerState=0x" + Integer.toHexString(mPowerState)
                         + " newState=0x" + Integer.toHexString(newState)
                         + " noChangeLights=" + noChangeLights
@@ -1829,7 +1803,7 @@ public class PowerManagerService extends IPowerManager.Stub
             boolean oldScreenOn = (mPowerState & SCREEN_ON_BIT) != 0;
             boolean newScreenOn = (newState & SCREEN_ON_BIT) != 0;
 
-            if (mSpew) {
+            if (DEBUG) {
                 Slog.d(TAG, "setPowerState: mPowerState=" + mPowerState
                         + " newState=" + newState + " noChangeLights=" + noChangeLights);
                 Slog.d(TAG, "  oldKeyboardBright=" + ((mPowerState & KEYBOARD_BRIGHT_BIT) != 0)
@@ -1848,7 +1822,7 @@ public class PowerManagerService extends IPowerManager.Stub
 
             if (stateChanged && reason == WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT) {
                 if (mPolicy != null && mPolicy.isScreenSaverEnabled()) {
-                    if (mSpew) {
+                    if (DEBUG) {
                         Slog.d(TAG, "setPowerState: running screen saver instead of turning off screen");
                     }
                     if (mPolicy.startScreenSaver()) {
@@ -1875,13 +1849,13 @@ public class PowerManagerService extends IPowerManager.Stub
                     // seconds to prevent a buggy app from disabling the
                     // screen forever; see forceReenableScreen().)
                     boolean reallyTurnScreenOn = true;
-                    if (mSpew) {
+                    if (DEBUG) {
                         Slog.d(TAG, "- turning screen on...  mPreventScreenOn = "
                               + mPreventScreenOn);
                     }
 
                     if (mPreventScreenOn) {
-                        if (mSpew) {
+                        if (DEBUG) {
                             Slog.d(TAG, "- PREVENTING screen from really turning on!");
                         }
                         reallyTurnScreenOn = false;
@@ -1903,11 +1877,7 @@ public class PowerManagerService extends IPowerManager.Stub
                         err = 0;
                     }
 
-                    mLastTouchDown = 0;
-                    mTotalTouchDownTime = 0;
-                    mTouchCycles = 0;
-                    EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 1, reason,
-                            mTotalTouchDownTime, mTouchCycles);
+                    EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 1, reason, 0, 0);
                     if (err == 0) {
                         sendNotificationLocked(true, -1);
                         // Update the lights *after* taking care of turning the
@@ -1946,7 +1916,6 @@ public class PowerManagerService extends IPowerManager.Stub
                         err = screenOffFinishedAnimatingLocked(reason);
                     } else {
                         err = 0;
-                        mLastTouchDown = 0;
                     }
                 }
             } else if (stateChanged) {
@@ -1972,9 +1941,7 @@ public class PowerManagerService extends IPowerManager.Stub
         // I don't think we need to check the current state here because all of these
         // Power.setScreenState and sendNotificationLocked can both handle being
         // called multiple times in the same state. -joeo
-        EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 0, reason, mTotalTouchDownTime,
-                mTouchCycles);
-        mLastTouchDown = 0;
+        EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 0, reason, 0, 0);
         int err = setScreenStateLocked(false);
         if (err == 0) {
             mScreenOffReason = reason;
@@ -2145,7 +2112,7 @@ public class PowerManagerService extends IPowerManager.Stub
             }
         }
 
-        if (mSpew) {
+        if (DEBUG) {
             Slog.d(TAG, "offMask=0x" + Integer.toHexString(offMask)
                     + " dimMask=0x" + Integer.toHexString(dimMask)
                     + " onMask=0x" + Integer.toHexString(onMask)
@@ -2156,7 +2123,7 @@ public class PowerManagerService extends IPowerManager.Stub
         }
 
         if (offMask != 0) {
-            if (mSpew) Slog.i(TAG, "Setting brightess off: " + offMask);
+            if (DEBUG) Slog.i(TAG, "Setting brightess off: " + offMask);
             setLightBrightness(offMask, PowerManager.BRIGHTNESS_OFF);
         }
         if (dimMask != 0) {
@@ -2165,7 +2132,7 @@ public class PowerManagerService extends IPowerManager.Stub
                     brightness > PowerManager.BRIGHTNESS_LOW_BATTERY) {
                 brightness = PowerManager.BRIGHTNESS_LOW_BATTERY;
             }
-            if (mSpew) Slog.i(TAG, "Setting brightess dim " + brightness + ": " + dimMask);
+            if (DEBUG) Slog.i(TAG, "Setting brightess dim " + brightness + ": " + dimMask);
             setLightBrightness(dimMask, brightness);
         }
         if (onMask != 0) {
@@ -2174,7 +2141,7 @@ public class PowerManagerService extends IPowerManager.Stub
                     brightness > PowerManager.BRIGHTNESS_LOW_BATTERY) {
                 brightness = PowerManager.BRIGHTNESS_LOW_BATTERY;
             }
-            if (mSpew) Slog.i(TAG, "Setting brightess on " + brightness + ": " + onMask);
+            if (DEBUG) Slog.i(TAG, "Setting brightess on " + brightness + ": " + onMask);
             setLightBrightness(onMask, brightness);
         }
     }
@@ -2213,7 +2180,7 @@ public class PowerManagerService extends IPowerManager.Stub
                         int value = msg.arg2;
                         long tStart = SystemClock.uptimeMillis();
                         if ((mask & SCREEN_BRIGHT_BIT) != 0) {
-                            if (mDebugLightAnimation) Slog.v(TAG, "Set brightness: " + value);
+                            if (DEBUG_LIGHT_ANIMATION) Slog.v(TAG, "Set brightness: " + value);
                             mLcdLight.setBrightness(value, brightnessMode);
                         }
                         long elapsed = SystemClock.uptimeMillis() - tStart;
@@ -2275,7 +2242,7 @@ public class PowerManagerService extends IPowerManager.Stub
                         }
                     }
 
-                    if (mDebugLightAnimation) {
+                    if (DEBUG_LIGHT_ANIMATION) {
                         Slog.v(TAG, "Animating light: " + "start:" + startValue
                                 + ", end:" + endValue + ", elapsed:" + elapsed
                                 + ", duration:" + duration + ", current:" + currentValue
@@ -2287,7 +2254,7 @@ public class PowerManagerService extends IPowerManager.Stub
                     if (turningOff && !mHeadless && !mAnimateScreenLights) {
                         int mode = mScreenOffReason == OFF_BECAUSE_OF_PROX_SENSOR
                                 ? 0 : mAnimationSetting;
-                        if (mDebugLightAnimation) {
+                        if (DEBUG_LIGHT_ANIMATION) {
                             Slog.v(TAG, "Doing power-off anim, mode=" + mode);
                         }
                         mScreenBrightnessHandler.obtainMessage(ANIMATE_POWER_OFF, mode, 0)
@@ -2341,7 +2308,7 @@ public class PowerManagerService extends IPowerManager.Stub
                 startTimeMillis = SystemClock.elapsedRealtime();
                 mInitialAnimation = mInitialAnimation && target > 0;
 
-                if (mDebugLightAnimation) {
+                if (DEBUG_LIGHT_ANIMATION) {
                     Slog.v(TAG, "animateTo(target=" + target
                             + ", sensor=" + sensorTarget
                             + ", mask=" + mask
@@ -2533,7 +2500,7 @@ public class PowerManagerService extends IPowerManager.Stub
         }
 
         synchronized (mLocks) {
-            if (mSpew) {
+            if (DEBUG) {
                 Slog.d(TAG, "userActivity mLastEventTime=" + mLastEventTime + " time=" + time
                         + " mUserActivityAllowed=" + mUserActivityAllowed
                         + " mUserState=0x" + Integer.toHexString(mUserState)
@@ -2678,13 +2645,13 @@ public class PowerManagerService extends IPowerManager.Stub
     }
 
     private void lightSensorChangedLocked(int value, boolean immediate) {
-        if (mDebugLightSensor) {
+        if (DEBUG_LIGHT_SENSOR) {
             Slog.d(TAG, "lightSensorChangedLocked value=" + value + " immediate=" + immediate);
         }
 
         // Don't do anything if the screen is off.
         if ((mPowerState & SCREEN_ON_BIT) == 0) {
-            if (mDebugLightSensor) {
+            if (DEBUG_LIGHT_SENSOR) {
                 Slog.d(TAG, "dropping lightSensorChangedLocked because screen is off");
             }
             return;
@@ -2708,7 +2675,7 @@ public class PowerManagerService extends IPowerManager.Stub
                 mLightSensorButtonBrightness = buttonValue;
                 mLightSensorKeyboardBrightness = keyboardValue;
 
-                if (mDebugLightSensor) {
+                if (DEBUG_LIGHT_SENSOR) {
                     Slog.d(TAG, "lcdValue " + lcdValue);
                     Slog.d(TAG, "buttonValue " + buttonValue);
                     Slog.d(TAG, "keyboardValue " + keyboardValue);
@@ -2817,7 +2784,7 @@ public class PowerManagerService extends IPowerManager.Stub
     }
 
     private void goToSleepLocked(long time, int reason) {
-        if (mSpew) {
+        if (DEBUG) {
             Exception ex = new Exception();
             ex.fillInStackTrace();
             Slog.d(TAG, "goToSleep mLastEventTime=" + mLastEventTime + " time=" + time
@@ -2845,7 +2812,7 @@ public class PowerManagerService extends IPowerManager.Stub
             }
             if (!proxLock) {
                 mProxIgnoredBecauseScreenTurnedOff = true;
-                if (mDebugProximitySensor) {
+                if (DEBUG_PROXIMITY_SENSOR) {
                     Slog.d(TAG, "setting mProxIgnoredBecauseScreenTurnedOff");
                 }
             }
@@ -2868,7 +2835,7 @@ public class PowerManagerService extends IPowerManager.Stub
 
     public void setKeyboardVisibility(boolean visible) {
         synchronized (mLocks) {
-            if (mSpew) {
+            if (DEBUG) {
                 Slog.d(TAG, "setKeyboardVisibility: " + visible);
             }
             if (mKeyboardVisible != visible) {
@@ -2897,7 +2864,7 @@ public class PowerManagerService extends IPowerManager.Stub
      * short screen timeout when keyguard is unhidden.
      */
     public void enableUserActivity(boolean enabled) {
-        if (mSpew) {
+        if (DEBUG) {
             Slog.d(TAG, "enableUserActivity " + enabled);
         }
         synchronized (mLocks) {
@@ -2958,7 +2925,7 @@ public class PowerManagerService extends IPowerManager.Stub
                 mDimDelay = -1;
             }
         }
-        if (mSpew) {
+        if (DEBUG) {
             Slog.d(TAG, "setScreenOffTimeouts mKeylightDelay=" + mKeylightDelay
                     + " mDimDelay=" + mDimDelay + " mScreenOffDelay=" + mScreenOffDelay
                     + " mDimScreen=" + mDimScreen);
@@ -3034,7 +3001,7 @@ public class PowerManagerService extends IPowerManager.Stub
                     result |= wl.minState;
                 }
             }
-            if (mDebugProximitySensor) {
+            if (DEBUG_PROXIMITY_SENSOR) {
                 Slog.d(TAG, "reactivateScreenLocksLocked mProxIgnoredBecauseScreenTurnedOff="
                         + mProxIgnoredBecauseScreenTurnedOff);
             }
@@ -3172,7 +3139,7 @@ public class PowerManagerService extends IPowerManager.Stub
     }
 
     private void enableProximityLockLocked() {
-        if (mDebugProximitySensor) {
+        if (DEBUG_PROXIMITY_SENSOR) {
             Slog.d(TAG, "enableProximityLockLocked");
         }
         if (!mProximitySensorEnabled) {
@@ -3189,7 +3156,7 @@ public class PowerManagerService extends IPowerManager.Stub
     }
 
     private void disableProximityLockLocked() {
-        if (mDebugProximitySensor) {
+        if (DEBUG_PROXIMITY_SENSOR) {
             Slog.d(TAG, "disableProximityLockLocked");
         }
         if (mProximitySensorEnabled) {
@@ -3207,7 +3174,7 @@ public class PowerManagerService extends IPowerManager.Stub
             }
             if (mProximitySensorActive) {
                 mProximitySensorActive = false;
-                if (mDebugProximitySensor) {
+                if (DEBUG_PROXIMITY_SENSOR) {
                     Slog.d(TAG, "disableProximityLockLocked mProxIgnoredBecauseScreenTurnedOff="
                             + mProxIgnoredBecauseScreenTurnedOff);
                 }
@@ -3219,7 +3186,7 @@ public class PowerManagerService extends IPowerManager.Stub
     }
 
     private void proximityChangedLocked(boolean active) {
-        if (mDebugProximitySensor) {
+        if (DEBUG_PROXIMITY_SENSOR) {
             Slog.d(TAG, "proximityChangedLocked, active: " + active);
         }
         if (!mProximitySensorEnabled) {
@@ -3227,7 +3194,7 @@ public class PowerManagerService extends IPowerManager.Stub
             return;
         }
         if (active) {
-            if (mDebugProximitySensor) {
+            if (DEBUG_PROXIMITY_SENSOR) {
                 Slog.d(TAG, "b mProxIgnoredBecauseScreenTurnedOff="
                         + mProxIgnoredBecauseScreenTurnedOff);
             }
@@ -3241,7 +3208,7 @@ public class PowerManagerService extends IPowerManager.Stub
             // temporarily set mUserActivityAllowed to true so this will work
             // even when the keyguard is on.
             mProximitySensorActive = false;
-            if (mDebugProximitySensor) {
+            if (DEBUG_PROXIMITY_SENSOR) {
                 Slog.d(TAG, "b mProxIgnoredBecauseScreenTurnedOff="
                         + mProxIgnoredBecauseScreenTurnedOff);
             }
@@ -3257,7 +3224,7 @@ public class PowerManagerService extends IPowerManager.Stub
     }
 
     private void enableLightSensorLocked(boolean enable) {
-        if (mDebugLightSensor) {
+        if (DEBUG_LIGHT_SENSOR) {
             Slog.d(TAG, "enableLightSensorLocked enable=" + enable
                     + " mLightSensorEnabled=" + mLightSensorEnabled
                     + " mAutoBrightessEnabled=" + mAutoBrightessEnabled
@@ -3308,7 +3275,7 @@ public class PowerManagerService extends IPowerManager.Stub
                 boolean active = (distance >= 0.0 && distance < PROXIMITY_THRESHOLD &&
                         distance < mProximitySensor.getMaximumRange());
 
-                if (mDebugProximitySensor) {
+                if (DEBUG_PROXIMITY_SENSOR) {
                     Slog.d(TAG, "mProximityListener.onSensorChanged active: " + active);
                 }
                 if (timeSinceLastEvent < PROXIMITY_SENSOR_DELAY) {
@@ -3370,7 +3337,7 @@ public class PowerManagerService extends IPowerManager.Stub
     SensorEventListener mLightListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
-            if (mDebugLightSensor) {
+            if (DEBUG_LIGHT_SENSOR) {
                 Slog.d(TAG, "onSensorChanged: light value: " + event.values[0]);
             }
             synchronized (mLocks) {
@@ -3380,7 +3347,7 @@ public class PowerManagerService extends IPowerManager.Stub
                 }
                 handleLightSensorValue((int)event.values[0], mWaitingForFirstLightSensor);
                 if (mWaitingForFirstLightSensor && !mPreparingForScreenOn) {
-                    if (mDebugLightAnimation) {
+                    if (DEBUG_LIGHT_ANIMATION) {
                         Slog.d(TAG, "onSensorChanged: Clearing mWaitingForFirstLightSensor.");
                     }
                     mWaitingForFirstLightSensor = false;
