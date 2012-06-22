@@ -11293,9 +11293,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     scrollBar.setParameters(computeVerticalScrollRange(),
                                             computeVerticalScrollOffset(),
                                             computeVerticalScrollExtent(), true);
-                    switch (mVerticalScrollbarPosition) {
+                    int verticalScrollbarPosition = mVerticalScrollbarPosition;
+                    if (verticalScrollbarPosition == SCROLLBAR_POSITION_DEFAULT) {
+                        verticalScrollbarPosition = isLayoutRtl() ?
+                                SCROLLBAR_POSITION_LEFT : SCROLLBAR_POSITION_RIGHT;
+                    }
+                    switch (verticalScrollbarPosition) {
                         default:
-                        case SCROLLBAR_POSITION_DEFAULT:
                         case SCROLLBAR_POSITION_RIGHT:
                             left = scrollX + width - size - (mUserPaddingRight & inside);
                             break;
@@ -14328,7 +14332,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         ? 0 : getVerticalScrollbarWidth();
                 switch (mVerticalScrollbarPosition) {
                     case SCROLLBAR_POSITION_DEFAULT:
-                        if (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) {
+                        if (isLayoutRtl()) {
                             left += offset;
                         } else {
                             right += offset;
