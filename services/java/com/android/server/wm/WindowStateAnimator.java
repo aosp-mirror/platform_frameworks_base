@@ -896,10 +896,14 @@ class WindowStateAnimator {
                 //Slog.i(TAG, "Not applying alpha transform");
             }
 
-            if (WindowManagerService.localLOGV) Slog.v(
+            if (WindowManagerService.localLOGV && (mShownAlpha == 1.0 || mShownAlpha == 0.0)) Slog.v(
                 TAG, "computeShownFrameLocked: Animating " + this +
-                ": " + mWin.mShownFrame +
-                ", alpha=" + mTransformation.getAlpha() + ", mShownAlpha=" + mShownAlpha);
+                " mAlpha=" + mAlpha +
+                " self=" + (selfTransformation ? mTransformation.getAlpha() : "null") +
+                " attached=" + (attachedTransformation == null ? "null" : attachedTransformation.getAlpha()) +
+                " app=" + (appTransformation == null ? "null" : appTransformation.getAlpha()) +
+                " screen=" + (screenAnimation ? mService.mAnimator.mScreenRotationAnimation.getEnterTransformation().getAlpha()
+                        : "null"));
             return;
         } else if (mWin.mIsWallpaper &&
                     (mAnimator.mPendingActions & WindowAnimator.WALLPAPER_ACTION_PENDING) != 0) {
