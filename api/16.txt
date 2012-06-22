@@ -676,6 +676,7 @@ package android {
     field public static final int measureAllChildren = 16843018; // 0x101010a
     field public static final int measureWithLargestChild = 16843476; // 0x10102d4
     field public static final int mediaRouteButtonStyle = 16843693; // 0x10103ad
+    field public static final int mediaRouteTypes = 16843694; // 0x10103ae
     field public static final int menuCategory = 16843230; // 0x10101de
     field public static final int mimeType = 16842790; // 0x1010026
     field public static final int minDate = 16843583; // 0x101033f
@@ -3688,6 +3689,8 @@ package android.app {
     ctor public MediaRouteButton(android.content.Context, android.util.AttributeSet);
     ctor public MediaRouteButton(android.content.Context, android.util.AttributeSet, int);
     method public int getRouteTypes();
+    method public void onAttachedToWindow();
+    method public void onDetachedFromWindow();
     method public void setExtendedSettingsClickListener(android.view.View.OnClickListener);
     method public void setRouteTypes(int);
     method public void showDialog();
@@ -3759,6 +3762,7 @@ package android.app {
   public static class Notification.BigPictureStyle extends android.app.Notification.Style {
     ctor public Notification.BigPictureStyle();
     ctor public Notification.BigPictureStyle(android.app.Notification.Builder);
+    method public android.app.Notification.BigPictureStyle bigLargeIcon(android.graphics.Bitmap);
     method public android.app.Notification.BigPictureStyle bigPicture(android.graphics.Bitmap);
     method public android.app.Notification build();
     method public android.app.Notification.BigPictureStyle setBigContentTitle(java.lang.CharSequence);
@@ -5827,7 +5831,6 @@ package android.content {
     field public static final int FLAG_ACTIVITY_CLEAR_TASK = 32768; // 0x8000
     field public static final int FLAG_ACTIVITY_CLEAR_TOP = 67108864; // 0x4000000
     field public static final int FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET = 524288; // 0x80000
-    field public static final int FLAG_ACTIVITY_CLOSE_SYSTEM_DIALOGS = 8192; // 0x2000
     field public static final int FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS = 8388608; // 0x800000
     field public static final int FLAG_ACTIVITY_FORWARD_RESULT = 33554432; // 0x2000000
     field public static final int FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY = 1048576; // 0x100000
@@ -11537,6 +11540,7 @@ package android.media {
     method public abstract void onRouteSelected(android.media.MediaRouter, int, android.media.MediaRouter.RouteInfo);
     method public abstract void onRouteUngrouped(android.media.MediaRouter, android.media.MediaRouter.RouteInfo, android.media.MediaRouter.RouteGroup);
     method public abstract void onRouteUnselected(android.media.MediaRouter, int, android.media.MediaRouter.RouteInfo);
+    method public abstract void onRouteVolumeChanged(android.media.MediaRouter, android.media.MediaRouter.RouteInfo);
   }
 
   public static class MediaRouter.RouteCategory {
@@ -11564,10 +11568,21 @@ package android.media {
     method public android.graphics.drawable.Drawable getIconDrawable();
     method public java.lang.CharSequence getName();
     method public java.lang.CharSequence getName(android.content.Context);
+    method public int getPlaybackStream();
+    method public int getPlaybackType();
     method public java.lang.CharSequence getStatus();
     method public int getSupportedTypes();
     method public java.lang.Object getTag();
+    method public int getVolume();
+    method public int getVolumeHandling();
+    method public int getVolumeMax();
+    method public void requestSetVolume(int);
+    method public void requestUpdateVolume(int);
     method public void setTag(java.lang.Object);
+    field public static final int PLAYBACK_TYPE_LOCAL = 0; // 0x0
+    field public static final int PLAYBACK_TYPE_REMOTE = 1; // 0x1
+    field public static final int PLAYBACK_VOLUME_FIXED = 0; // 0x0
+    field public static final int PLAYBACK_VOLUME_VARIABLE = 1; // 0x1
   }
 
   public static class MediaRouter.SimpleCallback extends android.media.MediaRouter.Callback {
@@ -11579,15 +11594,29 @@ package android.media {
     method public void onRouteSelected(android.media.MediaRouter, int, android.media.MediaRouter.RouteInfo);
     method public void onRouteUngrouped(android.media.MediaRouter, android.media.MediaRouter.RouteInfo, android.media.MediaRouter.RouteGroup);
     method public void onRouteUnselected(android.media.MediaRouter, int, android.media.MediaRouter.RouteInfo);
+    method public void onRouteVolumeChanged(android.media.MediaRouter, android.media.MediaRouter.RouteInfo);
   }
 
   public static class MediaRouter.UserRouteInfo extends android.media.MediaRouter.RouteInfo {
+    method public android.media.RemoteControlClient getRemoteControlClient();
     method public void setIconDrawable(android.graphics.drawable.Drawable);
     method public void setIconResource(int);
     method public void setName(java.lang.CharSequence);
     method public void setName(int);
+    method public void setPlaybackStream(int);
+    method public void setPlaybackType(int);
     method public void setRemoteControlClient(android.media.RemoteControlClient);
     method public void setStatus(java.lang.CharSequence);
+    method public void setVolume(int);
+    method public void setVolumeCallback(android.media.MediaRouter.VolumeCallback);
+    method public void setVolumeHandling(int);
+    method public void setVolumeMax(int);
+  }
+
+  public static abstract class MediaRouter.VolumeCallback {
+    ctor public MediaRouter.VolumeCallback();
+    method public abstract void onVolumeSetRequest(android.media.MediaRouter.RouteInfo, int);
+    method public abstract void onVolumeUpdateRequest(android.media.MediaRouter.RouteInfo, int);
   }
 
   public class MediaScannerConnection implements android.content.ServiceConnection {
@@ -22816,10 +22845,18 @@ package android.view {
   public abstract class ActionProvider {
     ctor public ActionProvider(android.content.Context);
     method public boolean hasSubMenu();
+    method public boolean isVisible();
     method public abstract deprecated android.view.View onCreateActionView();
     method public android.view.View onCreateActionView(android.view.MenuItem);
     method public boolean onPerformDefaultAction();
     method public void onPrepareSubMenu(android.view.SubMenu);
+    method public boolean overridesItemVisibility();
+    method public void refreshVisibility();
+    method public void setVisibilityListener(android.view.ActionProvider.VisibilityListener);
+  }
+
+  public static abstract interface ActionProvider.VisibilityListener {
+    method public abstract void onActionProviderVisibilityChanged(boolean);
   }
 
   public final class Choreographer {
@@ -28146,8 +28183,11 @@ package android.widget {
     method public void setString(int, java.lang.String, java.lang.String);
     method public void setTextColor(int, int);
     method public void setTextViewCompoundDrawables(int, int, int, int, int);
+    method public void setTextViewCompoundDrawablesRelative(int, int, int, int, int);
     method public void setTextViewText(int, java.lang.CharSequence);
+    method public void setTextViewTextSize(int, int, float);
     method public void setUri(int, java.lang.String, android.net.Uri);
+    method public void setViewPadding(int, int, int, int, int);
     method public void setViewVisibility(int, int);
     method public void showNext(int);
     method public void showPrevious(int);

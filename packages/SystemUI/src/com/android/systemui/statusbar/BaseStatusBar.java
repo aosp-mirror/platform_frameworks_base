@@ -154,6 +154,35 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     };
 
+    private RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
+        @Override
+        public boolean onClickHandler(View view, PendingIntent pendingIntent, Intent fillInIntent) {
+            final boolean isActivity = pendingIntent.isActivity();
+            if (isActivity) {
+                try {
+                    // The intent we are sending is for the application, which
+                    // won't have permission to immediately start an activity after
+                    // the user switches to home.  We know it is safe to do at this
+                    // point, so make sure new activity switches are now allowed.
+                    ActivityManagerNative.getDefault().resumeAppSwitches();
+                    // Also, notifications can be launched from the lock screen,
+                    // so dismiss the lock screen when the activity starts.
+                    ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+                } catch (RemoteException e) {
+                }
+            }
+
+            boolean handled = super.onClickHandler(view, pendingIntent, fillInIntent);
+
+            if (isActivity && handled) {
+                // close the shade if it was open
+                animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
+                visibilityChanged(false);
+            }
+            return handled;
+        }
+    };
+
     public void start() {
         mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
@@ -547,8 +576,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         View expandedLarge = null;
         Exception exception = null;
         try {
+            oneU.setOnClickHandler(mOnClickHandler);
             expandedOneU = oneU.apply(mContext, adaptive);
             if (large != null) {
+                large.setOnClickHandler(mOnClickHandler);
                 expandedLarge = large.apply(mContext, adaptive);
             }
         }

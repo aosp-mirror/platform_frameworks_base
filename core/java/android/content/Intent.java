@@ -3105,17 +3105,6 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final int FLAG_ACTIVITY_TASK_ON_HOME = 0X00004000;
     /**
-     * If set in an Intent passed to {@link Context#startActivity Context.startActivity()},
-     * upon starting the activity the system will also clear any system dialogs that
-     * are currently shown.  This is intended primarily for any actions that are
-     * associated with buttons in a notification: tapping on the button to launch
-     * the activity needs to also dismiss the notification window (which is one
-     * of the system dialogs); setting this flag on the Intent associated with that
-     * action will ensure that and other system dialogs are dismissed so that the
-     * user arrives in the new activity.
-     */
-    public static final int FLAG_ACTIVITY_CLOSE_SYSTEM_DIALOGS = 0X00002000;
-    /**
      * If set, when sending a broadcast only registered receivers will be
      * called -- no BroadcastReceiver components will be launched.
      */

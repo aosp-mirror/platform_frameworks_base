@@ -2559,10 +2559,6 @@ final class ActivityStack {
             mDismissKeyguardOnNextActivity = false;
             mService.mWindowManager.dismissKeyguard();
         }
-        if (err >= ActivityManager.START_SUCCESS &&
-                (launchFlags&Intent.FLAG_ACTIVITY_CLOSE_SYSTEM_DIALOGS) != 0) {
-            mService.closeSystemDialogsLocked(Process.myUid(), "launch");
-        }
         return err;
     }
   
