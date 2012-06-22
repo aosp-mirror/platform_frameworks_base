@@ -180,7 +180,7 @@ public class TelephonyCapabilities {
 
     /**
      * Returns true if the device can distinguish the phone's dialing state
-     * (Call.State.DIALING/ACTIVE) and connected state (Call.State.CONNECTED).
+     * (Call.State.DIALING/ALERTING) and connected state (Call.State.ACTIVE).
      *
      * Currently this returns true for GSM phones as we cannot know when a CDMA
      * phone has transitioned from dialing/active to connected.
