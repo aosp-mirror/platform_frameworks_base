@@ -117,7 +117,6 @@ class CallbackProxy extends Handler {
     private static final int ADD_HISTORY_ITEM                     = 135;
     private static final int HISTORY_INDEX_CHANGED                = 136;
     private static final int AUTH_CREDENTIALS                     = 137;
-    private static final int SET_INSTALLABLE_WEBAPP               = 138;
     private static final int NOTIFY_SEARCHBOX_LISTENERS           = 139;
     private static final int AUTO_LOGIN                           = 140;
     private static final int CLIENT_CERT_REQUEST                  = 141;
@@ -858,11 +857,6 @@ class CallbackProxy extends Handler {
                         host, realm, username, password);
                 break;
             }
-            case SET_INSTALLABLE_WEBAPP:
-                if (mWebChromeClient != null) {
-                    mWebChromeClient.setInstallableWebApp();
-                }
-                break;
             case NOTIFY_SEARCHBOX_LISTENERS: {
                 SearchBoxImpl searchBox = (SearchBoxImpl) mWebView.getSearchBox();
 
@@ -1607,13 +1601,6 @@ class CallbackProxy extends Handler {
         }
         Message msg = obtainMessage(HISTORY_INDEX_CHANGED, index, 0, item);
         sendMessage(msg);
-    }
-
-    void setInstallableWebApp() {
-        if (mWebChromeClient == null) {
-            return;
-        }
-        sendMessage(obtainMessage(SET_INSTALLABLE_WEBAPP));
     }
 
     boolean canShowAlertDialog() {
