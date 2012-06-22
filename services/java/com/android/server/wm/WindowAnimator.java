@@ -14,6 +14,7 @@ import android.content.Context;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.Slog;
+import android.view.Choreographer;
 import android.view.Surface;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
@@ -35,6 +36,8 @@ public class WindowAnimator {
     final Context mContext;
     final WindowManagerPolicy mPolicy;
 
+    final Choreographer mChoreographer = Choreographer.getInstance();
+
     ArrayList<WindowStateAnimator> mWinAnimators = new ArrayList<WindowStateAnimator>();
 
     boolean mAnimating;
@@ -49,6 +52,18 @@ public class WindowAnimator {
         int mWindowAnimationBackgroundColor;
     }
     InnerLoopParams mInner = new InnerLoopParams();
+
+    static class LayoutToAnimatorParams {
+        boolean mAnimationScheduled;
+        ArrayList<WindowStateAnimator> mWinAnimators = new ArrayList<WindowStateAnimator>();
+        WindowState mWallpaperTarget;
+    }
+    /** Params from WindowManagerService. Do not modify or read without first locking on
+     * either WindowManagerService.mWindowMap or WindowManagerService.mAnimator.and then on
+     * mLayoutToAnim */
+    final LayoutToAnimatorParams mLayoutToAnim = new LayoutToAnimatorParams();
+
+    final Runnable mAnimationRunnable;
 
     int mAdjResult;
 
@@ -86,11 +101,48 @@ public class WindowAnimator {
     static final int WALLPAPER_ACTION_PENDING = 1;
     int mPendingActions;
 
+    WindowState mWallpaperTarget = null;
+
     WindowAnimator(final WindowManagerService service, final Context context,
             final WindowManagerPolicy policy) {
         mService = service;
         mContext = context;
         mPolicy = policy;
+
+        mAnimationRunnable = new Runnable() {
+            @Override
+            public void run() {
+                // TODO(cmautner): When full isolation is achieved for animation, the first lock
+                // goes away and only the WindowAnimator.this remains.
+                synchronized(mService.mWindowMap) {
+                    synchronized(WindowAnimator.this) {
+                        copyLayoutToAnimParamsLocked();
+                        animateLocked();
+                    }
+                }
+            }
+        };
+    }
+
+    /** Copy all WindowManagerService params into local params here. Locked on 'this'. */
+    private void copyLayoutToAnimParamsLocked() {
+        final LayoutToAnimatorParams layoutToAnim = mLayoutToAnim;
+        synchronized(layoutToAnim) {
+            layoutToAnim.mAnimationScheduled = false;
+
+            mWinAnimators = new ArrayList<WindowStateAnimator>(layoutToAnim.mWinAnimators);
+            mWallpaperTarget = layoutToAnim.mWallpaperTarget;
+        }
+    }
+
+    /** Note that Locked in this case is on mLayoutToAnim */
+    void scheduleAnimationLocked() {
+        final LayoutToAnimatorParams layoutToAnim = mLayoutToAnim;
+        if (!layoutToAnim.mAnimationScheduled) {
+            layoutToAnim.mAnimationScheduled = true;
+            mChoreographer.postCallback(
+                    Choreographer.CALLBACK_ANIMATION, mAnimationRunnable, null);
+        }
     }
 
     void hideWallpapersLocked(final WindowState w) {
@@ -128,11 +180,11 @@ public class WindowAnimator {
             if (mService.mWallpaperTarget == target
                     || mService.mLowerWallpaperTarget == target
                     || mService.mUpperWallpaperTarget == target) {
-                final int N = mService.mWindows.size();
+                final int N = mWinAnimators.size();
                 for (int i = 0; i < N; i++) {
-                    WindowState w = mService.mWindows.get(i);
-                    if (w.mIsWallpaper) {
-                        target = w;
+                    WindowStateAnimator winAnimator = mWinAnimators.get(i);
+                    if (winAnimator.mWin.mIsWallpaper) {
+                        target = winAnimator.mWin;
                         break;
                     }
                 }
@@ -479,7 +531,9 @@ public class WindowAnimator {
         }
     }
 
-    synchronized void animate() {
+    // TODO(cmautner): Change the following comment when no longer locked on mWindowMap */
+    /** Locked on mService.mWindowMap and this. */
+    private void animateLocked() {
         mPendingLayoutChanges = 0;
         mCurrentTime = SystemClock.uptimeMillis();
         mBulkUpdateParams = 0;
@@ -546,7 +600,9 @@ public class WindowAnimator {
         }
 
         if (mAnimating) {
-            mService.scheduleAnimationLocked();
+            synchronized (mLayoutToAnim) {
+                scheduleAnimationLocked();
+            }
         } else if (wasAnimating) {
             mService.requestTraversalLocked();
         }
