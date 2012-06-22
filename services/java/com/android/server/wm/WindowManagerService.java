@@ -655,33 +655,6 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Only do a maximum of 6 repeated layouts. After that quit */
     private int mLayoutRepeatCount;
 
-    private final class AnimationRunnable implements Runnable {
-        @Override
-        public void run() {
-            synchronized(mWindowMap) {
-                mAnimationScheduled = false;
-                // Update animations of all applications, including those
-                // associated with exiting/removed apps
-                synchronized (mAnimator) {
-                    Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "wmAnimate");
-                    final ArrayList<WindowStateAnimator> winAnimators = mAnimator.mWinAnimators;
-                    winAnimators.clear();
-                    final int N = mWindows.size();
-                    for (int i = 0; i < N; i++) {
-                        final WindowStateAnimator winAnimator = mWindows.get(i).mWinAnimator;
-                        if (winAnimator.mSurface != null) {
-                            winAnimators.add(winAnimator);
-                        }
-                    }
-                    mAnimator.animate();
-                    Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
-                }
-            }
-        }
-    }
-    final AnimationRunnable mAnimationRunnable = new AnimationRunnable();
-    boolean mAnimationScheduled;
-
     final WindowAnimator mAnimator;
 
     final class DragInputEventReceiver extends InputEventReceiver {
@@ -7155,18 +7128,23 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 case FORCE_GC: {
-                    synchronized(mWindowMap) {
-                        if (mAnimationScheduled) {
-                            // If we are animating, don't do the gc now but
-                            // delay a bit so we don't interrupt the animation.
-                            mH.sendMessageDelayed(mH.obtainMessage(H.FORCE_GC),
-                                    2000);
-                            return;
-                        }
-                        // If we are currently rotating the display, it will
-                        // schedule a new message when done.
-                        if (mDisplayFrozen) {
-                            return;
+                    synchronized (mWindowMap) {
+                        synchronized (mAnimator) {
+                            // Since we're holding both mWindowMap and mAnimator we don't need to
+                            // hold mAnimator.mLayoutToAnim.
+                            if (mAnimator.mAnimating ||
+                                    mAnimator.mLayoutToAnim.mAnimationScheduled) {
+                                // If we are animating, don't do the gc now but
+                                // delay a bit so we don't interrupt the animation.
+                                mH.sendMessageDelayed(mH.obtainMessage(H.FORCE_GC),
+                                        2000);
+                                return;
+                            }
+                            // If we are currently rotating the display, it will
+                            // schedule a new message when done.
+                            if (mDisplayFrozen) {
+                                return;
+                            }
                         }
                     }
                     Runtime.getRuntime().gc();
@@ -8960,9 +8938,20 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void scheduleAnimationLocked() {
-        if (!mAnimationScheduled) {
-            mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION, mAnimationRunnable, null);
-            mAnimationScheduled = true;
+        final WindowAnimator.LayoutToAnimatorParams layoutToAnim = mAnimator.mLayoutToAnim;
+        synchronized (layoutToAnim) {
+            // Copy local params to transfer params.
+            ArrayList<WindowStateAnimator> winAnimators = layoutToAnim.mWinAnimators;
+            winAnimators.clear();
+            final int N = mWindows.size();
+            for (int i = 0; i < N; i++) {
+                final WindowStateAnimator winAnimator = mWindows.get(i).mWinAnimator;
+                if (winAnimator.mSurface != null) {
+                    winAnimators.add(winAnimator);
+                }
+            }
+            layoutToAnim.mWallpaperTarget = mWallpaperTarget;
+            mAnimator.scheduleAnimationLocked();
         }
     }
 
