@@ -50,9 +50,6 @@ public class DatabaseUtils {
     private static final String TAG = "DatabaseUtils";
 
     private static final boolean DEBUG = false;
-    private static final boolean LOCAL_LOGV = false;
-
-    private static final String[] countProjection = new String[]{"count(*)"};
 
     /** One of the values returned by {@link #getSqlStatementType(String)}. */
     public static final int STATEMENT_SELECT = 1;
@@ -963,10 +960,15 @@ public class DatabaseUtils {
     }
 
     /**
-     * This class allows users to do multiple inserts into a table but
-     * compile the SQL insert statement only once, which may increase
-     * performance.
+     * This class allows users to do multiple inserts into a table using
+     * the same statement.
+     * <p>
+     * This class is not thread-safe.
+     * </p>
+     *
+     * @deprecated Use {@link SQLiteStatement} instead.
      */
+    @Deprecated
     public static class InsertHelper {
         private final SQLiteDatabase mDb;
         private final String mTableName;
@@ -983,6 +985,13 @@ public class DatabaseUtils {
          * table_info(...)" command that we depend on.
          */
         public static final int TABLE_INFO_PRAGMA_COLUMNNAME_INDEX = 1;
+
+        /**
+         * This field was accidentally exposed in earlier versions of the platform
+         * so we can hide it but we can't remove it.
+         *
+         * @hide
+         */
         public static final int TABLE_INFO_PRAGMA_DEFAULT_INDEX = 4;
 
         /**
@@ -1036,7 +1045,7 @@ public class DatabaseUtils {
             sb.append(sbv);
 
             mInsertSQL = sb.toString();
-            if (LOCAL_LOGV) Log.v(TAG, "insert statement is " + mInsertSQL);
+            if (DEBUG) Log.v(TAG, "insert statement is " + mInsertSQL);
         }
 
         private SQLiteStatement getStatement(boolean allowReplace) throws SQLException {
@@ -1069,24 +1078,35 @@ public class DatabaseUtils {
          * @return the row ID of the newly inserted row, or -1 if an
          * error occurred
          */
-        private synchronized long insertInternal(ContentValues values, boolean allowReplace) {
+        private long insertInternal(ContentValues values, boolean allowReplace) {
+            // Start a transaction even though we don't really need one.
+            // This is to help maintain compatibility with applications that
+            // access InsertHelper from multiple threads even though they never should have.
+            // The original code used to lock the InsertHelper itself which was prone
+            // to deadlocks.  Starting a transaction achieves the same mutual exclusion
+            // effect as grabbing a lock but without the potential for deadlocks.
+            mDb.beginTransactionNonExclusive();
             try {
                 SQLiteStatement stmt = getStatement(allowReplace);
                 stmt.clearBindings();
-                if (LOCAL_LOGV) Log.v(TAG, "--- inserting in table " + mTableName);
+                if (DEBUG) Log.v(TAG, "--- inserting in table " + mTableName);
                 for (Map.Entry<String, Object> e: values.valueSet()) {
                     final String key = e.getKey();
                     int i = getColumnIndex(key);
                     DatabaseUtils.bindObjectToProgram(stmt, i, e.getValue());
-                    if (LOCAL_LOGV) {
+                    if (DEBUG) {
                         Log.v(TAG, "binding " + e.getValue() + " to column " +
                               i + " (" + key + ")");
                     }
                 }
-                return stmt.executeInsert();
+                long result = stmt.executeInsert();
+                mDb.setTransactionSuccessful();
+                return result;
             } catch (SQLException e) {
                 Log.e(TAG, "Error inserting " + values + " into table  " + mTableName, e);
                 return -1;
+            } finally {
+                mDb.endTransaction();
             }
         }
 
@@ -1223,7 +1243,7 @@ public class DatabaseUtils {
                         + "execute");
             }
             try {
-                if (LOCAL_LOGV) Log.v(TAG, "--- doing insert or replace in table " + mTableName);
+                if (DEBUG) Log.v(TAG, "--- doing insert or replace in table " + mTableName);
                 return mPreparedStatement.executeInsert();
             } catch (SQLException e) {
                 Log.e(TAG, "Error executing InsertHelper with table " + mTableName, e);

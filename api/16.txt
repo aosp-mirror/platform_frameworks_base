@@ -7321,7 +7321,6 @@ package android.database {
     method public void prepareForInsert();
     method public void prepareForReplace();
     method public long replace(android.content.ContentValues);
-    field public static final int TABLE_INFO_PRAGMA_DEFAULT_INDEX = 4; // 0x4
   }
 
   public final class DefaultDatabaseErrorHandler implements android.database.DatabaseErrorHandler {
