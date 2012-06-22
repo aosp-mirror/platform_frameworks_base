@@ -39,6 +39,8 @@ public class MediaRouteButton extends View {
     private final MediaRouteCallback mRouterCallback = new MediaRouteCallback();
     private int mRouteTypes;
 
+    private boolean mAttachedToWindow;
+
     private Drawable mRemoteIndicator;
     private boolean mRemoteActive;
     private boolean mToggleMode;
@@ -132,13 +134,22 @@ public class MediaRouteButton extends View {
             // Already registered; nothing to do.
             return;
         }
-        if (mRouteTypes != 0) {
+
+        if (mAttachedToWindow && mRouteTypes != 0) {
             mRouter.removeCallback(mRouterCallback);
         }
+
         mRouteTypes = types;
+
+        if (mAttachedToWindow) {
+            updateRouteInfo();
+            mRouter.addCallback(types, mRouterCallback);
+        }
+    }
+
+    private void updateRouteInfo() {
         updateRemoteIndicator();
         updateRouteCount();
-        mRouter.addCallback(types, mRouterCallback);
     }
 
     public int getRouteTypes() {
@@ -211,6 +222,25 @@ public class MediaRouteButton extends View {
         if (mRemoteIndicator != null) {
             mRemoteIndicator.setVisible(getVisibility() == VISIBLE, false);
         }
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mAttachedToWindow = true;
+        if (mRouteTypes != 0) {
+            mRouter.addCallback(mRouteTypes, mRouterCallback);
+            updateRouteInfo();
+        }
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        if (mRouteTypes != 0) {
+            mRouter.removeCallback(mRouterCallback);
+        }
+        mAttachedToWindow = false;
+        super.onDetachedFromWindow();
     }
 
     @Override
