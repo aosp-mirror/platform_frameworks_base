@@ -190,7 +190,9 @@ class AppWidgetServiceImpl {
         WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         int height = wm.getDefaultDisplay().getRawHeight();
         int width = wm.getDefaultDisplay().getRawWidth();
-        mMaxWidgetBitmapMemory = 4 * width * height;
+        // Cap memory usage at 1.5 times the size of the display
+        // 1.5 * 4 bytes/pixel * w * h ==> 6 * w * h
+        mMaxWidgetBitmapMemory = 6 * width * height;
     }
 
     public void systemReady(boolean safeMode) {
