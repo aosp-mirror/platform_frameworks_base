@@ -4147,6 +4147,11 @@ public class WindowManagerService extends IWindowManager.Stub
             if (theme != 0) {
                 AttributeCache.Entry ent = AttributeCache.instance().get(pkg, theme,
                         com.android.internal.R.styleable.Window);
+                if (ent == null) {
+                    // Whoops!  App doesn't exist.  Um.  Okay.  We'll just
+                    // pretend like we didn't see that.
+                    return;
+                }
                 if (ent.array.getBoolean(
                         com.android.internal.R.styleable.Window_windowIsTranslucent, false)) {
                     return;
