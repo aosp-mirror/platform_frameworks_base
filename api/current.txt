@@ -7318,7 +7318,7 @@ package android.database {
     field public static final int STATEMENT_UPDATE = 2; // 0x2
   }
 
-  public static class DatabaseUtils.InsertHelper {
+  public static deprecated class DatabaseUtils.InsertHelper {
     ctor public DatabaseUtils.InsertHelper(android.database.sqlite.SQLiteDatabase, java.lang.String);
     method public void bind(int, double);
     method public void bind(int, float);
@@ -7335,7 +7335,6 @@ package android.database {
     method public void prepareForInsert();
     method public void prepareForReplace();
     method public long replace(android.content.ContentValues);
-    field public static final int TABLE_INFO_PRAGMA_DEFAULT_INDEX = 4; // 0x4
   }
 
   public final class DefaultDatabaseErrorHandler implements android.database.DatabaseErrorHandler {
