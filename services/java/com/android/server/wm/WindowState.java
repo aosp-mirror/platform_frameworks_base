@@ -587,7 +587,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     public boolean hasAppShownWindows() {
-        return mAppToken != null ? mAppToken.firstWindowDrawn : false;
+        return mAppToken != null && (mAppToken.firstWindowDrawn || mAppToken.startingDisplayed);
     }
 
     boolean isIdentityMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {

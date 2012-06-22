@@ -4042,7 +4042,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         // token.
                         wtoken.startingData = ttoken.startingData;
                         wtoken.startingView = ttoken.startingView;
+                        wtoken.startingDisplayed = ttoken.startingDisplayed;
                         wtoken.startingWindow = startingWindow;
+                        wtoken.reportedVisible = ttoken.reportedVisible;
                         ttoken.startingData = null;
                         ttoken.startingView = null;
                         ttoken.startingWindow = null;
@@ -4331,14 +4333,15 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 if (DEBUG_APP_TRANSITIONS) Slog.v(
                         TAG, "Setting dummy animation on: " + wtoken);
-                wtoken.mAppAnimator.setDummyAnimation();
+                if (!wtoken.startingDisplayed) {
+                    wtoken.mAppAnimator.setDummyAnimation();
+                }
                 mOpeningApps.remove(wtoken);
                 mClosingApps.remove(wtoken);
                 wtoken.waitingToShow = wtoken.waitingToHide = false;
                 wtoken.inPendingTransaction = true;
                 if (visible) {
                     mOpeningApps.add(wtoken);
-                    wtoken.startingDisplayed = false;
                     wtoken.startingMoved = false;
 
                     // If the token is currently hidden (should be the
