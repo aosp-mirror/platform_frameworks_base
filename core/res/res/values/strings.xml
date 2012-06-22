@@ -3552,11 +3552,11 @@
 
     <!-- Name of the default audio route for tablets when nothing
          is connected to a headphone or other wired audio output jack. [CHAR LIMIT=50] -->
-    <string name="default_audio_route_name" product="tablet">Tablet speakers</string>
+    <string name="default_audio_route_name" product="tablet">Tablet</string>
 
     <!-- Name of the default audio route when nothing is connected to
          a headphone or other wired audio output jack. [CHAR LIMIT=50] -->
-    <string name="default_audio_route_name" product="default">Phone speaker</string>
+    <string name="default_audio_route_name" product="default">Phone</string>
 
     <!-- Name of the default audio route when wired headphones are
          connected. [CHAR LIMIT=50] -->
