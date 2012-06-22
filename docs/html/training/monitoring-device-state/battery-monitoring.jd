@@ -21,7 +21,7 @@ next.link=docking-monitoring.html
 
 <h2>You should also read</h2>
 <ul>
-  <li><a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a>
+  <li><a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
 </ul>
 
 </div> 

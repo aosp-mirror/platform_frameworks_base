@@ -1,0 +1,328 @@
+page.title=OEM USB Drivers
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#InstallingDriver">Installing a USB Driver</a>
+      <ol>
+        <li><a href="#Win7">Windows 7</a></li>
+        <li><a href="#WinXp">Windows XP</a></li>
+        <li><a href="#WinVista">Windows Vista</a></li>
+      </ol>
+    </li>
+    <li><a href="#Drivers">OEM Drivers</a></li>
+  </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}tools/device.html">Using Hardware Devices</a></li>
+    <li><a href="{@docRoot}sdk/win-usb.html">Google USB Driver</a></li>
+  </ol>
+</div>
+</div>
+
+<p>If you are developing on Windows and would like to connect an Android-powered device
+to test your applications, then you need to install the appropriate USB driver. This document
+provides links to the web sites for several original equipment manufacturers (OEMs),
+where you can download the appropriate USB driver for your device. However, this list is
+not exhaustive for all available Android-powered devices.</p>
+
+<p>If you're developing on Mac OS X or Linux, then you probably don't need to install a USB driver.
+To start developing with your device, read <a
+href="{@docRoot}tools/device.html">Using Hardware Devices</a>.</p>
+
+<p class="note"><strong>Note:</strong> If your device is one of the Android Developer Phones
+(ADP), a Nexus One, or a Nexus S, then you need
+the <a href="{@docRoot}sdk/win-usb.html">Google USB Driver</a>, instead of an OEM driver. The Galaxy
+Nexus driver, however, is distributed by <a
+href="http://www.samsung.com/us/support/downloads/verizon-wireless/SCH-I515MSAVZW">Samsung</a>
+(listed as model SCH-I515).</p>
+
+
+<h2 id="InstallingDriver">Installing a USB Driver</h2>
+
+<p>First, find the appropriate driver for your device from the <a href="#Drivers">OEM drivers</a>
+table below.</p>
+
+<p>Once you've downloaded your USB driver, follow the instructions below to install or upgrade the
+driver, based on your version of Windows and whether you're installing for the first time
+or upgrading an existing driver.</p>
+
+<p class="note"><strong>Tip:</strong> When you finish the USB driver installation,
+see <a
+href="{@docRoot}tools/device.html">Using Hardware Devices</a> for
+other important information about using an Android-powered device for
+development.</p>
+
+<ol class="nolist">
+  <li><a href="#Win7">Windows 7</a></li>
+  <li><a href="#WinXp">Windows XP</a></li>
+  <li><a href="#WinVista">Windows Vista</a></li>
+</ol>
+
+
+<p class="caution"><strong>Caution:</strong>
+You may make changes to <code>android_winusb.inf</code> file found inside
+<code>usb_driver\</code> (for example, to add support for other devices),
+however, this will lead to security warnings when you install or upgrade the
+driver. Making any other changes to the driver files may break the installation
+process.</p>
+
+
+<h3 id="Win7">Windows 7</h3>
+
+
+<p>To install the Android USB driver on Windows 7 for the first time:</p>
+<ol>
+  <li>Connect your Android-powered device to your computer's USB port.</li>
+  <li>Right-click on <em>Computer</em> from your desktop or Windows Explorer,
+    and select <strong>Manage</strong>.</li>
+  <li>Select <strong>Devices</strong> in the left pane.</li>
+  <li>Locate and expand <em>Other device</em> in the right pane.</li>
+  <li>Right-click the device name (such as <em>Nexus S</em>) and select <strong>Update
+  Driver Software</strong>.
+    This will launch the Hardware Update Wizard.</li>
+  <li>Select <strong>Browse my computer for driver software</strong> and click
+    <strong>Next</strong>.</li>
+  <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
+Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.)</li>
+  <li>Click <strong>Next</strong> to install the driver.</li>
+</ol>
+
+<p>Or, to <em>upgrade</em> an existing Android USB driver on Windows 7 with the new
+driver:</p>
+
+<ol>
+  <li>Connect your Android-powered device to your computer's USB port.</li>
+  <li>Right-click on <em>Computer</em> from your desktop or Windows Explorer,
+    and select <strong>Manage</strong>.</li>
+  <li>Select <strong>Device Manager</strong> in the left pane of the Computer Management
+  window.</li>
+  <li>Locate and expand <em>Android Phone</em> in the right pane.</li>
+  <li>Right-click <em>Android Composite ADB Interface</em> and select <strong>Update
+  Driver</strong>.
+    This will launch the Hardware Update Wizard.</li>
+  <li>Select <strong>Install from a list or specific location</strong> and click
+    <strong>Next</strong>.</li>
+  <li>Select <strong>Search for the best driver in these locations</strong>; un-check
+<strong>Search removable media</strong>; and check <strong>Include this location in the
+search</strong>.</li>
+  <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
+Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.)</li>
+  <li>Click <strong>Next</strong> to upgrade the driver.</li>
+</ol>
+
+
+
+
+
+<h3 id="WinXp">Windows XP</h3>
+
+<p>To install the Android USB driver on Windows XP for the first time:</p>
+
+<ol>
+  <li>Connect your Android-powered device to your computer's USB port. Windows 
+    will detect the device and launch the Hardware Update Wizard.</li>
+  <li>Select <strong>Install from a list or specific location</strong> and click
+    <strong>Next</strong>.</li>
+  <li>Select <strong>Search for the best driver in these locations</strong>; un-check
+<strong>Search
+    removable media</strong>; and check <strong>Include
+this location in the search</strong>.</li>
+  <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
+Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.)</li>
+  <li>Click <strong>Next</strong> to install the driver.</li>
+</ol>
+
+<p>Or, to <em>upgrade</em> an existing Android USB driver on Windows XP with the new
+driver:</p>
+
+<ol>
+  <li>Connect your Android-powered device to your computer's USB port.</li>
+  <li>Right-click on <em>My Computer</em> from your desktop or Windows Explorer,
+    and select <strong>Manage</strong>.</li>
+  <li>Select <strong>Device Manager</strong> in the left pane.</li>
+  <li>Locate and expand <em>Android Phone</em> in the right pane.</li>
+  <li>Right-click <em>Android Composite ADB Interface</em> and select <strong>Update
+  Driver</strong>.
+    This will launch the Hardware Update Wizard.</li>
+  <li>Select <strong>Install from a list or specific location</strong> and click
+    <strong>Next</strong>.</li>
+  <li>Select <strong>Search for the best driver in these locations</strong>; un-check <strong>Search
+    removable media</strong>; and check <strong>Include
+this location in the search</strong>.</li>
+  <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
+Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.)</li>
+  <li>Click <strong>Next</strong> to upgrade the driver.</li>
+</ol>
+
+
+
+<h3 id="WinVista">Windows Vista</h3>
+
+<p>To install the Android USB driver on Windows Vista for the first time:</p>
+
+<ol>
+  <li>Connect your Android-powered device to your computer's USB port. Windows
+  will detect the device and launch the Found New Hardware wizard.</li>
+  <li>Select <strong>Locate and install driver software</strong>.</li>
+  <li>Select <strong>Don't search online</strong>.</li>
+  <li>Select <strong>I don't have the disk. Show me other options</strong>.</li>
+  <li>Select <strong>Browse my computer for driver software</strong>.</li>
+  <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
+Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.) As long as you specified the
+exact location of the 
+    installation package, you may leave <strong>Include subfolders</strong> checked or
+  unchecked&mdash;it doesn't matter.</li>
+  <li>Click <strong>Next</strong>. Vista may prompt you to confirm the privilege elevation
+  required for driver installation. Confirm it.</li>
+  <li>When Vista asks if you'd like to install the Google ADB Interface device,
+  click <strong>Install</strong> to install the driver.</li>
+</ol>
+
+<p>Or, to <em>upgrade</em> an existing Android USB driver on Windows Vista with the new
+driver:</p>
+
+<ol>
+  <li>Connect your Android-powered device to your computer's USB port.</li>
+  <li>Right-click on <em>Computer</em> from your desktop or Windows Explorer,
+    and select <strong>Manage</strong>.</li>
+  <li>Select <strong>Device Manager</strong> in the left pane.</li>
+  <li>Locate and expand <em>ADB Interface</em> in the right pane.</li>
+  <li>Right-click on <em>HTC Dream Composite ADB Interface</em>, and select <strong>Update
+  Driver Software</strong>.</li>
+  <li>When Vista starts updating the driver, a prompt will ask how you want to
+  search for the driver
+    software. Select <strong>Browse my computer for driver software</strong>.</li>
+  <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
+Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.) As long as you specified the
+exact location of the 
+    installation package, you may leave <strong>Include subfolders</strong> checked or
+    unchecked&mdash;it doesn't matter.</li>
+  <li>Click <strong>Next</strong>. Vista might prompt you to confirm the privilege elevation
+  required for driver installation. Confirm it.</li>
+  <li>When Vista asks if you'd like to install the Google ADB Interface device,
+  click <strong>Install</strong> to upgrade the driver.</li>
+</ol>
+  
+
+<h2 id="Drivers">OEM Drivers</h2>
+
+<p class="note"><strong>Note:</strong> If your device is one of the Android Developer Phones
+(purchased from the Google Play publisher site), a Nexus One, or a Nexus S, then you need
+the <a href="{@docRoot}sdk/win-usb.html">Google USB Driver</a>, instead of an OEM driver. The Galaxy
+Nexus driver, however, is distributed by <a
+href="http://www.samsung.com/us/support/downloads/verizon-wireless/SCH-I515MSAVZW">Samsung</a>
+(listed as model SCH-I515).</p>
+
+
+<table><tr>
+    <th>OEM</th>
+    <th>Driver URL</th></tr>
+<tr><td>Acer</td>	<td><a
+href="http://www.acer.com/worldwide/support/mobile.html">http://www.acer.com/worldwide/support/mobile.html</a>
+    </td></tr>
+  <tr>
+    <td style="font-variant:small-caps">alcatel one touch</td>
+    <td><a
+href="http://www.alcatel-mobilephones.com/global/Android-Downloads">http://www.alcatel-mobilephones.com/global/Android-Downloads</a></td>
+  </tr>
+  <tr>
+    <td>Asus</td>
+    <td><a href="http://support.asus.com/download/">http://support.asus.com/download/</a></td>
+  </tr>
+  <tr><td>
+       Dell
+    </td>	<td>
+      <a
+href="http://support.dell.com/support/downloads/index.aspx?c=us&cs=19&l=en&s=dhs&~ck=anavml">http://support.dell.com/support/downloads/index.aspx?c=us&cs=19&l=en&s=dhs&~ck=anavml</a>  </td></tr>
+
+<tr><td>Foxconn</td>	<td><a
+href="http://drivers.cmcs.com.tw/">http://drivers.cmcs.com.tw/</a></td>
+</tr>
+  <tr>
+    <td>
+      Fujitsu
+    </td>
+    <td><a
+href="http://www.fmworld.net/product/phone/sp/android/develop/">http://www.fmworld.net/product/phone/sp/android/develop/</a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Fujitsu Toshiba
+    </td>
+    <td><a
+href="http://www.fmworld.net/product/phone/sp/android/develop/">http://www.fmworld.net/product/phone/sp/android/develop/</a>
+    </td>
+  </tr>
+  <tr><td>
+       Garmin-Asus
+    </td>	<td><a
+href="https://www.garminasus.com/en_US/support/pcsync/">https://www.garminasus.com/en_US/support/pcsync/</a></td>
+</tr>
+
+<tr><td>Hisense</td>
+  <td><a
+href="http://app.hismarttv.com/dss/resourcecontent.do?method=viewResourceDetail&resourceId=16&type=5">http://app.hismarttv.com/dss/resourcecontent.do?method=viewResourceDetail&amp;resourceId=16&amp;type=5 </a></td>
+</tr>
+
+<tr><td>HTC</td>	<td><a href="http://www.htc.com">http://www.htc.com </a> <br>Click on the
+support tab to select your products/device.  Different regions will have different links.</td>
+</tr>
+
+<tr><td>Huawei</td>	<td><a
+href="http://www.huaweidevice.com/worldwide/downloadCenter.do?method=index">http://www.huaweidevice.com/worldwide/downloadCenter.do?method=index</a></td>
+</tr>
+
+<tr><td>Intel</td>	<td><a
+href="http://www.intel.com/software/android">http://www.intel.com/software/android</a></td>
+</tr>
+
+<tr><td>KT Tech</td>	<td><a
+href="http://www.kttech.co.kr/cscenter/download05.asp">http://www.kttech.co.kr/cscenter/download05.asp</a> for EV-S100 (Take)</td>
+</tr>
+  <tr>
+    <td>
+      Kyocera
+    </td>
+    <td><a href="http://www.kyocera-wireless.com/support/phone_drivers.htm">http://www.kyocera-wireless.com/support/phone_drivers.htm</a>
+    </td>
+  </tr>
+  <tr>
+    <td>Lenevo</td>
+    <td><a href="http://developer.lenovomm.com/developer/download.jsp"
+        >http://developer.lenovomm.com/developer/download.jsp</a>
+    </td>
+  </tr>
+  <tr><td>LGE</td>	<td><a
+href="http://www.lg.com/us/mobile-phones/mobile-support/mobile-lg-mobile-phone-support.jsp">http://www.lg.com/us/mobile-phones/mobile-support/mobile-lg-mobile-phone-support.jsp</a></td>
+</tr><tr><td>Motorola</td>	<td><a
+href="http://developer.motorola.com/docstools/USB_Drivers/">http://developer.motorola.com/docstools/USB_Drivers/</a></td>
+</tr><tr><td>Pantech</td>	<td><a
+href="http://www.isky.co.kr/cs/software/software.sky?fromUrl=index">http://www.isky.co.kr/cs/software/software.sky?fromUrl=index</a></td>
+</tr><tr><td>Pegatron</td>	<td><a
+href="http://www.pegatroncorp.com/download/New_Duke_PC_Driver_0705.zip">http://www.pegatroncorp.com/download/New_Duke_PC_Driver_0705.zip</a> (ZIP download)</td>
+</tr><tr><td>Samsung</td>	<td><a
+href="http://www.samsung.com/us/support/downloads">http://www.samsung.com/us/support/downloads</a></td>
+</tr><tr><td>Sharp</td>	<td><a
+href="http://k-tai.sharp.co.jp/support/">http://k-tai.sharp.co.jp/support/</a></td>
+</tr><tr><td>SK Telesys</td>	<td><a
+href="http://www.sk-w.com/service/wDownload/wDownload.jsp">http://www.sk-w.com/service/wDownload/wDownload.jsp</a></td></tr><tr>
+<td>Sony Ericsson</td>	<td><a
+href="http://developer.sonyericsson.com/wportal/devworld/search-downloads/driver?cc=gb&lc=en">http://developer.sonyericsson.com/wportal/devworld/search-downloads/driver?cc=gb&amp;lc=en</a></td></tr>
+
+<tr><td>Teleepoch</td>	<td><a
+href="http://www.teleepoch.com/android.html">http://www.teleepoch.com/android.html</a></td>
+</tr>
+
+<tr><td>Yulong Coolpad</td>	<td><a
+href="http://www.yulong.com/product/product/product/downloadList.html#downListUL">http://www.yulong.com/product/product/product/downloadList.html#downListUL</a></td>
+</tr>
+
+<tr>
+<td>ZTE</td>	<td><a
+href="http://support.zte.com.cn/support/news/NewsDetail.aspx?newsId=1000442">http://support.zte.com.cn/support/news/NewsDetail.aspx?newsId=1000442</a></td></tr>
+</table>

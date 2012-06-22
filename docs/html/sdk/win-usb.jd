@@ -10,7 +10,7 @@ page.title=Google USB Driver
   </ol>
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}sdk/oem-usb.html#InstallingDriver">Installing a USB Driver</a></li>
+    <li><a href="{@docRoot}tools/extras/oem-usb.html#InstallingDriver">Installing a USB Driver</a></li>
     <li><a href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a></li>
     <li><a href="{@docRoot}sdk/adding-components.html">Adding SDK Packages</a></li>
   </ol>
@@ -30,7 +30,7 @@ following devices:</p>
   <p>* <em>Or similar hardware on other carriers</em></p>
   
   <p>All other devices require Windows drivers provided by the hardware manufacturer, as listed in
-the <a href="{@docRoot}sdk/oem-usb.html">OEM USB Drivers</a> document. The Galaxy Nexus
+the <a href="{@docRoot}tools/extras/oem-usb.html">OEM USB Drivers</a> document. The Galaxy Nexus
 driver is also distributed by <a
 href="http://www.samsung.com/us/support/downloads/verizon-wireless/SCH-I515MSAVZW">Samsung</a>
 (listed as model SCH-I515).</p>
@@ -169,4 +169,4 @@ included with the <a href="{@docRoot}sdk/index.html">Android SDK</a>:</p>
 downloaded into the <code>&lt;sdk&gt;\extras\google\usb_driver\</code> directory.</li>
 </ol>
 
-<p>For installation information, read <a href="{@docRoot}sdk/oem-usb.html#InstallingDriver">Installing a USB Driver</a>.</p>
+<p>For installation information, read <a href="{@docRoot}tools/extras/oem-usb.html#InstallingDriver">Installing a USB Driver</a>.</p>

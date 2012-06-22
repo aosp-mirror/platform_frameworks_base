@@ -1,0 +1,267 @@
+page.title=Using Hardware Devices
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#setting-up">Setting up a Device for Development</a>
+      <ol>
+        <li><a href="#VendorIds">USB Vendor IDs</a></li>
+      </ol>
+    </li>
+  </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}sdk/win-usb.html">Google USB Driver</a></li>
+    <li><a href="{@docRoot}tools/extras/oem-usb.html">OEM USB Drivers</a></li>
+  </ol>
+</div>
+</div>
+
+<p>When building a mobile application, it's important that you always test your application on a
+real device before releasing it to users. This page describes how to set up your development
+environment and Android-powered device for testing and debugging on the device.</p>
+
+<p>You can use any Android-powered device as an environment for running,
+debugging, and testing your applications. The tools included in the SDK make it easy to install and
+run your application on the device each time you compile. You can install your application on the
+device directly from Eclipse or from the command line with ADB. If
+you don't yet have a device, check with the service providers in your area to determine which
+Android-powered devices are available.</p>
+
+<p>If you want a SIM-unlocked phone, then you might consider the Google Nexus S. To find a place
+to purchase the Nexus S and other Android-powered devices, visit <a
+href="http://www.google.com/phone/detail/nexus-s">google.com/phone</a>.</p>
+
+<p class="note"><strong>Note:</strong> When developing on a device, keep in mind that you should
+still use the <a
+href="{@docRoot}tools/devices/emulator.html">Android emulator</a> to test your
+application
+on configurations that are not equivalent to those of your real device. Although the emulator
+does not allow you to test every device feature (such as the accelerometer), it does
+allow you to verify that your application functions properly on different versions of the Android
+platform, in different screen sizes and orientations, and more.</p>
+
+
+<h2 id="setting-up">Setting up a Device for Development</h2>
+
+<p>With an Android-powered device, you can develop and debug your Android applications just as you
+would on the emulator. Before you can start, there are just a few things to do:</p>
+
+<ol>
+  <li>Declare your application as "debuggable" in your Android Manifest.
+    <p>When using Eclipse, you can skip this step, because running your app directly from
+the Eclipse IDE automatically enables debugging.</p>
+    <p>In the <code>AndroidManifest.xml</code> file, add <code>android:debuggable="true"</code> to
+the <code>&lt;application></code> element.</p>
+    <p class="note"><strong>Note:</strong> If you manually enable debugging in the manifest
+ file, be sure to disable it before you build for release (your published application
+should usually <em>not</em> be debuggable).</p></li>
+  <li>Turn on "USB Debugging" on your device.
+    <p>On the device, go to <strong>Settings > Applications > Development</strong> 
+    and enable <strong>USB debugging</strong> 
+    (on an Android 4.0 device, the setting is 
+located in <strong>Settings > Developer options</strong>).</p>
+  </li>
+  <li>Set up your system to detect your device.
+    <ul>
+      <li>If you're developing on Windows, you need to install a USB driver for adb. For an
+installation guide and links to OEM drivers, see the <a href="{@docRoot}tools/extras/oem-usb.html">OEM USB
+Drivers</a> document.</li>
+      <li>If you're developing on Mac OS X, it just works. Skip this step.</li>
+      <li>If you're developing on Ubuntu Linux, you need to add a
+<code>udev</code> rules file that contains a USB configuration for each type of device
+you want to use for development. In the rules file, each device manufacturer
+is identified by a unique vendor ID, as specified by the
+<code>ATTR{idVendor}</code> property. For a list of vendor IDs, see  <a
+href="#VendorIds">USB Vendor IDs</a>, below. To set up device detection on
+Ubuntu Linux:
+
+        <ol type="a">
+          <li>Log in as root and create this file:
+            <code>/etc/udev/rules.d/51-android.rules</code></span>.
+            <p>Use this format to add each vendor to the file:<br/>
+              <code>SUBSYSTEM==&quot;usb&quot;, ATTR{idVendor}==&quot;0bb4&quot;, MODE=&quot;0666&quot;, GROUP=&quot;plugdev&quot;</code>
+              <br /><br />
+              
+              In this example, the vendor ID is for HTC. The <code>MODE</code>
+assignment specifies read/write permissions, and <code>GROUP</code> defines
+which Unix group  owns the device node. </p>
+            
+            <p class="note"><strong>Note:</strong> The rule syntax
+may vary slightly depending on your  environment. Consult the <code>udev</code>
+documentation for your system as needed. For an overview of rule syntax, see
+this guide to <a
+href="http://www.reactivated.net/writing_udev_rules.html">writing udev
+rules</a>.</p>
+          </li>
+          <li>Now execute:<br/>
+            <code>chmod a+r /etc/udev/rules.d/51-android.rules</code>
+          </li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+</ol>
+
+<p>When plugged in over USB, can verify that your device is connected by executing <code>adb
+devices</code> from your SDK {@code platform-tools/} directory. If connected,
+you'll see the device name listed as a "device."</p>
+
+<p>If using Eclipse, run or debug your application as usual. You will be
+presented with a <b>Device Chooser</b> dialog that lists the available
+emulator(s) and connected device(s). Select the device upon which you want to
+install and run the application.</p>
+
+<p>If using the <a href="{@docRoot}tools/help/adb.html">Android
+Debug Bridge</a> (adb), you can issue commands with the <code>-d</code> flag to
+target your connected device.</p>
+
+<h3 id="VendorIds">USB Vendor IDs</h3>
+
+<p>This table provides a reference to the vendor IDs needed in order to add USB
+device support on Linux. The USB Vendor ID is the value given to the
+<code>ATTR{idVendor}</code> property in the rules file, as described 
+above.</p>
+
+<table>
+  <tr>
+    <th>Company</th><th>USB Vendor ID</th></tr>
+  <tr>
+    <td>Acer</td>
+    <td><code>0502</code></td>
+  </tr>
+  <tr>
+    <td>ASUS</td>
+    <td><code>0b05</code></td>
+  </tr>
+  <tr>
+    <td>Dell</td>
+    <td><code>413c</code></td>
+  </tr>
+  <tr>
+    <td>Foxconn</td>
+    <td><code>0489</code></td>
+  </tr>
+  <tr>
+    <td>Fujitsu</td>
+    <td><code>04c5</code></td>
+  </tr>
+  <tr>
+    <td>Fujitsu Toshiba</td>
+    <td><code>04c5</code></td>
+  </tr>
+  <tr>
+    <td>Garmin-Asus</td>
+    <td><code>091e</code></td>
+  </tr>
+  <tr>
+    <td>Google</td>
+    <td><code>18d1</code></td>
+  </tr>
+  <tr>
+    <td>Hisense</td>
+    <td><code>109b</code></td>
+  </tr>
+  <tr>
+    <td>HTC</td>
+    <td><code>0bb4</code></td>
+  </tr>
+  <tr>
+    <td>Huawei</td>
+    <td><code>12d1</code></td>
+  </tr>
+  <tr>
+    <td>K-Touch</td>
+    <td><code>24e3</code></td>
+  </tr>
+  <tr>
+    <td>KT Tech</td>
+    <td><code>2116</code></td>
+  </tr>
+  <tr>
+    <td>Kyocera</td>
+    <td><code>0482</code></td>
+  </tr>
+  <tr>
+    <td>Lenovo</td>
+    <td><code>17ef</code></td>
+  </tr>
+  <tr>
+    <td>LG</td>
+    <td><code>1004</code></td>
+  </tr>
+  <tr>
+    <td>Motorola</td>
+    <td><code>22b8</code></td>
+  </tr>
+  <tr>
+    <td>NEC</td>
+    <td><code>0409</code></td>
+  </tr>
+  <tr>
+    <td>Nook</td>
+    <td><code>2080</code></td>
+  </tr>
+  <tr>
+    <td>Nvidia</td>
+    <td><code>0955</code></td>
+  </tr>
+  <tr>
+    <td>OTGV</td>
+    <td><code>2257</code></td>
+  </tr>
+  <tr>
+    <td>Pantech</td>
+    <td><code>10a9</code></td>
+  </tr>
+  <tr>
+    <td>Pegatron</td>
+    <td><code>1d4d</code></td>
+  </tr>
+  <tr>
+    <td>Philips</td>
+    <td><code>0471</code></td>
+  </tr>
+  <tr>
+    <td>PMC-Sierra</td>
+    <td><code>04da</code></td>
+  </tr>
+  <tr>
+    <td>Qualcomm</td>
+    <td><code>05c6</code></td>
+  </tr>
+  <tr>
+    <td>SK Telesys</td>
+    <td><code>1f53</code></td>
+  </tr>
+  <tr>
+    <td>Samsung</td>
+    <td><code>04e8</code></td>
+  </tr>
+  <tr>
+    <td>Sharp</td>
+    <td><code>04dd</code></td>
+  </tr>
+  <tr>
+    <td>Sony</td>
+    <td><code>054c</code></td>
+  </tr>
+  <tr>
+    <td>Sony Ericsson</td>
+    <td><code>0fce</code></td>
+  </tr>
+  <tr>
+    <td>Teleepoch</td>
+    <td><code>2340</code></td>
+  </tr>
+  <tr>
+    <td>Toshiba</td>
+    <td><code>0930</code></td>
+  </tr>
+  <tr>
+    <td>ZTE</td>
+    <td><code>19d2</code></td>
+  </tr>
+</table>

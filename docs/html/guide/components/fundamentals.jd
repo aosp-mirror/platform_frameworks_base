@@ -1,0 +1,518 @@
+page.title=Application Fundamentals
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Quickview</h2>
+<ul>
+  <li>Android applications are composed of one or more application components (activities,
+services, content providers, and broadcast receivers)</li>
+  <li>Each component performs a different role in the overall application behavior, and each
+one can be activated individually (even by other applications)</li>
+  <li>The manifest file must declare all components in the application and should also declare
+all application requirements, such as the minimum version of Android required and any hardware
+configurations required</li>
+  <li>Non-code application resources (images, strings, layout files, etc.) should include
+alternatives for different device configurations (such as different strings for different
+languages and different layouts for different screen sizes)</li>
+</ul>
+
+
+<h2>In this document</h2>
+<ol>
+<li><a href="#Components">Application Components</a>
+  <ol>
+    <li><a href="#ActivatingComponents">Activating components</a></li>
+  </ol>
+</li>
+<li><a href="#Manifest">The Manifest File</a>
+  <ol>
+    <li><a href="#DeclaringComponents">Declaring components</a></li>
+    <li><a href="#DeclaringRequirements">Declaring application requirements</a></li>
+  </ol>
+</li>
+<li><a href="#Resources">Application Resources</a></li>
+</ol>
+</div>
+</div>
+
+<p>Android applications are written in the Java programming language. The Android SDK tools compile
+the code&mdash;along with any data and resource files&mdash;into an <i>Android package</i>, an
+archive file with an {@code .apk} suffix. All the code in a single {@code .apk} file is considered
+to be one application and is the file that Android-powered devices use to install the
+application.</p>
+
+<p>Once installed on a device, each Android application lives in its own security sandbox: </p>
+
+<ul>
+ <li>The Android operating system is a multi-user Linux system in which each application is a
+different user.</li>
+
+<li>By default, the system assigns each application a unique Linux user ID (the ID is used only by
+the system and is unknown to the application). The system sets permissions for all the files in an
+application so that only the user ID assigned to that application can access them. </li>
+
+<li>Each process has its own virtual machine (VM), so an application's code runs in isolation from
+other applications.</li>
+
+<li>By default, every application runs in its own Linux process. Android starts the process when any
+of the application's components need to be executed, then shuts down the process when it's no longer
+needed or when the system must recover memory for other applications.</li>
+</ul>
+
+<p>In this way, the Android system implements the <em>principle of least privilege</em>. That is,
+each application, by default, has access only to the components that it requires to do its work and
+no more. This creates a very secure environment in which an application cannot access parts of
+the system for which it is not given permission.</p>
+
+<p>However, there are ways for an application to share data with other applications and for an
+application to access system services:</p>
+
+<ul>
+  <li>It's possible to arrange for two applications to share the same Linux user ID, in which case
+they are able to access each other's files.  To conserve system resources, applications with the
+same user ID can also arrange to run in the same Linux process and share the same VM (the
+applications must also be signed with the same certificate).</li>
+  <li>An application can request permission to access device data such as the user's
+contacts, SMS messages, the mountable storage (SD card), camera, Bluetooth, and more. All
+application permissions must be granted by the user at install time.</li>
+</ul>
+
+<p>That covers the basics regarding how an Android application exists within the system. The rest of
+this document introduces you to:</p>
+<ul>
+  <li>The core framework components that define your application.</li>
+  <li>The manifest file in which you declare components and required device features for your
+application.</li>
+  <li>Resources that are separate from the application code and allow your application to
+gracefully optimize its behavior for a variety of device configurations.</li>
+</ul>
+
+<!--
+<p class="note"><strong>Tip:</strong> If you're new to Android development, we suggest that you
+follow the Beginner's Path link at the bottom of this page. For each document in the Application
+Fundamentals, the Beginner's Path points you to the document we suggest you read next, in order
+to get up to speed on the core Android concepts.</p>
+-->
+
+
+<h2 id="Components">Application Components</h2>
+
+<p>Application components are the essential building blocks of an Android application. Each
+component is a different point through which the system can enter your application. Not all
+components are actual entry points for the user and some depend on each other, but each one exists
+as its own entity and plays a specific role&mdash;each one is a unique building block that
+helps define your application's overall behavior.</p>
+
+<p>There are four different types of application components. Each type serves a distinct purpose
+and has a distinct lifecycle that defines how the component is created and destroyed.</p>
+
+<p>Here are the four types of application components:</p>
+
+<dl>
+
+<dt><b>Activities</b></dt>
+
+<dd>An <i>activity</i> represents a single screen with a user interface. For example,
+an email application might have one activity that shows a list of new
+emails, another activity to compose an email, and another activity for reading emails. Although
+the activities work together to form a cohesive user experience in the email application, each one
+is independent of the others. As such, a different application can start any one of these
+activities (if the email application allows it). For example, a camera application can start the
+activity in the email application that composes new mail, in order for the user to share a picture.
+
+<p>An activity is implemented as a subclass of {@link android.app.Activity} and you can learn more
+about it in the <a href="{@docRoot}guide/components/activities.html">Activities</a>
+developer guide.</p>
+</dd>
+
+
+<dt><b>Services</b></dt>
+
+<dd>A <i>service</i> is a component that runs in the background to perform long-running
+operations or to perform work for remote processes. A service
+does not provide a user interface. For example, a service might play music in the background while
+the user is in a different application, or it might fetch data over the network without
+blocking user interaction with an activity. Another component, such as an activity, can start the
+service and let it run or bind to it in order to interact with it.
+
+<p>A service is implemented as a subclass of {@link android.app.Service} and you can learn more
+about it in the <a href="{@docRoot}guide/components/services.html">Services</a> developer
+guide.</p>
+</dd>
+
+
+<dt><b>Content providers</b></dt>
+
+<dd>A <i>content provider</i> manages a shared set of application data. You can store the data in
+the file system, an SQLite database, on the web, or any other persistent storage location your
+application can access. Through the content provider, other applications can query or even modify
+the data (if the content provider allows it). For example, the Android system provides a content
+provider that manages the user's contact information. As such, any application with the proper
+permissions can query part of the content provider (such as {@link
+android.provider.ContactsContract.Data}) to read and write information about a particular person.
+
+<p>Content providers are also useful for reading and writing data that is private to your
+application and not shared. For example, the <a
+href="{@docRoot}resources/samples/NotePad/index.html">Note Pad</a> sample application uses a
+content provider to save notes.</p>
+
+<p>A content provider is implemented as a subclass of {@link android.content.ContentProvider}
+and must implement a standard set of APIs that enable other applications to perform
+transactions. For more information, see the <a
+href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a> developer
+guide.</p>
+</dd>
+
+
+<dt><b>Broadcast receivers</b></dt>
+
+<dd>A <i>broadcast receiver</i> is a component that responds to system-wide broadcast
+announcements.  Many broadcasts originate from the system&mdash;for example, a broadcast announcing
+that the screen has turned off, the battery is low, or a picture was captured.
+Applications can also initiate broadcasts&mdash;for example, to let other applications know that
+some data has been downloaded to the device and is available for them to use. Although broadcast
+receivers don't display a user interface, they may <a
+href="{@docRoot}guide/topics/ui/notifiers/notifications.html">create a status bar notification</a>
+to alert the user when a broadcast event occurs. More commonly, though, a broadcast receiver is
+just a "gateway" to other components and is intended to do a very minimal amount of work. For
+instance, it might initiate a service to perform some work based on the event.
+
+<p>A broadcast receiver is implemented as a subclass of {@link android.content.BroadcastReceiver}
+and each broadcast is delivered as an {@link android.content.Intent} object. For more information,
+see the {@link android.content.BroadcastReceiver} class.</p>
+</dd>
+
+</dl>
+
+
+
+<p>A unique aspect of the Android system design is that any application can start another
+application’s component. For example, if you want the user to capture a
+photo with the device camera, there's probably another application that does that and your
+application can use it, instead of developing an activity to capture a photo yourself. You don't
+need to incorporate or even link to the code from the camera application.
+Instead, you can simply start the activity in the camera application that captures a
+photo. When complete, the photo is even returned to your application so you can use it. To the user,
+it seems as if the camera is actually a part of your application.</p>
+
+<p>When the system starts a component, it starts the process for that application (if it's not
+already running) and instantiates the classes needed for the component. For example, if your
+application starts the activity in the camera application that captures a photo, that activity
+runs in the process that belongs to the camera application, not in your application's process.
+Therefore, unlike applications on most other systems, Android applications don't have a single entry
+point (there's no {@code main()} function, for example).</p>
+
+<p>Because the system runs each application in a separate process with file permissions that
+restrict access to other applications, your application cannot directly activate a component from
+another application. The Android system, however, can. So, to activate a component in
+another application, you must deliver a message to the system that specifies your <em>intent</em> to
+start a particular component. The system then activates the component for you.</p>
+
+
+<h3 id="ActivatingComponents">Activating Components</h3>
+
+<p>Three of the four component types&mdash;activities, services, and
+broadcast receivers&mdash;are activated by an asynchronous message called an <em>intent</em>.
+Intents bind individual components to each other at runtime (you can think of them
+as the messengers that request an action from other components), whether the component belongs
+to your application or another.</p>
+
+<p>An intent is created with an {@link android.content.Intent} object, which defines a message to
+activate either a specific component or a specific <em>type</em> of component&mdash;an intent
+can be either explicit or implicit, respectively.</p>
+
+<p>For activities and services, an intent defines the action to perform (for example, to "view" or
+"send" something) and may specify the URI of the data to act on (among other things that the
+component being started might need to know). For example, an intent might convey a request for an
+activity to show an image or to open a web page. In some cases, you can start an
+activity to receive a result, in which case, the activity also returns
+the result in an {@link android.content.Intent} (for example, you can issue an intent to let
+the user pick a personal contact and have it returned to you&mdash;the return intent includes a
+URI pointing to the chosen contact).</p>
+
+<p>For broadcast receivers, the intent simply defines the
+announcement being broadcast (for example, a broadcast to indicate the device battery is low
+includes only a known action string that indicates "battery is low").</p>
+
+<p>The other component type, content provider, is not activated by intents. Rather, it is
+activated when targeted by a request from a {@link android.content.ContentResolver}. The content
+resolver handles all direct transactions with the content provider so that the component that's
+performing transactions with the provider doesn't need to and instead calls methods on the {@link
+android.content.ContentResolver} object. This leaves a layer of abstraction between the content
+provider and the component requesting information (for security).</p>
+
+<p>There are separate methods for activating each type of component:</p>
+<ul>
+  <li>You can start an activity (or give it something new to do) by
+passing an {@link android.content.Intent} to {@link android.content.Context#startActivity
+startActivity()} or {@link android.app.Activity#startActivityForResult startActivityForResult()}
+(when you want the activity to return a result).</li>
+  <li>You can start a service (or give new instructions to an ongoing service) by
+passing an {@link android.content.Intent} to {@link android.content.Context#startService
+startService()}. Or you can bind to the service by passing an {@link android.content.Intent} to
+{@link android.content.Context#bindService bindService()}.</li>
+  <li>You can initiate a broadcast by passing an {@link android.content.Intent} to methods like
+{@link android.content.Context#sendBroadcast(Intent) sendBroadcast()}, {@link
+android.content.Context#sendOrderedBroadcast(Intent, String) sendOrderedBroadcast()}, or {@link
+android.content.Context#sendStickyBroadcast sendStickyBroadcast()}.</li>
+  <li>You can perform a query to a content provider by calling {@link
+android.content.ContentProvider#query query()} on a {@link android.content.ContentResolver}.</li>
+</ul>
+
+<p>For more information about using intents, see the <a
+href="{@docRoot}guide/components/intents-filters.html">Intents and
+Intent Filters</a> document. More information about activating specific components is also provided
+in the following documents: <a
+href="{@docRoot}guide/components/activities.html">Activities</a>, <a
+href="{@docRoot}guide/components/services.html">Services</a>, {@link
+android.content.BroadcastReceiver} and <a
+href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>.</p>
+
+
+<h2 id="Manifest">The Manifest File</h2>
+
+<p>Before the Android system can start an application component, the system must know that the
+component exists by reading the application's {@code AndroidManifest.xml} file (the "manifest"
+file). Your application must declare all its components in this file, which must be at the root of
+the application project directory.</p>
+
+<p>The manifest does a number of things in addition to declaring the application's components,
+such as:</p>
+<ul>
+  <li>Identify any user permissions the application requires, such as Internet access or
+read-access to the user's contacts.</li>
+  <li>Declare the minimum <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Level</a>
+required by the application, based on which APIs the application uses.</li>
+  <li>Declare hardware and software features used or required by the application, such as a camera,
+bluetooth services, or a multitouch screen.</li>
+  <li>API libraries the application needs to be linked against (other than the Android framework
+APIs), such as the <a
+href="http://code.google.com/android/add-ons/google-apis/maps-overview.html">Google Maps
+library</a>.</li>
+  <li>And more</li>
+</ul>
+
+
+<h3 id="DeclaringComponents">Declaring components</h3>
+
+<p>The primary task of the manifest is to inform the system about the application's components. For
+example, a manifest file can declare an activity as follows: </p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest ... &gt;
+    &lt;application android:icon="@drawable/app_icon.png" ... &gt;
+        &lt;activity android:name="com.example.project.ExampleActivity"
+                  android:label="@string/example_label" ... &gt;
+        &lt;/activity&gt;
+        ...
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p>In the <code><a
+href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+element, the {@code android:icon} attribute points to resources for an icon that identifies the
+application.</p>
+
+<p>In the <code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> element,
+the {@code android:name} attribute specifies the fully qualified class name of the {@link
+android.app.Activity} subclass and the {@code android:label} attributes specifies a string
+to use as the user-visible label for the activity.</p>
+
+<p>You must declare all application components this way:</p>
+<ul>
+  <li><code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> elements
+for activities</li>
+  <li><code><a
+href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code> elements for
+services</li>
+  <li><code><a
+href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code> elements
+for broadcast receivers</li>
+  <li><code><a
+href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code> elements
+for content providers</li>
+</ul>
+
+<p>Activities, services, and content providers that you include in your source but do not declare
+in the manifest are not visible to the system and, consequently, can never run.  However,
+broadcast
+receivers can be either declared in the manifest or created dynamically in code (as
+{@link android.content.BroadcastReceiver} objects) and registered with the system by calling
+{@link android.content.Context#registerReceiver registerReceiver()}.</p>
+
+<p>For more about how to structure the manifest file for your application, see the <a
+href="{@docRoot}guide/topics/manifest/manifest-intro.html">The AndroidManifest.xml File</a>
+documentation. </p>
+
+
+
+<h3 id="DeclaringComponentCapabilities">Declaring component capabilities</h3>
+
+<p>As discussed above, in <a href="#ActivatingComponents">Activating Components</a>, you can use an
+{@link android.content.Intent} to start activities, services, and broadcast receivers. You can do so
+by explicitly naming the target component (using the component class name) in the intent. However,
+the real power of intents lies in the concept of intent actions. With intent actions, you simply
+describe the type of action you want to perform (and optionally, the data upon which you’d like to
+perform the action) and allow the system to find a component on the device that can perform the
+action and start it. If there are multiple components that can perform the action described by the
+intent, then the user selects which one to use.</p>
+
+<p>The way the system identifies the components that can respond to an intent is by comparing the
+intent received to the <i>intent filters</i> provided in the manifest file of other applications on
+the device.</p>
+
+<p>When you declare a component in your application's manifest, you can optionally include
+intent filters that declare the capabilities of the component so it can respond to intents
+from other applications. You can declare an intent filter for your component by
+adding an <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> element as a child of the component's declaration element.</p>
+
+<p>For example, an email application with an activity for composing a new email might declare an
+intent filter in its manifest entry to respond to "send" intents (in order to send email). An
+activity in your application can then create an intent with the “send” action ({@link
+android.content.Intent#ACTION_SEND}), which the system matches to the email application’s “send”
+activity and launches it when you invoke the intent with {@link android.app.Activity#startActivity
+startActivity()}.</p>
+
+<p>For more about creating intent filters, see the <a
+href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a> document.
+</p>
+
+
+
+<h3 id="DeclaringRequirements">Declaring application requirements</h3>
+
+<p>There are a variety of devices powered by Android and not all of them provide the
+same features and capabilities. In order to prevent your application from being installed on devices
+that lack features needed by your application, it's important that you clearly define a profile for
+the types of devices your application supports by declaring device and software requirements in your
+manifest file. Most of these declarations are informational only and the system does not read
+them, but external services such as Google Play do read them in order to provide filtering
+for users when they search for applications from their device.</p>
+
+<p>For example, if your application requires a camera and uses APIs introduced in Android 2.1 (<a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Level</a> 7), you should declare these as
+requirements in your manifest file. That way, devices that do <em>not</em> have a camera and have an
+Android version <em>lower</em> than 2.1 cannot install your application from Google Play.</p>
+
+<p>However, you can also declare that your application uses the camera, but does not
+<em>require</em> it. In that case, your application must perform a check at runtime to determine
+if the device has a camera and disable any features that use the camera if one is not available.</p>
+
+<p>Here are some of the important device characteristics that you should consider as you design and
+develop your application:</p>
+
+<dl>
+  <dt>Screen size and density</dt>
+  <dd>In order to categorize devices by their screen type, Android defines two characteristics for
+each device: screen size (the physical dimensions of the screen) and screen density (the physical
+density of the pixels on the screen, or dpi&mdash;dots per inch). To simplify all the different
+types of screen configurations, the Android system generalizes them into select groups that make
+them easier to target.
+<p>The screen sizes are: small, normal, large, and extra large.<br/>
+The screen densities are: low density, medium density, high density, and extra high density.</p>
+
+<p>By default, your application is compatible with all screen sizes and densities,
+because the Android system makes the appropriate adjustments to your UI layout and image
+resources. However, you should create specialized layouts for certain screen sizes and provide
+specialized images for certain densities, using alternative layout resources, and by declaring in
+your manifest exactly which screen sizes your application supports with the <a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens&gt;}</a> element.</p>
+<p>For more information, see the <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>
+document.</p></dd>
+
+  <dt>Input configurations</dt>
+  <dd>Many devices provide a different type of user input mechanism, such as a hardware keyboard, a
+trackball, or a five-way navigation pad. If your application requires a particular kind of input
+hardware, then you should declare it in your manifest with the <a
+href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">{@code
+&lt;uses-configuration&gt;}</a> element. However, it is rare that an application should require
+a certain input configuration.</dd>
+
+  <dt>Device features</dt>
+  <dd>There are many hardware and software features that may or may not exist on a given
+Android-powered device, such as a camera, a light sensor, bluetooth, a certain
+version of OpenGL, or the fidelity of the touchscreen. You should never assume that a certain
+feature is available on all Android-powered devices (other than the availability of the standard
+Android library), so you should declare any features used by your application with the <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
+element.</dd>
+
+  <dt>Platform Version</dt>
+  <dd>Different Android-powered devices often run different versions of the Android platform,
+such as Android 1.6 or Android 2.3. Each successive version often includes additional APIs not
+available in the previous version. In order to indicate which set of APIs are available, each
+platform version specifies an <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Level</a> (for example, Android 1.0 is API Level
+1 and Android 2.3 is API Level 9). If you use any APIs that were added to the platform after
+version 1.0, you should declare the minimum API Level in which those APIs were introduced using the
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a>
+element.</dd>
+</dl>
+
+<p>It's important that you declare all such requirements for your application, because, when you
+distribute your application on Google Play, the store uses these declarations to filter which
+applications are available on each device. As such, your application should be available only to
+devices that meet all your application requirements.</p>
+
+<p>For more information about how Google Play filters applications based on these (and other)
+requirements, see the <a href="{@docRoot}guide/google/play/filters.html">Filters on Google Play</a>
+document.</p>
+
+
+
+<h2 id="Resources">Application Resources</h2>
+
+<p>An Android application is composed of more than just code&mdash;it requires resources that are
+separate from the source code, such as images, audio files, and anything relating to the visual
+presentation of the application. For example, you should define animations, menus, styles, colors,
+and the layout of activity user interfaces with XML files. Using application resources makes it easy
+to update various characteristics of your application without modifying code and&mdash;by providing
+sets of alternative resources&mdash;enables you to optimize your application for a  variety of
+device configurations (such as different languages and screen sizes).</p>
+
+<p>For every resource that you include in your Android project, the SDK build tools define a unique
+integer ID, which you can use to reference the resource from your application code or from
+other resources defined in XML. For example, if your application contains an image file named {@code
+logo.png} (saved in the {@code res/drawable/} directory), the SDK tools generate a resource ID
+named {@code R.drawable.logo}, which you can use to reference the image and insert it in your
+user interface.</p>
+
+<p>One of the most important aspects of providing resources separate from your source code
+is the ability for you to provide alternative resources for different device
+configurations. For example, by defining UI strings in XML, you can translate the strings into other
+languages and save those strings in separate files. Then, based on a language <em>qualifier</em>
+that you append to the resource directory's name (such as {@code res/values-fr/} for French string
+values) and the user's language setting, the Android system applies the appropriate language strings
+to your UI.</p>
+
+<p>Android supports many different <em>qualifiers</em> for your alternative resources. The
+qualifier is a short string that you include in the name of your resource directories in order to
+define the device configuration for which those resources should be used. As another
+example, you should often create different layouts for your activities, depending on the
+device's screen orientation and size. For example, when the device screen is in portrait
+orientation (tall), you might want a layout with buttons to be vertical, but when the screen is in
+landscape orientation (wide), the buttons should be aligned horizontally. To change the layout
+depending on the orientation, you can define two different layouts and apply the appropriate
+qualifier to each layout's directory name. Then, the system automatically applies the appropriate
+layout depending on the current device orientation.</p>
+
+<p>For more about the different kinds of resources you can include in your application and how
+to create alternative resources for various device configurations, see the <a
+href="{@docRoot}guide/topics/resources/index.html">Application Resources</a> developer guide.</p>
+
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>For a close look at implementing activities&mdash;the components your users use to
+interact with your application&mdash;continue with the <b><a
+href="{@docRoot}guide/components/activities.html">Activities</a></b> document.</p>
+-->

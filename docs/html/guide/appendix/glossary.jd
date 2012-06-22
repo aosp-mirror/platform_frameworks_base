@@ -42,7 +42,7 @@ page.title=Glossary
         SDK. It provides tools to browse the device, copy tools on the device, and
         forward ports for debugging. If you are developing in Eclipse using the
 		ADT Plugin, adb is integrated into your development environment. See 
-		<a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a>
+		<a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a>
 		for more information. </dd>
 
     <dt id="application">Application</dt>
@@ -91,7 +91,7 @@ page.title=Glossary
     with the SDK. It provides screen capture, log dump, and process
     examination capabilities. If you are developing in Eclipse using the ADT
     Plugin, DDMS is integrated into your development environment. See <a
-    href="{@docRoot}guide/developing/debugging/ddms.html">Using DDMS</a> to learn more about the program.</dd>
+    href="{@docRoot}tools/debugging/ddms.html">Using DDMS</a> to learn more about the program.</dd>
 
     <dt id="dialog">Dialog</dt> <dd> A floating window that that acts as a lightweight
     form. A dialog can have button controls only and is intended to perform a
@@ -131,7 +131,7 @@ page.title=Glossary
     is responsible for resolving the best-available receiver for each Intent,
     based on the criteria supplied in the Intent and the Intent Filters
     defined by other applications. For more information, see <a
-    href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and
+    href="{@docRoot}guide/components/intents-filters.html">Intents and
     Intent Filters</a>. 
     <p>Related: <a href="#intentfilter">Intent Filter</a>, <a
     href="#broadcastreceiver">Broadcast Receiver</a>.</p></dd>
@@ -145,7 +145,7 @@ page.title=Glossary
     available intent filters in all applications and passes the Intent to the
     application/activity that best matches the Intent and criteria. For more
     information, see <a
-    href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and
+    href="{@docRoot}guide/components/intents-filters.html">Intents and
     Intent Filters</a>. 
     <p>Related: <a href="#intent">Intent</a>, <a
     href="#broadcastreceiver">Broadcast Receiver</a>.</p></dd>

@@ -23,9 +23,9 @@ next.link=running-app.html
 <h2>You should also read</h2>
 
 <ul>
-  <li><a href="{@docRoot}sdk/installing.html">Installing the
+  <li><a href="{@docRoot}sdk/installing/index.html">Installing the
 SDK</a></li>
-  <li><a href="{@docRoot}guide/developing/projects/index.html">Managing Projects</a></li>
+  <li><a href="{@docRoot}tools/projects/index.html">Managing Projects</a></li>
 </ul>
  
  
@@ -42,8 +42,8 @@ SDK tools from a command line.</p>
 
 <p class="note"><strong>Note:</strong> You should already have the Android SDK installed, and if
 you're using Eclipse, you should have installed the <a
-href="{@docRoot}sdk/eclipse-adt.html">ADT plugin</a> as well. If you have not installed
-these, see <a href="{@docRoot}sdk/installing.html">Installing the Android SDK</a> and return here
+href="{@docRoot}tools/sdk/eclipse-adt.html">ADT plugin</a> as well. If you have not installed
+these, see <a href="{@docRoot}sdk/installing/index.html">Installing the Android SDK</a> and return here
 when you've completed the installation.</p>
 
 
@@ -59,7 +59,7 @@ when you've completed the installation.</p>
 The resulting dialog should have a folder labeled <em>Android</em>.  (If you don’t see the
 <em>Android</em> folder,
 then you have not installed the ADT plugin&mdash;see <a
-href="{@docRoot}sdk/eclipse-adt.html#installing">Installing the ADT Plugin</a>).</li>
+href="{@docRoot}tools/sdk/eclipse-adt.html#installing">Installing the ADT Plugin</a>).</li>
   <li>Open the <em>Android</em> folder, select <em>Android Project</em> and click
 <strong>Next</strong>.</li>
   <li>Enter a project name (such as "MyFirstApp") and click <strong>Next</strong>.</li>
@@ -68,7 +68,7 @@ href="{@docRoot}sdk/eclipse-adt.html#installing">Installing the ADT Plugin</a>).
 support older versions, but setting the build target to the latest version allows you to
 easily optimize your app for a great user experience on the latest Android-powered devices.</p>
 <p>If you don't see any built targets listed, you need to install some using the Android SDK
-Manager tool. See <a href="{@docRoot}sdk/installing.html#AddingComponents">step 4 in the
+Manager tool. See <a href="{@docRoot}sdk/installing/index.html#AddingComponents">step 4 in the
 installing guide</a>.</p>
 <p>Click <strong>Next</strong>.</p></li>
   <li>Specify other app details, such as the:
@@ -87,7 +87,7 @@ app (an activity represents a single screen in your app). Enter "MyFirstActivity
       <li><em>Minimum SDK</em>: Select <em>4 (Android 1.6)</em>.
         <p>Because this version is lower than the build target selected for the app, a warning
 appears, but that's alright. You simply need to be sure that you don't use any APIs that require an
-<a href="{@docRoot}guide/appendix/api-levels.html">API level</a> greater than the minimum SDK
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API level</a> greater than the minimum SDK
 version without first using some code to verify the device's system version (you'll see this in some
 other classes).</p>
       </li>
@@ -117,7 +117,7 @@ support older versions, but setting the build target to the latest version allow
 your app for the latest devices.</p>
 <p>If you don't see any targets listed, you need to
 install some using the Android SDK
-Manager tool. See <a href="{@docRoot}sdk/installing.html#AddingComponents">step 4 in the
+Manager tool. See <a href="{@docRoot}sdk/installing/index.html#AddingComponents">step 4 in the
 installing guide</a>.</p></li>
   <li>Execute:
 <pre class="no-pretty-print">

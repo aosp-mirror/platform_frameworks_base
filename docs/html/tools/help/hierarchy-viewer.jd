@@ -1,0 +1,18 @@
+page.title=Hierarchy Viewer
+parent.title=Tools
+parent.link=index.html
+@jd:body
+
+<p>Hierarchy Viewer allows you to debug and optimize your user 
+interface. It provides a visual representation of the layout's View hierarchy 
+(the Layout View) and a magnified inspector of the display (the Pixel Perfect View). 
+</p>
+
+<p>To start Hierarchy Viewer, enter the following command from the SDK <code>tools/</code> directory:</p>
+  <pre>hierarchyviewer</pre>
+</ol>
+
+<p>For more information on how to use Hierarchy Viewer, see 
+<a href="{@docRoot}tools/debugging/debugging-ui.html">Debugging and Profiling UIs</a>
+</p>
+

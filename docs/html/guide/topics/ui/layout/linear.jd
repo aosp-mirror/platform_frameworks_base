@@ -1,0 +1,116 @@
+page.title=Linear Layout
+parent.title=Layouts
+parent.link=layout-objects.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+<ol>
+  <li><a href="#Weight">Layout Weight</a></li>
+  <li><a href="#Example">Example</a></li>
+</ol>
+
+<h2>Key classes</h2>
+<ol>
+  <li>{@link android.widget.LinearLayout}</li>
+  <li>{@link android.widget.LinearLayout.LayoutParams}</li>
+</ol>
+</div>
+</div>
+
+<p>{@link android.widget.LinearLayout} is a view group that aligns all children in a single
+direction, vertically or horizontally. You can specify the layout direction with the
+<a href="{@docRoot}reference/android/widget/LinearLayout.html#attr_android:orientation">{@code
+android:orientation}</a> attribute.</p>
+
+<img src="{@docRoot}images/ui/linearlayout.png" alt="" />
+
+<p>All children of a {@link android.widget.LinearLayout} are
+stacked one after the other, so a vertical list will only have one child per
+row, no matter how wide they are, and a horizontal list will only be one row
+high (the height of the tallest child, plus padding). A {@link
+android.widget.LinearLayout LinearLayout} respects <em>margin</em>s between children
+and the <em>gravity</em> (right, center, or left alignment) of each child. </p>
+
+
+<h2 id="Weight">Layout Weight</h2>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>Equally weighted children</h3>
+<p>To create a linear layout in which each child uses the same amount of
+space on the screen, set the <a
+href="{@docRoot}reference/android/view/ViewGroup.LayoutParams.html#attr_android:layout_height"
+>{@code android:layout_height}</a> of each view to {@code "0dp"} (for a
+vertical layout) or the <a
+href="{@docRoot}reference/android/view/ViewGroup.LayoutParams.html#attr_android:layout_width"
+>{@code android:layout_width}</a> of each view to {@code "0dp"} (for a
+horizontal
+layout). Then set the <a
+href="{@docRoot}reference/android/widget/LinearLayout.LayoutParams.html#attr_android:layout_weight"
+>{@code android:layout_weight}</a> of each view to {@code "1"}.</p>
+</div>
+</div>
+
+
+<p>{@link android.widget.LinearLayout} also supports assigning a
+<em>weight</em> to individual children with the <a
+href="{@docRoot}reference/android/widget/LinearLayout.LayoutParams.html#attr_android:layout_weight"
+>{@code android:layout_weight}</a> attribute.
+This attribute assigns an "importance" value to a view in
+terms of how much space is should occupy on the screen. A larger weight value allows it to expand
+to fill any remaining space in the parent view. 
+Child views can specify a weight value, and then any remaining space in the view group is
+assigned to children in the proportion of their declared weight. Default
+weight is zero.</p>
+
+<p>For example, if there are three text fields and two of them declare a weight of 1, while the
+other is given no weight, the third text field without weight will not grow and will only occupy the
+area required by its content. The other two will expand equally to fill the space remaining after
+all three fields are measured. If the third field is then given a weight of 2 (instead of 0), then
+it is now declared more important than both the others, so it gets half the total remaining space,
+while the first two
+share the rest equally.</p>
+
+
+<h2 id="Example">Example</h2>
+
+<div class="figure" style="width:220px;margin-top:0">
+<img src="{@docRoot}images/ui/sample-linearlayout.png" alt="" />
+</div>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:orientation="vertical" >
+    &lt;EditText
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/to" />
+    &lt;EditText
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/subject" />
+    &lt;EditText
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="top"
+        android:hint="@string/message" />
+    &lt;Button
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:text="@string/send" />
+&lt;/LinearLayout>
+</pre>
+
+<p>For details about the attributes available to each child view of a {@link
+android.widget.LinearLayout}, see {@link android.widget.LinearLayout.LayoutParams}.</p>
+
+

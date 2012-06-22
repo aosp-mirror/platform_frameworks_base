@@ -24,8 +24,8 @@ page.title=アプリケーションのバージョニング
 <h2>関連項目</h2>
 
 <ol>
-<li><a href="{@docRoot}guide/publishing/preparing.html">公開の準備</a></li>
-<li><a href="{@docRoot}guide/publishing/publishing.html#market">Android マーケットでの公開</a></li>
+<li><a href="{@docRoot}tools/publishing/preparing.html">公開の準備</a></li>
+<li><a href="{@docRoot}tools/publishing/publishing.html#market">Android マーケットでの公開</a></li>
 <li><a href="{@docRoot}guide/topics/manifest/manifest-intro.html">The AndroidManifest.xml File</a></li>
 </ol>
 
@@ -97,4 +97,4 @@ method of {@link android.content.pm.PackageManager PackageManager}. </p> を使�
 
 <p>アプリケーションに最小プラットフォーム バージョンを指定するには、<code>&lt;uses-sdk&gt;</code> 要素を <code>&lt;manifest&gt;</code> の子として追加し、<code>android:minSdkVersion</code> を属性として定義します。 </p>
 
-<p>詳細は、<a href="{@docRoot}sdk/android-1.1.html">Android System Image 1.1 Version Notes</a> もご覧ください。</p>
+<p>詳細は、<a href="{@docRoot}about/versions/android-1.1.html">Android System Image 1.1 Version Notes</a> もご覧ください。</p>

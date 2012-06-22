@@ -1,0 +1,42 @@
+page.title=Connectivity
+page.landing=true
+page.landing.intro=Android provides rich APIs to let your app connect and interact with other devices over Bluetooth, NFC, Wi-Fi Direct, USB, and SIP, in addition to standard network connections.
+page.landing.image=images/develop/connectivity.png
+
+@jd:body
+
+<div class="landing-docs">
+
+  <div class="col-6">
+    <h3>Blog Articles</h3>
+    
+    <a href="http://android-developers.blogspot.com/2011/09/androids-http-clients.html">
+      <h4>Android’s HTTP Clients</h4>
+      <p>Most network-connected Android apps will use HTTP to send and receive data. Android
+includes two HTTP clients: HttpURLConnection and Apache HTTP Client. Both support HTTPS, streaming
+uploads and downloads, configurable timeouts, IPv6 and connection pooling.</p>
+    </a>
+    
+  </div>
+
+  <div class="col-6">
+    <h3>Training</h3>
+    
+    <a href="http://developer.android.com/training/efficient-downloads/index.html">
+      <h4>Transferring Data Without Draining the Battery</h4>
+      <p>This class demonstrates the best practices for scheduling and executing downloads using
+techniques such as caching, polling, and prefetching. You will learn how the power-use profile of
+the wireless radio can affect your choices on when, what, and how to transfer data in order to
+minimize impact on battery life.</p>
+    </a>
+    
+    <a href="http://developer.android.com/training/cloudsync/index.html">
+      <h4>Syncing to the Cloud</h4>
+      <p>This class covers different strategies for cloud enabled applications. It covers syncing
+data with the cloud using your own back-end web application, and backing up data using the cloud so
+that users can restore their data when installing your application on a new device.</p>
+    </a>
+    
+  </div>
+
+</div>

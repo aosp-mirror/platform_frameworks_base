@@ -1,0 +1,393 @@
+page.title=android
+parent.title=Tools
+parent.link=index.html
+@jd:body
+
+<p>{@code android} is an important development tool that lets you:</p>
+
+  <ul>
+    <li>Create, delete, and view Android Virtual Devices (AVDs). See <a href= 
+    "{@docRoot}tools/devices/managing-avds-cmdline.html">Managing AVDs from the Command
+Line</a>.</li>
+
+    <li>Create and update Android projects. See <a href= 
+    "{@docRoot}tools/projects/projects-cmdline.html">Managing Projects from
+    the Command Line</a>.</li>
+
+    <li>Update your Android SDK with new platforms, add-ons, and documentation. See <a href= 
+    "{@docRoot}sdk/exploring.html">Exploring the SDK</a>.</li>
+  </ul>If you are using Eclipse, the <code>android</code> tool's features are integrated
+  into ADT, so you should not need to use this tool directly.
+  
+  <p class="note"><strong>Note:</strong> The documentation of options below is not exhaustive
+and may be out of date. For the most current list of options, execute <code>android
+--help</code>.</p>
+  
+  
+  
+
+  <h2>Syntax</h2>
+  <pre>android [global options] action [action options]</pre>
+
+  <h3>Global Options</h3>
+
+  <dl>
+    <dt><code>-s</code></dt>
+
+    <dd>Silent mode: only errors are printed out</dd>
+
+    <dt><code>-h</code></dt>
+
+    <dd>Usage help</dd>
+
+    <dt><code>-v</code></dt>
+
+    <dd>Verbose mode: errors, warnings and informational messages are printed.</dd>
+  </dl>
+
+  <h3>AVD actions and options</h3>
+
+  <table>
+    <tr>
+      <th width="15%">Action</th>
+
+      <th width="20%">Option</th>
+
+      <th width="30%">Description</th>
+
+      <th>Comments</th>
+    </tr>
+
+    <tr>
+      <td><code>avd</code></td>
+
+      <td>None</td>
+
+      <td>Launch the AVD Manager</td>
+
+      <td></td>
+    </tr>
+
+    <tr>
+      <td><code>sdk</code></td>
+
+      <td>None</td>
+
+      <td>Launch the Android SDK Manager</td>
+
+      <td></td>
+    </tr>
+
+    <tr>
+      <td rowspan="6"><code>create avd</code></td>
+
+      <td><code>-n &lt;name&gt;</code></td>
+
+      <td>The name for the AVD.</td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td><code>-t &lt;targetID&gt;</code></td>
+
+      <td>Target ID of the system image to use with the new AVD. To obtain a list of available
+      targets, use <code>android list targets</code></td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td><code>-c &lt;path&gt;|&lt;size&gt;[K|M]</code></td>
+
+      <td>The path to the SD card image to use with this AVD or the size of a new SD card image to
+      create for this AVD. For example, <code>-c path/to/sdcard</code> or <code>-c
+      1000M</code>.</td>
+
+      <td></td>
+    </tr>
+
+    <tr>
+      <td><code>-f</code></td>
+
+      <td>Force creation of the AVD</td>
+
+      <td></td>
+    </tr>
+
+    <tr>
+      <td><code>-p &lt;path&gt;</code></td>
+
+      <td>Path to the location at which to create the directory for this AVD's files.</td>
+
+      <td></td>
+    </tr>
+
+    <tr>
+      <td><code>-s &lt;name&gt;|&lt;width&gt;-&lt;height&gt;</code></td>
+
+      <td>The skin to use for this AVD, identified by name or dimensions. The <code>android</code>
+      tool scans for a matching skin by name or dimension in the <code>skins/</code> directory of
+      the target referenced in the <code>-t &lt;targetID&gt;</code> argument. For example, <code>-s
+      HVGA-L</code></td>
+
+      <td></td>
+    </tr>
+
+    <tr>
+      <td><code>delete avd</code></td>
+
+      <td><code>-n &lt;name&gt;</code></td>
+
+      <td>The name of the AVD to delete</td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td rowspan="3"><code>move avd</code></td>
+
+      <td><code>-n &lt;name&gt;</code></td>
+
+      <td>The name of the AVD to move</td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td><code>-p &lt;path&gt;</code></td>
+
+      <td>Path to the location at which to create the directory for this AVD's files.</td>
+
+      <td></td>
+    </tr>
+
+    <tr>
+      <td><code>-r &lt;new-name&gt;</code></td>
+
+      <td>New name of the AVD if you want to rename it</td>
+
+      <td></td>
+    </tr>
+
+    <tr>
+      <td><code>update avd</code></td>
+
+      <td><code>-n &lt;name&gt;</code></td>
+
+      <td>The name of the AVD to move</td>
+
+      <td>Required</td>
+    </tr>
+  </table>
+
+  <h3>Project actions and options</h3>
+
+  <table>
+    <tr>
+      <th width="15%">Action</th>
+
+      <th width="20%">Option</th>
+
+      <th width="30%">Description</th>
+
+      <th>Comments</th>
+    </tr>
+
+    <tr>
+      <td rowspan="5"><code>create project</code></td>
+
+      <td><code>-n &lt;name&gt;</code></td>
+
+      <td>The name for the project</td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td><code>-t &lt;targetID&gt;</code></td>
+
+      <td>Target ID of the system image to use with the new AVD. To obtain a list of available
+      targets, use <code>android list targets</code></td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td><code>-k &lt;path&gt;|&lt;size&gt;[K|M]</code></td>
+
+      <td>Package namespace</td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td><code>-a</code></td>
+
+      <td>Name for the default Activity class</td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td><code>-p &lt;path&gt;</code></td>
+
+      <td>Location of your project directory</td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td rowspan="5"><code>update project</code></td>
+
+      <td><code>-n &lt;name&gt;</code></td>
+
+      <td>The name of the project to update</td>
+
+      <td></td>
+    </tr>
+
+    <tr>
+      <td><code>-p &lt;path&gt;</code></td>
+
+      <td>Location path of the project</td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td><code>-l &lt;library path&gt;</code></td>
+
+      <td>Location path of an Android Library to add, relative to the main project</td>
+
+      <td></td>
+    </tr>
+
+    <tr>
+      <td><code>-s &lt;subprojects&gt;</code></td>
+
+      <td>Update any projects in subfolders such as test projects</td>
+
+      <td></td>
+    </tr>
+
+    <tr>
+      <td><code>-t &lt;targetID&gt;</code></td>
+
+      <td>Target id to set for the project</td>
+
+      <td></td>
+    </tr>
+
+    <tr>
+      <td rowspan="3"><code>create-test-project</code></td>
+
+      <td><code>-n &lt;name&gt;</code></td>
+
+      <td>The name of the project</td>
+
+      <td></td>
+    </tr>
+
+    <tr>
+      <td><code>-p &lt;path&gt;</code></td>
+
+      <td>Location path of the project</td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td><code>-m &lt;main&gt;</code></td>
+
+      <td>The name of the project</td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td rowspan="2"><code>update-test-project</code></td>
+
+      <td><code>-p &lt;path&gt;</code></td>
+
+      <td>Location path of the project to test, relative to the new project</td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td><code>-m &lt;main&gt;</code></td>
+
+      <td>The main class of the project to test</td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td rowspan="4"><code>create-lib-project</code></td>
+
+      <td><code>-k &lt;packageName&gt;</code></td>
+
+      <td>(Required) Package name of the library project</td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td><code>-p &lt;path&gt;</code></td>
+
+      <td>Location path of the project</td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td><code>-t &lt;targetID&gt;</code></td>
+
+      <td>Target ID of the library project</td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td><code>-n &lt;name&gt;</code></td>
+
+      <td>The name of the project</td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td rowspan="3"><code>update-lib-project</code></td>
+
+      <td><code>-p &lt;path&gt;</code></td>
+
+      <td>Location path of the project</td>
+
+      <td>Required</td>
+    </tr>
+
+    <tr>
+      <td><code>-l &lt;libraryPath&gt;</code></td>
+
+      <td>Location path of an Android Library to add, relative to the main project</td>
+
+      <td></td>
+    </tr>
+
+    <tr>
+      <td><code>-t &lt;name&gt;</code></td>
+
+      <td>Target ID of the library project</td>
+
+      <td></td>
+    </tr>
+  </table>
+
+  <h3>Update actions</h3>
+  <dl>
+  <dt><code>update adb</code></dt>
+  <dd>Updates adb to support the USB devices declared in the SDK add-ons.</dd>
+   
+  <dt><code>update sdk</code></dt>
+  <dd>Updates the SDK by suggesting new platforms to install if available.</dd>

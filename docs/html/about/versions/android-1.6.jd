@@ -1,0 +1,505 @@
+page.title=Android 1.6 Platform
+sdk.platform.version=1.6
+sdk.platform.apiLevel=4
+sdk.platform.majorMinor=minor
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#features">Platform Highlights</a></li>
+  <li><a href="#relnotes">Revisions</a></li>
+  <li><a href="#api-level">API Level</a></li>
+  <li><a href="#api">Framework API Changes</a>
+  <li><a href="#apps">Built-in Applications</a></li>
+  <li><a href="#locs">Locales</a></li>
+  <li><a href="#skins">Emulator Skins</a></li>
+
+    </ol>
+  </li>
+</ol>
+
+<h2>Reference</h2>
+<ol>
+<li><a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
+Differences Report &raquo;</a> </li>
+</ol>
+
+<h2>See Also</h2>
+<ol>
+  <li><a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>
+<em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
+
+<p>Android {@sdkPlatformVersion} is a {@sdkPlatformMajorMinor} platform release
+deployable to Android-powered handsets since October 2009.
+The platform includes new features for users and developers, as well as changes
+in the Android framework API. </p>
+
+<p>For developers, a new release of the Android {@sdkPlatformVersion} platform
+is available as a downloadable component for the Android SDK. The platform
+&mdash; Android 1.6 r2 &mdash; includes a fully compliant Android library and
+system image, as well as a set of emulator skins, sample applications, and minor
+development updates. The downloadable platform is fully compliant (API Level 4)
+and includes no external libraries.</p>
+
+<p>To get started developing or testing against the Android
+{@sdkPlatformVersion} platform, use the Android SDK and AVD Manager tool to
+download the latest Android 1.6 platform into your Android 1.6 or later SDK. For
+more information, see <a href="{@docRoot}sdk/exploring.html">Exploring the
+SDK</a>.</p>
+
+
+<h2 id="features">Platform Highlights</h2>
+
+<p>For a list of new user features and platform highlights, see the <a
+href="http://developer.android.com/about/versions/android-{@sdkPlatformVersion}-highlights.html">Android 
+{@sdkPlatformVersion} Platform Highlights</a> document.</p>
+
+
+<h2 id="relnotes">Revisions</h2>
+
+<p>The sections below provide notes about successive releases of
+the Android {@sdkPlatformVersion} platform component for the Android SDK, as denoted by
+revision number. To determine what revision(s) of the Android
+{@sdkPlatformVersion} platforms are installed in your SDK environment, refer to
+the "Installed Packages" listing in the Android SDK and AVD Manager.</p>
+
+<script type="text/javascript">
+function toggleDiv(link) {
+  var toggleable = $(link).parent();
+  if (toggleable.hasClass("closed")) {
+    //$(".toggleme", toggleable).slideDown("fast");
+    toggleable.removeClass("closed");
+    toggleable.addClass("open");
+    $(".toggle-img", toggleable).attr("title", "hide").attr("src", (toRoot + "assets/images/triangle-opened.png"));
+  } else {
+    //$(".toggleme", toggleable).slideUp("fast");
+    toggleable.removeClass("open");
+    toggleable.addClass("closed");
+    $(".toggle-img", toggleable).attr("title", "show").attr("src", (toRoot + "assets/images/triangle-closed.png"));
+  }
+  return false;
+}
+</script>
+<style>
+.toggleable {
+  padding: .25em 1em 0em 1em;
+  margin-bottom: 0;
+}
+.toggleme {
+  padding: 1em 1em 0 2em;
+  line-height:1em;
+}
+.toggleable a {
+  text-decoration:none;
+}
+.toggleme a {
+  text-decoration:underline;
+}
+.toggleable.closed .toggleme {
+  display:none;
+}
+#jd-content .toggle-img {
+  margin:0;
+}
+</style>
+
+<div class="toggleable opened">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+        Android 1.6, Revision 3</a> <em>(May 2010)</em></a>
+  <div class="toggleme">
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires SDK Tools r6 or higher.</p>
+</dd>
+<dt>Tools:</dt> 
+<dd>
+<ul> 
+<li>Adds support for library projects in the Ant build system.</li>
+</ul> 
+</dd>
+</dl>
+ </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
+        Android 1.6, Revision 2</a> <em>(December 2009)</em></a>
+  <div class="toggleme">
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires SDK Tools r4 or higher.</p>
+</dd>
+
+<dt>API related:</dt> 
+<dd>
+<ul> 
+<li>Properly exposes CDMA-related constants in <code><a href="{@docRoot}reference/android/telephony/TelephonyManager.html">android.telephony.TelephonyManager</a></code>: <code>DATA_ACTIVITY_DORMANT</code>,
+<code>PHONE_TYPE_CDMA</code>, <code>NETWORK_TYPE_CDMA</code>,
+<code>NETWORK_TYPE_EVDO_0</code>, <code>NETWORK_TYPE_EVDO_A</code>, and
+<code>NETWORK_TYPE_1xRTT</code>.</li> 
+</ul> 
+</dd>
+<dt>System image:</dt> 
+<dd>
+<ul> 
+<li>Fixes bug so that Bitmap's density is now propagated through Parcelable.</li> 
+<li>Fixes NinePatchDrawable to properly scale its reported padding for compatibility mode.</li> 
+<li>Fixes TextView to properly compute styled font metrics based on the screen density.</li> 
+<li>Updates kernel to 2.6.29, to match kernel on commercially
+available Android-powered devices.</li> 
+</ul> 
+</dd>
+<dt>Tools:</dt> 
+<dd>
+<ul> 
+<li>Adds new Ant build system with support for Emma instrumentation projects
+(code coverage).</li> 
+<li>Fixes emulator skins to properly emulate d-pad in landscape mode.</li> 
+<li>Fixes density rendering in the layout editor in ADT.</li> 
+</ul> 
+</dd>
+</dl>
+ </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
+        Android 1.6, Revision 1</a> <em>(September 2009)</em></a>
+  <div class="toggleme">
+<dl>
+<dt>Dependencies</dt>
+<dd>
+<p>Requires SDK Tools r3 or higher.</p>
+</dd>
+</dl>
+ </div>
+</div>
+
+
+<h2 id="api-level">API Level</h2>
+
+<p>The Android {@sdkPlatformVersion} platform delivers an updated version of
+the framework API. The Android {@sdkPlatformVersion} API
+is assigned an integer identifier &mdash;
+<strong>{@sdkPlatformApiLevel}</strong> &mdash; that is
+stored in the system itself. This identifier, called the "API Level", allows the
+system to correctly determine whether an application is compatible with
+the system, prior to installing the application. </p>
+
+<p>To use APIs introduced in Android {@sdkPlatformVersion} in your
+application, you need to set the proper value, "{@sdkPlatformApiLevel}", in the
+<code>android:minSdkVersion</code> attributes of the <code>&lt;uses-sdk&gt;</code>
+element in your application's manifest. </p>
+
+<p>For more information about how to use API Level, see the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Levels</a> document. </p>
+
+
+<h2 id="api">Framework API Changes</h2>
+
+<p>The sections below provide information about the application framework API provided by the Android {@sdkPlatformVersion} platform. </p>
+
+<h3 id="UIFramework">UI framework</h3>
+    <ul>
+      <li>New classes in {@link android.view.animation}
+      to control the behavior of animations:
+        <ul>
+          <li><code>AnticipateInterpolator</code></li>
+          <li><code>AnticipateOvershootInterpolator</code></li>
+          <li><code>BounceInterpolator</code></li>
+          <li><code>OvershootInterpolator</code></li>
+        </ul>
+      </li>
+      <li>New XML attribute <code>android:onClick</code> to specify a View's 
+<a href="/reference/android/view/View.OnClickListener.html">View.OnClickListener</a> 
+from a layout file.
+      </li>
+      <li>New support for dealing with varying screen densities. Density
+information is associated with Bitmap and Canvas for performing the
+correct scaling. The framework will automatically scale bitmaps and
+nine-patches based on the density the resource was found under and the
+density of the screen, etc.
+      </li><p>To use APIs introduced in Android {@sdkPlatformVersion} in your application, you need to 
+set the proper value, "{@sdkPlatformApiLevel}", in the attributes of the <code>&lt;uses-sdk&gt;</code> 
+element in your application's manifest. </p>
+    </ul>
+
+<h3>Search framework</h3>
+  <ul>
+    <li>Applications can now expose relevant content to users as search
+suggestions in the Quick Search Box, a new device-wide search capability that is
+accessible from the home screen. To support this, the search framework adds new
+attributes to the searchable metadata file. For complete information, see the
+{@link android.app.SearchManager SearchManager} documentation.
+    </li>
+  </ul>
+
+<h3>Accessibility framework</h3>
+  <ul>
+    <li>New {@link android.view.accessibility android.accessibility} package
+that includes classes for capturing accessibility events and forwarding them to
+an {@link android.accessibilityservice AccessibilityService} handler. </li>
+    <li>New {@link android.accessibilityservice AccessibilityService} package
+that lets your application track user events and provide visual, audible, or
+haptic feedback to the user. </li>
+  </ul>
+
+<h3>Gesture input</h3>
+  <ul>
+    <li>New {@link android.gesture gesture} API for creating, recognizing,
+loading, and saving gestures.</li>
+  </ul>
+
+<h3>Text-to-speech</h3>
+  <ul>
+    <li>New {@link android.speech.tts android.speech.tts} package provides
+classes for synthesizing speech from text, for immediate playback or to create a
+sound file.</li>
+  </ul>
+
+<h3>Graphics</h3>
+  <ul>
+    <li>Classes in {@link android.graphics android.graphics} now support scaling
+for different screen densities.</li>
+  </ul>
+
+<h3>Telephony</h3>
+  <ul>
+    <li>New {@link android.telephony.SmsManager SmsManager} and other classes
+for sending and receiving SMS messages.</li>
+  </ul>
+
+<h3>Utilities</h3>
+  <ul>
+    <li>New {@link android.util.DisplayMetrics DisplayMetrics} fields for
+determining the density of the current device screen.</li>
+  </ul>
+
+<h3 id="AndroidManifest">Android Manifest elements</h3>
+
+    <ul>
+      <li>New <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code 
+      &lt;supports-screens>}</a> element lets you specify the device screen sizes that your 
+      application is designed and tested to support, where "size" is a combination
+      of resolution and density. If your application is run on a device whose screen 
+      size is not specified in the <code>&lt;supports-screen&gt;</code> element, the system 
+      displays the application in <em>compatibility mode</em>, which performs best-effort scaling
+      of the application UI to match the resolution and density of the screen. 
+
+    <p>The attributes available for defining an application's screen support are:
+
+        <ul>
+
+          <li><code>smallScreen</code>: Boolean value that indicates whether the
+            application is designed to run on devices with small screens. 
+            Examples: QVGA low density; VGA high density.
+          </li>
+          <li><code>normalScreens</code>: Boolean value that indicates whether 
+            the application is designed to run on devices with normal screens. 
+            Examples: WQVGA low density; HVGA medium density; WVGA high density.
+          </li>
+          <li><code>largeScreens</code>: Boolean value that indicates whether 
+            the application is designed to run on devices with significantly 
+            larger screens, such that special care may be required on
+            the application's part to make proper use of the screen area. 
+            Examples: VGA medium density; WVGA medium density.
+          </li>
+          <li><code>anyDensity</code>: Boolean value that indicates whether 
+            the application can accommodate any screen density.
+          </li>
+          <li><code>resizable</code>: Boolean value that indicates whether
+            the application can expand its layout to fit slightly larger screens.
+          </li>
+        </ul>
+    </p>
+    </li>
+
+      <li>New <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature>}</a>
+        element lets an application specify hardware (or other)
+        features that it requires to function normally. When an application
+        specifies such features, the system allows the application to be installed only
+        on devices that offer the required features. The element supports these
+        attributes:
+        <ul>
+          <li><code>name</code>: The name of the feature required by the application. Currently accepts 
+          "android.hardware.camera" and "android.hardware.camera.autofocus" values, which specify that a 
+          camera and camera autofocus are required, respectively.</li>
+          <li><code>glEsVersion</code>: Indicates the minimum version of OpenGL ES required.</li>
+        </ul>
+      </li>
+      <li>New attributes for the 
+      <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk>}</a> element:
+        <ul>
+          <li><code>targetSdkVersion</code>: Indicates the API Level that the application is targeting. 
+          It is able to run on older versions (down to minSdkVersion), but was explicitly tested to 
+          work with the version specified here. Specifying this version allows the platform to 
+          disable compatibility code that is not required or enable newer features that are not 
+          available to older applications. </li>
+          <li><code>maxSdkVersion</code>: Indicates the maximum API Level on which an application is 
+          designed to run. <strong>Important:</strong> Please read the <a
+          href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
+          documentation before using this attribute. </li>
+        </ul>
+      </li>
+
+      </li>
+    </ul>
+
+<h3>New permissions</h3>
+
+    <ul>
+      <li>{@link android.Manifest.permission#CHANGE_WIFI_MULTICAST_STATE
+          CHANGE_WIFI_MULTICAST_STATE}: Allows applications to enter Wi-Fi 
+          Multicast mode.
+      </li>
+      <li>{@link android.Manifest.permission#GLOBAL_SEARCH}: Allows the 
+          global search system to access the data of a specified content provider.
+      </li> 
+      <li>{@link android.Manifest.permission#INSTALL_LOCATION_PROVIDER INSTALL_LOCATION_PROVIDER}: 
+          Allows an application to install a location provider into the Location Manager.
+      </li>
+      <li>{@link android.Manifest.permission#READ_HISTORY_BOOKMARKS READ_HISTORY_BOOKMARKS}: 
+          Allows an application to read (but not write) the user's browsing history 
+          and bookmarks.
+      </li>
+      <li>{@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS WRITE_HISTORY_BOOKMARKS}: 
+          Allows an application to write (but not read) the user's browsing history 
+          and bookmarks.
+      </li>
+      <li>{@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE WRITE_EXTERNAL_STORAGE}: 
+          Allows an application to write to external storage. Applications using API Level 3
+          and lower will be implicitly granted this permission (and this will be visible to 
+          the user); Applications using API Level 4 or higher must explicitly request this 
+          permission.
+      </li>
+    </ul>
+
+
+<h3 id="api-diff">API differences report</h3>
+
+<p>For a detailed view of API changes in Android {@sdkPlatformVersion} (API Level {@sdkPlatformApiLevel}), as compared to 
+the previous version, see the <a href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API 
+Differences Report</a>.</p>
+
+<h2 id="apps">Built-in Applications</h2>
+
+<p>The system image included in the downloadable platform provides these
+built-in applications:</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+	<ul>
+	<li>Alarm Clock</li>
+	<li>Browser</li>
+	<li>Calculator</li>
+	<li>Camcorder</li>
+	<li>Camera</li>
+	<li>Contacts</li>
+	<li>Custom Locale (developer app)</li>
+	<li>Dev Tools (developer app)</li>
+	<li>Dialer</li>
+	</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+	<ul>
+	<li>Email</li>
+	<li>Gallery</li>
+	<li>Gestures Builder</li>
+	<li>IME for Japanese text input</li>
+	<li>Messaging</li>
+	<li>Music</li>
+	<li>Settings</li>
+	<li>Spare Parts (developer app)</li>
+	</ul>
+</td>
+</tr>
+</table>
+
+<h2 id="locs" style="margin-top:.75em;">Locales</h2>
+
+<p>The system image included in the downloadable platform provides a variety of
+built-in locales. In some cases, region-specific strings are available for the
+locales. In other cases, a default version of the language is used. The
+languages that are available in the Android {@sdkPlatformVersion} system 
+image are listed below (with <em>language</em>_<em>country/region</em> 
+locale descriptor).</p>
+
+<table style="border:0;margin-bottom:0;padding-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+<ul>
+<li>Chinese, PRC (zh_CN)</li>
+<li>Chinese, Taiwan (zh_TW)</li>
+<li>Czech (cs_CZ)</li>
+<li>Dutch, Netherlands (nl_NL)</li>
+<li>Dutch, Belgium (nl_BE)</li>
+<li>English, US (en_US)</li>
+<li>English, Britain (en_GB)</li>
+<li>English, Canada (en_CA)</li>
+<li>English, Australia (en_AU)</li>
+<li>English, New Zealand (en_NZ)</li>
+<li>English, Singapore(en_SG)</li>
+<li>French, France (fr_FR)</li>
+<li>French, Belgium (fr_BE)</li>
+</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<li>French, Canada (fr_CA)</li>
+<li>French, Switzerland (fr_CH)</li>
+<li>German, Germany (de_DE)</li>
+<li>German, Austria (de_AT)</li>
+<li>German, Switzerland (de_CH)</li>
+<li>German, Liechtenstein (de_LI)</li>
+<li>Italian, Italy (it_IT)</li>
+<li>Italian, Switzerland (it_CH)</li>
+<li>Japanese (ja_JP)</li>
+<li>Korean (ko_KR)</li>
+<li>Polish (pl_PL)</li>
+<li>Russian (ru_RU)</li>
+<li>Spanish (es_ES)</li>
+</td>
+</tr>
+</table>
+
+<p>Localized UI strings match the locales that are accessible 
+through Settings.</p>
+
+<h2 id="skins">Emulator Skins</h2>
+
+<p>The downloadable platform includes a set of emulator skins that you can 
+use for modeling your application in different screen sizes and resolutions. 
+The emulator skins are: </p>
+
+<ul>
+  <li>
+    QVGA (240x320, low density, small screen)
+  </li>
+  <li>
+    HVGA (320x480, medium density, normal screen)
+  </li>
+  <li>
+    WVGA800 (480x800, high density, normal screen)
+  </li>
+  <li>
+    WVGA854 (480x854 high density, normal screen)
+  </li>
+</ul>
+
+<p>For more information about how to develop an application that displays and functions properly on all Android-powered devices, see <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>.</p>

@@ -1,0 +1,97 @@
+page.title=Google Services
+footer.hide=1
+@jd:body
+
+    
+   <p>Google offers a variety of services that help you build new revenue streams, enhance your app's capabilities, manage distribution and payloads, and track usage and installs. Many of the services use static libraries that you download through the Android SDK Manager and build into your app. Others are configurable directly from Google Play Android Developer Console.</p>
+   
+   <p>The sections below highlight some of the Google Services and link you to more information about how to use them in your Android app. </p>
+  
+
+<h2 id="monetization">Monetize Your App</h2>
+
+<div class="vspace size-1">&nbsp;</div>
+<div class="layout-content-row">
+
+  <div class="layout-content-col span-4">
+	  <h4>In-App Billing</h4>
+  		<p>Keep your users engaged by offering in-app purchases and subscriptions directly in your app.
+  		</p>
+   		<a href="{@docRoot}guide/google/play/billing/index.html">Learn more &raquo;</a>
+  </div>
+
+  <div class="layout-content-col span-4">
+		<h4>Google AdMob Ads</h4>
+		<p>Generate more revenue from your app by
+		displaying ads from multiple ad networks.</p>
+   	<a href="https://developers.google.com/mobile-ads-sdk/docs/android/fundamentals">Learn more &raquo;</a>
+  </div>
+  
+  <div class="layout-content-col span-4">
+			<h4>Application Licensing</h4>
+			<p>Protect your revenue streams and integrate policies for usage into your app.</p>
+			<a href="{@docRoot}guide/google/play/licensing/index.html">Learn more &raquo;</a>
+  </div>
+
+</div>
+
+<h2 id="integration">Manage App Distribution</h2>
+
+<div class="vspace size-1">&nbsp;</div>
+
+<div class="layout-content-row">
+
+<div class="layout-content-col span-4">
+
+<h4>Google Play Filters</h4>
+<p>Make sure your app gets to the right users by
+declaring the hardware and software features needed by your app.</p>
+<a href="{@docRoot}guide/google/play/filters.html">Learn more &raquo;</a>
+</div>
+
+  <div class="layout-content-col span-4">
+<h4>Multiple APK Support</h4>
+<p>Distribute different APKs based on a variety of properties such as platform version, screen size, and GLES texture compression support.</p>
+<a href="{@docRoot}guide/google/play/publishing/multiple-apks.html">Learn more &raquo;</a>
+</div>
+
+  <div class="layout-content-col span-4">
+
+<h4>APK Expansion files</h4>
+<p>Take load off of your servers and utilize APK expansion files
+to deliver up to 4 GB of assets for your Android app, free.</p>
+ 
+<a href="{@docRoot}guide/google/play/expansion-files.html">Learn more &raquo;</a>
+</div>
+
+</div>
+
+<h2 id="integration">Enhance Your App's Capabilities</h2>
+
+<div class="vspace size-1">&nbsp;</div>
+
+<div class="layout-content-row">
+
+<div class="layout-content-col span-4">
+  <h4>Android Cloud-to-Device Messaging </h4>
+  <p>Notify your apps of events with push messages that are lightweight
+   and battery-saving.</p>
+  <a href="https://developers.google.com/android/c2dm/">Learn more &raquo;</a>
+</div>
+
+<div class="layout-content-col span-4">
+	<h4>Google Maps</h4>
+  <p> The Google Maps library for Android lets you add powerful mapping and geo-location capabilities to your app.</p>
+  <a href="https://developers.google.com/maps/documentation/android/">Learn more &raquo;</a>
+</div>
+</div>
+
+
+<h2 id="integration">Track Performance with Analytics</h2>
+<p>Google Analytics gives you powerful insights into how users find your apps
+	and how they use them. <br />Start integrating analytics to measure
+	your app's success.</p>
+	
+	
+<div style="margin-bottom:1.5em;"><a href="https://developers.google.com/analytics/devguides/collection/android/">Learn more &raquo;</a></div>
+   

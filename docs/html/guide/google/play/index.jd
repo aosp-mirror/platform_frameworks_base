@@ -1,0 +1,16 @@
+page.title=Google Play APIs
+page.landing=1
+page.landing.intro=When you ditribute your Android app using Google Play you have the opportunity to enhance your app's capabilities with services such as in-app billing and control your app distribution with advanced device filtering.
+@jd:body
+
+
+<div class="distribute-features col-13">
+  <ul>
+    <li><h5>Monetize with in-app billing</h5>Lorem ipsum dolor sit amet, soldum
+consectetur adipiscing elit. <a href="#">Learn more &raquo;</a></li>
+    <li><h5>Control your app distribution</h5>Lorem ipsum dolor sit amet, soldum consectetur
+adipiscing elit. <a href="#">Learn more &raquo;</a></li>
+    <li class="last"><h5>Protect from piracy</h5>Lorem ipsum dolor sit amet, soldum
+consectetur adipiscing elit. <a href="#">Learn more &raquo;</a></li>
+  </ul>
+</div>

@@ -1,0 +1,73 @@
+page.title=Animation and Graphics Overview
+@jd:body
+
+  <p>Android provides a variety of powerful APIs for applying animation to UI elements and drawing custom
+  2D and 3D graphics. The sections below provide an overview of the APIs and system capabilities available
+  and help you decide with approach is best for your needs.</p>
+
+  <h3 id="animation">Animation</h3>
+  
+  <p>The Android framework provides two animation systems: property animation
+  (introduced in Android 3.0) and view animation. Both animation systems are viable options,
+  but the property animation system, in general, is the preferred method to use, because it
+  is more flexible and offers more features. In addition to these two systems, you can utilize Drawable
+  animation, which allows you to load drawable resources and display them one frame after
+  another.</p>
+
+<dl>
+<dt><strong><a href="{@docRoot}guide/topics/graphics/prop-animation.html">Property
+Animation</a></strong></dt>
+<dd>Introduced in Android 3.0 (API level 11), the property animation system lets you
+animate properties of any object, including ones that are not rendered to the screen. The system is
+extensible and lets you animate properties of custom types as well.</dd>
+
+<dt><strong><a href="{@docRoot}guide/topics/graphics/view-animation.html">View
+Animation</a></strong></dt>
+<dd>View Animation is the older system and can only be used for Views. It is relatively easy to
+setup and offers enough capabilities to meet many application's needs.</dd>
+</dl>
+
+<dt><strong><a href="{@docRoot}guide/topics/graphics/drawable-animation.html">Drawable
+Animation</a></strong></dt>
+<dd>Drawable animation involves displaying {@link android.graphics.drawable.Drawable} resources one
+after another, like a roll of film. This method of animation is useful if you want to animate
+things that are easier to represent with Drawable resources, such as a progression of bitmaps.</dd>
+
+<h3 id="graphics">2D and 3D Graphics</h3>
+
+<p>When writing an application, it's important to consider exactly what your graphical demands will be.
+Varying graphical tasks are best accomplished with varying techniques. For example, graphics and animations
+for a rather static application should be implemented much differently than graphics and animations
+for an interactive game. Here, we'll discuss a few of the options you have for drawing graphics
+on Android and which tasks they're best suited for.
+</p>
+
+<dl>
+<dt><strong><a href="{@docRoot}guide/topics/graphics/2d-graphics.html">Canvas and
+Drawables</a></strong></dt>
+<dd>Android provides a set of {@link android.view.View} widgets that provide general functionality
+for a wide array of user interfaces. You can also extend these widgets to modify the way they
+look or behave. In addition, you can do your own custom 2D rendering using the various drawing
+methods contained in the {@link android.graphics.Canvas} class or create {@link
+android.graphics.drawable.Drawable} objects for things such as textured buttons or frame-by-frame
+animations.</dd>
+
+<dt><strong><a href="{@docRoot}guide/topics/graphics/hardware-accel.html">Hardware
+Acceleration</a></strong></dt>
+<dd>Beginning in Android 3.0, you can hardware accelerate the majority of
+the drawing done by the Canvas APIs to further increase their performance.</dd>
+
+<dt><strong><a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL</a></strong></dt>
+<dd>Android supports OpenGL ES 1.0 and 2.0, with Android framework APIs as well as natively
+with the Native Development Kit (NDK). Using the framework APIs is desireable when you want to add a
+few graphical enhancements to your application that are not supported with the Canvas APIs, or if
+you desire platform independence and don't demand high performance. There is a performance hit in
+using the framework APIs compared to the NDK, so for many graphic intensive applications such as
+games, using the NDK is beneficial (It is important to note though that you can still get adequate
+performance using the framework APIs. For example, the Google Body app is developed entirely
+using the framework APIs). OpenGL with the NDK is also useful if you have a lot of native
+code that you want to port over to Android. For more information about using the NDK, read the
+docs in the <code>docs/</code> directory of the <a href="{@docRoot}tools/sdk/ndk/index.html">NDK
+download.</a></dd>
+</dl>
+

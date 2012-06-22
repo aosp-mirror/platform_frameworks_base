@@ -148,7 +148,7 @@ home=true
       'name':"Dev Phone 1",
       'img':"devphone-large.png",
       'title':"Android Dev Phone 1",
-      'desc': "<p>この携帯電話を使用することで、開発した Android アプリケーションの実行とデバッグを行うことができます。Android オペレーティングシステムを変更してからリビルドし、携帯電話に書き込むことができます。Android Dev Phone 1 は携帯通信会社に依存しておらず、<a href='http://play.google.com/apps/publish'>Android マーケット</a>に登録済みのデベロッパーなら誰でも購入可能です。</p><p><a href='/guide/developing/device.html#dev-phone-1'>Android Dev Phone 1 の詳細&raquo;</a></p>"
+      'desc': "<p>この携帯電話を使用することで、開発した Android アプリケーションの実行とデバッグを行うことができます。Android オペレーティングシステムを変更してからリビルドし、携帯電話に書き込むことができます。Android Dev Phone 1 は携帯通信会社に依存しておらず、<a href='http://play.google.com/apps/publish'>Android マーケット</a>に登録済みのデベロッパーなら誰でも購入可能です。</p><p><a href='/tools/device.html#dev-phone-1'>Android Dev Phone 1 の詳細&raquo;</a></p>"
     }
 
   }

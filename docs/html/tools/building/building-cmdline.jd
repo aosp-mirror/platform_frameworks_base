@@ -1,0 +1,371 @@
+page.title=Building and Running from the Command Line
+parent.title=Building and Running
+parent.link=index.html
+@jd:body
+
+ <div id="qv-wrapper">
+    <div id="qv">
+      <h2>In this document</h2>
+      <ol>
+        <li><a href="#DebugMode">Building in Debug Mode</a></li>
+        <li><a href="#ReleaseMode">Building in Release Mode</a>
+          <ol>
+            <li><a href="#ManualReleaseMode">Build unsigned</a></li>
+            <li><a href="#AutoReleaseMode">Build signed and aligned</a></li>
+            <li><a href="#OnceBuilt">Once built and signed in release mode</a></li>
+          </ol>
+        </li>
+        <li><a href="#RunningOnEmulator">Running on the Emulator</a></li>
+        <li><a href="#RunningOnDevice">Running on a Device</a></li>
+        <li><a href="#Signing">Application Signing</a></li>
+        <li><a href="#AntReference">Ant Command Reference</a></li>
+      </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}tools/devices/managing-avds-cmdline.html">Managing AVDs from
+the Command Line</a></li>
+    <li><a href="{@docRoot}tools/devices/emulator.html">Using the Android
+Emulator</a></li>
+    <li><a href="{@docRoot}tools/publishing/app-signing.html">Signing Your Applications</a></li>
+  </ol>
+    </div>
+  </div>
+
+  <p>There are two ways to build your application using the Ant build script: one for
+  testing/debugging your application &mdash; <em>debug mode</em> &mdash; and one for building your
+  final package for release &mdash; <em>release mode</em>. Regardless of which way you build your application,
+  it must be signed before it can install on an emulator or device&mdash;with a debug key when building
+  in debug mode and with your own private key when building in release mode.</p>
+
+  <p>Whether you're building in debug mode or release mode, you need to use the Ant tool to compile
+  and build your project. This will create the .apk file that you can install on an emulator or device.
+  When you build in debug mode, the .apk file is automatically signed by the SDK tools with
+  a debug key, so it's instantly ready for installation onto an emulator or attached
+  development device. You cannot distribute an application that is signed with a debug key.
+  When you build in release mode, the .apk file is <em>unsigned</em>, so you
+  must manually sign it with your own private key, using Keytool and Jarsigner.</p>
+
+  <p>It's important that you read and understand <a href=
+  "{@docRoot}tools/publishing/app-signing.html">Signing Your Applications</a>, particularly once
+  you're ready to release your application and share it with end-users. That document describes the
+  procedure for generating a private key and then using it to sign your .apk file. If you're just
+  getting started, however, you can quickly run your applications on an emulator or your own
+  development device by building in debug mode.</p>
+
+  <p>If you don't have Ant, you can obtain it from the <a href="http://ant.apache.org/">Apache Ant
+  home page</a>. Install it and make sure it is in your executable PATH. Before calling Ant, you
+  need to declare the JAVA_HOME environment variable to specify the path to where the JDK is
+  installed.</p>
+
+  <p class="note"><strong>Note:</strong> When installing JDK on Windows, the default is to install
+  in the "Program Files" directory. This location will cause <code>ant</code> to fail, because of
+  the space. To fix the problem, you can specify the JAVA_HOME variable like this:
+  <pre>set JAVA_HOME=c:\Progra~1\Java\&lt;jdkdir&gt;</pre>
+
+  <p>The easiest solution, however, is to install JDK in a non-space directory, for example:</p>
+
+  <pre>c:\java\jdk1.6.0_02</pre>
+
+  <h2 id="DebugMode">Building in Debug Mode</h2>
+
+  <p>For immediate application testing and debugging, you can build your application in debug mode
+  and immediately install it on an emulator. In debug mode, the build tools automatically sign your
+  application with a debug key and optimize the package with {@code zipalign}.</p>
+
+  <p>To build in debug mode:</p>
+
+  <ol>
+    <li>Open a command-line and navigate to the root of your project directory.</li>
+    <li>Use Ant to compile your project in debug mode:
+      <pre>
+ant debug
+</pre>
+
+      <p>This creates your debug <code>.apk</code> file inside the project <code>bin/</code> directory, named
+      <code>&lt;your_project_name&gt;-debug.apk</code>. The file is already signed with
+      the debug key and has been aligned with
+      <a href="{@docRoot}tools/help/zipalign.html"><code>zipalign</code></a>.
+      </p>
+    </li>
+  </ol>
+
+  <p>Each time you change a source file or resource, you must run Ant again in order to package up
+  the latest version of the application.</p>
+
+  <p>To install and run your application on an emulator, see the following section about <a href=
+  "#RunningOnEmulator">Running on the Emulator</a>.</p>
+
+  <h2 id="ReleaseMode">Building in Release Mode</h2>
+
+  <p>When you're ready to release and distribute your application to end-users, you must build your
+  application in release mode. Once you have built in release mode, it's a good idea to perform
+  additional testing and debugging with the final .apk.</p>
+
+  <p>Before you start building your application in release mode, be aware that you must sign the
+  resulting application package with your private key, and should then align it using the {@code
+  zipalign} tool. There are two approaches to building in release mode: build an unsigned package
+  in release mode and then manually sign and align the package, or allow the build script to sign
+  and align the package for you.</p>
+
+  <h3 id="ManualReleaseMode">Build unsigned</h3>
+
+  <p>If you build your application <em>unsigned</em>, then you will need to manually sign and align
+  the package.</p>
+
+  <p>To build an <em>unsigned</em> .apk in release mode:</p>
+
+  <ol>
+    <li>Open a command-line and navigate to the root of your project directory.</li>
+
+    <li>Use Ant to compile your project in release mode:
+      <pre>
+ant release
+</pre>
+    </li>
+  </ol>
+
+  <p>This creates your Android application .apk file inside the project <code>bin/</code>
+  directory, named <code><em>&lt;your_project_name&gt;</em>-unsigned.apk</code>.</p>
+
+  <p class="note"><strong>Note:</strong> The .apk file is <em>unsigned</em> at this point and can't
+  be installed until signed with your private key.</p>
+
+  <p>Once you have created the unsigned .apk, your next step is to sign the .apk with your private
+  key and then align it with {@code zipalign}. To complete this procedure, read <a href=
+  "{@docRoot}tools/publishing/app-signing.html">Signing Your Applications</a>.</p>
+
+  <p>When your <code>.apk</code> has been signed and aligned, it's ready to be distributed to end-users.
+  You should test the final build on different devices or AVDs to ensure that it
+  runs properly on different platforms.</p>
+
+  <h3 id="AutoReleaseMode">Build signed and aligned</h3>
+
+  <p>If you would like, you can configure the Android build script to automatically sign and align
+  your application package. To do so, you must provide the path to your keystore and the name of
+  your key alias in your project's {@code ant.properties} file. With this information provided,
+  the build script will prompt you for your keystore and alias password when you build in release
+  mode and produce your final application package, which will be ready for distribution.</p>
+
+  <p class="caution"><strong>Caution:</strong> Due to the way Ant handles input, the password that
+  you enter during the build process <strong>will be visible</strong>. If you are concerned about
+  your keystore and alias password being visible on screen, then you may prefer to perform the
+  application signing manually, via Jarsigner (or a similar tool). To instead perform the signing
+  procedure manually, <a href="#ManualReleaseMode">build unsigned</a> and then continue with
+  <a href="{@docRoot}tools/publishing/app-signing.html">Signing Your Applications</a>.</p>
+
+  <p>To specify your keystore and alias, open the project {@code ant.properties} file (found in
+  the root of the project directory) and add entries for {@code key.store} and {@code key.alias}.
+  For example:</p>
+  <pre>
+key.store=path/to/my.keystore
+key.alias=mykeystore
+</pre>
+
+  <p>Save your changes. Now you can build a <em>signed</em> .apk in release mode:</p>
+
+  <ol>
+    <li>Open a command-line and navigate to the root of your project directory.</li>
+
+    <li>Use Ant to compile your project in release mode:
+      <pre>
+ant release
+</pre>
+    </li>
+
+    <li>When prompted, enter you keystore and alias passwords.
+
+      <p class="caution"><strong>Caution:</strong> As described above, your password will be
+      visible on the screen.</p>
+    </li>
+  </ol>
+
+  <p>This creates your Android application .apk file inside the project <code>bin/</code>
+  directory, named <code><em>&lt;your_project_name&gt;</em>-release.apk</code>. This .apk file has
+  been signed with the private key specified in {@code ant.properties} and aligned with {@code
+  zipalign}. It's ready for installation and distribution.</p>
+
+  <h3 id="OnceBuilt">Once built and signed in release mode</h3>
+
+  <p>Once you have signed your application with a private key, you can install and run it on an
+  <a href="#RunningOnEmulator">emulator</a> or <a href="#RunningOnDevice">device</a>. You can
+  also try installing it onto a device from a web server. Simply upload the signed .apk to a web
+  site, then load the .apk URL in your Android web browser to download the application and begin
+  installation. (On your device, be sure you have enabled
+  <em>Settings &gt; Applications &gt; Unknown sources</em>.)</p>
+
+  <h2 id="RunningOnEmulator">Running on the Emulator</h2>
+
+  <p>Before you can run your application on the Android Emulator, you must <a href=
+  "{@docRoot}tools/devices/managing-avds.html">create an AVD</a>.</p>
+
+  <p>To run your application:</p>
+
+  <ol>
+    <li>
+      <strong>Open the AVD Manager and launch a virtual device</strong>
+
+      <p>From your SDK's <code>platform-tools/</code> directory, execute the {@code android} tool
+with the <code>avd</code> options:</p>
+      <pre>
+android avd
+</pre>
+
+      <p>In the <em>Virtual Devices</em> view, select an AVD and click <strong>Start</strong>.</p>
+    </li>
+
+    <li>
+      <strong>Install your application</strong>
+
+      <p>From your SDK's <code>tools/</code> directory, install the {@code .apk} on the
+      emulator:</p>
+      <pre>
+adb install <em>&lt;path_to_your_bin&gt;</em>.apk
+</pre>
+
+      <p>Your .apk file (signed with either a release or debug key) is in your project {@code bin/}
+      directory after you build your application.</p>
+
+      <p>If there is more than one emulator running, you must specify the emulator upon which to
+      install the application, by its serial number, with the <code>-s</code> option. For
+      example:</p>
+      <pre>
+adb -s emulator-5554 install <em>path/to/your/app</em>.apk
+</pre>
+
+      <p>To see a list of available device serial numbers, execute {@code adb devices}.</p>
+    </li>
+  </ol>
+
+  <p>If you don't see your application on the emulator, try closing the emulator and launching the
+  virtual device again from the AVD Manager. Sometimes when you install an application for the
+  first time, it won't show up in the application launcher or be accessible by other applications.
+  This is because the package manager usually examines manifests completely only on emulator
+  startup.</p>
+
+  <p>Be certain to create multiple AVDs upon which to test your application. You should have one
+  AVD for each platform and screen type with which your application is compatible. For instance, if
+  your application compiles against the Android 1.5 (API Level 3) platform, you should create an
+  AVD for each platform equal to and greater than 1.5 and an AVD for each <a href=
+  "{@docRoot}guide/practices/screens_support.html">screen type</a> you support, then test your
+  application on each one.</p>
+
+  <p class="note"><strong>Tip:</strong> If you have <em>only one</em> emulator running, you can
+  build your application and install it on the emulator in one simple step. Navigate to the root of
+  your project directory and use Ant to compile the project with <em>install mode</em>: <code>ant
+  install</code>. This will build your application, sign it with the debug key, and install it on
+  the currently running emulator.</p>
+
+  <h2 id="RunningOnDevice">Running on a Device</h2>
+
+  <p>Before you can run your application on a device, you must perform some basic setup for your
+  device:</p>
+
+  <ul>
+    <li>Enable USB Debugging on your device. You can find the setting on most Android devices by
+    going to <strong>Settings > Applications > Development > USB debugging</strong>.</li>
+
+    <li>Ensure that your development computer can detect your device when connected via USB</li>
+  </ul>
+
+  <p>Read <a href="{@docRoot}tools/device.html#setting-up">Setting up a Device for
+  Development</a> for more information.</p>
+
+  <p>Once your device is set up and connected via USB, navigate to your SDK's <code>platform-tools/</code>
+  directory and install the <code>.apk</code> on the device:</p>
+  <pre>
+adb -d install <em>path/to/your/app</em>.apk
+</pre>
+
+  <p>The {@code -d} flag specifies that you want to use the attached device (in case you also have
+  an emulator running).</p>
+
+  <p>For more information on the tools used above, please see the following documents:</p>
+
+  <ul>
+    <li><a href="{@docRoot}tools/help/android.html">android Tool</a></li>
+
+    <li><a href="{@docRoot}tools/devices/emulator.html">Android Emulator</a></li>
+
+    <li><a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a> (ADB)</li>
+  </ul>
+
+  <h2 id="Signing">Application Signing</h2>
+
+  <p>As you begin developing Android applications, understand that all Android applications must be
+  digitally signed before the system will install them on an emulator or device. There are two ways
+  to do this: with a <em>debug key</em> (for immediate testing on an emulator or development
+  device) or with a <em>private key</em> (for application distribution).</p>
+
+  <p>The Android build tools help you get started by automatically signing your .apk files with a
+  debug key at build time. This means that you can compile your application and install it on the
+  emulator without having to generate your own private key. However, please note that if you intend
+  to publish your application, you <strong>must</strong> sign the application with your own private
+  key, rather than the debug key generated by the SDK tools.</p>
+
+  <p>The ADT plugin helps you get started quickly by signing your .apk files with a debug key,
+  prior to installing them on an emulator or development device. This means that you can quickly
+  run your application from Eclipse without having to generate your own private key. No specific
+  action on your part is needed, provided ADT has access to Keytool. However, please note that if
+  you intend to publish your application, you <strong>must</strong> sign the application with your
+  own private key, rather than the debug key generated by the SDK tools.</p>
+
+  <p>Please read <a href="{@docRoot}tools/publishing/app-signing.html">Signing Your
+  Applications</a>, which provides a thorough guide to application signing on Android and what it
+  means to you as an Android application developer. The document also includes a guide to exporting
+  and signing your application with the ADT's Export Wizard.</p>
+
+  <h2 id="AntReference">Ant Command Reference</h2>
+  <dt><code>ant clean</code></dt>
+  <dd>Cleans the project. If you include the <code>all</code> target before <code>clean</code>
+(<code>ant all clean</code>), other projects are also cleaned. For instance if you clean a
+test project, the tested project is also cleaned.</dd>
+
+  <dt><code>ant debug</code></dt>
+  <dd>Builds a debug package. Works on application, library, and test projects and compiles
+  dependencies as  needed.</dd>
+
+  <dt id="emma"><code>ant emma debug</code></dt>
+  <dd>Builds a test project while building the tested project with instrumentation turned on.
+  This is used to run tests with code coverage enabled.</dd>
+
+  <dt><code>ant release</code></dt>
+  <dd>Builds a release package.</dd>
+
+  <dt><code>ant instrument</code>
+  </dt>
+  <dd>Builds an instrumented debug package. This is generally called automatically when building a
+  test project with code coverage enabled (with the <code>emma</code>
+  target)</dd>
+
+  <dt><code>ant &lt;build_target&gt; install</code></dt>
+  <dd>Builds and installs a package. Using <code>install</code> by itself fails.</dd>
+
+  <dt><code>ant installd</code></dt>
+  <dd>Installs an already compiled debug package. This fails if the <code>.apk</code> is not
+  already built.</dd>
+
+  <dt><code>ant installr</code></dt>
+  <dd>Installs an already compiled release package. This fails if the <code>.apk</code> is not
+  already built.</dd>
+
+  <dt><code>ant installt</code></dt>
+  <dd>Installs an already compiled test package. Also installs the <code>.apk</code> of the
+  tested application. This fails if the <code>.apk</code> is not already built.</dd>
+
+  <dt><code>ant installi</code></dt>
+  <dd>Installs an already compiled instrumented package. This is generally not used manually as
+  it's called when installing a test package. This fails if the <code>.apk</code> is not already
+  built.</dd>
+
+   <dt><code>ant test</code></dt>
+   <dd>Runs the tests (for test projects). The tested and test <code>.apk</code> files must be
+   previously installed.</dd>
+
+  <dt><code>ant debug installt test</code></dt>
+  <dd>Builds a test project and the tested project, installs both <code>.apk</code> files, and
+  runs the tests.</dd>
+
+  <dt><code>ant emma debug install test</code></dt>
+  <dd>Builds a test project and the tested project, installs both <code>.apk</code> files, and
+  runs the tests with code coverage enabled.</dd>
+

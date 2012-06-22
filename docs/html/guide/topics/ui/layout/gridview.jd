@@ -1,0 +1,191 @@
+page.title=Grid
+parent.title=Layouts
+parent.link=layout-objects.html
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+  <ol>
+    <li><a href="#example">Example</a></li>
+  </ol>
+  <h2>Key classes</h2>
+  <ol>
+	<li>{@link android.widget.GridView}</li>
+	<li>{@link android.widget.ImageView}</li>
+	<li>{@link android.widget.BaseAdapter}</li>
+  	<li>{@link android.widget.AdapterView.OnItemClickListener}</li>
+  </ol>
+</div>
+</div>
+<p>{@link android.widget.GridView} is a {@link android.view.ViewGroup} that displays items in a
+two-dimensional,
+scrollable grid. The grid items are automatically inserted to the layout using a {@link
+android.widget.ListAdapter}.</p>
+
+<img src="{@docRoot}images/ui/gridview.png" alt="" />
+
+
+<h2 id="example">Example</h2>
+<p>In this tutorial, you'll create a grid of image thumbnails. When an item is selected, a
+toast message will display the position of the image.</p>
+
+
+<ol>
+  <li>Start a new project named <em>HelloGridView</em>.</li>
+  <li>Find some photos you'd like to use, or <a
+href="{@docRoot}shareables/sample_images.zip">download these sample images</a>. Save the image files
+into the project's
+<code>res/drawable/</code> directory.</li>
+  <li>Open the <code>res/layout/main.xml</code> file and insert the following:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;GridView xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:id="@+id/gridview"
+    android:layout_width="fill_parent" 
+    android:layout_height="fill_parent"
+    android:columnWidth="90dp"
+    android:numColumns="auto_fit"
+    android:verticalSpacing="10dp"
+    android:horizontalSpacing="10dp"
+    android:stretchMode="columnWidth"
+    android:gravity="center"
+/>
+</pre>
+  <p>This {@link android.widget.GridView} will fill the entire screen. The attributes are rather
+self explanatory. For more information about valid attributes, see the {@link
+android.widget.GridView} reference.</p>
+</li>
+  <li>Open <code>HelloGridView.java</code> and insert the following code for the
+{@link android.app.Activity#onCreate(Bundle) onCreate()} method:
+<pre>
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+
+    GridView gridview = (GridView) findViewById(R.id.gridview);
+    gridview.setAdapter(new ImageAdapter(this));
+
+    gridview.setOnItemClickListener(new OnItemClickListener() {
+        public void onItemClick(AdapterView&lt;?> parent, View v, int position, long id) {
+            Toast.makeText(HelloGridView.this, "" + position, Toast.LENGTH_SHORT).show();
+        }
+    });
+}
+</pre>
+  <p>After the {@code main.xml} layout is set for the content view, the
+{@link android.widget.GridView} is captured from the layout with {@link
+android.app.Activity#findViewById(int)}. The {@link
+android.widget.GridView#setAdapter(T) setAdapter()} method then sets a custom adapter ({@code
+ImageAdapter}) as the source for all items to be displayed in the grid. The {@code ImageAdapter} is
+created in the next step.</p>
+<p>To do something when an item in the grid is clicked, the {@link
+android.widget.AdapterView#setOnItemClickListener(OnItemClickListener) setOnItemClickListener()}
+method is passed a new {@link android.widget.AdapterView.OnItemClickListener}. This anonymous
+instance defines the {@link
+android.widget.AdapterView.OnItemClickListener#onItemClick(AdapterView,View,int,long)
+onItemClick()} callback method to show a {@link android.widget.Toast} that displays the index
+position (zero-based) of the selected item (in a real world scenario, the position could be used to
+get the full sized
+image for some other task).</p>
+
+</li>
+<li>Create a new class called <code>ImageAdapter</code> that extends {@link
+android.widget.BaseAdapter}:
+<pre>
+public class ImageAdapter extends BaseAdapter {
+    private Context mContext;
+
+    public ImageAdapter(Context c) {
+        mContext = c;
+    }
+
+    public int getCount() {
+        return mThumbIds.length;
+    }
+
+    public Object getItem(int position) {
+        return null;
+    }
+
+    public long getItemId(int position) {
+        return 0;
+    }
+
+    // create a new ImageView for each item referenced by the Adapter
+    public View getView(int position, View convertView, ViewGroup parent) {
+        ImageView imageView;
+        if (convertView == null) {  // if it's not recycled, initialize some attributes
+            imageView = new ImageView(mContext);
+            imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            imageView.setPadding(8, 8, 8, 8);
+        } else {
+            imageView = (ImageView) convertView;
+        }
+
+        imageView.setImageResource(mThumbIds[position]);
+        return imageView;
+    }
+
+    // references to our images
+    private Integer[] mThumbIds = {
+            R.drawable.sample_2, R.drawable.sample_3,
+            R.drawable.sample_4, R.drawable.sample_5,
+            R.drawable.sample_6, R.drawable.sample_7,
+            R.drawable.sample_0, R.drawable.sample_1,
+            R.drawable.sample_2, R.drawable.sample_3,
+            R.drawable.sample_4, R.drawable.sample_5,
+            R.drawable.sample_6, R.drawable.sample_7,
+            R.drawable.sample_0, R.drawable.sample_1,
+            R.drawable.sample_2, R.drawable.sample_3,
+            R.drawable.sample_4, R.drawable.sample_5,
+            R.drawable.sample_6, R.drawable.sample_7
+    };
+}
+</pre>
+<p>First, this implements some required methods inherited from {@link
+android.widget.BaseAdapter}. The constructor and {@link
+android.widget.Adapter#getCount()} are self-explanatory. Normally, {@link
+android.widget.Adapter#getItem(int)} should return the actual object at the specified position in
+the adapter, but it's ignored for this example. Likewise, {@link
+android.widget.Adapter#getItemId(int)} should return the row id of the item, but it's not
+needed here.</p>
+
+<p>The first method necessary is {@link android.widget.Adapter#getView(int,View,ViewGroup)
+getView()}. This method creates a new {@link android.view.View} for each image added to the {@code
+ImageAdapter}. When this is called, a {@link android.view.View} is passed in, which is normally a
+recycled object (at least after this has been called once), so there's a check to see if the
+object is null. If it <em>is</em> null, an {@link android.widget.ImageView} is instantiated and
+configured with desired properties for the image presentation:</p>
+<ul>
+  <li>{@link android.view.View#setLayoutParams(ViewGroup.LayoutParams)} sets
+the height and width for the View&mdash;this ensures that, no matter the size of the drawable, each
+image is resized and cropped to fit in these dimensions, as appropriate.</li>
+  <li>{@link android.widget.ImageView#setScaleType(ImageView.ScaleType)} declares that images should
+be cropped toward the center (if necessary).</li>
+  <li>{@link android.widget.ImageView#setPadding(int,int,int,int)} defines the padding for all
+sides. (Note that, if the images have different aspect-ratios, then less
+padding will cause for more cropping of the image if it does not match
+the dimensions given to the ImageView.)</li>
+</ul>
+
+<p>If the {@link android.view.View} passed to {@link
+android.widget.Adapter#getView(int,View,ViewGroup) getView()} is <em>not</em> null, then the local
+{@link android.widget.ImageView} is initialized with the recycled {@link android.view.View}
+object.</p>
+
+<p>At the end of the {@link android.widget.Adapter#getView(int,View,ViewGroup) getView()} method,
+the {@code
+position} integer passed into the method is used to select an image from the {@code mThumbIds}
+array, which is set as the image resource for the {@link android.widget.ImageView}.</p>
+<p>All that's left is to define the {@code mThumbIds} array of drawable resources.</p>
+</li>
+<li>Run the application.</li>
+</ol>
+
+<p>Try experimenting with the behaviors of the {@link android.widget.GridView} and {@link
+android.widget.ImageView} elements by adjusting their properties. For example, instead of using
+{@link android.view.View#setLayoutParams(ViewGroup.LayoutParams)}, try using
+{@link android.widget.ImageView#setAdjustViewBounds(boolean)}. </p>
+
+

@@ -1,0 +1,31 @@
+page.title=Samples
+
+@jd:body
+
+<p>To help you understand some fundamental Android APIs and coding practices, a variety of sample
+code is available from the Android SDK Manager.</p>
+
+<p>To download the samples:</p>
+<ol>
+  <li>Launch the Android SDK Manager.
+    <ul>
+      <li>On Windows, double-click the SDK Manager.exe file at the root of the Android SDK
+directory.</li>
+      <li>On Mac or Linux, open a terminal to the {@code tools/} directory in the
+Android SDK, then execute {@code android sdk}.</ul>
+  </li>
+  <li>Expand the list of packages for the latest Android platform.</li>
+  <li>Select and download <em>Samples for SDK</em>.</li>
+</ol>
+
+<p>When the download is complete, you can find the samples sources at this location:</p>
+
+<p style="margin-left:2em">
+<code><em>&lt;sdk&gt;</em>/platforms/&lt;android-version>/samples/</code>
+</p>
+
+<p>You can easily create new Android projects with the downloaded samples, modify them
+if you'd like, and then run them on an emulator or device. </p>
+<!--
+<p>Below are summaries for several of the available samples.</p>
+-->

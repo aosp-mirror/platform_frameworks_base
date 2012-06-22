@@ -29,7 +29,7 @@ page.title=Android SDK のインストール
 
 <p>システム上に展開した SDK ディレクトリの名前とパスをメモしておきましょう。Android プラグインの設定時や、SDK ツールの使用時にこの SDK ディレクトリを参照する必要があります。</p>
 
-<p>SDK のプライマリディレクトリである <code>tools</code> のパスを、システム PATH に追加することをおすすめします。<code>tools/</code> プライマリディレクトリは、SDK フォルダのルートにあります。<code>tools</code> をパスに追加すると、Android Debug Bridge（adb）やその他のコマンド ライン <a href="{@docRoot}guide/developing/tools/index.html">ツール</a>を、ツールの格納されたディレクトの完全なパスを指定せずに実行できるようになります。 </p>
+<p>SDK のプライマリディレクトリである <code>tools</code> のパスを、システム PATH に追加することをおすすめします。<code>tools/</code> プライマリディレクトリは、SDK フォルダのルートにあります。<code>tools</code> をパスに追加すると、Android Debug Bridge（adb）やその他のコマンド ライン <a href="{@docRoot}tools/index.html">ツール</a>を、ツールの格納されたディレクトの完全なパスを指定せずに実行できるようになります。 </p>
 <ul>
     <li>Linux 上では <code>~/.bash_profile</code> ファイルまたは <code>~/.bashrc</code> ファイルを編集します。PATH 環境変数を設定している行を探し、その行に <code>tools/</code> ディレクトリへの完全なパスを追加します。PATH を設定する行が無い場合は、次の行を追加します:</li>
 
@@ -150,7 +150,7 @@ JKS</pre>
   <li><a href="{@docRoot}guide/index.html">デベロッパー ガイド</a>と、ガイドに説明されている情報の種類を参照します。</li>
   <li>Android をプラットフォームとして紹介している <a
   href="{@docRoot}guide/basics/what-is-android.html">Android とは</a>を読みます。</li>
-  <li><a href="{@docRoot}guide/topics/fundamentals.html">アプリケーションの基礎</a>を参照して、Android フレームワークとそこでのアプリケーションの実行方法について学びます。</li>
+  <li><a href="{@docRoot}guide/components/fundamentals.html">アプリケーションの基礎</a>を参照して、Android フレームワークとそこでのアプリケーションの実行方法について学びます。</li>
   <li>[<a
   href="{@docRoot}reference/packages.html">リファレンス</a>] タブの Android Framework API の仕様を参照します。</li>
 </ul>
@@ -158,7 +158,7 @@ JKS</pre>
 <p><strong>SDK の探索</strong></p>
 <ul>
   <li>利用可能な<a
-  href="{@docRoot}guide/developing/tools/index.html">開発ツール</a>の概要を把握します。</li>
+  href="{@docRoot}tools/index.html">開発ツール</a>の概要を把握します。</li>
   <li><a
   href="{@docRoot}guide/developing/eclipse-adt.html">Eclipse/ADT</a> または<a href="{@docRoot}guide/developing/other-ide.html">別の IDE</a> での開発方法を参照します。
   </li>
@@ -166,7 +166,7 @@ JKS</pre>
 
 <p><strong>サンプル コードの参照</strong></p>
 <ul>
-  <li><a href="{@docRoot}resources/tutorials/hello-world.html">Hello World アプリケーション</a>を構築します（特に Eclipse ユーザーにおすすめです）。</li>
+  <li><a href="{@docRoot}training/basics/firstapp/index.html">Hello World アプリケーション</a>を構築します（特に Eclipse ユーザーにおすすめです）。</li>
   <li><a href="{@docRoot}resources/tutorials/notepad/index.html">Notepad チュートリアル</a>に沿って Android アプリケーションを完全に構築します。 </li>
   <li><code><em>&lt;sdk&gt;</em>/platforms/<em>&lt;platfrom&gt;</em>/samples</code> に収められている他のサンプル アプリケーションのいずれかを新しいプロジェクトとして作成し、自分の開発環境でコンパイルし、実行します。</li>
 </ul>

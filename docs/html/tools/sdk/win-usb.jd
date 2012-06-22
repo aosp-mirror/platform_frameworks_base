@@ -1,0 +1,172 @@
+page.title=Google USB Driver
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#notes">Revisions</a></li>
+    <li><a href="#WinUsbDriver">Downloading the Google USB Driver</a></li>
+  </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}tools/extras/oem-usb.html#InstallingDriver">Installing a USB Driver</a></li>
+    <li><a href="{@docRoot}tools/device.html">Using Hardware Devices</a></li>
+    <li><a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a></li>
+  </ol>
+</div>
+</div>
+
+<p>The Google USB driver is a downloadable component for the Android SDK, available
+from the SDK Manager. The driver is for Windows only and provides the necessary drivers for the
+following devices:</p>
+  <ul>
+    <li>ADP1 / T-Mobile G1*</li>
+    <li>ADP2 / Google Ion / T-Mobile myTouch 3G*</li>
+    <li>Verizon Droid*</li>
+    <li>Nexus One</li>
+    <li>Nexus S</li>
+  </ul>
+  <p>* <em>Or similar hardware on other carriers</em></p>
+  
+  <p>All other devices require Windows drivers provided by the hardware manufacturer, as listed in
+the <a href="{@docRoot}tools/extras/oem-usb.html">OEM USB Drivers</a> document. The Galaxy Nexus
+driver is also distributed by <a
+href="http://www.samsung.com/us/support/downloads/verizon-wireless/SCH-I515MSAVZW">Samsung</a>
+(listed as model SCH-I515).</p>
+
+<p class="note"><strong>Note:</strong>
+If you're developing on Mac OS X or Linux, then you do not need to install a USB driver. To start
+developing with your device, also read <a href="{@docRoot}tools/device.html">Using
+Hardware Devices</a>.</p>
+
+<p>The sections below provide instructions on how to download and install the Google USB Driver
+for Windows. </p>
+
+
+
+
+<h2 id="notes">Revisions</h2>
+
+<p>The sections below provide notes about successive revisions of the USB Driver
+for Windows, as denoted by revision number. To determine what revision of the
+USB Driver for Windows you are using, refer to the "Installed Packages" listing
+in the Android SDK Manager.</p>
+
+<script type="text/javascript">
+function toggleDiv(link) {
+  var toggleable = $(link).parent();
+  if (toggleable.hasClass("closed")) {
+    //$(".toggleme", toggleable).slideDown("fast");
+    toggleable.removeClass("closed");
+    toggleable.addClass("open");
+    $(".toggle-img", toggleable).attr("title", "hide").attr("src", (toRoot + "assets/images/triangle-opened.png"));
+  } else {
+    //$(".toggleme", toggleable).slideUp("fast");
+    toggleable.removeClass("open");
+    toggleable.addClass("closed");
+    $(".toggle-img", toggleable).attr("title", "show").attr("src", (toRoot + "assets/images/triangle-closed.png"));
+  }
+  return false;
+}
+</script>
+<style>
+.toggleable {
+padding: .25em 1em;
+}
+.toggleme {
+  padding: 1em 1em 0 2em;
+  line-height:1em;
+}
+.toggleable a {
+  text-decoration:none;
+}
+.toggleme a {
+  text-decoration:underline;
+}
+.toggleable.closed .toggleme {
+  display:none;
+}
+#jd-content .toggle-img {
+  margin:0;
+}
+</style>
+
+<div class="toggleable opened">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
+width="9px" />
+USB Driver for Windows, Revision 4</a> <em>(December 2010)</em>
+  <div class="toggleme">
+
+<dl>
+<dt><p>Adds support for the Nexus S.</p></dt>
+</dl>
+ </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
+width="9px" />
+USB Driver for Windows, Revision 3</a> <em>(January 2010)</em>
+  <div class="toggleme">
+
+<dl>
+<dt><p>Adds support for the Nexus One.</p></dt>
+</dl>
+ </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
+USB Driver for Windows, Revision 2</a> <em>(November 2009)</em>
+  <div class="toggleme">
+
+<dl>
+<dt><p>Adds support for the Verizon Droid (or similar hardware on
+other carriers).</p></dt>
+</dl>
+ </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
+USB Driver for Windows, Revision 1</a> <em>(October 2009)</em>
+  <div class="toggleme">
+
+<dl>
+<dt><p>Initial release of the WinUsb-based driver, with support
+for the T-Mobile G1 and myTouch 3G (and similar devices).</p></dt>
+</dl>
+ </div>
+</div>
+
+
+<h2 id="WinUsbDriver">Downloading the Google USB Driver</h2>
+
+<div class="figure" style="width:536px;margin:0">
+  <img src="{@docRoot}images/developing/sdk-usb-driver.png" alt="" />
+  <p class="img-caption"><strong>Figure 1.</strong> The SDK Manager
+    with the Google USB Driver selected.</p>
+</div>
+
+<p>The USB Driver for Windows is available for download as an optional SDK
+component. You need the driver only if you are developing on Windows and 
+want to connect an Android-powered device (ADP, Nexus One, or Nexus S) to your
+development environment over USB. </p>
+
+<p>To download the driver, use the Android SDK Manager tool that is
+included with the <a href="{@docRoot}sdk/index.html">Android SDK</a>:</p>
+<ol>
+  <li>Launch the Android SDK Manager by double-clicking <code>SDK Manager.exe</code>,
+  at the root of your SDK directory.</li>
+  <li>Expand <em>Extras</em>.</li>
+  <li>Check <strong>Google USB Driver package</strong> and click <strong>Install</strong>.</li>
+  <li>Proceed to install the package. When done, the driver files are
+downloaded into the <code>&lt;sdk&gt;\extras\google\usb_driver\</code> directory.</li>
+</ol>
+
+<p>For installation information, read <a href="{@docRoot}tools/extras/oem-usb.html#InstallingDriver">Installing a USB Driver</a>.</p>

@@ -22,7 +22,7 @@ next.link=pausing.html
     
     <h2>You should also read</h2>
     <ul>
-      <li><a href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a></li>
+      <li><a href="{@docRoot}guide/components/activities.html">Activities</a></li>
     </ul>
 
 <h2>Try it out</h2>

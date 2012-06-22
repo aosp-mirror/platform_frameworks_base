@@ -1,0 +1,66 @@
+page.title=dmtracedump
+parent.title=Tools
+parent.link=index.html
+@jd:body
+
+
+ <p><code>dmtracedump</code> is a tool that gives you an alternate way of generating
+  graphical call-stack diagrams from trace log files (instead of using Traceview).</p>
+  
+  <p>This document is a reference to the available command line options. For more information on generating trace
+  logs, see <a href="{@docRoot}tools/debugging/debugging-tracing.html">Profiling with
+  Traceview and dmtracedump</a>.</p>
+
+  <p>The usage for <code>dmtracedump</code> is:</p>
+  <pre>
+dmtracedump [-ho] [-s sortable] [-d trace-base-name] [-g outfile] &lt;trace-base-name&gt;
+</pre>
+
+  <p>The tool then loads trace log data from <code>&lt;trace-base-name&gt;.data</code> and
+  &lt;trace-base-name&gt;.key. The table below lists the options for dmtracedump.</p>
+
+  <table>
+    <tr>
+      <th>Option</th>
+
+      <th>Description</th>
+    </tr>
+
+    <tr>
+      <td><nobr><code>-d&nbsp;<em>&lt;trace-base-name&gt;</em></code></nobr></td>
+
+      <td>Diff with this trace name</td>
+    </tr>
+
+    <tr>
+      <td><code>-g&nbsp;<em>&lt;outfile&gt;</em></code></td>
+
+      <td>Generate output to &lt;outfile&gt;</td>
+    </tr>
+
+    <tr>
+      <td><code>-h</code></td>
+
+      <td>Turn on HTML output</td>
+    </tr>
+
+    <tr>
+      <td><code>-o</code></td>
+
+      <td>Dump the trace file instead of profiling</td>
+    </tr>
+
+    <tr>
+      <td><code>-d&nbsp;<em>&lt;trace-base-name&gt;</em></code></td>
+
+      <td>URL base to the location of the sortable javascript file</td>
+    </tr>
+
+    <tr>
+      <td><code>-t&nbsp;&lt;percent&gt;</code></td>
+
+      <td>Minimum threshold for including child nodes in the graph (child's inclusive time as a
+      percentage of parent inclusive time). If this option is not used, the default threshold is
+      20%.</td>
+    </tr>
+  </table>

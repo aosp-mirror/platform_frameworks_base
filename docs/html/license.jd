@@ -1,15 +1,13 @@
 page.title=Content License
-hide_license_footer=true
+fullpage=1
 @jd:body
 
-<div id="mainBodyFluid">
-<h1>Content License</h1>
-
-<p>For the purposes of licensing, the content of this site is divided
+<div class="wrap" style="width:940px;">
+  <h1>Content License</h1>
+<p>For the purposes of licensing, the content of this web site is divided
 into two categories:</p>
 <ul>
-  <li>Documentation content, found under the "Dev Guide" and "Reference"
-  tabs, including both static content and content extracted from source 
+  <li>Documentation content, including both static documentation and content extracted from source 
   code modules, as well as sample code, and </li>
 <li>All other site content</li>
 </ul>
@@ -31,6 +29,10 @@ is licensed under GPLv2 or other license. In those cases, the license
 covering the source code module will apply to the documentation
 extracted from it. </p>
 
+<p>Third-party components of this site such as JavaScript libraries are included in the Android
+Open Source Project under the licenses specified by their authors. For information about these
+licenses, refer to the source files in the Android Open Source Project.</p>
+
 <p>All other content on this site, except the license documents themselves
 and as otherwise noted, is licensed under the <a
 href="http://creativecommons.org/licenses/by/2.5/">Creative Commons
@@ -42,17 +44,18 @@ above. For content licensed under Creative Commons Attribution 2.5, we
 ask that you give proper <a href="#attribution">attribution</a>. </p>
 
 
-<h3 id="terms">Terms of Use</h3>
+<h2 id="terms">Terms of Use</h2>
 
 <p>We are pleased to license the Android documentation and sample code under
 terms that encourage you to take, modify, reuse, re-purpose, and remix the
-content as you see fit. Except as noted in the Restrictions section below, you
+content as you see fit. Except as noted in the <a href="#restrictions">Restrictions</a> section
+below, you
 are free to use the documentation content in your own creations. For example,
 you could quote the text in a book, cut-and-paste sections to your blog, record
 it as an audiobook for the visually impaired, or even translate it. </p>
 
 
-<h3 id="restrictions">Restrictions</h3>
+<h2 id="restrictions">Restrictions</h2>
 
 <ul>
 <li>While the documentation itself is available to you under the Apache 2.0
@@ -60,9 +63,11 @@ license, note that proprietary trademarks and brand features are not
 included in that license.</li>
 
 <li>Google's trademarks and other brand features (including the 	
-ANDROID stylized typeface logo) are not included in the license.
-Please see <a href="http://www.google.com/permissions/guidelines.html">
-Guidelines for Third Party Use of Google Brand Features</a> for
+<img src="images/android-logo.png" alt="Android"
+style="margin:0;padding:0 2px;vertical-align:baseline" /> stylized typeface logo) are not included
+in the license.
+Please see <a
+href="http://www.android.com/developers/branding.html">Android Branding Guidelines</a> for
 information about this usage. </li>
 
 <li>In some cases, a page may include content, such as an image, that is not 
@@ -76,9 +81,8 @@ slide decks that are not covered.</li>
 documentation is subject to the conditions detailed in the <a
 href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license</a>.</li>
 </ul>
-</h3>
 
-<h3 id="attribution">Attribution</h3>
+<h2 id="attribution">Attribution</h2>
 <p>
 Proper attribution is required when you reuse or create modified
 versions of content that appears on a page made available under the
@@ -95,49 +99,47 @@ Creative Commons legal code</a>.
  are producing the work. There are several typical ways in which this 
  might apply:
 </p>
-<h4>Exact Reproductions</h4>
+<h3>Exact Reproductions</h3>
 <p>
  If your online work <em>exactly reproduces</em> text or images from this
  site, in whole or in part, please include a paragraph at the bottom
  of your page that reads: 
 </p>
-<blockquote>
+<p style="margin-left:20px;font-style:italic">
  Portions of this page are reproduced from work created and <a
  href="http://code.google.com/policies.html">shared by the Android Open Source Project</a>
  and used according to terms described in the <a
  href="http://creativecommons.org/licenses/by/2.5/">Creative Commons
  2.5 Attribution License</a>.
 
-</blockquote>
+</p>
 <p>
  Also, please link back to the original source page so that readers can
  refer there for more information.
 </p>
-<h4>Modified Versions</h4>
+<h3>Modified Versions</h3>
 <p>
  If your online work shows <em>modified</em> text or images based on
  the content from this site, please include a paragraph at the bottom of
  your page that reads:
 </p>
-<blockquote>
+<p style="margin-left:20px;font-style:italic">
  Portions of this page are modifications based on work created and <a
  href="http://code.google.com/policies.html">shared by the Android Open
  Source Project</a> and used according to terms described in the <a
  href="http://creativecommons.org/licenses/by/2.5/">Creative Commons
  2.5 Attribution License</a>.
-</blockquote>
+</p>
 <p>
  Again, please link back to the original source page so that readers can
  refer there for more information. This is even more important when
  the content has been modified.
 </p>
-<h4>Other Media</h4>
+<h3>Other Media</h3>
 <p>
  If you produce non-hypertext works, such as books, audio, or
  video, we ask that you make a best effort to include a spoken or
  written attribution in the spirit of the messages above.
 </p>
 
-</div>	
-
-
+</div>

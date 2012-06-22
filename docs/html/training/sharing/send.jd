@@ -22,7 +22,7 @@ next.link=receive.html
 <!-- other docs (NOT javadocs) -->
 <h2>You should also read</h2>
 <ul>
-  <li><a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and
+  <li><a href="{@docRoot}guide/components/intents-filters.html">Intents and
 Intent Filters</a></li>
 </ul>
 

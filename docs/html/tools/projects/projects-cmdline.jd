@@ -1,0 +1,295 @@
+page.title=Managing Projects from the Command Line
+parent.title=Managing Projects
+parent.link=index.html
+@jd:body
+
+  <div id="qv-wrapper">
+    <div id="qv">
+      <h2>In this document</h2>
+
+      <ol>
+        <li><a href="#CreatingAProject">Creating an Android Project</a></li>
+        <li><a href="#UpdatingAProject">Updating a Project</a></li>
+        <li><a href="#SettingUpLibraryProject">Setting up a Library Project</a>
+          <ol>
+            <li><a href="#CreatingManifestFile">Creating the manifest file</a></li>
+            <li><a href="#UpdatingLibraryProject">Updating a library project</a></li>
+          </ol>
+        </li>
+        <li><a href="#ReferencingLibraryProject">Referencing a Library Project</a>
+          <ol>
+            <li><a href="#DeclaringLibrary">Declaring library components in the manifest
+file</a></li>
+            <li><a href="#depAppBuild">Building a dependent application</a></li>
+          </ol>
+        </li>
+      </ol>
+
+      <h2>See also</h2>
+
+      <ol>
+        <li><a href=
+        "{@docRoot}tools/testing/testing_otheride.html#CreateTestProjectCommand">Testing
+        from Other IDEs</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <p>The <code>android</code> tool provides you with commands to create all three types of
+  projects. An Android project contains all of the files and resources that are needed to build a
+  project into an .apk file for installation.
+
+  <ul>
+    <li>An Android project contains all of the files and resources that are needed to build a project into
+  an .apk file for installation. You need to create an Android project for any application that you
+  want to eventually install on a device.</li>
+
+  <li>You can also designate an Android project as a library project, which allows it to be shared
+  with other projects that depend on it. Once an Android project is designated as a library
+  project, it cannot be installed onto a device.</li>
+
+  <li>Test projects extend JUnit test functionality to include Android specific functionality. For
+  more information on creating a test project, see <a href=
+  "{@docRoot}tools/testing/testing_otheride.html">Testing from other IDEs</a>.</li>
+  </ul>
+
+
+  <h2 id="CreatingAProject">Creating an Android Project</h2>
+
+  <p>To create an Android project, you must use the <code>android</code> tool. When you create a
+  new project with <code>android</code>, it will generate a project directory with some default
+  application files, stub files, configuration files and a build file.</p>
+
+  <p>To create a new Android project, open a command-line, navigate to the <code>tools/</code>
+  directory of your SDK and run:</p>
+  <pre>
+android create project \
+--target &lt;target_ID&gt; \
+--name &lt;your_project_name&gt; \
+--path path/to/your/project \
+--activity &lt;your_activity_name&gt; \
+--package &lt;your_package_namespace&gt;
+</pre>
+
+  <ul>
+    <li><code>target</code> is the "build target" for your application. It corresponds to an
+    Android platform library (including any add-ons, such as Google APIs) that you would like to
+    build your project against. To see a list of available targets and their corresponding IDs,
+    execute: <code>android list targets</code>.</li>
+
+    <li><code>name</code> is the name for your project. This is optional. If provided, this name
+    will be used for your .apk filename when you build your application.</li>
+
+    <li><code>path</code> is the location of your project directory. If the directory does not
+    exist, it will be created for you.</li>
+
+    <li><code>activity</code> is the name for your default {@link android.app.Activity} class. This
+    class file will be created for you inside
+    <code><em>&lt;path_to_your_project&gt;</em>/src/<em>&lt;your_package_namespace_path&gt;</em>/</code>
+    . This will also be used for your .apk filename unless you provide a <code>name</code>.</li>
+
+    <li><code>package</code> is the package namespace for your project, following the same rules as
+    for packages in the Java programming language.</li>
+  </ul>
+
+  <p>Here's an example:</p>
+  <pre>
+android create project \
+--target 1 \
+--name MyAndroidApp \
+--path ./MyAndroidAppProject \
+--activity MyAndroidAppActivity \
+--package com.example.myandroid
+</pre>
+
+  <p>Once you've created your project, you're ready to begin development. You can move your project
+  folder wherever you want for development, but keep in mind that you must use the <a href=
+  "{@docRoot}tools/help/adb.html">Android Debug Bridge</a> (adb) &mdash; located in the
+  SDK <code>platform-tools/</code> directory &mdash; to send your application to the emulator (discussed
+  later). So you need access between your project solution and the <code>platform-tools/</code> folder.</p>
+
+  <p class="note"><strong>Tip:</strong> Add the <code>platform-tools/</code> as well as the <code>tools/</code> directory
+  to your <code>PATH</code> environment variable.</p>
+
+  <p class="caution"><strong>Caution:</strong> You should refrain from moving the location of the
+  SDK directory, because this will break the SDK location property located in <code>local.properties</code>.
+  If you need to update the SDK location, use the <code>android update project</code> command.
+  See <a href="#UpdatingAProject">Updating a Project</a> for more information.</p>
+
+  <h2 id="UpdatingAProject">Updating a Project</h2>
+
+  <p>If you're upgrading a project from an older version of the Android SDK or want to create a new
+  project from existing code, use the <code>android update project</code> command to update the
+  project to the new development environment. You can also use this command to revise the build
+  target of an existing project (with the <code>--target</code> option) and the project name (with
+  the <code>--name</code> option). The <code>android</code> tool will generate any files and
+  folders (listed in the previous section) that are either missing or need to be updated, as needed
+  for the Android project.</p>
+
+  <p>To update an existing Android project, open a command-line and navigate to the
+  <code>tools/</code> directory of your SDK. Now run:</p>
+  <pre>
+android update project --name &lt;project_name&gt; --target &lt;target_ID&gt;
+--path &lt;path_to_your_project&gt;
+</pre>
+
+  <ul>
+    <li><code>target</code> is the "build target" for your application. It corresponds to an
+    Android platform library (including any add-ons, such as Google APIs) that you would like to
+    build your project against. To see a list of available targets and their corresponding IDs,
+    execute: <code>android list targets</code>.</li>
+
+    <li><code>path</code> is the location of your project directory.</li>
+
+    <li><code>name</code> is the name for the project. This is optional&mdash;if you're not
+    changing the project name, you don't need this.</li>
+  </ul>
+
+  <p>Here's an example:</p>
+  <pre>
+android update project --name MyApp --target 2 --path ./MyAppProject
+</pre>
+
+  <h2 id="SettingUpLibraryProject">Setting up a Library Project</h2>
+
+  <p>A library project is a standard Android project, so you can create a new one in the same way
+  as you would a new application project. Specifically, you can use the <code>android</code> tool
+  to generate a new library project with all of the necessary files and folders.</p>
+
+  <p>To create a new library project, navigate to the <code>&lt;sdk&gt;/tools/</code> directory and
+  use this command:</p>
+  <pre class="no-pretty-print">
+android create lib-project --name &lt;your_project_name&gt; \
+--target &lt;target_ID&gt; \
+--path path/to/your/project \
+--package &lt;your_library_package_namespace&gt;
+</pre>
+
+  <p>The <code>create lib-project</code> command creates a standard project structure that includes
+  preset property that indicates to the build system that the project is a library. It does this by
+  adding this line to the project's <code>project.properties</code> file:</p>
+  <pre class="no-pretty-print">
+android.library=true
+</pre>
+
+  <p>Once the command completes, the library project is created and you can begin moving source
+  code and resources into it, as described in the sections below.</p>
+
+  <p>If you want to convert an existing application project to a library project, so that other
+  applications can use it, you can do so by adding a the <code>android.library=true</code> property
+  to the application's <code>project.properties</code> file.</p>
+
+  <h3 id="CreatingManifestFile">Creating the manifest file</h3>
+
+  <p>A library project's manifest file must declare all of the shared components that it includes,
+  just as would a standard Android application. For more information, see the documentation for
+  <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml</a>.</p>
+
+  <p>For example, the <a href=
+  "{@docRoot}resources/samples/TicTacToeLib/AndroidManifest.html">TicTacToeLib</a> example library
+  project declares the Activity <code>GameActivity</code>:</p>
+  <pre>
+&lt;manifest&gt;
+  ...
+  &lt;application&gt;
+    ...
+    &lt;activity android:name="GameActivity" /&gt;
+    ...
+  &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+  <h3 id="UpdatingLibraryProject">Updating a library project</h3>
+
+  <p>If you want to update the build properties (build target, location) of the library project,
+  use this command:</p>
+  <pre>
+android update lib-project \
+--target <em>&lt;target_ID&gt;</em> \
+--path <em>path/to/your/project</em>
+</pre>
+
+  <h2 id="ReferencingLibraryProject">Referencing a Library Project</h2>
+
+  <p>If you are developing an application and want to include the shared code or resources from a
+  library project, you can do so easily by adding a reference to the library project in the
+  application project's build properties.</p>
+
+  <p>To add a reference to a library project, navigate to the <code>&lt;sdk&gt;/tools/</code>
+  directory and use this command:</p>
+  <pre>
+android update project \
+--target <em>&lt;target_ID&gt;</em> \
+--path <em>path/to/your/project</em>
+--library <em>path/to/library_projectA</em>
+</pre>
+
+  <p>This command updates the application project's build properties to include a reference to the
+  library project. Specifically, it adds an <code>android.library.reference.<em>n</em></code>
+  property to the project's <code>project.properties</code> file. For example:</p>
+  <pre class="no-pretty-print">
+android.library.reference.1=path/to/library_projectA
+</pre>
+
+  <p>If you are adding references to multiple libraries, note that you can set their relative
+  priority (and merge order) by manually editing the <code>project.properties</code> file and
+  adjusting the each reference's <code>.<em>n</em></code> index as appropriate. For example, assume
+  these references:</p>
+  <pre class="no-pretty-print">
+android.library.reference.1=path/to/library_projectA
+android.library.reference.2=path/to/library_projectB
+android.library.reference.3=path/to/library_projectC
+</pre>
+
+  <p>You can reorder the references to give highest priority to <code>library_projectC</code> in
+  this way:</p>
+  <pre class="no-pretty-print">
+android.library.reference.2=path/to/library_projectA
+android.library.reference.3=path/to/library_projectB
+android.library.reference.1=path/to/library_projectC
+</pre>
+
+  <p>Note that the <code>.<em>n</em></code> index in the references must begin at "1" and increase
+  uniformly without "holes". References appearing in the index after a hole are ignored.</p>
+
+  <p>At build time, the libraries are merged with the application one at a time, starting from the
+  lowest priority to the highest. Note that a library cannot itself reference another library and
+  that, at build time, libraries are not merged with each other before being merged with the
+  application.</p>
+
+  <h3 id="DeclaringLibrary">Declaring library components in the manifest file</h3>
+
+  <p>In the manifest file of the application project, you must add declarations of all components
+  that the application will use that are imported from a library project. For example, you must
+  declare any <code>&lt;activity&gt;</code>, <code>&lt;service&gt;</code>,
+  <code>&lt;receiver&gt;</code>, <code>&lt;provider&gt;</code>, and so on, as well as
+  <code>&lt;permission&gt;</code>, <code>&lt;uses-library&gt;</code>, and similar elements.</p>
+
+  <p>Declarations should reference the library components by their fully-qualified package names,
+  where appropriate.</p>
+
+  <p>For example, the <a href=
+  "{@docRoot}resources/samples/TicTacToeMain/AndroidManifest.html">TicTacToeMain</a> example
+  application declares the library Activity <code>GameActivity</code> like this:</p>
+  <pre>
+&lt;manifest&gt;
+  ...
+  &lt;application&gt;
+    ...
+    &lt;activity android:name="com.example.android.tictactoe.library.GameActivity" /&gt;
+    ...
+  &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+  <p>For more information about the manifest file, see the documentation for
+  <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml</a>.</p>
+
+  <h3 id="depAppBuild">Building a dependent application</h3>
+
+  <p>To build an application project that depends on one or more library projects, you can use the
+  standard Ant build commands and compile modes, as described in <a href=
+  "{@docRoot}tools/building/index.html">Building and Running</a>. The tools
+compile and merge all libraries referenced by the application as part of
+  compiling the dependent application project. No additional commands or steps are necessary.</p>
+

@@ -31,7 +31,7 @@ previous.link=building-ui.html
 <h2>You should also read</h2>
 
 <ul>
-  <li><a href="{@docRoot}sdk/installing.html">Installing the
+  <li><a href="{@docRoot}sdk/installing/index.html">Installing the
 SDK</a></li>
 </ul>
  
@@ -42,7 +42,7 @@ SDK</a></li>
 
 
 <p>After completing the <a href="building-ui.html">previous lesson</a>, you have an app that
-shows an activity (a single screen) with a text box and a button. In this lesson, you’ll add some
+shows an activity (a single screen) with a text field and a button. In this lesson, you’ll add some
 code to <code>MyFirstActivity</code> that
 starts a new activity when the user selects the Send button.</p>
 
@@ -90,7 +90,7 @@ the signature must be exactly as shown. Specifically, the method must:</p>
 android.view.View} that was clicked)</li>
 </ul>
 
-<p>Next, you’ll fill in this method to read the contents of the text box and deliver that text to
+<p>Next, you’ll fill in this method to read the contents of the text field and deliver that text to
 another activity.</p>
 
 
@@ -290,8 +290,8 @@ public void onCreate(Bundle savedInstanceState) {
 }
 </pre>
 
-<p>You can now run the app, type a message in the text box, press Send, and view the message on the
-second activity.</p>
+<p>You can now run the app, type a message in the text field, press Send, and view the message on
+the second activity.</p>
 
 <img src="{@docRoot}images/training/firstapp/firstapp.png" />
 <p class="img-caption"><strong>Figure 1.</strong> Both activities in the final app, running

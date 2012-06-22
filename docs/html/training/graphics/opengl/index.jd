@@ -1,0 +1,75 @@
+page.title=Displaying Graphics with OpenGL ES
+trainingnavtop=true
+next.title=Building an OpenGL ES Environment
+next.link=environment.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li>Android 2.2 (API Level 8) or higher</li>
+  <li>Experience building an <a href="{@docRoot}training/basics/firstapp/index.html">Android
+app</a></li>
+</ul>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL</a></li>
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+ <a href="{@docRoot}shareables/training/OpenGLES.zip"
+class="button">Download the sample</a>
+ <p class="filename">OpenGLES.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>The Android framework provides plenty of standard tools for creating attractive, functional
+graphical user interfaces. However, if you want more control of what your application draws on
+screen, or are venturing into three dimensional graphics, you need to use a different tool. The
+OpenGL ES APIs provided by the Android framework offers a set of tools for displaying high-end,
+animated graphics that are limited only by your imagination and can also benefit from the
+acceleration of graphics processing units (GPUs) provided on many Android devices.</p>
+
+<p>This class walks you through the basics of developing applications that use OpenGL, including
+setup, drawing objects, moving drawn elements and responding to touch input.</p>
+
+<p>The example code in this class uses the OpenGL ES 2.0 APIs, which is the recommended API version
+to use with current Android devices. For more information about versions of OpenGL ES, see the <a
+href="{@docRoot}guide/topics/graphics/opengl.html#choosing-version">OpenGL</a>
+developer guide.</p>
+
+<p class="note"><strong>Note:</strong> Be careful not to mix OpenGL ES 1.x API calls with OpenGL
+ES 2.0 methods! The two APIs are not interchangeable and trying to use them together only results in
+frustration and sadness.</p>
+
+
+<h2>Lessons</h2>
+
+<dl>
+  <dt><b><a href="environment.html">Building an OpenGL ES Environment</a></b></dt>
+    <dd>Learn how to set up an Android application to be able to draw OpenGL graphics.</dd>
+
+  <dt><b><a href="shapes.html">Defining Shapes</a></b></dt>
+    <dd>Learn how to define shapes and why you need to know about faces and winding.</dd>
+
+  <dt><b><a href="draw.html">Drawing Shapes</a></b></dt>
+    <dd>Learn how to draw OpenGL shapes in your application.</dd>
+
+  <dt><b><a href="projection.html">Applying Projection and Camera Views</a></b></dt>
+    <dd>Learn how to use projection and camera views to get a new perspective on your drawn
+objects.</dd>
+
+  <dt><b><a href="motion.html">Adding Motion</a></b></dt>
+    <dd>Learn how to do basic movement and animation of drawn objects with OpenGL.</dd>
+
+  <dt><b><a href="touch.html">Responding to Touch Events</a></b></dt>
+    <dd>Learn how to do basic interaction with OpenGL graphics.</dd>
+</dl>

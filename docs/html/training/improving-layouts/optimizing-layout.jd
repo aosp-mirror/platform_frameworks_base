@@ -44,8 +44,8 @@ is inflated repeatedly, such as when used in a {@link android.widget.ListView} o
 android.widget.GridView}.</p>
 
 <p>In this lesson you'll learn to use <a
-href="{@docRoot}guide/developing/tools/hierarchy-viewer.html">Hierarchy Viewer</a> and <a
-href="{@docRoot}guide/developing/tools/layoutopt.html">Layoutopt</a> to examine and optimize your
+href="{@docRoot}tools/help/hierarchy-viewer.html">Hierarchy Viewer</a> and <a
+href="{@docRoot}tools/help/layoutopt.html">Layoutopt</a> to examine and optimize your
 layout.</p>
 
 
@@ -53,7 +53,7 @@ layout.</p>
 <h2 id="Inspect">Inspect Your Layout</h2>
 
 <p>The Android SDK tools include a tool called <a
-href="{@docRoot}guide/developing/tools/hierarchy-viewer.html">Hierarchy Viewer</a> that allows
+href="{@docRoot}tools/help/hierarchy-viewer.html">Hierarchy Viewer</a> that allows
 you to analyze your layout while your application is running. Using this tool helps you discover
 bottlenecks in the layout performance.</p>
 

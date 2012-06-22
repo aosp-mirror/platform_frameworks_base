@@ -328,7 +328,7 @@ following approaches:</p>
   <li>If your application targets Android 4.0 (API level 14) and higher, override and implement the
 accessibility methods listed above directly in your custom view class.</li>
   <li>If your custom view is intended to be compatible with Android 1.6 (API Level 4) and above, add
-the Android <a href="{@docRoot}sdk/compatibility-library.html">Support Library</a>, revision 5 or
+the Android <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>, revision 5 or
 higher, to your project. Then, within your custom view class, call the
 {@link android.support.v4.view.ViewCompat#setAccessibilityDelegate
 ViewCompat.setAccessibilityDelegate()} method to implement the accessibility methods
@@ -467,7 +467,7 @@ appropriate feedback to users.</p>
 <p>The example code below shows how override these three methods by using
 {@link android.support.v4.view.ViewCompat#setAccessibilityDelegate
 ViewCompat.setAccessibilityDelegate()}. Note that this sample code requires that the Android
-<a href="{@docRoot}sdk/compatibility-library.html">Support Library</a> for API Level 4 (revision 5
+<a href="{@docRoot}tools/extras/support-library.html">Support Library</a> for API Level 4 (revision 5
 or higher) is added to your project.</p>
 
 <pre>
@@ -511,7 +511,7 @@ ViewCompat.setAccessibilityDelegate(new AccessibilityDelegateCompat() {
 
 <p>On applications targeting Android 4.0 (API Level 14) and higher, these methods can be implemented
 directly in your custom view class. For another example of this approach, see the Android
-<a href="{@docRoot}sdk/compatibility-library.html">Support Library</a> (revision 5 or higher) sample
+<a href="{@docRoot}tools/extras/support-library.html">Support Library</a> (revision 5 or higher) sample
 {@code AccessibilityDelegateSupportActivity} in 
 ({@code &lt;sdk&gt;/extras/android/support/v4/samples/Support4Demos/}).</p>
 
@@ -567,7 +567,7 @@ option is not available.</p>
 
 <p>As part of your accessibility testing, you can test navigation of your application using focus,
 even if your test devices does not have a directional controller. The <a
-href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a> provides a
+href="{@docRoot}tools/help/emulator.html">Android Emulator</a> provides a
 simulated directional controller that you can easily use to test navigation. You can also use a
 software-based directional controller, such as the one provided by the
 <a href="https://play.google.com/store/apps/details?id=com.googlecode.eyesfree.inputmethod.latin">

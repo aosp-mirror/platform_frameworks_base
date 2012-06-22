@@ -1,0 +1,79 @@
+page.title=Creating Custom Views
+
+trainingnavtop=true
+startpage=true
+next.title=Creating a View Class
+next.link=create-view.html
+
+@jd:body
+
+<div id="tb-wrapper">
+    <div id="tb">
+
+        <h2>Dependencies and prerequisites</h2>
+        <ul>
+            <li>Android 2.1 (API level 7) or higher</li>
+        </ul>
+
+        <h2>You should also read</h2>
+        <ul>
+            <li><a href="{@docRoot}/guide/topics/ui/custom-components.html">Custom Components</a>
+            </li>
+            <li><a href="{@docRoot}/guide/topics/ui/ui-events.html">Input Events</a></li>
+            <li><a href="{@docRoot}/guide/topics/graphics/prop-animation.html">Property
+                Animation</a></li>
+            <li><a href="{@docRoot}/guide/topics/graphics/hardware-accel.html">Hardware
+                Acceleration</a></li>
+            <li><a href="{@docRoot}guide/topics/ui/accessibility/index.html">
+                Accessibility</a> developer guide</li>
+        </ul>
+<h2>Try it out</h2>
+<div class="download-box">
+<a href="{@docRoot}shareables/training/CustomView.zip"
+class="button">Download the sample</a>
+<p class="filename">CustomView.zip</p>
+</div>
+    </div>
+</div>
+
+<p>
+The Android framework has a large set of {@link android.view.View} classes for
+interacting with the user and displaying various
+types of data. But
+sometimes your app has unique needs that aren’t covered by the built-in views. This class shows you
+how to create your
+own views that are robust and reusable.</p>
+
+<h2>Lessons</h2>
+
+<dl>
+<dt><b><a href="create-view.html">Creating a View Class</a></b></dt>
+<dd>Create a class that acts like a built-in view, with custom
+    attributes and support from the <a href="http://developer.android.com/sdk/eclipse-adt.html">ADT</a> layout editor.
+</dd>
+
+<dt><b><a href="custom-drawing.html">Custom Drawing</a></b></dt>
+<dd>Make your view visually distinctive using the Android graphics system.</dd>
+
+<dt><b><a href="making-interactive.html">Making the View Interactive</a></b></dt>
+<dd>Users expect a view to react smoothly and naturally to input gestures.
+    This lesson discusses how to use gesture detection, physics, and animation
+    to give your user interface a professional feel.
+</dd>
+
+<dt><b><a href="optimizing-view.html">Optimizing the View</a></b></dt>
+<dd>No matter how beautiful your UI is, users won't love it if it
+    doesn't run at a consistently high frame rate. Learn how to avoid common
+    performance problems, and how to use hardware acceleration to make your
+    custom drawings run faster.
+</dd>
+
+</dl> 
+
+
+
+
+
+
+
+

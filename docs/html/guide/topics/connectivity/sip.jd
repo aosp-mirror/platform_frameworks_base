@@ -1,0 +1,490 @@
+page.title=Session Initiation Protocol
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+    <h2>In this document</h2>
+    <ol>
+
+      <li><a href="#requirements">Requirements and Limitations</a></li>
+      <li><a href="#classes">Classes and Interfaces</a></li>
+      <li><a href="#manifest">Creating the Manifest</a></li>
+      <li><a href="#manager">Creating a SIP Manager</a></li>
+      <li><a href="#profiles">Registering with a SIP Server</a></li>
+      <li><a href="#audio">Making an Audio Call</a></li>
+      <li><a href="#receiving">Receiving Calls</a></li>   
+      <li><a href="#testing">Testing SIP Applications</a></li>
+    </ol>
+    
+  <h2>Key classes</h2>
+    <ol>
+      <li>{@link android.net.sip.SipManager}</li>
+      <li>{@link android.net.sip.SipProfile}</li>
+      <li>{@link android.net.sip.SipAudioCall}</li>
+
+    </ol>
+    
+   <h2>Related samples</h2>
+   <ol>
+     <li> <a href="{@docRoot}resources/samples/SipDemo/index.html"> SipDemo</a></li>
+   </ol>
+  </div>
+</div>
+
+<p>Android provides an API that supports the Session Initiation Protocol (SIP).
+This lets you add SIP-based internet telephony features to your applications.
+Android includes a full SIP protocol stack and integrated call management
+services that let applications easily set up outgoing and incoming voice calls,
+without having to manage sessions, transport-level communication, or audio
+record or playback directly.</p>
+
+<p>Here are examples of the types of applications that might use the SIP API:</p>
+<ul>
+  <li>Video conferencing.</li>
+  <li>Instant messaging.</li>
+</ul>
+<h2 id="requirements">Requirements and Limitations</h2>
+<p>Here are the requirements for developing a SIP application:</p>
+<ul>
+  
+  <li>You must have a mobile device that is running Android 2.3 or higher. </li>
+  
+  <li>SIP runs over a wireless data connection, so your device must have a data
+connection (with a mobile data service or Wi-Fi)</span>. This means that you
+can't test on AVD&#8212;you can only test on a physical device. For details, see
+<a href="#testing">Testing SIP Applications</a>.</li>
+
+  <li>Each participant in the application's communication session must have a
+SIP account. There are many different SIP providers that offer SIP accounts.</li>
+</ul>
+
+
+<h2 id="classes">SIP API Classes and Interfaces</h2>
+
+<p>Here is a summary of the classes and one interface
+(<code>SipRegistrationListener</code>) that are included in the Android SIP
+API:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Class/Interface</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>{@link android.net.sip.SipAudioCall}</td>
+      <td>Handles an Internet audio call over SIP.</td>
+    </tr>
+    <tr>
+      <td>{@link android.net.sip.SipAudioCall.Listener}</td>
+      <td>Listener for events relating to a SIP call, such as when a call is being
+received ("on ringing") or a call is outgoing ("on calling").</td>
+    </tr>
+    <tr>
+      <td>{@link android.net.sip.SipErrorCode}</td>
+      <td>Defines error codes returned during SIP actions.</td>
+    </tr>
+    <tr>
+      <td>{@link android.net.sip.SipManager}</td>
+      <td>Provides APIs for SIP tasks, such as initiating SIP connections, and provides access
+to related SIP services.</td>
+    </tr>
+    <tr>
+      <td>{@link android.net.sip.SipProfile}</td>
+      <td>Defines a SIP profile, including a SIP account, domain and server information.
+</td>
+    </tr>
+    <tr>
+      <td>{@link android.net.sip.SipProfile.Builder}</td>
+      <td>Helper class for creating a SipProfile.</td>
+    </tr>
+    <tr>
+      <td>{@link android.net.sip.SipSession}</td>
+      <td>Represents a SIP session that is associated with a SIP dialog or a standalone transaction
+not within a dialog.</td>
+    </tr>
+    <tr>
+      <td>{@link android.net.sip.SipSession.Listener}</td>
+      <td>Listener for events relating to a SIP session, such as when a session is being registered
+("on registering") or a call is outgoing ("on calling"). </td>
+    </tr>
+    <tr>
+      <td>{@link android.net.sip.SipSession.State}</td>
+      <td>Defines SIP session states, such as "registering", "outgoing call", and "in call". </td>
+    </tr>
+    <tr>
+      <td>{@link android.net.sip.SipRegistrationListener}</td>
+      <td>An interface that is a listener for SIP registration events.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="manifest">Creating the Manifest</h2>
+
+<p>If you are developing an application that uses the SIP API, remember that the
+feature is supported only on Android 2.3 (API level 9) and higher versions of
+the platform. Also, among devices running Android 2.3 (API level 9) or higher,
+not all devices will offer SIP support.</p>
+
+<p>To use SIP, add the following permissions to your application's manifest:</p>
+<ul>
+  <li><code>android.permission.USE_SIP</code></li>
+  <li><code>android.permission.INTERNET</code></li>
+</ul>
+
+<p> To ensure that your application can only be installed on devices that are
+capable of supporting SIP,  add the following to your application's
+manifest:</p>
+
+<ul>
+  <li><code>&lt;uses-sdk android:minSdkVersion=&quot;9&quot; /&gt;</code>. This 
+ indicates that your application requires   Android 2.3 or higher. For more
+information, see <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API
+Levels</a> and the documentation for the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a
+> element.</li>
+</ul>
+
+<p>To control how your application is filtered from devices that do not support
+SIP (for example, on Google Play), add the following to your application's
+manifest:</p>
+
+<ul>
+
+  <li><code>&lt;uses-feature android:name=&quot;android.hardware.sip.voip&quot;
+/&gt;</code>. This states that your application uses the SIP API. The
+declaration should include an <code>android:required</code> attribute that
+indicates whether you want the application to be filtered from devices that do
+not offer SIP   support. Other <code>&lt;uses-feature&gt;</code> declarations
+may also be   needed, depending on your implementation. For more information,
+see the   documentation for the <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-
+feature&gt;</a> element.</li>
+  
+</ul>
+<p>If your application is designed to receive calls, you must also define a receiver ({@link android.content.BroadcastReceiver} subclass) in the application's manifest: </p>
+
+<ul>
+  <li><code>&lt;receiver android:name=&quot;.IncomingCallReceiver&quot; android:label=&quot;Call Receiver&quot;/&gt;</code></li>
+</ul>
+<p>Here are excerpts from the <strong>SipDemo</strong> manifest:</p>
+
+
+
+<pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+          package=&quot;com.example.android.sip&quot;&gt;
+  ...
+     &lt;receiver android:name=&quot;.IncomingCallReceiver&quot; android:label=&quot;Call Receiver&quot;/&gt;
+  ...
+  &lt;uses-sdk android:minSdkVersion=&quot;9&quot; /&gt;
+  &lt;uses-permission android:name=&quot;android.permission.USE_SIP&quot; /&gt;
+  &lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;
+  ...
+  &lt;uses-feature android:name=&quot;android.hardware.sip.voip&quot; android:required=&quot;true&quot; /&gt;
+  &lt;uses-feature android:name=&quot;android.hardware.wifi&quot; android:required=&quot;true&quot; /&gt;
+  &lt;uses-feature android:name=&quot;android.hardware.microphone&quot; android:required=&quot;true&quot; /&gt;
+&lt;/manifest&gt;
+</pre>
+
+
+<h2 id="manager">Creating a SipManager</h2>
+
+<p>To use the SIP API, your application must create a {@link
+android.net.sip.SipManager} object. The {@link android.net.sip.SipManager} takes
+care of the following in your application:</p>
+
+<ul>
+  <li>Initiating SIP sessions.</li>
+  <li>Initiating and receiving calls.</li>
+  <li>Registering and unregistering with a SIP provider.</li>
+  <li>Verifying session connectivity.</li>
+</ul>
+<p>You instantiate a new {@link android.net.sip.SipManager} as follows:</p>
+<pre>public SipManager mSipManager = null;
+...
+if(mSipManager == null) {
+    mSipManager = SipManager.newInstance(this);
+}</pre>
+<h2 id="profiles">Registering with a SIP Server</h2>
+
+<p>A typical Android SIP application involves one or more users, each of whom
+has a SIP account. In an Android SIP application, each SIP account  is
+represented by  a {@link android.net.sip.SipProfile} object.</p>
+
+<p>A {@link android.net.sip.SipProfile} defines a SIP profile, including a SIP
+account, and domain and server information. The profile associated with the SIP
+account on the device running the application is called the <em>local
+profile</em>. The profile that the session is connected to is called the
+<em>peer profile</em>. When your SIP application logs into the SIP server with
+the local {@link android.net.sip.SipProfile}, this effectively registers the
+device as the location to send SIP calls to for your SIP address.</p>
+
+<p>This section shows how to create a {@link android.net.sip.SipProfile},
+register it with a SIP server, and track registration events.</p>
+
+<p>You  create a {@link android.net.sip.SipProfile} object as follows:</p>
+<pre>
+public SipProfile mSipProfile = null;
+...
+
+SipProfile.Builder builder = new SipProfile.Builder(username, domain);
+builder.setPassword(password);
+mSipProfile = builder.build();</pre>
+
+<p>The following code excerpt opens the local profile for making calls and/or
+receiving generic SIP calls. The caller can  make subsequent calls through
+<code>mSipManager.makeAudioCall</code>. This excerpt also sets the action
+<code>android.SipDemo.INCOMING_CALL</code>, which will be used by an intent
+filter when the device receives a call (see <a href="#intent_filter">Setting up
+an intent filter to receive calls</a>). This is the registration step:</p>
+
+<pre>Intent intent = new Intent();
+intent.setAction(&quot;android.SipDemo.INCOMING_CALL&quot;);
+PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, Intent.FILL_IN_DATA);
+mSipManager.open(mSipProfile, pendingIntent, null);</pre>
+
+<p>Finally, this code sets a <code>SipRegistrationListener</code> on the {@link
+android.net.sip.SipManager}. This tracks whether the {@link
+android.net.sip.SipProfile} was successfully registered with your SIP service
+provider:<br>
+</p>
+
+<pre>mSipManager.setRegistrationListener(mSipProfile.getUriString(), new SipRegistrationListener() {
+
+public void onRegistering(String localProfileUri) {
+    updateStatus(&quot;Registering with SIP Server...&quot;);
+}
+
+public void onRegistrationDone(String localProfileUri, long expiryTime) {
+    updateStatus(&quot;Ready&quot;);
+}
+   
+public void onRegistrationFailed(String localProfileUri, int errorCode,
+    String errorMessage) {
+    updateStatus(&quot;Registration failed.  Please check settings.&quot;);
+}</pre>
+
+
+<p>When your application is done using a profile, it should close it to free
+associated objects into memory and unregister the device from the server. For
+example:</p>
+
+<pre>public void closeLocalProfile() {
+    if (mSipManager == null) {
+       return;
+    }
+    try {
+       if (mSipProfile != null) {
+          mSipManager.close(mSipProfile.getUriString());
+       }
+     } catch (Exception ee) {
+       Log.d(&quot;WalkieTalkieActivity/onDestroy&quot;, &quot;Failed to close local profile.&quot;, ee);
+     }
+}</pre>
+
+<h2 id="audio">Making an Audio Call</h2>
+<p>To make an audio call, you must have the following in place:</p>
+<ul>
+
+  <li>A {@link android.net.sip.SipProfile} that is making the call (the
+&quot;local profile&quot;), and a valid SIP address to receive the call (the
+&quot;peer profile&quot;). 
+  
+  <li>A {@link android.net.sip.SipManager} object. </li>
+</ul>
+
+<p>To make an audio call, you should set up a {@link
+android.net.sip.SipAudioCall.Listener}. Much of the client's interaction with
+the SIP stack happens through listeners. In this snippet, you see how the {@link
+android.net.sip.SipAudioCall.Listener} sets things up after the call is
+established:</p>
+
+<pre>
+SipAudioCall.Listener listener = new SipAudioCall.Listener() {
+  
+   &#64;Override
+   public void onCallEstablished(SipAudioCall call) {
+      call.startAudio();
+      call.setSpeakerMode(true);
+      call.toggleMute();
+         ...
+   }
+   
+   &#64;Override
+   public void onCallEnded(SipAudioCall call) {
+      // Do something.
+   }
+};</pre>
+
+<p>Once you've set up the {@link android.net.sip.SipAudioCall.Listener}, you can
+make the  call. The {@link android.net.sip.SipManager} method
+<code>makeAudioCall</code> takes the following parameters:</p>
+
+<ul>
+  <li>A local SIP profile (the caller).</li>
+  <li>A peer SIP profile (the user being called).</li>
+  
+  <li>A {@link android.net.sip.SipAudioCall.Listener} to listen to the call
+events from {@link android.net.sip.SipAudioCall}. This can be <code>null</code>,
+but as shown above, the listener is used to set things up once the call is
+established.</li>
+  
+  <li>The timeout value, in seconds.</li>
+</ul>
+<p>For example:</p>
+<pre> call = mSipManager.makeAudioCall(mSipProfile.getUriString(), sipAddress, listener, 30);</pre>
+
+<h2 id="receiving">Receiving Calls</h2>
+
+<p>To receive calls, a SIP application must include a subclass of {@link
+android.content.BroadcastReceiver} that has the ability to respond to an intent
+indicating that there is an incoming call. Thus, you must do the following in
+your application:</p>
+
+<ul>
+  <li>In <code>AndroidManifest.xml</code>, declare a
+<code>&lt;receiver&gt;</code>. In <strong>SipDemo</strong>, this is
+<code>&lt;receiver android:name=&quot;.IncomingCallReceiver&quot;
+android:label=&quot;Call Receiver&quot;/&gt;</code>.</li>
+  
+  <li>Implement the receiver, which is a subclass of {@link
+android.content.BroadcastReceiver}. In <strong>SipDemo</strong>, this is
+<code>IncomingCallReceiver</code>.</li>
+  
+  <li>Initialize the local profile ({@link android.net.sip.SipProfile}) with a
+pending intent that fires your receiver when someone calls the local profile.
+</li>
+  
+  <li>Set up an intent filter that filters by the action that represents an
+incoming call. In <strong>SipDemo</strong>, this action is
+<code>android.SipDemo.INCOMING_CALL</code>. </li>
+</ul>
+<h4 id="BroadcastReceiver">Subclassing BroadcastReceiver</h4>
+
+<p>To receive calls, your SIP application must subclass {@link
+android.content.BroadcastReceiver}. <span id="internal-source-marker_0.">The
+Android system handles incoming SIP calls and broadcasts an &quot;incoming
+call&quot;<code></code> intent  (as defined by the application) when it receives
+a call.</span> Here is the subclassed {@link android.content.BroadcastReceiver}
+code from <strong>SipDemo</strong>. To see the full example, go to <a
+href="{@docRoot}resources/samples/SipDemo/index.html">SipDemo sample</a>, which
+is included in the SDK samples. For information on downloading and installing
+the SDK samples, see <a
+href="{@docRoot}resources/samples/get.html">
+Getting the Samples</a>. </p>
+
+<pre>/*** Listens for incoming SIP calls, intercepts and hands them off to WalkieTalkieActivity.
+ */
+public class IncomingCallReceiver extends BroadcastReceiver {
+    /**
+     * Processes the incoming call, answers it, and hands it over to the
+     * WalkieTalkieActivity.
+     * @param context The context under which the receiver is running.
+     * @param intent The intent being received.
+     */
+    &#64;Override
+    public void onReceive(Context context, Intent intent) {
+        SipAudioCall incomingCall = null;
+        try {
+            SipAudioCall.Listener listener = new SipAudioCall.Listener() {
+                &#64;Override
+                public void onRinging(SipAudioCall call, SipProfile caller) {
+                    try {
+                        call.answerCall(30);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            WalkieTalkieActivity wtActivity = (WalkieTalkieActivity) context;
+            incomingCall = wtActivity.mSipManager.takeAudioCall(intent, listener);
+            incomingCall.answerCall(30);
+            incomingCall.startAudio();
+            incomingCall.setSpeakerMode(true);
+            if(incomingCall.isMuted()) {
+                incomingCall.toggleMute();
+            }
+            wtActivity.call = incomingCall;
+            wtActivity.updateStatus(incomingCall);
+        } catch (Exception e) {
+            if (incomingCall != null) {
+                incomingCall.close();
+            }
+        }
+    }
+}
+</pre>
+
+<h4 id="intent_filter">Setting up an intent filter to receive calls</h4>
+
+<p>When the SIP service  receives a new call, it  sends out an intent with the
+action  string provided by the application. In SipDemo, this action string is
+<code>android.SipDemo.INCOMING_CALL</code>. </p>
+<p>This code excerpt from <strong>SipDemo</strong> shows how the {@link
+android.net.sip.SipProfile} object gets created with a pending intent based on
+the action string <code>android.SipDemo.INCOMING_CALL</code>. The
+<code>PendingIntent</code> object   will perform a broadcast when the {@link
+android.net.sip.SipProfile}  receives a call:</p> 
+
+<pre>
+public SipManager mSipManager = null;
+public SipProfile mSipProfile = null;
+...
+
+Intent intent = new Intent(); 
+intent.setAction(&quot;android.SipDemo.INCOMING_CALL&quot;); 
+PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, Intent.FILL_IN_DATA); 
+mSipManager.open(mSipProfile, pendingIntent, null);</pre>
+
+<p>The broadcast will be intercepted by the intent filter, which will then fire
+the receiver (<code>IncomingCallReceiver</code>). You can specify an intent
+filter in your application's manifest file, or do it in code as in the <strong>SipDemo</strong>
+sample application's <code>onCreate()</code> method
+of the application's <code>Activity</code>:</p>
+
+<pre>
+public class WalkieTalkieActivity extends Activity implements View.OnTouchListener {
+...
+    public IncomingCallReceiver callReceiver;
+    ...
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+
+       IntentFilter filter = new IntentFilter();
+       filter.addAction(&quot;android.SipDemo.INCOMING_CALL&quot;);
+       callReceiver = new IncomingCallReceiver();
+       this.registerReceiver(callReceiver, filter);
+       ...
+    }
+    ...
+}
+</pre>
+
+
+<h2 id="testing">Testing SIP Applications</h2>
+
+<p>To test SIP applications, you need the following:</p>
+<ul>
+<li>A mobile device that is running Android 2.3 or higher. SIP runs over
+wireless, so you must test on an actual device. Testing on AVD won't work.</li>
+<li>A SIP account. There are many different SIP providers that offer SIP accounts.</li>
+<li>If you are placing a call, it must also be to a valid SIP account. </li>
+</ul>
+<p>To test a SIP application:</p>
+<ol>
+
+<li>On your device, connect to wireless (<strong>Settings > Wireless & networks
+> Wi-Fi > Wi-Fi settings</strong>)</li>
+<li>Set up your mobile device for testing, as described in <a
+href="{@docRoot}tools/device.html">Developing on a Device</a>.</li>
+<li>Run your application on your mobile device, as described in <a
+href="{@docRoot}tools/device.html">Developing on a Device</a>.</li>
+
+<li>If you are using Eclipse, you can view the application log output in Eclipse
+using LogCat (<strong>Window > Show View > Other > Android >
+LogCat</strong>).</li>
+</ol>
+

@@ -1,0 +1,192 @@
+page.title=Android 2.3.3 Platform
+sdk.platform.version=2.3.3
+sdk.platform.apiLevel=10
+
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#api">API Overview</a></li>
+  <li><a href="#api-level">API Level</a></li>
+</ol>
+
+<h2>Reference</h2>
+<ol>
+<li><a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
+Differences Report &raquo;</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p>
+<em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
+
+<p>Android 2.3.3 is a small feature release that adds several improvements
+and APIs to the Android 2.3 platform.</p>
+
+<p>For developers, the Android {@sdkPlatformVersion} platform is available as a
+downloadable component for the Android SDK. The downloadable platform includes
+an Android library and system image, as well as a set of emulator skins and
+more. To get started developing or testing against Android {@sdkPlatformVersion},
+use the Android SDK Manager to download the platform into your SDK.</p>
+
+
+
+<h2 id="api">API Overview</h2>
+
+<p>The sections below provide a technical overview of what's new for developers
+in {@sdkPlatformVersion}, including new features and changes in the framework
+API since the previous version.</p>
+
+<h3 id="nfc">Near Field Communications (NFC)</h3>
+
+<p>Android 2.3.3 provides improved and extended support for NFC, to allow
+applications to interact with more types of tags in new ways.</p>
+
+<p>A new, comprehensive set of APIs give applications read and write access
+to a wider range of standard tag technologies, including:</p>
+
+<ul>
+<li>NFC-A (ISO 14443-3A)</li>
+<li>NFC-B (ISO 14443-3B)</li>
+<li>NFC-F (JIS 6319-4)</li>
+<li>NFC-V (ISO 15693)</li>
+<li>ISO-DEP (ISO 14443-4)</li>
+<li>MIFARE Classic</li>
+<li>MIFARE Ultralight</li>
+<li>NFC Forum NDEF tags</li>
+</ul>
+
+<p>The platform also provides a limited peer-to-peer communication protocol
+and API. Foreground Activities can use the API to register an NDEF
+message that will get pushed to other NFC devices when they connect.</p>
+
+<p>Advanced tag dispatching now gives applications more control over how and
+when they are launched, when an NFC tag is discovered. Previously, the platform
+used a single-step intent dispatch to notify interested applications that a tag
+was discovered. The platform now uses a four-step process that enables the
+foreground application to take control of a tag event before it is passed to any
+other applications (<code>android.nfc.NfcAdapter.enableForegroundDispatch()</code>).
+
+The new dispatch process also lets apps listen for specific tag content and
+tag technologies, based on two new intent actions &mdash;
+<code>android.nfc.action.NDEF_DISCOVERED</code> and
+<code>android.nfc.action.TECH_DISCOVERED</code>.</p>
+
+<p>The NFC API is available in the {@link android.nfc} and 
+{@link android.nfc.tech} packages. The key classes are: </p>
+
+<ul>
+<li>{@link android.nfc.NfcAdapter}, which represents the NFC hardware on the device.</li>
+<li>{@link android.nfc.NdefMessage}, which represents an NDEF data message,
+the standard format in which "records" carrying data are transmitted between
+devices and tags. An NDEF message certain many NDEF records of different types.
+Applications can receive these messages from 
+{@link android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED NDEF_DISCOVERED},
+{@link android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED TECH_DISCOVERED}, or
+{@link android.nfc.NfcAdapter#ACTION_TAG_DISCOVERED TAG_DISCOVERED} Intents.</li>
+<li>{@link android.nfc.NdefRecord}, delivered in an
+{@link android.nfc.NdefMessage}, which describes the type of data being shared
+and carries the data itself.</li>
+<li>{@link android.nfc.Tag}, which represents a tag scanned by the device.
+Multiple types of tags are supported, based on the underlying tag
+technology.</li>
+<li>{@link android.nfc.tech.TagTechnology}, an interface that gives applications
+access to tag properties and I/O operations based on the technologies present
+in the tag. For a full list of tag technologies supported in Android 2.3.3, see
+{@link android.nfc.tech}.</li>
+</ul>
+
+<p>NFC communication relies on wireless technology in the device hardware, and
+is not present in all Android devices. Android devices that do not support
+NFC will return a null object when
+{@link android.nfc.NfcAdapter#getDefaultAdapter(android.content.Context)
+getDefaultAdapter(Context)} is called, and
+<code>context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC)</code>
+will return <code>false</code>. The NFC API is always present, however, regardless of
+underlying hardware support.</p>
+
+<p>To use the NFC API, applications must request permission from the user by
+declaring <code>&lt;uses-permission
+android:name="android.permission.NFC"&gt;</code> in their manifest files.</p>
+
+<p>Additionally, developers can request filtering on Google Play, such that
+their applications are not discoverable to users whose devices do not support
+NFC. To request filtering, add
+<code>&lt;uses-feature android:name="android.hardware.nfc"
+android:required="true"&gt;</code> to the application's manifest.</p>
+
+<p class="note">To look at sample code for NFC, see
+<a href="{@docRoot}resources/samples/NFCDemo/index.html">NFCDemo app</a>, <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/nfc/TechFilter.html">filtering by tag technology</a></li>, <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/nfc/ForegroundDispatch.html">using foreground dispatch</a>, and <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/nfc/ForegroundNdefPush.html">foreground NDEF push (P2P)</a>.</p>
+
+<h3 id="bluetooth">Bluetooth</h3>
+
+<p>Android 2.3.3 adds platform and API support for Bluetooth nonsecure socket
+connections. This lets applications communicate with simple devices that may not
+offer a UI for authentication. See 
+{@link android.bluetooth.BluetoothDevice#createInsecureRfcommSocketToServiceRecord(java.util.UUID)} and 
+{@link android.bluetooth.BluetoothAdapter#listenUsingInsecureRfcommWithServiceRecord(java.lang.String, java.util.UUID)}
+for more information. </p>
+
+<h3 id="graphics">Graphics</h3>
+
+<ul>
+<li>A new {@link android.graphics.BitmapRegionDecoder} class lets applications
+decode a rectangle region from an image. The API is particularly useful when an
+original image is large and and the application only need parts of the image.
+</li>
+<li>A new {@link
+android.graphics.BitmapFactory.Options#inPreferQualityOverSpeed} field in {@link
+android.graphics.BitmapFactory.Options} allows applications to use a more accurate
+but slightly slower IDCT method in JPEG decode. This in turn improves the
+quality of the reconstructed image.</li>
+</ul>
+
+
+<h3 id="media">Media framework</h3>
+
+<ul>
+<li>A new {@link android.media.MediaMetadataRetriever} class provides a unified
+interface for retrieving frame and metadata from an input media file.</li>
+<li>{@link android.media.MediaRecorder.AudioEncoder} and {@link
+android.media.MediaRecorder.OutputFormat} include new fields for specifying AMR
+Wideband and AAC formats. </li>
+</ul>
+
+
+<h3 id="speech">Speech recognition</h3>
+
+<p>The speech-recognition API includes new constants to let you manage voice
+search results in new ways. Although the new constants are not needed for normal
+use of speech recognition, you could use them to offer a different view of voice
+search results in your application. For information, see {@link
+android.speech.RecognizerResultsIntent}.</p>
+
+
+<h2 id="api-level">API Level</h2>
+
+<p>The Android {@sdkPlatformVersion} platform delivers an updated version of
+the framework API. The Android {@sdkPlatformVersion} API
+is assigned an integer identifier &mdash;
+<strong>{@sdkPlatformApiLevel}</strong> &mdash; that is
+stored in the system itself. This identifier, called the "API Level", allows the
+system to correctly determine whether an application is compatible with
+the system, prior to installing the application. </p>
+
+<p>To use APIs introduced in Android {@sdkPlatformVersion} in your application,
+you need compile the application against the Android library that is provided in
+the Android {@sdkPlatformVersion} SDK platform. Depending on your needs, you might 
+also need to add an <code>android:minSdkVersion="{@sdkPlatformApiLevel}"</code>
+attribute to the <code>&lt;uses-sdk&gt;</code> element in the application's
+manifest. If your application is designed to run only on Android 2.3 and higher,
+declaring the attribute prevents the application from being installed on earlier
+versions of the platform.</p>
+
+<p>For more information, read <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">What is API
+Level?</a></p>

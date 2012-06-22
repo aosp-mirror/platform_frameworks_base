@@ -1,51 +1,49 @@
-page.title=Graphics
+page.title=Animation and Graphics
+page.landing=true
+page.landing.intro=Make your apps look and perform their best using Android's powerful graphics features such as OpenGL, hardware acceleration, and built-in UI animations.
+page.landing.image=
+
 @jd:body
 
-<div id="qv-wrapper">
-  <div id="qv">
-  <h2>Topics</h2>
-  <ol>
-    <li><a href="{@docRoot}guide/topics/graphics/2d-graphics.html">Canvas and Drawables</a></li>
-    <li><a href="{@docRoot}guide/topics/graphics/hardware-accel.html">Hardware Acceleration</a></li>
-    <li><a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL</a></li>
-  </ol>
+<div class="landing-docs">
+
+  <div class="col-6">
+    <h3>Blog Articles</h3>
+      <a
+href="http://android-developers.blogspot.com/2011/11/android-40-graphics-and-animations.html">
+        <h4>Android 4.0 Graphics and Animations</h4>
+        <p>Earlier this year, Android 3.0 launched with a new 2D rendering pipeline designed to
+support hardware acceleration on tablets. With this new pipeline, all drawing operations performed
+by the UI toolkit are carried out using the GPU. You’ll be happy to hear that Android 4.0, Ice Cream
+Sandwich, brings an improved version of the hardware-accelerated 2D rendering pipeline.</p>
+      </a>
+  
+      <a
+href="http://android-developers.blogspot.com/2011/05/introducing-viewpropertyanimator.html">
+        <h4>Introducing ViewPropertyAnimator</h4>
+        <p>This new animation system makes it easy to animate any kind of property on any object,
+including the new properties added to the View class in 3.0. In the 3.1 release, we added a small
+utility class that makes animating these properties even easier.</p>
+      </a>
+      
+      <a
+href="http://android-developers.blogspot.com/2011/03/android-30-hardware-acceleration.html">
+        <h4>Android 3.0 Hardware Acceleration</h4>
+        <p>Hardware accelerated graphics is nothing new to the Android platform, it has always been
+used for windows composition or OpenGL games for instance, but with this new rendering pipeline
+applications can benefit from an extra boost in performance.</p>
+      </a>
+  </div>
+
+  <div class="col-6">
+    <h3>Training</h3>
+    <a href="{@docRoot}training/displaying-bitmaps/index.html">
+      <h4>Displaying Bitmaps Efficiently</h4>
+      <p>This class covers some common techniques for processing and loading Bitmap objects in a way
+that keeps your user interface (UI) components responsive and avoids exceeding your application
+memory limit.</p>
+    </a>
+    
+
   </div>
 </div>
-
-<p>When writing an application, it's important to consider exactly what your graphical demands will be.
-Varying graphical tasks are best accomplished with varying techniques. For example, graphics and animations
-for a rather static application should be implemented much differently than graphics and animations
-for an interactive game. Here, we'll discuss a few of the options you have for drawing graphics
-on Android and which tasks they're best suited for.
-</p>
-
-<dl>
-<dt><strong><a href="{@docRoot}guide/topics/graphics/2d-graphics.html">Canvas and
-Drawables</a></strong></dt>
-<dd>Android provides a set of {@link android.view.View} widgets that provide general functionality
-for a wide array of user interfaces. You can also extend these widgets to modify the way they
-look or behave. In addition, you can do your own custom 2D rendering using the various drawing
-methods contained in the {@link android.graphics.Canvas} class or create {@link
-android.graphics.drawable.Drawable} objects for things such as textured buttons or frame-by-frame
-animations.</dd>
-
-<dt><strong><a href="{@docRoot}guide/topics/graphics/hardware-accel.html">Hardware
-Acceleration</a></strong></dt>
-<dd>Beginning in Android 3.0, you can hardware accelerate the majority of
-the drawing done by the Canvas APIs to further increase their performance.</dd>
-
-<dt><strong><a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL</a></strong></dt>
-<dd>Android supports OpenGL ES 1.0 and 2.0, with Android framework APIs as well as natively
-with the Native Development Kit (NDK). Using the framework APIs is desireable when you want to add a
-few graphical enhancements to your application that are not supported with the Canvas APIs, or if
-you desire platform independence and don't demand high performance. There is a performance hit in
-using the framework APIs compared to the NDK, so for many graphic intensive applications such as
-games, using the NDK is beneficial (It is important to note though that you can still get adequate
-performance using the framework APIs. For example, the Google Body app is developed entirely
-using the framework APIs). OpenGL with the NDK is also useful if you have a lot of native
-code that you want to port over to Android. For more information about using the NDK, read the
-docs in the <code>docs/</code> directory of the <a href="{@docRoot}sdk/ndk/index.html">NDK
-download.</a></dd>
-</dl>
-
-

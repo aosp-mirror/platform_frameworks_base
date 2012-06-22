@@ -1,0 +1,127 @@
+page.title=Distribution Control
+page.metaDescription=Reach the users you want, whenever you want.
+
+@jd:body
+
+<p>Deliver your apps to the users you want, on the devices you want, on <em>your</em> schedule. </p>
+
+<h2 id="instant">Instant publishing, instant updates</h2>
+
+<p>On Google Play, you can publish your products to customers instantly. Just
+upload and configure your product in the <span style="font-weight:500;">Google Play Android Developer Console</span>
+and press the Publish button&mdash;your app appears in the store listings within
+hours, not weeks. There are no delays for code or policy reviews, so you keep
+complete control over your release schedule.</p>
+
+<p>Once your app is published, you can update it as often as you want. You can
+change prices, configuration, and distribution options at any time through the
+Google Play Android Developer Console, without needing to update your app
+binary.</p>
+
+<p>Later, as you add features or address code issues, you can publish an updated
+binary at any time. Google Play makes the new version available immediately and
+notifies existing customers that an update is ready for download. To streamline
+the rollout across your customer base, Google Play also lets users accept
+automatic updates of your app, so that your updates are delivered and installed
+s soon as you publish them.</p>
+
+<h2>Reaching the customers you want</h2>
+
+<p>Google Play does more than connect your app with users&mdash;it helps you
+reach the broadest possible distribution across the Android ecosystem, while
+making sure that your app is only available to the audience that you want to
+reach.</p>
+
+<div style="float:right;margin-left:18px;border:1px solid #DDD;margin:1.5em;">
+<img src="{@docRoot}images/gp-dc-countries.png" style="width:400px;padding:4px;margin-bottom:0;">
+</div>
+
+<h3 id="geotargeting">Geographic targeting</h3>
+
+<p>You can use controls in the Google Play Android Developer Console to easily
+manage the geographic distribution of your apps, without any changes in your
+application binary. You can specify which countries and territories you want to
+distribute to, and even which carriers (for some countries). </p>
+
+<p>When users visit the store, Google Play makes sure that they are in one of
+your targeted countries before downloading your app. You can change your country
+and carrier targeting at any time just by saving changes in the Google Play
+Android Developer Console</p>
+
+<div style="float:right;margin-left:18px;border:1px solid #DDD;margin:1.5em;">
+<img src="{@docRoot}images/gp-supported-dev-requirements.png"
+style="width:400px;padding:4px;margin-bottom:0;">
+</div>
+
+<h3 id="captargeting">Capabilities targeting</h3>
+
+<p>Google Play also lets you control distribution according to device features
+or capabilities that your app depends on. There are several types of
+dependencies that the app can define in its manifest, such as hardware features,
+OpenGL texture compression formats, libraries, Android platform versions, and
+others.</p>
+
+<p>When you upload your app, Google Play reads the dependencies and sets up any
+necessary distribution rules. For technical information about declaring
+dependencies, read <a href="{@docRoot}guide/google/play/filters.html">Filters on 
+Google Play</a>. </p>
+
+<p>For pinpoint control over distribution, Google Play lets you see all of the
+devices your app is available to based on its dependencies (if any). From the
+Google Play Android Developer Console, you can list the supported devices and
+even exclude specific devices if needed.</p>
+
+<h2 id="stats">Statistics for analyzing installs</h2>
+
+<p>Once you’ve published your app, Google Play makes it easy to see how it’s
+doing. The Google Play Android Developer Console gives you access to a variety
+of anonymized metrics that show your app’s installation performance measured by
+unique users and unique devices, across a variety of different dimensions such
+as country, Android version, device, country, carrier, and app version.</p>
+
+<div style="border:1px solid #DDD;margin:1.5em;margin-left:8%;width:608px">
+<img src="{@docRoot}images/gp-dc-stats-mini.png"
+style="width:600px;padding:4px;margin-bottom:0;">
+</div>
+<p>You can also view your installation data on timeline charts, for all metrics and
+dimensions. At a glance, these charts highlight your app’s installation peaks
+and longer-term trends, which you can correlate to promotions, app improvements,
+or other factors. You can even focus in on data inside a dimension by
+highlighting specific data points (such as individual platform versions or
+languages) on the timeline.</p>
+
+<p>So that you can “take your data with you”, you can download all of your
+installation data as a CSV file for viewing in the business program of your
+choice.</p>
+
+
+<h2 id="advanced">Advanced delivery options</h2>
+
+<p>Google Play offers convenient options for managing how your apps are
+delivered to users.</p>
+
+<p>In most cases, it’s easy to create an app that supports all of your targeted
+screen sizes and platform versions from a single APK. Distributing a single APK
+to all of your users is a highly recommended approach, because it’s the easiest
+way to manage and maintain the app. If you need to deliver a different APK to
+devices, Google Play provides a way to do that. </p>
+ 
+<p>An option called Multiple APK support lets you create multiple APK packages
+that use the same package name but differ in their OpenGL texture compression
+formats, screen-size support, or Android platform versions supported. You can
+upload all of the APKs to Google Play under a single product listing and Google
+Play selects the best APK to deliver to users, based on the characteristics of
+their devices.  </p>
+
+<p>The APK Expansion Files option lets you upload up to two secondary downloads
+for each published APK, including multiple APKs. Each of the two expansion files
+can be up to 2GB each and can contain any type of code or assets. When you
+upload the expansion files, Google Play hosts them for free and handles the
+download of the files as part of the normal APK installation.</p>
+
+<h2 id="licensing">Protecting your App</h2>
+
+<p>To help you protect your application against piracy, Google Play offers a
+licensing service that you can implement in your app. It’s a network-based
+service that lets an application query a trusted Google Play licensing server to
+determine whether the application is licensed to the current device user.</p>

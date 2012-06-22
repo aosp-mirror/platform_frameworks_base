@@ -1,0 +1,166 @@
+page.title=Exploring the SDK
+walkthru=1
+
+@jd:body
+
+
+<p>The Android SDK is composed of modular packages that you can download separately using
+the Android SDK Manager. For example, when the SDK Tools are updated or a new version of
+the Android platform is released, you can use the SDK Manager to quickly download them to
+your environment. Simply follow the procedures described in <a
+href="{@docRoot}sdk/installing/adding-packages.html">Adding Platforms and Packages</a>.</p>
+
+<p>There are several different packages available for the Android SDK. The table below describes
+most of the available packages and where they're located once you download them.</p>
+
+
+<h2 id="Packages">Available Packages</h2>
+
+
+<table>
+  <tr><th>Package</th><th>Description</th><th>File Location</th></tr>
+  <tr>
+    <td><a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools</a></td>
+    <td>Contains tools for debugging and testing, plus other
+utilities that are required to develop an app. If you've just installed the SDK starter package,
+then you already have the latest version of this package. Make sure you keep this up to date.</td>
+    <td>{@code &lt;sdk>/tools/}</td></tr>
+  <tr><td>SDK Platform-tools</td>
+    <td>Contains platform-dependent tools for developing and debugging
+your application. These tools support the latest features of the Android platform and are typically
+updated only when a new platform becomes available. These tools are always backward compatible with
+older platforms, but you must be sure that you have the latest version of these tools when you
+install a new SDK platform.</td>
+    <td>{@code &lt;sdk>/platform-tools/}</td>
+  </tr>
+  
+  <tr>
+    <td>Documentation</td>
+    <td>An offline copy of the latest documentation for the Android
+platform APIs.</td>
+    <td>{@code &lt;sdk>/docs/}</td>
+  </tr>
+  <tr><td>SDK Platform</td>
+    <td>There's one SDK Platform available for each version of Android. It includes an {@code
+android.jar} file with a fully compliant Android library. In order to build an Android app, you must
+specify an SDK platform as your build target.</td>
+    <td>{@code &lt;sdk>/platforms/&lt;android-version>/}</td>
+  </tr>
+  <tr>
+    <td>System Images</td>
+    <td>Each platform version offers one or more different system images (such as for ARM
+and x86). The Android emulator requires a system image to operate. You should always test your
+app on the latest version of Android and using the emulator with the latest system image is a
+good way to do so.</td>
+    <td>{@code &lt;sdk>/platforms/&lt;android-version>/}</td>
+  </tr>
+  <tr>
+    <td>Sources for Android SDK</td>
+    <td>A copy of the Android platform source code that's useful for
+stepping through the code while debugging your app.</td>
+    <td>{@code &lt;sdk>/sources/}</td>
+  </tr>
+  <tr>
+    <td><a href="{@docRoot}tools/samples/index.html">Samples for SDK</a></td>
+    <td>A collection of sample apps that demonstrate a variety of the
+platform APIs. These are a great resource to browse Android app code. The API Demos app in
+particular provides a huge number of small demos you should explore.</td>
+    <td>{@code &lt;sdk>/platforms/&lt;android-version>/samples/}</td>
+  </tr>
+  <tr>
+    <td><a href="http://developers.google.com/android">Google APIs</a></td>
+    <td>An SDK add-on that provides both a platform you can use to develop an app
+using special Google APIs and a system image for the emulator so you can test your app using the
+Google APIs.</td>
+    <td>{@code &lt;sdk>/add-ons/}</td>
+  </tr>
+  
+  <tr>
+    <td><a href="{@docRoot}tools/extras/support-library.html">Android Support</a></td>
+    <td>A static library you can include in your app sources in order to use powerful
+APIs that aren't available in the standard platform. For example, the support library
+contains versions of the {@link android.support.v4.app.Fragment} class that's compatible with
+Android 1.6 and higher (the class was originally introduced in Android 3.0) and the {@link
+android.support.v4.view.ViewPager} APIs that allow you to easily build a side-swipeable UI.</td>
+    <td>{@code &lt;sdk>/extras/android/support/}</td>
+  </tr>
+  <tr>
+    <td><a href="{@docRoot}guide/google/play/billing/index.html">Google Play Billing</a></td>
+    <td>Provides the static libraries and samples that allow you to
+integrate billing services in your app with Google Play.</td>
+    <td>{@code &lt;sdk>/extras/google/}</td>
+  </tr>
+  <tr>
+    <td><a href="{@docRoot}guide/google/play/licensing/index.html">Google Play Licensing</a></td>
+    <td>Provides the static libraries and samples that allow you to perform license verification for
+your app when distributing with Google Play.</td>
+    <td>{@code &lt;sdk>/extras/google/}</td>
+  </tr>
+</table>
+
+<p>The above table is not comprehensive and you can <a
+href="#AddingSites">add new sites</a> to download additional packages from third-parties.</p>
+
+<p>In some cases, an SDK package may require a specific minimum revision of
+another package or SDK tool. For example, there may be a dependency between the ADT Plugin for
+Eclipse and
+the SDK Tools package. When you install the SDK Tools
+package, you should also upgrade to the required version of ADT (if you
+are developing in Eclipse). In this case,  the major version number for your ADT plugin should
+always match the revision number of your SDK Tools (for example, ADT 8.x requires SDK Tools r8).
+</p>
+
+<p>The development tools will notify you with debug warnings if there is dependency that you need to
+address. The Android SDK Manager also enforces dependencies by requiring that you download any
+packages that are needed by those you have selected.</p>
+
+
+
+
+
+<h2 id="AddingSites">Adding New Sites</h2>
+
+<p>By default, <strong>Available Packages</strong> displays packages available from the
+<em>Android Repository</em> and <em>Third party Add-ons</em>. You can add other sites that host
+their own Android SDK add-ons, then download the SDK add-ons
+from those sites.</p>
+
+<p>For example, a mobile carrier or device manufacturer might offer additional
+API libraries that are supported by their own Android-powered devices. In order
+to develop using their libraries, you must install their Android SDK add-on, if it's not already
+available under <em>Third party Add-ons</em>. </p>
+
+<p>If a carrier or device manufacturer has hosted an SDK add-on repository file
+on their web site, follow these steps to add their site to the Android SDK
+Manager:</p>
+
+<ol>
+  <li>Select <strong>Available Packages</strong> in the left panel.</li>
+  <li>Click <strong>Add Add-on Site</strong> and enter the URL of the
+<code>repository.xml</code> file. Click <strong>OK</strong>.</li>
+</ol>
+<p>Any SDK packages available from the site will now be listed under a new item named
+<strong>User Add-ons</strong>.</p>
+
+
+
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+
+<p><strong>Problems connecting to the SDK repository</strong></p>
+
+<p>If you are using the Android SDK Manager to download packages and are encountering
+connection problems, try connecting over http, rather than https. To switch the
+protocol used by the Android SDK Manager, follow these steps: </p>
+
+<ol>
+  <li>With the Android SDK Manager window open, select "Settings" in the
+  left pane. </li>
+  <li>On the right, in the "Misc" section, check the checkbox labeled "Force
+  https://... sources to be fetched using http://..." </li>
+  <li>Click <strong>Save &amp; Apply</strong>.</li>
+</ol>
+
+
+
+

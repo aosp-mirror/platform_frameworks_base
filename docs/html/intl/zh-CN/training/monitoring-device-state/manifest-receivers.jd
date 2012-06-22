@@ -1,0 +1,50 @@
+page.title=根据需要操作广播接收器
+parent.title=优化电池使用时间
+parent.link=index.html
+
+trainingnavtop=true
+
+previous.title=确定和监控网络连接状态
+previous.link=connectivity-monitoring.html
+
+@jd:body
+
+<div id="tb-wrapper"> 
+<div id="tb">
+
+<h2>本教程将指导您</h2>
+<ol>
+  <li><a href="#ToggleReceivers">切换和层叠状态变化接收器以提高效率</a></li>
+</ol>
+
+
+<h2>您还应参阅</h2>
+<ul>
+  <li><a href="{@docRoot}guide/components/intents-filters.html">intent 和 intent 过滤器</a>
+</ul>
+
+</div> 
+</div>
+
+<p>监控设备状态变化的最简单方法就是，为您监控的每种状态创建 {@link android.content.BroadcastReceiver} 并在应用清单中逐一进行注册。然后，您只需根据当前设备状态在每个接收器中重新安排重复提醒即可。</p>
+
+<p>此方法的负面影响在于，只要系统触发了这些接收器中的任何一个，相关应用就会唤醒设备，其频率可能会远远超过所需的水平。</p>
+
+<p>更好的方法是在运行时停用或启用广播接收器。这样的话，您就可以将自己在清单中声明的接收器用作被动提醒，只有在需要时才会由系统事件触发。</p>
+ 
+
+<h2 id="ToggleReceivers">切换和层叠状态变化接收器以提高效率 </h2> 
+ 
+<p>您可以使用 {@link android.content.pm.PackageManager} 切换清单中定义的任意组件的启用状态（包括您要启用或停用的任意广播接收器），具体如以下片段所示：</p>
+
+<pre>ComponentName receiver = new ComponentName(context, myReceiver.class);
+
+PackageManager pm = context.getPackageManager();
+
+pm.setComponentEnabledSetting(receiver,
+        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+        PackageManager.DONT_KILL_APP)</pre>
+
+<p>在使用此技巧时，如果您确定连接已断开，就可以停用除连接变化接收器外的所有接收器。相反，成功连接后，您就可以停止侦听连接变化，同时只需在执行更新和重新安排重复更新提醒前查看是否在线即可。</p>
+
+<p>您可以使用同样的方法来延迟需要较高带宽的下载任务。只有在连接 Wi-Fi 后，您才能直接启用用于侦听连接变化和启动下载任务的广播接收器。</p>

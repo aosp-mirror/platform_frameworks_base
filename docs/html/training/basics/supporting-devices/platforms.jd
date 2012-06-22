@@ -21,9 +21,9 @@ previous.link=screens.html
     
     <h2>You should also read</h2>
     <ul>
-      <li><a href="{@docRoot}guide/appendix/api-levels.html">Android API Levels</a></li>
+      <li><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Android API Levels</a></li>
       <li><a
-href="{@docRoot}sdk/compatibility-library.html">Android Support Library</a></li>
+href="{@docRoot}tools/extras/support-library.html">Android Support Library</a></li>
     </ul>
   </div>
 </div>
@@ -34,7 +34,7 @@ lesson shows you how to take advantage of the latest APIs while continuing to su
 versions as well.</p>
 
 <p>The dashboard for <a
-href="http://developer.android.com/resources/dashboard/platform-versions.html">Platform Versions</a>
+href="http://developer.android.com/about/dashboards/index.html">Platform Versions</a>
 is updated regularly to show the distribution of active 
 devices running each version of Android, based on the number of devices that visit the Google Play 
 Store.  Generally, it’s a good practice to support about 90% of the active devices, while 
@@ -42,7 +42,7 @@ targeting your app to the latest version.</p>
 
 <p class="note"><strong>Tip:</strong> In order to provide the best features and 
 functionality across several Android versions, you should use the <a
-href="{@docRoot}sdk/compatibility-library.html">Android Support Library</a> in your app,
+href="{@docRoot}tools/extras/support-library.html">Android Support Library</a> in your app,
 which allows you to use several recent platform APIs on older versions.</p>
 
 

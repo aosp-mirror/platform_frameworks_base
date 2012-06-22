@@ -1,0 +1,223 @@
+page.title=Building an OpenGL ES Environment
+parent.title=Displaying Graphics with OpenGL ES
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Displaying Graphics with OpenGL ES
+previous.link=index.html
+next.title=Defining Shapes
+next.link=shapes.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#manifest">Declare OpenGL ES Use in the Manifest</a></li>
+  <li><a href="#activity">Create an Activity for OpenGL ES Graphics</a></li>
+  <li><a href="#glsurfaceview">Build a GLSurfaceView Object</a></li>
+  <li><a href="#renderer">Build a Renderer Class</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL</a></li>
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+ <a href="{@docRoot}shareables/training/OpenGLES.zip"
+class="button">Download the sample</a>
+ <p class="filename">OpenGLES.zip</p>
+</div>
+
+</div>
+</div>
+
+
+<p>In order to draw graphics with OpenGL ES in your Android application, you must create a
+view container for them. One of the more straight-forward ways to do this is to implement both a
+{@link android.opengl.GLSurfaceView} and a {@link android.opengl.GLSurfaceView.Renderer}. A {@link
+android.opengl.GLSurfaceView} is a view container for graphics drawn with OpenGL and {@link
+android.opengl.GLSurfaceView.Renderer} controls what is drawn within that view. For more information
+about these classes, see the <a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL ES</a>
+developer guide.</p>
+
+<p>{@link android.opengl.GLSurfaceView} is just one way to incorporate OpenGL ES graphics into your
+application. For a full-screen or near-full screen graphics view, it is a reasonable choice.
+Developers who want to incorporate OpenGL ES graphics in a small portion of their layouts should
+take a look at {@link android.view.TextureView}. For real, do-it-yourself developers, it is also
+possible to build up an OpenGL ES view using {@link android.view.SurfaceView}, but this requires
+writing quite a bit of additional code.</p>
+
+<p>This lesson explains how to complete a minimal implementation of {@link
+android.opengl.GLSurfaceView} and {@link android.opengl.GLSurfaceView.Renderer} in a simple
+application activity.</p>
+
+
+<h2 id="manifest">Declare OpenGL ES Use in the Manifest</h2>
+
+<p>In order for your application to use the OpenGL ES 2.0 API, you must add the following
+declaration to your manifest:</p>
+
+<pre>
+&lt;uses-feature android:glEsVersion="0x00020000" android:required="true" /&gt;
+</pre>
+
+<p>If your application uses texture compression, you must also declare which compression formats
+you support so that devices that do not support theses formats do not try to run your
+application:</p>
+
+<pre>
+&lt;supports-gl-texture android:name="GL_OES_compressed_ETC1_RGB8_texture" /&gt;
+&lt;supports-gl-texture android:name="GL_OES_compressed_paletted_texture" /&gt;
+</pre>
+
+<p>For more information about texture compression formats, see the
+<a href="{@docRoot}guide/topics/graphics/opengl.html#textures">OpenGL</a> developer guide.</p>
+
+
+<h2 id="activity">Create an Activity for OpenGL ES Graphics</h2>
+
+<p>Android applications that use OpenGL ES have activities just like any other application that has
+a user interface. The main difference from other applications is what you put in the layout for your
+activity. While in many applications you might use {@link android.widget.TextView}, {@link
+android.widget.Button} and {@link android.widget.ListView}, in an app that uses OpenGL ES, you can
+also add a {@link android.opengl.GLSurfaceView}.</p>
+
+<p>The following code example shows a minimal implementation of an activity that uses a
+{@link android.opengl.GLSurfaceView} as its primary view:</p>
+
+<pre>
+public class OpenGLES20 extends Activity {
+
+    private GLSurfaceView mGLView;
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Create a GLSurfaceView instance and set it
+        // as the ContentView for this Activity.
+        mGLView = new MyGLSurfaceView(this);
+        setContentView(mGLView);
+    }
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> OpenGL ES 2.0 requires Android 2.2 (API Level 8) or higher,
+so make sure your Android project targets that API or higher.</p>
+
+
+<h2 id="glsurfaceview">Build a GLSurfaceView Object</h2>
+
+<p>A {@link android.opengl.GLSurfaceView} is a specialized view where you can draw OpenGL ES
+graphics.
+It does not do much by itself. The actual drawing of objects is controlled in the {@link
+android.opengl.GLSurfaceView.Renderer} that you set on this view. In fact, the code for this object
+is so thin, you may be tempted to skip extending it and just create an unmodified {@link
+android.opengl.GLSurfaceView} instance, but don’t do that. You need to extend this class in
+order to capture touch events, which is covered in the <a href="#touch.html">Responding to Touch
+Events</a> lesson.</p>
+
+<p>The essential code for a {@link android.opengl.GLSurfaceView} is minimal, so for a quick
+implementation, it is common to
+just create an inner class in the activity that uses it:</p>
+
+<pre>
+class MyGLSurfaceView extends GLSurfaceView {
+
+    public MyGLSurfaceView(Context context){
+        super(context);
+
+        // Set the Renderer for drawing on the GLSurfaceView
+        setRenderer(new MyRenderer());
+    }
+}
+</pre>
+
+<p>When using OpenGL ES 2.0, you must add another call to your {@link android.opengl.GLSurfaceView}
+constructor, specifying that you want to use the 2.0 API:</p>
+
+<pre>
+// Create an OpenGL ES 2.0 context
+setEGLContextClientVersion(2);
+</pre>
+
+<p class="note"><strong>Note:</strong> If you are using the OpenGL ES 2.0 API, make sure you declare
+this in your application manifest. For more information, see <a href="#manifest">Declare OpenGL ES
+Use
+in the Manifest</a>.</p>
+
+<p>One other optional addition to your {@link android.opengl.GLSurfaceView} implementation is to set
+the render mode to only draw the view when there is a change to your drawing data using the
+{@link android.opengl.GLSurfaceView#RENDERMODE_WHEN_DIRTY GLSurfaceView.RENDERMODE_WHEN_DIRTY}
+setting:</p>
+
+<pre>
+// Render the view only when there is a change in the drawing data
+setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+</pre>
+
+<p>This setting prevents the {@link android.opengl.GLSurfaceView} frame from being redrawn until you
+call {@link android.opengl.GLSurfaceView#requestRender requestRender()}, which is more
+efficient for this sample app.</p>
+
+
+<h2 id="renderer">Build a Renderer Class</h2>
+
+<p>The implementation of the {@link android.opengl.GLSurfaceView.Renderer} class, or renderer,
+within an application that uses OpenGL ES is where things start to get interesting. This class
+controls
+what gets drawn on the {@link android.opengl.GLSurfaceView} with which it is associated. There are
+three methods in a renderer that are called by the Android system in order to figure out what and
+how to draw on a {@link android.opengl.GLSurfaceView}:</p>
+
+<ul>
+  <li>{@link android.opengl.GLSurfaceView.Renderer#onSurfaceCreated onSurfaceCreated()} -
+Called once to set up the view's OpenGL ES environment.</li>
+  <li>{@link android.opengl.GLSurfaceView.Renderer#onDrawFrame onDrawFrame()} - Called for each
+redraw of the view.</li>
+  <li>{@link android.opengl.GLSurfaceView.Renderer#onSurfaceChanged onSurfaceChanged()} - Called if
+the geometry of the view changes, for example when the device's screen orientation changes.
+  </li>
+</ul>
+
+<p>Here is a very basic implementation of an OpenGL ES renderer, that does nothing more than draw a
+gray background in the {@link android.opengl.GLSurfaceView}:</p>
+
+<pre>
+public class MyGL20Renderer implements GLSurfaceView.Renderer {
+
+    public void onSurfaceCreated(GL10 unused, EGLConfig config) {
+        // Set the background frame color
+        GLES20.glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+    }
+
+    public void onDrawFrame(GL10 unused) {
+        // Redraw background color
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+    }
+
+    public void onSurfaceChanged(GL10 unused, int width, int height) {
+        GLES20.glViewport(0, 0, width, height);
+    }
+}
+</pre>
+
+<p>That’s all there is to it! The code examples above create a simple Android application that
+displays a gray screen using OpenGL. While this code does not do anything very interesting, by
+creating these classes, you have laid the foundation you need to start drawing graphic elements with
+OpenGL.</p>
+
+<p class="note"><strong>Note:</strong> You may wonder why these methods have a {@link
+javax.microedition.khronos.opengles.GL10} parameter, when you are using the OpengGL ES 2.0 APIs.
+These method signatures are simply reused for the 2.0 APIs to keep the Android framework code
+simpler.</p>
+
+<p>If you are familiar with the OpenGL ES APIs, you should now be able to set up a OpenGL ES
+environment in your app and start drawing graphics. However, if you need a bit more help getting
+started with OpenGL, head on to the next lessons for a few more hints.</p>

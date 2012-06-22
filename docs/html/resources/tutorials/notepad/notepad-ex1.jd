@@ -33,7 +33,7 @@ selections. </em></li>
     
     <p><code>Notepadv1</code> is a project that is provided as a starting point. It
     takes care of some of the boilerplate work that you have already seen if you
-    followed the <a href="{@docRoot}resources/tutorials/hello-world.html">Hello,
+    followed the <a href="{@docRoot}training/basics/firstapp/index.html">Hello,
     World</a> tutorial.</p>
     
   <ol>

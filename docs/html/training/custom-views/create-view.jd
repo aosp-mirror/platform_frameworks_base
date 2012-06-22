@@ -1,0 +1,281 @@
+page.title=Creating a View Class
+parent.title=Creating Custom Views
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Custom Drawing
+next.link=custom-drawing.html
+
+@jd:body
+
+<div id="tb-wrapper">
+    <div id="tb">
+
+        <h2>This lesson teaches you to</h2>
+        <ol>
+            <li><a href="#subclassview">Subclass a View</a></li>
+            <li><a href="#customattr">Define Custom Attributes</a></li>
+            <li><a href="#applyattr">Apply Custom Attributes to a View</a></li>
+            <li><a href="#addprop">Add Properties and Events</a></li>
+            <li><a href="#accessibility">Design For Accessibility</a></li>
+        </ol>
+
+        <h2>You should also read</h2>
+        <ul>
+            <li><a href="{@docRoot}/guide/topics/ui/custom-components.html">Custom Components</a>
+            </li>
+        </ul>
+<h2>Try it out</h2>
+<div class="download-box">
+<a href="{@docRoot}shareables/training/CustomView.zip"
+class="button">Download the sample</a>
+<p class="filename">CustomView.zip</p>
+</div>
+    </div>
+</div>
+
+<p>A well-designed custom view is much like any other well-designed class. It encapsulates a
+specific set of
+functionality with an easy to use interface, it uses CPU and memory efficiently, and so forth. In
+addition to being a
+well-designed class, though, a custom view should:
+
+<ul>
+    <li>Conform to Android standards</li>
+    <li>Provide custom styleable attributes that work with Android XML layouts</li>
+    <li>Send accessibility events</li>
+    <li>Be compatible with multiple Android platforms.</li>
+</ul>
+
+<p>The Android framework provides a set of base classes and XML tags to help you create a view that
+    meets all of these
+    requirements. This lesson discusses how to use the Android framework to create the core
+    functionality of a view
+    class.</p>
+
+<h2 id="subclassview">Subclass a View</h2>
+
+<p>All of the view classes defined in the Android framework extend {@link android.view.View}. Your
+    custom view can also
+    extend {@link android.view.View View} directly, or you can save time by extending one of the
+    existing view
+    subclasses, such as {@link android.widget.Button}.</p>
+
+<p>To allow the <a href=”{@docRoot}guide/developing/tools/adt.html”>Android Developer Tools
+</a> to interact with your view, at a minimum you must provide a constructor that takes a
+{@link android.content.Context} and an {@link android.util.AttributeSet} object as parameters.
+This constructor allows the layout editor to create and edit an instance of your view.</p>
+
+<pre class="prettyprint">
+class PieChart extends View {
+    public PieChart(Context ctx, AttributeSet attrs) {
+        super(ctx, attrs);
+    }
+}
+</pre>
+
+<h2 id="customattr">Define Custom Attributes</h2>
+
+<p>To add a built-in {@link android.view.View View} to your user interface, you specify it in an XML element and
+control its
+appearance and behavior with element attributes. Well-written custom views can also be added and
+styled via XML. To
+enable this behavior in your custom view, you must:
+
+<ul>
+    <li>Define custom attributes for your view in a {@code
+        &lt;declare-styleable&gt;
+        } resource element
+    </li>
+    <li>Specify values for the attributes in your XML layout</li>
+    <li>Retrieve attribute values at runtime</li>
+    <li>Apply the retrieved attribute values to your view</li>
+</ul>
+
+<p>This section discusses how to define custom attributes and specify their values.
+  The next section deals with
+    retrieving and applying the values at runtime.</p>
+
+<p>To define custom attributes, add {@code
+    &lt;declare-styleable&gt;
+    } resources to your project. It's customary to put these resources into a {@code
+    res/values/attrs.xml} file. Here's
+    an example of an {@code attrs.xml} file:
+</p>
+
+<pre>
+&lt;resources>;
+   &ltdeclare-styleable name="PieChart">
+       &lt;attr name="showText" format="boolean" />
+       &lt;attr name="labelPosition" format="enum">
+           &lt;enum name="left" value="0"/>
+           &lt;enum name="right" value="1"/>
+       &lt;/attr>
+   &lt;/declare-styleable>
+&lt;/resources>
+</pre>
+
+<p>This code declares two custom attributes, {@code showText} and {@code labelPosition}, that belong
+    to a styleable
+    entity named {@code PieChart}. The name of the styleable entity is, by convention, the same name as the
+    name of the class
+    that defines the custom view. Although it's not strictly necessary to follow this convention,
+    many popular code
+    editors depend on this naming convention to provide statement completion.</p>
+
+<p>Once you define the custom attributes, you can use them in layout XML files just like built-in
+    attributes. The only
+    difference is that your custom attributes belong to a different namespace. Instead of belonging
+    to the {@code
+    http://schemas.android.com/apk/res/android} namespace, they belong to {@code
+    http://schemas.android.com/apk/res/[your package name]}. For example, here's how to use the
+    attributes defined for
+    {@code PieChart}:
+    <p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+   xmlns:custom="http://schemas.android.com/apk/res/com.example.customviews">
+ &lt;com.example.customviews.charting.PieChart
+     custom:showText="true"
+     custom:labelPosition="left" />
+&lt;/LinearLayout>
+</pre>
+
+        <p>In order to avoid having to repeat the long namespace URI, the sample uses an {@code
+            xmlns} directive. This
+            directive assigns the alias {@code custom} to the namespace {@code
+            http://schemas.android.com/apk/res/com.example.customviews}. You can choose any alias
+            you want for your
+            namespace.</p>
+
+        <p>Notice the name of the XML tag that adds the custom view to the layout. It is the fully
+            qualified name of the
+            custom view class. If your view class is an inner class, you must further qualify it with the name of the view's outer class.
+            further. For instance, the
+            {@code PieChart} class has an inner class called {@code PieView}. To use the custom attributes from this class, you would
+            use the tag {@code com.example.customviews.charting.PieChart$PieView}.</p>
+
+        <h2 id="applyattr">Apply Custom Attributes</h2>
+
+        <p>When a view is created from an XML layout, all of the attributes in the XML tag are read
+            from the resource
+            bundle and passed into the view's constructor as an {@link android.util.AttributeSet}.
+            Although it's
+            possible to read values from the {@link android.util.AttributeSet} directly, doing so
+            has some disadvantages:</p>
+
+        <ul>
+            <li>Resource references within attribute values are not resolved</li>
+            <li>Styles are not applied</li>
+        </ul>
+
+        <p>Instead, pass the {@link android.util.AttributeSet} to {@link
+            android.content.res.Resources.Theme#obtainStyledAttributes obtainStyledAttributes()}.
+            This method passes back a {@link android.content.res.TypedArray TypedArray} array of
+            values that have
+            already been dereferenced and styled.</p>
+
+        <p>The Android resource compiler does a lot of work for you to make calling {@link
+            android.content.res.Resources.Theme#obtainStyledAttributes obtainStyledAttributes()}
+            easier. For each {@code &lt;declare-styleable&gt;}
+            resource in the res directory, the generated R.java defines both an array of attribute
+            ids and a set of
+            constants that define the index for each attribute in the array. You use the predefined
+            constants to read
+            the attributes from the {@link android.content.res.TypedArray TypedArray}. Here's how
+            the {@code PieChart} class
+            reads its attributes:</p>
+
+<pre>
+public PieChart(Context ctx, AttributeSet attrs) {
+   super(ctx, attrs);
+   TypedArray a = context.getTheme().obtainStyledAttributes(
+        attrs,
+        R.styleable.PieChart,
+        0, 0);
+
+   try {
+       mShowText = a.getBoolean(R.styleable.PieChart_showText, false);
+       mTextPos = a.getInteger(R.styleable.PieChart_labelPosition, 0);
+   } finally {
+       a.recycle();
+   }
+}
+</pre>
+
+        <p>Note that {@link android.content.res.TypedArray TypedArray} objects
+          are a shared resource
+            and must be recycled after use.</p>
+
+        <h2 id="addprop">Add Properties and Events</h2>
+
+        <p>Attributes are a powerful way of controlling the behavior and appearance of views, but
+            they can only be read
+            when the view is initialized. To provide dynamic behavior, expose a property getter and
+            setter pair for each
+            custom attribute. The following snippet shows how {@code PieChart} exposes a property
+            called {@code
+            showText}:</p>
+
+<pre>
+public boolean isShowText() {
+   return mShowText;
+}
+
+public void setShowText(boolean showText) {
+   mShowText = showText;
+   invalidate();
+   requestLayout();
+}
+</pre>
+
+        <p>Notice that {@code setShowText} calls {@link android.view.View#invalidate invalidate()}
+            and {@link android.view.View#requestLayout requestLayout()}. These calls are crucial
+            to ensure that the view behaves reliably. You have
+            to invalidate the view after any change to its properties that might change its
+            appearance, so that the
+            system knows that it needs to be redrawn. Likewise, you need to request a new layout if
+            a property changes
+            that might affect the size or shape of the view. Forgetting these method calls can cause
+            hard-to-find
+            bugs.</p>
+
+        <p>Custom views should also support event listeners to communicate important events. For
+            instance, {@code PieChart}
+            exposes a custom event called {@code OnCurrentItemChanged} to notify listeners that the
+            user has rotated the
+            pie chart to focus on a new pie slice.</p>
+
+        <p>It's easy to forget to expose properties and events, especially when you're the only user
+            of the custom view.
+            Taking some time to carefully define your view's interface reduces future maintenance
+            costs.
+            A good rule to follow is to always expose any property that affects the visible
+            appearance or behavior of
+            your custom view.
+
+            <h2 id="accessibility">Design For Accessibility</h2>
+
+            <p>Your custom view should support the widest range of users. This includes users with
+                disabilities that
+                prevent them from seeing or using a touchscreen. To support users with disabilities,
+                you should:</p>
+
+            <ul>
+              <li>Label your input fields using the {@code android:contentDescription} attribute
+              </li>
+              <li>Send accessibility events by calling {@link
+                android.view.accessibility.AccessibilityEventSource#sendAccessibilityEvent
+                sendAccessibilityEvent()} when
+                appropriate.
+              </li>
+                <li>
+                Support alternate controllers, such as D-pad and trackball</li>
+            </ul>
+
+            <p>For more information on creating accessible views, see
+                <a href=”{@docRoot}guide/topics/ui/accessibility/apps.html#custom-views”>
+              Making Applications Accessible</a> in the Android Developers Guide.
+        </p>

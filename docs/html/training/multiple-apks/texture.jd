@@ -33,7 +33,7 @@ next.link=multiple.html
 <!-- other docs (NOT javadocs) -->
 <h2>You should also read</h2>
 <ul>
-  <li><a href="http://developer.android.com/guide/market/publishing/multiple-apks.html">Multiple APK
+  <li><a href="http://developer.android.com/guide/google/play/publishing/multiple-apks.html">Multiple APK
 Support</a></li>
 </ul>
 
@@ -49,10 +49,10 @@ Support</a></li>
 devices, naturally you want your application look its best on each individual device, regardless of
 the fact they don’t all support the same set of GL textures.  It may seem at the outset as though
 multiple APK support is the best solution, but this often isn’t the case.  The <a
-href="{@docRoot}guide/market/publishing/multiple-apks.html#ApiLevelOptions">Using Single APK
+href="{@docRoot}guide/google/play/publishing/multiple-apks.html#ApiLevelOptions">Using Single APK
 Instead</a> section of the multiple APK developer guide includes some useful information on how to
 accomplish this with a single APK, including how to <a
-href="{@docRoot}guide/market/publishing/multiple-apks.html#TextureOptions">detect supported texture
+href="{@docRoot}guide/google/play/publishing/multiple-apks.html#TextureOptions">detect supported texture
 formats at runtime</a>.  Depending on your situation, it might be easier to bundle all formats with
 your application, and simply pick which one to use at runtime.</p>
 
@@ -113,10 +113,10 @@ include library projects are beyond the scope of this lesson, you can get up to 
 their creation at the following links:</p>
 <ul>
 <li><a
-href="{@docRoot}guide/developing/projects/projects-eclipse.html#SettingUpLibraryProject">Setting up
+href="{@docRoot}tools/projects/projects-eclipse.html#SettingUpLibraryProject">Setting up
 a library project (Eclipse)</a></li>
 <li><a
-href="{@docRoot}guide/developing/projects/projects-cmdline.html#SettingUpLibraryProject">Setting up
+href="{@docRoot}tools/projects/projects-cmdline.html#SettingUpLibraryProject">Setting up
 a library project (Command line)</a></li>
 </ul>
 

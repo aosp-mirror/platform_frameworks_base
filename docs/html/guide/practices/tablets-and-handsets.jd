@@ -26,7 +26,7 @@ Gallery</a></li>
 
 <h2>See also</h2>
 <ol>
-  <li><a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a></li>
+  <li><a href="{@docRoot}guide/components/fragments.html">Fragments</a></li>
   <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a></li>
   <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
 </ol>
@@ -85,7 +85,7 @@ activity), which has its own lifecycle and which you can add or remove while the
 running.</p>
 
 <p>If you haven't used fragments yet, start by reading the <a
-href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> developer guide.</p>
+href="{@docRoot}guide/components/fragments.html">Fragments</a> developer guide.</p>
 </li>
 
 
@@ -141,16 +141,16 @@ bar below.</p>
   <h3>Remaining backward-compatible</h3>
 <p>If you want to use fragments in your application <em>and</em> remain compatible with
 versions of Android older than 3.0, you can do so by using the Android <a
-href="{@docRoot}sdk/compatibility-library.html">Support Library</a> (downloadable from the
+href="{@docRoot}tools/extras/support-library.html">Support Library</a> (downloadable from the
 SDK Manager).</p>
 <p>The support library includes APIs for <a
-href="{@docRoot}guide/topics/fundamentals/fragments.html">fragments</a>, <a
-href="{@docRoot}guide/topics/fundamentals/loaders.html">loaders</a>, and other APIs added in newer
+href="{@docRoot}guide/components/fragments.html">fragments</a>, <a
+href="{@docRoot}guide/components/loaders.html">loaders</a>, and other APIs added in newer
 versions of Android. By simply adding this library to your Android project, you can use
 backward-compatible versions of these APIs in your application and remain compatible with Android
 1.6 (your <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
 android:minSdkVersion}</a> value can be as low as {@code "4"}). For information about how to get the
-library and start using it, see the <a href="{@docRoot}sdk/compatibility-library.html">Support
+library and start using it, see the <a href="{@docRoot}tools/extras/support-library.html">Support
 Library</a> document.</p>
 
 <p>The support library <em>does not</em> provide APIs for the action bar, but you can use

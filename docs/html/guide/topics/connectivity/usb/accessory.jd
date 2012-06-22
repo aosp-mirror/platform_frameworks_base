@@ -1,0 +1,462 @@
+page.title=USB Accessory
+@jd:body
+
+  <div id="qv-wrapper">
+    <div id="qv">
+      <h2>In this document</h2>
+
+      <ol>
+        <li>
+          <a href="#choosing">Choosing the Right USB Accessory APIs</a>
+
+          <ol>
+            <li><a href="#installing">Installing the Google APIs add-on library</a></li>
+          </ol>
+        </li>
+
+        <li>
+          <a href="#api">API Overview</a>
+
+          <ol>
+            <li><a href="#usage">Usage differences between the add-on library and the platform
+            APIs</a></li>
+          </ol>
+        </li>
+
+        <li><a href="#manifest">Android Manifest Requirements</a></li>
+
+        <li>
+          <a href="#working-a">Working with accessories</a>
+
+          <ol>
+            <li><a href="#discovering-a">Discovering an accessory</a></li>
+
+            <li><a href="#permission-a">Obtaining permission to communicate with an
+            accessory</a></li>
+
+            <li><a href="#communicating-a">Communicating with an accessory</a></li>
+
+            <li><a href="#terminating-a">Terminating communication with an accessory</a></li>
+          </ol>
+        </li>
+      </ol>
+
+      <h2>See also</h2>
+
+      <ol>
+        <li><a href="http://accessories.android.com/demokit">Android USB Accessory Development
+        Kit</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <p>USB accessory mode allows users to connect
+  USB host hardware specifically designed for Android-powered devices. The accessories must adhere
+  to the Android accessory protocol outlined in the <a href=
+  "http://accessories.android.com/demokit">Android Accessory Development Kit</a> documentation.
+  This allows Android-powered devices that cannot act as a USB host to still interact with USB
+  hardware. When an Android-powered device is in USB accessory mode, the attached Android USB
+  accessory acts as the host, provides power to the USB bus, and enumerates connected devices.
+  Android 3.1 (API level 12) supports USB accessory mode and the feature is also backported to
+  Android 2.3.4 (API level 10) to enable support for a broader range of devices.</p>
+
+  <h2 id="choosing">Choosing the Right USB Accessory APIs</h2>
+
+  <p>Although the USB accessory APIs were introduced to the platform in Android 3.1, they are also
+  available in Android 2.3.4 using the Google APIs add-on library. Because these APIs were
+  backported using an external library, there are two packages that you can import to support USB
+  accessory mode. Depending on what Android-powered devices you want to support, you might have to
+  use one over the other:</p>
+
+  <ul>
+    <li><code>com.android.future.usb</code>: To support USB accessory mode in Android 2.3.4, the
+    <a href="http://code.google.com/android/add-ons/google-apis/index.html">Google APIs add-on
+    library</a> includes the backported USB accessory APIs and they are contained in this
+    namespace. Android 3.1 also supports importing and calling the classes within this namespace to
+    support applications written with the add-on library. This add-on library is a thin wrapper
+    around the {@link android.hardware.usb} accessory APIs and does not support USB host mode. If
+    you want to support the widest range of devices that support USB accessory mode, use the add-on
+    library and import this package. It is important to note that not all Android 2.3.4 devices are
+    required to support the USB accessory feature. Each individual device manufacturer decides
+    whether or not to support this capability, which is why you must declare it in your manifest
+    file.</li>
+
+    <li>{@link android.hardware.usb}: This namespace contains the classes that support USB
+    accessory mode in Android 3.1. This package is included as part of the framework APIs, so
+    Android 3.1 supports USB accessory mode without the use of an add-on library. Use this package
+    if you only care about Android 3.1 or newer devices that have hardware support for USB
+    accessory mode, which you can declare in your manifest file.</li>
+  </ul>
+
+  <h3 id="installing">Installing the Google APIs add-on library</h3>
+
+  <p>If you want to install the add-on, you can do so by installing the Google APIs Android API 10
+  package with the SDK Manager. See <a href=
+  "http://code.google.com/android/add-ons/google-apis/installing.html">Installing the Google APIs
+  Add-on</a> for more information on installing the add-on library.</p>
+
+  <h2 id="api">API Overview</h2>
+
+  <p>Because the add-on library is a wrapper for the framework APIs, the classes that support the
+  USB accessory feature are similar. You can use the reference documentation for the {@link
+  android.hardware.usb} even if you are using the add-on library.</p>
+
+  <p class="note"><strong>Note:</strong> There is, however, a minor <a href="#usage">usage
+  difference</a> between the add-on library and framework APIs that you should be aware of.</p>
+
+  <p>The following table describes the classes that support the USB accessory APIs:</p>
+
+  <table>
+    <tr>
+      <th>Class</th>
+
+      <th>Description</th>
+    </tr>
+
+    <tr>
+      <td>{@link android.hardware.usb.UsbManager}</td>
+
+      <td>Allows you to enumerate and communicate with connected USB accessories.</td>
+    </tr>
+
+    <tr>
+      <td>{@link android.hardware.usb.UsbAccessory}</td>
+
+      <td>Represents a USB accessory and contains methods to access its identifying
+      information.</td>
+    </tr>
+  </table>
+
+  <h3 id="usage">Usage differences between the add-on library and platform APIs</h3>
+
+  <p>There are two usage differences between using the Google APIs add-on library and the platform
+  APIs.</p>
+
+  <p>If you are using the add-on library, you must obtain the {@link
+  android.hardware.usb.UsbManager} object in the following manner:</p>
+  <pre>
+UsbManager manager = UsbManager.getInstance(this);
+</pre>
+
+  <p>If you are not using the add-on library, you must obtain the {@link
+  android.hardware.usb.UsbManager} object in the following manner:</p>
+  <pre>
+UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
+</pre>
+
+  <p>When you filter for a connected accessory with an intent filter, the {@link
+  android.hardware.usb.UsbAccessory} object is contained inside the intent that is passed to your
+  application. If you are using the add-on library, you must obtain the {@link
+  android.hardware.usb.UsbAccessory} object in the following manner:</p>
+  <pre>
+UsbAccessory accessory = UsbManager.getAccessory(intent);
+</pre>
+
+  <p>If you are not using the add-on library, you must obtain the {@link
+  android.hardware.usb.UsbAccessory} object in the following manner:</p>
+  <pre>
+UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
+</pre>
+
+  <h2 id="manifest">Android Manifest requirements</h2>
+
+  <p>The following list describes what you need to add to your application's manifest file before
+  working with the USB accesory APIs. The <a href="#manifest-example">manifest and resource file
+  examples</a> show how to declare these items:</p>
+
+  <ul>
+    <li>Because not all Android-powered devices are guaranteed to support the USB accessory APIs,
+    include a <code>&lt;uses-feature&gt;</code> element that declares that your application uses
+    the <code>android.hardware.usb.accessory</code> feature.</li>
+
+    <li>If you are using the 
+    <a href="http://code.google.com/android/add-ons/google-apis/index.html">add-on library</a>,
+    add the <code>&lt;uses-library&gt;</code> element specifying
+    <code>com.android.future.usb.accessory</code> for the library.</li>
+
+    <li>Set the minimum SDK of the application to API Level 10 if you are using the add-on library
+    or 12 if you are using the {@link android.hardware.usb} package.</li>
+
+    <li>
+      <p>If you want your application to be notified of an attached USB accessory, specify an
+      <code>&lt;intent-filter&gt;</code> and <code>&lt;meta-data&gt;</code> element pair for the
+      <code>android.hardware.usb.action.USB_ACCESSORY_ATTACHED</code> intent in your main activity.
+      The <code>&lt;meta-data&gt;</code> element points to an external XML resource file that
+      declares identifying information about the accessory that you want to detect.</p>
+
+      <p>In the XML resource file, declare <code>&lt;usb-accessory&gt;</code> elements for the
+      accessories that you want to filter. Each <code>&lt;usb-accessory&gt;</code> can have the
+      following attributes:</p>
+
+      <ul>
+        <li><code>manufacturer</code></li>
+
+        <li><code>model</code></li>
+
+        <li><code>version</code></li>
+      </ul>
+
+      <p>Save the resource file in the <code>res/xml/</code> directory. The resource file name
+      (without the .xml extension) must be the same as the one you specified in the
+      <code>&lt;meta-data&gt;</code> element. The format for the XML resource file is also shown in
+      the <a href="#example">example</a> below.</p>
+    </li>
+  </ul>
+
+  <h3 id="manifest-example">Manifest and resource file examples</h3>
+
+  <p>The following example shows a sample manifest and its corresponding resource file:</p>
+  <pre>
+&lt;manifest ...&gt;
+    &lt;uses-feature android:name="android.hardware.usb.accessory" /&gt;
+    <!-- version must be either 10 or 12 -->
+    &lt;uses-sdk android:minSdkVersion="&lt;<em>version</em>&gt;" /&gt;
+    ...
+    &lt;application&gt;
+      &lt;uses-library android:name="com.android.future.usb.accessory" /&gt;
+        &lt;activity ...&gt;
+            ...
+            &lt;intent-filter&gt;
+                &lt;action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" /&gt;
+            &lt;/intent-filter&gt;
+
+            &lt;meta-data android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
+                android:resource="@xml/accessory_filter" /&gt;
+        &lt;/activity&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+  <p>In this case, the following resource file should be saved in
+  <code>res/xml/accessory_filter.xml</code> and specifies that any accessory that has the
+  corresponding model, manufacturer, and version should be filtered. The accessory sends these
+  attributes the Android-powered device:</p>
+  <pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+
+&lt;resources&gt;
+    &lt;usb-accessory model="DemoKit" manufacturer="Google" version="1.0"/&gt;
+&lt;/resources&gt;
+</pre>
+
+  <h2 id="working-a">Working with Accessories</h2>
+
+  <p>When users connect USB accessories to an Android-powered device, the Android system can
+  determine whether your application is interested in the connected accessory. If so, you can set
+  up communication with the accessory if desired. To do this, your application has to:</p>
+
+  <ol>
+    <li>Discover connected accessories by using an intent filter that filters for accessory
+    attached events or by enumerating connected accessories and finding the appropriate one.</li>
+
+    <li>Ask the user for permission to communicate with the accessory, if not already
+    obtained.</li>
+
+    <li>Communicate with the accessory by reading and writing data on the appropriate interface
+    endpoints.</li>
+  </ol>
+
+  <h3 id="discovering-a">Discovering an accessory</h3>
+
+  <p>Your application can discover accessories by either using an intent filter to be notified when
+  the user connects an accessory or by enumerating accessories that are already connected. Using an
+  intent filter is useful if you want to be able to have your application automatically detect a
+  desired accessory. Enumerating connected accessories is useful if you want to get a list of all
+  connected accessories or if your application did not filter for an intent.</p>
+
+  <h4 id="discover-a-intent">Using an intent filter</h4>
+
+  <p>To have your application discover a particular USB accessory, you can specify an intent filter
+  to filter for the <code>android.hardware.usb.action.USB_ACCESSORY_ATTACHED</code> intent. Along
+  with this intent filter, you need to specify a resource file that specifies properties of the USB
+  accessory, such as manufacturer, model, and version. When users connect an accessory that matches
+  your accessory filter,</p>
+
+  <p>The following example shows how to declare the intent filter:</p>
+  <pre>
+&lt;activity ...&gt;
+    ...
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" /&gt;
+    &lt;/intent-filter&gt;
+
+    &lt;meta-data android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
+        android:resource="@xml/accessory_filter" /&gt;
+&lt;/activity&gt;
+</pre>
+
+  <p>The following example shows how to declare the corresponding resource file that specifies the
+  USB accessories that you're interested in:</p>
+  <pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+
+&lt;resources&gt;
+    &lt;usb-accessory manufacturer="Google, Inc." model="DemoKit" version="1.0" /&gt;
+&lt;/resources&gt;
+</pre>
+
+  <p>In your activity, you can obtain the {@link android.hardware.usb.UsbAccessory} that represents
+  the attached accessory from the intent like this (with the add-on library):</p>
+  <pre>
+UsbAccessory accessory = UsbManager.getAccessory(intent);
+</pre>
+
+  <p>or like this (with the platform APIs):</p>
+  <pre>
+UsbAccessory accessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
+</pre>
+
+  <h4 id="discover-a-enumerate">Enumerating accessories</h4>
+
+  <p>You can have your application enumerate accesories that have identified themselves while your
+  application is running.</p>
+
+  <p>Use the {@link android.hardware.usb.UsbManager#getAccessoryList() getAccessoryList()} method
+  to get an array all the USB accessories that are connected:</p>
+  <pre>
+UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
+UsbAccessory[] accessoryList = manager.getAcccessoryList();
+</pre>
+
+  <p class="note"><strong>Note:</strong> Currently, only one connected accessory is supported at
+  one time, but the API is designed to support multiple accessories in the future.</p>
+
+  <h3 id="permission-a">Obtaining permission to communicate with an accessory</h3>
+
+  <p>Before communicating with the USB accessory, your applicaton must have permission from your
+  users.</p>
+
+  <p class="note"><strong>Note:</strong> If your application <a href="#using-intents">uses an
+  intent filter</a> to discover accessories as they're connected, it automatically receives
+  permission if the user allows your application to handle the intent. If not, you must request
+  permission explicitly in your application before connecting to the accessory.</p>
+
+  <p>Explicitly asking for permission might be neccessary in some situations such as when your
+  application enumerates accessories that are already connected and then wants to communicate with
+  one. You must check for permission to access an accessory before trying to communicate with it.
+  If not, you will receive a runtime error if the user denied permission to access the
+  accessory.</p>
+
+  <p>To explicitly obtain permission, first create a broadcast receiver. This receiver listens for
+  the intent that gets broadcast when you call {@link
+  android.hardware.usb.UsbManager#requestPermission requestPermission()}. The call to {@link
+  android.hardware.usb.UsbManager#requestPermission requestPermission()} displays a dialog to the
+  user asking for permission to connect to the accessory. The following sample code shows how to
+  create the broadcast receiver:</p>
+  <pre>
+private static final String ACTION_USB_PERMISSION =
+    "com.android.example.USB_PERMISSION";
+private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
+ 
+    public void onReceive(Context context, Intent intent) {
+        String action = intent.getAction();
+        if (ACTION_USB_PERMISSION.equals(action)) {
+            synchronized (this) {
+                UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
+
+                if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                    if(accessory != null){
+                        //call method to set up accessory communication
+                    }
+                }
+                else {
+                    Log.d(TAG, "permission denied for accessory " + accessory);
+                }
+            }
+        }
+    }
+};
+</pre>
+
+  <p>To register the broadcast receiver, put this in your <code>onCreate()</code> method in your
+  activity:</p>
+  <pre>
+UsbManager mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+private static final String ACTION_USB_PERMISSION =
+    "com.android.example.USB_PERMISSION";
+...
+mPermissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+registerReceiver(mUsbReceiver, filter);
+</pre>
+
+  <p>To display the dialog that asks users for permission to connect to the accessory, call the
+  {@link android.hardware.usb.UsbManager#requestPermission requestPermission()} method:</p>
+  <pre>
+UsbAccessory accessory;
+...
+mUsbManager.requestPermission(accessory, mPermissionIntent);
+</pre>
+
+  <p>When users reply to the dialog, your broadcast receiver receives the intent that contains the
+  {@link android.hardware.usb.UsbManager#EXTRA_PERMISSION_GRANTED} extra, which is a boolean
+  representing the answer. Check this extra for a value of true before connecting to the
+  accessory.</p>
+
+  <h3 id="communicating-a">Communicating with an accessory</h3>
+
+  <p>You can communicate with the accessory by using the {@link android.hardware.usb.UsbManager} to
+  obtain a file descriptor that you can set up input and output streams to read and write data to
+  descriptor. The streams represent the accessory's input and output bulk endpoints. You should set
+  up the communication between the device and accessory in another thread, so you don't lock the
+  main UI thread. The following example shows how to open an accessory to communicate with:</p>
+  <pre>
+UsbAccessory mAccessory;
+ParcelFileDescriptor mFileDescriptor;
+FileInputStream mInputStream;
+FileOutputStream mOutputStream;
+
+...
+
+private void openAccessory() {
+    Log.d(TAG, "openAccessory: " + accessory);
+    mFileDescriptor = mUsbManager.openAccessory(mAccessory);
+    if (mFileDescriptor != null) {
+        FileDescriptor fd = mFileDescriptor.getFileDescriptor();
+        mInputStream = new FileInputStream(fd);
+        mOutputStream = new FileOutputStream(fd);
+        Thread thread = new Thread(null, this, "AccessoryThread");
+        thread.start();
+    }
+}
+</pre>
+
+  <p>In the thread's <code>run()</code> method, you can read and write to the accessory by using
+  the {@link java.io.FileInputStream} or {@link java.io.FileOutputStream} objects. When reading
+  data from an accessory with a {@link java.io.FileInputStream} object, ensure that the buffer that
+  you use is big enough to store the USB packet data. The Android accessory protocol supports
+  packet buffers up to 16384 bytes, so you can choose to always declare your buffer to be of this
+  size for simplicity.</p>
+
+  <p class="note"><strong>Note:</strong> At a lower level, the packets are 64 bytes for USB
+  full-speed accessories and 512 bytes for USB high-speed accessories. The Android accessory
+  protocol bundles the packets together for both speeds into one logical packet for simplicity.</p>
+
+  <p>For more information about using threads in Android, see <a href=
+  "{@docRoot}guide/components/processes-and-threads.html#Threads">Processes and
+  Threads</a>.</p>
+
+  <h3 id="terminating-a">Terminating communication with an accessory</h3>
+
+  <p>When you are done communicating with an accessory or if the accessory was detached, close the
+  file descriptor that you opened by calling {@link android.os.ParcelFileDescriptor#close close()}.
+  To listen for detached events, create a broadcast receiver like below:</p>
+  <pre>
+BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
+    public void onReceive(Context context, Intent intent) {
+        String action = intent.getAction(); 
+
+        if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action)) {
+            UsbAccessory accessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
+            if (accessory != null) {
+                // call your method that cleans up and closes communication with the accessory
+            }
+        }
+    }
+};
+</pre>
+
+  <p>Creating the broadcast receiver within the application, and not the manifest, allows your
+  application to only handle detached events while it is running. This way, detached events are
+  only sent to the application that is currently running and not broadcast to all applications.</p>
+

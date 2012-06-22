@@ -1,0 +1,74 @@
+page.title=Determining and Monitoring the Docking State and Type
+parent.title=Optimizing Battery Life
+parent.link=index.html
+
+trainingnavtop=true
+previous.title= Monitoring the Battery Level and Charging State
+previous.link=battery-monitoring.html
+next.title= Determining and Monitoring the Connectivity Status
+next.link=connectivity-monitoring.html
+
+@jd:body
+
+<div id="tb-wrapper"> 
+<div id="tb">
+
+<h2>Содержание урока</h2>
+<ol>
+  <li><a href="#CurrentDockState">Запрос аудиофокуса</a></li>
+  <li><a href="#DockType">Определение типа док-станции</a></li>
+  <li><a href="#MonitorDockState">Отслеживание изменений состояния подключения к док-станции и ее типа</a></li>
+</ol>
+
+
+<h2>Дополнительные материалы</h2>
+<ul>
+  <li><a href="{@docRoot}guide/components/intents-filters.html">Намерения и фильтры намерений</a>
+</ul>
+
+</div> 
+</div>
+
+<p>Устройства под управлением ОС Android можно подключать к нескольким типам док-станций: настольным, которые делятся на цифровые и аналоговые, и автомобильным. В большинстве случаев устройства заряжаются при подключении к док-станции, поэтому состояние подключения к док-станции часто связано с состоянием зарядки.</p>
+
+<p>Насколько состояние подключения к док-станции влияет на частоту обновления, зависит от конкретного приложения. Например, можно увеличить частоту обновлений приложения, показывающего спортивные новости, когда устройство подключено к настольной док-станции, и полностью отключить обновления при подключении к автомобильной. И наоборот, если используется приложение, которое в фоновом режиме загружает данные о дорожной обстановке, то при подключении устройства к автомобильной док-станции следует выполнять обновления максимально часто.</p>
+
+<p>Состояние подключения к док-станции также передается в виде закрепленного намерения {@link android.content.Intent}, что позволяет запрашивать сведения о наличии подключения к док-станции и ее типе.</p>
+
+
+<h2 id="CurrentDockState">Определение текущего состояния подключения к док-станции</h2> 
+ 
+<p>Сведения о состоянии подключения к док-станции передаются в качестве дополнительных данных в закрепленном оповещении действия {@link android.content.Intent#ACTION_DOCK_EVENT}. Поскольку это закрепленное намерение, регистрировать {@link android.content.BroadcastReceiver} не требуется. Достаточно вызвать {@link android.content.Context#registerReceiver registerReceiver()}, передав {@code null} в качестве приемника широковещательных намерений, как показано в коде ниже.</p>
+
+<pre>IntentFilter ifilter = new IntentFilter(Intent.ACTION_DOCK_EVENT);
+Intent dockStatus = context.registerReceiver(null, ifilter);</pre>
+
+<p>Сведения о текущем состоянии подключения к док-станции можно извлечь из дополнительных данных {@code EXTRA_DOCK_STATE}:<p>
+
+<pre>int dockState = battery.getIntExtra(EXTRA_DOCK_STATE, -1);
+boolean isDocked = dockState != Intent.EXTRA_DOCK_STATE_UNDOCKED;</pre>
+
+
+<h2 id="DockType">Определение типа док-станции</h2> 
+
+<p>Док-станция, к которой подключено устройство, может быть одного из четырех типов: 
+<ul><li>автомобильная;</li>
+<li>настольная;</li>
+<li>настольная с минимальным набором функций (аналоговая);</li>
+<li>настольная с широким набором функций (цифровая).</li></ul></p>
+
+<p>Обратите внимание, что последние два типа поддерживаются только на уровне API&nbsp;11, поэтому, даже если вас не интересует, является ли док-станция цифровой или аналоговой, а интересует только ее тип, рекомендуется выполнять проверку по всем трем типам:</p>
+
+<pre>boolean isCar = dockState == EXTRA_DOCK_STATE_CAR;
+boolean isDesk = dockState == EXTRA_DOCK_STATE_DESK || 
+                 dockState == EXTRA_DOCK_STATE_LE_DESK ||
+                 dockState == EXTRA_DOCK_STATE_HE_DESK;</pre>
+
+
+<h2 id="MonitorDockState">Отслеживание изменений состояния подключения к док-станции и ее типа</h2> 
+
+<p>При каждом подключении устройства к док-станции или отключении от нее передается действие {@link android.content.Intent#ACTION_DOCK_EVENT}. Чтобы отслеживать состояние подключения к док-станции, достаточно зарегистрировать в манифесте приложения приемник широковещательных намерений, как показано ниже.</p>
+
+<pre>&lt;action android:name="android.intent.action.ACTION_DOCK_EVENT"/></pre>
+
+<p>Данные о типе док-станции и о состоянии подключения к ней можно извлечь внутри реализации приемника с помощью методов, описанных в предыдущем шаге.</p>

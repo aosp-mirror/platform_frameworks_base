@@ -63,8 +63,4 @@
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>design/downloads/index.html">Downloads</a></div>
   </li>
 
-  <li>
-    <div id="back-dac-section"><a href="<?cs var:toroot ?>index.html">Developers</a></div>
-  </li>
-
 </ul>

@@ -41,7 +41,7 @@ Most of the contents of the filter are described by its
 
 <p>
 For a more detailed discussion of filters, see the separate  
-<a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents 
+<a href="{@docRoot}guide/components/intents-filters.html">Intents 
 and Intent Filters</a> document, as well as the 
 <a href="{@docRoot}guide/topics/manifest/manifest-intro.html#ifs">Intents Filters</a> 
 section in the introduction.

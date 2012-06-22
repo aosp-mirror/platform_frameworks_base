@@ -1,0 +1,454 @@
+page.title=Filters on Google Play
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Quickview</h2>
+<ul>
+<li>Google Play applies filters that control which Android-powered devices can access your
+application when the user is visiting the store.</li>
+<li>Filtering is determined by comparing device configurations that you declare in you app's
+manifest file to the configurations defined by the device, as well as other factors.</li> </ul>
+
+<h2>In this document</h2>
+
+<ol>
+  <li><a href="#how-filters-work">How Filters Work on Google Play</a></li>
+  <li><a href="#manifest-filters">Filtering based on Manifest Elements</a>
+    <ol>
+      <li><a href="#advanced-filters">Advanced manifest filters</a></li>
+    </ol>
+  </li>
+  <li><a href="#other-filters">Other Filters</a></li>
+  <li><a href="#MultiApks">Publishing Multiple APKs with Different Filters</a></li>
+</ol>
+
+<h2>See also</h2>
+ <ol>
+<li><a
+href="{@docRoot}guide/practices/compatibility.html">Android Compatibility</a></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">&lt;supports-gl-texture&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code></li>
+<li><code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</code></a></li>
+</ol>
+
+<div id="qv-extra">
+  <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png">
+  <div id="qv-sub-rule">
+    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0 5px;">
+    <h2 style="color:#669999;padding-top:1em;">Interested in publishing your app on Google Play?</h2>
+    <p><a id="publish-link"
+href="http://play.google.com/apps/publish">Go to Google Play</a> to create a publisher
+account and upload your app.</p></div>
+</div>
+
+</div>
+</div>
+
+
+<p>When a user searches or browses on Google Play on an Android device, the results are filtered
+based on which applications are compatible with that device. For example, if an application
+requires a camera (as specified in the application manifest file), then Google Play will not show
+the app on any device that does not have a camera.</p>
+
+<p>Declarations in the manifest file that are compared to the device's configuration is not the
+only part of how applications are filtered. Filtering might also occur due to the user's country and
+carrier, the presence or absence of a SIM card, and other factors. </p>
+
+<p>Changes to the Google Play filters are independent of changes to the Android platform itself.
+This document is updated periodically to reflect any changes that affect the way Google Play
+filters applications.</p>
+
+
+<h2 id="how-filters-work">How Filters Work on Google Play</h2>
+
+<p>Google Play uses the filter restrictions described below to determine
+whether to show your application to a user who is browsing or searching for
+applications from the Google Play app. When determining whether to display your app,
+Google Play checks the device's hardware and software configuration, as well as it's
+carrier, location, and other characteristics. It then compares those against the
+restrictions and dependencies expressed by the application's
+manifest file and publishing details. If the application is
+compatible with the device according to the filter rules, Google Play displays the
+application to the user. Otherwise, Google Play hides your application from search
+results and category browsing, even if a user specifically requests
+the app by clicking a deep link that points directly to the app's ID within Google Play..</p>
+
+<p class="note"><strong>Note:</strong> When users browse the <a
+href="http://play.google.com/apps">Google Play web site</a>, they can see all published
+applications. The Google Play web site compares the application requirements to each of the
+user's registered devices for compatibility, though, and only allows them to install the application
+if it's compatible with their device.</p>
+
+<p>You can use any combination of the available filters for your app. For example, you can set a
+<code>minSdkVersion</code> requirement of <code>"4"</code> and set <code>smallScreens="false"</code>
+in the app, then when uploading the app to Google Play you could target European countries (carriers)
+only. Google Play's filters will thus prevent the application from being available on any device
+that does not match all three of these requirements. </p>
+
+<p>All filtering restrictions are associated with an application's version and can
+change between versions. For example, if a user has installed your application and you publish an
+update that makes the app invisible to the user, the user will not see that an update is
+available.</p>
+
+
+<h2 id="manifest-filters">Filtering based on Manifest Elements</h2>
+
+<p>Most filters are triggered by elements within an application's
+manifest file, <a
+href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml</a>
+(although not everything in the manifest file can trigger filtering).
+Table 1 lists the manifest elements that you should use to trigger
+filtering, and explains how the filtering for each element works.</p>
+
+<p id="table1" class="table-caption"><strong>Table 1.</strong> Manifest elements that
+trigger filtering on Google Play.</p>
+<table>
+  <tr>
+    <th>Manifest Element</th>
+    <th>Filter Name</th>
+    <th>How It Works</th>
+  </tr>
+  <tr>
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code>
+      <!-- ##api level 4## --></td>
+    <td valign="top">Screen Size</td>
+    <td valign="top">
+
+<p>An application indicates the screen sizes that it is capable of supporting by
+setting attributes of the <code>&lt;supports-screens&gt;</code> element. When
+the application is published, Google Play uses those attributes to determine whether
+to show the application to users, based on the screen sizes of their
+devices. </p>
+
+<p>As a general rule, Google Play assumes that the platform on the device can adapt
+smaller layouts to larger screens, but cannot adapt larger layouts to smaller
+screens. Thus, if an application declares support for "normal" screen size only,
+Google Play makes the application available to both normal- and large-screen devices,
+but filters the application so that it is not available to small-screen
+devices.</p>
+
+<p>If an application does not declare attributes for
+<code>&lt;supports-screens&gt;</code>, Google Play uses the default values for those
+attributes, which vary by API Level. Specifically: </p>
+
+<ul>
+<li><p>For applications that set either the <code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">android:
+minSdkVersion</a></code> or <code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">android:
+targetSdkVersion</a></code> to 3 or lower, the <code>&lt;supports-screens&gt;</code> element itself
+is undefined and no attributes are available. In this case, Google Play assumes that
+the application is designed for normal-size screens and shows the application to
+devices that have normal or larger screens. </p>
+
+<li>When the either the <code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">android:
+minSdkVersion</a></code> or <code><a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">android:
+targetSdkVersion</a></code> is set to 4 or higher, the default for all attributes is
+<code>"true"</code>. In this way, the application is considered to support all screen sizes by
+default.</li>
+</ul>
+
+    <p><strong>Example 1</strong><br />
+    The manifest declares <code>&lt;uses-sdk android:minSdkVersion="3"&gt;</code>
+    and does not include a <code>&lt;supports-screens&gt;</code> element.
+    <strong>Result</strong>: Google Play will not show the app to a user of a
+    small-screen device, but will show it to users of normal and large-screen
+    devices, unless  other filters apply. </p>
+    <p><strong>Example 2<br />
+    </strong>The manifest declares <code>&lt;uses-sdk android:minSdkVersion="3"
+    android:targetSdkVersion="4"&gt;</code> and does not include a
+    <code>&lt;supports-screens&gt;</code> element.
+    <strong>Result</strong>: Google Play will show the app to users on all
+    devices, unless other filters apply. </p>
+    <p><strong>Example 3<br />
+    </strong>The manifest declares <code>&lt;uses-sdk android:minSdkVersion="4"&gt;</code>
+    and does not include a <code>&lt;supports-screens&gt;</code> element.
+    <strong>Result</strong>: Google Play will show the app to all users,
+    unless  other filters apply. </p>
+    <p>For more information on how to declare support for screen sizes in your
+    application, see <code><a
+    href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code>
+    and <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+    Screens</a>.</p>
+</td>
+  </tr>
+
+  <tr>
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code>
+      <!-- ##api level 3## --></td>
+    <td valign="top">Device
+    Configuration: <br />
+    keyboard, navigation, touch screen</td>
+    <td valign="top"><p>An application can
+    request certain hardware features, and Google Play will  show the app only on devices that have the required hardware.</p>
+      <p><strong>Example 1<br />
+      </strong>The manifest includes <code>&lt;uses-configuration android:reqFiveWayNav=&quot;true&quot; /&gt;</code>, and a user is searching for apps on a device that does not have a five-way navigational control. <strong>Result</strong>: Google Play will not show the app to the user. </p>
+      <p><strong>Example 2<br />
+      </strong>The manifest does not include a <code>&lt;uses-configuration&gt;</code> element. <strong>Result</strong>: Google Play will show the app to all users, unless other filters apply.</p>
+<p>For more details, see  <a
+href="{@docRoot}guide/topics/manifest/uses-configuration-element.html"><code>&lt;uses-configuration&gt;</code></a>.</p></td>
+  </tr>
+
+  <tr>
+    <td rowspan="2" valign="top" style="white-space:nowrap;"><code><a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a>
+</code>
+      <!-- ##api level 4## --></td>
+    <td valign="top">Device Features<br />
+      (<code>name</code>)</td>
+    <td valign="top"><p>An application can require certain device features to be
+present on the device. This functionality was introduced in Android 2.0 (API
+Level 5).</p>
+      <p><strong>Example 1<br />
+      </strong>The manifest includes <code>&lt;uses-feature
+android:name=&quot;android.hardware.sensor.light&quot; /&gt;</code>, and a user
+is searching for apps on a device that does not have a light sensor.
+<strong>Result</strong>: Google Play will not show the app to the user. </p>
+      <p><strong>Example 2<br />
+      </strong>The manifest does not include a <code>&lt;uses-feature&gt;</code>
+element. <strong>Result</strong>: Google Play will show the app to all users,
+unless other filters apply.</p>
+      <p>For complete information, see <code><a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a>
+</code>.</p>
+      <p><em>Filtering based on implied features:</em> In some cases, Google
+Play interprets permissions requested through
+<code>&lt;uses-permission&gt;</code> elements as feature requirements equivalent
+to those declared in <code>&lt;uses-feature&gt;</code> elements. See <a
+href="#uses-permission-filtering"><code>&lt;uses-permission&gt;</code></a>,
+below.</p>
+</td>
+  </tr>
+
+  <tr>
+    <td valign="top">OpenGL-ES
+    Version<br />
+(<code>openGlEsVersion</code>)</td>
+    <td valign="top"><p>An application can require that the device support a specific
+      OpenGL-ES version using the <code>&lt;uses-feature
+        android:openGlEsVersion=&quot;int&quot;&gt;</code> attribute.</p>
+      <p><strong>Example 1<br />
+      </strong>An app
+        requests multiple OpenGL-ES versions by specifying <code>openGlEsVersion</code> multiple times in the
+        manifest.  <strong>Result</strong>: Google Play assumes that the app requires the highest of the indicated versions.</p>
+<p><strong>Example 2<br />
+</strong>An app
+        requests OpenGL-ES version 1.1, and a user is searching for apps on a device that supports OpenGL-ES version 2.0. <strong>Result</strong>: Google Play will show the app to the user, unless other filters apply. If a
+  device reports that it supports OpenGL-ES version <em>X</em>,  Google Play assumes that it
+  also supports any version earlier than <em>X</em>.
+</p>
+<p><strong>Example 3<br />
+</strong>A user is searching for apps on a device that does not
+        report an OpenGL-ES version (for example, a device running Android 1.5 or earlier). <strong>Result</strong>: Google Play assumes that the device
+  supports only OpenGL-ES 1.0. Google Play will only show the user apps that do not specify <code>openGlEsVersion</code>, or apps that do not specify an OpenGL-ES version higher than 1.0. </p>
+      <p><strong>Example 4<br />
+      </strong>The manifest does not specify <code>openGlEsVersion</code>. <strong>Result</strong>: Google Play will show the app to all users, unless other filters apply. </p>
+<p>For more details, see <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>.</p></td>
+  </tr>
+
+  <tr>
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code></td>
+    <td valign="top">Software Libraries</td>
+    <td valign="top"><p>An application can require specific
+    shared libraries to be present on the device. </p>
+      <p><strong>Example 1<br />
+      </strong>An app requires the <code>com.google.android.maps</code> library, and a user is searching for apps on a device that does not have the <code>com.google.android.maps</code> library. <strong>Result</strong>: Google Play will not show the app to the user. </p>
+      <p><strong>Example 2</strong><br />
+        The manifest does not include a <code>&lt;uses-library&gt;</code> element. <strong>Result</strong>: Google Play will show the app to all users, unless other filters apply.</p>
+<p>For more details, see <a
+href="{@docRoot}guide/topics/manifest/uses-library-element.html"><code>&lt;uses-library&gt;</code></a>.</p></td>
+  </tr>
+  <tr id="uses-permission-filtering">
+    <td valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code></td>
+    <td valign="top">&nbsp;</td>
+    <td valign="top">Strictly, Google Play does not filter based on
+<code>&lt;uses-permission&gt;</code> elements. However, it does read the
+elements to determine whether the application has hardware feature requirements
+that may not have been properly declared in <code>&lt;uses-feature&gt;</code>
+elements. For example, if an application requests the <code>CAMERA</code>
+permission but does not declare a <code>&lt;uses-feature&gt;</code> element for
+<code>android.hardware.camera</code>, Google Play considers that the
+application requires a camera and should not be shown to users whose devices do
+not offer a camera.</p>
+    <p>In general, if an application requests hardware-related permissions,
+Google Play assumes that the application requires the underlying hardware
+features, even though there might be no corresponding to
+<code>&lt;uses-feature&gt;</code> declarations. Google Play then sets up
+filtering based on the features implied by the <code>&lt;uses-feature&gt;</code>
+declarations.</p>
+    <p>For a list of permissions that imply hardware features, see
+the documentation for the <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions-features"><code>&lt;uses-feature&gt;</code></a>
+element.</p>
+</td>
+  </tr>
+
+  <tr>
+    <td rowspan="2" valign="top" style="white-space:nowrap;"><code><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></code></td>
+    <td valign="top">Minimum Framework Version (<code>minSdkVersion</code>)</td>
+    <td valign="top"><p>An application can require a minimum API level.  </p>
+      <p><strong>Example 1</strong><br />
+        The manifest includes <code>&lt;uses-sdk
+      android:minSdkVersion=&quot;3&quot;&gt;</code>, and the app uses APIs that were introduced in API Level 3. A user is searching for apps on a device that has API Level 2. <strong>Result</strong>: Google Play will not show the app to the user. </p>
+      <p><strong>Example 2</strong><br />
+      The manifest does not include <code>minSdkVersion</code>, and the app uses APIs that were introduced in API Level 3. A user is searching for apps on a device that has API Level 2. <strong>Result</strong>: Google Play assumes that <code>minSdkVersion</code> is &quot;1&quot; and that the app is compatible with all versions of Android. Google Play  shows the app to the user and allows the user to download the app. The app crashes at runtime. </p>
+    <p>Because you want to avoid this second scenario, we recommend that you always declare a <code>minSdkVersion</code>. For details, see <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min"><code>android:minSdkVersion</code></a>.</p></td>
+  </tr>
+  <tr>
+    <td valign="top">Maximum Framework Version (<code>maxSdkVersion</code>)</td>
+    <td valign="top"><p><em>Deprecated.</em> Android
+    2.1 and later do not check or enforce the <code>maxSdkVersion</code> attribute, and
+    the SDK will not compile if <code>maxSdkVersion</code> is set in an app's manifest. For devices already
+    compiled with <code>maxSdkVersion</code>, Google Play will respect it and use it for
+    filtering.</p>
+<p> Declaring <code>maxSdkVersion</code> is <em>not</em> recommended. For details, see <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#max"><code>android:maxSdkVersion</code></a>.</p></td>
+  </tr>
+</table>
+
+
+
+<h3 id="advanced-filters">Advanced manifest filters</h3>
+
+<p>In addition to the manifest elements in <a href="#table1">table 1</a>, Google Play can also
+filter applications based on the advanced manifest elements in table 2.</p>
+
+<p>These manifest elements and the filtering they trigger are for exceptional use-cases
+only. These are designed for certain types of high-performance games and similar applications that
+require strict controls on application distribution. <strong>Most applications should never use
+these filters</strong>.</p>
+
+<p id="table2" class="table-caption"><strong>Table 2.</strong> Advanced manifest elements for
+Google Play filtering.</p>
+<table>
+  <tr><th>Manifest Element</th><th>Summary</th></tr>
+  <tr>
+    <td><nobr><a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+&lt;compatible-screens&gt;}</a></nobr></td>
+    <td>
+      <p>Google Play filters the application if the device screen size and density does not match
+any of the screen configurations (declared by a {@code &lt;screen&gt;} element) in the {@code
+&lt;compatible-screens&gt;} element.</p>
+      <p class="caution"><strong>Caution:</strong> Normally, <strong>you should not use
+this manifest element</strong>. Using this element can dramatically
+reduce the potential user base for your application, by excluding all combinations of screen size
+and density that you have not listed. You should instead use the <a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens&gt;}</a> manifest element (described above in <a href="#table1">table
+1</a>) to enable screen compatibility mode for screen configurations you have not accounted for
+with alternative resources.</p>
+    </td>
+  </tr>
+  <tr>
+    <td><nobr><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
+&lt;supports-gl-texture&gt;}</a></nobr></td>
+    <td>
+      <p>Google Play filters the application unless one or more of the GL texture compression
+formats supported by the application are also supported by the device. </p>
+    </td>
+  </tr>
+</table>
+
+
+
+<h2 id="other-filters">Other Filters</h2>
+
+<p>Google Play uses other application characteristics to determine whether to show or hide an application for a particular user on a given device, as described in the table below. </p>
+
+<p id="table3" class="table-caption"><strong>Table 3.</strong> Application and publishing
+characteristics that affect filtering on Google Play.</p>
+<table> <tr>
+    <th>Filter Name</th> <th>How It Works</th> </tr>
+
+  <tr>
+    <td valign="top">Publishing Status</td> <td valign="top"><p>Only published applications will appear in
+      searches and browsing within Google Play.</p> <p>Even if an app is unpublished, it can
+        be installed if users can see it in their Downloads area among their purchased,
+        installed, or recently uninstalled apps.</p> <p>If an application has been
+  suspended, users will not be able to reinstall or update it, even if it appears in their Downloads.</p> </td></tr>
+  <tr>
+  <td valign="top">Priced
+    Status</td> <td valign="top"><p>Not all users can see paid apps. To show paid apps, a device
+must have a SIM card and be running Android 1.1 or later, and it must be in a
+country (as determined by SIM carrier) in which paid apps are available.</p></td>
+</tr> <tr>
+  <td valign="top">Country / Carrier Targeting</td> <td valign="top"> <p>When you upload your app to
+    Google Play, you can select specific countries to target. The app will only
+    be visible to the countries (carriers) that you select, as follows:</p>
+    <ul><li><p>A device's country is determined based on the carrier, if a carrier is
+      available. If no carrier can be determined, Google Play tries to
+      determine the country based on IP.</p></li> <li><p>Carrier is determined based on
+      the device's SIM (for GSM devices), not the current roaming carrier.</p></li></ul>
+</td> </tr> <tr>
+  <td valign="top">Native Platform</td> <td valign="top"><p>An application that includes native
+    libraries that target a specific platform (ARM EABI v7 or x86, for example) are
+    visible only on devices that support that platform. For details about the NDK and using
+    native libraries, see <a href="{@docRoot}tools/sdk/ndk/index.html#overview">What is the
+      Android NDK?</a></p> </tr> <tr>
+        <td valign="top">Copy-Protected Applications</td> <td valign="top"><p>To
+          copy protect an application, set copy protection to "On" when you configure publishing
+options for your application. Google Play will not show copy-protected applications on
+developer devices or unreleased devices.</p></td> </tr> </table>
+
+
+
+<h2 id="MultiApks">Publishing Multiple APKs with Different Filters</h2>
+
+<p>Some specific Google Play filters allow you to publish multiple APKs for the same
+application in order to provide a different APK to different device configurations. For example, if
+you're creating a video game that uses high-fidelity graphic assets, you might want to create
+two APKs that each support different texture compression formats. This way, you can reduce the
+size of the APK file by including only the textures that are required for each device
+configuration. Depending on each device's support for your texture compression formats, Google
+Play will deliver it the APK that you've declared to support that device.</p>
+
+<p>Currently, Google Play allows you to publish multiple APKs for the same application only
+when each APK provides different filters based on the following configurations:</p>
+<ul>
+  <li>OpenGL texture compression formats
+    <p>By using the <a
+href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
+&lt;supports-gl-texture&gt;}</a> element.</p>
+  </li>
+  <li>Screen size (and, optionally, screen density)
+    <p>By using the <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens&gt;}</a> or <a
+href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+&lt;compatible-screens&gt;}</a> element.</p>
+  </li>
+  <li>API level
+    <p>By using the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code
+&lt;uses-sdk&gt;}</a> element.</p>
+  </li>
+</ul>
+
+<p>All other filters still work the same as usual, but these three are the only filters that can
+distinguish one APK from another within the same application listing on Google Play. For example,
+you <em>cannot</em> publish multiple APKs for the same application if the APKs differ only based on
+whether the device has a camera.</p>
+
+<p class="caution"><strong>Caution:</strong> Publishing multiple APKs for the same application is
+considered an advanced feature and <strong>most application should publish only one
+APK that supports a wide range of device configurations</strong>. Publishing multiple APKs
+requires that you follow specific rules within your filters and that you pay extra attention to the
+version codes for each APK to ensure proper update paths for each configuration.</p>
+
+<p>If you need more information about how to publish multiple APKs on Google Play, read <a
+href="{@docRoot}guide/google/play/publishing/multiple-apks.html">Multiple APK Support</a>.</p>

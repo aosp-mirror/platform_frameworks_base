@@ -1,0 +1,72 @@
+page.title=Get Started with Publishing
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Help topics</h2>
+<ul>
+  <li><a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=113468">Developer Registration</a></li>
+  <li><a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=138294&topic=2365624&ctx=topic">Supported Locations for Distributing Apps</a></li>
+  <li><a href="http://support.google.com/googleplay/android-developer/bin/topic.py?hl=en&topic=2364761">Policy and Best Practices</a></li>
+  <li><a href="http://support.google.com/googleplay/android-developer/">Developer Support</a></li>
+</ul>
+
+<h2>Get Started</h2>
+<ol>
+  <li><a href="https://play.google.com/apps/publish/">Google Play Android Developer Console</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>You can set up to start publishing on Google Play in only a few minutes. Here's how you do it: </p>
+
+<ul>
+<li>Register for a Google Play publisher account</li>
+<li>If you will sell apps, set up a Google Checkout Merchant Account</li>
+<li>Explore the Google Play Android Developer Console and learn about the tools for publishing</li>
+</ul>
+
+
+<h3>Register for a publisher account</h3>
+
+<p>The first step is to visit the Google Play Android Developer Console and register for a publisher account.</p>
+
+<p>Here's what you will do during registration: </p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Tips</h2>
+  <ul>
+    <li>You need a Google account to register. You can create one during the process. </li>
+    <li>If you are an organization, consider registering a new Google account rather than using a personal account.</li>
+    <li>Review the <a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=138294">developer countries</a> and <a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=150324">merchant countries</a> where you can distribute and sell apps.</li> 
+  </ul>
+</div></div>
+
+
+<ol>
+<li>Visit the Google Play Android Developer Console at <a href="https://play.google.com/apps/publish/">https://play.google.com/apps/publish/</a>.
+<li>Enter basic information about your <strong>developer identity</strong> &mdash; developer name, email address, and so on. You can modify this information later.</li>
+<li>Read and accept the <strong>Developer Distribution Agreement</strong> that applies to your country or region. Note that apps and store listings that you publish on Google Play must comply with the Developer Program Policies and US export law,</li>
+<li>Pay a <strong>$25 USD registration fee</strong> using Google Checkout. If you don't have a Google Checkout account, you can quickly set one up during the process.</li>
+</ol>
+
+<p>When your registration is verified, you’ll be notified at the email address you specified during registration. </p>
+
+<h3>Set up a Google Checkout Merchant account</h3>
+ 
+<p>If you want to sell products on Google Play &mdash; priced apps, in-app products, or subscriptions &mdash; you will also need to set up a Google Checkout <a href="http://checkout.google.com/sell">Merchant Account</a>. You can do that at any time, but make sure to first review the list of <a href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=150324">merchant countries</a>.</p>
+
+<p>To set up a Merchant account from the Developer Console:</p>
+
+<ol>
+<li><strong>Sign in</strong> to your Google Play Android Developer Console at <a href="https://play.google.com/apps/publish/">https://play.google.com/apps/publish/</a>
+<li>Click on the "<strong>Edit profile</strong>" link.
+<li>Select "<strong>Setup a Merchant Account at Google Checkout</strong>".</li>
+</ol>
+
+<p>This will take you to the Google Checkout site to sign up as a Merchant; you'll need to have information about your business handy to complete this step.</p>
+
+<h3>Explore the Developer Console</h3>
+<p>When your registration is verified, you can sign in to your Android Developer Console, which will be the home for your app publishing operations and tools on Google Play. </p>

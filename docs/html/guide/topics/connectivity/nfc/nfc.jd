@@ -1,0 +1,923 @@
+page.title=NFC Basics
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#tag-dispatch">The Tag Dispatch System</a>
+      <ol>
+        <li><a href="#ndef">How NFC tags are mapped to MIME types and URIs</a></li>
+        <li><a href="#dispatching">How NFC Tags are Dispatched to Applications</a></li>
+      </ol>
+    </li>
+    <li><a href="#manifest">Requesting NFC Access in the Android Manifest</a></li>
+    <li><a href="#filtering-intents">Filtering for Intents</a>
+      <ol>
+        <li><a href="#ndef-disc">ACTION_NDEF_DISCOVERED</a></li>
+        <li><a href="#tech-disc">ACTION_TECH_DISCOVERED</a></li>
+        <li><a href="#tag-disc">ACTION_TAG_DISCOVERED</a></li>
+        <li><a href="#obtain-info">Obtaining information from intents</a></li>
+      </ol>
+    </li>
+    <li><a href="#creating-records">Creating Common Types of NDEF Records</a>
+      <ol>
+        <li><a href="#abs-uri">TNF_ABSOLUTE_URI</a></li>
+        <li><a href="#mime">TNF_MIME_MEDIA</a></li>
+        <li><a href="#well-known-text">TNF_WELL_KNOWN with RTD_TEXT</a></li>
+        <li><a href="#well-known-uri">TNF_WELL_KNOWN with RTD_URI</a></li>
+        <li><a href="#ext-type">TNF_EXTERNAL_TYPE</a></li>
+        <li><a href="#aar">Android Application Records</a></li>
+      </ol>
+    </li>
+    <li><a href="#p2p">Beaming NDEF Messages to Other Devices</a></li>
+  </ol>
+</div>
+</div>
+
+<p>This document describes the basic NFC tasks you perform in Android. It explains how to send and
+receive NFC data in the form of NDEF messages and describes the Android framework APIs that support
+these features. For more advanced topics, including a discussion of working with non-NDEF data,
+see <a href="{@docRoot}guide/topics/connectivity/nfc/advanced-nfc.html">Advanced NFC</a>.</p>
+
+
+<p>There are two major uses cases when working with NDEF data and Android:</p>
+
+<ul>
+  <li>Reading NDEF data from an NFC tag</li>
+  <li>Beaming NDEF messages from one device to another with <a href="#p2p">Android
+Beam&trade;</a></li>
+</ul>
+
+
+<p>Reading NDEF data from an NFC tag is handled with the <a href="#tag-dispatch">tag dispatch
+system</a>, which analyzes discovered NFC tags, appropriately categorizes the data, and starts
+an application that is interested in the categorized data. An application that wants to handle the
+scanned NFC tag can <a href="#filtering-intents">declare an intent filter</a> and
+request to handle the data.</p>
+
+<p>The Android Beam&trade; feature allows a device to push an NDEF message onto
+another device by physically tapping the devices together. This interaction provides an easier way
+to send data than other wireless technologies like Bluetooth, because with NFC, no manual device
+discovery or pairing is required. The connection is automatically started when two devices come
+into range. Android Beam is available through a set of NFC APIs, so any application can transmit
+information between devices. For example, the Contacts, Browser, and YouTube applications use
+Android Beam to share contacts, web pages, and videos with other devices.
+</p>
+
+
+<h2 id="tag-dispatch">The Tag Dispatch System</h2>
+
+<p>Android-powered devices are usually looking for NFC tags when the screen
+is unlocked, unless NFC is disabled in the device's Settings menu.
+When an Android-powered device discovers an NFC tag, the desired behavior
+is to have the most appropriate activity handle the intent without asking the user what application
+to use. Because devices scan NFC tags at a very short range, it is likely that making users manually
+select an activity would force them to move the device away from the tag and break the connection.
+You should develop your activity to only handle the NFC tags that your activity cares about to
+prevent the Activity Chooser from appearing.</p>
+
+<p>To help you with this goal, Android provides a special tag dispatch system that analyzes scanned
+NFC tags, parses them, and tries to locate applications that are interested in the scanned data. It
+does this by:</p>
+
+<ol>
+  <li>Parsing the NFC tag and figuring out the MIME type or a URI that identifies the data payload
+  in the tag.</li>
+  <li>Encapsulating the MIME type or URI and the payload into an intent. These first two
+  steps are described in <a href="#ndef">How NFC tags are mapped to MIME types and URIs</a>.</li>
+  <li>Starts an activity based on the intent. This is described in
+  <a href="#dispatching">How NFC Tags are Dispatched to Applications</a>.</li>
+</ol>
+
+<h3 id="ndef">How NFC tags are mapped to MIME types and URIs</h3>
+<p>Before you begin writing your NFC applications, it is important to understand the different
+types of NFC tags, how the tag dispatch system parses NFC tags, and the special work that the tag
+dispatch system does when it detects an NDEF message. NFC tags come in a
+wide array of technologies and can also have data written to them in many different ways.
+Android has the most support for the NDEF standard, which is defined by the <a
+href="http://www.nfc-forum.org/home">NFC Forum</a>.
+</p>
+
+<p>NDEF data is encapsulated inside a message ({@link android.nfc.NdefMessage}) that contains one
+or more records ({@link android.nfc.NdefRecord}). Each NDEF record must be well-formed according to
+the specification of the type of record that you want to create. Android
+also supports other types of tags that do not contain NDEF data, which you can work with by using
+the classes in the {@link android.nfc.tech} package. To learn more
+about these technologies, see the <a href="{@docRoot}guide/topics/connectivity/nfc/advanced-nfc.html">Advanced
+NFC</a> topic. Working with these other types of tags involves
+writing your own protocol stack to communicate with the tags, so we recommend using NDEF when
+possible for ease of development and maximum support for Android-powered devices.
+</p>
+
+<p class="note"><strong>Note:</strong>
+To download complete NDEF specifications, go to the <a
+href="http://www.nfc-forum.org/specs/spec_license">NFC Forum Specification Download</a> site and see
+<a href="#creating-records">Creating common types of NDEF records</a> for examples of how to
+construct NDEF records. </p>
+
+<p>Now that you have some background in NFC tags, the following sections describe in more detail how
+Android handles NDEF formatted tags. When an Android-powered device scans an NFC tag containing NDEF
+formatted data, it parses the message and tries to figure out the data's MIME type or identifying
+URI. To do this, the system reads the first {@link android.nfc.NdefRecord} inside the {@link
+android.nfc.NdefMessage} to determine how to interpret the entire NDEF message (an NDEF message can
+have multiple NDEF records). In a well-formed NDEF message, the first {@link android.nfc.NdefRecord}
+contains the following fields:
+<dl>
+  <dt><strong>3-bit TNF (Type Name Format)</strong></dt>
+  <dd>Indicates how to interpret the variable length type field. Valid values are described in
+described in <a href="#table1">Table 1</a>.</dd>
+
+  <dt><strong>Variable length type</strong></dt>
+  <dd>Describes the type of the record. If using {@link android.nfc.NdefRecord#TNF_WELL_KNOWN}, use
+this field to specify the Record Type Definition (RTD). Valid RTD values are described in <a
+href="#table2">Table 2</a>.</dd>
+
+<dt><strong>Variable length ID</strong></dt>
+<dd>A unique identifier for the record. This field is not used often, but
+if you need to uniquely identify a tag, you can create an ID for it.</dd>
+
+<dt><strong>Variable length payload</strong></dt>
+<dd>The actual data payload that you want to read or write. An NDEF
+message can contain multiple NDEF records, so don't assume the full payload is in the first NDEF
+record of the NDEF message.</dd>
+
+</dl>
+
+<p>The tag dispatch system uses the TNF and type fields to try to map a MIME type or URI to the
+NDEF message. If successful, it encapsulates that information inside of a {@link
+android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED} intent along with the actual payload. However, there
+are cases when the tag dispatch system cannot determine the type of data based on the first NDEF
+record. This happens when the NDEF data cannot be mapped to a MIME type or URI, or when the
+NFC tag does not contain NDEF data to begin with. In such cases, a {@link
+android.nfc.Tag} object that has information about the tag's technologies and the payload are
+encapsulated inside of a {@link android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED} intent instead.</p>
+
+<p>
+<a href="#table1">Table 1.</a> describes how the tag dispatch system maps TNF and type
+fields to MIME types or URIs. It also describes which TNFs cannot be mapped to a MIME type or URI.
+In these cases, the tag dispatch system falls back to
+{@link android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED}.
+
+<p>For example, if the tag dispatch system encounters a record of type {@link
+android.nfc.NdefRecord#TNF_ABSOLUTE_URI}, it maps the variable length type field of that record
+into a URI. The tag dispatch system encapsulates that URI in the data field of an {@link
+android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED} intent along with other information about the tag,
+such as the payload. On the other hand, if it encounters a record of type {@link
+android.nfc.NdefRecord#TNF_UNKNOWN}, it creates an intent that encapsulates the tag's technologies
+instead.</p>
+
+
+<p class="table-caption" id="table1">
+  <strong>Table 1.</strong> Supported TNFs and their mappings</p>
+<table id="mappings">
+  <tr>
+    <th>Type Name Format (TNF)</th>
+    <th>Mapping</th>
+  </tr>
+  <tr>
+    <td>{@link android.nfc.NdefRecord#TNF_ABSOLUTE_URI}</td>
+    <td>URI based on the type field.</td>
+  </tr>
+    <td>{@link android.nfc.NdefRecord#TNF_EMPTY}</td>
+    <td>Falls back to {@link android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED}.</td>
+  </tr>
+    <td>{@link android.nfc.NdefRecord#TNF_EXTERNAL_TYPE}</td>
+    <td>URI based on the URN in the type field. The URN is encoded into the NDEF type field in
+        a shortened form: <code><em>&lt;domain_name&gt;:&lt;service_name&gt;</em></code>.
+        Android maps this to a URI in the form:
+        <code>vnd.android.nfc://ext/<em>&lt;domain_name&gt;:&lt;service_name&gt;</em></code>.</td>
+  </tr>
+    <td>{@link android.nfc.NdefRecord#TNF_MIME_MEDIA}</td>
+    <td>MIME type based on the type field.</td>
+  </tr>
+    <td>{@link android.nfc.NdefRecord#TNF_UNCHANGED}</td>
+    <td>Invalid in the first record, so falls back to
+        {@link android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED}.</td>
+  </tr>
+    <td>{@link android.nfc.NdefRecord#TNF_UNKNOWN}</td>
+    <td>Falls back to {@link android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED}.</td>
+  </tr>
+    <td>{@link android.nfc.NdefRecord#TNF_WELL_KNOWN}</td>
+    <td>MIME type or URI depending on the Record Type Definition (RTD), which you set in the
+type field. See <a  href="#well_known">Table 2.</a> for more information on
+available RTDs and their mappings.</td>
+  </tr>
+</table>
+
+<p class="table-caption" id="table2">
+  <strong>Table 2.</strong> Supported RTDs for TNF_WELL_KNOWN and their
+mappings</p>
+<table id="well-known">
+  <tr>
+    <th>Record Type Definition (RTD)</th>
+    <th>Mapping</th>
+  </tr>
+  <tr>
+    <td>{@link android.nfc.NdefRecord#RTD_ALTERNATIVE_CARRIER}</td>
+    <td>Falls back to {@link android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED}.</td>
+  </tr>
+    <td>{@link android.nfc.NdefRecord#RTD_HANDOVER_CARRIER}</td>
+    <td>Falls back to {@link android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED}.</td>
+  </tr>
+    <td>{@link android.nfc.NdefRecord#RTD_HANDOVER_REQUEST}</td>
+    <td>Falls back to {@link android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED}.</td>
+  </tr>
+    <td>{@link android.nfc.NdefRecord#RTD_HANDOVER_SELECT}</td>
+    <td>Falls back to {@link android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED}.</td>
+  </tr>
+    <td>{@link android.nfc.NdefRecord#RTD_SMART_POSTER}</td>
+    <td>URI based on parsing the payload.</td>
+  </tr>
+    <td>{@link android.nfc.NdefRecord#RTD_TEXT}</td>
+    <td>MIME type of <code>text/plain</code>.</td>
+  </tr>
+    <td>{@link android.nfc.NdefRecord#RTD_URI}</td>
+    <td>URI based on payload.</td>
+  </tr>
+</table>
+
+<h3 id="dispatching">How NFC Tags are Dispatched to Applications</h3>
+
+<p>When the tag dispatch system is done creating an intent that encapsulates the NFC tag and its
+identifying information, it sends the intent to an interested application that
+filters for the intent. If more than one application can handle the intent, the Activity Chooser
+is presented so the user can select the Activity. The tag dispatch system defines three intents,
+which are listed in order of highest to lowest priority:</p>
+
+<ol>
+  <li>
+      {@link android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED}: This intent is used to start an
+Activity when a tag that contains an NDEF payload is scanned and is of a recognized type. This is
+the highest priority intent, and the tag dispatch system tries to start an Activity with this
+intent before any other intent, whenever possible.
+  </li>
+
+    <li>{@link android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED}: If no activities register to
+handle the {@link android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED}
+intent, the tag dispatch system tries to start an application with this intent. This
+intent is also directly started (without starting {@link
+android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED} first) if the tag that is scanned
+contains NDEF data that cannot be mapped to a MIME type or URI, or if the tag does not contain NDEF
+data but is of a known tag technology.
+</li>
+
+    <li>{@link android.nfc.NfcAdapter#ACTION_TAG_DISCOVERED}: This intent is started
+    if no activities handle the {@link
+android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED} or {@link
+android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED}
+    intents.</li>
+  </ol>
+
+<p>The basic way the tag dispatch system works is as follows:</p>
+
+<ol>
+  <li>Try to start an Activity with the intent that was created by the tag dispatch system
+when parsing the NFC tag (either
+{@link android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED} or {@link
+android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED}).</li>
+  <li>If no activities filter for that intent, try to start an Activity with the next
+  lowest priority intent (either {@link android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED} or {@link
+android.nfc.NfcAdapter#ACTION_TAG_DISCOVERED}) until an application filters for the
+  intent or until the tag dispatch system tries all possible intents.</li>
+  <li>If no applications filter for any of the intents, do nothing.</li>
+</ol>
+
+<img src="{@docRoot}images/nfc_tag_dispatch.png" />
+
+<p class="figure"><strong>Figure 1. </strong> Tag Dispatch System</p>
+
+
+<p>Whenever possible, work with NDEF messages and the {@link
+android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED} intent, because it is the most specific out of
+the three. This intent allows you to start your application at a more appropriate time than the
+other two intents, giving the user a better experience.</p>
+
+<h2 id="manifest">Requesting NFC Access in the Android Manifest</h2>
+
+  <p>Before you can access a device's NFC hardware and properly handle NFC intents, declare these
+  items in your <code>AndroidManifest.xml</code> file:</p>
+
+  <ul>
+    <li>The NFC <code>&lt;uses-permission&gt;</code> element to access the NFC hardware:
+      <pre>
+&lt;uses-permission android:name="android.permission.NFC" /&gt;
+</pre>
+    </li>
+
+    <li>The minimum SDK version that your application can support. API level 9 only supports
+    limited tag dispatch via {@link android.nfc.NfcAdapter#ACTION_TAG_DISCOVERED}, and only gives
+    access to NDEF messages via the {@link android.nfc.NfcAdapter#EXTRA_NDEF_MESSAGES} extra. No
+    other tag properties or I/O operations are accessible. API level 10
+    includes comprehensive reader/writer support as well as foreground NDEF pushing, and API level
+    14 provides an easier way to push NDEF messages to other devices with Android Beam and extra
+    convenience methods to create NDEF records.
+<pre class="pretty-print">
+&lt;uses-sdk android:minSdkVersion="10"/&gt;
+</pre>
+    </li>
+
+    <li>The <code>uses-feature</code> element so that your application shows up in Google
+Play only for devices that have NFC hardware:
+      <pre>
+&lt;uses-feature android:name="android.hardware.nfc" android:required="true" /&gt;
+</pre>
+<p>If your application uses NFC functionality, but that functionality is not crucial to your
+application, you can omit the <code>uses-feature</code> element and check for NFC avalailbility at
+runtime by checking to see if {@link android.nfc.NfcAdapter#getDefaultAdapter getDefaultAdapter()}
+is <code>null</code>.</p>
+    </li>
+  </ul>
+
+  <h2 id="filtering-intents">Filtering for NFC Intents</h2>
+
+  <p>To start your application when an NFC tag that you want to handle is scanned, your application
+can filter for one, two, or all three of the NFC intents in the Android manifest. However, you
+usually want to filter for the {@link android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED} intent for the
+most control of when your application starts. The {@link
+android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED} intent is a fallback for {@link
+android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED} when no applications filter for
+ {@link android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED} or for when the payload is not
+NDEF. Filtering for {@link android.nfc.NfcAdapter#ACTION_TAG_DISCOVERED} is usually too general of a
+category to filter on.  Many applications will filter for {@link
+android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED} or {@link
+android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED} before {@link
+android.nfc.NfcAdapter#ACTION_TAG_DISCOVERED}, so your application has a low probability of
+starting. {@link android.nfc.NfcAdapter#ACTION_TAG_DISCOVERED} is only available as a last resort
+for applications to filter for in the cases where no other applications are installed to handle the
+{@link android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED} or {@link
+android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED}intent.</p>
+
+<p>Because NFC tag deployments vary and are many times not under your control, this is not always
+possible, which is why you can fallback to the other two intents when necessary. When you have
+control over the types of tags and data written, it is recommended that you use NDEF to format your
+tags. The following sections describe how to filter for each type of intent.</p>
+
+
+<h3 id="ndef-disc">ACTION_NDEF_DISCOVERED</h3>
+<p>
+To filter for {@link android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED} intents, declare the
+intent filter along with the type of data that you want to filter for. The
+following example filters for {@link android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED}
+intents with a MIME type of <code>text/plain</code>:
+</p>
+<pre>
+&lt;intent-filter&gt;
+    &lt;action android:name="android.nfc.action.NDEF_DISCOVERED"/&gt;
+    &lt;category android:name="android.intent.category.DEFAULT"/&gt;
+    &lt;data android:mimeType="text/plain" /&gt;
+&lt;/intent-filter&gt;
+</pre>
+<p>The following example filters for a URI in the form of
+<code>http://developer.android.com/index.html</code>.
+<pre>
+&lt;intent-filter&gt;
+    &lt;action android:name="android.nfc.action.NDEF_DISCOVERED"/&gt;
+    &lt;category android:name="android.intent.category.DEFAULT"/&gt;
+   &lt;data android:scheme="http"
+              android:host="developer.android.com"
+              android:pathPrefix="/index.html" />
+&lt;/intent-filter&gt;
+</pre>
+
+
+  <h3 id="tech-disc">ACTION_TECH_DISCOVERED</h3>
+
+  <p>If your activity filters for the {@link android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED} intent,
+you must create an XML resource file that specifies the technologies that your activity supports
+within a <code>tech-list</code> set. Your activity is
+  considered a match if a <code>tech-list</code> set is a subset of the technologies that are
+  supported by the tag, which you can obtain by calling {@link android.nfc.Tag#getTechList
+  getTechList()}.</p>
+
+  <p>For example, if the tag that is scanned supports MifareClassic, NdefFormatable, and NfcA, your
+  <code>tech-list</code> set must specify all three, two, or one of the technologies (and nothing
+  else) in order for your activity to be matched.</p>
+
+  <p>The following sample defines all of the technologies. You can remove the ones that you do not
+  need. Save this file (you can name it anything you wish) in the
+  <code>&lt;project-root&gt;/res/xml</code> folder.</p>
+  <pre>
+&lt;resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"&gt;
+    &lt;tech-list&gt;
+        &lt;tech&gt;android.nfc.tech.IsoDep&lt;/tech&gt;
+        &lt;tech&gt;android.nfc.tech.NfcA&lt;/tech&gt;
+        &lt;tech&gt;android.nfc.tech.NfcB&lt;/tech&gt;
+        &lt;tech&gt;android.nfc.tech.NfcF&lt;/tech&gt;
+        &lt;tech&gt;android.nfc.tech.NfcV&lt;/tech&gt;
+        &lt;tech&gt;android.nfc.tech.Ndef&lt;/tech&gt;
+        &lt;tech&gt;android.nfc.tech.NdefFormatable&lt;/tech&gt;
+        &lt;tech&gt;android.nfc.tech.MifareClassic&lt;/tech&gt;
+        &lt;tech&gt;android.nfc.tech.MifareUltralight&lt;/tech&gt;
+    &lt;/tech-list&gt;
+&lt;/resources&gt;
+</pre>
+
+  <p>You can also specify multiple <code>tech-list</code> sets. Each of the <code>tech-list</code>
+  sets is considered independently, and your activity is considered a match if any single
+  <code>tech-list</code> set is a subset of the technologies that are returned by {@link
+  android.nfc.Tag#getTechList getTechList()}. This provides <code>AND</code> and <code>OR</code>
+  semantics for matching technologies. The following example matches tags that can support the
+  NfcA and Ndef technologies or can support the NfcB and Ndef technologies:</p>
+  <pre>
+&lt;resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"&gt;
+    &lt;tech-list&gt;
+        &lt;tech&gt;android.nfc.tech.NfcA&lt;/tech&gt;
+        &lt;tech&gt;android.nfc.tech.Ndef&lt;/tech&gt;
+    &lt;/tech-list&gt;
+&lt;/resources&gt;
+
+&lt;resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"&gt;
+    &lt;tech-list&gt;
+        &lt;tech&gt;android.nfc.tech.NfcB&lt;/tech&gt;
+        &lt;tech&gt;android.nfc.tech.Ndef&lt;/tech&gt;
+    &lt;/tech-list&gt;
+&lt;/resources&gt;
+</pre>
+
+  <p>In your <code>AndroidManifest.xml</code> file, specify the resource file that you just created
+  in the <code>&lt;meta-data&gt;</code> element inside the <code>&lt;activity&gt;</code>
+  element like in the following example:</p>
+  <pre>
+&lt;activity&gt;
+...
+&lt;intent-filter&gt;
+    &lt;action android:name="android.nfc.action.TECH_DISCOVERED"/&gt;
+&lt;/intent-filter&gt;
+
+&lt;meta-data android:name="android.nfc.action.TECH_DISCOVERED"
+    android:resource="@xml/nfc_tech_filter" /&gt;
+...
+&lt;/activity&gt;
+</pre>
+
+<p>For more information about working with tag technologies and the {@link
+android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED} intent, see <a
+href="{@docRoot}guide/topics/connectivity/nfc/advanced-nfc.html#tag-tech">Working with Supported Tag
+Technologies</a> in the Advanced NFC document.</p>
+<h3 id="tag-disc">ACTION_TAG_DISCOVERED</h3>
+<p>To filter for {@link android.nfc.NfcAdapter#ACTION_TAG_DISCOVERED} use the following intent
+filter:</p>
+
+
+<pre>&lt;intent-filter&gt;
+    &lt;action android:name="android.nfc.action.TAG_DISCOVERED"/&gt;
+&lt;/intent-filter&gt;
+</pre>
+
+
+
+<h3 id="obtain-info">Obtaining information from intents</h3>
+
+<p>If an activity starts because of an NFC intent, you can obtain information about the scanned NFC
+tag from the intent. Intents can contain the following extras depending on the tag that was scanned:
+
+<ul>
+  <li>{@link android.nfc.NfcAdapter#EXTRA_TAG} (required): A {@link android.nfc.Tag} object
+representing the scanned tag.</li>
+  <li>{@link android.nfc.NfcAdapter#EXTRA_NDEF_MESSAGES} (optional): An array of NDEF messages
+parsed from the tag. This extra is mandatory on {@link android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED
+intents.</li>
+  <li>{@link android.nfc.NfcAdapter#EXTRA_ID} (optional): The low-level ID of the tag.</li></ul>
+
+<p>To obtain these extras, check to see if your activity was launched with one of
+the NFC intents to ensure that a tag was scanned, and then obtain the extras out of the
+intent. The following example checks for the {@link android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED}
+intent and gets the NDEF messages from an intent extra.</p>
+
+<pre>
+public void onResume() {
+    super.onResume();
+    ...
+    if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
+        Parcelable[] rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+        if (rawMsgs != null) {
+            msgs = new NdefMessage[rawMsgs.length];
+            for (int i = 0; i &lt; rawMsgs.length; i++) {
+                msgs[i] = (NdefMessage) rawMsgs[i];
+            }
+        }
+    }
+    //process the msgs array
+}
+</pre>
+
+<p>Alternatively, you can obtain a {@link android.nfc.Tag} object from the intent, which will
+contain the payload and allow you to enumerate the tag's technologies:</p>
+
+<pre>Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);</pre>
+
+
+<h2 id="creating-records">Creating Common Types of NDEF Records</h2>
+<p>This section describes how to create common types of NDEF records to help you when writing to
+NFC tags or sending data with Android Beam. It also describes how to create the corresponding
+intent filter for the record. All of these NDEF record examples should be in the first NDEF
+record of the NDEF message that you are writing to a tag or beaming.</p>
+
+<h3 id="abs-uri">TNF_ABSOLUTE_URI</h3>
+<p>Given the following {@link android.nfc.NdefRecord#TNF_ABSOLUTE_URI} NDEF record, which is
+stored as the first record inside of an {@link android.nfc.NdefMessage}:</p>
+
+<pre>
+NdefRecord uriRecord = new NdefRecord(
+    NdefRecord.TNF_ABSOLUTE_URI ,
+    "http://developer.android.com/index.html".getBytes(Charset.forName("US-ASCII")),
+    new byte[0], new byte[0]);
+</pre>
+
+<p>the intent filter would look like this:</p>
+<pre>
+&lt;intent-filter&gt;
+    &lt;action android:name="android.nfc.action.NDEF_DISCOVERED" /&gt;
+    &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;data android:scheme="http"
+        android:host="developer.android.com"
+        android:pathPrefix="/index.html" /&gt;
+&lt;/intent-filter&gt;
+</pre>
+
+
+<h3 id="mime">TNF_MIME_MEDIA</h3>
+<p>Given the following {@link android.nfc.NdefRecord#TNF_MIME_MEDIA} NDEF record, which is stored as
+the first record inside
+of an {@link android.nfc.NdefMessage}:</p>
+<pre>
+NdefRecord mimeRecord = new NdefRecord(
+    NdefRecord.TNF_MIME_MEDIA ,
+    "application/com.example.android.beam".getBytes(Charset.forName("US-ASCII")),
+    new byte[0], "Beam me up, Android!".getBytes(Charset.forName("US-ASCII")));
+</pre>
+
+<p>the intent filter would look like this:</p>
+<pre>
+&lt;intent-filter&gt;
+    &lt;action android:name="android.nfc.action.NDEF_DISCOVERED" /&gt;
+    &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;data android:mimeType="application/com.example.android.beam" /&gt;
+&lt;/intent-filter&gt;
+</pre>
+
+
+<h3 id="well-known-text">TNF_WELL_KNOWN with RTD_TEXT</h3>
+
+<p>Given the following {@link android.nfc.NdefRecord#TNF_WELL_KNOWN} NDEF record, which is stored as
+the first record inside of an {@link android.nfc.NdefMessage}:</p>
+<pre>
+public NdefRecord createTextRecord(String payload, Locale locale, boolean encodeInUtf8) {
+    byte[] langBytes = locale.getLanguage().getBytes(Charset.forName("US-ASCII"));
+    Charset utfEncoding = encodeInUtf8 ? Charset.forName("UTF-8") : Charset.forName("UTF-16");
+    byte[] textBytes = payload.getBytes(utfEncoding);
+    int utfBit = encodeInUtf8 ? 0 : (1 &lt;&lt; 7);
+    char status = (char) (utfBit + langBytes.length);
+    byte[] data = new byte[1 + langBytes.length + textBytes.length];
+    data[0] = (byte) status;
+    System.arraycopy(langBytes, 0, data, 1, langBytes.length);
+    System.arraycopy(textBytes, 0, data, 1 + langBytes.length, textBytes.length);
+    NdefRecord record = new NdefRecord(NdefRecord.TNF_WELL_KNOWN,
+    NdefRecord.RTD_TEXT, new byte[0], data);
+    return record;
+}
+</pre>
+
+<p>the intent filter would look like this:</p>
+<pre>
+&lt;intent-filter&gt;
+    &lt;action android:name="android.nfc.action.NDEF_DISCOVERED" /&gt;
+    &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;data android:mimeType="text/plain" /&gt;
+&lt;/intent-filter&gt;
+</pre>
+
+
+<h3 id="well-known-uri">TNF_WELL_KNOWN with RTD_URI</h3>
+
+<p>Given the following {@link android.nfc.NdefRecord#TNF_WELL_KNOWN} NDEF record, which is stored as
+the first record inside of an {@link android.nfc.NdefMessage}:</p>
+
+<pre>
+byte[] uriField = "example.com".getBytes(Charset.forName("US-ASCII"));
+byte[] payload = new byte[uriField.length + 1];              //add 1 for the URI Prefix
+byte payload[0] = 0x01;                                      //prefixes http://www. to the URI
+System.arraycopy(uriField, 0, payload, 1, uriField.length);  //appends URI to payload
+NdefRecord rtdUriRecord = new NdefRecord(
+    NdefRecord.TNF_WELL_KNOWN, NdefRecord.RTD_URI, new byte[0], payload);
+</pre>
+
+<p>the intent filter would look like this:</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;action android:name="android.nfc.action.NDEF_DISCOVERED" /&gt;
+    &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;data android:scheme="http"
+        android:host="example.com"
+        android:pathPrefix="" /&gt;
+&lt;/intent-filter&gt;
+</pre>
+
+<h3 id="ext-type">TNF_EXTERNAL_TYPE</h3>
+<p>Given the following {@link android.nfc.NdefRecord#TNF_EXTERNAL_TYPE} NDEF record, which is stored
+as the first record inside of an {@link android.nfc.NdefMessage}:</p>
+
+<pre>
+byte[] payload;
+...
+NdefRecord mimeRecord = new NdefRecord(
+    NdefRecord.TNF_EXTERNAL_TYPE, "example.com:externalType", new byte[0], payload);
+</pre>
+
+<p>the intent filter would look like this:</p>
+<pre>
+&lt;intent-filter&gt;
+    &lt;action android:name="android.nfc.action.NDEF_DISCOVERED" /&gt;
+    &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;data android:scheme="vnd.android.nfc"
+        android:host="ext"
+        android:pathPrefix="/example.com:externalType"/&gt;
+&lt;/intent-filter&gt;
+</pre>
+
+
+<p>Use TNF_EXTERNAL_TYPE for more generic NFC tag deployments to better support both
+Android-powered and non-Android-powered devices.</p>
+
+<p class="note"><strong>Note</strong>: URNs for {@link
+android.nfc.NdefRecord#TNF_EXTERNAL_TYPE} have a canonical format of:
+<code>urn:nfc:ext:example.com:externalType</code>, however the NFC Forum RTD specification
+declares that the <code>urn:nfc:ext:</code> portion of the URN must be ommitted from the
+NDEF record. So all you need to provide is the domain (<code>example.com</code> in the example)
+and type (<code>externalType</code> in the example) separated by a colon.
+When dispatching TNF_EXTERNAL_TYPE, Android converts the <code>urn:nfc:ext:example.com:externalType</code> URN to a
+<code>vnd.android.nfc://ext/example.com:externalType</code> URI, which is what the intent filter in the example
+declares.</p>
+
+<h3 id="aar">Android Application Records</h3>
+
+<p>
+Introduced in Android 4.0 (API level 14), an Android Application Record (AAR) provides a stronger
+certainty that your application is started when an NFC tag is scanned. An AAR has the package name
+of an application embedded inside an NDEF record. You can add an AAR to any NDEF record of your NDEF message,
+because Android searches the entire NDEF message for AARs. If it finds an AAR, it starts the application based
+on the package name inside the AAR. If the application is not present on the device,
+Google Play is launched to download the application.</p>
+
+<p>AARs are useful if you want to prevent other applications from filtering for the same intent and
+potentially handling specific tags that you have deployed. AARs are only supported at the
+application level, because of the package name constraint, and not at the Activity level as with
+intent filtering. If you want to handle an intent at the Activity level, <a
+href="#filtering-intents">use intent filters</a>.
+</p>
+
+
+
+<p>If a tag contains an AAR, the tag dispatch system dispatches in the following manner:</p>
+<ol>
+  <li>Try to start an Activity using an intent filter as normal. If the Activity that matches
+the intent also matches the AAR, start the Activity.</li>
+  <li>If the Activity that filters for the intent does not match the
+AAR, if multiple Activities can handle the intent, or if no Activity handles the intent, start the
+application specified by the AAR.</li>
+  <li>If no application can start with the AAR, go to Google Play to download the
+application based on the AAR.</li>
+</ol>
+
+</p>
+
+<p class="note"><strong>Note:</strong> You can override AARs and the intent dispatch system with the <a
+href="{@docRoot}guide/topics/connectivity/nfc/advanced-nfc.html#foreground-dispatch">foreground dispatch
+system</a>, which allows a foreground activity to have priority when an NFC tag is discovered.
+With this method, the activity must be in the foreground to
+override AARs and the intent dispatch system.</p>
+
+<p>If you still want to filter for scanned tags that do not contain an AAR, you can declare
+intent filters as normal. This is useful if your application is interested in other tags
+that do not contain an AAR. For example, maybe you want to guarantee that your application handles
+proprietary tags that you deploy as well as general tags deployed by third parties. Keep in mind
+that AARs are specific to Android 4.0 devices or later, so when deploying tags, you most likely want
+to use a combination of AARs and MIME types/URIs to support the widest range of devices. In
+addition, when you deploy NFC tags, think about how you want to write your NFC tags to enable
+support for the most devices (Android-powered and other devices). You can do this by
+defining a relatively unique MIME type or URI to make it easier for applications to distinguish.
+</p>
+
+<p>Android provides a simple API to create an AAR,
+{@link android.nfc.NdefRecord#createApplicationRecord createApplicationRecord()}. All you need to
+do is embed the AAR anywhere in your {@link android.nfc.NdefMessage}. You do not want
+to use the first record of your {@link android.nfc.NdefMessage}, unless the AAR is the only
+record in the {@link android.nfc.NdefMessage}. This is because the Android
+system checks the first record of an {@link android.nfc.NdefMessage} to determine the MIME type or
+URI of the tag, which is used to create an intent for applications to filter. The following code
+shows you how to create an AAR:</p>
+
+<pre>
+NdefMessage msg = new NdefMessage(
+        new NdefRecord[] {
+            ...,
+            NdefRecord.createApplicationRecord("com.example.android.beam")}
+</pre>
+
+
+<h2 id="p2p">Beaming NDEF Messages to Other Devices</h2>
+
+<p>Android Beam allows simple peer-to-peer data exchange between two Android-powered devices. The
+application that wants to beam data to another device must be in the foreground and the device
+receiving the data must not be locked. When the beaming device comes in close enough contact with a
+receiving device, the beaming device displays the "Touch to Beam" UI. The user can then choose
+whether or not to beam the message to the receiving device.</p>
+
+<p class="note"><strong>Note:</strong> Foreground NDEF pushing was available at API level 10,
+which provides similar functionality to Android Beam. These APIs have since been deprecated, but
+are available to support older devices. See {@link android.nfc.NfcAdapter#enableForegroundNdefPush
+enableForegroundNdefPush()} for more information.</p>
+
+<p>You can enable Android Beam for your application by calling one of the two methods:</p>
+  <ul>
+    <li>{@link android.nfc.NfcAdapter#setNdefPushMessage setNdefPushMessage()}: Accepts an
+{@link android.nfc.NdefMessage} to set as the message to beam. Automatically beams the message
+when two devices are in close enough proximity.</li>
+    <li>{@link android.nfc.NfcAdapter#setNdefPushMessageCallback setNdefPushMessageCallback()}:
+Accepts a callback that contains a
+{@link android.nfc.NfcAdapter.CreateNdefMessageCallback#createNdefMessage createNdefMessage()}
+which is called when a device is in range to beam data to. The callback lets you create
+the NDEF message only when necessary.</li>
+  </ul>
+
+<p>An activity can only push one NDEF message at a time, so {@link
+android.nfc.NfcAdapter#setNdefPushMessageCallback setNdefPushMessageCallback()} takes precedence
+over {@link android.nfc.NfcAdapter#setNdefPushMessage setNdefPushMessage()} if both are set. To use
+Android Beam, the following general guidelines must be met:
+</p>
+
+  <ul>
+    <li>The activity that is beaming the data must be in the foreground. Both devices must have
+their screens unlocked.</li>
+
+    <li>You must encapsulate the data that you are beaming in an {@link android.nfc.NdefMessage}
+    object.</li>
+
+    <li>The NFC device that is receiving the beamed data must support the
+    <code>com.android.npp</code> NDEF push protocol or NFC Forum's SNEP (Simple NDEF Exchange
+Protocol). The <code>com.android.npp</code> protocol is required for devices on API level 9 (Android
+2.3) to API level 13 (Android 3.2). <code>com.android.npp</code> and SNEP are both required on
+API level 14 (Android 4.0) and later.</li>
+</li>
+  </ul>
+
+  <p class="note"><strong>Note:</strong> If your activity enables Android Beam and is
+in the foreground, the standard intent dispatch system is disabled. However, if your activity also
+enables <a href="{@docRoot}guide/topics/connectivity/nfc/advanced-nfc.html#foreground-dispatch">foreground
+dispatching</a>, then it can still scan tags that match the intent filters set in the foreground
+dispatching.</p>
+
+  <p>To enable Android Beam:</p>
+
+  <ol>
+    <li>Create an {@link android.nfc.NdefMessage} that contains the {@link android.nfc.NdefRecord}s
+that you want to push onto the other device.</li>
+
+    <li>Call {@link
+android.nfc.NfcAdapter#setNdefPushMessage setNdefPushMessage()} with a {@link
+android.nfc.NdefMessage} or call {@link
+android.nfc.NfcAdapter#setNdefPushMessageCallback setNdefPushMessageCallback} passing in a {@link
+android.nfc.NfcAdapter.CreateNdefMessageCallback} object in the <code>onCreate()</code> method of
+your activity. These methods require at least one activity that you want to enable with Android
+Beam, along with an optional list of other activities to activate.
+
+<p>In general, you normally use {@link
+android.nfc.NfcAdapter#setNdefPushMessage setNdefPushMessage()} if your Activity only needs to
+push the same NDEF message at all times, when two devices are in range to communicate. You use
+{@link android.nfc.NfcAdapter#setNdefPushMessageCallback setNdefPushMessageCallback} when your
+application cares about the current context of the application and wants to push an NDEF message
+depending on what the user is doing in your application.</p>
+    </li>
+  </ol>
+
+<p>The following sample shows how a simple activity calls {@link
+android.nfc.NfcAdapter.CreateNdefMessageCallback} in the <code>onCreate()</code> method of an
+activity (see <a href="{@docRoot}resources/samples/AndroidBeamDemo/index.html">AndroidBeamDemo</a>
+for the complete sample). This example also has methods to help you create a MIME record:</p>
+
+<pre id="code-example">
+package com.example.android.beam;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcAdapter.CreateNdefMessageCallback;
+import android.nfc.NfcEvent;
+import android.os.Bundle;
+import android.os.Parcelable;
+import android.widget.TextView;
+import android.widget.Toast;
+import java.nio.charset.Charset;
+
+
+public class Beam extends Activity implements CreateNdefMessageCallback {
+    NfcAdapter mNfcAdapter;
+    TextView textView;
+
+    &#064;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+        TextView textView = (TextView) findViewById(R.id.textView);
+        // Check for available NFC Adapter
+        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        if (mNfcAdapter == null) {
+            Toast.makeText(this, "NFC is not available", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+        // Register callback
+        mNfcAdapter.setNdefPushMessageCallback(this, this);
+    }
+
+    &#064;Override
+    public NdefMessage createNdefMessage(NfcEvent event) {
+        String text = ("Beam me up, Android!\n\n" +
+                "Beam Time: " + System.currentTimeMillis());
+        NdefMessage msg = new NdefMessage(
+                new NdefRecord[] { createMimeRecord(
+                        "application/com.example.android.beam", text.getBytes())
+         /**
+          * The Android Application Record (AAR) is commented out. When a device
+          * receives a push with an AAR in it, the application specified in the AAR
+          * is guaranteed to run. The AAR overrides the tag dispatch system.
+          * You can add it back in to guarantee that this
+          * activity starts when receiving a beamed message. For now, this code
+          * uses the tag dispatch system.
+          */
+          //,NdefRecord.createApplicationRecord("com.example.android.beam")
+        });
+        return msg;
+    }
+
+    &#064;Override
+    public void onResume() {
+        super.onResume();
+        // Check to see that the Activity started due to an Android Beam
+        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
+            processIntent(getIntent());
+        }
+    }
+
+    &#064;Override
+    public void onNewIntent(Intent intent) {
+        // onResume gets called after this to handle the intent
+        setIntent(intent);
+    }
+
+    /**
+     * Parses the NDEF Message from the intent and prints to the TextView
+     */
+    void processIntent(Intent intent) {
+        textView = (TextView) findViewById(R.id.textView);
+        Parcelable[] rawMsgs = intent.getParcelableArrayExtra(
+                NfcAdapter.EXTRA_NDEF_MESSAGES);
+        // only one message sent during the beam
+        NdefMessage msg = (NdefMessage) rawMsgs[0];
+        // record 0 contains the MIME type, record 1 is the AAR, if present
+        textView.setText(new String(msg.getRecords()[0].getPayload()));
+    }
+
+    /**
+     * Creates a custom MIME type encapsulated in an NDEF record
+     */
+    public NdefRecord createMimeRecord(String mimeType, byte[] payload) {
+        byte[] mimeBytes = mimeType.getBytes(Charset.forName("US-ASCII"));
+        NdefRecord mimeRecord = new NdefRecord(
+                NdefRecord.TNF_MIME_MEDIA, mimeBytes, new byte[0], payload);
+        return mimeRecord;
+    }
+}
+</pre>
+
+<p>Note that this code comments out an AAR, which you can remove. If you enable the AAR, the
+application specified in the AAR always receives the Android Beam message. If the application is not
+present, Google Play launches to download the application. Therefore, the following intent
+filter is not technically necessary for Android 4.0 devices or later if the AAR is used:
+</p>
+
+<pre>
+&lt;intent-filter&gt;
+  &lt;action android:name="android.nfc.action.NDEF_DISCOVERED"/&gt;
+  &lt;category android:name="android.intent.category.DEFAULT"/&gt;
+  &lt;data android:mimeType="application/com.example.android.beam"/&gt;
+&lt;/intent-filter&gt;
+</pre>
+<p>With this intent filter, the <code>com.example.android.beam</code> application now can be started
+when it scans an NFC tag or receives an Android Beam with an AAR of
+type <code>com.example.android.beam</code>, or when an NDEF formatted message contains a MIME record
+of type <code>application/com.example.android.beam</code>.</p>
+
+<p>Even though AARs guarantee an application is started or downloaded, intent filters are
+recommended, because they let you start an Activity of your choice in your
+application instead of always starting the main Activity within the package specified by an AAR.
+AARs do not have Activity level granularity. Also, because some Android-powered devices do not
+support AARs, you should also embed identifying information in the first NDEF record of your NDEF
+messages and filter for that as well, just in case. See <a href="#creating-records">Creating Common
+Types of NDEF records</a> for more information on how to create records.
+</p>

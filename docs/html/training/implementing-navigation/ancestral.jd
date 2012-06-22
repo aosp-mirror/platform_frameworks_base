@@ -22,7 +22,7 @@ next.link=temporal.html
 <h2>You should also read</h2>
 <ul>
   <li><a href="{@docRoot}training/design-navigation/ancestral-temporal.html">Providing Ancestral and Temporal Navigation</a></li>
-  <li><a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a></li>
+  <li><a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back Stack</a></li>
   <li><a href="{@docRoot}design/patterns/navigation.html">Android Design: Navigation</a></li>
 </ul>
 
@@ -87,7 +87,7 @@ public boolean onOptionsItemSelected(MenuItem item) {
 
 <p>When the current activity belongs to a task from a different application&mdash;for example if it was reached via an intent from another application&mdash;pressing <em>Up</em> should create a new task for the application with a synthesized back stack. This approach is described in <a href="{@docRoot}design/patterns/navigation.html">Android Design: Navigation</a> and the {@link android.support.v4.app.TaskStackBuilder} class reference.</p>
 
-<p>The {@link android.support.v4.app.NavUtils} and {@link android.support.v4.app.TaskStackBuilder} classes in the <a href="{@docRoot}sdk/compatibility-library.html">Android Support Package</a> provide helpers for implementing this behavior correctly. An example usage of these two helper classes is below:</p>
+<p>The {@link android.support.v4.app.NavUtils} and {@link android.support.v4.app.TaskStackBuilder} classes in the <a href="{@docRoot}tools/extras/support-library.html">Android Support Package</a> provide helpers for implementing this behavior correctly. An example usage of these two helper classes is below:</p>
 
 <pre>
 {@literal @}Override

@@ -1,0 +1,133 @@
+page.title=Installing the SDK
+walkthru=1
+
+@jd:body
+
+
+<p>You should have already downloaded the <a href="{@docRoot}sdk/index.html">Android SDK</a>. Now
+you need to set up your development environment.</p>
+
+<p>The SDK you've downloaded is not the complete SDK environment. It includes only the core SDK tools, which you can
+use to download the rest of the SDK packages (such as the latest system image).</p>
+
+
+<div id="win" class="docs" style="display:none">
+  
+<h3>Getting started on Windows</h3>
+<p>Your download package is an executable file that starts an installer. The installer checks your machine
+  for required tools, such as the proper Java SE Development Kit (JDK) and installs it if necessary.
+  The installer then saves the Android SDK Tools into a default location (or you can specify the location).</p>
+
+<p>Make a note of the name and location of the SDK directory on your system&mdash;you will need to
+refer to the SDK directory later, when setting up the ADT plugin and when using
+the SDK tools from the command line.</p>
+
+<p>Once the tools are installed, the installer offers to start the Android SDK Manager. Start it and
+continue with the installation guide by clicking the
+<strong>Next</strong> link on the right.</p>
+
+</div>
+
+  
+
+<div id="mac" class="docs" style="display:none">
+  
+<h3>Getting started on Mac</h3>
+
+<p>Your download package is {@code .zip}.
+  Unpack it to a safe location on your machine. By default, the SDK files are unpacked
+into a directory named <code>android-sdk-mac_x86</code>.</p>
+
+<p>Make a note of the name and location of the SDK directory on your system&mdash;you will need to
+refer to the SDK directory later, when setting up the ADT plugin and when using
+the SDK tools from the command line.</p>
+
+<p>Now continue with the installation guide by clicking the
+<strong>Next</strong> link on the right.</p>
+
+</div>
+
+
+
+
+<div id="linux" class="docs" style="display:none">
+  
+<h3>Getting started on Linux</h3>
+
+<p>Your download package is a {@code .tgz}.
+  Unpack it to a safe location on your machine. By default, the SDK files are unpacked
+into a directory named <code>android-sdk-linux_x86</code>.</p>
+
+<p>Make a note of the name and location of the SDK directory on your system&mdash;you will need to
+refer to the SDK directory later, when setting up the ADT plugin and when using
+the SDK tools from the command line.</p>
+
+<p>Now continue with the installation guide by clicking the
+<strong>Next</strong> link on the right.</p>
+
+
+<h4 id="Troubleshooting">Troubleshooting Ubuntu</h4>
+
+<ul>
+  <li>If you need help installing and configuring Java on your
+    development machine, you might find these resources helpful:
+    <ul>
+      <li><a href="https://help.ubuntu.com/community/Java">https://help.ubuntu.com/community/Java </a></li>
+      <li><a href="https://help.ubuntu.com/community/Java">https://help.ubuntu.com/community/JavaInstallation</a></li>
+    </ul>
+  </li>
+  <li>Here are the steps to install Java and Eclipse, prior to installing
+  the Android SDK and ADT Plugin.
+    <ol>
+      <li>If you are running a 64-bit distribution on your development
+      machine, you need to install the <code>ia32-libs</code> package using
+      <code>apt-get:</code>:
+      <pre>apt-get install ia32-libs</pre>
+      </li>
+      <li>Next, install Java: <pre>apt-get install sun-java6-jdk</pre></li>
+      <li>The Ubuntu package manager does not currently offer an Eclipse 3.3
+      version for download, so we recommend that you download Eclipse from
+      eclipse.org (<a
+      href="http://www.eclipse.org/downloads/">http://www.eclipse.org/
+      downloads/</a>). A Java or RCP version of Eclipse is recommended.</li>
+      <li>Follow the steps given in previous sections to install the SDK
+      and the ADT plugin. </li>
+    </ol>
+  </li>
+</ul>
+
+</div>
+
+<p><a href='' onclick='showAll();return false;'>Other platforms</a></p>
+
+<script>
+  var $osDocs;
+  if (navigator.appVersion.indexOf("Win")!=-1) {
+    $osDocs = $('#win');
+  } else if (navigator.appVersion.indexOf("Mac")!=-1) {
+    $osDocs = $('#mac');
+  } else if (navigator.appVersion.indexOf("Linux")!=-1) {
+    $osDocs = $('#linux');
+  }
+
+  if ($osDocs.length) {
+    // reveal only the docs for this OS
+    $osDocs.show();
+  } else {
+    // not running a compatible OS, so just show all the docs
+    $('.docs').show();
+  }
+  
+  function showAll() {
+    $('.docs').each(function() {
+      if (!$(this).is(':visible')) {
+        console.log('show')
+        $(this).show();
+      } else {
+        console.log('hide')
+        $(this).hide();
+        $osDocs.show();
+      }
+    });
+  }
+</script>

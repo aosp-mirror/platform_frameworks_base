@@ -1,0 +1,71 @@
+page.title=Web Apps Overview
+@jd:body
+
+<div class="figure" style="width:327px">
+  <img src="{@docRoot}images/webapps/webapps.png" alt="" />
+  <p class="img-caption"><strong>Figure 1.</strong> You can make your web content available to
+users in two ways: in a traditional web browser and in an Android application, by
+including a WebView in the layout.</p>
+</div>
+
+<p>There are essentially two ways to deliver an application on Android: as a
+client-side application (developed using the Android SDK and installed on user devices as an {@code
+.apk}) or as a web application (developed using web standards and accessed through a web
+browser&mdash;there's nothing to install on user devices).</p>
+
+<p>The approach you choose for your application could depend on several factors, but Android makes
+the decision to develop a web application easier by providing:</p>
+<ul>
+  <li>Support for viewport properties that allow you to properly size your web application
+based on the screen size</li>
+  <li>CSS and JavaScript features that allow you to provide different styles and images
+based on the screen's pixel density (screen resolution)</li>
+</ul>
+
+<p>Thus, your decision to develop a web application for Android can exclude consideration for
+screen support, because it's already easy to make your web pages look good on all types of screens
+powered by Android.</p>
+
+<p>Another great feature of Android is that you don't have to build your application purely on
+the client or purely on the web. You can mix the two together by developing a client-side Android
+application that embeds some web pages (using a {@link android.webkit.WebView} in your Android
+application layout). Figure 1 visualizes how you can provide access to your web pages from either
+a web browser or your Android application. However, you shouldn't develop an Android
+application simply as a means to launch your web site. Rather, the web pages you embed in your
+Android application should be designed especially for that environment. You can even define an
+interface between your Android application and your web pages that allows JavaScript in the web
+pages to call upon APIs in your Android application&mdash;providing Android APIs to your web-based
+application.</p>
+
+<p>Since Android 1.0, {@link android.webkit.WebView} has been available for Android
+applications to embed web content in their layout and bind JavaScript to Android APIs. After
+Android added support for more screen densities (adding support for high and low-density
+screens), Android 2.0 added features to the WebKit framework to allow web pages to specify
+viewport properties and query the screen density in order to modify styles
+and image assets, as mentioned above. Because these features are a part of Android's WebKit
+framework, both the Android Browser (the default web browser provided with the platform) and
+{@link android.webkit.WebView} support the same viewport and screen density features.</p>
+
+<p>To develop a web application for Android-powered devices, you should read the
+following documents:</p>
+
+<dl>
+  <dt><a href="{@docRoot}guide/webapps/targeting.html"><strong>Targeting Screens from Web
+Apps</strong></a></dt>
+  <dd>How to properly size your web app on Android-powered devices and support
+multiple screen densities. The information in this document is important if you're building a web
+application that you at least expect to be available on Android-powered devices (which you should
+assume for anything you publish on the web), but especially if you're targeting mobile devices
+or using {@link android.webkit.WebView}.</dd>
+  <dt><a href="{@docRoot}guide/webapps/webview.html"><strong>Building Web Apps in
+WebView</strong></a></dt>
+  <dd>How to embed web pages into your Android application using {@link android.webkit.WebView} and
+bind JavaScript to Android APIs.</dd>
+  <dt><a href="{@docRoot}guide/webapps/debugging.html"><strong>Debugging Web Apps</strong></a></dt>
+  <dd>How to debug web apps using JavaScript Console APIs.</dd>
+  <dt><a href="{@docRoot}guide/webapps/best-practices.html"><strong>Best Practices for Web
+Apps</strong></a></dt>
+  <dd>A list of practices you should follow, in order to provide an effective web application on
+Android-powered devices.</dd>
+</dl>
+

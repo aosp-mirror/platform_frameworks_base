@@ -20,13 +20,13 @@ page.title=Hello, World
 
 <p>Eclipse を使用していない場合でも問題ありません。<a href="{@docRoot}guide/developing/other-ide.html">Developing in Other IDEs</a>に慣れてから、このチュートリアルに戻り、Eclipse に関する部分以外を参考にしてください。</p>
 
-<p>開始する前に、最新の SDK がインストールされている必要があります。また、Eclipse を使用する場合には、ADT プラグインもインストールされている必要があります。これらのプログラムがインストールされていない場合は、「<a href="{@docRoot}sdk/installing.html">Installing the Android SDK</a>」を参考にインストールを実行して、完了後にこのチュートリアルに戻ってください。</p>
+<p>開始する前に、最新の SDK がインストールされている必要があります。また、Eclipse を使用する場合には、ADT プラグインもインストールされている必要があります。これらのプログラムがインストールされていない場合は、「<a href="{@docRoot}sdk/installing/index.html">Installing the Android SDK</a>」を参考にインストールを実行して、完了後にこのチュートリアルに戻ってください。</p>
 
 <h2 id="avd">AVD の作成</h2>
 
 <div class="sidebox-wrapper">
   <div class="sidebox">
-    <p>AVD の使用方法と使用可能なオプションについて詳しくは、<a href="{@docRoot}guide/developing/tools/avd.html">Android 仮想デバイス</a> のドキュメントを参照してください。</p>
+    <p>AVD の使用方法と使用可能なオプションについて詳しくは、<a href="{@docRoot}tools/avd.html">Android 仮想デバイス</a> のドキュメントを参照してください。</p>
   </div>
 </div>
 
@@ -289,7 +289,7 @@ public class HelloAndroid extends Activity {
 
 <p class="note"><strong>ヒント:</strong> ショートカット キー<strong>Ctrl+F11</strong>（Mac では <strong>コマンド+Shift+F11</strong>）を使用して、現在表示されているアプリケーションを実行することができます。</p>
 
-<p>ここからは、デバッグの基礎知識と、他の総合開発環境に関する補足情報について説明します。さらに詳しく学習したい場合は、「<a href="{@docRoot}guide/topics/fundamentals.html">アプリケーションの基礎</a>」を参照してください。Android アプリケーションが動作するためのすべての要素について説明しています。また、「<a href="{@docRoot}guide/index.html">デベロッパー ガイド</a>」の導入ページを参照して、<em>デベロッパー ガイド</em> ドキュメントの概要を確認してください。</p>
+<p>ここからは、デバッグの基礎知識と、他の総合開発環境に関する補足情報について説明します。さらに詳しく学習したい場合は、「<a href="{@docRoot}guide/components/fundamentals.html">アプリケーションの基礎</a>」を参照してください。Android アプリケーションが動作するためのすべての要素について説明しています。また、「<a href="{@docRoot}guide/index.html">デベロッパー ガイド</a>」の導入ページを参照して、<em>デベロッパー ガイド</em> ドキュメントの概要を確認してください。</p>
 
 
 <div class="special">
@@ -358,7 +358,7 @@ public class HelloAndroid extends Activity {
   
   <p>Eclipse を使用していない場合（普段から使用している総合開発環境がある場合や、シンプルにテキスト エディタやコマンド ライン ツールを使用している場合など）は、Eclipse プラグインを利用することはできません。しかし心配は無用です。Eclipse を使用していないからといって何らかの機能が失われることはありません。</p>
   
-  <p>Android Plugin for Eclipse は、単に Android SDK に含まれるツール セットをまとめたものに過ぎません（エミュレータ、aapt、adb、ddms などの個別のツールについては、<a href="{@docRoot}guide/developing/tools/index.html">こちらで別途説明</a>しています）。このため、これらのツールを別のツール、たとえば「Ant」のビルド ファイルなどでまとめることも可能です。</p>
+  <p>Android Plugin for Eclipse は、単に Android SDK に含まれるツール セットをまとめたものに過ぎません（エミュレータ、aapt、adb、ddms などの個別のツールについては、<a href="{@docRoot}tools/index.html">こちらで別途説明</a>しています）。このため、これらのツールを別のツール、たとえば「Ant」のビルド ファイルなどでまとめることも可能です。</p>
   
   <p>Android SDK には、「android」という名前のツールが含まれています。このツールを使用すると、作成するプロジェクトのソース コードとディレクトリ スタブすべて、および Ant と互換性のある <code>build.xml</code> ファイルを作成することができます。これにより、プロジェクトをコマンド ラインで作成したり、普段使用している総合開発環境と統合したりすることができます。</p>
   

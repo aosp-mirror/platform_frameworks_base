@@ -1,0 +1,547 @@
+page.title=Optimizing Your UI
+parent.title=Debugging
+parent.link=index.html
+@jd:body
+
+ <div id="qv-wrapper">
+    <div id="qv">
+      <h2>In this document</h2>
+
+      <ol>
+        <li>
+            <a href="#HierarchyViewer">
+                Using Hierarchy Viewer
+            </a>
+            <ol>
+                <li><a href="#runhv">Running Hierarchy Viewer and choosing a window</a></li>
+                <li><a href="#viewhierarchy">About the View Hierarchy window</a></li>
+                <li><a href="#indiView">Working with an individual View in Tree View</a></li>
+                <li><a href="#hvdebugging">Debugging with View Hierarchy</a></li>
+                <li><a href="#hvoptimize">Optimizing with View Hierarchy</a></li>
+            </ol>
+        </li>
+        <li>
+            <a href="#pixelperfect">
+                Using Pixel Perfect
+            </a>
+            <ol>
+                <li><a href="#aboutpixelperfect">About the Pixel Perfect window</a></li>
+                <li><a href="#overlays">Working with Pixel Perfect overlays</a></li>
+            </ol>
+        </li>
+        <li><a href="#layoutopt">Using layoutopt</a></li>
+      </ol>
+      <h2>Related videos</h2>
+          <ol>
+              <li>
+<iframe title="Hierarchyviewer" 
+    width="210" height="160" 
+    src="http://www.youtube.com/embed/PAgE7saQUUY?rel=0&amp;hd=1" 
+    frameborder="0" allowfullscreen>
+</iframe>
+              </li>
+              <li>
+<iframe title="Pixel Perfect" 
+    width="210" height="160" 
+    src="http://www.youtube.com/embed/C45bMZGdN7Y?rel=0&amp;hd=1" 
+    frameborder="0" 
+    allowfullscreen>
+</iframe>
+              </li>
+          </ol>
+    </div>
+  </div>
+
+  <p>
+Sometimes your application's layout can slow down your application.
+  To help debug issues in your layout, the Android SDK provides the Hierarchy Viewer and
+  <code>layoutopt</code> tools.
+  </p>
+
+  <p>The Hierarchy Viewer application allows you to debug and optimize your user interface. It
+  provides a visual representation of the layout's View hierarchy (the View Hierarchy window)
+  and a magnified view of the display (the Pixel Perfect window).</p>
+
+  <p><code>layoutopt</code> is a command-line tool that helps you optimize the layouts and layout
+  hierarchies of your applications. You can run it against your layout files or resource
+  directories to quickly check for inefficiencies or other types of problems that could be
+  affecting the performance of your application.</p>
+
+<h2 id="HierarchyViewer">Using Hierarchy Viewer</h2>
+
+<h3 id="runhv">Running Hierarchy Viewer and choosing a window</h3>
+<p>
+    To run Hierarchy Viewer, follow these steps:</p>
+<ol>
+    <li>
+        Connect your device or launch an emulator.
+        <p>
+            To preserve security, Hierarchy Viewer can only connect to devices running a
+            developer version of the Android system.
+        </p>
+    </li>
+    <li>
+        If you have not done so already, install the application you want to work with.
+    </li>
+    <li>
+        Run the application, and ensure that its UI is visible.
+    </li>
+    <li>
+        From a terminal, launch <code>hierarchyviewer</code> from the
+        <code>&lt;sdk&gt;/tools/</code>
+        directory.
+    </li>
+    <li>
+        The first window you see displays a list of devices and emulators. To expand the list
+        of Activity objects for a device or emulator, click the arrow on the left. This displays a
+        list of the Activity objects whose UI is currently visible on the device or emulator. The
+        objects are listed by their Android component name. The list includes both your application
+        Activity and system Activity objects. A screenshot of this window appears in
+        figure 1.
+    </li>
+    <li>
+        Select the name of your Activity from the list. You can now look at its view
+        hierarchy using the View Hierarchy window, or look at a magnified image of the UI using
+        the Pixel Perfect window.
+    </li>
+</ol>
+<p>
+    To learn how to use the View Hierarchy window, go to
+    <a href="#viewhierarchy">About the View Hierarchy window</a>. To learn how to use the
+    Pixel Perfect window, go to <a href="#pixelperfect">About the Pixel Perfect window</a>.
+</p>
+<img id="Fig1" src="{@docRoot}images/developing/hv_device_window.png" alt="" height="600"/>
+<p class="img-caption"><strong>Figure 1.</strong> Hierarchy Viewer device window</p>
+<h3 id="viewhierarchy">About the View Hierarchy window</h3>
+<p>
+    The View Hierarchy window displays the View objects that form the UI of the
+    Activity that is running on your device or emulator. You use it to look at individual
+    View objects within the context of the entire View tree. For each View object, the View
+    Hierarchy window also displays rendering performance data.
+</p>
+<p>
+    To see the View Hierarchy window, run Hierarchy Viewer as described in
+    the section <a href="#runhv">Running Hierarchy Viewer and choosing a window</a>. Next, click
+    <strong>View Hierarchy</strong> at the top of the device window.
+</p>
+<p>
+    You should see four panes:
+</p>
+<ul>
+    <li>
+        <strong>Tree View</strong>: The left-hand pane displays the Tree View,
+        a diagram of the Activity object's hierarchy of views. Use Tree View to examine individual
+        View objects and see the relationships between View objects in your UI.
+        <p>
+            To zoom in on the pane, use the slider at the bottom of the pane, or use your mouse
+            scroll wheel. To move around in the pane or reveal View objects that are not currently
+            visible, click and drag the pane.
+        </p>
+        <p>
+            To highlight the nodes in the tree whose class or ID match a search string, enter the
+            string in the <strong>Filter by class or id:</strong> edit box at the bottom of the
+            window. The background of nodes that match the search string will change from gray to
+            bright blue.
+        </p>
+        <p>
+            To save a screenshot of Tree View to a PNG file, click <strong>Save As PNG</strong> at
+            the top of the View Hierarchy window. This displays a dialog in which you can choose
+            a directory and file name.
+        </p>
+        <p>
+            To save a layered screenshot of your device or emulator to an Adobe Photoshop (PSD)
+            file, click <strong>Capture Layers</strong> at the top of the View Hierarchy window.
+            This displays a dialog in which you can choose a directory or file name.
+            Each View in the UI is saved as a separate Photoshop layer.
+        </p>
+        <p>
+            In Photoshop (or similar program that accepts .psd files), you can hide, show or edit a
+            layer independently of others. When you save a layered screenshot, you can examine and
+            modify the image of an individual View object. This helps you experiment with design
+            changes.
+        </p>
+    </li>
+    <li>
+        The upper right-hand pane displays the <strong>Tree Overview</strong>, a smaller map
+        representation of the entire Tree View window. Use Tree Overview to identify the part of the
+        view tree that is being displayed in Tree View.
+        <p>
+            You can also use Tree Overview to move around in the Tree View pane. Click and drag
+            the shaded rectangle over an area to reveal it in Tree View.
+        </p>
+    </li>
+    <li>
+        The middle right-hand pane displays the <strong>Properties View</strong>,
+        a list of the properties for a selected View object. With Properties View, you can
+        examine all the properties without having to look at your application source.
+        <p>
+            The properties are organized by category. To find an individual property, expand
+            a category name by clicking the arrow on its left. This reveals all the properties
+            in that category.
+        </p>
+    </li>
+    <li>
+        The lower right-hand pane displays the <strong>Layout View</strong>,
+        a block representation of the UI. Layout View is another way to navigate through your UI.
+        When you click on a View object in Tree View, its position in the UI is highlighted.
+        Conversely, when you click in an area of Layout View, the View object for that area is
+        highlighted in Tree View.
+        <p>
+            The outline colors of blocks in Layout View provide additional information:
+        </p>
+            <ul>
+                <li>
+                    Bold red: The block represents the the View that is currently selected in
+                    Tree View.
+                </li>
+                <li>
+                    Light red: The block represents the parent of the block outlined in bold red.
+                </li>
+                <li>
+                    White: The block represents a visible View that is not a parent or child of the
+                    View that is currently selected in Tree View.
+                </li>
+            </ul>
+    </li>
+</ul>
+<p>
+    When the UI of the current Activity changes, the View Hierarchy window is not automatically
+    updated. To update it, click <strong>Load View Hierarchy</strong> at the top of the window.
+</p>
+<p>
+    Also, the window is not updated if you switch to a new Activity. To update it, start by
+    clicking the window selection icon in the bottom left-hand corner of the window. This
+    navigates back to the Window Selection window. From this window, click the Android
+    component name of the new Activity and then click <strong>Load View Hierarchy</strong>
+    at the top of the window.
+</p>
+<p>
+    A screenshot of the View Hierarchy window appears in figure 2.
+</p>
+<img id="Fig2" src="{@docRoot}images/developing/hv_view_hierarchy_window.png" alt="" height="600"/>
+<p class="img-caption"><strong>Figure 2.</strong> The View Hierarchy window</p>
+<h3 id="indiView">Working with an individual View in Tree View</h3>
+<p>
+    Each node in Tree View represents a single View. Some information is always visible. Starting
+    at the top of the node, you see the following:
+</p>
+<ol>
+    <li>
+        View class: The View object's class.
+    </li>
+    <li>
+        View object address: A pointer to View object.
+    </li>
+    <li>
+        View object ID: The value of the
+        <code><a href="{@docRoot}guide/topics/resources/layout-resource.html#idvalue">android:id</a>
+        </code> attribute.
+    </li>
+    <li>
+        Performance indicators: A set of three colored dots that indicate the rendering
+        speed of this View relative to other View objects in the tree. The three dots
+        represent (from left to right) the measure, layout, and draw times of the rendering.
+        <p>
+            The colors indicate the following relative performance:
+        </p>
+        <ul>
+            <li>
+                Green: For this part of the render time, this View is in the faster 50% of all
+                the View objects in the tree. For example, a green dot for the measure time means
+                that this View has a faster measure time than 50% of the View objects in the tree.
+            </li>
+            <li>
+                Yellow: For this part of the render time, this View is in the slower 50% of all
+                the View objects in the tree. For example, a yellow dot for the layout time means
+                that this View has a slower layout time than 50% of the View objects in the tree.
+            </li>
+            <li>
+                Red: For this part of the render time, this View is the slowest one in the tree.
+                For example, a red dot for the draw time means that this View takes the most
+                time to draw of all the View objects in the tree.
+            </li>
+        </ul>
+    </li>
+    <li>
+        View index: The zero-based index of the View in its parent View. If it is the only child,
+        this is 0.
+    </li>
+</ol>
+<p>
+    When you select a node, additional information for the View appears in a small window above
+    the node. When you click one of the nodes, you see the following:
+</p>
+<ul>
+    <li>
+        Image: The actual image of the View, as it would appear in the emulator. If the View has
+        children, these are also displayed.
+    </li>
+    <li>
+        View count: The number of View objects represented by this node. This includes the View
+        itself and a count of its children. For example, this value is 4 for a View that has 3
+        children.
+    </li>
+    <li>
+        Render times: The actual measure, layout, and draw times for the View rendering, in
+        milliseconds. These represent the same values as the performance indicators mentioned in
+        the preceding section.
+    </li>
+</ul>
+<p>
+    An annotated screenshot of an individual node in the Tree View window appears in figure 3.
+</p>
+<img id="Fig3" src="{@docRoot}images/developing/hv_treeview_screenshot.png" alt="" height="600"/>
+<p class="img-caption"><strong>Figure 3.</strong> An annotated node in Tree View</p>
+<h3 id="hvdebugging">Debugging with View Hierarchy</h3>
+<p>
+    The View Hierarchy window helps you debug an application by providing a static display
+    of the UI. The display starts with your application's opening screen. As you step through
+    your application, the display remains unchanged until you redraw it by invalidating and
+    then requesting layout for a View.
+</p>
+<p>
+    To redraw a View in the display:
+</p>
+    <ul>
+        <li>
+            Select a View in Tree View. As you move up towards the root of the tree (to the
+            left in the Tree View), you see the highest-level View objects. Redrawing a high-level
+            object usually forces the lower-level objects to redraw as well.
+        </li>
+        <li>
+            Click <strong>Invalidate</strong> at the top of the window. This marks the View as
+            invalid, and schedules it for a redraw at the next point that a layout is requested.
+        </li>
+        <li>
+            Click <strong>Request Layout</strong> to request a layout. The View and its children
+            are redrawn, as well as any other View objects that need to be redrawn.
+        </li>
+    </ul>
+<p>
+    Manually redrawing a View allows you to watch the View object tree and examine the properties of
+    individual View objects one step at a time as you go through breakpoints in your code.
+</p>
+<h3 id="hvoptimize">Optimizing with View Hierarchy</h3>
+<p>
+    View Hierarchy also helps you identify slow render performance. You start by looking at the
+    View nodes with red or yellow performance indicators to identify the slower View objects. As you
+    step through your application, you can judge if a View is consistently slow or slow only in
+    certain circumstances.
+</p>
+<p>
+    Remember that slow performance is not necessarily evidence of a problem, especially for
+    ViewGroup objects. View objects that have more children and more complex View objects render
+    more slowly.
+</p>
+<p>
+    The View Hierarchy window also helps you find performance issues. Just by looking at the
+    performance indicators (the dots) for each View node, you can see which View objects are the
+    slowest to measure, layout, and draw. From that, you can quickly identify the problems you
+    should look at first.
+</p>
+<h2 id="pixelperfect">Using Pixel Perfect</h2>
+<p>
+    Pixel Perfect is a tool for examining pixel properties and laying out UIs from a design drawing.
+</p>
+<h3 id="aboutpixelperfect">About the Pixel Perfect window</h3>
+<p>
+    The Pixel Perfect window displays a magnified image of the screen that is currently
+    visible on the emulator or device. In it, you can examine the properties
+    of individual pixels in the screen image. You can also use the Pixel Perfect window
+    to help you lay out your application UI based on a bitmap design.
+</p>
+<p>
+    To see the Pixel Perfect window, run Hierarchy Viewer, as described in
+    the section <a href="#runhv">Running Hierarchy Viewer and choosing a window</a>. Next, click
+    <strong>Inspect Screenshot</strong> at the top of the device window. The Pixel Perfect window
+    appears.
+</p>
+<p>
+    In it, you see three panes:
+</p>
+<ul>
+    <li>
+        View Object pane: This is a hierarchical list of the View objects that are currently
+        visible on the device or emulator screen, including both the ones in your application and
+        the ones generated by the system. The objects are listed by their View class.
+        To see the class names of a View object's children, expand the View by clicking the
+        arrow to its left. When you click a View, its position is highlighted in the Pixel Perfect
+        pane on the right.
+    </li>
+    <li>
+        Pixel Perfect Loupe pane: This is the magnified screen image. It is overlaid by a grid in
+        which each square represents one pixel. To look at the information for a pixel, click in its
+        square. Its color and X,Y coordinates appear at the bottom of the pane.
+        <p>
+            The magenta crosshair in the pane corresponds to the positioning
+            crosshair in the next pane. It only moves when you move the crosshair in the next pane.
+        </p>
+        <p>
+            To zoom in or out on the image, use the <strong>Zoom</strong> slider at the bottom of
+            the pane, or use your mouse's scroll wheel.
+        </p>
+        <p>
+            When you select a pixel in the Loupe pane, you see the following information at the
+            bottom of the pane:
+        </p>
+        <ul>
+            <li>
+                Pixel swatch: A rectangle filled with the same color as the pixel.
+            </li>
+            <li>
+                HTML color code: The hexadecimal RGB code corresponding to the pixel color
+            </li>
+            <li>
+                RGB color values: A list of the (R), green (G), and blue (B) color values of the
+                pixel color. Each value is in the range 0-255.
+            </li>
+            <li>
+                X and Y coordinates: The pixel's coordinates, in device-specific pixel units.
+                The values are 0-based, with X=0 at the left of the screen and Y=0 at the top.
+            </li>
+        </ul>
+    </li>
+    <li>
+        Pixel Perfect pane: This displays the currently visible screen as it would appear in the
+        emulator.
+        <p>
+            You use the cyan crosshair to do coarse positioning. Drag the crosshair in the image,
+            and the Loupe crosshair will move accordingly. You can also click on a point in the
+            Pixel Perfect pane, and the crosshair will move to that point.
+        </p>
+        <p>
+            The image corresponding to the View object selected in the View Object pane is
+            outlined in a box that indicates the View object's position on the screen. For the
+            selected object, the box is bold red. Sibling and parent View objects have a light
+            red box. View objects that are neither parents nor siblings are in white.
+        </p>
+        <p>
+            The layout box may have other rectangles either inside or outside it, each of which
+            indicates part of the View. A purple or green rectangle indicates the View bounding box.
+            A white or black box inside the layout box represents the <strong>padding</strong>, the
+            defined distance between the View object's content and its bounding box. An outer white
+            or black rectangle represents the <strong>margins</strong>, the distance between the
+            View bounding box and adjacent View objects. The padding and margin boxes are white if
+            the layout background is black, and vice versa.
+        </p>
+        <p>
+            You can save the screen image being displayed in the Pixel Perfect pane as a PNG file.
+            This produces a screenshot of the current screen. To do this, click
+            <strong>Save as PNG</strong> at the top of the window. This displays a dialog,
+            in which you can choose a directory and filename for the file.
+        </p>
+    </li>
+</ul>
+<p>
+    The panes are not automatically refreshed when you change one of the View objects or go to
+    another Activity. To refresh the Pixel Perfect pane and the Loupe pane, click
+    <strong>Refresh Screenshot</strong> at the top of the window. This will change the panes
+    to reflect the current screen image. You still may need to refresh the View Object pane;
+    to do this, click <strong>Refresh Tree</strong> at the top of the window.
+</p>
+<p>
+    To automatically refresh the panes while you are debugging, set
+    <strong>Auto Refresh</strong> at the top of the window, and then set a refresh rate
+    with the <strong>Refresh Rate</strong> slider at the bottom of the Loupe pane.
+</p>
+<h3 id="overlays">Working with Pixel Perfect overlays</h3>
+<p>
+    You often construct a UI based on a design done as a bitmap image. The Pixel Perfect window
+    helps you match up your View layout to a bitmap image by allowing you to load the bitmap as an
+    <strong>overlay</strong> on the screen image.
+</p>
+<p>
+    To use a bitmap image as an overlay:
+</p>
+<ul>
+    <li>
+        Start your application in a device or emulator and navigate to the Activity whose UI you
+        want to work with.
+    </li>
+    <li>
+        Start Hierarchy Viewer and navigate to the Pixel Perfect window.
+    </li>
+    <li>
+        At the top of the window, click <strong>Load Overlay</strong>. A dialog opens, prompting
+        for the image file to load. Load the image file.
+    </li>
+    <li>
+        Pixel Perfect displays the overlay over the screen image in the Pixel Perfect pane. The
+        lower left corner of the bitmap image (X=0, Y=<em>max value</em>) is anchored on the lower
+        leftmost pixel (X=0, Y=<em>max screen</em>) of the screen.
+        <p>
+            By default, the overlay has a 50% transparency, which allows you to see the screen
+            image underneath. You can adjust this with the <strong>Overlay:</strong> slider at the
+            bottom of the Loupe pane.
+        </p>
+        <p>
+            Also by default, the overlay is not displayed in the Loupe pane. To display it,
+            set <strong>Show in Loupe</strong> at the top of the window.
+        </p>
+    </li>
+</ul>
+<p>
+    The overlay is not saved as part of the screenshot when you save the screen image as a PNG
+    file.
+</p>
+<p>
+    A screenshot of the Pixel Perfect window appears in figure 4.
+</p>
+<img id="Fig4" src="{@docRoot}images/developing/hv_pixelperfect.png"
+        alt=""
+        height="600"/>
+<p class="img-caption"><strong>Figure 4.</strong> The Pixel Perfect window</p>
+<h2 id="layoutopt">Using layoutopt</h2>
+<p>
+    The <code>layoutopt</code> tool lets you analyze the XML files that define your
+    application's UI to find inefficiencies in the view hierarchy.</p>
+
+<p>
+    To run the tool, open a terminal and launch <code>layoutopt &lt;xmlfiles&gt;</code>
+    from your SDK <code>tools/</code> directory. The &lt;xmlfiles&gt; argument is a space-
+    delimited list of resources you want to analyze, either uncompiled resource xml files or
+    directories of such files.
+</p>
+<p>
+    The tool loads the specified XML files and analyzes their definitions and
+    hierarchies according to a set of predefined rules. For every issue it detects, it
+    displays the following information:
+</p>
+<ul>
+    <li>
+        The filename in which the issue was detected.
+    </li>
+    <li>
+        The line number for the issue.
+    </li>
+    <li>
+        A description of the issue, and for some types of issues it also suggests a resolution.
+    </li>
+</ul>
+<p>The following is a sample of the output from the tool:</p>
+<pre>
+$ layoutopt samples/
+samples/compound.xml
+   7:23 The root-level &lt;FrameLayout/&gt; can be replaced with &lt;merge/&gt;
+   11:21 This LinearLayout layout or its FrameLayout parent is useless
+samples/simple.xml
+   7:7 The root-level &lt;FrameLayout/&gt; can be replaced with &lt;merge/&gt;
+samples/too_deep.xml
+   -1:-1 This layout has too many nested layouts: 13 levels, it should have &lt;= 10!
+   20:81 This LinearLayout layout or its LinearLayout parent is useless
+   24:79 This LinearLayout layout or its LinearLayout parent is useless
+   28:77 This LinearLayout layout or its LinearLayout parent is useless
+   32:75 This LinearLayout layout or its LinearLayout parent is useless
+   36:73 This LinearLayout layout or its LinearLayout parent is useless
+   40:71 This LinearLayout layout or its LinearLayout parent is useless
+   44:69 This LinearLayout layout or its LinearLayout parent is useless
+   48:67 This LinearLayout layout or its LinearLayout parent is useless
+   52:65 This LinearLayout layout or its LinearLayout parent is useless
+   56:63 This LinearLayout layout or its LinearLayout parent is useless
+samples/too_many.xml
+   7:413 The root-level &lt;FrameLayout/&gt; can be replaced with &lt;merge/&gt;
+   -1:-1 This layout has too many views: 81 views, it should have &lt;= 80!
+samples/useless.xml
+   7:19 The root-level &lt;FrameLayout/&gt; can be replaced with &lt;merge/&gt;
+   11:17 This LinearLayout layout or its FrameLayout parent is useless
+</pre>

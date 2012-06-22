@@ -348,7 +348,7 @@ you can start with a regular image (figure 4, shown with in 4x zoom for clarity)
 <p class="img-caption"><strong>Figure 4.</strong> <code>button.png</code></p>
 
 <p>And then run it through the <ode
-href="{@docRoot}guide/developing/tools/draw9patch.html"><code>draw9patch</code></a> utility of the
+href="{@docRoot}tools/help/draw9patch.html"><code>draw9patch</code></a> utility of the
 SDK (which is located in the <code>tools/</code> directory), in which you can mark the areas that
 should be stretched by drawing pixels along the left and top borders. You can also mark the area
 that should hold the content by drawing pixels along the right and bottom borders, resulting in
