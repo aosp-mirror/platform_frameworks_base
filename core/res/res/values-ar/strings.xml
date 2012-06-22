@@ -220,7 +220,7 @@
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"استرداد تفاصيل التطبيقات قيد التشغيل"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"يسمح للتطبيق باسترداد معلومات تفصيلية حول المهام قيد التشغيل حاليًا ومؤخرًا. قد تكتشف التطبيقات الضارة معلومات خاصة حول التطبيقات الأخرى."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"إعادة ترتيب التطبيقات قيد التشغيل"</string>
-    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"للسماح للتطبيق بنقل المهام إلى المقدمة والخلفية. وقد يجري التطبيق ذلك بدون الإرسال."</string>
+    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"للسماح للتطبيق بنقل المهام إلى المقدمة والخلفية. وقد يجري التطبيق ذلك بدون إذنك."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"إيقاف التطبيقات التي قيد التشغيل"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"للسماح للتطبيق بإزالة المهام وإنهاء تطبيقاتها. قد تعطل التطبيقات الضارة عمل التطبيقات الأخرى."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"بدء أي نشاط"</string>
@@ -371,11 +371,11 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"للسماح للتطبيق بإضافة أو إزالة أو تغيير الأحداث التي يمكنك تعديلها على جهازك اللوحي، بما في ذلك أحداث الأصدقاء أو زملاء العمل. وقد يتيح هذا للتطبيق إرسال رسائل يبدو أنها واردة من أصحاب التقويم أو تعديل الأحداث بدون معرفة المالكين."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"للسماح للتطبيق بإضافة أو إزالة أو تغيير الأحداث التي يمكنك تعديلها على هاتفك، بما في ذلك أحداث الأصدقاء أو زملاء العمل. وقد يتيح هذا للتطبيق إرسال رسائل يبدو أنها واردة من أصحاب التقويم أو تعديل الأحداث بدون معرفة المالكين."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"مصادر مواقع وهمية للاختبار"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"لإنشاء مصادر مواقع زائفة للاختبار أو تثبيت موفر مواقع جديد. يتيح هذا للتطبيق إلغاء الموقع و/أو الحالة الذي تعرضه مصادر المواقع الأخرى مثل GPS أو موفري المواقع."</string>
+    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"لإنشاء مصادر مواقع زائفة للاختبار أو تثبيت موفر مواقع جديد. يتيح هذا للتطبيق إلغاء الموقع و/أو الحالة التي تعرضها مصادر المواقع الأخرى مثل GPS أو موفري المواقع."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"الدخول إلى المزيد من أوامر موفر الموقع"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"للسماح للتطبيق بالدخول إلى المزيد من أوامر موفر خدمة الموقع. وقد يتيح هذا للتطبيق التدخل في عمل GPS أو مصادر المواقع الأخرى."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"إذن لتثبيت موفر خدمة موقع"</string>
-    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"لإنشاء مصادر مواقع زائفة للاختبار أو تثبيت موفر مواقع جديد. يتيح هذا للتطبيق إلغاء الموقع و/أو الحالة الذي تعرضه مصادر المواقع الأخرى مثل GPS أو موفري المواقع."</string>
+    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"لإنشاء مصادر مواقع زائفة للاختبار أو تثبيت موفر مواقع جديد. يتيح هذا للتطبيق إلغاء الموقع و/أو الحالة التي تعرضها مصادر المواقع الأخرى مثل GPS أو موفري المواقع."</string>
     <string name="permlab_accessFineLocation" msgid="5885550969882561436">"موقع دقيق (GPS)"</string>
     <string name="permdesc_accessFineLocation" product="tablet" msgid="8960597421469894181">"للدخول إلى مصادر المواقع مثل نظام تحديد المواقع العالمي على الجهاز اللوحي. وعند توفر خدمات المواقع وتشغيلها، يتيح هذا الإذن للتطبيق تحديد الموقع تحديدًا دقيقًا."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="239268765496141815">"للدخول إلى مصادر المواقع الدقيقة مثل نظام تحديد المواقع العالمي على الهاتف. وعند توفر خدمات المواقع وتشغيلها، يتيح هذا الإذن للتطبيق تحديد الموقع تحديدًا دقيقًا."</string>
@@ -509,13 +509,13 @@
     <string name="permlab_nfc" msgid="4423351274757876953">"التحكم في اتصال الحقل القريب"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"للسماح للتطبيق بالاتصال بعلامات الاتصال قريب المدى (NFC)، والبطاقات وبرامج القراءة."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"تعطيل قفل الشاشة"</string>
-    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"للسماح للتطبيق بتعطيل تأمين المفاتيح وأي أمان لكلمة مرور مرتبطة. على سبيل المثال، يعطل الهاتف تأمين المفاتيح عند استلام مكالمة هاتفية واردة، ثم يعيد تمكين تأمين المفاتيح عند انتهاء المكالمة."</string>
+    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"للسماح للتطبيق بتعطيل تأمين المفاتيح وأي أمان لكلمة مرور مرتبطة. على سبيل المثال، يعطل الهاتف تأمين المفاتيح عند استقبال مكالمة هاتفية واردة، ثم يعيد تمكين تأمين المفاتيح عند انتهاء المكالمة."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"قراءة إعدادات المزامنة"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"للسماح للتطبيق بقراءة الإعدادات المتزامنة لحساب ما. على سبيل المثال، يمكن أن يؤدي هذا إلى تحديد ما إذا تمت مزامنة تطبيق \"الأشخاص\" مع حساب ما."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"التبديل بين تشغيل المزامنة وإيقافها"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"للسماح للتطبيق بتعديل إعدادات المزامنة لحساب ما. على سبيل المثال، يمكن استخدام ذلك لتمكين مزامنة تطبيق \"الأشخاص\" مع حساب ما."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"قراءة إحصاءات المزامنة"</string>
-    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"للسماح للتطبيق بقراءة الإحصائيات المتزامنة لحساب ما، بما في ذلك سجل الأحداث المتزامنة ومقدار البيانات التي تمت مزامنتها."</string>
+    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"للسماح للتطبيق بقراءة إحصائيات المزامنة لحساب ما، بما في ذلك سجل الأحداث المتزامنة ومقدار البيانات التي تمت مزامنتها."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"قراءة الخلاصات المشتركة"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"للسماح للتطبيق بالحصول على تفاصيل حول الخلاصات المتزامنة في الوقت الحالي."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"كتابة الخلاصات المشتركة"</string>
@@ -1282,8 +1282,10 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"هل تريد قبول المكالمة؟"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"دومًا"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"مرة واحدة فقط"</string>
-    <string name="default_audio_route_name" product="tablet" msgid="6890731863195399186">"مكبرات صوت الجهاز اللوحي"</string>
-    <string name="default_audio_route_name" product="default" msgid="4551396562363128432">"مكبر صوت الهاتف"</string>
+    <!-- no translation found for default_audio_route_name (4617053898167127471) -->
+    <skip />
+    <!-- no translation found for default_audio_route_name (4239291273420140123) -->
+    <skip />
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"سماعات رأس"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"مكبرات صوت للإرساء"</string>
     <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"صوت HDMI"</string>
