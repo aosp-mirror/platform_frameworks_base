@@ -57,6 +57,7 @@ enum {
     SET_PARAMETER,
     GET_PARAMETER,
     SET_RETRANSMIT_ENDPOINT,
+    GET_RETRANSMIT_ENDPOINT,
 };
 
 class BpMediaPlayer: public BpInterface<IMediaPlayer>
@@ -293,7 +294,8 @@ public:
         return remote()->transact(GET_PARAMETER, data, reply);
     }
 
-    status_t setRetransmitEndpoint(const struct sockaddr_in* endpoint) {
+    status_t setRetransmitEndpoint(const struct sockaddr_in* endpoint)
+    {
         Parcel data, reply;
         status_t err;
 
@@ -311,6 +313,23 @@ public:
         }
 
         return reply.readInt32();
+    }
+
+    status_t getRetransmitEndpoint(struct sockaddr_in* endpoint)
+    {
+        Parcel data, reply;
+        status_t err;
+
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        err = remote()->transact(GET_RETRANSMIT_ENDPOINT, data, &reply);
+
+        if ((OK != err) || (OK != (err = reply.readInt32()))) {
+            return err;
+        }
+
+        data.read(endpoint, sizeof(*endpoint));
+
+        return err;
     }
 };
 
@@ -491,6 +510,17 @@ status_t BnMediaPlayer::onTransact(
             } else {
                 reply->writeInt32(setRetransmitEndpoint(NULL));
             }
+
+            return NO_ERROR;
+        } break;
+        case GET_RETRANSMIT_ENDPOINT: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+
+            struct sockaddr_in endpoint;
+            status_t res = getRetransmitEndpoint(&endpoint);
+
+            reply->writeInt32(res);
+            reply->write(&endpoint, sizeof(endpoint));
 
             return NO_ERROR;
         } break;

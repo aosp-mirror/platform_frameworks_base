@@ -144,10 +144,13 @@ public:
     virtual status_t    getParameter(int key, Parcel *reply) = 0;
 
     // Right now, only the AAX TX player supports this functionality.  For now,
-    // provide a default implementation which indicates a lack of support for
-    // this functionality to make life easier for all of the other media player
+    // provide default implementations which indicate a lack of support for this
+    // functionality to make life easier for all of the other media player
     // maintainers out there.
     virtual status_t setRetransmitEndpoint(const struct sockaddr_in* endpoint) {
+        return INVALID_OPERATION;
+    }
+    virtual status_t getRetransmitEndpoint(struct sockaddr_in* endpoint) {
         return INVALID_OPERATION;
     }
 

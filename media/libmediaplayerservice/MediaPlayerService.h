@@ -246,7 +246,6 @@ public:
 private:
 
     class Client : public BnMediaPlayer {
-
         // IMediaPlayer interface
         virtual void            disconnect();
         virtual status_t        setVideoSurfaceTexture(
@@ -273,6 +272,7 @@ private:
         virtual status_t        setParameter(int key, const Parcel &request);
         virtual status_t        getParameter(int key, Parcel *reply);
         virtual status_t        setRetransmitEndpoint(const struct sockaddr_in* endpoint);
+        virtual status_t        getRetransmitEndpoint(struct sockaddr_in* endpoint);
 
         sp<MediaPlayerBase>     createPlayer(player_type playerType);
 

@@ -8,6 +8,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=               \
     MediaRecorderClient.cpp     \
+    MediaPlayerFactory.cpp      \
     MediaPlayerService.cpp      \
     MetadataRetrieverClient.cpp \
     TestPlayerStub.cpp          \
