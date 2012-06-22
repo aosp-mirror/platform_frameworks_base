@@ -410,7 +410,7 @@ void AAH_TXPlayer::onPrepareAsyncEvent() {
 
     mAudioFormat = mAudioSource->getFormat();
     if (!mAudioFormat->findInt64(kKeyDuration, &mDurationUs))
-        mDurationUs = 1;
+        mDurationUs = -1;
 
     const char* mime_type = NULL;
     if (!mAudioFormat->findCString(kKeyMIMEType, &mime_type)) {
@@ -1061,7 +1061,7 @@ void AAH_TXPlayer::onBufferingUpdate() {
             }
         } else {
             int64_t bitrate;
-            if (getBitrate_l(&bitrate)) {
+            if (getBitrate_l(&bitrate) && mDurationUs > 0) {
                 size_t cachedSize = mCachedSource->cachedSize();
                 int64_t cachedDurationUs = cachedSize * 8000000ll / bitrate;
 

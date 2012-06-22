@@ -202,10 +202,9 @@ status_t AAH_RXPlayer::getCurrentPosition(int *msec) {
 }
 
 status_t AAH_RXPlayer::getDuration(int *msec) {
-    if (NULL != msec) {
-        *msec = 1;
-    }
-    return OK;
+    // Other media players are returning UNKNOWN_ERROR for streams of unknown
+    // length
+    return UNKNOWN_ERROR;
 }
 
 status_t AAH_RXPlayer::reset() {
