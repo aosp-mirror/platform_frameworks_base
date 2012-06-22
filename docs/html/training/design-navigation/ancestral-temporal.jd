@@ -34,7 +34,7 @@ screen hierarchy, we need to provide a method for navigating up the hierarchy, t
 ancestor screens. Additionally, we should ensure that temporal navigation via the <em>Back</em>
 button is respected to respect Android conventions.</p>
 
-<div class="design-announce">
+<div class="note design">
 <p><strong>Back/Up Navigation Design</strong></p>
   <p>For design guidelines, read Android Design's <a
   href="{@docRoot}design/patterns/navigation.html">Navigation</a> pattern guide.</p>
